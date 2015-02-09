@@ -1,0 +1,27 @@
+# Editors temp files
+*.swp
+*~
+
+# SCRAM business
+__init__.py
+*.pyc
+
+# CRAB3 stuff
+crab_*
+crabConfig_*
+
+# ROOT-related files
+*.root
+*_cc.d
+*_cc.so
+*_C.d
+*_C.so
+*\#*
+.\#*
+AutoDict_*
+
+# Other temp files
+*.txt
+*.log
+*.png
+*.pdf
