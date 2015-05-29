@@ -1,0 +1,11 @@
+# proc cat nGausRV nGausWV
+
+VBF 0 2 1
+VBF 1 2 1
+VBF 2 3 2
+VBF 3 3 2
+VBF 4 3 2
+VBF 5 3 1
+VBF 6 1 1
+VBF 7 1 1
+

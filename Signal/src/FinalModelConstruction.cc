@@ -897,16 +897,46 @@ RooSpline1D* FinalModelConstruction::graphToSpline(string name, TGraph *graph, R
 }
 
 void FinalModelConstruction::getNormalization(){
- 
+	
+	std::string procLowerCase_ = proc_;
+  std::transform(procLowerCase_.begin(), procLowerCase_.end(), procLowerCase_.begin(), ::tolower); 
   TGraph *temp = new TGraph();
+	std::cout << "DEBUG FMC 0" << std::endl;
   TF1 *pol2 = new TF1("pol","pol2",110,150);
   for (unsigned int i=0; i<allMH_.size(); i++){
+	std::cout << "DEBUG FMC 0.1" << std::endl;
     double mh = double(allMH_[i]);
+	std::cout << "DEBUG FMC 0.2" << std::endl;
     RooDataSet *data = stdDatasets[mh];
+	std::cout << "DEBUG FMC 0.3 norm->GetBR(mh)"<< norm->GetBR(mh) << std::endl;
+	std::cout << "DEBUG FMC 0.3 data->sumEntries() "<< data->sumEntries() << std::endl;
+	std::cout << "DEBUG FMC 0.3 norm->GetXsection(mh,procLowerCase_) " << norm->GetXsection(mh,procLowerCase_) << std::endl;
+	double effAcc =0.;
+	if (intLumi) {
     // calcu eA as sumEntries / totalxs * totalbr * intL
-    double effAcc = (data->sumEntries()/(intLumi->getVal()*norm->GetXsection(mh,proc_)*norm->GetBR(mh)));
+    effAcc = (data->sumEntries()/(intLumi->getVal()*norm->GetXsection(mh,procLowerCase_)*norm->GetBR(mh)));
+		} else {
+		std::cout << "*****************************************************************" << std::endl;
+		std::cout << "*****************************************************************" << std::endl;
+		std::cout << "*** WARNING WARNING WARNING WARNING WARNING WARNING WARNING *****" << std::endl;
+		std::cout << "*****************************************************************" << std::endl;
+		std::cout << "******** IntLumi rooRealVar is not in this worspace    **********" << std::endl;
+		std::cout << "******** Faking it by making it 20. PLEASE FIX ME      **********" << std::endl;
+		std::cout << "*****************************************************************" << std::endl;
+		std::cout << "*****************************************************************" << std::endl;
+		std::cout << "*****************************************************************" << std::endl;
+		std::cout << "*** WARNING WARNING WARNING WARNING WARNING WARNING WARNING *****" << std::endl;
+		std::cout << "*****************************************************************" << std::endl;
+		std::cout << "*****************************************************************" << std::endl;
+		double intLumiVal =1.;
+    effAcc = (data->sumEntries()/(intLumiVal*norm->GetXsection(mh,procLowerCase_)*norm->GetBR(mh)));
+		effAcc =1.;
+		std::cout <<"DEBUG effAcc" << effAcc<< std::endl;
+		}
+	std::cout << "DEBUG FMC 0.4" << std::endl;
     temp->SetPoint(i,mh,effAcc);
   }
+	std::cout << "DEBUG FMC 1" << std::endl;
   verbosity_ >=2 ?
     temp->Fit(pol2,"EMFEX0") :
     temp->Fit(pol2,"QEMFEX0")
@@ -914,30 +944,36 @@ void FinalModelConstruction::getNormalization(){
   TGraph *eaGraph = new TGraph(pol2);
   RooSpline1D *eaSpline = graphToSpline(Form("fea_%s_cat%d_%dTeV",proc_.c_str(),cat_,sqrts_),eaGraph);
   RooSpline1D *xs = xsSplines[proc_];
+	std::cout << "DEBUG FMC 2" << std::endl;
 	RooAbsReal *rateNuisTerm = getRateWithPhotonSyst(Form("rate_%s_cat%d_%dTeV",proc_.c_str(),cat_,sqrts_));
   
 	finalNorm = new RooFormulaVar(Form("%s_norm",finalPdf->GetName()),Form("%s_norm",finalPdf->GetName()),"@0*@1*@2*@3",RooArgList(*xs,*brSpline,*eaSpline,*rateNuisTerm));
   // these are for plotting
   finalNormThisLum = new RooFormulaVar(Form("%s_normThisLumi",finalPdf->GetName()),Form("%s_normThisLumi",finalPdf->GetName()),"@0*@1*@2*@3*@4",RooArgList(*xs,*brSpline,*eaSpline,*rateNuisTerm,*intLumi));
   
+	std::cout << "DEBUG FMC 3" << std::endl;
 	extendPdfRel = new RooExtendPdf(Form("extend%s",finalPdf->GetName()),Form("extend%s",finalPdf->GetName()),*finalPdf,*finalNorm);
   extendPdf = new RooExtendPdf(Form("extend%sThisLumi",finalPdf->GetName()),Form("extend%sThisLumi",finalPdf->GetName()),*finalPdf,*finalNormThisLum);
   // do secondary models
   if (doSecondaryModels){
     assert(secondaryModelVarsSet);
     // sm higgs as bkg
+	std::cout << "DEBUG FMC 3.1" << std::endl;
     RooSpline1D *eaSpline_SM = graphToSpline(Form("fea_%s_cat%d_%dTeV_SM",proc_.c_str(),cat_,sqrts_),eaGraph,MH_SM);
     RooSpline1D *xs_SM = xsSplines_SM[proc_];
     finalNorm_SM = new RooFormulaVar(Form("%s_norm",finalPdf_SM->GetName()),Form("%s_norm",finalPdf_SM->GetName()),"@0*@1*@2*@3",RooArgList(*xs_SM,*brSpline_SM,*eaSpline_SM,*rateNuisTerm));
     // second degen higgs
+	std::cout << "DEBUG FMC 3.3" << std::endl;
     RooSpline1D *eaSpline_2 = graphToSpline(Form("fea_%s_cat%d_%dTeV_2",proc_.c_str(),cat_,sqrts_),eaGraph,MH_2);
     RooSpline1D *xs_2 = xsSplines_2[proc_];
     finalNorm_2 = new RooFormulaVar(Form("%s_norm",finalPdf_2->GetName()),Form("%s_norm",finalPdf_2->GetName()),"@0*@1*@2*@3",RooArgList(*xs_2,*brSpline_2,*eaSpline_2,*rateNuisTerm));
     // natural width
+	std::cout << "DEBUG FMC 3.3" << std::endl;
     RooSpline1D *eaSpline_NW = graphToSpline(Form("fea_%s_cat%d_%dTeV_NW",proc_.c_str(),cat_,sqrts_),eaGraph,MH);
     RooSpline1D *xs_NW = xsSplines_NW[proc_];
     finalNorm_NW = new RooFormulaVar(Form("%s_norm",finalPdf_NW->GetName()),Form("%s_norm",finalPdf_NW->GetName()),"@0*@1*@2*@3",RooArgList(*xs_NW,*brSpline_NW,*eaSpline_NW,*rateNuisTerm));
   }
+	std::cout << "DEBUG FMC 3" << std::endl;
 
 }
 
