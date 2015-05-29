@@ -387,9 +387,11 @@ map<string,RooDataSet*> getGlobeData(RooWorkspace *work, int ncats, int m_hyp){
   
   map<string,RooDataSet*> result;
   for (int cat=0; cat<ncats; cat++){
-    result.insert(pair<string,RooDataSet*>(Form("cat%d",cat),(RooDataSet*)work->data(Form("sig_VBF_mass_m%3d_cat%d",m_hyp,cat))));
+    result.insert(pair<string,RooDataSet*>(Form("cat%d",cat),(RooDataSet*)work->data(Form("sig_mass_m%3d_cat%d",m_hyp,cat))));
+		std::cout << "DEBUG MACRO " << Form("sig_VBF_mass_m%3d_cat%d",m_hyp,cat) <<std::endl; 
   }
-  result.insert(pair<string,RooDataSet*>("all",(RooDataSet*)work->data(Form("sig_VBF_mass_m%3d_AllCats",m_hyp))));
+  result.insert(pair<string,RooDataSet*>("all",(RooDataSet*)work->data(Form("sig_mass_m%3d_AllCats",m_hyp))));
+		std::cout << "DEBUG MACRO " << Form("sig_VBF_mass_m%3d_AllCats",m_hyp) << (RooDataSet*)work->data(Form("sig_VBF_mass_m%3d_AllCats",m_hyp))<<std::endl; 
 
   return result;
 }
