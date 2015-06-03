@@ -61,15 +61,19 @@ void OptionParser(int argc, char *argv[]){
     ("infilenames,i", po::value<string>(&infilenamesStr_),                                           		"Input file names (comma sep)")
     ("outfilename,o", po::value<string>(&outfilename_)->default_value("dat/photonCatSyst.dat"), 				"Output file name")
     ("mh,m", po::value<int>(&mh_)->default_value(125),                                  								"Mass point")
-    ("nCats,n", po::value<int>(&nCats_)->default_value(9),                                    					"Number of total categories")
 		("sqrtS", po::value<string>(&sqrtS_)->default_value("8"),																								"CoM energy")
 		("procs,p",po::value<string>(&procStr_)->default_value("ggh,vbf,wh,zh,tth"),												"Processes (comma sep)")
 		("plotDir,D", po::value<string>(&plotDir_)->default_value("plots"),																	"Out directory for plots")
 		("doPlots,P", po::value<bool>(&doPlots_)->default_value(true),																	"Plot variations")
 		("quadInterpolate",	po::value<int>(&quadInterpolate_)->default_value(0),														"Do a quadratic interpolation from this amount of sigma")
-		("isFlashgg",	po::value<bool>(&isFlashgg_)->default_value(false),														"Use flashgg format (default false)")
-    ("flashggCats,f", po::value<string>(&flashggCatsStr_)->default_value("DiPhotonUntaggedCategory_0,DiPhotonUntaggedCategory_1,DiPhotonUntaggedCategory_2,DiPhotonUntaggedCategory_3,DiPhotonUntaggedCategory_4,VBFTag_0,VBFTag_1,VBFTag_2"),       "Flashgg categories if used") 
-		;                                                                                             		
+		("isFlashgg",	po::value<bool>(&isFlashgg_)->default_value(true),														"Use flashgg format")
+    ("flashggCats,f", po::value<string>(&flashggCatsStr_)->default_value("DiPhotonUntaggedCategory_0,DiPhotonUntaggedCategory_1,DiPhotonUntaggedCategory_2,DiPhotonUntaggedCategory_3,DiPhotonUntaggedCategory_4,VBFTag_0,VBFTag_1,VBFTag_2"),       "Flashgg category names") 
+		;                                   
+
+	po::options_description backw_opts("Backwards compatibility options");
+	backw_opts.add_options()
+    ("nCats,n", po::value<int>(&nCats_)->default_value(9),                                    					"Number of total categories (Now set automatically if using --isFlashgg 1)")
+		;
 	
 	po::options_description syst_opts("Systematics options");
 	syst_opts.add_options()
@@ -82,7 +86,7 @@ void OptionParser(int argc, char *argv[]){
 	;
 
 	po::options_description all("Allowed options");
-	all.add(general_opts).add(syst_opts);
+	all.add(general_opts).add(syst_opts).add(backw_opts);
 
   po::variables_map vm;
   po::store(po::parse_command_line(argc,argv,all),vm);
@@ -324,10 +328,10 @@ vector<TH1F*> getHistograms(vector<TFile*> files, string name, string syst){
 			TH1F *up = (TH1F*)files[i]->Get(Form("diphotonDumper_%sUp01sigma/histograms/%smass",syst.c_str(),name.c_str()));
 			TH1F *down = (TH1F*)files[i]->Get(Form("diphotonDumper_%sDown01sigma/histograms/%smass",syst.c_str(),name.c_str()));
 			TH1F *nominal = (TH1F*)files[i]->Get(Form("diphotonDumper/histograms/%smass",name.c_str()));
-			std::cout << "FLASHGG Histos needed: " << std::endl;
-			std::cout << Form("diphotonDumper_%sUp01sigma/histograms/%smass",syst.c_str(),name.c_str())<< ", open ? " << up << std::endl;
-			std::cout << Form("diphotonDumper_%sDown01sigma/histograms/%smass",syst.c_str(),name.c_str())<< ", open ? " << down <<std::endl;
-			std::cout << Form("diphotonDumper/histograms/%smass",name.c_str())<< ", open ? " << nominal<<std::endl;
+		//	std::cout << "FLASHGG Histos needed: " << std::endl;
+		//	std::cout << Form("diphotonDumper_%sUp01sigma/histograms/%smass",syst.c_str(),name.c_str())<< ", open ? " << up << std::endl;
+		//	std::cout << Form("diphotonDumper_%sDown01sigma/histograms/%smass",syst.c_str(),name.c_str())<< ", open ? " << down <<std::endl;
+		//	std::cout << Form("diphotonDumper/histograms/%smass",name.c_str())<< ", open ? " << nominal<<std::endl;
 			if (up && down && nominal) {
 				ret_hists.push_back(nominal);
 				ret_hists.push_back(up);
@@ -422,8 +426,12 @@ int main(int argc, char *argv[]){
 		for (vector<string>::iterator proc=procs_.begin(); proc!=procs_.end(); proc++){
 
 			cout << *proc << " - cat " << cat << endl;
-
+			
+		//	if (isFlashgg_){
+		//	outfile << Form("diphotonCat=%s",(flashggCats_[cat]).c_str()) << endl;
+		//	} else {
 			outfile << Form("diphotonCat=%d",cat) << endl;
+		//	}
 			outfile << Form("proc=%s",proc->c_str()) << endl;
 
 			// photon scales not correlated ....
@@ -458,7 +466,7 @@ int main(int argc, char *argv[]){
 				}
 			}
 			
-			if (!isFlashgg_){
+			if (!isFlashgg_){ // Smearing not yet supported for Flashgg
 			// photon smears not correlated
 			if (photonCatSmearsStr_.size()!=0){
 				for (vector<string>::iterator phoCat=photonCatSmears_.begin(); phoCat!=photonCatSmears_.end(); phoCat++){

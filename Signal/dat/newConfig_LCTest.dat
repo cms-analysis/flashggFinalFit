@@ -1,11 +1,20 @@
 # proc cat nGausRV nGausWV
 
-VBF 0 2 1
-VBF 1 2 1
-VBF 2 3 2
-VBF 3 3 2
-VBF 4 3 2
-VBF 5 3 1
-VBF 6 1 1
-VBF 7 1 1
+VBF 0 3 3
+VBF 1 4 4
+VBF 2 3 3
+VBF 3 3 3
+VBF 4 4 4
+VBF 5 3 3
+VBF 6 3 3
+VBF 7 4 4
+
+ggH 0 4 4
+ggH 1 4 4
+ggH 2 3 3
+ggH 3 4 4
+ggH 4 4 4
+ggH 5 3 3
+ggH 6 4 4
+ggH 7 4 4
 

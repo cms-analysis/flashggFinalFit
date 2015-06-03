@@ -152,8 +152,15 @@ void Packager::packageOutput(){
 			TGraph *expEventsGraph = new TGraph();
 			int p=0;
 			for (double mh=mhLow_; mh<mhHigh_+0.5; mh+=1){
+			double intLumiVal = 0.;
+			if (intLumi){
+			intLumiVal = intLumi->getVal();//FIXME
+			} else {
+			std::cout  << "[WARNING] IntLumi missing from workspace, artifically set to 1 "<< std::endl;
+			intLumiVal = 1;
+			}
 				MH->setVal(mh);
-				expEventsGraph->SetPoint(p,mh,intLumi->getVal()*norm->getVal());
+				expEventsGraph->SetPoint(p,mh,intLumiVal*norm->getVal());
 				effAccGraph->SetPoint(p,mh,norm->getVal()/(normalization->GetXsection(mh)*normalization->GetBR(mh)));
 				p++;
 			}
@@ -166,7 +173,14 @@ void Packager::packageOutput(){
 			canv->Print(Form("%s/effAccCheck.png",outDir_.c_str()));
 			expEventsGraph->SetLineWidth(3);
 			expEventsGraph->GetXaxis()->SetTitle("m_{H} (GeV)");
-			expEventsGraph->GetYaxis()->SetTitle(Form("Expected Events for %4.1ffb^{-1}",intLumi->getVal()/1000.));
+			double intLumiVal = 0.;
+			if (intLumi){
+			intLumiVal = intLumi->getVal();//FIXME
+			} else {
+			std::cout  << "[WARNING] IntLumi missing from workspace, artifically set to 1 "<< std::endl;
+			intLumiVal = 1;
+			}
+			expEventsGraph->GetYaxis()->SetTitle(Form("Expected Events for %4.1ffb^{-1}",intLumiVal/1000.));
 			expEventsGraph->Draw("AL");
 			canv->Print(Form("%s/expEventsCheck.pdf",outDir_.c_str()));
 			canv->Print(Form("%s/expEventsCheck.png",outDir_.c_str()));
