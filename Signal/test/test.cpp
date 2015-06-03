@@ -58,9 +58,11 @@ int main(){
   linInterpWV.interpolate(1);
   map<string,RooSpline1D*> splinesWV = linInterpWV.getSplines();
 	*/
-
+	vector<string> procs;
+	procs.push_back("ggH");
+	procs.push_back("VBF");
 	vector<int> skipMasses;
-  FinalModelConstruction finalModel(mass,MH,intLumi,110,150,"ggh",0,false,"dat/photon_systs_massfac_legacy_8TeV_v2.dat",skipMasses,1,false);
+  FinalModelConstruction finalModel(mass,MH,intLumi,110,150,"ggh",0,false,"dat/photon_systs_massfac_legacy_8TeV_v2.dat",skipMasses,1,procs,false);
 	finalModel.printSignalSystematics();
   /*
 	finalModel.setRVsplines(splinesRV);

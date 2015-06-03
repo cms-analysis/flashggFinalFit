@@ -388,8 +388,10 @@ map<string,RooDataSet*> getGlobeData(RooWorkspace *work, int ncats, int m_hyp){
   map<string,RooDataSet*> result;
   for (int cat=0; cat<ncats; cat++){
     result.insert(pair<string,RooDataSet*>(Form("cat%d",cat),(RooDataSet*)work->data(Form("sig_mass_m%3d_cat%d",m_hyp,cat))));
+		std::cout << "DEBUG MACRO " << Form("sig_VBF_mass_m%3d_cat%d",m_hyp,cat) <<std::endl; 
   }
   result.insert(pair<string,RooDataSet*>("all",(RooDataSet*)work->data(Form("sig_mass_m%3d_AllCats",m_hyp))));
+		std::cout << "DEBUG MACRO " << Form("sig_VBF_mass_m%3d_AllCats",m_hyp) << (RooDataSet*)work->data(Form("sig_VBF_mass_m%3d_AllCats",m_hyp))<<std::endl; 
 
   return result;
 }
@@ -1415,6 +1417,7 @@ void makeParametricSignalModelPlots(string sigFitFileName, string outPathName, i
   else newFileName = sigFitFileName;
 
   TFile *hggFile = TFile::Open(newFileName.c_str());
+	std::cout << "hggFile is Open " << hggFile->IsOpen() << std::endl;
 
   getConfigFromFile(hggFile,is2011,splitVH,isMassFac);
   
@@ -1425,6 +1428,11 @@ void makeParametricSignalModelPlots(string sigFitFileName, string outPathName, i
   RooWorkspace *hggWS;
   if (is2011) hggWS = (RooWorkspace*)hggFile->Get(Form("wsig_%s",sqrts.c_str()));
   else        hggWS = (RooWorkspace*)hggFile->Get(Form("wsig_%s",sqrts.c_str()));
+			
+		/*	std::list<RooAbsData*> data2 =  (hggWS->allData()) ;
+			for (std::list<RooAbsData*>::const_iterator iterator = data.begin(), end = data.end(); iterator != end; ++iterator) {
+			std::cout << **iterator << std::endl;
+			}*/
  
   if (!hggWS) {
     cerr << "Workspace is null" << endl;

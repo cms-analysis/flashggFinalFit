@@ -34,7 +34,7 @@ template<class ResultT, class SourceT, class PredicateT> typename ResultT::itera
 	return dst.begin()+orig_size;
 }
 
-FinalModelConstruction::FinalModelConstruction(RooRealVar *massVar, RooRealVar *MHvar, RooRealVar *intL, int mhLow, int mhHigh, string proc, int cat, bool doSecMods, string systematicsFileName, vector<int> skipMasses, int verbosity, bool isCB, bool is2011, bool quadraticSigmaSum):
+FinalModelConstruction::FinalModelConstruction(RooRealVar *massVar, RooRealVar *MHvar, RooRealVar *intL, int mhLow, int mhHigh, string proc, int cat, bool doSecMods, string systematicsFileName, vector<int> skipMasses, int verbosity,std::vector<std::string> procList, bool isCB, bool is2011, bool quadraticSigmaSum)	:
   mass(massVar),
   MH(MHvar),
   intLumi(intL),
@@ -49,22 +49,28 @@ FinalModelConstruction::FinalModelConstruction(RooRealVar *massVar, RooRealVar *
 	skipMasses_(skipMasses),
   verbosity_(verbosity),
   systematicsSet_(false),
-  rvFractionSet_(false)
+  rvFractionSet_(false),
+	procs_(procList)
 {
   allMH_ = getAllMH();
 	if (is2011_) sqrts_ = 7;
 	else sqrts_ = 8;
   // load xs and br info from Normalization_8TeV
   norm = new Normalization_8TeV();
-  norm->Init(sqrts_);
+  if(!norm->Init(sqrts_)){
+	std::cout << "[ERROR] Normalization Initiation failed, exit." << std::endl;
+	exit(1);
+	}
   TGraph *brGraph = norm->GetBrGraph();
 	brSpline = graphToSpline(Form("fbr_%dTeV",sqrts_),brGraph);
-  
-  string procs[8] = {"ggh","vbf","wzh","wh","zh","tth","gg_grav","qq_grav"};
-  for (int i=0; i<8; i++){
-    TGraph *xsGraph = norm->GetSigmaGraph(procs[i].c_str());
-    RooSpline1D *xsSpline = graphToSpline(Form("fxs_%s_%dTeV",procs[i].c_str(),sqrts_),xsGraph);
-    xsSplines.insert(pair<string,RooSpline1D*>(procs[i],xsSpline));
+
+ std::cout << "DEBUG procs.size " << (procs_.size()) <<" "<<std::endl;
+ // string procs[8] = {"ggh","vbf","wzh","wh","zh","tth","gg_grav","qq_grav"} ;//Don't want this hard-coded.
+  for (int i=0; i<procs_.size(); i++){
+	std::cout << "DEBUG procs.size " << procs_[i] <<" "<<std::endl;
+    TGraph *xsGraph = norm->GetSigmaGraph(procs_[i].c_str());
+    RooSpline1D *xsSpline = graphToSpline(Form("fxs_%s_%dTeV",procs_[i].c_str(),sqrts_),xsGraph);
+    xsSplines.insert(pair<string,RooSpline1D*>(procs_[i],xsSpline));
   }
 
   vector<string> files;
@@ -495,15 +501,18 @@ void FinalModelConstruction::setSecondaryModelVars(RooRealVar *mh_sm, RooRealVar
 	brSpline_2 = graphToSpline(Form("fbr_%dTeV_2",sqrts_),brGraph,MH_2);
 	brSpline_NW = graphToSpline(Form("fbr_%dTeV_NW",sqrts_),brGraph,MH);
   
-	string procs[8] = {"ggh","vbf","wzh","wh","zh","tth","gg_grav","qq_grav"};
-  for (int i=0; i<8; i++){
-    TGraph *xsGraph = norm->GetSigmaGraph(procs[i].c_str());
-    RooSpline1D *xsSpline_SM = graphToSpline(Form("fxs_%s_%dTeV_SM",procs[i].c_str(),sqrts_),xsGraph,MH_SM);
-    RooSpline1D *xsSpline_2 = graphToSpline(Form("fxs_%s_%dTeV_2",procs[i].c_str(),sqrts_),xsGraph,MH_2); 
-    RooSpline1D *xsSpline_NW = graphToSpline(Form("fxs_%s_%dTeV_NW",procs[i].c_str(),sqrts_),xsGraph,MH);
-    xsSplines_SM.insert(pair<string,RooSpline1D*>(procs[i],xsSpline_SM));
-    xsSplines_2.insert(pair<string,RooSpline1D*>(procs[i],xsSpline_2));
-    xsSplines_NW.insert(pair<string,RooSpline1D*>(procs[i],xsSpline_NW));
+	//string procs[8] = {"ggh","vbf","wzh","wh","zh","tth","gg_grav","qq_grav"};
+	//string procs[2] = {"ggH","VBF"};//,"wzh","wh","zh","tth","gg_grav","qq_grav"};//FIXME
+	std::cout << "DEBUG procs.size " << (procs_.size()) <<" "<<std::endl;
+  for (unsigned int i=0; i<procs_.size(); i++){
+	std::cout << "DEBUG procs.size " << procs_[i] <<" "<<std::endl;
+    TGraph *xsGraph = norm->GetSigmaGraph(procs_[i].c_str());
+    RooSpline1D *xsSpline_SM = graphToSpline(Form("fxs_%s_%dTeV_SM",procs_[i].c_str(),sqrts_),xsGraph,MH_SM);
+    RooSpline1D *xsSpline_2 = graphToSpline(Form("fxs_%s_%dTeV_2",procs_[i].c_str(),sqrts_),xsGraph,MH_2); 
+    RooSpline1D *xsSpline_NW = graphToSpline(Form("fxs_%s_%dTeV_NW",procs_[i].c_str(),sqrts_),xsGraph,MH);
+    xsSplines_SM.insert(pair<string,RooSpline1D*>(procs_[i],xsSpline_SM));
+    xsSplines_2.insert(pair<string,RooSpline1D*>(procs_[i],xsSpline_2));
+    xsSplines_NW.insert(pair<string,RooSpline1D*>(procs_[i],xsSpline_NW));
   }
   secondaryModelVarsSet=true;
 }
@@ -897,14 +906,23 @@ RooSpline1D* FinalModelConstruction::graphToSpline(string name, TGraph *graph, R
 }
 
 void FinalModelConstruction::getNormalization(){
- 
+	
+	std::string procLowerCase_ = proc_;
+  std::transform(procLowerCase_.begin(), procLowerCase_.end(), procLowerCase_.begin(), ::tolower); 
   TGraph *temp = new TGraph();
   TF1 *pol2 = new TF1("pol","pol2",110,150);
   for (unsigned int i=0; i<allMH_.size(); i++){
     double mh = double(allMH_[i]);
     RooDataSet *data = stdDatasets[mh];
+	double effAcc =0.;
+	if (intLumi) {
     // calcu eA as sumEntries / totalxs * totalbr * intL
-    double effAcc = (data->sumEntries()/(intLumi->getVal()*norm->GetXsection(mh,proc_)*norm->GetBR(mh)));
+    effAcc = (data->sumEntries()/(intLumi->getVal()*norm->GetXsection(mh,procLowerCase_)*norm->GetBR(mh)));
+		} else {
+		std::cout << "[WARNING] IntLumi rooRealVar is not in this workspace. Set to 1 for now." << std::endl;
+		double intLumiVal =1.;
+    effAcc = (data->sumEntries()/(intLumiVal*norm->GetXsection(mh,procLowerCase_)*norm->GetBR(mh)));
+		}
     temp->SetPoint(i,mh,effAcc);
   }
   verbosity_ >=2 ?
@@ -915,11 +933,17 @@ void FinalModelConstruction::getNormalization(){
   RooSpline1D *eaSpline = graphToSpline(Form("fea_%s_cat%d_%dTeV",proc_.c_str(),cat_,sqrts_),eaGraph);
   RooSpline1D *xs = xsSplines[proc_];
 	RooAbsReal *rateNuisTerm = getRateWithPhotonSyst(Form("rate_%s_cat%d_%dTeV",proc_.c_str(),cat_,sqrts_));
-  
+	if (!(xs && brSpline && eaSpline && rateNuisTerm && intLumi)){
+	std::cout << "[ERROR] some of the following are not set properly. exit." << std::endl;
+	std::cout << "xs " << xs << ", brSpline " << brSpline << ", eaSpline " << eaSpline << ", rateNuisTerm " << rateNuisTerm << ", intLumi " << intLumi << std::endl;
+	exit(1);
+	}
 	finalNorm = new RooFormulaVar(Form("%s_norm",finalPdf->GetName()),Form("%s_norm",finalPdf->GetName()),"@0*@1*@2*@3",RooArgList(*xs,*brSpline,*eaSpline,*rateNuisTerm));
+	//finalNorm = new RooFormulaVar(Form("%s_norm",finalPdf->GetName()),Form("%s_norm",finalPdf->GetName()),"@0*@1*@2",RooArgList(*xs,*brSpline,*eaSpline));
   // these are for plotting
   finalNormThisLum = new RooFormulaVar(Form("%s_normThisLumi",finalPdf->GetName()),Form("%s_normThisLumi",finalPdf->GetName()),"@0*@1*@2*@3*@4",RooArgList(*xs,*brSpline,*eaSpline,*rateNuisTerm,*intLumi));
-  
+  //finalNormThisLum = new RooFormulaVar(Form("%s_normThisLumi",finalPdf->GetName()),Form("%s_normThisLumi",finalPdf->GetName()),"@0*@1*@2*@3",RooArgList(*xs,*brSpline,*eaSpline,*intLumi));
+	
 	extendPdfRel = new RooExtendPdf(Form("extend%s",finalPdf->GetName()),Form("extend%s",finalPdf->GetName()),*finalPdf,*finalNorm);
   extendPdf = new RooExtendPdf(Form("extend%sThisLumi",finalPdf->GetName()),Form("extend%sThisLumi",finalPdf->GetName()),*finalPdf,*finalNormThisLum);
   // do secondary models
@@ -929,16 +953,18 @@ void FinalModelConstruction::getNormalization(){
     RooSpline1D *eaSpline_SM = graphToSpline(Form("fea_%s_cat%d_%dTeV_SM",proc_.c_str(),cat_,sqrts_),eaGraph,MH_SM);
     RooSpline1D *xs_SM = xsSplines_SM[proc_];
     finalNorm_SM = new RooFormulaVar(Form("%s_norm",finalPdf_SM->GetName()),Form("%s_norm",finalPdf_SM->GetName()),"@0*@1*@2*@3",RooArgList(*xs_SM,*brSpline_SM,*eaSpline_SM,*rateNuisTerm));
+    //finalNorm_SM = new RooFormulaVar(Form("%s_norm",finalPdf_SM->GetName()),Form("%s_norm",finalPdf_SM->GetName()),"@0*@1*@2",RooArgList(*xs_SM,*brSpline_SM,*eaSpline_SM));
     // second degen higgs
     RooSpline1D *eaSpline_2 = graphToSpline(Form("fea_%s_cat%d_%dTeV_2",proc_.c_str(),cat_,sqrts_),eaGraph,MH_2);
     RooSpline1D *xs_2 = xsSplines_2[proc_];
     finalNorm_2 = new RooFormulaVar(Form("%s_norm",finalPdf_2->GetName()),Form("%s_norm",finalPdf_2->GetName()),"@0*@1*@2*@3",RooArgList(*xs_2,*brSpline_2,*eaSpline_2,*rateNuisTerm));
+   // finalNorm_2 = new RooFormulaVar(Form("%s_norm",finalPdf_2->GetName()),Form("%s_norm",finalPdf_2->GetName()),"@0*@1*@2",RooArgList(*xs_2,*brSpline_2,*eaSpline_2));
     // natural width
     RooSpline1D *eaSpline_NW = graphToSpline(Form("fea_%s_cat%d_%dTeV_NW",proc_.c_str(),cat_,sqrts_),eaGraph,MH);
     RooSpline1D *xs_NW = xsSplines_NW[proc_];
     finalNorm_NW = new RooFormulaVar(Form("%s_norm",finalPdf_NW->GetName()),Form("%s_norm",finalPdf_NW->GetName()),"@0*@1*@2*@3",RooArgList(*xs_NW,*brSpline_NW,*eaSpline_NW,*rateNuisTerm));
+   // finalNorm_NW = new RooFormulaVar(Form("%s_norm",finalPdf_NW->GetName()),Form("%s_norm",finalPdf_NW->GetName()),"@0*@1*@2",RooArgList(*xs_NW,*brSpline_NW,*eaSpline_NW));
   }
-
 }
 
 void FinalModelConstruction::save(RooWorkspace *work){

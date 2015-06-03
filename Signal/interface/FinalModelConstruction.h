@@ -25,7 +25,7 @@ class FinalModelConstruction {
 
   public:
     
-    FinalModelConstruction(RooRealVar *massVar, RooRealVar *MHvar, RooRealVar *intL, int mhLow, int mhHigh, std::string proc, int cat, bool doSecMods, std::string systematicsFileName, std::vector<int> skipMasses, int verbosity, bool isCB=false, bool is2011=false, bool quadraticSigmaSum=false);
+    FinalModelConstruction(RooRealVar *massVar, RooRealVar *MHvar, RooRealVar *intL, int mhLow, int mhHigh, std::string proc, int cat, bool doSecMods, std::string systematicsFileName, std::vector<int> skipMasses, int verbosity, std::vector<std::string> procsList, bool isCB=false, bool is2011=false, bool quadraticSigmaSum=false);
     ~FinalModelConstruction();
 
 		void loadSignalSystematics(std::string filename);
@@ -82,6 +82,7 @@ class FinalModelConstruction {
 		bool skipMass(int mh);
     int verbosity_;
     Normalization_8TeV *norm;
+		std::vector<std::string> procs_;
 
     std::map<std::string,RooSpline1D*> stdSplines;
     std::map<std::string,RooSpline1D*> rvSplines;

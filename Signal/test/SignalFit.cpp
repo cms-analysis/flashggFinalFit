@@ -36,7 +36,9 @@ typedef map<int,map<string,RooRealVar*> > parlist_t;
 typedef map<pair<string,int>, std::pair<parlist_t,parlist_t> > parmap_t;
 typedef map<pair<string,int>,map<string,RooSpline1D*> > clonemap_t;
 
-string filename_;
+string filenameStr_;
+vector<string> filename_;
+
 string outfilename_;
 string mergefilename_;
 string datfilename_;
@@ -68,38 +70,51 @@ int verbose_=0;
 int ncpu_=1;
 vector<int> cats_;
 string catsStr_;
+bool isFlashgg_;
+string flashggCatsStr_;
+vector<string> flashggCats_;
+bool check_;
 
 void OptionParser(int argc, char *argv[]){
-  po::options_description desc("Allowed options");
-  desc.add_options()
+  po::options_description desc1("Allowed options");
+  desc1.add_options()
     ("help,h",                                                                                			"Show help")
-    ("infilename,i", po::value<string>(&filename_),                                           			"Input file name")
+    ("infilename,i", po::value<string>(&filenameStr_),                                           			"Input file name")
     ("outfilename,o", po::value<string>(&outfilename_)->default_value("CMS-HGG_sigfit.root"), 			"Output file name")
     ("merge,m", po::value<string>(&mergefilename_)->default_value(""),                               	        "Merge the output with the given workspace")
-    ("datfilename,d", po::value<string>(&datfilename_)->default_value("dat/config.dat"),      			"Configuration file")
+    ("datfilename,d", po::value<string>(&datfilename_)->default_value("dat/newConfig.dat"),      			"Configuration file")
     ("systfilename,s", po::value<string>(&systfilename_)->default_value("dat/photonCatSyst.dat"),		"Systematic model numbers")
     ("plotDir,p", po::value<string>(&plotDir_)->default_value("plots"),						"Put plots in this directory")
     ("skipPlots", 																																									"Do not make any plots")
 		("mhLow,L", po::value<int>(&mhLow_)->default_value(110),                                  			"Low mass point")
     ("nThreads,t", po::value<int>(&ncpu_)->default_value(ncpu_),                               			"Number of threads to be used for the fits")
     ("mhHigh,H", po::value<int>(&mhHigh_)->default_value(150),                                			"High mass point")
-    ("nCats,n", po::value<int>(&nCats_)->default_value(9),                                    			"Number of total categories")
-    ("cats,c", po::value<string>(&catsStr_)->default_value(""),                                   			"Comma-separated list of cats to process")
+   // ("nCats,n", po::value<int>(&nCats_)->default_value(9),                                    			"Number of total categories")
     ("constraintValue,C", po::value<float>(&constraintValue_)->default_value(0.1),            			"Constraint value")
     ("constraintValueMass,M", po::value<int>(&constraintValueMass_)->default_value(125),                        "Constraint value mass")
     ("skipSecondaryModels",                                                                   			"Turn off creation of all additional models")
     ("doQuadraticSigmaSum",  										        "Add sigma systematic terms in quadrature")
     ("procs", po::value<string>(&procStr_)->default_value("ggh,vbf,wh,zh,tth"),					"Processes (comma sep)")
-    ("isCutBased",                                                                               		"Is this the cut based analysis")
-    ("is2011",                                                                         				"Is this the 7TeV analysis")
     ("skipMasses", po::value<string>(&massesToSkip_)->default_value(""),					"Skip these mass points - used eg for the 7TeV where there's no mc at 145")
     ("runInitialFitsOnly",                                                                                      "Just fit gaussians - no interpolation, no systematics - useful for testing nGaussians")
 		("cloneFits", po::value<string>(&cloneFitFile_),															"Do not redo the fits but load the fit parameters from this workspace. Pass as fileName:wsName.")
     ("nonRecursive",                                                                             		"Do not recursively calculate gaussian fractions")
+    ("verbose,v", po::value<int>(&verbose_)->default_value(0),                                			"Verbosity level: 0 (lowest) - 3 (highest)")
+		("isFlashgg",	po::value<bool>(&isFlashgg_)->default_value(true),														"Use flashgg format")
+	//	("check",	po::value<bool>(&check_)->default_value(false),														"Use flashgg format (default false)")
+    ("flashggCats,f", po::value<string>(&flashggCatsStr_)->default_value("DiPhotonUntaggedCategory_0,DiPhotonUntaggedCategory_1,DiPhotonUntaggedCategory_2,DiPhotonUntaggedCategory_3,DiPhotonUntaggedCategory_4,VBFTag_0,VBFTag_1,VBFTag_2"),       "Flashgg categories if used") 
+  ;                                                                                             		
+	po::options_description desc2("Options kept for backward compatibility");
+	desc2.add_options()
+  ("cats,c", po::value<string>(&catsStr_)->default_value(""),                                   			"Comma-separated list of cats to process")
+	("nCats,n", po::value<int>(&nCats_)->default_value(9),																			"Number of cats (Set Automatically if using --isFlashgg 1)")
     ("highR9cats", po::value<string>(&highR9cats_)->default_value("0,1,4,5"),					"For cut based only - pass over which categories are inclusive high R9 cats (comma sep string)")
     ("lowR9cats", po::value<string>(&lowR9cats_)->default_value("2,3,6,7"),              			"For cut based only - pass over which categories are inclusive low R9 cats (comma sep string)")
-    ("verbose,v", po::value<int>(&verbose_)->default_value(0),                                			"Verbosity level: 0 (lowest) - 3 (highest)")
-  ;                                                                                             		
+    ("isCutBased",                                                                               		"Is this the cut based analysis")
+    ("is2011",                                                                         				"Is this the 7TeV analysis")
+		;
+	po::options_description desc("Allowed options");
+	desc.add(desc1).add(desc2);
   po::variables_map vm;
   po::store(po::parse_command_line(argc,argv,desc),vm);
   po::notify(vm);
@@ -137,6 +152,9 @@ void OptionParser(int argc, char *argv[]){
 	  }
   }
   split(procs_,procStr_,boost::is_any_of(","));
+	split(flashggCats_,flashggCatsStr_,boost::is_any_of(","));
+	split(filename_,filenameStr_,boost::is_any_of(","));
+
 }
 
 void transferMacros(TFile *inFile, TDirectory *outFile){
@@ -250,46 +268,94 @@ bool skipMass(int mh){
 }
 
 int main(int argc, char *argv[]){
- 
+
+
 	gROOT->SetBatch();
 
-  OptionParser(argc,argv);
+	OptionParser(argc,argv);
 
-  TStopwatch sw;
-  sw.Start();
+	TStopwatch sw;
+	sw.Start();
 
-  TFile *inFile = TFile::Open(filename_.c_str());
-  RooWorkspace *inWS = (RooWorkspace*)inFile->Get("cms_hgg_workspace");
-  
-  RooRealVar *mass = (RooRealVar*)inWS->var("CMS_hgg_mass");
-  mass->SetTitle("m_{#gamma#gamma}");
-  mass->setUnit("GeV");
-  RooRealVar *intLumi = (RooRealVar*)inWS->var("IntLumi");
-  RooRealVar *MH = new RooRealVar("MH","m_{H}",mhLow_,mhHigh_);
-  MH->setUnit("GeV");
-  MH->setConstant(true);
-  RooRealVar *MH_SM = new RooRealVar("MH_SM","m_{H} (SM)",mhLow_,mhHigh_);
-  MH_SM->setConstant(true);
-  RooRealVar *DeltaM = new RooRealVar("DeltaM","#Delta m_{H}",0.,-10.,10.);
-  DeltaM->setUnit("GeV");
-  DeltaM->setConstant(true);
-  RooAddition *MH_2 = new RooAddition("MH_2","m_{H} (2)",RooArgList(*MH,*DeltaM));
-  RooRealVar *higgsDecayWidth = new RooRealVar("HiggsDecayWidth","#Gamma m_{H}",0.,0.,10.);
-  higgsDecayWidth->setConstant(true);
-  
-  TFile *outFile = new TFile(outfilename_.c_str(),"RECREATE");
-  RooWorkspace *outWS;
-  if (is2011_) outWS = new RooWorkspace("wsig_7TeV");
-  else outWS = new RooWorkspace("wsig_8TeV");
-  RooWorkspace *mergeWS = 0;
-  TFile *mergeFile = 0;
-  if(!mergefilename_.empty()) {
-	  mergeFile = TFile::Open(mergefilename_.c_str());
-	  if (is2011_) mergeWS = (RooWorkspace*)mergeFile->Get("wsig_7TeV");
-	  else  mergeWS = (RooWorkspace*)mergeFile->Get("wsig_8TeV");
-  }
-  
-  transferMacros(inFile,outFile);
+	if (isFlashgg_){ nCats_= flashggCats_.size();
+	}
+
+	TFile *inFile = TFile::Open(filename_[0].c_str());
+	if (check_){
+	RooWorkspace *	inWS0 = (RooWorkspace*)inFile->Get(Form("wsig_8TeV"));
+			std::list<RooAbsData*> data =  (inWS0->allData()) ;
+			for (std::list<RooAbsData*>::const_iterator iterator = data.begin(), end = data.end(); iterator != end; ++iterator) {
+			std::cout << **iterator << std::endl;
+			}
+	return 1;
+	}
+	RooWorkspace *inWS;
+	if (isFlashgg_){
+		inWS = (RooWorkspace*)inFile->Get("diphotonDumper/cms_hgg_13TeV");
+    /*if (filename_.size()>2){ // can be used to merge workspaces for different mass points if needed (should already be done)
+			TFile *inFile1 = TFile::Open(filename_[1].c_str());
+			TFile *inFile2 = TFile::Open(filename_[2].c_str());
+			RooWorkspace *inWS1;
+			RooWorkspace *inWS2;
+			inWS1 = (RooWorkspace*)inFile1->Get("diphotonDumper/cms_hgg_13TeV");
+			inWS2 = (RooWorkspace*)inFile2->Get("diphotonDumper/cms_hgg_13TeV");
+			std::list<RooAbsData*> data =  (inWS1->allData()) ;
+			std::list<RooAbsData*> data2 =  (inWS2->allData()) ;
+			for (std::list<RooAbsData*>::const_iterator iterator = data.begin(), end = data.end(); iterator != end; ++iterator) {
+				inWS->import(**iterator);
+			}
+			for (std::list<RooAbsData*>::const_iterator iterator = data2.begin(), end = data2.end(); iterator != end; ++iterator) {
+				inWS->import(**iterator);
+			}
+		}*/
+		std::list<RooAbsData*> test =  (inWS->allData()) ;
+		std::cout << " WS contains " << std::endl;
+		for (std::list<RooAbsData*>::const_iterator iterator = test.begin(), end = test.end(); iterator != end; ++iterator) {
+			std::cout << **iterator << std::endl;
+		}
+	} else {
+		inWS = (RooWorkspace*)inFile->Get("cms_hgg_workspace");
+		std::list<RooAbsData*> test =  (inWS->allData()) ;
+		std::cout << " WS contains " << std::endl;
+		for (std::list<RooAbsData*>::const_iterator iterator = test.begin(), end = test.end(); iterator != end; ++iterator) {
+			std::cout << **iterator << std::endl
+				;}
+		//std::cout << " WS contains " << *inWS->allData() << std::endl;
+	}
+
+	if (inWS) { std::cout << "[INFO] workspace opened correctly" << std::endl;}
+	else { std::cout << "[EXIT] Workspace is null pointer. exit" << std::endl; return 0;}
+
+	RooRealVar *mass = (RooRealVar*)inWS->var("CMS_hgg_mass");
+	mass->SetTitle("m_{#gamma#gamma}");
+	mass->setUnit("GeV");
+	RooRealVar *intLumi = (RooRealVar*)inWS->var("IntLumi");
+	std::cout << "intLumi " << intLumi  << std::endl;
+	RooRealVar *MH = new RooRealVar("MH","m_{H}",mhLow_,mhHigh_);
+	MH->setUnit("GeV");
+	MH->setConstant(true);
+	RooRealVar *MH_SM = new RooRealVar("MH_SM","m_{H} (SM)",mhLow_,mhHigh_);
+	MH_SM->setConstant(true);
+	RooRealVar *DeltaM = new RooRealVar("DeltaM","#Delta m_{H}",0.,-10.,10.);
+	DeltaM->setUnit("GeV");
+	DeltaM->setConstant(true);
+	RooAddition *MH_2 = new RooAddition("MH_2","m_{H} (2)",RooArgList(*MH,*DeltaM));
+	RooRealVar *higgsDecayWidth = new RooRealVar("HiggsDecayWidth","#Gamma m_{H}",0.,0.,10.);
+	higgsDecayWidth->setConstant(true);
+
+	TFile *outFile = new TFile(outfilename_.c_str(),"RECREATE");
+	RooWorkspace *outWS;
+	if (is2011_) outWS = new RooWorkspace("wsig_7TeV");
+	else outWS = new RooWorkspace("wsig_8TeV");
+	RooWorkspace *mergeWS = 0;
+	TFile *mergeFile = 0;
+	if(!mergefilename_.empty()) {
+		mergeFile = TFile::Open(mergefilename_.c_str());
+		if (is2011_) mergeWS = (RooWorkspace*)mergeFile->Get("wsig_7TeV");
+		else  mergeWS = (RooWorkspace*)mergeFile->Get("wsig_8TeV");
+	}
+
+	transferMacros(inFile,outFile);
 
 	clonemap_t cloneSplinesMapRV;
 	clonemap_t cloneSplinesMapWV;
@@ -308,61 +374,76 @@ int main(int argc, char *argv[]){
 
 	}
 
-  system(Form("mkdir -p %s/initialFits",plotDir_.c_str()));
-  system("mkdir -p dat/in");
-  parmap_t allParameters;
+	system(Form("mkdir -p %s/initialFits",plotDir_.c_str()));
+	system("mkdir -p dat/in");
+	parmap_t allParameters;
 
-  // run fits for each line in datfile
-  ifstream datfile;
-  datfile.open(datfilename_.c_str());
-  if (datfile.fail()) {
-	  std::cerr << "Could not open " << datfilename_ <<std::endl;
-	  exit(1);
-  }
-  while (datfile.good()){
-    string line;
-    getline(datfile,line);
-    if (line=="\n" || line.substr(0,1)=="#" || line==" " || line.empty()) continue;
-    vector<string> els;
-    split(els,line,boost::is_any_of(" "));
-    if( els.size()!=4 && els.size()!=6 ) {
-	    cerr << "Malformed line " << line << " " << els.size() <<endl;
-	    assert(0);
-    }
-    string proc = els[0];
-    int cat = boost::lexical_cast<int>(els[1]);
-    int nGaussiansRV = boost::lexical_cast<int>(els[2]);
-    int nGaussiansWV = boost::lexical_cast<int>(els[3]);
-    bool replace = false;
-    pair<string,int> replaceWith;
-    if( els.size()==6 ) {
-	    replaceWith = make_pair(els[4],boost::lexical_cast<int>(els[5]));
-	    replace = true;
-    }
+	// run fits for each line in datfile
+	ifstream datfile;
+	datfile.open(datfilename_.c_str());
+	if (datfile.fail()) {
+		std::cerr << "Could not open " << datfilename_ <<std::endl;
+		exit(1);
+	}
+	while (datfile.good()){
+		string line;
+		getline(datfile,line);
+		if (line=="\n" || line.substr(0,1)=="#" || line==" " || line.empty()) continue;
+		vector<string> els;
+		split(els,line,boost::is_any_of(" "));
+		if( els.size()!=4 && els.size()!=6 ) {
+			cerr << "Malformed line " << line << " " << els.size() <<endl;
+			assert(0);
+		}
+		string proc = els[0];
+		int cat = boost::lexical_cast<int>(els[1]);
+		int nGaussiansRV = boost::lexical_cast<int>(els[2]);
+		int nGaussiansWV = boost::lexical_cast<int>(els[3]);
+		bool replace = false;
+		pair<string,int> replaceWith;
+		if( els.size()==6 ) {
+			replaceWith = make_pair(els[4],boost::lexical_cast<int>(els[5]));
+			replace = true;
+		}
 
-    cout << "-----------------------------------------------------------------" << endl;
-    cout << Form("Running fits for proc:%s - cat:%d with nGausRV:%d nGausWV:%d",proc.c_str(),cat,nGaussiansRV,nGaussiansWV) << endl;
-    if( replace ) { cout << Form("Will replace parameters using  proc:%s - cat:%d",replaceWith.first.c_str(),replaceWith.second) << endl; }
-    cout << "-----------------------------------------------------------------" << endl;
-    // get datasets for each MH here
-    map<int,RooDataSet*> datasetsRV;
-    map<int,RooDataSet*> datasetsWV;
-    map<int,RooDataSet*> datasets;
+		cout << "-----------------------------------------------------------------" << endl;
+		cout << Form("Running fits for proc:%s - cat:%d with nGausRV:%d nGausWV:%d",proc.c_str(),cat,nGaussiansRV,nGaussiansWV) << endl;
+		if( replace ) { cout << Form("Will replace parameters using  proc:%s - cat:%d",replaceWith.first.c_str(),replaceWith.second) << endl; }
+		cout << "-----------------------------------------------------------------" << endl;
+		// get datasets for each MH here
+		map<int,RooDataSet*> datasetsRV;
+		map<int,RooDataSet*> datasetsWV;
+		map<int,RooDataSet*> datasets;
 
-    for (int mh=mhLow_; mh<=mhHigh_; mh+=5){
+		for (int mh=mhLow_; mh<=mhHigh_; mh+=5){
 			if (skipMass(mh)) continue;
-      RooDataSet *dataRV = (RooDataSet*)inWS->data(Form("sig_%s_mass_m%d_rv_cat%d",proc.c_str(),mh,cat));
-      RooDataSet *dataWV = (RooDataSet*)inWS->data(Form("sig_%s_mass_m%d_wv_cat%d",proc.c_str(),mh,cat));
-      RooDataSet *data = (RooDataSet*)inWS->data(Form("sig_%s_mass_m%d_cat%d",proc.c_str(),mh,cat));
-      datasetsRV.insert(pair<int,RooDataSet*>(mh,dataRV));
-      datasetsWV.insert(pair<int,RooDataSet*>(mh,dataWV));
-      datasets.insert(pair<int,RooDataSet*>(mh,data));
-    }
+			RooDataSet *dataRV; 
+			RooDataSet *dataWV; 
+			RooDataSet *data;  
 
-    // these guys do the fitting
-    // right vertex
-    InitialFit initFitRV(mass,MH,mhLow_,mhHigh_,skipMasses_);
-    initFitRV.setVerbosity(verbose_);
+			if (isFlashgg_){
+				dataRV = (RooDataSet*)inWS->data(Form("%s_%d_13TeV_flashgg%s",proc.c_str(),mh,flashggCats_[cat].c_str())); //FIXME
+				dataWV = (RooDataSet*)inWS->data(Form("%s_%d_13TeV_flashgg%s",proc.c_str(),mh,flashggCats_[cat].c_str())); // FIXME
+				data   = (RooDataSet*)inWS->data(Form("%s_%d_13TeV_flashgg%s",proc.c_str(),mh,flashggCats_[cat].c_str()));
+			//	std::cout << "Data histos: " << std::endl;
+			//	std::cout << Form("%s_%d_13TeV_flashgg%s",proc.c_str(),mh,flashggCats_[cat].c_str())  << std::endl;
+			//	std::cout << "data open ?  data " << data << ", dataWV " << dataWV << ", data RV " << dataRV << std::endl;
+			//	if (data ) {std :: cout << "data OK! " << std::endl; 
+			//	} else { std::cout << "data not ok :( " << std::endl; return 0 ;}
+			} else {
+				dataRV = (RooDataSet*)inWS->data(Form("sig_%s_mass_m%d_rv_cat%d",proc.c_str(),mh,cat));
+				dataWV = (RooDataSet*)inWS->data(Form("sig_%s_mass_m%d_wv_cat%d",proc.c_str(),mh,cat));
+				data   = (RooDataSet*)inWS->data(Form("sig_%s_mass_m%d_cat%d",proc.c_str(),mh,cat));
+			}
+			datasetsRV.insert(pair<int,RooDataSet*>(mh,dataRV));
+			datasetsWV.insert(pair<int,RooDataSet*>(mh,dataWV));
+			datasets.insert(pair<int,RooDataSet*>(mh,data));
+		}
+
+		// these guys do the fitting
+		// right vertex
+		InitialFit initFitRV(mass,MH,mhLow_,mhHigh_,skipMasses_);
+		initFitRV.setVerbosity(verbose_);
 		if (!cloneFits_) {
 			initFitRV.buildSumOfGaussians(Form("%s_cat%d",proc.c_str(),cat),nGaussiansRV,recursive_);
 			initFitRV.setDatasets(datasetsRV);
@@ -377,11 +458,11 @@ int main(int argc, char *argv[]){
 			}
 			if (!skipPlots_) initFitRV.plotFits(Form("%s/initialFits/%s_cat%d_rv",plotDir_.c_str(),proc.c_str(),cat));
 		}
-    parlist_t fitParamsRV = initFitRV.getFitParams();
-    
-    // wrong vertex
-    InitialFit initFitWV(mass,MH,mhLow_,mhHigh_,skipMasses_);
-    initFitWV.setVerbosity(verbose_);
+		parlist_t fitParamsRV = initFitRV.getFitParams();
+
+		// wrong vertex
+		InitialFit initFitWV(mass,MH,mhLow_,mhHigh_,skipMasses_);
+		initFitWV.setVerbosity(verbose_);
 		if (!cloneFits_) {
 			initFitWV.buildSumOfGaussians(Form("%s_cat%d",proc.c_str(),cat),nGaussiansWV,recursive_);
 			initFitWV.setDatasets(datasetsWV);
@@ -396,15 +477,15 @@ int main(int argc, char *argv[]){
 			}
 			if (!skipPlots_) initFitWV.plotFits(Form("%s/initialFits/%s_cat%d_wv",plotDir_.c_str(),proc.c_str(),cat));
 		}
-    parlist_t fitParamsWV = initFitWV.getFitParams();
+		parlist_t fitParamsWV = initFitWV.getFitParams();
 
-    allParameters[ make_pair(proc,cat) ] = make_pair(fitParamsRV,fitParamsWV);
-    
-    if (!runInitialFitsOnly_) {
-    	//these guys do the interpolation
+		allParameters[ make_pair(proc,cat) ] = make_pair(fitParamsRV,fitParamsWV);
+
+		if (!runInitialFitsOnly_) {
+			//these guys do the interpolation
 			map<string,RooSpline1D*> splinesRV;
 			map<string,RooSpline1D*> splinesWV;
-			
+
 			if (!cloneFits_){
 				// right vertex
 				LinearInterp linInterpRV(MH,mhLow_,mhHigh_,fitParamsRV,doSecondaryModels_,skipMasses_);
@@ -424,57 +505,85 @@ int main(int argc, char *argv[]){
 				splinesRV = cloneSplinesMapRV[make_pair(proc,cat)];
 				splinesWV = cloneSplinesMapWV[make_pair(proc,cat)];
 			}
+			// this guy constructs the final model with systematics, eff*acc etc.
 
-    	// this guy constructs the final model with systematics, eff*acc etc.
-    	FinalModelConstruction finalModel(mass,MH,intLumi,mhLow_,mhHigh_,proc,cat,doSecondaryModels_,systfilename_,skipMasses_,verbose_,isCutBased_,is2011_,doQuadraticSigmaSum_);
-    	if (isCutBased_){
-    		finalModel.setHighR9cats(highR9cats_);
-    		finalModel.setLowR9cats(lowR9cats_);
-    	}
-    	finalModel.setSecondaryModelVars(MH_SM,DeltaM,MH_2,higgsDecayWidth);
-    	finalModel.setRVsplines(splinesRV);
-    	finalModel.setWVsplines(splinesWV);
-    	finalModel.setRVdatasets(datasetsRV);
-    	finalModel.setWVdatasets(datasetsWV);
-    	//finalModel.setSTDdatasets(datasets);
-    	finalModel.makeSTDdatasets();
-    	if (is2011_) {
-    		finalModel.buildRvWvPdf("hggpdfsmrel_7TeV",nGaussiansRV,nGaussiansWV,recursive_);
-    	} else {
-    		finalModel.buildRvWvPdf("hggpdfsmrel_8TeV",nGaussiansRV,nGaussiansWV,recursive_);
-    	}
-    	finalModel.getNormalization();
-    	if (!skipPlots_) finalModel.plotPdf(plotDir_);
-    	finalModel.save(outWS);
-    }
-  }
-  
-  datfile.close();
-  
-  sw.Stop();
-  cout << "Whole fitting process took..." << endl;
-  cout << "\t";
-  sw.Print();
+			if (isFlashgg_){
+				RooRealVar *intLumi2 = new RooRealVar("intLumi2","intLumi2",0.9,1.1); //FIXME
+				std::cout << "[WARNING] Artificially setting intLumi to 1. FIXME before using on data"<< std::endl;
 
-  if (!runInitialFitsOnly_) { 
-	sw.Start();
-	cout << "Starting to combine fits..." << endl;
-	// this guy packages everything up
-	Packager packager(outWS,procs_,nCats_,mhLow_,mhHigh_,skipMasses_,is2011_,skipPlots_,plotDir_,mergeWS,cats_);
-	packager.packageOutput();
+				FinalModelConstruction finalModel(mass,MH,intLumi2,mhLow_,mhHigh_,proc,cat,doSecondaryModels_,systfilename_,skipMasses_,verbose_,procs_,isCutBased_,is2011_,doQuadraticSigmaSum_);
+				if (isCutBased_){
+					finalModel.setHighR9cats(highR9cats_);
+					finalModel.setLowR9cats(lowR9cats_);
+				}
+				finalModel.setSecondaryModelVars(MH_SM,DeltaM,MH_2,higgsDecayWidth);
+				finalModel.setRVsplines(splinesRV);
+				finalModel.setWVsplines(splinesWV);
+				finalModel.setRVdatasets(datasetsRV);
+				finalModel.setWVdatasets(datasetsWV);
+				//finalModel.setSTDdatasets(datasets);
+				finalModel.makeSTDdatasets();
+				if (is2011_) {
+					finalModel.buildRvWvPdf("hggpdfsmrel_7TeV",nGaussiansRV,nGaussiansWV,recursive_);
+				} else {
+					finalModel.buildRvWvPdf("hggpdfsmrel_8TeV",nGaussiansRV,nGaussiansWV,recursive_);
+				}
+				finalModel.getNormalization();
+				if (!skipPlots_) finalModel.plotPdf(plotDir_);
+				finalModel.save(outWS);
+
+			} else {
+
+				FinalModelConstruction finalModel(mass,MH,intLumi,mhLow_,mhHigh_,proc,cat,doSecondaryModels_,systfilename_,skipMasses_,verbose_,procs_,isCutBased_,is2011_,doQuadraticSigmaSum_);
+				if (isCutBased_){
+					finalModel.setHighR9cats(highR9cats_);
+					finalModel.setLowR9cats(lowR9cats_);
+				}
+				finalModel.setSecondaryModelVars(MH_SM,DeltaM,MH_2,higgsDecayWidth);
+				finalModel.setRVsplines(splinesRV);
+				finalModel.setWVsplines(splinesWV);
+				finalModel.setRVdatasets(datasetsRV);
+				finalModel.setWVdatasets(datasetsWV);
+				//finalModel.setSTDdatasets(datasets);
+				finalModel.makeSTDdatasets();
+				if (is2011_) {
+					finalModel.buildRvWvPdf("hggpdfsmrel_7TeV",nGaussiansRV,nGaussiansWV,recursive_);
+				} else {
+					finalModel.buildRvWvPdf("hggpdfsmrel_8TeV",nGaussiansRV,nGaussiansWV,recursive_);
+				}
+				finalModel.getNormalization();
+				if (!skipPlots_) finalModel.plotPdf(plotDir_);
+				finalModel.save(outWS);
+			}
+		}
+	}
+
+	datfile.close();
+
 	sw.Stop();
-	cout << "Combination complete." << endl;
-	cout << "Whole process took..." << endl;
+	cout << "Whole fitting process took..." << endl;
 	cout << "\t";
 	sw.Print();
-  }
 
-  cout << "Writing to file..." << endl;
-  outFile->cd();
-  outWS->Write();
-  outFile->Close();
-  inFile->Close();
-  cout << "Done." << endl;
+	if (!runInitialFitsOnly_) { 
+		sw.Start();
+		cout << "Starting to combine fits..." << endl;
+		// this guy packages everything up
+		Packager packager(outWS,procs_,nCats_,mhLow_,mhHigh_,skipMasses_,is2011_,skipPlots_,plotDir_,mergeWS,cats_);
+		packager.packageOutput();
+		sw.Stop();
+		cout << "Combination complete." << endl;
+		cout << "Whole process took..." << endl;
+		cout << "\t";
+		sw.Print();
+	}
 
-  return 0;
+	cout << "Writing to file..." << endl;
+	outFile->cd();
+	outWS->Write();
+	outFile->Close();
+	inFile->Close();
+	cout << "Done." << endl;
+
+	return 0;
 }

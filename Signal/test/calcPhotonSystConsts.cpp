@@ -43,12 +43,15 @@ vector<string> globalScalesCorr_;
 
 string procStr_;
 vector<string> procs_;
+string flashggCatsStr_;
+vector<string> flashggCats_;
 string plotDir_;
 bool doPlots_;
 int mh_;
 int nCats_;
 string sqrtS_;
 int quadInterpolate_;
+bool isFlashgg_;
 
 void OptionParser(int argc, char *argv[]){
 
@@ -58,13 +61,19 @@ void OptionParser(int argc, char *argv[]){
     ("infilenames,i", po::value<string>(&infilenamesStr_),                                           		"Input file names (comma sep)")
     ("outfilename,o", po::value<string>(&outfilename_)->default_value("dat/photonCatSyst.dat"), 				"Output file name")
     ("mh,m", po::value<int>(&mh_)->default_value(125),                                  								"Mass point")
-    ("nCats,n", po::value<int>(&nCats_)->default_value(9),                                    					"Number of total categories")
 		("sqrtS", po::value<string>(&sqrtS_)->default_value("8"),																								"CoM energy")
 		("procs,p",po::value<string>(&procStr_)->default_value("ggh,vbf,wh,zh,tth"),												"Processes (comma sep)")
 		("plotDir,D", po::value<string>(&plotDir_)->default_value("plots"),																	"Out directory for plots")
 		("doPlots,P", po::value<bool>(&doPlots_)->default_value(true),																	"Plot variations")
 		("quadInterpolate",	po::value<int>(&quadInterpolate_)->default_value(0),														"Do a quadratic interpolation from this amount of sigma")
-  ;                                                                                             		
+		("isFlashgg",	po::value<bool>(&isFlashgg_)->default_value(true),														"Use flashgg format")
+    ("flashggCats,f", po::value<string>(&flashggCatsStr_)->default_value("DiPhotonUntaggedCategory_0,DiPhotonUntaggedCategory_1,DiPhotonUntaggedCategory_2,DiPhotonUntaggedCategory_3,DiPhotonUntaggedCategory_4,VBFTag_0,VBFTag_1,VBFTag_2"),       "Flashgg category names") 
+		;                                   
+
+	po::options_description backw_opts("Backwards compatibility options");
+	backw_opts.add_options()
+    ("nCats,n", po::value<int>(&nCats_)->default_value(9),                                    					"Number of total categories (Now set automatically if using --isFlashgg 1)")
+		;
 	
 	po::options_description syst_opts("Systematics options");
 	syst_opts.add_options()
@@ -77,7 +86,7 @@ void OptionParser(int argc, char *argv[]){
 	;
 
 	po::options_description all("Allowed options");
-	all.add(general_opts).add(syst_opts);
+	all.add(general_opts).add(syst_opts).add(backw_opts);
 
   po::variables_map vm;
   po::store(po::parse_command_line(argc,argv,all),vm);
@@ -87,6 +96,7 @@ void OptionParser(int argc, char *argv[]){
 	// make vectors of strings from passed strings
 	split(infilenames_,infilenamesStr_,boost::is_any_of(","));
 	split(procs_,procStr_,boost::is_any_of(","));
+	split(flashggCats_,flashggCatsStr_,boost::is_any_of(","));
 	split(photonCatScales_,photonCatScalesStr_,boost::is_any_of(","));
 	split(photonCatScalesCorr_,photonCatScalesCorrStr_,boost::is_any_of(","));
 	split(photonCatSmears_,photonCatSmearsStr_,boost::is_any_of(","));
@@ -312,24 +322,48 @@ vector<TH1F*> getHistograms(vector<TFile*> files, string name, string syst){
 
 	vector<TH1F*> ret_hists;
 	for (unsigned int i=0; i<files.size(); i++){
-		
+
 		files[i]->cd();
-		TH1F *up = (TH1F*)files[i]->Get(Form("%s_%sUp01_sigma",name.c_str(),syst.c_str()));
-		TH1F *down = (TH1F*)files[i]->Get(Form("%s_%sDown01_sigma",name.c_str(),syst.c_str()));
-		TH1F *nominal = (TH1F*)files[i]->Get(name.c_str());
-		if (up && down && nominal) {
-			ret_hists.push_back(nominal);
-			ret_hists.push_back(up);
-			ret_hists.push_back(down);
-			return ret_hists;
+		if (isFlashgg_){
+			TH1F *up = (TH1F*)files[i]->Get(Form("diphotonDumper_%sUp01sigma/histograms/%smass",syst.c_str(),name.c_str()));
+			TH1F *down = (TH1F*)files[i]->Get(Form("diphotonDumper_%sDown01sigma/histograms/%smass",syst.c_str(),name.c_str()));
+			TH1F *nominal = (TH1F*)files[i]->Get(Form("diphotonDumper/histograms/%smass",name.c_str()));
+		//	std::cout << "FLASHGG Histos needed: " << std::endl;
+		//	std::cout << Form("diphotonDumper_%sUp01sigma/histograms/%smass",syst.c_str(),name.c_str())<< ", open ? " << up << std::endl;
+		//	std::cout << Form("diphotonDumper_%sDown01sigma/histograms/%smass",syst.c_str(),name.c_str())<< ", open ? " << down <<std::endl;
+		//	std::cout << Form("diphotonDumper/histograms/%smass",name.c_str())<< ", open ? " << nominal<<std::endl;
+			if (up && down && nominal) {
+				ret_hists.push_back(nominal);
+				ret_hists.push_back(up);
+				ret_hists.push_back(down);
+				return ret_hists;
+			}else{
+				cout << "ERROR - at least one of histograms " << name << ", " << name+"_"+syst+"Up01_sigma, " << name+"_"+syst+"Down01_sigma not found in any file" << endl;
+				return vector<TH1F*>(3,NULL);
+			}
+		}	else {
+			TH1F *up = (TH1F*)files[i]->Get(Form("%s_%sUp01_sigma",name.c_str(),syst.c_str()));
+			TH1F *down = (TH1F*)files[i]->Get(Form("%s_%sDown01_sigma",name.c_str(),syst.c_str()));
+			TH1F *nominal = (TH1F*)files[i]->Get(name.c_str());
+			std::cout << "Histos needed: " << std::endl;
+			std::cout << Form("%s_%sUp01_sigma",name.c_str(),syst.c_str())<< std::endl;
+			std::cout << Form("%s_%sDown01_sigma",name.c_str(),syst.c_str())<< std::endl;
+			std::cout << Form(name.c_str())<< std::endl;
+			if (up && down && nominal) {
+				ret_hists.push_back(nominal);
+				ret_hists.push_back(up);
+				ret_hists.push_back(down);
+				return ret_hists;
+				} else {
+				cout << "ERROR - at least one of histograms " << name << ", " << name+"_"+syst+"Up01_sigma, " << name+"_"+syst+"Down01_sigma not found in any file" << endl;
+				return vector<TH1F*>(3,NULL);
+			}
 		}
 	}
-	cout << "ERROR - at least one of histograms " << name << ", " << name+"_"+syst+"Up01_sigma, " << name+"_"+syst+"Down01_sigma not found in any file" << endl;
-	return vector<TH1F*>(3,NULL);
 }
 
 TH1F *getHistogram(vector<TFile*> files, string name){
-	
+
 	for (unsigned int i=0; i<files.size(); i++){
 		files[i]->cd();
 		TH1F *h = (TH1F*)files[i]->Get(name.c_str());
@@ -340,7 +374,7 @@ TH1F *getHistogram(vector<TFile*> files, string name){
 }
 
 void printInfo(ofstream &outfile, string name, vector<string> systs, string ext){
-	
+
 	outfile << name;
 	for (unsigned int i=0; i<systs.size(); i++) {
 		string pre = systs[i];
@@ -356,11 +390,11 @@ void printInfo(ofstream &outfile, string name, vector<string> systs, string ext)
 }
 
 int main(int argc, char *argv[]){
- 
-  OptionParser(argc,argv);
 
-  TStopwatch sw;
-  sw.Start();
+	OptionParser(argc,argv);
+
+	TStopwatch sw;
+	sw.Start();
 
 	system(Form("mkdir -p %s/systematics",plotDir_.c_str()));
 
@@ -387,38 +421,56 @@ int main(int argc, char *argv[]){
 	outfile << endl;
 	outfile << "# photonCat                   mean_change    sigma_change    rate_change" << endl;
 
+	if(isFlashgg_){ nCats_ = flashggCats_.size();}
 	for (int cat=0; cat<nCats_; cat++){
 		for (vector<string>::iterator proc=procs_.begin(); proc!=procs_.end(); proc++){
-	
+
 			cout << *proc << " - cat " << cat << endl;
 			
+		//	if (isFlashgg_){
+		//	outfile << Form("diphotonCat=%s",(flashggCats_[cat]).c_str()) << endl;
+		//	} else {
 			outfile << Form("diphotonCat=%d",cat) << endl;
+		//	}
 			outfile << Form("proc=%s",proc->c_str()) << endl;
 
 			// photon scales not correlated ....
 			if (photonCatScalesStr_.size()!=0){
 				for (vector<string>::iterator phoCat=photonCatScales_.begin(); phoCat!=photonCatScales_.end(); phoCat++){
-				
+
 					// this is to ensure nominal comes from the right file
-					vector<TH1F*> hists = getHistograms(inFiles,Form("th1f_sig_%s_mass_m%d_cat%d",proc->c_str(),mh_,cat),Form("E_scale_%s",phoCat->c_str()));
+					vector<TH1F*> hists;
+					if (isFlashgg_){
+						string flashggCat = flashggCats_[cat]; 
+						hists= getHistograms(inFiles,Form("%s_%d_13TeV_flashgg%s",proc->c_str(),mh_,flashggCat.c_str()),Form("MCScale%s",phoCat->c_str()));
+					}else{
+						hists= getHistograms(inFiles,Form("th1f_sig_%s_mass_m%d_cat%d",proc->c_str(),mh_,cat),Form("E_scale_%s",phoCat->c_str()));
+					}
 					TH1F *nominal = hists[0];
 					TH1F *scaleUp = hists[1];
 					TH1F *scaleDown = hists[2];
 
 					outfile << Form("%-30s",(*phoCat+"_"+sqrtS_+"TeVscale").c_str());
 					if( scaleUp != 0 && scaleDown != 0 && nominal != 0) {
-						if( doPlots_ ) { plotVariation(nominal,scaleUp,scaleDown,*phoCat,Form("%s_cat%d_scale",proc->c_str(),cat)); }
+						if( doPlots_ ) { 
+						if (isFlashgg_){
+						plotVariation(nominal,scaleUp,scaleDown,*phoCat,Form("%s_cat%s_scale",proc->c_str(),flashggCats_[cat].c_str())); 
+						} else {
+						plotVariation(nominal,scaleUp,scaleDown,*phoCat,Form("%s_cat%d_scale",proc->c_str(),cat)); 
+						}
+						}
 						outfile << Form("%1.4g     %1.4g     %1.4g    ",getMeanVar(nominal,scaleUp,scaleDown),getSigmaVar(nominal,scaleUp,scaleDown),getRateVar(nominal,scaleUp,scaleDown)) << endl;
 					} else {
 						outfile << Form("%1.4g     %1.4g     %1.4g    ",0.,0.,0.) << endl;
 					}
 				}
 			}
-
+			
+			if (!isFlashgg_){ // Smearing not yet supported for Flashgg
 			// photon smears not correlated
 			if (photonCatSmearsStr_.size()!=0){
 				for (vector<string>::iterator phoCat=photonCatSmears_.begin(); phoCat!=photonCatSmears_.end(); phoCat++){
-				
+
 					// this is to ensure nominal comes from the right file
 					vector<TH1F*> hists = getHistograms(inFiles,Form("th1f_sig_%s_mass_m%d_cat%d",proc->c_str(),mh_,cat),Form("E_res_%s",phoCat->c_str()));
 					TH1F *nominal = hists[0];
@@ -434,17 +486,17 @@ int main(int argc, char *argv[]){
 					}
 				}
 			}
-			
+
 			// photon scales correlated
 			if (photonCatScalesCorrStr_.size()!=0){
 				for (vector<string>::iterator phoCat=photonCatScalesCorr_.begin(); phoCat!=photonCatScalesCorr_.end(); phoCat++){
-				
+
 					// this is to ensure nominal comes from the right file
 					vector<TH1F*> hists = getHistograms(inFiles,Form("th1f_sig_%s_mass_m%d_cat%d",proc->c_str(),mh_,cat),Form("E_scale_%s",phoCat->c_str()));
 					TH1F *nominal = hists[0];
 					TH1F *scaleUp = hists[1];
 					TH1F *scaleDown = hists[2];
-					
+
 					outfile << Form("%-30s",(*phoCat+"_scale").c_str());
 					if( scaleUp != 0 && scaleDown != 0 && nominal != 0) {
 						if( doPlots_ ) { plotVariation(nominal,scaleUp,scaleDown,*phoCat,Form("%s_cat%d_scale",proc->c_str(),cat)); }
@@ -458,13 +510,13 @@ int main(int argc, char *argv[]){
 			// photon smears correlated
 			if (photonCatSmearsCorrStr_.size()!=0){
 				for (vector<string>::iterator phoCat=photonCatSmearsCorr_.begin(); phoCat!=photonCatSmearsCorr_.end(); phoCat++){
-				
+
 					// this is to ensure nominal comes from the right file
 					vector<TH1F*> hists = getHistograms(inFiles,Form("th1f_sig_%s_mass_m%d_cat%d",proc->c_str(),mh_,cat),Form("E_res_%s",phoCat->c_str()));
 					TH1F *nominal = hists[0];
 					TH1F *smearUp = hists[1];
 					TH1F *smearDown = hists[2];
-					
+
 					outfile << Form("%-30s",(*phoCat+"_smear").c_str());
 					if( smearUp != 0 && smearDown != 0 && nominal != 0) {
 						if( doPlots_ ) { plotVariation(nominal,smearUp,smearDown,*phoCat,Form("%s_cat%d_smear",proc->c_str(),cat)); }
@@ -473,6 +525,7 @@ int main(int argc, char *argv[]){
 						outfile << Form("%1.4g     %1.4g     %1.4g    ",0.,0.,0.) << endl;
 					}
 				}
+			}
 			}
 			outfile << endl;	
 		} // end process loop
@@ -485,7 +538,7 @@ int main(int argc, char *argv[]){
 		inFiles[i]->Close();
 	}
 	outfile.close();
-	
+
 	sw.Stop();
 	cout << "Took ..." << endl;
 	cout << "\t";
