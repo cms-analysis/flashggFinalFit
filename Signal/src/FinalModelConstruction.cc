@@ -66,7 +66,7 @@ FinalModelConstruction::FinalModelConstruction(RooRealVar *massVar, RooRealVar *
 
  std::cout << "DEBUG procs.size " << (procs_.size()) <<" "<<std::endl;
  // string procs[8] = {"ggh","vbf","wzh","wh","zh","tth","gg_grav","qq_grav"} ;//Don't want this hard-coded.
-  for (int i=0; i<procs_.size(); i++){
+  for (unsigned int i=0; i<procs_.size(); i++){
 	std::cout << "DEBUG procs.size " << procs_[i] <<" "<<std::endl;
     TGraph *xsGraph = norm->GetSigmaGraph(procs_[i].c_str());
     RooSpline1D *xsSpline = graphToSpline(Form("fxs_%s_%dTeV",procs_[i].c_str(),sqrts_),xsGraph);

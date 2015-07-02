@@ -642,6 +642,7 @@ def plot1DNLL(returnErrors=False,xvar="", ext=""):
 
   if options.method=='mh':
     x = 'MH'
+    #x = 'mh'
     xtitle = 'm_{H} (GeV)'
   elif options.method=='mu':
     x = 'r'
@@ -1396,11 +1397,11 @@ def run():
   if options.method=='pval' or options.method=='limit' or options.method=='maxlh':
     runStandard()
   elif options.method=='mh' or options.method=='mu' or options.method=='rv' or options.method=='rf' or options.method=='mpdfchcomp' or options.method=='mpdfmaxlh':
-    path = os.path.expandvars('$CMSSW_BASE/src/h2gglobe_sigmod/Macros/FinalResults/rootPalette.C')
+    path = os.path.expandvars('$CMSSW_BASE/src/flashggFinalFit/Plots/FinalResults/rootPalette.C')
     if not os.path.exists(path):
       sys.exit('ERROR - Can\'t find path: '+path) 
     r.gROOT.ProcessLine(".x "+path)
-    path = os.path.expandvars('$CMSSW_BASE/src/h2gglobe_sigmod/Macros/ResultScripts/GraphToTF1.C')
+    path = os.path.expandvars('$CMSSW_BASE/src/flashggFinalFit/Plots/FinalResults/ResultScripts/GraphToTF1.C')
     if not os.path.exists(path):
       sys.exit('ERROR - Can\'t find path: '+path) 
     r.gROOT.LoadMacro(path)

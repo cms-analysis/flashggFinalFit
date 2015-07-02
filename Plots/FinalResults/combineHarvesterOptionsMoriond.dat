@@ -1,13 +1,17 @@
-datacard=hgg_comb.txt
-files=hgg.inputsig_7TeV.root,hgg.inputsig_8TeV.root,hgg.inputbkgdata_7TeV.root,hgg.inputbkgdata_8TeV.root
+#datacard=hgg_comb.txt
+#files=hgg.inputsig_7TeV.root,hgg.inputsig_8TeV.root,hgg.inputbkgdata_7TeV.root,hgg.inputbkgdata_8TeV.root
+datacard=hgg_datacard_mva_8TeV_multipdf.txt
+files=CMS-HGG_mva_8TeV_sigfit.root,CMS-HGG_mva_8TeV_multipdf.root
 
 # limit
 outDir=combineJobs/Asymptotic											method=Asymptotic expected=0 mhLow=110. mhHigh=150. mhStep=1. jobs=41
 
 # exp pval
 outDir=combineJobs/ExpProfileLikelihood 					method=ProfileLikelihood expected=1 expectSignal=1 mhLow=110. mhHigh=150. mhStep=1. jobs=41 
-outDir=combineJobs/ExpProfileLikelihood/inc 			method=ProfileLikelihood expected=1 expectSignal=1 mhLow=110. mhHigh=150. mhStep=1. jobs=41 splitChannels=ch1_cat0_7TeV,ch1_cat1_7TeV,ch1_cat2_7TeV,ch1_cat3_7TeV,ch2_cat0_8TeV,ch2_cat1_8TeV,ch2_cat2_8TeV,ch2_cat3_8TeV
-outDir=combineJobs/ExpProfileLikelihood/vbf				method=ProfileLikelihood expected=1 expectSignal=1 mhLow=110. mhHigh=150. mhStep=1. jobs=41 splitChannels=ch1_cat4_7TeV,ch2_cat4_8TeV,ch2_cat5_8TeV
+#outDir=combineJobs/ExpProfileLikelihood/inc 			method=ProfileLikelihood expected=1 expectSignal=1 mhLow=110. mhHigh=150. mhStep=1. jobs=41 splitChannels=ch1_cat0_7TeV,ch1_cat1_7TeV,ch1_cat2_7TeV,ch1_cat3_7TeV,ch2_cat0_8TeV,ch2_cat1_8TeV,ch2_cat2_8TeV,ch2_cat3_8TeV
+outDir=combineJobs/ExpProfileLikelihood/inc 			method=ProfileLikelihood expected=1 expectSignal=1 mhLow=110. mhHigh=150. mhStep=1. jobs=41 splitChannels=ch2_cat0_8TeV,ch2_cat1_8TeV,ch2_cat2_8TeV,ch2_cat3_8TeV
+#outDir=combineJobs/ExpProfileLikelihood/vbf				method=ProfileLikelihood expected=1 expectSignal=1 mhLow=110. mhHigh=150. mhStep=1. jobs=41 splitChannels=ch1_cat4_7TeV,ch2_cat4_8TeV,ch2_cat5_8TeV
+outDir=combineJobs/ExpProfileLikelihood/vbf				method=ProfileLikelihood expected=1 expectSignal=1 mhLow=110. mhHigh=150. mhStep=1. jobs=41 splitChannels=ch2_cat4_8TeV,ch2_cat5_8TeV
 outDir=combineJobs/ExpProfileLikelihood/ass				method=ProfileLikelihood expected=1 expectSignal=1 mhLow=110. mhHigh=150. mhStep=1. jobs=41 splitChannels=ch2_cat6_8TeV,ch2_cat7_8TeV,ch2_cat8_8TeV
 
 # exp pval @ 125
@@ -15,8 +19,10 @@ outDir=combineJobs/ExpProfileLikelihood_m125 			method=ProfileLikelihood expecte
 
 # obs pval
 outDir=combineJobs/ProfileLikelihood 							method=ProfileLikelihood expected=0 mhLow=110. mhHigh=150. mhStep=1. jobs=41 
-outDir=combineJobs/ProfileLikelihood/inc 					method=ProfileLikelihood expected=0 mhLow=110. mhHigh=150. mhStep=1. jobs=41 splitChannels=ch1_cat0_7TeV,ch1_cat1_7TeV,ch1_cat2_7TeV,ch1_cat3_7TeV,ch2_cat0_8TeV,ch2_cat1_8TeV,ch2_cat2_8TeV,ch2_cat3_8TeV
-outDir=combineJobs/ProfileLikelihood/vbf					method=ProfileLikelihood expected=0 mhLow=110. mhHigh=150. mhStep=1. jobs=41 splitChannels=ch1_cat4_7TeV,ch2_cat4_8TeV,ch2_cat5_8TeV
+#outDir=combineJobs/ProfileLikelihood/inc 					method=ProfileLikelihood expected=0 mhLow=110. mhHigh=150. mhStep=1. jobs=41 splitChannels=ch1_cat0_7TeV,ch1_cat1_7TeV,ch1_cat2_7TeV,ch1_cat3_7TeV,ch2_cat0_8TeV,ch2_cat1_8TeV,ch2_cat2_8TeV,ch2_cat3_8TeV
+outDir=combineJobs/ProfileLikelihood/inc 					method=ProfileLikelihood expected=0 mhLow=110. mhHigh=150. mhStep=1. jobs=41 splitChannels=ch2_cat0_8TeV,ch2_cat1_8TeV,ch2_cat2_8TeV,ch2_cat3_8TeV
+#outDir=combineJobs/ProfileLikelihood/vbf					method=ProfileLikelihood expected=0 mhLow=110. mhHigh=150. mhStep=1. jobs=41 splitChannels=ch1_cat4_7TeV,ch2_cat4_8TeV,ch2_cat5_8TeV
+outDir=combineJobs/ProfileLikelihood/vbf					method=ProfileLikelihood expected=0 mhLow=110. mhHigh=150. mhStep=1. jobs=41 splitChannels=ch2_cat4_8TeV,ch2_cat5_8TeV
 outDir=combineJobs/ProfileLikelihood/ass					method=ProfileLikelihood expected=0 mhLow=110. mhHigh=150. mhStep=1. jobs=41 splitChannels=ch2_cat6_8TeV,ch2_cat7_8TeV,ch2_cat8_8TeV
 
 # nll scans

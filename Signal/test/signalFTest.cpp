@@ -42,6 +42,7 @@ string flashggCatsStr_;
 vector<string> flashggCats_;
 bool forceFracUnity_=false;
 bool isFlashgg_;
+bool verbose_;
 
 void OptionParser(int argc, char *argv[]){
 	po::options_description desc1("Allowed options");
@@ -54,6 +55,7 @@ void OptionParser(int argc, char *argv[]){
 		("recursive",																																							"Recursive fraction")
 		("forceFracUnity",																																				"Force fraction unity")
 		("isFlashgg",	po::value<bool>(&isFlashgg_)->default_value(true),													"Use flashgg format")
+		("verbose",	po::value<bool>(&verbose_)->default_value(false),													"Use flashgg format")
 		("flashggCats,f", po::value<string>(&flashggCatsStr_)->default_value("DiPhotonUntaggedCategory_0,DiPhotonUntaggedCategory_1,DiPhotonUntaggedCategory_2,DiPhotonUntaggedCategory_3,DiPhotonUntaggedCategory_4,VBFTag_0,VBFTag_1,VBFTag_2"),       "Flashgg category names to consider")
 		;
 
@@ -163,8 +165,11 @@ int main(int argc, char *argv[]){
 	RooWorkspace *inWS;
 	RooRealVar *mass; 
 	if (isFlashgg_){
+	if (verbose_) std::cout << "[INFO] Opening workspace diphotonDumper/cms_hgg_13TeV"<<std::endl;
 		inWS = (RooWorkspace*)inFile->Get("diphotonDumper/cms_hgg_13TeV");
+	if (verbose_) std::cout << "[INFO] Workspace Open "<< inWS << std::endl;
 		mass = (RooRealVar*)inWS->var("CMS_hgg_mass");
+	if (verbose_) std::cout << "[INFO] Got mass var from ws"<<std::endl;
 	} else {
 		inWS = (RooWorkspace*)inFile->Get("cms_hgg_workspace"); 
 		mass = (RooRealVar*)inWS->var("CMS_hgg_mass"); 
@@ -205,11 +210,28 @@ int main(int argc, char *argv[]){
 	for (int cat=0; cat<ncats_; cat++){
 		for (unsigned int p=0; p<procs.size(); p++){
 			string proc = procs[p];
+			RooDataSet *data;  
 			RooDataSet *dataRV;
 			RooDataSet *dataWV; 
 			if (isFlashgg_){
-				dataRV = (RooDataSet*)inWS->data(Form("%s_%d_13TeV_flashgg%s",proc.c_str(),mass_,flashggCats_[cat].c_str()));
-				dataWV = (RooDataSet*)inWS->data(Form("%s_%d_13TeV_flashgg%s",proc.c_str(),mass_,flashggCats_[cat].c_str()));
+		//		dataRV = (RooDataSet*)inWS->data(Form("%s_%d_13TeV_flashgg%s",proc.c_str(),mass_,flashggCats_[cat].c_str()));
+		//		dataWV = (RooDataSet*)inWS->data(Form("%s_%d_13TeV_flashgg%s",proc.c_str(),mass_,flashggCats_[cat].c_str()));
+				data   = (RooDataSet*)inWS->data(Form("%s_%d_13TeV_flashgg%s",proc.c_str(),mass_,flashggCats_[cat].c_str()));
+				if (verbose_) {
+
+				std::cout << "[INFO] Workspace contains : " << std::endl;
+			std::list<RooAbsData*> data =  (inWS->allData()) ;
+			for (std::list<RooAbsData*>::const_iterator iterator = data.begin(), end = data.end(); iterator != end; ++iterator) {
+			std::cout << **iterator << std::endl;
+			}
+
+
+				}
+				if (verbose_) std::cout << "[INFO] Retrieved combined RV/WV data "<< Form("%s_%d_13TeV_flashgg%s",proc.c_str(),mass_,flashggCats_[cat].c_str()) << "? "<< data<<std::endl;
+				dataRV = new RooDataSet("dataRV","dataRV",&*data,*(data->get()),"dZ<1");
+				if (verbose_) std::cout << "[INFO] Retrieved combined RV data"<<std::endl;
+				dataWV = new RooDataSet("dataWV","dataWV",&*data,*(data->get()),"dZ>=1");
+				if (verbose_) std::cout << "[INFO] Retrieved combined WV data"<<std::endl;
 			} else {
 				dataRV = (RooDataSet*)inWS->data(Form("sig_%s_mass_m%d_rv_cat%d",proc.c_str(),mass_,cat));
 				dataWV = (RooDataSet*)inWS->data(Form("sig_%s_mass_m%d_wv_cat%d",proc.c_str(),mass_,cat));

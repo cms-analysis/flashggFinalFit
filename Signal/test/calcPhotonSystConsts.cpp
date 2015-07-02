@@ -426,12 +426,12 @@ int main(int argc, char *argv[]){
 		for (vector<string>::iterator proc=procs_.begin(); proc!=procs_.end(); proc++){
 
 			cout << *proc << " - cat " << cat << endl;
-			
-		//	if (isFlashgg_){
-		//	outfile << Form("diphotonCat=%s",(flashggCats_[cat]).c_str()) << endl;
-		//	} else {
+
+			//	if (isFlashgg_){
+			//	outfile << Form("diphotonCat=%s",(flashggCats_[cat]).c_str()) << endl;
+			//	} else {
 			outfile << Form("diphotonCat=%d",cat) << endl;
-		//	}
+			//	}
 			outfile << Form("proc=%s",proc->c_str()) << endl;
 
 			// photon scales not correlated ....
@@ -453,11 +453,11 @@ int main(int argc, char *argv[]){
 					outfile << Form("%-30s",(*phoCat+"_"+sqrtS_+"TeVscale").c_str());
 					if( scaleUp != 0 && scaleDown != 0 && nominal != 0) {
 						if( doPlots_ ) { 
-						if (isFlashgg_){
-						plotVariation(nominal,scaleUp,scaleDown,*phoCat,Form("%s_cat%s_scale",proc->c_str(),flashggCats_[cat].c_str())); 
-						} else {
-						plotVariation(nominal,scaleUp,scaleDown,*phoCat,Form("%s_cat%d_scale",proc->c_str(),cat)); 
-						}
+							if (isFlashgg_){
+								plotVariation(nominal,scaleUp,scaleDown,*phoCat,Form("%s_cat%s_scale",proc->c_str(),flashggCats_[cat].c_str())); 
+							} else {
+								plotVariation(nominal,scaleUp,scaleDown,*phoCat,Form("%s_cat%d_scale",proc->c_str(),cat)); 
+							}
 						}
 						outfile << Form("%1.4g     %1.4g     %1.4g    ",getMeanVar(nominal,scaleUp,scaleDown),getSigmaVar(nominal,scaleUp,scaleDown),getRateVar(nominal,scaleUp,scaleDown)) << endl;
 					} else {
@@ -465,83 +465,97 @@ int main(int argc, char *argv[]){
 					}
 				}
 			}
-			
-			if (!isFlashgg_){ // Smearing not yet supported for Flashgg
+
 			// photon smears not correlated
 			if (photonCatSmearsStr_.size()!=0){
 				for (vector<string>::iterator phoCat=photonCatSmears_.begin(); phoCat!=photonCatSmears_.end(); phoCat++){
 
-					// this is to ensure nominal comes from the right file
-					vector<TH1F*> hists = getHistograms(inFiles,Form("th1f_sig_%s_mass_m%d_cat%d",proc->c_str(),mh_,cat),Form("E_res_%s",phoCat->c_str()));
+					vector<TH1F*> hists;
+					if (isFlashgg_){ // Smearing not yet supported for Flashgg
+						string flashggCat = flashggCats_[cat]; 
+						hists= getHistograms(inFiles,Form("%s_%d_13TeV_flashgg%s",proc->c_str(),mh_,flashggCat.c_str()),Form("MCSmear%s",phoCat->c_str()));
+					}	 else {
+
+						// this is to ensure nominal comes from the right file
+						hists = getHistograms(inFiles,Form("th1f_sig_%s_mass_m%d_cat%d",proc->c_str(),mh_,cat),Form("E_res_%s",phoCat->c_str()));}
 					TH1F *nominal = hists[0];
 					TH1F *smearUp = hists[1];
 					TH1F *smearDown = hists[2];
 
 					outfile << Form("%-30s",(*phoCat+"_"+sqrtS_+"TeVsmear").c_str());
 					if( smearUp != 0 && smearDown != 0 && nominal != 0) {
-						if( doPlots_ ) { plotVariation(nominal,smearUp,smearDown,*phoCat,Form("%s_cat%d_smear",proc->c_str(),cat)); }
+						if( doPlots_ ) { 
+						
+							if (isFlashgg_){
+								plotVariation(nominal,smearUp,smearDown,*phoCat,Form("%s_cat%s_smear",proc->c_str(),flashggCats_[cat].c_str())); 
+							} else {
+						plotVariation(nominal,smearUp,smearDown,*phoCat,Form("%s_cat%d_smear",proc->c_str(),cat));
+						}
+						}
 						outfile << Form("%1.4g     %1.4g     %1.4g    ",getMeanVar(nominal,smearUp,smearDown),getSigmaVar(nominal,smearUp,smearDown),getRateVar(nominal,smearUp,smearDown)) << endl;
 					} else {
 						outfile << Form("%1.4g     %1.4g     %1.4g    ",0.,0.,0.) << endl;
 					}
-				}
+				}	
 			}
 
-			// photon scales correlated
-			if (photonCatScalesCorrStr_.size()!=0){
-				for (vector<string>::iterator phoCat=photonCatScalesCorr_.begin(); phoCat!=photonCatScalesCorr_.end(); phoCat++){
+			if (!isFlashgg_){
+				// photon scales correlated
+				if (photonCatScalesCorrStr_.size()!=0){
+					for (vector<string>::iterator phoCat=photonCatScalesCorr_.begin(); phoCat!=photonCatScalesCorr_.end(); phoCat++){
 
-					// this is to ensure nominal comes from the right file
-					vector<TH1F*> hists = getHistograms(inFiles,Form("th1f_sig_%s_mass_m%d_cat%d",proc->c_str(),mh_,cat),Form("E_scale_%s",phoCat->c_str()));
-					TH1F *nominal = hists[0];
-					TH1F *scaleUp = hists[1];
-					TH1F *scaleDown = hists[2];
+						// this is to ensure nominal comes from the right file
+						vector<TH1F*> hists = getHistograms(inFiles,Form("th1f_sig_%s_mass_m%d_cat%d",proc->c_str(),mh_,cat),Form("E_scale_%s",phoCat->c_str()));
+						TH1F *nominal = hists[0];
+						TH1F *scaleUp = hists[1];
+						TH1F *scaleDown = hists[2];
 
-					outfile << Form("%-30s",(*phoCat+"_scale").c_str());
-					if( scaleUp != 0 && scaleDown != 0 && nominal != 0) {
-						if( doPlots_ ) { plotVariation(nominal,scaleUp,scaleDown,*phoCat,Form("%s_cat%d_scale",proc->c_str(),cat)); }
-						outfile << Form("%1.4g     %1.4g     %1.4g    ",getMeanVar(nominal,scaleUp,scaleDown),getSigmaVar(nominal,scaleUp,scaleDown),getRateVar(nominal,scaleUp,scaleDown)) << endl;
-					} else {
-						outfile << Form("%1.4g     %1.4g     %1.4g    ",0.,0.,0.) << endl;
+						outfile << Form("%-30s",(*phoCat+"_scale").c_str());
+						if( scaleUp != 0 && scaleDown != 0 && nominal != 0) {
+							if( doPlots_ ) { plotVariation(nominal,scaleUp,scaleDown,*phoCat,Form("%s_cat%d_scale",proc->c_str(),cat)); }
+							outfile << Form("%1.4g     %1.4g     %1.4g    ",getMeanVar(nominal,scaleUp,scaleDown),getSigmaVar(nominal,scaleUp,scaleDown),getRateVar(nominal,scaleUp,scaleDown)) << endl;
+						} else {
+							outfile << Form("%1.4g     %1.4g     %1.4g    ",0.,0.,0.) << endl;
+						}
 					}
 				}
-			}
 
-			// photon smears correlated
-			if (photonCatSmearsCorrStr_.size()!=0){
-				for (vector<string>::iterator phoCat=photonCatSmearsCorr_.begin(); phoCat!=photonCatSmearsCorr_.end(); phoCat++){
+				// photon smears correlated
+				if (photonCatSmearsCorrStr_.size()!=0){
+					for (vector<string>::iterator phoCat=photonCatSmearsCorr_.begin(); phoCat!=photonCatSmearsCorr_.end(); phoCat++){
 
-					// this is to ensure nominal comes from the right file
-					vector<TH1F*> hists = getHistograms(inFiles,Form("th1f_sig_%s_mass_m%d_cat%d",proc->c_str(),mh_,cat),Form("E_res_%s",phoCat->c_str()));
-					TH1F *nominal = hists[0];
-					TH1F *smearUp = hists[1];
-					TH1F *smearDown = hists[2];
+						// this is to ensure nominal comes from the right file
+						vector<TH1F*> hists = getHistograms(inFiles,Form("th1f_sig_%s_mass_m%d_cat%d",proc->c_str(),mh_,cat),Form("E_res_%s",phoCat->c_str()));
+						TH1F *nominal = hists[0];
+						TH1F *smearUp = hists[1];
+						TH1F *smearDown = hists[2];
 
-					outfile << Form("%-30s",(*phoCat+"_smear").c_str());
-					if( smearUp != 0 && smearDown != 0 && nominal != 0) {
-						if( doPlots_ ) { plotVariation(nominal,smearUp,smearDown,*phoCat,Form("%s_cat%d_smear",proc->c_str(),cat)); }
-						outfile << Form("%1.4g     %1.4g     %1.4g    ",getMeanVar(nominal,smearUp,smearDown),getSigmaVar(nominal,smearUp,smearDown),getRateVar(nominal,smearUp,smearDown)) << endl;
-					} else {
-						outfile << Form("%1.4g     %1.4g     %1.4g    ",0.,0.,0.) << endl;
+						outfile << Form("%-30s",(*phoCat+"_smear").c_str());
+						if( smearUp != 0 && smearDown != 0 && nominal != 0) {
+							if( doPlots_ ) { plotVariation(nominal,smearUp,smearDown,*phoCat,Form("%s_cat%d_smear",proc->c_str(),cat)); }
+							outfile << Form("%1.4g     %1.4g     %1.4g    ",getMeanVar(nominal,smearUp,smearDown),getSigmaVar(nominal,smearUp,smearDown),getRateVar(nominal,smearUp,smearDown)) << endl;
+						} else {
+							outfile << Form("%1.4g     %1.4g     %1.4g    ",0.,0.,0.) << endl;
+						}
 					}
 				}
-			}
-			}
-			outfile << endl;	
-		} // end process loop
-		outfile << endl;
-	} // end category loop
+				
+		}
+		outfile << endl;	
+	} // end process loop
+	outfile << endl;
+} // end category loop
 
-	for (unsigned int i=0; i<inFiles.size(); i++){
-		cout << "Closed file " << inFiles[i]->GetName() << endl;
-		inFiles[i]->cd();
-		inFiles[i]->Close();
-	}
-	outfile.close();
+for (unsigned int i=0; i<inFiles.size(); i++){
+	cout << "Closed file " << inFiles[i]->GetName() << endl;
+	inFiles[i]->cd();
+	inFiles[i]->Close();
+}
+outfile.close();
 
-	sw.Stop();
-	cout << "Took ..." << endl;
-	cout << "\t";
-	sw.Print();
-	return 0;
+sw.Stop();
+cout << "Took ..." << endl;
+cout << "\t";
+sw.Print();
+return 0;
 }

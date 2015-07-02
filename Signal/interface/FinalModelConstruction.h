@@ -82,7 +82,6 @@ class FinalModelConstruction {
 		bool skipMass(int mh);
     int verbosity_;
     Normalization_8TeV *norm;
-		std::vector<std::string> procs_;
 
     std::map<std::string,RooSpline1D*> stdSplines;
     std::map<std::string,RooSpline1D*> rvSplines;
@@ -117,6 +116,7 @@ class FinalModelConstruction {
 
     bool systematicsSet_;
     bool rvFractionSet_;
+		std::vector<std::string> procs_;
 
     RooSpline1D *graphToSpline(string name, TGraph *graph);
     RooSpline1D *graphToSpline(string name, TGraph *graph, RooAbsReal *var);

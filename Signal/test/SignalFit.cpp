@@ -101,7 +101,7 @@ void OptionParser(int argc, char *argv[]){
     ("nonRecursive",                                                                             		"Do not recursively calculate gaussian fractions")
     ("verbose,v", po::value<int>(&verbose_)->default_value(0),                                			"Verbosity level: 0 (lowest) - 3 (highest)")
 		("isFlashgg",	po::value<bool>(&isFlashgg_)->default_value(true),														"Use flashgg format")
-	//	("check",	po::value<bool>(&check_)->default_value(false),														"Use flashgg format (default false)")
+		("check",	po::value<bool>(&check_)->default_value(false),														"Use flashgg format (default false)")
     ("flashggCats,f", po::value<string>(&flashggCatsStr_)->default_value("DiPhotonUntaggedCategory_0,DiPhotonUntaggedCategory_1,DiPhotonUntaggedCategory_2,DiPhotonUntaggedCategory_3,DiPhotonUntaggedCategory_4,VBFTag_0,VBFTag_1,VBFTag_2"),       "Flashgg categories if used") 
   ;                                                                                             		
 	po::options_description desc2("Options kept for backward compatibility");
@@ -282,7 +282,8 @@ int main(int argc, char *argv[]){
 
 	TFile *inFile = TFile::Open(filename_[0].c_str());
 	if (check_){
-	RooWorkspace *	inWS0 = (RooWorkspace*)inFile->Get(Form("wsig_8TeV"));
+	//RooWorkspace *	inWS0 = (RooWorkspace*)inFile->Get(Form("wsig_8TeV"));
+	RooWorkspace *	inWS0 = (RooWorkspace*)inFile->Get(Form("diphotonDumper/cms_hgg_13TeV"));
 			std::list<RooAbsData*> data =  (inWS0->allData()) ;
 			for (std::list<RooAbsData*>::const_iterator iterator = data.begin(), end = data.end(); iterator != end; ++iterator) {
 			std::cout << **iterator << std::endl;
@@ -422,9 +423,12 @@ int main(int argc, char *argv[]){
 			RooDataSet *data;  
 
 			if (isFlashgg_){
-				dataRV = (RooDataSet*)inWS->data(Form("%s_%d_13TeV_flashgg%s",proc.c_str(),mh,flashggCats_[cat].c_str())); //FIXME
-				dataWV = (RooDataSet*)inWS->data(Form("%s_%d_13TeV_flashgg%s",proc.c_str(),mh,flashggCats_[cat].c_str())); // FIXME
+			//	dataRV = (RooDataSet*)inWS->data(Form("%s_%d_13TeV_flashgg%s",proc.c_str(),mh,flashggCats_[cat].c_str())); //FIXME
+			//	dataWV = (RooDataSet*)inWS->data(Form("%s_%d_13TeV_flashgg%s",proc.c_str(),mh,flashggCats_[cat].c_str())); // FIXME
 				data   = (RooDataSet*)inWS->data(Form("%s_%d_13TeV_flashgg%s",proc.c_str(),mh,flashggCats_[cat].c_str()));
+				dataRV = new RooDataSet("dataRV","dataRV",&*data,*(data->get()),"dZ<1");
+				dataWV = new RooDataSet("dataWV","dataWV",&*data,*(data->get()),"dZ>=1");
+
 			//	std::cout << "Data histos: " << std::endl;
 			//	std::cout << Form("%s_%d_13TeV_flashgg%s",proc.c_str(),mh,flashggCats_[cat].c_str())  << std::endl;
 			//	std::cout << "data open ?  data " << data << ", dataWV " << dataWV << ", data RV " << dataRV << std::endl;
