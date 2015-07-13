@@ -55,6 +55,7 @@ vector<string> procs_;
 string procStr_;
 bool isCutBased_=false;
 bool is2011_=false;
+bool is2012_=false;
 string massesToSkip_;
 vector<int> skipMasses_;
 bool splitRVWV_=true;
@@ -68,6 +69,7 @@ string highR9cats_;
 string lowR9cats_;
 int verbose_=0;
 int ncpu_=1;
+int sqrts_=13;
 vector<int> cats_;
 string catsStr_;
 bool isFlashgg_;
@@ -112,6 +114,7 @@ void OptionParser(int argc, char *argv[]){
     ("lowR9cats", po::value<string>(&lowR9cats_)->default_value("2,3,6,7"),              			"For cut based only - pass over which categories are inclusive low R9 cats (comma sep string)")
     ("isCutBased",                                                                               		"Is this the cut based analysis")
     ("is2011",                                                                         				"Is this the 7TeV analysis")
+    ("is2012",                                                                         				"Is this the 8TeV analysis")
 		;
 	po::options_description desc("Allowed options");
 	desc.add(desc1).add(desc2);
@@ -123,6 +126,9 @@ void OptionParser(int argc, char *argv[]){
   if (vm.count("spin"))                     spin_=true;
   if (vm.count("isCutBased"))               isCutBased_=true;
   if (vm.count("is2011"))               		is2011_=true;
+  if (vm.count("is2011"))               		sqrts_=7;
+  if (vm.count("is2012"))               		is2012_=true;
+  if (vm.count("is2012"))               		sqrts_=8;
   if (vm.count("runInitialFitsOnly"))       runInitialFitsOnly_=true;
 	if (vm.count("cloneFits"))								cloneFits_=true;
   if (vm.count("nosplitRVWV"))              splitRVWV_=false;
@@ -331,7 +337,6 @@ int main(int argc, char *argv[]){
 	mass->SetTitle("m_{#gamma#gamma}");
 	mass->setUnit("GeV");
 	RooRealVar *intLumi = (RooRealVar*)inWS->var("IntLumi");
-	std::cout << "intLumi " << intLumi  << std::endl;
 	RooRealVar *MH = new RooRealVar("MH","m_{H}",mhLow_,mhHigh_);
 	MH->setUnit("GeV");
 	MH->setConstant(true);
@@ -347,7 +352,8 @@ int main(int argc, char *argv[]){
 	TFile *outFile = new TFile(outfilename_.c_str(),"RECREATE");
 	RooWorkspace *outWS;
 	if (is2011_) outWS = new RooWorkspace("wsig_7TeV");
-	else outWS = new RooWorkspace("wsig_8TeV");
+	if (is2012_) outWS = new RooWorkspace("wsig_8TeV");
+	if (isFlashgg_) outWS = new RooWorkspace("wsig_13TeV");
 	RooWorkspace *mergeWS = 0;
 	TFile *mergeFile = 0;
 	if(!mergefilename_.empty()) {
@@ -423,17 +429,27 @@ int main(int argc, char *argv[]){
 			RooDataSet *data;  
 
 			if (isFlashgg_){
-			//	dataRV = (RooDataSet*)inWS->data(Form("%s_%d_13TeV_flashgg%s",proc.c_str(),mh,flashggCats_[cat].c_str())); //FIXME
-			//	dataWV = (RooDataSet*)inWS->data(Form("%s_%d_13TeV_flashgg%s",proc.c_str(),mh,flashggCats_[cat].c_str())); // FIXME
-				data   = (RooDataSet*)inWS->data(Form("%s_%d_13TeV_flashgg%s",proc.c_str(),mh,flashggCats_[cat].c_str()));
-				dataRV = new RooDataSet("dataRV","dataRV",&*data,*(data->get()),"dZ<1");
-				dataWV = new RooDataSet("dataWV","dataWV",&*data,*(data->get()),"dZ>=1");
+				//	dataRV = (RooDataSet*)inWS->data(Form("%s_%d_13TeV_flashgg%s",proc.c_str(),mh,flashggCats_[cat].c_str())); //FIXME
+				//	dataWV = (RooDataSet*)inWS->data(Form("%s_%d_13TeV_flashgg%s",proc.c_str(),mh,flashggCats_[cat].c_str())); // FIXME
+				std::cout << "[WARNING] FIXME - Artificially adding weight 0.085 (~correct weight for hgg events with 9000 MC events, 20/fb of data and e*a of 0.5) to signal sample events. Should eventually be included in workspace by default " << std::endl;
+				RooDataSet *data0   = (RooDataSet*)inWS->data(Form("%s_%d_13TeV_flashgg%s",proc.c_str(),mh,flashggCats_[cat].c_str()));
+				RooDataSet *dataRV0 = new RooDataSet("dataRV","dataRV",&*data0,*(data0->get()),"dZ<1");
+				RooDataSet *dataWV0 = new RooDataSet("dataWV","dataWV",&*data0,*(data0->get()),"dZ>=1");
+				RooFormulaVar wFunc("w","event weight","0.085",*mass);
+				RooRealVar* w = (RooRealVar*) data0->addColumn(wFunc); 
+				RooRealVar* wrv = (RooRealVar*) dataRV0->addColumn(wFunc); 
+				RooRealVar* wwv = (RooRealVar*) dataWV0->addColumn(wFunc);
+				data = new RooDataSet(data0->GetName(),data0->GetTitle(),data0,*data0->get(),0,w->GetName()) ;
+				dataRV = new RooDataSet(dataRV0->GetName(),dataRV0->GetTitle(),dataRV0,*dataRV0->get(),0,wrv->GetName()) ;
+				dataWV = new RooDataSet(dataWV0->GetName(),dataWV0->GetTitle(),dataWV0,*dataWV0->get(),0,wwv->GetName()) ;
 
-			//	std::cout << "Data histos: " << std::endl;
-			//	std::cout << Form("%s_%d_13TeV_flashgg%s",proc.c_str(),mh,flashggCats_[cat].c_str())  << std::endl;
-			//	std::cout << "data open ?  data " << data << ", dataWV " << dataWV << ", data RV " << dataRV << std::endl;
-			//	if (data ) {std :: cout << "data OK! " << std::endl; 
-			//	} else { std::cout << "data not ok :( " << std::endl; return 0 ;}
+				//FIXME above I artificially add in a weight to the 
+
+				//	std::cout << "Data histos: " << std::endl;
+				//	std::cout << Form("%s_%d_13TeV_flashgg%s",proc.c_str(),mh,flashggCats_[cat].c_str())  << std::endl;
+				//	std::cout << "data open ?  data " << data << ", dataWV " << dataWV << ", data RV " << dataRV << std::endl;
+				//	if (data ) {std :: cout << "data OK! " << std::endl; 
+				//	} else { std::cout << "data not ok :( " << std::endl; return 0 ;}
 			} else {
 				dataRV = (RooDataSet*)inWS->data(Form("sig_%s_mass_m%d_rv_cat%d",proc.c_str(),mh,cat));
 				dataWV = (RooDataSet*)inWS->data(Form("sig_%s_mass_m%d_wv_cat%d",proc.c_str(),mh,cat));
@@ -442,6 +458,7 @@ int main(int argc, char *argv[]){
 			datasetsRV.insert(pair<int,RooDataSet*>(mh,dataRV));
 			datasetsWV.insert(pair<int,RooDataSet*>(mh,dataWV));
 			datasets.insert(pair<int,RooDataSet*>(mh,data));
+			std::cout << *data << std::endl;
 		}
 
 		// these guys do the fitting
@@ -512,10 +529,11 @@ int main(int argc, char *argv[]){
 			// this guy constructs the final model with systematics, eff*acc etc.
 
 			if (isFlashgg_){
-				RooRealVar *intLumi2 = new RooRealVar("intLumi2","intLumi2",0.9,1.1); //FIXME
-				std::cout << "[WARNING] Artificially setting intLumi to 1. FIXME before using on data"<< std::endl;
-
-				FinalModelConstruction finalModel(mass,MH,intLumi2,mhLow_,mhHigh_,proc,cat,doSecondaryModels_,systfilename_,skipMasses_,verbose_,procs_,isCutBased_,is2011_,doQuadraticSigmaSum_);
+				intLumi = new RooRealVar("IntLumi","IntLumi",0,3000000); //FIXME
+				intLumi->setVal(19700);
+				std::cout << "[WARNING] Artificially setting intLumi to " << intLumi->getVal() << ". FIXME before using on data"<< std::endl;
+				outWS->import(*intLumi);
+				FinalModelConstruction finalModel(mass,MH,intLumi,mhLow_,mhHigh_,proc,cat,doSecondaryModels_,systfilename_,skipMasses_,verbose_,procs_, flashggCats_,isCutBased_,sqrts_,doQuadraticSigmaSum_);
 				if (isCutBased_){
 					finalModel.setHighR9cats(highR9cats_);
 					finalModel.setLowR9cats(lowR9cats_);
@@ -529,8 +547,12 @@ int main(int argc, char *argv[]){
 				finalModel.makeSTDdatasets();
 				if (is2011_) {
 					finalModel.buildRvWvPdf("hggpdfsmrel_7TeV",nGaussiansRV,nGaussiansWV,recursive_);
-				} else {
+				} 
+				if (is2012_){
 					finalModel.buildRvWvPdf("hggpdfsmrel_8TeV",nGaussiansRV,nGaussiansWV,recursive_);
+				}
+				if( isFlashgg_){
+					finalModel.buildRvWvPdf("hggpdfsmrel_13TeV",nGaussiansRV,nGaussiansWV,recursive_);
 				}
 				finalModel.getNormalization();
 				if (!skipPlots_) finalModel.plotPdf(plotDir_);
@@ -538,7 +560,7 @@ int main(int argc, char *argv[]){
 
 			} else {
 
-				FinalModelConstruction finalModel(mass,MH,intLumi,mhLow_,mhHigh_,proc,cat,doSecondaryModels_,systfilename_,skipMasses_,verbose_,procs_,isCutBased_,is2011_,doQuadraticSigmaSum_);
+				FinalModelConstruction finalModel(mass,MH,intLumi,mhLow_,mhHigh_,proc,cat,doSecondaryModels_,systfilename_,skipMasses_,verbose_,procs_, flashggCats_,isCutBased_,sqrts_,doQuadraticSigmaSum_);
 				if (isCutBased_){
 					finalModel.setHighR9cats(highR9cats_);
 					finalModel.setLowR9cats(lowR9cats_);
@@ -552,8 +574,12 @@ int main(int argc, char *argv[]){
 				finalModel.makeSTDdatasets();
 				if (is2011_) {
 					finalModel.buildRvWvPdf("hggpdfsmrel_7TeV",nGaussiansRV,nGaussiansWV,recursive_);
-				} else {
+				} 
+				if (is2012_){
 					finalModel.buildRvWvPdf("hggpdfsmrel_8TeV",nGaussiansRV,nGaussiansWV,recursive_);
+				}
+				if (isFlashgg_){
+					finalModel.buildRvWvPdf("hggpdfsmrel_13TeV",nGaussiansRV,nGaussiansWV,recursive_);
 				}
 				finalModel.getNormalization();
 				if (!skipPlots_) finalModel.plotPdf(plotDir_);
@@ -573,7 +599,7 @@ int main(int argc, char *argv[]){
 		sw.Start();
 		cout << "Starting to combine fits..." << endl;
 		// this guy packages everything up
-		Packager packager(outWS,procs_,nCats_,mhLow_,mhHigh_,skipMasses_,is2011_,skipPlots_,plotDir_,mergeWS,cats_);
+		Packager packager(outWS,procs_,nCats_,mhLow_,mhHigh_,skipMasses_,sqrts_,skipPlots_,plotDir_,mergeWS,cats_,flashggCats_);
 		packager.packageOutput();
 		sw.Stop();
 		cout << "Combination complete." << endl;

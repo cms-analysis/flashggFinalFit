@@ -646,6 +646,7 @@ def plot1DNLL(returnErrors=False,xvar="", ext=""):
     xtitle = 'm_{H} (GeV)'
   elif options.method=='mu':
     x = 'r'
+    print 'debug x ', x
     xtitle = '#sigma / #sigma_{SM}'
     if options.xlab: 
       xtitle = options.xlab
@@ -666,6 +667,7 @@ def plot1DNLL(returnErrors=False,xvar="", ext=""):
   clean_graphs=[]
 
   for k, f in enumerate(options.files):
+    print k,f
     ntitle = options.names[k]
     tf = r.TFile(f)
     tree = tf.Get('limit')

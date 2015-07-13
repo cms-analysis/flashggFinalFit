@@ -263,7 +263,7 @@ def makeNoGlobCard():
   opts.datacard = newcardname 
 
 def writePreamble(sub_file):
-  print "[INFO] writing preamble"
+  #print "[INFO] writing preamble"
   sub_file.write('#!/bin/bash\n')
   sub_file.write('touch %s.run\n'%os.path.abspath(sub_file.name))
   sub_file.write('cd %s\n'%os.getcwd())
@@ -281,7 +281,7 @@ def writePreamble(sub_file):
 
 def writePostamble(sub_file, exec_line):
 
-  print "[INFO] writing to postamble"
+  #print "[INFO] writing to postamble"
   sub_file.write('if ( %s ) then\n'%exec_line)
   sub_file.write('\t mv higgsCombine*.root %s\n'%os.path.abspath(opts.outDir))
   sub_file.write('\t touch %s.done\n'%os.path.abspath(sub_file.name))

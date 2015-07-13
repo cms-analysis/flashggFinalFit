@@ -1,10 +1,10 @@
 {
 //=========Macro generated from canvas: c/c
-//=========  (Tue Jun 23 13:16:24 2015) by ROOT version5.34/18
-   TCanvas *c = new TCanvas("c", "c",1473,246,600,600);
+//=========  (Wed Jul  8 16:01:06 2015) by ROOT version5.34/18
+   TCanvas *c = new TCanvas("c", "c",1466,82,600,600);
    gStyle->SetOptStat(0);
    c->SetHighLightColor(2);
-   c->Range(103.2468,-5.845187,155.1948,0.5077619);
+   c->Range(103.2468,-80.63897,155.1948,8.435251);
    c->SetFillColor(0);
    c->SetBorderMode(0);
    c->SetBorderSize(2);
@@ -16,8 +16,8 @@
    c->SetFrameBorderMode(0);
    
    TH1D *dummy = new TH1D("dummy","",1,110,150);
-   dummy->SetMinimum(8.263548e-06);
-   dummy->SetMaximum(0.9284559);
+   dummy->SetMinimum(1.121864e-70);
+   dummy->SetMaximum(7.310432);
    dummy->SetStats(0);
    dummy->SetLineColor(0);
    dummy->GetXaxis()->SetTitle("m_{H} (GeV)");
@@ -42,55 +42,25 @@
    multigraph->SetName("");
    multigraph->SetTitle("");
    
-   TGraph *graph = new TGraph(41);
+   TGraph *graph = new TGraph(11);
    graph->SetName("");
    graph->SetTitle("");
    graph->SetFillColor(1);
-   graph->SetPoint(0,110,0.153696912);
-   graph->SetPoint(1,111,0.0732541531);
-   graph->SetPoint(2,112,0.1694610308);
-   graph->SetPoint(3,113,0.5);
-   graph->SetPoint(4,114,0.5);
-   graph->SetPoint(5,115,0.5);
-   graph->SetPoint(6,116,0.5);
-   graph->SetPoint(7,117,0.5);
-   graph->SetPoint(8,118,0.5);
-   graph->SetPoint(9,119,0.5);
-   graph->SetPoint(10,120,0.5);
-   graph->SetPoint(11,121,0.4317744161);
-   graph->SetPoint(12,122,0.1284434049);
-   graph->SetPoint(13,123,0.01867043328);
-   graph->SetPoint(14,124,0.0003892192945);
-   graph->SetPoint(15,125,2.596637748e-05);
-   graph->SetPoint(16,126,0.0008770833146);
-   graph->SetPoint(17,127,0.2260820839);
-   graph->SetPoint(18,128,0.5);
-   graph->SetPoint(19,129,0.5);
-   graph->SetPoint(20,130,0.3554420211);
-   graph->SetPoint(21,131,0.2520260846);
-   graph->SetPoint(22,132,0.3329607519);
-   graph->SetPoint(23,133,0.4545545598);
-   graph->SetPoint(24,134,0.5);
-   graph->SetPoint(25,135,0.5);
-   graph->SetPoint(26,136,0.3960038808);
-   graph->SetPoint(27,137,0.4807328465);
-   graph->SetPoint(28,138,0.5);
-   graph->SetPoint(29,139,0.5);
-   graph->SetPoint(30,140,0.5);
-   graph->SetPoint(31,141,0.5);
-   graph->SetPoint(32,142,0.5);
-   graph->SetPoint(33,143,0.5);
-   graph->SetPoint(34,144,0.5);
-   graph->SetPoint(35,145,0.5);
-   graph->SetPoint(36,146,0.5);
-   graph->SetPoint(37,147,0.5);
-   graph->SetPoint(38,148,0.5);
-   graph->SetPoint(39,149,0.5);
-   graph->SetPoint(40,150,0.08322803824);
+   graph->SetPoint(0,120,1.388534765e-40);
+   graph->SetPoint(1,121,0.5);
+   graph->SetPoint(2,122,0.5);
+   graph->SetPoint(3,123,0.5);
+   graph->SetPoint(4,124,0.278914528);
+   graph->SetPoint(5,125,0.1068655552);
+   graph->SetPoint(6,126,3.932375701e-69);
+   graph->SetPoint(7,127,0.5);
+   graph->SetPoint(8,128,0.4964558761);
+   graph->SetPoint(9,129,0.4970008231);
+   graph->SetPoint(10,130,6.222503174e-26);
    
-   TH1F *Graph_Graph1 = new TH1F("Graph_Graph1","",100,106,154);
-   Graph_Graph1->SetMinimum(2.336974e-05);
-   Graph_Graph1->SetMaximum(0.5499974);
+   TH1F *Graph_Graph1 = new TH1F("Graph_Graph1","",100,119,131);
+   Graph_Graph1->SetMinimum(3.539138e-69);
+   Graph_Graph1->SetMaximum(0.55);
    Graph_Graph1->SetDirectory(0);
    Graph_Graph1->SetStats(0);
    Graph_Graph1->GetXaxis()->SetLabelFont(42);
@@ -123,8 +93,8 @@
    multigraph->GetYaxis()->SetTitleFont(42);
    
    TH1D *dummy = new TH1D("dummy","",1,110,150);
-   dummy->SetMinimum(8.263548e-06);
-   dummy->SetMaximum(0.9284559);
+   dummy->SetMinimum(1.121864e-70);
+   dummy->SetMaximum(7.310432);
    dummy->SetStats(0);
    dummy->SetLineColor(0);
    dummy->GetXaxis()->SetTitle("m_{H} (GeV)");
@@ -188,6 +158,28 @@
    tex->SetTextSize(0.03);
    tex->SetLineWidth(2);
    tex->Draw();
+   line = new TLine(110,2.866516e-07,150,2.866516e-07);
+   line->SetLineColor(13);
+   line->SetLineStyle(2);
+   line->SetLineWidth(2);
+   line->Draw();
+      tex = new TLatex(151,2.293213e-07,"5 #sigma");
+   tex->SetTextColor(13);
+   tex->SetTextFont(42);
+   tex->SetTextSize(0.03);
+   tex->SetLineWidth(2);
+   tex->Draw();
+   line = new TLine(110,9.865876e-10,150,9.865876e-10);
+   line->SetLineColor(13);
+   line->SetLineStyle(2);
+   line->SetLineWidth(2);
+   line->Draw();
+      tex = new TLatex(151,7.892701e-10,"6 #sigma");
+   tex->SetTextColor(13);
+   tex->SetTextFont(42);
+   tex->SetTextSize(0.03);
+   tex->SetLineWidth(2);
+   tex->Draw();
    
    TLegend *leg = new TLegend(0.6,0.12,0.89,0.4,NULL,"brNDC");
    leg->SetBorderSize(0);
@@ -207,8 +199,8 @@
    leg->Draw();
    
    TH1D *dummy__1 = new TH1D("dummy__1","",1,110,150);
-   dummy__1->SetMinimum(8.263548e-06);
-   dummy__1->SetMaximum(0.9284559);
+   dummy__1->SetMinimum(1.121864e-70);
+   dummy__1->SetMaximum(7.310432);
    dummy__1->SetDirectory(0);
    dummy__1->SetStats(0);
    dummy__1->SetLineColor(0);

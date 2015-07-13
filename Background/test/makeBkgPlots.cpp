@@ -41,6 +41,9 @@
 #include "RooCategory.h"
 
 #include "boost/program_options.hpp"
+#include "boost/algorithm/string/split.hpp"
+#include "boost/algorithm/string/classification.hpp"
+#include "boost/algorithm/string/predicate.hpp"
 #include "../interface/ProfileMultiplePdfs.h"
 
 #include "HiggsAnalysis/CombinedLimit/interface/RooMultiPdf.h"
@@ -625,10 +628,15 @@ void profileExtendTerm(RooRealVar *mgg, RooAbsData *data, RooMultiPdf *mpdf, Roo
 	}
 }
 
-void plotAllPdfs(RooRealVar *mgg, RooAbsData *data, RooMultiPdf *mpdf, RooCategory *mcat, string name, int cat, bool blind){
-	
+void plotAllPdfs(RooRealVar *mgg, RooAbsData *data, RooMultiPdf *mpdf, RooCategory *mcat, string name, int cat, bool blind, int isFlashgg, std::vector<string> flashggCats){
+	string catname;
+	if (isFlashgg){
+		catname = Form("%s",flashggCats[cat].c_str());
+	} else {
+		catname = Form("cat%d",cat);
+	}
 	RooPlot *plot = mgg->frame();
-	plot->SetTitle(Form("Background functions profiled for category %d",cat));
+	plot->SetTitle(Form("Background functions profiled for category %s",catname.c_str()));
 	plot->GetXaxis()->SetTitle("m_{#gamma#gamma} (GeV)");
 	if (blind) {
 		mgg->setRange("unblind_up",150,180);
@@ -638,7 +646,7 @@ void plotAllPdfs(RooRealVar *mgg, RooAbsData *data, RooMultiPdf *mpdf, RooCatego
 	else {
 		data->plotOn(plot,Binning(80));
 	}
-	
+
 	TLegend *leg = new TLegend(0.6,0.5,0.89,0.89);
 	leg->SetFillColor(0);
 	leg->SetLineColor(0);
@@ -685,8 +693,11 @@ int main(int argc, char* argv[]){
 	int mhHigh;
 	int sqrts;
 	double mhvalue_;
+	int isFlashgg_ =1;
+	string flashggCatsStr_;
+	vector<string> flashggCats_;
 
-  po::options_description desc("Allowed options");
+	po::options_description desc("Allowed options");
 	desc.add_options()
 		("help,h", 																																		 			"Show help")
 		("bkgFileName,b", po::value<string>(&bkgFileName), 																	"Input file name")
@@ -706,12 +717,14 @@ int main(int argc, char* argv[]){
 		("mhHigh,H", po::value<int>(&mhHigh)->default_value(180),														"End point for scan")
 		("mhVal", po::value<double>(&mhvalue_)->default_value(125.),														"Choose the MH for the plots")
 		("sqrts,S", po::value<int>(&sqrts)->default_value(8),																"Which centre of mass is this data from?")
+		("isFlashgg",  po::value<int>(&isFlashgg_)->default_value(1),  								    	        "Use Flashgg output ")
+		("flashggCats,f", po::value<string>(&flashggCatsStr_)->default_value("DiPhotonUntaggedCategory_0,DiPhotonUntaggedCategory_1,DiPhotonUntaggedCategory_2,DiPhotonUntaggedCategory_3,DiPhotonUntaggedCategory_4,VBFTag_0,VBFTag_1,VBFTag_2"),       "Flashgg category names to consider")
 		("verbose,v", 																																			"Verbose");
 	;
 	po::variables_map vm;
-  po::store(po::parse_command_line(argc,argv,desc),vm);
-  po::notify(vm);
-  if (vm.count("help")) { cout << desc << endl; exit(1); }
+	po::store(po::parse_command_line(argc,argv,desc),vm);
+	po::notify(vm);
+	if (vm.count("help")) { cout << desc << endl; exit(1); }
 	if (vm.count("doBands")) doBands=true;
 	if (vm.count("isMultiPdf")) isMultiPdf=true;
 	if (vm.count("makeCrossCheckProfPlots")) makeCrossCheckProfPlots=true;
@@ -722,6 +735,7 @@ int main(int argc, char* argv[]){
 
 	RooMsgService::instance().setGlobalKillBelow(RooFit::ERROR);
 	RooMsgService::instance().setSilentMode(true);
+	split(flashggCats_,flashggCatsStr_,boost::is_any_of(","));
 
 	system(Form("mkdir -p %s",outDir.c_str()));
 	if (makeCrossCheckProfPlots) system(Form("mkdir -p %s/normProfs",outDir.c_str()));
@@ -734,34 +748,40 @@ int main(int argc, char* argv[]){
 		exit(0);
 	}
 	RooRealVar *mgg = (RooRealVar*)inWS->var("CMS_hgg_mass");
+  string catname;
+	if (isFlashgg_){
+		catname = Form("%s",flashggCats_[cat].c_str());
+	} else {
+		catname = Form("cat%d",cat);
+	}
 
 	TFile *outFile = TFile::Open(outFileName.c_str(),"RECREATE");
 	RooWorkspace *outWS = new RooWorkspace("bkgplotws","bkgplotws");
 
-	RooAbsData *data = (RooDataSet*)inWS->data(Form("data_mass_cat%d",cat));
-	if (useBinnedData) data = (RooDataHist*)inWS->data(Form("roohist_data_mass_cat%d",cat));
+	RooAbsData *data = (RooDataSet*)inWS->data(Form("data_mass_%s",catname.c_str()));
+	if (useBinnedData) data = (RooDataHist*)inWS->data(Form("roohist_data_mass_%s",catname.c_str()));
 
 	RooAbsPdf *bpdf = 0;
 	RooMultiPdf *mpdf = 0; 
 	RooCategory *mcat = 0;
 	if (isMultiPdf) {
-		mpdf = (RooMultiPdf*)inWS->pdf(Form("CMS_hgg_cat%d_%dTeV_bkgshape",cat,sqrts));
-		mcat = (RooCategory*)inWS->cat(Form("pdfindex_%d_%dTeV",cat,sqrts));
+		mpdf = (RooMultiPdf*)inWS->pdf(Form("CMS_hgg_%s_%dTeV_bkgshape",catname.c_str(),sqrts));
+		mcat = (RooCategory*)inWS->cat(Form("pdfindex_%s_%dTeV",catname.c_str(),sqrts));
 		if (!mpdf || !mcat){
-			cout << "Can't find multipdfs or multicat" << endl;
+			cout << "Can't find multipdfs (" << Form("CMS_hgg_%s_%dTeV_bkgshape",catname.c_str(),sqrts) << ") or multicat ("<< Form("pdfindex_%s_%dTeV",catname.c_str(),sqrts) <<")" << endl;
 			exit(0);
 		}
 	}
 	else {
-		bpdf = (RooAbsPdf*)inWS->pdf(Form("pdf_data_pol_model_%dTeV_cat%d",sqrts,cat));
+		bpdf = (RooAbsPdf*)inWS->pdf(Form("pdf_data_pol_model_%dTeV_%s",sqrts,catname.c_str()));
 		if (!bpdf){
-			cout << "Cant't find background pdf" << endl;
+			cout << "Cant't find background pdf " << Form("pdf_data_pol_model_%dTeV_%s",sqrts,catname.c_str()) << endl;
 			exit(0);
 		}
-		mcat = new RooCategory(Form("pdfindex_%d_%dTeV",cat,sqrts),"c");
+		mcat = new RooCategory(Form("pdfindex_%s_%dTeV",catname.c_str(),sqrts),"c");
 		RooArgList temp;
 		temp.add(*bpdf);
-		mpdf = new RooMultiPdf(Form("tempmpdf_cat%d",cat),"",*mcat,temp);
+		mpdf = new RooMultiPdf(Form("tempmpdf_%s",catname.c_str()),"",*mcat,temp);
 	}
 
 	cout << "Current PDF and data:" << endl;
@@ -769,22 +789,22 @@ int main(int argc, char* argv[]){
 	cout << "\t"; data->Print();
 
 	// plot all the pdfs for reference
-	if (isMultiPdf || verbose_) plotAllPdfs(mgg,data,mpdf,mcat,Form("%s/allPdfs_cat%d",outDir.c_str(),cat),cat,blind);
+	if (isMultiPdf || verbose_) plotAllPdfs(mgg,data,mpdf,mcat,Form("%s/allPdfs_%s",outDir.c_str(),catname.c_str()),cat,blind, isFlashgg_, flashggCats_);
 
 	// include normalization hack RooBernsteinFast;
 	/*
-	for (int pInd=0; pInd<mpdf->getNumPdfs(); pInd++){
-		mcat->setIndex(pInd);
-		if (mpdf->getCurrentPdf()->IsA()->InheritsFrom(RooBernsteinFast<1>::Class())) mpdf->getCurrentPdf()->forceNumInt();	
-		if (mpdf->getCurrentPdf()->IsA()->InheritsFrom(RooBernsteinFast<2>::Class())) mpdf->getCurrentPdf()->forceNumInt();	
-		if (mpdf->getCurrentPdf()->IsA()->InheritsFrom(RooBernsteinFast<3>::Class())) mpdf->getCurrentPdf()->forceNumInt();	
-		if (mpdf->getCurrentPdf()->IsA()->InheritsFrom(RooBernsteinFast<4>::Class())) mpdf->getCurrentPdf()->forceNumInt();	
-		if (mpdf->getCurrentPdf()->IsA()->InheritsFrom(RooBernsteinFast<5>::Class())) mpdf->getCurrentPdf()->forceNumInt();	
-		if (mpdf->getCurrentPdf()->IsA()->InheritsFrom(RooBernsteinFast<6>::Class())) mpdf->getCurrentPdf()->forceNumInt();	
-		if (mpdf->getCurrentPdf()->IsA()->InheritsFrom(RooBernsteinFast<7>::Class())) mpdf->getCurrentPdf()->forceNumInt();	
-	}
-	*/
-	
+		 for (int pInd=0; pInd<mpdf->getNumPdfs(); pInd++){
+		 mcat->setIndex(pInd);
+		 if (mpdf->getCurrentPdf()->IsA()->InheritsFrom(RooBernsteinFast<1>::Class())) mpdf->getCurrentPdf()->forceNumInt();	
+		 if (mpdf->getCurrentPdf()->IsA()->InheritsFrom(RooBernsteinFast<2>::Class())) mpdf->getCurrentPdf()->forceNumInt();	
+		 if (mpdf->getCurrentPdf()->IsA()->InheritsFrom(RooBernsteinFast<3>::Class())) mpdf->getCurrentPdf()->forceNumInt();	
+		 if (mpdf->getCurrentPdf()->IsA()->InheritsFrom(RooBernsteinFast<4>::Class())) mpdf->getCurrentPdf()->forceNumInt();	
+		 if (mpdf->getCurrentPdf()->IsA()->InheritsFrom(RooBernsteinFast<5>::Class())) mpdf->getCurrentPdf()->forceNumInt();	
+		 if (mpdf->getCurrentPdf()->IsA()->InheritsFrom(RooBernsteinFast<6>::Class())) mpdf->getCurrentPdf()->forceNumInt();	
+		 if (mpdf->getCurrentPdf()->IsA()->InheritsFrom(RooBernsteinFast<7>::Class())) mpdf->getCurrentPdf()->forceNumInt();	
+		 }
+		 */
+
 	// reset to best fit
 	int bf = getBestFitFunction(mpdf,data,mcat,!verbose_);
 	mcat->setIndex(bf);
@@ -808,32 +828,32 @@ int main(int argc, char* argv[]){
 
 	leg->AddEntry(dataLeg,"Data","LEP");
 	leg->AddEntry(nomBkgCurve,"Bkg Fit","L");
-	
+
 	// Bands
 	TGraphAsymmErrors *oneSigmaBand = new TGraphAsymmErrors();
-	oneSigmaBand->SetName(Form("onesigma_cat%d",cat));
+	oneSigmaBand->SetName(Form("onesigma_%s",catname.c_str()));
 	TGraphAsymmErrors *twoSigmaBand = new TGraphAsymmErrors();
-	twoSigmaBand->SetName(Form("twosigma_cat%d",cat));
+	twoSigmaBand->SetName(Form("twosigma_%s",catname.c_str()));
 
 	cout << "Plot has " << plot->GetXaxis()->GetNbins() << " bins" << endl;
 	if (doBands) {
 		int p=0;
 		for (double mass=double(mhLow); mass<double(mhHigh)+massStep; mass+=massStep) {
-		//for (int i=1; i<(plot->GetXaxis()->GetNbins()+1); i++){
+			//for (int i=1; i<(plot->GetXaxis()->GetNbins()+1); i++){
 			double lowedge = mass-0.5;
 			double upedge = mass+0.5;
 			double center = mass;
 			/*
-			double lowedge = plot->GetXaxis()->GetBinLowEdge(i);
-			double upedge = plot->GetXaxis()->GetBinUpEdge(i);
-			double center = plot->GetXaxis()->GetBinCenter(i);
-			*/
+				 double lowedge = plot->GetXaxis()->GetBinLowEdge(i);
+				 double upedge = plot->GetXaxis()->GetBinUpEdge(i);
+				 double center = plot->GetXaxis()->GetBinCenter(i);
+				 */
 			double nomBkg = nomBkgCurve->interpolate(center);
 			double nllBest = getNormTermNll(mgg,data,mpdf,mcat,nomBkg,lowedge,upedge);
 
-		 	// sensible range
-      double lowRange = TMath::Max(0.,nomBkg - 3*TMath::Sqrt(nomBkg));
-      double highRange = nomBkg + 3*TMath::Sqrt(nomBkg);
+			// sensible range
+			double lowRange = TMath::Max(0.,nomBkg - 3*TMath::Sqrt(nomBkg));
+			double highRange = nomBkg + 3*TMath::Sqrt(nomBkg);
 
 			if (verbose_) cout << "mgg: " << center << " nomBkg: " << nomBkg << " lR: " << lowRange << " hR: " << highRange << endl;
 
@@ -858,29 +878,29 @@ int main(int argc, char* argv[]){
 				if (verbose_) cout << "errHigh2" << endl;
 				errHigh2Value = guessNew(mgg,mpdf,mcat,data,nomBkg,nllBest,highRange,lowedge,upedge,4.,nllTolerance);
 			}
-		 
-      double errLow1 = nomBkg - errLow1Value;
-      double errHigh1 = errHigh1Value - nomBkg;
-      double errLow2 = nomBkg - errLow2Value;
-      double errHigh2 = errHigh2Value - nomBkg;
+
+			double errLow1 = nomBkg - errLow1Value;
+			double errHigh1 = errHigh1Value - nomBkg;
+			double errLow2 = nomBkg - errLow2Value;
+			double errHigh2 = errHigh2Value - nomBkg;
 
 			oneSigmaBand->SetPoint(p,center,nomBkg);
 			twoSigmaBand->SetPoint(p,center,nomBkg);
 			oneSigmaBand->SetPointError(p,0.,0.,errLow1,errHigh1);
 			twoSigmaBand->SetPointError(p,0.,0.,errLow2,errHigh2);
-			
+
 			cout << "mgg: " << center << " nomBkg: " << nomBkg << " +/- 1 (2) sig -- +" << errHigh1 << "(" << errHigh2 << ")" << " - " << errLow1 << "(" << errLow2 << ")" << endl;
 
 			if (makeCrossCheckProfPlots) {
 				// literal profile
 				TCanvas *temp = new TCanvas();
-        TGraph *profCurve = new TGraph();
-        int p2=0;
-        for (double scanVal=0.9*errLow2Value; scanVal<1.1*errHigh2Value; scanVal+=1){
-          double nll = getNormTermNll(mgg,data,mpdf,mcat,scanVal,lowedge,upedge)-nllBest;
-          profCurve->SetPoint(p2,scanVal,nll);
-          p2++;
-        }
+				TGraph *profCurve = new TGraph();
+				int p2=0;
+				for (double scanVal=0.9*errLow2Value; scanVal<1.1*errHigh2Value; scanVal+=1){
+					double nll = getNormTermNll(mgg,data,mpdf,mcat,scanVal,lowedge,upedge)-nllBest;
+					profCurve->SetPoint(p2,scanVal,nll);
+					p2++;
+				}
 				profCurve->GetXaxis()->SetRangeUser(0.9*errLow2Value,1.1*errHigh2Value);
 				profCurve->GetYaxis()->SetRangeUser(0.,5.);
 				profCurve->Draw("ALP");
@@ -895,124 +915,127 @@ int main(int argc, char* argv[]){
 				line.DrawLine(nomBkg-errLow2,0.,nomBkg-errLow2,4.);
 				line.DrawLine(nomBkg+errHigh2,0.,nomBkg+errHigh2,4.);
 				line.DrawLine(0.9*errLow2Value,4.,1.1*errHigh2Value,4.);
-				temp->Print(Form("%s/normProfs/cat%d_mass%6.2f.pdf",outDir.c_str(),cat,center));
+				temp->Print(Form("%s/normProfs/%s_mass%6.2f.pdf",outDir.c_str(),catname.c_str(),center));
 				delete profCurve;
-        delete temp;
+				delete temp;
 			}
 			p++;
 		}
 		cout << endl;
-	}
-
-	outFile->cd();
-	oneSigmaBand->Write();
-	twoSigmaBand->Write();
-	nomBkgCurve->Write();
-	outWS->import(*mcat);
-	outWS->import(*mpdf);
-	outWS->import(*data);
-
-	TCanvas *canv = new TCanvas("c","",800,800);
-	plot->Draw();
-
-	if (blind) {
-		mgg->setRange("unblind_up",150,180);
-		mgg->setRange("unblind_down",100,110);
-		data->plotOn(plot,Binning(80),CutRange("unblind_down,unblind_up"));
-	}
-	else {
-		data->plotOn(plot,Binning(80));
-	}
-
-	if (doBands) {
-		twoSigmaBand->SetLineColor(kGreen);
-		twoSigmaBand->SetFillColor(kGreen);
-		twoSigmaBand->SetMarkerColor(kGreen);
-		twoSigmaBand->Draw("L3 SAME");
-		oneSigmaBand->SetLineColor(kYellow);
-		oneSigmaBand->SetFillColor(kYellow);
-		oneSigmaBand->SetMarkerColor(kYellow);
-		oneSigmaBand->Draw("L3 SAME");
-		leg->AddEntry(oneSigmaBand,"#pm1#sigma","F");
-		leg->AddEntry(twoSigmaBand,"#pm2#sigma","F");
-	}
-
-	if (doSignal){
-		TFile *sigFile = TFile::Open(sigFileName.c_str());
-		RooWorkspace *w_sig = (RooWorkspace*)sigFile->Get("wsig_7TeV");
-		if (!w_sig) w_sig = (RooWorkspace*)sigFile->Get("wsig_8TeV");
-		if (!w_sig) w_sig = (RooWorkspace*)sigFile->Get("cms_hgg_workspace");
-		if (!w_sig) {
-			cout << "Signal workspace not found" << endl;
-			exit(0);
 		}
-		if (w_sig->GetName()==TString("cms_hgg_workspace")) {
-			TH1F::SetDefaultSumw2();
-			TH1F *gghHist = (TH1F*)sigFile->Get(Form("th1f_sig_ggh_mass_m125_cat%d",cat));
-			TH1F *vbfHist = (TH1F*)sigFile->Get(Form("th1f_sig_vbf_mass_m125_cat%d",cat));
-			TH1F *wzhHist = (TH1F*)sigFile->Get(Form("th1f_sig_wzh_mass_m125_cat%d",cat));
-			TH1F *tthHist = (TH1F*)sigFile->Get(Form("th1f_sig_tth_mass_m125_cat%d",cat));
-			TH1F *whHist = (TH1F*)sigFile->Get(Form("th1f_sig_wh_mass_m125_cat%d",cat));
-			TH1F *zhHist = (TH1F*)sigFile->Get(Form("th1f_sig_zh_mass_m125_cat%d",cat));
-			TH1F *sigHist = (TH1F*)gghHist->Clone(Form("th1f_sig_mass_m125_cat%d",cat));
-			sigHist->Add(gghHist);
-			sigHist->Add(vbfHist);
-			if (wzhHist) sigHist->Add(wzhHist);
-			if (whHist) sigHist->Add(whHist);
-			if (zhHist) sigHist->Add(zhHist);
-			sigHist->Add(tthHist);
-			sigHist->SetLineColor(kBlue);
-			sigHist->SetLineWidth(3);
-			sigHist->SetFillColor(38);
-			sigHist->SetFillStyle(3001);
-			sigHist->Draw("HISTsame");
-			leg->AddEntry(sigHist,"Sig model m_{H}=125GeV","LF");
-			outFile->cd();
-			sigHist->Write();
-			if (verbose_) cout << "Plotted binned signal with " << sigHist->Integral() << " entries" << endl;
+
+		outFile->cd();
+		oneSigmaBand->Write();
+		twoSigmaBand->Write();
+		nomBkgCurve->Write();
+		outWS->import(*mcat);
+		outWS->import(*mpdf);
+		outWS->import(*data);
+
+		TCanvas *canv = new TCanvas("c","",800,800);
+		plot->Draw();
+
+		if (blind) {
+			mgg->setRange("unblind_up",150,180);
+			mgg->setRange("unblind_down",100,110);
+			data->plotOn(plot,Binning(80),CutRange("unblind_down,unblind_up"));
 		}
 		else {
-			RooRealVar *MH = (RooRealVar*)w_sig->var("MH");
-			RooAbsPdf *sigPDF = (RooAbsPdf*)w_sig->pdf(Form("sigpdfrelcat%d_allProcs",cat));
-			MH->setVal(mhvalue_);
-			sigPDF->plotOn(plot,Normalization(1.0,RooAbsReal::RelativeExpected),LineColor(kBlue),LineWidth(3));
-			sigPDF->plotOn(plot,Normalization(1.0,RooAbsReal::RelativeExpected),LineColor(kBlue),LineWidth(3),FillColor(38),FillStyle(3001),DrawOption("F"));
-			TObject *sigLeg = (TObject*)plot->getObject(plot->numItems()-1);
-			leg->AddEntry(sigLeg,Form("Sig model m_{H}=%.1fGeV",MH->getVal()),"L");
-			outWS->import(*sigPDF);
+			data->plotOn(plot,Binning(80));
 		}
+
+		if (doBands) {
+			twoSigmaBand->SetLineColor(kGreen);
+			twoSigmaBand->SetFillColor(kGreen);
+			twoSigmaBand->SetMarkerColor(kGreen);
+			twoSigmaBand->Draw("L3 SAME");
+			oneSigmaBand->SetLineColor(kYellow);
+			oneSigmaBand->SetFillColor(kYellow);
+			oneSigmaBand->SetMarkerColor(kYellow);
+			oneSigmaBand->Draw("L3 SAME");
+			leg->AddEntry(oneSigmaBand,"#pm1#sigma","F");
+			leg->AddEntry(twoSigmaBand,"#pm2#sigma","F");
+		}
+
+		if (doSignal){
+			TFile *sigFile = TFile::Open(sigFileName.c_str());
+			RooWorkspace *w_sig = (RooWorkspace*)sigFile->Get("wsig_7TeV");
+			if (!w_sig) w_sig = (RooWorkspace*)sigFile->Get("wsig_8TeV");
+			if (!w_sig) w_sig = (RooWorkspace*)sigFile->Get("wsig_13TeV");
+			if (!w_sig) w_sig = (RooWorkspace*)sigFile->Get("cms_hgg_workspace");
+			if (!w_sig) {
+				cout << "Signal workspace not found" << endl;
+				exit(0);
+			}
+			if (w_sig->GetName()==TString("cms_hgg_workspace")) {
+				TH1F::SetDefaultSumw2();
+				TH1F *gghHist = (TH1F*)sigFile->Get(Form("th1f_sig_ggh_mass_m125_%s",catname.c_str()));
+				TH1F *vbfHist = (TH1F*)sigFile->Get(Form("th1f_sig_vbf_mass_m125_%s",catname.c_str()));
+				TH1F *wzhHist = (TH1F*)sigFile->Get(Form("th1f_sig_wzh_mass_m125_%s",catname.c_str()));
+				TH1F *tthHist = (TH1F*)sigFile->Get(Form("th1f_sig_tth_mass_m125_%s",catname.c_str()));
+				TH1F *whHist = (TH1F*)sigFile->Get(Form("th1f_sig_wh_mass_m125_%s",catname.c_str()));
+				TH1F *zhHist = (TH1F*)sigFile->Get(Form("th1f_sig_zh_mass_m125_%s",catname.c_str()));
+				TH1F *sigHist = (TH1F*)gghHist->Clone(Form("th1f_sig_mass_m125_%s",catname.c_str()));
+				sigHist->Add(gghHist);
+				sigHist->Add(vbfHist);
+				if (wzhHist) sigHist->Add(wzhHist);
+				if (whHist) sigHist->Add(whHist);
+				if (zhHist) sigHist->Add(zhHist);
+				sigHist->Add(tthHist);
+				sigHist->SetLineColor(kBlue);
+				sigHist->SetLineWidth(3);
+				sigHist->SetFillColor(38);
+				sigHist->SetFillStyle(3001);
+				sigHist->Draw("HISTsame");
+				leg->AddEntry(sigHist,"Sig model m_{H}=125GeV","LF");
+				outFile->cd();
+				sigHist->Write();
+				if (verbose_) cout << "Plotted binned signal with " << sigHist->Integral() << " entries" << endl;
+			}
+			else {
+				RooRealVar *MH = (RooRealVar*)w_sig->var("MH");
+				if (!MH) MH = (RooRealVar*)w_sig->var("CMS_hgg_mass");
+				RooAbsPdf *sigPDF = (RooAbsPdf*)w_sig->pdf(Form("sigpdfrel%s_allProcs",catname.c_str()));
+				MH->setVal(mhvalue_);
+				sigPDF->plotOn(plot,Normalization(1.0,RooAbsReal::RelativeExpected),LineColor(kBlue),LineWidth(3));
+				sigPDF->plotOn(plot,Normalization(1.0,RooAbsReal::RelativeExpected),LineColor(kBlue),LineWidth(3),FillColor(38),FillStyle(3001),DrawOption("F"));
+				TObject *sigLeg = (TObject*)plot->getObject(plot->numItems()-1);
+				leg->AddEntry(sigLeg,Form("Sig model m_{H}=%.1fGeV",MH->getVal()),"L");
+				outWS->import(*sigPDF);
+			}
+		}
+
+		plot->Draw("same");
+		leg->Draw("same");
+
+		TLatex *latex = new TLatex();	
+		latex->SetTextSize(0.03);
+		latex->SetNDC();
+		TLatex *cmslatex = new TLatex();
+		cmslatex->SetTextSize(0.03);
+		cmslatex->SetNDC();
+		RooRealVar *lumi = (RooRealVar*)inWS->var("IntLumi");
+		std::cout << "[LC DEBUG] intLumi " << lumi->getVal() << std::endl;
+		cmslatex->DrawLatex(0.2,0.85,Form("#splitline{CMS Preliminary}{#sqrt{s} = %dTeV L = %2.1ffb^{-1}}",sqrts,lumi->getVal()/1000.));
+		latex->DrawLatex(0.2,0.78,catLabel.c_str());
+		outWS->import(*lumi,RecycleConflictNodes());
+
+		if (blind) plot->SetMinimum(0.0001);
+		plot->GetYaxis()->SetTitleOffset(1.3);
+		canv->Modified();
+		canv->Update();
+		canv->Print(Form("%s/bkgplot_%s.pdf",outDir.c_str(),catname.c_str()));
+		canv->Print(Form("%s/bkgplot_%s.png",outDir.c_str(),catname.c_str()));
+		canv->Print(Form("%s/bkgplot_%s.C",outDir.c_str(),catname.c_str()));
+		canv->SetName(Form("bkgplot_%s",catname.c_str()));
+
+		outFile->cd();
+		canv->Write();
+		outWS->Write();
+		outFile->Close();
+
+		inFile->Close();
+
+		return 0;
 	}
-
-	plot->Draw("same");
-	leg->Draw("same");
-	
-	TLatex *latex = new TLatex();	
-	latex->SetTextSize(0.03);
-	latex->SetNDC();
-	TLatex *cmslatex = new TLatex();
-	cmslatex->SetTextSize(0.03);
-	cmslatex->SetNDC();
-	RooRealVar *lumi = (RooRealVar*)inWS->var("IntLumi");
-	cmslatex->DrawLatex(0.2,0.85,Form("#splitline{CMS Preliminary}{#sqrt{s} = %dTeV L = %2.1ffb^{-1}}",sqrts,lumi->getVal()/1000.));
-	latex->DrawLatex(0.2,0.78,catLabel.c_str());
-	outWS->import(*lumi,RecycleConflictNodes());
-
-	if (blind) plot->SetMinimum(0.0001);
-	plot->GetYaxis()->SetTitleOffset(1.3);
-	canv->Modified();
-	canv->Update();
-	canv->Print(Form("%s/bkgplot_cat%d.pdf",outDir.c_str(),cat));
-	canv->Print(Form("%s/bkgplot_cat%d.png",outDir.c_str(),cat));
-	canv->Print(Form("%s/bkgplot_cat%d.C",outDir.c_str(),cat));
-	canv->SetName(Form("bkgplot_cat%d",cat));
-
-	outFile->cd();
-	canv->Write();
-	outWS->Write();
-	outFile->Close();
-	
-	inFile->Close();
-
-	return 0;
-}
 
