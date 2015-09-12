@@ -34,6 +34,8 @@ namespace po = boost::program_options;
 
 string filename_;
 string datfilename_;
+string json_dict_;
+string outdir_;
 int mass_;
 string procString_;
 int ncats_;
@@ -50,22 +52,24 @@ void OptionParser(int argc, char *argv[]){
 		("help,h",                                                                                "Show help")
 		("infilename,i", po::value<string>(&filename_),                                           "Input file name")
 		("datfilename,d", po::value<string>(&datfilename_)->default_value("dat/config.dat"),      "Output configuration file")
+		("outdir,o", po::value<string>(&outdir_)->default_value("plots"),      "Output configuration file")
+		("json_dict,j", po::value<string>(&json_dict_)->default_value(""),      "Output configuration file")
 		("mass,m", po::value<int>(&mass_)->default_value(125),                                    "Mass to run at")
 		("procs,p", po::value<string>(&procString_)->default_value("ggh,vbf,wh,zh,tth"),          "Processes")
 		("recursive",																																							"Recursive fraction")
 		("forceFracUnity",																																				"Force fraction unity")
 		("isFlashgg",	po::value<bool>(&isFlashgg_)->default_value(true),													"Use flashgg format")
 		("verbose",	po::value<bool>(&verbose_)->default_value(false),													"Use flashgg format")
-		("flashggCats,f", po::value<string>(&flashggCatsStr_)->default_value("DiPhotonUntaggedCategory_0,DiPhotonUntaggedCategory_1,DiPhotonUntaggedCategory_2,DiPhotonUntaggedCategory_3,DiPhotonUntaggedCategory_4,VBFTag_0,VBFTag_1,VBFTag_2"),       "Flashgg category names to consider")
+		("flashggCats,f", po::value<string>(&flashggCatsStr_)->default_value("UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,UntaggedTag_4,VBFTag_0,VBFTag_1,VBFTag_2,TTHHadronicTag,TTHLeptonicTag,VHHadronicTag,VHTightTag,VHLooseTag,VHEtTag"),       "Flashgg category names to consider")
 		;
 
 	po::options_description desc2("Options kept for backward compatibility");
 	desc2.add_options()
-	("ncats,n", po::value<int>(&ncats_)->default_value(9),																			"Number of cats (Set Automatically if using --isFlashgg 1)")
+		("ncats,n", po::value<int>(&ncats_)->default_value(9),																			"Number of cats (Set Automatically if using --isFlashgg 1)")
 		;
 	po::options_description desc("Allowed options");
 	desc.add(desc1).add(desc2);
-	
+
 	po::variables_map vm;
 	po::store(po::parse_command_line(argc,argv,desc),vm);
 	po::notify(vm);
@@ -143,6 +147,9 @@ RooDataSet *stripWeights(RooDataSet *data, RooRealVar *var){
 int main(int argc, char *argv[]){
 
 	OptionParser(argc,argv);
+	
+	if (verbose_) std::cout << "[INFO] datfilename_	" << datfilename_ << std::endl;
+	if (verbose_) std::cout << "[INFO] filename_	" << filename_ << std::endl;
 
 	TStopwatch sw;
 	sw.Start();
@@ -150,7 +157,7 @@ int main(int argc, char *argv[]){
 	RooMsgService::instance().setGlobalKillBelow(RooFit::ERROR);
 	RooMsgService::instance().setSilentMode(true);
 
-	system("mkdir -p plots/fTest");
+	system(Form("mkdir -p %s/fTest",outdir_.c_str()));
 
 	vector<string> procs;
 	split(procs,procString_,boost::is_any_of(","));
@@ -165,11 +172,11 @@ int main(int argc, char *argv[]){
 	RooWorkspace *inWS;
 	RooRealVar *mass; 
 	if (isFlashgg_){
-	if (verbose_) std::cout << "[INFO] Opening workspace diphotonDumper/cms_hgg_13TeV"<<std::endl;
+		if (verbose_) std::cout << "[INFO] Opening workspace diphotonDumper/cms_hgg_13TeV"<<std::endl;
 		inWS = (RooWorkspace*)inFile->Get("diphotonDumper/cms_hgg_13TeV");
-	if (verbose_) std::cout << "[INFO] Workspace Open "<< inWS << std::endl;
+		if (verbose_) std::cout << "[INFO] Workspace Open "<< inWS << std::endl;
 		mass = (RooRealVar*)inWS->var("CMS_hgg_mass");
-	if (verbose_) std::cout << "[INFO] Got mass var from ws"<<std::endl;
+		if (verbose_) std::cout << "[INFO] Got mass var from ws"<<std::endl;
 	} else {
 		inWS = (RooWorkspace*)inFile->Get("cms_hgg_workspace"); 
 		mass = (RooRealVar*)inWS->var("CMS_hgg_mass"); 
@@ -214,20 +221,20 @@ int main(int argc, char *argv[]){
 			RooDataSet *dataRV;
 			RooDataSet *dataWV; 
 			if (isFlashgg_){
-		//		dataRV = (RooDataSet*)inWS->data(Form("%s_%d_13TeV_flashgg%s",proc.c_str(),mass_,flashggCats_[cat].c_str()));
-		//		dataWV = (RooDataSet*)inWS->data(Form("%s_%d_13TeV_flashgg%s",proc.c_str(),mass_,flashggCats_[cat].c_str()));
-				data   = (RooDataSet*)inWS->data(Form("%s_%d_13TeV_flashgg%s",proc.c_str(),mass_,flashggCats_[cat].c_str()));
+				//		dataRV = (RooDataSet*)inWS->data(Form("%s_%d_13TeV_flashgg%s",proc.c_str(),mass_,flashggCats_[cat].c_str()));
+				//		dataWV = (RooDataSet*)inWS->data(Form("%s_%d_13TeV_flashgg%s",proc.c_str(),mass_,flashggCats_[cat].c_str()));
+				data   = (RooDataSet*)inWS->data(Form("%s_%d_13TeV_flashgg%s_",proc.c_str(),mass_,flashggCats_[cat].c_str()));
 				if (verbose_) {
 
-				std::cout << "[INFO] Workspace contains : " << std::endl;
-			std::list<RooAbsData*> data =  (inWS->allData()) ;
-			for (std::list<RooAbsData*>::const_iterator iterator = data.begin(), end = data.end(); iterator != end; ++iterator) {
-			std::cout << **iterator << std::endl;
-			}
+					std::cout << "[INFO] Workspace contains : " << std::endl;
+					std::list<RooAbsData*> data =  (inWS->allData()) ;
+					for (std::list<RooAbsData*>::const_iterator iterator = data.begin(), end = data.end(); iterator != end; ++iterator) {
+						std::cout << **iterator << std::endl;
+					}
 
 
 				}
-				if (verbose_) std::cout << "[INFO] Retrieved combined RV/WV data "<< Form("%s_%d_13TeV_flashgg%s",proc.c_str(),mass_,flashggCats_[cat].c_str()) << "? "<< data<<std::endl;
+				if (verbose_) std::cout << "[INFO] Retrieved combined RV/WV data "<< Form("%s_%d_13TeV_flashgg%s_",proc.c_str(),mass_,flashggCats_[cat].c_str()) << "? "<< data<<std::endl;
 				dataRV = new RooDataSet("dataRV","dataRV",&*data,*(data->get()),"dZ<1");
 				if (verbose_) std::cout << "[INFO] Retrieved combined RV data"<<std::endl;
 				dataWV = new RooDataSet("dataWV","dataWV",&*data,*(data->get()),"dZ>=1");
@@ -260,10 +267,10 @@ int main(int argc, char *argv[]){
 			double prob=0.;
 
 			dataRV->plotOn(plotsRV[proc][cat]);
-			//while (prob<0.8) {
+			//while (prob<0.8) 
 			while (order<5) {
 				RooAddPdf *pdf = buildSumOfGaussians(Form("cat%d_g%d",cat,order),mass,MH,order);
-				RooFitResult *fitRes = pdf->fitTo(*dataRV,Save(true),SumW2Error(true));//,Range(mass_-10,mass_+10));
+				RooFitResult *fitRes = pdf->fitTo(*dataRV,Save(true),/*SumW2Error(true),*/Verbose(false));//,Range(mass_-10,mass_+10));
 				double myNll=0.;
 				thisNll = fitRes->minNll();
 				//double myNll = getMyNLL(mass,pdf,dataRV);
@@ -278,7 +285,7 @@ int main(int argc, char *argv[]){
 				//if (chi2<0. && order>1) chi2=0.;
 				int diffInDof = (2*order+(order-1))-(2*prev_order+(prev_order-1));
 				prob = TMath::Prob(chi2,diffInDof);
-				cout << "\t RV: " << cat << " " << order << " " << diffInDof << " " << prevNll << " " << thisNll << " " << myNll << " " << chi2 << " " << prob << endl;
+				cout << "[INFO] \t RV: " << cat << " " << order << " " << diffInDof << " " << prevNll << " " << thisNll << " " << myNll << " " << chi2 << " " << prob << endl;
 				prevNll=thisNll;
 				cache_order=prev_order;
 				prev_order=order;
@@ -297,9 +304,9 @@ int main(int argc, char *argv[]){
 
 			dataWV->plotOn(plotsWV[proc][cat]);
 			while (order<4) {
-				//while (prob<0.8) {
+				//while (prob<0.8) 
 				RooAddPdf *pdf = buildSumOfGaussians(Form("cat%d_g%d",cat,order),mass,MH,order);
-				RooFitResult *fitRes = pdf->fitTo(*dataWV,Save(true),SumW2Error(true));//,Range(mass_-10,mass_+10));
+				RooFitResult *fitRes = pdf->fitTo(*dataWV,Save(true),/*SumW2Error(true),*/Verbose(false));//,Range(mass_-10,mass_+10));
 				double myNll=0.;
 				thisNll = fitRes->minNll();
 				//double myNll = getMyNLL(mass,pdf,dataRV);
@@ -314,7 +321,7 @@ int main(int argc, char *argv[]){
 				//if (chi2<0. && order>1) chi2=0.;
 				int diffInDof = (2*order+(order-1))-(2*prev_order+(prev_order-1));
 				prob = TMath::Prob(chi2,diffInDof);
-				cout << "\t WV: " << cat << " " << order << " " << diffInDof << " " << prevNll << " " << thisNll << " " << myNll << " " << chi2 << " " << prob << endl;
+				cout << "[INFO] \t WV: " << cat << " " << order << " " << diffInDof << " " << prevNll << " " << thisNll << " " << myNll << " " << chi2 << " " << prob << endl;
 				prevNll=thisNll;
 				cache_order=prev_order;
 				prev_order=order;
@@ -322,54 +329,62 @@ int main(int argc, char *argv[]){
 			}
 			wvChoice=cache_order;
 
-			choices.insert(pair<string,pair<int,int> >(Form("%s_cat%d",proc.c_str(),cat),make_pair(rvChoice,wvChoice)));
-			} 
-		}
+			choices.insert(pair<string,pair<int,int> >(Form("%s %d",proc.c_str(),cat),make_pair(rvChoice,wvChoice)));
+		} 
+	}
 
-		TLegend *leg = new TLegend(0.6,0.6,0.89,0.89);
-		leg->SetFillColor(0);
-		leg->SetLineColor(0);
-		TH1F *h1 = new TH1F("h1","",1,0,1);
-		h1->SetLineColor(colors[0]);
-		leg->AddEntry(h1,"1st order","L");
-		TH1F *h2 = new TH1F("h2","",1,0,1);
-		h2->SetLineColor(colors[1]);
-		leg->AddEntry(h2,"2nd order","L");
-		TH1F *h3 = new TH1F("h3","",1,0,1);
-		h3->SetLineColor(colors[2]);
-		leg->AddEntry(h3,"3rd order","L");
-		TH1F *h4 = new TH1F("h4","",1,0,1);
-		h4->SetLineColor(colors[3]);
-		leg->AddEntry(h4,"4th order","L");
+	TLegend *leg = new TLegend(0.6,0.6,0.89,0.89);
+	leg->SetFillColor(0);
+	leg->SetLineColor(0);
+	TH1F *h1 = new TH1F("h1","",1,0,1);
+	h1->SetLineColor(colors[0]);
+	leg->AddEntry(h1,"1st order","L");
+	TH1F *h2 = new TH1F("h2","",1,0,1);
+	h2->SetLineColor(colors[1]);
+	leg->AddEntry(h2,"2nd order","L");
+	TH1F *h3 = new TH1F("h3","",1,0,1);
+	h3->SetLineColor(colors[2]);
+	leg->AddEntry(h3,"3rd order","L");
+	TH1F *h4 = new TH1F("h4","",1,0,1);
+	h4->SetLineColor(colors[3]);
+	leg->AddEntry(h4,"4th order","L");
 
-		TCanvas *canv = new TCanvas();
-		for (map<string,vector<RooPlot*> >::iterator plotIt=plotsRV.begin(); plotIt!=plotsRV.end(); plotIt++){
-			string proc = plotIt->first;
-			for (int cat=0; cat<ncats_; cat++){
-				RooPlot *plot = plotIt->second.at(cat);
-				plot->Draw();
-				leg->Draw();
-				canv->Print(Form("plots/fTest/rv_%s_cat%d.pdf",proc.c_str(),cat));
-			}
+	TCanvas *canv = new TCanvas();
+	for (map<string,vector<RooPlot*> >::iterator plotIt=plotsRV.begin(); plotIt!=plotsRV.end(); plotIt++){
+		string proc = plotIt->first;
+		for (int cat=0; cat<ncats_; cat++){
+			RooPlot *plot = plotIt->second.at(cat);
+			plot->Draw();
+			leg->Draw();
+			canv->Print(Form("%s/fTest/rv_%s_cat%d.pdf",outdir_.c_str(),proc.c_str(),cat));
+			canv->Print(Form("%s/fTest/rv_%s_cat%d.png",outdir_.c_str(),proc.c_str(),cat));
 		}
-		for (map<string,vector<RooPlot*> >::iterator plotIt=plotsWV.begin(); plotIt!=plotsWV.end(); plotIt++){
-			string proc = plotIt->first;
-			for (int cat=0; cat<ncats_; cat++){
-				RooPlot *plot = plotIt->second.at(cat);
-				plot->Draw();
-				leg->Draw();
-				canv->Print(Form("plots/fTest/wv_%s_cat%d.pdf",proc.c_str(),cat));
-			}
+	}
+	for (map<string,vector<RooPlot*> >::iterator plotIt=plotsWV.begin(); plotIt!=plotsWV.end(); plotIt++){
+		string proc = plotIt->first;
+		for (int cat=0; cat<ncats_; cat++){
+			RooPlot *plot = plotIt->second.at(cat);
+			plot->Draw();
+			leg->Draw();
+			canv->Print(Form("%s/fTest/wv_%s_cat%d.pdf",outdir_.c_str(),proc.c_str(),cat));
+			canv->Print(Form("%s/fTest/wv_%s_cat%d.png",outdir_.c_str(),proc.c_str(),cat));
 		}
-		delete canv;
+	}
+	delete canv;
 
-		cout << "Recommended options" << endl;
-		int p =0;
-		for (map<string,pair<int,int> >::iterator it=choices.begin(); it!=choices.end(); it++){
-			cout << "\t "  <<" "<< it->first << " - " << it->second.first << " " << it->second.second << endl;
-			p++;
-		}
+	cout << "[INFO] Recommended options" << endl;
+	ofstream output_datfile;
+	output_datfile.open ((datfilename_).c_str());
+	if (verbose_) std::cout << "[INFO] Writing to datfilename_ " << datfilename_ << std::endl;
+	output_datfile << "#proc cat nGausRV nGausWV" << std::endl;
+	int p =0;
+	for (map<string,pair<int,int> >::iterator it=choices.begin(); it!=choices.end(); it++){
+		cout << "[INFO] \t "  <<" "<< it->first << " " << it->second.first << " " << it->second.second << endl;
+		output_datfile<< it->first << " " << it->second.first << " " << it->second.second << endl;
+		p++;
+	}
 
-		inFile->Close();
-		return 0;
-		}
+	output_datfile.close();
+	inFile->Close();
+	return 0;
+}

@@ -11,10 +11,10 @@ parser = OptionParser()
 parser.add_option("-i","--infilename", help="Input file (binned signal from flashgg)")
 parser.add_option("-o","--outfilename",default="cms_hgg_datacard.txt",help="Name of card to print (default: %default)")
 parser.add_option("-p","--procs",default="ggh,vbf,wh,zh,tth",help="String list of procs (default: %default)")
-parser.add_option("-c","--cats",default="DiPhotonUntaggedCategory_0,DiPhotonUntaggedCategory_1,DiPhotonUntaggedCategory_2,DiPhotonUntaggedCategory_3,DiPhotonUntaggedCategory_4,VBFTag_0,VBFTag_1,VBFTag_2",help="Flashgg Categories (default: %default)")
-parser.add_option("--photonCatScales",default="EBlowR9,EBhighR9,EElowR9,EEhighR9",help="String list of photon scale nuisance names - WILL NOT correlate across years (default: %default)")
+parser.add_option("-c","--cats",default="UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,UntaggedTag_4,VBFTag_0,VBFTag_1,VBFTag_2",help="Flashgg Categories (default: %default)")
+parser.add_option("--photonCatScales",default="HighR9EE,LowR9EE,HighR9EB,LowR9EB",help="String list of photon scale nuisance names - WILL NOT correlate across years (default: %default)")
 parser.add_option("--photonCatScalesCorr",default="MaterialEBCentral,MaterialEBOuterEE,LightColl",help="String list of photon scale nuisance names - WILL correlate across years (default: %default)")
-parser.add_option("--photonCatSmears",default="EBlowR9,EBhighR9,EBlowR9Phi,EBhighR9Phi,EElowR9,EEhighR9",help="String list of photon smearing nuisance names - WILL NOT correlate across years (default: %default)")
+parser.add_option("--photonCatSmears",default="HighR9EE,LowR9EE,HighR9EBRho,LowR9EBRho,HighR9EBPhi,LowR9EBPhi",help="String list of photon smearing nuisance names - WILL NOT correlate across years (default: %default)")
 parser.add_option("--photonCatSmearsCorr",default="",help="String list of photon smearing nuisance names - WILL correlate across years (default: %default)")
 parser.add_option("--globalScales",default="NonLinearity:0.001",help="String list of global scale nuisances names with value separated by a \':\' - WILL NOT correlate across years (default: %default)")
 parser.add_option("--globalScalesCorr",default="Geant4:0.0005",help="String list of global scale nuisances names with value separated by a \':\' - WILL correlate across years (default: %default)")
@@ -106,9 +106,10 @@ else: options.globalScales = options.globalScales.split(',')
 if options.globalScalesCorr=='': options.globalScalesCorr = []
 else: options.globalScalesCorr = options.globalScalesCorr.split(',')
 
-inWS = inFile.Get('cms_hgg_workspace')
-#intL = inWS.var('IntLumi').getVal() #FIXME
-intL = 19700 #FIXME
+inWS = inFile.Get('wsig_13TeV')
+intL = inWS.var('IntLumi').getVal() #FIXME
+print "[INFO] Get Intlumi from file, value : ", intL
+#intL = 19700 #FIXME
 
 # info = [file,workspace,name]
 file_ext = 'mva'
@@ -401,7 +402,7 @@ def interp1Sigma(th1f_nom,th1f_down,th1f_up):
 	return [downE,upE]
 
 def printPreamble():
-	print 'Preamble...'
+	print '[INFO] Making Preamble...'
 #	if options.isCutBased:
 #		outFile.write('CMS-HGG datacard for parametric model - cut based analysis %dTeV \n'%sqrts)
 #	else:
@@ -416,7 +417,7 @@ def printPreamble():
 	outFile.write('\n')
 
 def printFileOptions():
-	print 'File opts...'
+	print '[INFO] File opts...'
 	for typ, info in fileDetails.items():
 		for c in options.cats:
 			file = info[0]
@@ -430,7 +431,7 @@ def printFileOptions():
 	outFile.write('\n')
 
 def printObsProcBinLines():
-	print 'Rates...'
+	print '[INFO] Rates...'
 	outFile.write('%-15s '%'bin')
 	for c in options.cats:
 		outFile.write('%s_%dTeV '%(c,sqrts))
@@ -496,7 +497,7 @@ def printNuisParam(name,typ,sqrtS=None):
 
 def printNuisParams():
 	if not options.isBinnedSignal:
-		print 'Nuisances...'
+		print '[INFO] Nuisances...'
 		## outFile.write('%-40s param 0.0 %1.4g\n'%('CMS_hgg_nuisance_%dTeVdeltafracright'%sqrts,vtxSyst))
 		outFile.write('%-40s param 0.0 %1.4g\n'%('CMS_hgg_nuisance_deltafracright',vtxSyst))
 	#	if options.isCutBased:
@@ -524,7 +525,7 @@ def printNuisParams():
 
 def printTheorySysts():
 	# as these are antisymmetric lnN systematics - implement as [1/(1.+err_down)] for the lower and [1.+err_up] for the upper
-	print 'Theory...'
+	print '[INFO] Theory...'
 	for systName, systDetails in theorySyst.items():
 		outFile.write('%-35s   lnN   '%systName)
 		for c in options.cats:
@@ -550,7 +551,7 @@ def printTheorySysts():
 	outFile.write('\n')
 
 def printLumiSyst():
-	print 'Lumi...'
+	print '[INFO] Lumi...'
 	outFile.write('%-35s   lnN   '%('lumi_%dTeV'%sqrts))
 	for c in options.cats:
 		for p in options.procs:
@@ -563,7 +564,7 @@ def printLumiSyst():
 	outFile.write('\n')
 
 def printTrigSyst():
-	print 'Trig...'
+	print '[INFO] Trig...'
 	outFile.write('%-35s   lnN   '%'CMS_hgg_n_trig_eff')
 	for c in options.cats:
 		for p in options.procs:
@@ -582,6 +583,7 @@ def getGlobeLine(proc,cat,name):
 	th1f_nom = inFile.Get('diphotonDumper/histograms/%s_125_13TeV_flashgg%smass'%(proc,cat))
 	th1f_up  = inFile.Get('diphotonDumper_%sUp01sigma/histograms/%s_125_13TeV_flashgg%smass'%(name,proc,cat))
 	th1f_dn  = inFile.Get('diphotonDumper_%sDown01sigma/histograms/%s_125_13TeV_flashgg%smass'%(name,proc,cat))
+	print "FIXME getGlobeLine"
 	print 'diphotonDumper/histograms/%s_125_13TeV_flashgg%smass'%(proc,cat), ' ', th1f_nom
 	print 'diphotonDumper_%sUp01sigma/histograms/%s_125_13TeV_flashgg%smass'%(name,proc,cat), ' ', th1f_up
 	print 'diphotonDumper_%sDown01sigma/histograms/%s_125_13TeV_flashgg%smass'%(name,proc,cat), ' ', th1f_dn
@@ -597,12 +599,10 @@ def getGlobeLine(proc,cat,name):
 	return line
 
 def printGlobeSysts():
-	print 'Efficiencies...'
+	print '[INFO] Efficiencies...'
 	for flashggSyst, paramSyst in flashggSysts.items():
-		print 'DEBUG LC ' ,flashggSyst, paramSyst
 	#	continue
 		if 'pdfWeight' and 'QCDscale' in flashggSyst: # special case
-			print 'DEBUG LC if pdfWeight and QCDscale in flashggSyst'
 			if options.isBinnedSignal: 
 				outFile.write('%-25s   shape   '%(flashggSyst))
 				for c in options.cats:
@@ -615,9 +615,7 @@ def printGlobeSysts():
 			else: 
 				outFile.write('%-35s   lnN   '%('CMS_hgg_%s_ggH'%paramSyst))
 				for c in options.cats:
-					print 'DEBUG LC cat ', c
 					for p in options.procs:
-						print '-- DEBUG LC proc ', p
 						if '%s:%s'%(p,c) in options.toSkip: continue
 						#if p=='ggH': outFile.write(getGlobeLine(flashggProc[p],c,flashggSyst))
 						if p=='ggH': outFile.write(getGlobeLine(p,c,flashggSyst))
@@ -636,9 +634,7 @@ def printGlobeSysts():
 			else:
 				outFile.write('%-35s   lnN   '%('CMS_hgg_%s'%paramSyst))
 			for c in options.cats:
-				print 'DEBUG LC cat ', c
 				for p in options.procs:
-					print '-- DEBUG LC proc ', p
 					if '%s:%s'%(p,c) in options.toSkip: continue
 					if p in bkgProcs or ('pdfWeight' in flashggSyst and (p!='ggH' and p!='qqH')):
 						outFile.write('- ')
@@ -751,7 +747,7 @@ def printVbfSysts():
 		outFile.write('\n')
 
 def printLepSysts():
-	print 'Lep...'
+	print '[INFO] Lep...'
 	# electron efficiency -- NOTE to correlate with combination change to CMS_eff_e
 	outFile.write('%-35s   lnN   '%('CMS_eff_e'))
 	for c in options.cats:
@@ -816,7 +812,7 @@ def printLepSysts():
 	outFile.write('\n')
 
 def printTTHSysts():
-	print 'tth...'
+	print '[INFO] tth...'
 	# b tag efficiency
 	outFile.write('%-35s   lnN   '%('CMS_eff_b'))
 	for c in options.cats:

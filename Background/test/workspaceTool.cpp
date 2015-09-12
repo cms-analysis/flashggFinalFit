@@ -40,6 +40,7 @@ int convert_;
 int draw_;
 int intlumi_;
 int print_;
+int pseudodata_;
 string procString_;
 int ncats_;
 float factor_;
@@ -59,6 +60,7 @@ void OptionParser(int argc, char *argv[]){
 		("draw", po::value<int>(&draw_)->default_value(0),                                    "Draw some plots")
 		("intlumi", po::value<int>(&intlumi_)->default_value(0),                                    "Draw some plots")
 		("print", po::value<int>(&print_)->default_value(0),                                    "print contents of ws")
+		("pseudodata", po::value<int>(&pseudodata_)->default_value(0),                                    "make pseudodata from inputfiles")
 		("factor", po::value<float>(&factor_)->default_value(1.05),                                    "factor to increase FLASHgg workspace by")
 		("procs,p", po::value<string>(&procString_)->default_value("ggh,vbf,wh,zh,tth"),          "Processes")
 		("flashggCats,f", po::value<string>(&flashggCatsStr_)->default_value("DiPhotonUntaggedCategory_0,DiPhotonUntaggedCategory_1,DiPhotonUntaggedCategory_2,DiPhotonUntaggedCategory_3,DiPhotonUntaggedCategory_4,VBFTag_0,VBFTag_1,VBFTag_2"),       "Flashgg category names to consider")
@@ -110,6 +112,8 @@ int main(int argc, char *argv[]){
 	if (! inWS) inWS = (RooWorkspace*)inFile->Get("multipdf");
 	if (! inWS) inWS = (RooWorkspace*)inFile->Get("wsig_8TeV");
 	if (! inWS) inWS = (RooWorkspace*)inFile->Get("wsig_13TeV");
+	if (! inWS) inWS = (RooWorkspace*)inFile->Get("diphotonDumper/cms_hgg_13TeV");
+	if (! inWS) return 0;
 	std::cout << "[INFO] Workspace Open "<< inWS << std::endl;
 	mass = (RooRealVar*)inWS->var("CMS_hgg_mass");
 	std::cout << "[INFO] Got mass var from ws"<<std::endl;
@@ -148,6 +152,7 @@ return 0;
 		}
 		std::cout <<" [INFO] Reading WS roorealvar contents: "<< std::endl;
 		inWS->Print();
+
 	}
 
 

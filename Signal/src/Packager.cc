@@ -160,6 +160,7 @@ void Packager::packageOutput(){
 				double intLumiVal = 0.;
 				if (intLumi){
 					intLumiVal = intLumi->getVal();//FIXME
+				std::cout << "[INFO] intlumi value is " << intLumiVal << std::endl;
 				} else {
 					std::cout  << "[WARNING] IntLumi missing from workspace, artifically set to 19700 "<< std::endl;
 					intLumiVal = 19700;
@@ -181,6 +182,7 @@ void Packager::packageOutput(){
 			double intLumiVal = 19700;
 			if (intLumi){
 				intLumiVal = intLumi->getVal();//FIXME
+				std::cout << "[INFO] intlumi value is " << intLumiVal << std::endl;
 			} else {
 				std::cout  << "[WARNING] IntLumi missing from workspace, artifically set to 19700 "<< std::endl;
 				intLumiVal = 19700;

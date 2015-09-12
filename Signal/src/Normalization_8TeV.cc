@@ -19,7 +19,7 @@ int Normalization_8TeV::Init(int sqrtS){
 	// std::cout <<" globeRt " << globeRt<< std::endl;
 	 //std::cout << " Form " << Form("buildSMHiggsSignalXSBR = imp.load_source('*', '%s/python/buildSMHiggsSignalXSBR.py')",globeRt.c_str()) << std::endl;
     if( ! TPython::Exec(Form("buildSMHiggsSignalXSBR = imp.load_source('*', '%s/python/buildSMHiggsSignalXSBR.py')",globeRt.c_str())) ) {
-	     std::cout<<  "Importing buildSMHiggsSignalXSBR from python failed. exit." << std::endl;
+	     std::cout<<  "[ERROR] Importing buildSMHiggsSignalXSBR from python failed. exit." << std::endl;
 			return 0;
     }
     TPython::Eval(Form("buildSMHiggsSignalXSBR.Init%dTeV()", sqrtS));
@@ -158,7 +158,7 @@ TGraph * Normalization_8TeV::GetSigmaGraph(TString process)
 	} else if (process.Contains("grav")){
 		XSectionMap = &XSectionMap_sm;
 	} else {
-		std::cout << "Warning ggh, vbf, wh, zh, wzh, tth or grav not found in histname!!!!" << std::endl;
+		std::cout << "[WARNING] Warning ggh, vbf, wh, zh, wzh, tth or grav not found in histname!!!!" << std::endl;
 		//exit(1);
 	}
 
@@ -196,7 +196,7 @@ double Normalization_8TeV::GetBR(double mass) {
 		}
 	}
 
-	std::cout << "Warning branching ratio outside range of 90-250GeV!!!!" << std::endl;
+	std::cout << "[WARNING] Warning branching ratio outside range of 90-250GeV!!!!" << std::endl;
 	//std::exit(1);
 	return -1;
 
@@ -224,7 +224,7 @@ double Normalization_8TeV::GetXsection(double mass, TString HistName) {
 	} else if (HistName.Contains("grav")) {
 		XSectionMap = &XSectionMap_sm;
 	} else {
-		std::cout << "Warning ggh, vbf, wh, zh, wzh, tth or grav not found in " << HistName << std::endl;
+		std::cout << "[WARNING] Warning ggh, vbf, wh, zh, wzh, tth or grav not found in " << HistName << std::endl;
 		//exit(1);
 	}
 
@@ -244,7 +244,7 @@ double Normalization_8TeV::GetXsection(double mass, TString HistName) {
 		}
 	}
 
-	std::cout << "Warning cross section outside range of 80-300GeV!!!!" << std::endl;
+	std::cout << "[WARNING] Warning cross section outside range of 80-300GeV!!!!" << std::endl;
 	//exit(1);
 	return -1;
 
@@ -270,7 +270,7 @@ TString Normalization_8TeV::GetProcess(int ty){
 		else if (process == 610) return "gg_spin0";
 		else if (process == 650) return "qq_grav";
 		else {
-			std::cout << "Error -- No signal process known " << process << std::endl;
+			std::cout << "[ERROR] Error -- No signal process known " << process << std::endl;
 			assert(0);
 		}
 

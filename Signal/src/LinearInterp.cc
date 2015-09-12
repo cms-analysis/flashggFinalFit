@@ -31,7 +31,7 @@ vector<int> LinearInterp::getAllMH(){
   vector<int> result;
   for (int m=mhLow_; m<=mhHigh_; m+=5){
 		if (skipMass(m)) continue;
-    if (verbosity_>=1) cout << "LinearInterp - Adding mass: " << m << endl;
+    if (verbosity_>=1) cout << "[INFO] LinearInterp - Adding mass: " << m << endl;
     result.push_back(m);
   }
   return result;

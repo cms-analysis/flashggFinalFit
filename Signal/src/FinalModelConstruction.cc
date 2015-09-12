@@ -99,7 +99,7 @@ void FinalModelConstruction::addToSystematicsList(vector<string>::iterator begin
 			*it = name;
 		}
 		if (find(systematicsList.begin(),systematicsList.end(),name)!=systematicsList.end()) {
-			cout << "ERROR - duplicate systematic names! " << *it << " already found in systematics list." << endl;
+			cout << "[ERROR] - duplicate systematic names! " << *it << " already found in systematics list." << endl;
 			exit(1);
 		}
 		else {
@@ -198,20 +198,20 @@ bool FinalModelConstruction::isLowR9cat(){
 
 void FinalModelConstruction::printSignalSystematics(){
 
-	cout << "Signal systematics info..." << endl;
+	cout << "[INFO] Signal systematics info..." << endl;
 	// names in systematicsList
-	cout << "The following systematic names are stored" << endl;
+	cout << "[INFO] The following systematic names are stored" << endl;
 	for (vector<string>::iterator sys=systematicsList.begin(); sys!=systematicsList.end(); sys++){
 		if (isGlobalSyst(*sys)) cout << "\t " << Form("%-50s -- global",sys->c_str()) << endl;
 		if (isPerCatSyst(*sys)) cout << "\t " << Form("%-50s -- photon cat",sys->c_str()) << endl;
 	}
 	// nuisance parameters
-	cout << "Implementing the following floating nuisance parameters" << endl;
+	cout << "[INFO] Implementing the following floating nuisance parameters" << endl;
 	for (map<string,RooAbsReal*>::iterator sys=photonSystematics.begin(); sys!=photonSystematics.end(); sys++){
 		cout << "\t " << Form("%-50s",sys->first.c_str()) << " -- "; sys->second->Print();
 	}
 	// const parameters
-	cout << "Implementing the following constant parameters" << endl;
+	cout << "[INFO] Implementing the following constant parameters" << endl;
 	for (map<string,RooConstVar*>::iterator sys=photonSystematicConsts.begin(); sys!=photonSystematicConsts.end(); sys++){
 		cout << "\t " << Form("%-50s",sys->first.c_str()) << " -- "; sys->second->Print();
 	}
@@ -224,7 +224,7 @@ void FinalModelConstruction::loadSignalSystematics(string filename){
 	ifstream datfile;
 	datfile.open(filename.c_str());
 	if (datfile.fail()) {
-		cout << "Failed to load " << filename.c_str();
+		cout << "[ERROR] Failed to load " << filename.c_str();
 		exit(1);
 	}
 	while (datfile.good()){
@@ -242,7 +242,7 @@ void FinalModelConstruction::loadSignalSystematics(string filename){
 			vector<string>::iterator beg = split_append(photonCatScales,line,boost::is_any_of(","));
 			addToSystematicsList(beg,photonCatScales.end());
 			if (verbosity_){
-				cout << "PhotonCatScales: ";
+				cout << "[INFO] PhotonCatScales: ";
 				if (verbosity_) printVec(photonCatScales);
 			}
 		}
@@ -252,7 +252,7 @@ void FinalModelConstruction::loadSignalSystematics(string filename){
 			vector<string>::iterator beg = split_append(photonCatScalesCorr,line,boost::is_any_of(","));
 			addToSystematicsList(beg,photonCatScalesCorr.end());
 			if (verbosity_){
-				cout << "PhotonCatScalesCorr: ";
+				cout << "[INFO] PhotonCatScalesCorr: ";
 				if (verbosity_) printVec(photonCatScalesCorr);
 			}
 		}
@@ -262,7 +262,7 @@ void FinalModelConstruction::loadSignalSystematics(string filename){
 			vector<string>::iterator beg = split_append(photonCatSmears,line,boost::is_any_of(","));
 			addToSystematicsList(beg,photonCatSmears.end());
 			if (verbosity_){
-				cout << "PhotonCatSmears: ";
+				cout << "[INFO] PhotonCatSmears: ";
 				if (verbosity_) printVec(photonCatSmears);
 			}
 		}
@@ -272,7 +272,7 @@ void FinalModelConstruction::loadSignalSystematics(string filename){
 			vector<string>::iterator beg = split_append(photonCatSmearsCorr,line,boost::is_any_of(","));
 			addToSystematicsList(beg,photonCatSmearsCorr.end());
 			if (verbosity_){
-				cout << "PhotonCatSmearsCorr: ";
+				cout << "[INFO] PhotonCatSmearsCorr: ";
 				if (verbosity_) printVec(photonCatSmearsCorr);
 			}
 		}
@@ -282,7 +282,7 @@ void FinalModelConstruction::loadSignalSystematics(string filename){
 			// split first by comma and then by colon for specific options
 			vector<string> temp;
 			split(temp,line,boost::is_any_of(","));
-			if (verbosity_) cout << "GlobalScales: ";
+			if (verbosity_) cout << " [INFO] GlobalScales: ";
 			for (vector<string>::iterator strIt=temp.begin(); strIt!=temp.end(); strIt++){
 				vector<string> opts;
 				vector<pair<int,float> > optDetails;
@@ -305,7 +305,7 @@ void FinalModelConstruction::loadSignalSystematics(string filename){
 			// split first by comma and then by colon for specific options
 			vector<string> temp;
 			split(temp,line,boost::is_any_of(","));
-			if (verbosity_) cout << "GlobalScalesCorr: ";
+			if (verbosity_) cout << "[INFO] GlobalScalesCorr: ";
 			for (vector<string>::iterator strIt=temp.begin(); strIt!=temp.end(); strIt++){
 				vector<string> opts;
 				vector<pair<int,float> > optDetails;
@@ -329,7 +329,7 @@ void FinalModelConstruction::loadSignalSystematics(string filename){
 		// And the process
 		else if (starts_with(line,"proc")){
 			proc = line.substr(line.find('=')+1,string::npos);
-			if (verbosity_) cout << "Process:  " << proc << "  DiphoCat: " << diphotonCat << endl;
+			if (verbosity_) cout << "[INFO] Process:  " << proc << "  DiphoCat: " << diphotonCat << endl;
 		}
 		// Then read values
 		else {
@@ -338,7 +338,7 @@ void FinalModelConstruction::loadSignalSystematics(string filename){
 			split(els,line,boost::is_any_of(" "));
 			if (verbosity_) {cout << "\t"; printVec(els);}
 			if (els.size()!=4) {
-				cout << "I cant read this datfile " << line << endl;
+				cout << "[ERROR] I cant read this datfile " << line << endl;
 				exit(1);
 			}
 			string phoSystName = els[0];
@@ -496,7 +496,7 @@ vector<int> FinalModelConstruction::getAllMH(){
   vector<int> result;
   for (int m=mhLow_; m<=mhHigh_; m+=5){
 		if (skipMass(m)) continue;
-    if (verbosity_>=1) cout << "FinalModelConstruction - Adding mass: " << m << endl;
+    if (verbosity_>=1) cout << "[INFO] FinalModelConstruction - Adding mass: " << m << endl;
     result.push_back(m);
   }
   return result;
@@ -556,11 +556,11 @@ RooAbsReal* FinalModelConstruction::getMeanWithPhotonSyst(RooAbsReal *dm, string
 	if (sqrts_ ==13) catname = Form("%s",flashggCats_[cat_].c_str());
 
 	if (!doSecondaryModels && (isMH2 || isMHSM)) {
-		cout << "ERROR -- for some reason your asking for a dependence on MH_2 or MH_SM but are not running secondary models" << endl;
+		cout << "[ERROR] -- for some reason your asking for a dependence on MH_2 or MH_SM but are not running secondary models" << endl;
 		exit(1);
 	}
 	if (isMH2 && isMHSM) {
-		cout << "ERROR -- for some reason your asking for a dependence on MH_2 and MH_SM but both cannot be true" << endl;
+		cout << "[ERROR] -- for some reason your asking for a dependence on MH_2 and MH_SM but both cannot be true" << endl;
 		exit(1);
 	}
 
@@ -595,7 +595,7 @@ RooAbsReal* FinalModelConstruction::getMeanWithPhotonSyst(RooAbsReal *dm, string
 				RooConstVar *constVar = photonSystematicConsts[Form("const_%s_%s_%dTeV_mean_%s",proc_.c_str(),catname.c_str(),sqrts_,syst.c_str())];
 				RooAbsReal *nuisVar = photonSystematics[Form("CMS_hgg_nuisance_%s",syst.c_str())];
 				if( verbosity_ ) { 
-					std::cout << "Systematic " << syst << std::endl;
+					std::cout << "[INFO] Systematic " << syst << std::endl;
 					nuisVar->Print("V");
 				}
 				if ( fabs(constVar->getVal())>=5.e-5) { 
@@ -606,7 +606,7 @@ RooAbsReal* FinalModelConstruction::getMeanWithPhotonSyst(RooAbsReal *dm, string
 				}
 			}
 			if (verbosity_ && !hasEffect) {
-				cout << "WARNING -- systematic " << syst << " is found to have no effect on the scale for category " << catname.c_str() << " and process " << proc_ << " so it is being skipped." << endl;
+				cout << "[WARNING] -- systematic " << syst << " is found to have no effect on the scale for category " << catname.c_str() << " and process " << proc_ << " so it is being skipped." << endl;
 			}
 		}
 	}
@@ -646,7 +646,7 @@ RooAbsReal* FinalModelConstruction::getSigmaWithPhotonSyst(RooAbsReal *sig_fit, 
 				}
 			}
 			if (verbosity_ && !hasEffect) {
-				cout << "WARNING -- systematic " << syst << " is found to have no effect on the resolution for category " << catname.c_str() << " and process " << proc_ << " so it is being skipped." << endl;
+				cout << "[WARNING] -- systematic " << syst << " is found to have no effect on the resolution for category " << catname.c_str() << " and process " << proc_ << " so it is being skipped." << endl;
 			}
 		}
 	}
@@ -679,7 +679,7 @@ RooAbsReal* FinalModelConstruction::getRateWithPhotonSyst(string name){
 				}
 			}
 			if (verbosity_ && !hasEffect) {
-				cout << "WARNING -- systematic " << syst << " is found to have no effect on the rate for category " << catname.c_str() << " and process " << proc_ << " so it is being skipped." << endl;
+				cout << "[WARNING] -- systematic " << syst << " is found to have no effect on the rate for category " << catname.c_str() << " and process " << proc_ << " so it is being skipped." << endl;
 			}
 		}
 	}
@@ -970,7 +970,7 @@ void FinalModelConstruction::getNormalization(){
 	RooAbsReal *rateNuisTerm = getRateWithPhotonSyst(Form("rate_%s_%s_%dTeV",proc_.c_str(),catname.c_str(),sqrts_));
 	if (!(xs && brSpline && eaSpline && rateNuisTerm && intLumi)){
 	std::cout << "[ERROR] some of the following are not set properly. exit." << std::endl;
-	std::cout << "xs " << xs << ", brSpline " << brSpline << ", eaSpline " << eaSpline << ", rateNuisTerm " << rateNuisTerm << ", intLumi " << intLumi << std::endl;
+	if( verbosity_) std::cout << "[INFO] xs " << xs << ", brSpline " << brSpline << ", eaSpline " << eaSpline << ", rateNuisTerm " << rateNuisTerm << ", intLumi " << intLumi << std::endl;
 	exit(1);
 	}
 	finalNorm = new RooFormulaVar(Form("%s_norm",finalPdf->GetName()),Form("%s_norm",finalPdf->GetName()),"@0*@1*@2*@3",RooArgList(*xs,*brSpline,*eaSpline,*rateNuisTerm));

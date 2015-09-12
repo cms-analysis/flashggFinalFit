@@ -139,7 +139,7 @@ if not opts.files and opts.datacard:
 defaults = copy(opts)
 
 def system(exec_line):
-  print "[INFO] defining exec_line"
+  #print "[INFO] defining exec_line"
   if opts.verbose: print '\t', exec_line
   os.system(exec_line)
 
@@ -335,7 +335,7 @@ def writeAsymptoticGrid():
   
   # create specialised limit grid workspace
   if not opts.skipWorkspace:
-    print 'Creating workspace for %s...'%opts.method
+    print '[INFO] Creating workspace for %s...'%opts.method
     ws_exec_line = 'text2workspace.py %s -o %s'%(os.path.abspath(opts.datacard),os.path.abspath(opts.datacard).replace('.txt','.root')) 
     system(ws_exec_line)
   opts.datacard = opts.datacard.replace('.txt','.root')

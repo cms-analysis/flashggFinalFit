@@ -104,7 +104,7 @@ void OptionParser(int argc, char *argv[]){
     ("verbose,v", po::value<int>(&verbose_)->default_value(0),                                			"Verbosity level: 0 (lowest) - 3 (highest)")
 		("isFlashgg",	po::value<bool>(&isFlashgg_)->default_value(true),														"Use flashgg format")
 		("check",	po::value<bool>(&check_)->default_value(false),														"Use flashgg format (default false)")
-    ("flashggCats,f", po::value<string>(&flashggCatsStr_)->default_value("DiPhotonUntaggedCategory_0,DiPhotonUntaggedCategory_1,DiPhotonUntaggedCategory_2,DiPhotonUntaggedCategory_3,DiPhotonUntaggedCategory_4,VBFTag_0,VBFTag_1,VBFTag_2"),       "Flashgg categories if used") 
+    ("flashggCats,f", po::value<string>(&flashggCatsStr_)->default_value("UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,UntaggedTag_4,VBFTag_0,VBFTag_1,VBFTag_2,TTHHadronicTag,TTHLeptonicTag,VHHadronicTag,VHTightTag,VHLooseTag,VHEtTag"),       "Flashgg categories if used") 
   ;                                                                                             		
 	po::options_description desc2("Options kept for backward compatibility");
 	desc2.add_options()
@@ -136,7 +136,7 @@ void OptionParser(int argc, char *argv[]){
   if (vm.count("skipSecondaryModels"))      doSecondaryModels_=false;
   if (vm.count("recursive"))                recursive_=false;
   if (vm.count("skipMasses")) {
-	  cout << "Masses to skip... " << endl;
+	  cout << "[INFO] Masses to skip... " << endl;
 	  vector<string> els;
 	  split(els,massesToSkip_,boost::is_any_of(","));
 	  if (els.size()>0 && massesToSkip_!="") {
@@ -216,7 +216,7 @@ void makeCloneConfig(clonemap_t mapRV, clonemap_t mapWV, string newdatfilename){
 				countWV++;
 			}
 		}
-		cout << proc << " " << cat << " " << countRV << " " << countWV << endl;
+		if (verbose_) cout << "[INFO] "<< proc << " " << cat << " " << countRV << " " << countWV << endl;
 		datfile << proc << " " << cat << " " << countRV << " " << countWV << endl;
 	}
 	datfile.close();
@@ -288,52 +288,43 @@ int main(int argc, char *argv[]){
 
 	TFile *inFile = TFile::Open(filename_[0].c_str());
 	if (check_){
-	//RooWorkspace *	inWS0 = (RooWorkspace*)inFile->Get(Form("wsig_8TeV"));
-	RooWorkspace *	inWS0 = (RooWorkspace*)inFile->Get(Form("diphotonDumper/cms_hgg_13TeV"));
-			std::list<RooAbsData*> data =  (inWS0->allData()) ;
-			for (std::list<RooAbsData*>::const_iterator iterator = data.begin(), end = data.end(); iterator != end; ++iterator) {
-			std::cout << **iterator << std::endl;
-			}
-	return 1;
+		//RooWorkspace *	inWS0 = (RooWorkspace*)inFile->Get(Form("wsig_8TeV"));
+		RooWorkspace *	inWS0 = (RooWorkspace*)inFile->Get(Form("diphotonDumper/cms_hgg_13TeV"));
+		std::list<RooAbsData*> data =  (inWS0->allData()) ;
+		for (std::list<RooAbsData*>::const_iterator iterator = data.begin(), end = data.end(); iterator != end; ++iterator) {
+			if(verbose_) std::cout << "[INFO] " <<**iterator << std::endl;
+		}
+		return 1;
 	}
 	RooWorkspace *inWS;
 	if (isFlashgg_){
 		inWS = (RooWorkspace*)inFile->Get("diphotonDumper/cms_hgg_13TeV");
-    /*if (filename_.size()>2){ // can be used to merge workspaces for different mass points if needed (should already be done)
-			TFile *inFile1 = TFile::Open(filename_[1].c_str());
-			TFile *inFile2 = TFile::Open(filename_[2].c_str());
-			RooWorkspace *inWS1;
-			RooWorkspace *inWS2;
-			inWS1 = (RooWorkspace*)inFile1->Get("diphotonDumper/cms_hgg_13TeV");
-			inWS2 = (RooWorkspace*)inFile2->Get("diphotonDumper/cms_hgg_13TeV");
-			std::list<RooAbsData*> data =  (inWS1->allData()) ;
-			std::list<RooAbsData*> data2 =  (inWS2->allData()) ;
-			for (std::list<RooAbsData*>::const_iterator iterator = data.begin(), end = data.end(); iterator != end; ++iterator) {
-				inWS->import(**iterator);
-			}
-			for (std::list<RooAbsData*>::const_iterator iterator = data2.begin(), end = data2.end(); iterator != end; ++iterator) {
-				inWS->import(**iterator);
-			}
-		}*/
 		std::list<RooAbsData*> test =  (inWS->allData()) ;
-		std::cout << " WS contains " << std::endl;
-		for (std::list<RooAbsData*>::const_iterator iterator = test.begin(), end = test.end(); iterator != end; ++iterator) {
-			std::cout << **iterator << std::endl;
+		if (verbose_) {
+			std::cout << " [INFO] WS contains " << std::endl;
+			for (std::list<RooAbsData*>::const_iterator iterator = test.begin(), end = test.end(); iterator != end; ++iterator) {
+				std::cout << **iterator << std::endl;
+			}
 		}
 	} else {
 		inWS = (RooWorkspace*)inFile->Get("cms_hgg_workspace");
 		std::list<RooAbsData*> test =  (inWS->allData()) ;
-		std::cout << " WS contains " << std::endl;
-		for (std::list<RooAbsData*>::const_iterator iterator = test.begin(), end = test.end(); iterator != end; ++iterator) {
-			std::cout << **iterator << std::endl
-				;}
-		//std::cout << " WS contains " << *inWS->allData() << std::endl;
+		if (verbose_) {
+			std::cout << " [INFO] WS contains " << std::endl;
+			for (std::list<RooAbsData*>::const_iterator iterator = test.begin(), end = test.end(); iterator != end; ++iterator) {
+				std::cout << **iterator << std::endl
+					;}
+			//std::cout << " WS contains " << *inWS->allData() << std::endl;
+		}
 	}
-
 	if (inWS) { std::cout << "[INFO] workspace opened correctly" << std::endl;}
 	else { std::cout << "[EXIT] Workspace is null pointer. exit" << std::endl; return 0;}
 
 	RooRealVar *mass = (RooRealVar*)inWS->var("CMS_hgg_mass");
+	RooRealVar *weight = (RooRealVar*)inWS->var("weight:weight");
+	RooRealVar *weight0 = (RooRealVar*)inWS->var("weight");
+	if (verbose_) std::cout << "[INFO] RooRealVars mass and weight found ? " << mass << ", " << weight << ", " << weight0 << std::endl;
+	//	if ((!mass) || (!weight) || (!weight0)) return 0;
 	mass->SetTitle("m_{#gamma#gamma}");
 	mass->setUnit("GeV");
 	RooRealVar *intLumi = (RooRealVar*)inWS->var("IntLumi");
@@ -371,13 +362,13 @@ int main(int argc, char *argv[]){
 		rand.SetSeed(0);
 		string newdatfilename = Form("tmp/config_%d.dat",rand.Integer(1.e6));
 		string cloneWSname = outWS->GetName();
-		cout << "Requested clone of fit parameters from file: " << cloneFitFile_ << " workspace: " << cloneWSname << endl;
-		cout << "This means the configuration of nGaussians given in the datfile: " << datfilename_ << " WILL BE IGNORED" << endl;
-		cout << "Instead the configuration will be picked up from the file: " << cloneFitFile_ << " and dumped in a tempory location: " << newdatfilename << endl;
+		cout << "[WARNING] Requested clone of fit parameters from file: " << cloneFitFile_ << " workspace: " << cloneWSname << endl;
+		cout << "[WARNING] This means the configuration of nGaussians given in the datfile: " << datfilename_ << " WILL BE IGNORED" << endl;
+		cout << "[WARNING] Instead the configuration will be picked up from the file: " << cloneFitFile_ << " and dumped in a tempory location: " << newdatfilename << endl;
 		fillCloneSplinesMap(cloneSplinesMapRV,cloneSplinesMapWV,cloneFitFile_,cloneWSname);
 		makeCloneConfig(cloneSplinesMapRV,cloneSplinesMapWV,newdatfilename);
 		datfilename_ = newdatfilename;
-		cout << "Loaded splines from reference file: " << cloneFitFile_ << endl;
+		cout << "[INFO] Loaded splines from reference file: " << cloneFitFile_ << endl;
 
 	}
 
@@ -389,7 +380,7 @@ int main(int argc, char *argv[]){
 	ifstream datfile;
 	datfile.open(datfilename_.c_str());
 	if (datfile.fail()) {
-		std::cerr << "Could not open " << datfilename_ <<std::endl;
+		std::cerr << "[ERROR] Could not open " << datfilename_ <<std::endl;
 		exit(1);
 	}
 	while (datfile.good()){
@@ -414,7 +405,7 @@ int main(int argc, char *argv[]){
 		}
 
 		cout << "-----------------------------------------------------------------" << endl;
-		cout << Form("Running fits for proc:%s - cat:%d with nGausRV:%d nGausWV:%d",proc.c_str(),cat,nGaussiansRV,nGaussiansWV) << endl;
+		cout << Form("[INFO] Running fits for proc:%s - cat:%d with nGausRV:%d nGausWV:%d",proc.c_str(),cat,nGaussiansRV,nGaussiansWV) << endl;
 		if( replace ) { cout << Form("Will replace parameters using  proc:%s - cat:%d",replaceWith.first.c_str(),replaceWith.second) << endl; }
 		cout << "-----------------------------------------------------------------" << endl;
 		// get datasets for each MH here
@@ -431,17 +422,27 @@ int main(int argc, char *argv[]){
 			if (isFlashgg_){
 				//	dataRV = (RooDataSet*)inWS->data(Form("%s_%d_13TeV_flashgg%s",proc.c_str(),mh,flashggCats_[cat].c_str())); //FIXME
 				//	dataWV = (RooDataSet*)inWS->data(Form("%s_%d_13TeV_flashgg%s",proc.c_str(),mh,flashggCats_[cat].c_str())); // FIXME
-				std::cout << "[WARNING] FIXME - Artificially adding weight 0.085 (~correct weight for hgg events with 9000 MC events, 20/fb of data and e*a of 0.5) to signal sample events. Should eventually be included in workspace by default " << std::endl;
-				RooDataSet *data0   = (RooDataSet*)inWS->data(Form("%s_%d_13TeV_flashgg%s",proc.c_str(),mh,flashggCats_[cat].c_str()));
-				RooDataSet *dataRV0 = new RooDataSet("dataRV","dataRV",&*data0,*(data0->get()),"dZ<1");
-				RooDataSet *dataWV0 = new RooDataSet("dataWV","dataWV",&*data0,*(data0->get()),"dZ>=1");
-				RooFormulaVar wFunc("w","event weight","0.085",*mass);
-				RooRealVar* w = (RooRealVar*) data0->addColumn(wFunc); 
-				RooRealVar* wrv = (RooRealVar*) dataRV0->addColumn(wFunc); 
-				RooRealVar* wwv = (RooRealVar*) dataWV0->addColumn(wFunc);
-				data = new RooDataSet(data0->GetName(),data0->GetTitle(),data0,*data0->get(),0,w->GetName()) ;
-				dataRV = new RooDataSet(dataRV0->GetName(),dataRV0->GetTitle(),dataRV0,*dataRV0->get(),0,wrv->GetName()) ;
-				dataWV = new RooDataSet(dataWV0->GetName(),dataWV0->GetTitle(),dataWV0,*dataWV0->get(),0,wwv->GetName()) ;
+				//std::cout << "[WARNING] FIXME - Artificially adding weight 0.085 (~correct weight for hgg events with 9000 MC events, 20/fb of data and e*a of 0.5) to signal sample events. Should eventually be included in workspace by default " << std::endl;
+				if (verbose_)std::cout << "[INFO] opening dataset called "<< Form("%s_%d_13TeV_flashgg%s_",proc.c_str(),mh,flashggCats_[cat].c_str()) << " in in WS " << inWS << std::endl;
+				RooDataSet *data0   = (RooDataSet*)inWS->data(Form("%s_%d_13TeV_flashgg%s_",proc.c_str(),mh,flashggCats_[cat].c_str()));
+				//		if (verbose_) std::cout << "[INFO] dataset "<<  Form("%s_%d_13TeV_flashgg%s_",proc.c_str(),mh,flashggCats_[cat].c_str()) << " for RV+WV open ? " << *data0 <<  " with weight " << data0->weight() << std::endl;
+				//		RooDataSet *dataRV0 = new RooDataSet("dataRV","dataRV",&*data0,*(data0->get()),"(dZ<1)*(weight:weight)","weight:weight");
+				//		if (verbose_) std::cout << "[INFO] dataset RV open ? " << dataRV0 << std::endl;
+				//		RooDataSet *dataWV0 = new RooDataSet("dataWV","dataWV",&*data0,*(data0->get()),"(dZ>=1)","weight");
+				//		if (verbose_) std::cout << "[INFO] dataset WV open ? " << dataWV0 << std::endl;
+
+				//   RooRealVar *w0 = new RooRealVar("weight:weight","weight:weight",0,30); //FIXME
+				//		RooFormulaVar wFunc("w","event weight","@0",RooArgList(*w0));
+				//		RooRealVar* w = (RooRealVar*) data0->addColumn(wFunc); 
+				//		RooRealVar* wrv = (RooRealVar*) dataRV0->addColumn(wFunc); 
+				//		RooRealVar* wwv = (RooRealVar*) dataWV0->addColumn(wFunc);
+				data = (RooDataSet*) data0->Clone();
+				dataRV = (RooDataSet*) data->reduce(Cut("dZ<1."));
+				dataWV = (RooDataSet*) data->reduce(Cut("dZ>=1."));
+
+				if (verbose_) std::cout << "[INFO] datasets? " << *data << std::endl;
+				if (verbose_) std::cout << "[INFO] datasets? " << *dataRV << std::endl;
+				if (verbose_) std::cout << "[INFO] datasets? " << *dataWV << std::endl;
 
 				//FIXME above I artificially add in a weight to the 
 
@@ -458,7 +459,7 @@ int main(int argc, char *argv[]){
 			datasetsRV.insert(pair<int,RooDataSet*>(mh,dataRV));
 			datasetsWV.insert(pair<int,RooDataSet*>(mh,dataWV));
 			datasets.insert(pair<int,RooDataSet*>(mh,data));
-			std::cout << *data << std::endl;
+			if (verbose_) std::cout << "[INFO] Dataset: "<< *data << std::endl;
 		}
 
 		// these guys do the fitting
@@ -530,9 +531,9 @@ int main(int argc, char *argv[]){
 
 			if (isFlashgg_){
 				intLumi = new RooRealVar("IntLumi","IntLumi",0,3000000); //FIXME
-				intLumi->setVal(19700);
-				std::cout << "[WARNING] Artificially setting intLumi to " << intLumi->getVal() << ". FIXME before using on data"<< std::endl;
-				outWS->import(*intLumi);
+				//	intLumi->setVal(1000);
+				//	std::cout << "[INFO] Artificially setting intLumi to " << intLumi->getVal() << ". FIXME before using on data"<< std::endl;
+				//	outWS->import(*intLumi);
 				FinalModelConstruction finalModel(mass,MH,intLumi,mhLow_,mhHigh_,proc,cat,doSecondaryModels_,systfilename_,skipMasses_,verbose_,procs_, flashggCats_,isCutBased_,sqrts_,doQuadraticSigmaSum_);
 				if (isCutBased_){
 					finalModel.setHighR9cats(highR9cats_);
@@ -591,29 +592,29 @@ int main(int argc, char *argv[]){
 	datfile.close();
 
 	sw.Stop();
-	cout << "Whole fitting process took..." << endl;
+	cout << "[INFO] Whole fitting process took..." << endl;
 	cout << "\t";
 	sw.Print();
 
 	if (!runInitialFitsOnly_) { 
 		sw.Start();
-		cout << "Starting to combine fits..." << endl;
+		cout << "[INFO] Starting to combine fits..." << endl;
 		// this guy packages everything up
 		Packager packager(outWS,procs_,nCats_,mhLow_,mhHigh_,skipMasses_,sqrts_,skipPlots_,plotDir_,mergeWS,cats_,flashggCats_);
 		packager.packageOutput();
 		sw.Stop();
-		cout << "Combination complete." << endl;
-		cout << "Whole process took..." << endl;
+		cout << "[INFO] Combination complete." << endl;
+		cout << "[INFO ]Whole process took..." << endl;
 		cout << "\t";
 		sw.Print();
 	}
 
-	cout << "Writing to file..." << endl;
+	cout << "[INFO] Writing to file..." << endl;
 	outFile->cd();
 	outWS->Write();
 	outFile->Close();
 	inFile->Close();
-	cout << "Done." << endl;
+	cout << "[INFO] Done." << endl;
 
 	return 0;
 }

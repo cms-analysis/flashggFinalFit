@@ -5,22 +5,22 @@
 We have several types of files, which can be differentiated by their suffix:
 
 * `_Bkg.root`        
-—> Output of running over Background MC. Used as input to `./Background/bin/BiasStudy`.
+-> Output of running over Background MC. Used as input to `./Background/bin/BiasStudy`.
 
 * `_Data.root` or `_data.root`            
-—> Output of running over Data. Used as input to `./Background/bin/fTest` to produce `_multipdf.root` files.
+-> Output of running over Data. Used as input to `./Background/bin/fTest` to produce `_multipdf.root` files.
 
 * `_Sig.root`
-—> Output of running over signal MC without systematic variations. This is used as input to the scripts `./Signal/bin/SignalFit` to create `_sigfit.root` files and `./Signal/bin/signalFTest` to create plots (which help to determine `dat/newConfig.dat`). Also used in Used as input to `./Background/bin/BiasStudy`.
+-> Output of running over signal MC without systematic variations. This is used as input to the scripts `./Signal/bin/SignalFit` to create `_sigfit.root` files and `./Signal/bin/signalFTest` to create plots (which help to determine `dat/newConfig.dat`). Also used in Used as input to `./Background/bin/BiasStudy`.
 
 * `_Syst.root`
-—> Input for `./Signal/bin/calcPhotonSystConsts` to create `Signal/dat/photonCatSyst.dat`
+-> Input for `./Signal/bin/calcPhotonSystConsts` to create `Signal/dat/photonCatSyst.dat`
 
 * `_multipdf.root`
-—> Not used for signal model workflow (for Background model).
+-> Not used for signal model workflow (for Background model).
 
 * `_sigfit.root`
-—> Output of `./Signal/binSignalFit`, used as input for `Plots/makeParametricSignalModelPlots.C` to make Signal Plots.
+-> Output of `./Signal/binSignalFit`, used as input for `Plots/makeParametricSignalModelPlots.C` to make Signal Plots.
 
 For now, for FLASHgg `_Sig.root` and `_Syst.root` are in the same file.
 
@@ -47,7 +47,7 @@ The workflow looks like this:
 	                           		_sigfit.root
 	                                   		|
 	                                  		|
-	               		../Plots/makeParametricSignalModelPlots.C                                                    
+	               		../Plots/makeParametricSignalModelPlots.C                                          
 		                                  	|
 		                                  	|
                     	            		Plots
@@ -59,7 +59,8 @@ http://www.hep.ph.imperial.ac.uk/~lc1113/FinalFit_010615/Signal/fTest/
 
 Working FLASHgg example:
 ```
-./bin/signalFTest -i /afs/cern.ch/user/s/sethzenz/work/public/ValidationTagsDump_5k_new.root -d dat/newConfig_LCTest2.dat -p ggH,VBF
+file=/afs/cern.ch/work/s/sethzenz/public/test_jobs_3/output_GluGluHToGG_M-125_13TeV_powheg_pythia8.root
+./bin/signalFTest -i $file -d dat/newConfig_LCTest2.dat -p ggh
 ```
 
 Working h2gglobe example:
@@ -84,7 +85,7 @@ The code will be updated to allow other types in due course. For h22globe, this 
 
 FLASHgg working example:
 ```
-./bin/calcPhotonSystConsts -i /afs/cern.ch/user/s/sethzenz/work/public/ValidationTagsDump_5k_new.root -o dat/photonCatSyst_LCTest.dat -p ggH,VBF -s BadEE,GoldEE,BadEB,GoldEB
+./bin/calcPhotonSystConsts -i $file -o dat/photonCatSyst_LCTest.dat -p ggh,tth -s HighR9EE,LowR9EE,HighR9EB,LowR9EB -r HighR9EE,LowR9EE,HighR9EBRho,LowR9EBRho,HighR9EBPhi,LowR9EBPhi
 ```
 h2gglobe working example:
 ```
@@ -104,7 +105,7 @@ http://www.hep.ph.imperial.ac.uk/~lc1113/FinalFit_010615/Signal/FinalModel/
 
 FLASHgg working example:
 ```
-./bin/SignalFit -i /afs/cern.ch/user/s/sethzenz/work/public/ValidationTagsDump_5k_new.root -d dat/newConfig_LCTest.dat  --mhLow=120 --mhHigh=130 -s dat/photonCatSyst_LCTest.dat --procs VBF,ggH
+./bin/SignalFit -i $file -d dat/newConfig_LCTest2.dat  --mhLow=120 --mhHigh=130 -s dat/photonCatSyst_LCTest.dat --procs ggh,tth
 ```
 
 h2gglobe working example:

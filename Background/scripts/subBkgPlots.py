@@ -6,8 +6,11 @@ parser.add_option("-b","--bkgfilename",help="Data and background workspace file"
 parser.add_option("-s","--sigfilename",help="Signal file (can be binned or parametric) or left blank")
 parser.add_option("-d","--outDir",default="BkgPlots",help="Out directory for plots default: %default")
 parser.add_option("-c","--cats",type="int",help="Number of categories to run")
+parser.add_option("-f","--flashggCats",help="flashggCats : UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,UntaggedTag_4,VBFTag_0,VBFTag_1,VBFTag_2,TTHHadronicTag,TTHLeptonicTag,VHHadronicTag,VHTightTag,VHLooseTag,VHEtTag")
 parser.add_option("-l","--catLabels",default="mk_default",help="Category labels (comma separated) default will use Category %cat")
 parser.add_option("-S","--sqrts",type='int',default=8,help="Sqrt(S) COM energy for finding strings etc")
+parser.add_option("-H","--high",type='int',default=100,help="Sqrt(S) COM energy for finding strings etc")
+parser.add_option("-L","--low",type='int',default=180,help="Sqrt(S) COM energy for finding strings etc")
 parser.add_option("--isMultiPdf",default=False,action="store_true",help="Use for multipdf workspaces")
 parser.add_option("--doBands",default=False,action="store_true",help="Use to draw bands")
 parser.add_option("--useBinnedData",default=False,action="store_true",help="Use binned data")
@@ -25,24 +28,32 @@ import os
 
 os.system('mkdir -p %s'%options.outDir)
 
+vcats = options.flashggCats.split(',') 
+ncats = len(vcats)
+print 'Considering ',ncats,' catgeories :', vcats
+
 if options.catLabels=='mk_default':
 	options.catLabels=[]
-	for cat in range(options.cats):
+	#for cat in range(options.cats):
+	for cat in range(ncats):
 		options.catLabels.append('Category %d'%cat)
 else:
 	options.catLabels = options.catLabels.split(',')
 
-for cat in range(options.cats):
+#for cat in range(options.cats):
+for cat in range(ncats):
 	
 	f = open('%s/sub%d.sh'%(options.outDir,cat),'w')
 	f.write('#!/bin/bash\n')
 	f.write('cd %s\n'%os.getcwd())
 	f.write('eval `scramv1 runtime -sh`\n')
-	execLine = '$CMSSW_BASE/src/flashggFinalFit/Background/bin/makeBkgPlots -b %s -s %s -o %s/BkgPlots_cat%d.root -d %s -c %d -l \"%s\"'%(options.bkgfilename,options.sigfilename,options.outDir,cat,options.outDir,cat,options.catLabels[cat])
+	execLine = '$CMSSW_BASE/src/flashggFinalFit/Background/bin/makeBkgPlots -b %s -o %s/BkgPlots_cat%d.root -d %s -c %d -l \"%s\"'%(options.bkgfilename,options.outDir,cat,options.outDir,cat,options.catLabels[cat])
 #	execLine = '$PWD -b %s -s %s -o %s/BkgPlots_cat%d.root -d %s -c %d -l \"%s\"'%(options.bkgfilename,options.sigfilename,options.outDir,cat,options.outDir,cat,options.catLabels[cat])
 	execLine += " --sqrts %d "%options.sqrts
 	if options.doBands:
-		execLine += ' --doBands --massStep %5.3f --nllTolerance %5.3f'%(options.massStep,options.nllTolerance)
+		execLine += ' --doBands --massStep %5.3f --nllTolerance %5.3f -L %d -H %d'%(options.massStep,options.nllTolerance,options.low,options.high)
+	if options.sigfilename:
+		execLine += ' -s %s'%(options.sigfilename)
 	if options.blind:
 		execLine += ' --blind'
 	if options.isMultiPdf:

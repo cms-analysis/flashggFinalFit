@@ -106,6 +106,7 @@ map<string,RooDataSet*> getFlashggData(RooWorkspace *work, int ncats, int m_hyp)
 	map<string,RooDataSet*> result;
 
 	for (int cat=0; cat<ncats; cat++){
+	std::cout << "[DEBUG] getting dataset : " << Form("sig_mass_m%3d_%s",m_hyp,flashggCats_[cat].c_str()) << std::endl; 
 		result.insert(pair<string,RooDataSet*>(Form("%s",flashggCats_[cat].c_str()),(RooDataSet*)work->data(Form("sig_mass_m%3d_%s",m_hyp,flashggCats_[cat].c_str()))));
 	}
 	result.insert(pair<string,RooDataSet*>("all",(RooDataSet*)work->data(Form("sig_mass_m%3d_AllCats",m_hyp))));
@@ -127,6 +128,7 @@ map<string,RooAddPdf*> getFlashggPdfs(RooWorkspace *work, int ncats){
 
 	map<string,RooAddPdf*> result;
 	for (int cat=0; cat<ncats; cat++){
+	std::cout << "[DEBUG] getting dataset : " << (RooAddPdf*)work->pdf(Form("sigpdfrel%s_    allProcs",flashggCats_[cat].c_str()))<< std::endl; 
 		result.insert(pair<string,RooAddPdf*>(Form("%s",flashggCats_[cat].c_str()),(RooAddPdf*)work->pdf(Form("sigpdfrel%s_allProcs",flashggCats_[cat].c_str()))));
 	}
 	result.insert(pair<string,RooAddPdf*>("all",(RooAddPdf*)work->pdf("sigpdfrelAllCats_allProcs")));
@@ -418,6 +420,7 @@ int main(int argc, char *argv[]){
 	if (isFlashgg_){
 		ncats_ =flashggCats_.size();
 		// Ensure that the loop over the categories does not go out of scope. 
+	 std::cout << "[INFO] consider "<< ncats_ <<" tags/categories" << std::endl;
 	}
 
 
@@ -452,7 +455,7 @@ int main(int argc, char *argv[]){
 		pdfs = getGlobePdfs(hggWS,ncats_); 
 	}
 
-	printInfo(dataSets,pdfs);
+//	printInfo(dataSets,pdfs);
 
 	map<string,double> sigEffs;
 	map<string,double> fwhms;
