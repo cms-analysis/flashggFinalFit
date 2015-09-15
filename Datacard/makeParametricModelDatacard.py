@@ -33,12 +33,14 @@ if options.quadInterpolate:
 	r.gROOT.ProcessLine(".L quadInterpolate.C+g")
 	from ROOT import quadInterpolate
 r.gROOT.ProcessLine(".L $CMSSW_BASE/lib/$SCRAM_ARCH/libHiggsAnalysisCombinedLimit.so")
-r.gROOT.ProcessLine(".L ../libLoopAll.so")
+#r.gROOT.ProcessLine(".L ../libLoopAll.so")
 
 # convert globe style to combine style process
 combProc = {'ggh':'ggH','vbf':'qqH','wzh':'VH','wh':'WH','zh':'ZH','tth':'ttH','bkg_mass':'bkg_mass','gg_grav':'ggH_ALT','qq_grav':'qqbarH_ALT'}
 globeProc = {'ggH':'ggh','qqH':'vbf','VH':'wzh','WH':'wh','ZH':'zh','ttH':'tth','bkg_mass':'bkg_mass','ggH_ALT':'gg_grav','qqbarH_ALT':'qq_grav'}
 procId = {'ggH':0,'qqH':-1,'VH':-2,'WH':-2,'ZH':-3,'ttH':-4,'ggH_ALT':-5,'qqbarH_ALT':-6,'bkg_mass':1}
+	
+splitVH=False
 
 # setup
 if options.is2011: sqrts=7
@@ -111,8 +113,8 @@ else: options.globalScales = options.globalScales.split(',')
 if options.globalScalesCorr=='': options.globalScalesCorr = []
 else: options.globalScalesCorr = options.globalScalesCorr.split(',')
 
-inWS = inFile.Get('cms_hgg_workspace')
-intL = inWS.var('IntLumi').getVal()
+inWS = inFile.Get('diphotonDumper/cms_hgg_13TeV')
+intL = inWS.var('IntLumi').getVal() #FIXME
 
 # info = [file,workspace,name]
 file_ext = 'mva'

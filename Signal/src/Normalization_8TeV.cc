@@ -5,15 +5,22 @@
 Normalization_8TeV::Normalization_8TeV(){
 }
 
-void Normalization_8TeV::Init(int sqrtS){
+int Normalization_8TeV::Init(int sqrtS){
 
     //TPython::Exec("import $(CMSSW_BASE).src.h2gglobe.AnalysisScripts.AnalysisScripts.python.buildSMHiggsSignalXSBR");
     TPython::Exec("import os,imp");
-    const char * env = gSystem->Getenv("H2GGLOBE_RUNTIME");
+    const char * env = gSystem->Getenv("CMSSW_BASE");
     //std::string globeRt = ( env != 0 ? env : H2GGLOBE_BASE "/AnalysisScripts");
-    std::string globeRt = ( env != 0 ? env : "/afs/cern.ch/user/l/lcorpe/work/Globe_Jan15/CMSSW_7_1_0/src/h2gglobe/AnalysisScripts");
+   // std::string globeRt = ( env != 0 ? env : env + "src/flashggFinalFits/Signal")
+	 std::string globeRt = env;
+	 if (globeRt !=0){
+	 globeRt = globeRt+"/src/flashggFinalFit/Signal";
+	 }
+	// std::cout <<" globeRt " << globeRt<< std::endl;
+	 //std::cout << " Form " << Form("buildSMHiggsSignalXSBR = imp.load_source('*', '%s/python/buildSMHiggsSignalXSBR.py')",globeRt.c_str()) << std::endl;
     if( ! TPython::Exec(Form("buildSMHiggsSignalXSBR = imp.load_source('*', '%s/python/buildSMHiggsSignalXSBR.py')",globeRt.c_str())) ) {
-	    return;
+	     std::cout<<  "[ERROR] Importing buildSMHiggsSignalXSBR from python failed. exit." << std::endl;
+			return 0;
     }
     TPython::Eval(Form("buildSMHiggsSignalXSBR.Init%dTeV()", sqrtS));
     
@@ -37,7 +44,7 @@ void Normalization_8TeV::Init(int sqrtS){
     //Graviton X-Sections - assume the same as SM
     for (std::map<double, double>::const_iterator iter = XSectionMap_ggh.begin(); iter != XSectionMap_ggh.end(); ++iter)
       XSectionMap_sm[iter->first]=iter->second+XSectionMap_vbf[iter->first]+XSectionMap_wzh[iter->first]+XSectionMap_tth[iter->first];
-   
+ return 1;
 }
 
 
@@ -132,14 +139,14 @@ void Normalization_8TeV::FillSignalTypes(){
 
 TGraph * Normalization_8TeV::GetSigmaGraph(TString process)
 {
-  TGraph * gr = new TGraph();
+	TGraph * gr = new TGraph();
 	std::map<double, double> * XSectionMap = 0 ;
-	if ( process == "ggh") {
+	if ( process == "ggh" || process == "ggH") {
 		XSectionMap = &XSectionMap_ggh;
-	} else if ( process == "vbf") {
+	} else if ( process == "vbf" || process == "VBF" ) { // FIXME
 		XSectionMap = &XSectionMap_vbf;
-    } else if ( process == "vbfold") {
-      XSectionMap = &XSectionMap_vbfold;
+	} else if ( process == "vbfold") {
+		XSectionMap = &XSectionMap_vbfold;
 	} else if ( process == "wzh") {
 		XSectionMap = &XSectionMap_wzh;
 	} else if ( process == "tth") {
@@ -149,16 +156,16 @@ TGraph * Normalization_8TeV::GetSigmaGraph(TString process)
 	} else if ( process == "zh") {
 		XSectionMap = &XSectionMap_zh;
 	} else if (process.Contains("grav")){
-    XSectionMap = &XSectionMap_sm;
-  } else {
-    std::cout << "Warning ggh, vbf, wh, zh, wzh, tth or grav not found in histname!!!!" << std::endl;
-    //exit(1);
-  }
-  
-  for (std::map<double, double>::const_iterator iter = XSectionMap->begin();  iter != XSectionMap->end(); ++iter) {
-    gr->SetPoint(gr->GetN(),iter->first, iter->second );
-  }
-	
+		XSectionMap = &XSectionMap_sm;
+	} else {
+		std::cout << "[WARNING] Warning ggh, vbf, wh, zh, wzh, tth or grav not found in histname!!!!" << std::endl;
+		//exit(1);
+	}
+
+	for (std::map<double, double>::const_iterator iter = XSectionMap->begin();  iter != XSectionMap->end(); ++iter) {
+		gr->SetPoint(gr->GetN(),iter->first, iter->second );
+	}
+
 	return gr;
 }
 
@@ -173,110 +180,110 @@ TGraph * Normalization_8TeV::GetBrGraph()
 
 double Normalization_8TeV::GetBR(double mass) {
 
-  for (std::map<double, double>::const_iterator iter = BranchingRatioMap.begin();  iter != BranchingRatioMap.end(); ++iter) {
-    if (mass==iter->first) return iter->second;
-    if (mass>iter->first) {
-      double lowmass = iter->first;
-      double lowbr = iter->second;
-      ++iter;
-      if (mass<iter->first) {
-        double highmass = iter->first;
-        double highbr = iter->second;
-        double br = (highbr-lowbr)/(highmass-lowmass)*(mass-lowmass)+lowbr;
-        return br;
-      }
-      --iter;
-    }
-  }
-  
-  std::cout << "Warning branching ratio outside range of 90-250GeV!!!!" << std::endl;
-  //std::exit(1);
-  return -1;
-  
+	for (std::map<double, double>::const_iterator iter = BranchingRatioMap.begin();  iter != BranchingRatioMap.end(); ++iter) {
+		if (mass==iter->first) return iter->second;
+		if (mass>iter->first) {
+			double lowmass = iter->first;
+			double lowbr = iter->second;
+			++iter;
+			if (mass<iter->first) {
+				double highmass = iter->first;
+				double highbr = iter->second;
+				double br = (highbr-lowbr)/(highmass-lowmass)*(mass-lowmass)+lowbr;
+				return br;
+			}
+			--iter;
+		}
+	}
+
+	std::cout << "[WARNING] Warning branching ratio outside range of 90-250GeV!!!!" << std::endl;
+	//std::exit(1);
+	return -1;
+
 }
 
 
 double Normalization_8TeV::GetXsection(double mass, TString HistName) {
 
-  std::map<double,double> *XSectionMap;
+	std::map<double,double> *XSectionMap;
 
-  if (HistName.Contains("ggh")) {
-    XSectionMap = &XSectionMap_ggh;
-  } else if (HistName.Contains("vbf") && !HistName.Contains("vbfold")) {
-    XSectionMap = &XSectionMap_vbf;
-  } else if (HistName.Contains("vbfold")) {
-    XSectionMap = &XSectionMap_vbfold;
-  } else if (HistName.Contains("wh") && !HistName.Contains("wzh")) {
-    XSectionMap = &XSectionMap_wh;
-  } else if (HistName.Contains("zh") && !HistName.Contains("wzh")) {
-    XSectionMap = &XSectionMap_zh;
-  } else if (HistName.Contains("wzh")) {
-    XSectionMap = &XSectionMap_wzh;
-  } else if (HistName.Contains("tth")) {
-    XSectionMap = &XSectionMap_tth;
-  } else if (HistName.Contains("grav")) {
-    XSectionMap = &XSectionMap_sm;
-  } else {
-    std::cout << "Warning ggh, vbf, wh, zh, wzh, tth or grav not found in " << HistName << std::endl;
-    //exit(1);
-  }
+	if (HistName.Contains("ggh")) {
+		XSectionMap = &XSectionMap_ggh;
+	} else if (HistName.Contains("vbf") && !HistName.Contains("vbfold")) {
+		XSectionMap = &XSectionMap_vbf;
+	} else if (HistName.Contains("vbfold")) {
+		XSectionMap = &XSectionMap_vbfold;
+	} else if (HistName.Contains("wh") && !HistName.Contains("wzh")) {
+		XSectionMap = &XSectionMap_wh;
+	} else if (HistName.Contains("zh") && !HistName.Contains("wzh")) {
+		XSectionMap = &XSectionMap_zh;
+	} else if (HistName.Contains("wzh")) {
+		XSectionMap = &XSectionMap_wzh;
+	} else if (HistName.Contains("tth")) {
+		XSectionMap = &XSectionMap_tth;
+	} else if (HistName.Contains("grav")) {
+		XSectionMap = &XSectionMap_sm;
+	} else {
+		std::cout << "[WARNING] Warning ggh, vbf, wh, zh, wzh, tth or grav not found in " << HistName << std::endl;
+		//exit(1);
+	}
 
-  for (std::map<double, double>::const_iterator iter = XSectionMap->begin();  iter != XSectionMap->end(); ++iter) {
-    if (mass==iter->first) return iter->second;
-    if (mass>iter->first) {
-      double lowmass = iter->first;
-      double lowxsec = iter->second;
-      ++iter;
-      if (mass<iter->first) {
-        double highmass = iter->first;
-        double highxsec = iter->second;
-        double xsec = (highxsec-lowxsec)/(highmass-lowmass)*(mass-lowmass)+lowxsec;
-        return xsec;
-      }
-      --iter;
-    }
-  }
+	for (std::map<double, double>::const_iterator iter = XSectionMap->begin();  iter != XSectionMap->end(); ++iter) {
+		if (mass==iter->first) return iter->second;
+		if (mass>iter->first) {
+			double lowmass = iter->first;
+			double lowxsec = iter->second;
+			++iter;
+			if (mass<iter->first) {
+				double highmass = iter->first;
+				double highxsec = iter->second;
+				double xsec = (highxsec-lowxsec)/(highmass-lowmass)*(mass-lowmass)+lowxsec;
+				return xsec;
+			}
+			--iter;
+		}
+	}
 
-  std::cout << "Warning cross section outside range of 80-300GeV!!!!" << std::endl;
-  //exit(1);
-  return -1;
+	std::cout << "[WARNING] Warning cross section outside range of 80-300GeV!!!!" << std::endl;
+	//exit(1);
+	return -1;
 
 }
 
 double Normalization_8TeV::GetVBFCorrection(double mass) {
-  return GetXsection(mass,"vbf")/GetXsection(mass,"vbfold");
+	return GetXsection(mass,"vbf")/GetXsection(mass,"vbfold");
 }
 
 // Simple accessors
 TString Normalization_8TeV::GetProcess(int ty){
-  if (ty < -7999){  // We dont go below 80 GeV and Spin samples in the 100 range 
-    int process = -ty % 1000;
-    if (process == 0 ) return "ggh";
-    else if (process == 10 ) return "ggh_minlo";
-    else if (process == 100) return "vbf";
-    else if (process == 200) return "wh";
-    else if (process == 300) return "zh";
-    else if (process == 400) return "tth";
-    else if (process == 500) return "wzh";
-    else if (process == 500) return "wzh";
-    else if (process == 600) return "gg_grav";
-    else if (process == 610) return "gg_spin0";
-    else if (process == 650) return "qq_grav";
-    else {
-	std::cout << "Error -- No signal process known " << process << std::endl;
-	assert(0);
-    }
+	if (ty < -7999){  // We dont go below 80 GeV and Spin samples in the 100 range 
+		int process = -ty % 1000;
+		if (process == 0 ) return "ggh";
+		else if (process == 10 ) return "ggh_minlo";
+		else if (process == 100) return "vbf";
+		else if (process == 200) return "wh";
+		else if (process == 300) return "zh";
+		else if (process == 400) return "tth";
+		else if (process == 500) return "wzh";
+		else if (process == 500) return "wzh";
+		else if (process == 600) return "gg_grav";
+		else if (process == 610) return "gg_spin0";
+		else if (process == 650) return "qq_grav";
+		else {
+			std::cout << "[ERROR] Error -- No signal process known " << process << std::endl;
+			assert(0);
+		}
 
-  } else {
-    return SignalTypeMap[ty].first;
-  }
+	} else {
+		return SignalTypeMap[ty].first;
+	}
 }
 
 double Normalization_8TeV::GetMass(int ty){
-  if (ty < -7999){  // We dont go below 80 GeV and Spin samples in the 100 range
-    return double(-ty/1000);
-  }	 
-  else return SignalTypeMap[ty].second;
+	if (ty < -7999){  // We dont go below 80 GeV and Spin samples in the 100 range
+		return double(-ty/1000);
+	}	 
+	else return SignalTypeMap[ty].second;
 }
 //// double Normalization_8TeV::GetXsection(int ty){
 ////   std::pair<TString,double> proc_mass = SignalTypeMap[ty];
@@ -294,68 +301,68 @@ double Normalization_8TeV::GetMass(int ty){
 //// }
 
 double Normalization_8TeV::GetXsection(double mass) {
-  return GetXsection(mass,"ggh") + GetXsection(mass,"vbf") + GetXsection(mass,"wzh") + GetXsection(mass,"tth");
+	return GetXsection(mass,"ggh") + GetXsection(mass,"vbf") + GetXsection(mass,"wzh") + GetXsection(mass,"tth");
 }
 
 double Normalization_8TeV::GetNorm(double mass1, TH1F* hist1, double mass2, TH1F* hist2, double mass) {
 
-  double br = GetBR(mass);
-  double br1 = GetBR(mass1);
-  double br2 = GetBR(mass2);
-  
-  double xsec = GetXsection(mass, hist1->GetName());
-  double xsec1 = GetXsection(mass1, hist1->GetName());
-  double xsec2 = GetXsection(mass2, hist2->GetName());
-  
-  double alpha = 1.0*(mass-mass1)/(mass2-mass1);
-  double effAcc1 = hist1->Integral()/(xsec1*br1);
-  double effAcc2 = hist2->Integral()/(xsec2*br2);
+	double br = GetBR(mass);
+	double br1 = GetBR(mass1);
+	double br2 = GetBR(mass2);
 
-  double Normalization = (xsec*br)*(effAcc1 + alpha * (effAcc2 - effAcc1));
+	double xsec = GetXsection(mass, hist1->GetName());
+	double xsec1 = GetXsection(mass1, hist1->GetName());
+	double xsec2 = GetXsection(mass2, hist2->GetName());
 
-  /// std::cout << mass1 << " " << hist1->GetName() << " " << mass2 << " " << hist2->GetName() << " " << mass 
-  /// 	    << br << " " << br1 << " " << br2 << " " << xsec << " " << xsec1 << " " << xsec2 << " " << alpha << " " 
-  /// 	    << effAcc1 << " " << effAcc2 << " " << Normalization << std::endl;
-	  
+	double alpha = 1.0*(mass-mass1)/(mass2-mass1);
+	double effAcc1 = hist1->Integral()/(xsec1*br1);
+	double effAcc2 = hist2->Integral()/(xsec2*br2);
 
-  return Normalization;
-  
+	double Normalization = (xsec*br)*(effAcc1 + alpha * (effAcc2 - effAcc1));
+
+	/// std::cout << mass1 << " " << hist1->GetName() << " " << mass2 << " " << hist2->GetName() << " " << mass 
+	/// 	    << br << " " << br1 << " " << br2 << " " << xsec << " " << xsec1 << " " << xsec2 << " " << alpha << " " 
+	/// 	    << effAcc1 << " " << effAcc2 << " " << Normalization << std::endl;
+
+
+	return Normalization;
+
 }
 
 void Normalization_8TeV::CheckNorm(double Min, double Max, double Step, TString histname="") {
 
-  vector <double> Mass;
-  vector <double> BranchingRatio;
-  vector <double> XSection;
-  for (double i=Min; i<Max; i+=Step) {
-    Mass.push_back(i);
-    BranchingRatio.push_back(GetBR(i));
-    if (histname=="") XSection.push_back(GetXsection(i));
-    else XSection.push_back(GetXsection(i,histname));
-  }
+	vector <double> Mass;
+	vector <double> BranchingRatio;
+	vector <double> XSection;
+	for (double i=Min; i<Max; i+=Step) {
+		Mass.push_back(i);
+		BranchingRatio.push_back(GetBR(i));
+		if (histname=="") XSection.push_back(GetXsection(i));
+		else XSection.push_back(GetXsection(i,histname));
+	}
 
-  TGraph* BranchGraph = new TGraph(Mass.size(),&Mass[0],&BranchingRatio[0]);
-  TGraph* XSectionGraph = new TGraph(Mass.size(),&Mass[0],&XSection[0]);
-  BranchGraph->SetTitle("Interpolated Branching Ratios");
-  XSectionGraph->SetTitle("Interpolated Cross Sections");
-  BranchGraph->SetMarkerStyle(20);
-  XSectionGraph->SetMarkerStyle(20);
-  BranchGraph->SetMarkerSize(1);
-  XSectionGraph->SetMarkerSize(1);
+	TGraph* BranchGraph = new TGraph(Mass.size(),&Mass[0],&BranchingRatio[0]);
+	TGraph* XSectionGraph = new TGraph(Mass.size(),&Mass[0],&XSection[0]);
+	BranchGraph->SetTitle("Interpolated Branching Ratios");
+	XSectionGraph->SetTitle("Interpolated Cross Sections");
+	BranchGraph->SetMarkerStyle(20);
+	XSectionGraph->SetMarkerStyle(20);
+	BranchGraph->SetMarkerSize(1);
+	XSectionGraph->SetMarkerSize(1);
 
-  TCanvas* c1 = new TCanvas("c1","c1",800,650);
-  c1->cd();
-  BranchGraph->Draw("AP");
-  c1->SaveAs("BranchingRatios.png");
-  c1->Clear();
-  XSectionGraph->Draw("AP");
-  TString outfile = "XSections.png";
-  if (histname!="") outfile.ReplaceAll(".png",histname.Append(".png"));
-  c1->SaveAs(outfile.Data());
+	TCanvas* c1 = new TCanvas("c1","c1",800,650);
+	c1->cd();
+	BranchGraph->Draw("AP");
+	c1->SaveAs("BranchingRatios.png");
+	c1->Clear();
+	XSectionGraph->Draw("AP");
+	TString outfile = "XSections.png";
+	if (histname!="") outfile.ReplaceAll(".png",histname.Append(".png"));
+	c1->SaveAs(outfile.Data());
 
-  delete BranchGraph;
-  delete XSectionGraph;
-  delete c1;
+	delete BranchGraph;
+	delete XSectionGraph;
+	delete c1;
 
 }
 void Normalization_8TeV::PlotXS(double Min, double Max){
@@ -462,7 +469,7 @@ void Normalization_8TeV::PlotExpected(double Min, double Max){
 		vbf->SetPoint(i,mH,GetBR(mH)*GetXsection(mH,"vbf"));
 		wzh->SetPoint(i,mH,GetBR(mH)*GetXsection(mH,"wzh"));
 		tth->SetPoint(i,mH,GetBR(mH)*GetXsection(mH,"tth"));
-		
+
 		i++;
 	}
 	can->SetLogy();

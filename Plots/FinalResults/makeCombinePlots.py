@@ -61,6 +61,8 @@ parser.add_option("","--mpdfchcomp",dest="mpdfchcomp",default=False,action="stor
 parser.add_option("","--mpdfmaxlh",dest="mpdfmaxlh",default=False,action="store_true",help="Do MultiPdf best fit mu as a function of MH plot")
 parser.add_option("-v","--verbose",dest="verbose",default=False,action="store_true")
 parser.add_option("-b","--batch",dest="batch",default=False,action="store_true")
+parser.add_option("--it",dest="it",type="string",help="if using superloop, index of iteration")
+parser.add_option("--itLedger",dest="itLedger",type="string",help="ledger to keep track of values of each iteration if using superloop")
 (options,args)=parser.parse_args()
 
 # Required for back compatbility and current compatibility it seems
@@ -262,11 +264,19 @@ def pvalPlot(allVals):
   #leg.SetFillColor(0)
   # make graphs from values
   for k, values in enumerate(allVals):
+    minpvalue=99999.
+    minpvalueX=99999.
     graph = r.TGraph()
     for j in range(len(values)):
       graph.SetPoint(j,values[j][0],values[j][1])
+      if (minpvalue > values[j][1]): 
+        minpvalue = values[j][1]
+        minpvalueX =values[j][0]
       if options.verbose or values[j][0]==125: print '\t', j, values[j][0], values[j][1], r.RooStats.PValueToSignificance(values[j][1])
+      print "debug minpval", minpvalue
     
+    with open(options.itLedger, "a") as myfile:
+		    myfile.write("%s %f %f\n" % ( (options.names[k].replace(" ","_"))+" "+options.it, minpvalue,minpvalueX ))
     graph.SetLineColor(int(options.colors[k]))
     graph.SetLineStyle(int(options.styles[k]))
     graph.SetLineWidth(int(options.widths[k]))
@@ -492,7 +502,8 @@ def limitPlot(allVals):
     if not options.expected: mg.Add(graph)
   
   # draw dummy hist and multigraph
-  dummyHist.GetYaxis().SetTitle("\sigma(H#rightarrow #gamma #gamma)_{95%%CL} / \sigma(H#rightarrow #gamma #gamma)_{SM}")
+  #dummyHist.GetYaxis().SetTitle("\sigma(H#rightarrow #gamma #gamma)_{95%%CL} / \sigma(H#rightarrow #gamma #gamma)_{SM}")
+  dummyHist.GetYaxis().SetTitle("\sigma(H\gamma\gamma)_{95pc \quad CL} / \sigma(H\gamma\gamma)_{SM}")
   mg.Draw("A")
   if not options.yaxis:
     dummyHist.SetMinimum(mg.GetYaxis().GetXmin())
@@ -642,9 +653,11 @@ def plot1DNLL(returnErrors=False,xvar="", ext=""):
 
   if options.method=='mh':
     x = 'MH'
+    #x = 'mh'
     xtitle = 'm_{H} (GeV)'
   elif options.method=='mu':
     x = 'r'
+    print 'debug x ', x
     xtitle = '#sigma / #sigma_{SM}'
     if options.xlab: 
       xtitle = options.xlab
@@ -665,6 +678,7 @@ def plot1DNLL(returnErrors=False,xvar="", ext=""):
   clean_graphs=[]
 
   for k, f in enumerate(options.files):
+    print k,f
     ntitle = options.names[k]
     tf = r.TFile(f)
     tree = tf.Get('limit')
@@ -736,6 +750,11 @@ def plot1DNLL(returnErrors=False,xvar="", ext=""):
     eminus2 = m-l2
 
     print "%15s : %4.4f +%4.4g -%4.4g" % ( ntitle+" "+ext, xmin, eplus , eminus )
+    #Write in the ledger
+    with open(options.itLedger, "a") as myfile:
+		    myfile.write("%s %f %f %f\n" % ( options.method+" "+options.it, xmin, eplus , eminus ))
+
+
 
     if returnErrors:
       return [xmin,eplus,eminus,eplus2,eminus2]
@@ -1396,11 +1415,11 @@ def run():
   if options.method=='pval' or options.method=='limit' or options.method=='maxlh':
     runStandard()
   elif options.method=='mh' or options.method=='mu' or options.method=='rv' or options.method=='rf' or options.method=='mpdfchcomp' or options.method=='mpdfmaxlh':
-    path = os.path.expandvars('$CMSSW_BASE/src/h2gglobe_sigmod/Macros/FinalResults/rootPalette.C')
+    path = os.path.expandvars('$CMSSW_BASE/src/flashggFinalFit/Plots/FinalResults/rootPalette.C')
     if not os.path.exists(path):
       sys.exit('ERROR - Can\'t find path: '+path) 
     r.gROOT.ProcessLine(".x "+path)
-    path = os.path.expandvars('$CMSSW_BASE/src/h2gglobe_sigmod/Macros/ResultScripts/GraphToTF1.C')
+    path = os.path.expandvars('$CMSSW_BASE/src/flashggFinalFit/Plots/FinalResults/ResultScripts/GraphToTF1.C')
     if not os.path.exists(path):
       sys.exit('ERROR - Can\'t find path: '+path) 
     r.gROOT.LoadMacro(path)

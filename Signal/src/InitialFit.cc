@@ -36,7 +36,7 @@ vector<int> InitialFit::getAllMH(){
   vector<int> result;
   for (int m=mhLow_; m<=mhHigh_; m+=5){
 		if (skipMass(m)) continue;
-    if (verbosity_>=1) cout << "LinearInterp - Adding mass: " << m << endl;
+    if (verbosity_>=1) cout << "[INFO] LinearInterp - Adding mass: " << m << endl;
     result.push_back(m);
   }
   return result;
@@ -117,7 +117,7 @@ void InitialFit::loadPriorConstraints(string filename, float constraintValue){
     string name = line.substr(0,line.find_first_of(" "));
     double val = boost::lexical_cast<double>(line.substr(line.find_first_of(" ")+1,string::npos));
     int mhS = boost::lexical_cast<int>(name.substr(name.find("_mh")+3,name.find("_g")-name.find("_mh")-3));
-    if (verbosity_>=2) cout << name << " " << mhS << " " << val << endl;
+    if (verbosity_>=2) cout << "[INFO] "<< name << " " << mhS << " " << val << endl;
     assert(fitParams.find(mhS)!=fitParams.end());
     assert(fitParams[mhS].find(name)!=fitParams[mhS].end());
     fitParams[mhS][name]->setVal(val);
@@ -158,7 +158,7 @@ map<int,map<string,RooRealVar*> > InitialFit::getFitParams(){
 }
 
 void InitialFit::printFitParams(){
-	cout << "Printing fit param map: " << endl;
+	cout << "[INFO] Printing fit param map: " << endl;
 	for (map<int,map<string,RooRealVar*> >::iterator it = fitParams.begin(); it != fitParams.end(); it++){
 		for (map<string,RooRealVar*>::iterator it2 = it->second.begin(); it2 != it->second.end(); it2++){
 			cout << it->first << " : " << it2->first << " -- " << it2->second->getVal() << endl; 

@@ -34,7 +34,7 @@ template<class ResultT, class SourceT, class PredicateT> typename ResultT::itera
 	return dst.begin()+orig_size;
 }
 
-FinalModelConstruction::FinalModelConstruction(RooRealVar *massVar, RooRealVar *MHvar, RooRealVar *intL, int mhLow, int mhHigh, string proc, int cat, bool doSecMods, string systematicsFileName, vector<int> skipMasses, int verbosity, bool isCB, bool is2011, bool quadraticSigmaSum):
+FinalModelConstruction::FinalModelConstruction(RooRealVar *massVar, RooRealVar *MHvar, RooRealVar *intL, int mhLow, int mhHigh, string proc, int cat, bool doSecMods, string systematicsFileName, vector<int> skipMasses, int verbosity,std::vector<std::string> procList, std::vector<std::string> flashggCats ,bool isCB, int sqrts, bool quadraticSigmaSum)	:
   mass(massVar),
   MH(MHvar),
   intLumi(intL),
@@ -44,27 +44,34 @@ FinalModelConstruction::FinalModelConstruction(RooRealVar *massVar, RooRealVar *
   cat_(cat),
   doSecondaryModels(doSecMods),
   isCutBased_(isCB),
-	is2011_(is2011),
+	//is2011_(is2011),
+	sqrts_(sqrts),
 	quadraticSigmaSum_(quadraticSigmaSum),
 	skipMasses_(skipMasses),
+  flashggCats_(flashggCats),
   verbosity_(verbosity),
   systematicsSet_(false),
-  rvFractionSet_(false)
+  rvFractionSet_(false),
+	procs_(procList)
 {
   allMH_ = getAllMH();
-	if (is2011_) sqrts_ = 7;
-	else sqrts_ = 8;
+	if (sqrts_ ==7) is2011_=1;
+	if (sqrts_ ==8) is2012_=1;
+	if (sqrts_ ==13) isFlashgg_=1;
   // load xs and br info from Normalization_8TeV
   norm = new Normalization_8TeV();
-  norm->Init(sqrts_);
+  if(!norm->Init(sqrts_)){
+	std::cout << "[ERROR] Normalization Initiation failed, exit." << std::endl;
+	exit(1);
+	}
   TGraph *brGraph = norm->GetBrGraph();
 	brSpline = graphToSpline(Form("fbr_%dTeV",sqrts_),brGraph);
-  
-  string procs[8] = {"ggh","vbf","wzh","wh","zh","tth","gg_grav","qq_grav"};
-  for (int i=0; i<8; i++){
-    TGraph *xsGraph = norm->GetSigmaGraph(procs[i].c_str());
-    RooSpline1D *xsSpline = graphToSpline(Form("fxs_%s_%dTeV",procs[i].c_str(),sqrts_),xsGraph);
-    xsSplines.insert(pair<string,RooSpline1D*>(procs[i],xsSpline));
+
+ // string procs[8] = {"ggh","vbf","wzh","wh","zh","tth","gg_grav","qq_grav"} ;//Don't want this hard-coded.
+  for (unsigned int i=0; i<procs_.size(); i++){
+    TGraph *xsGraph = norm->GetSigmaGraph(procs_[i].c_str());
+    RooSpline1D *xsSpline = graphToSpline(Form("fxs_%s_%dTeV",procs_[i].c_str(),sqrts_),xsGraph);
+    xsSplines.insert(pair<string,RooSpline1D*>(procs_[i],xsSpline));
   }
 
   vector<string> files;
@@ -92,7 +99,7 @@ void FinalModelConstruction::addToSystematicsList(vector<string>::iterator begin
 			*it = name;
 		}
 		if (find(systematicsList.begin(),systematicsList.end(),name)!=systematicsList.end()) {
-			cout << "ERROR - duplicate systematic names! " << *it << " already found in systematics list." << endl;
+			cout << "[ERROR] - duplicate systematic names! " << *it << " already found in systematics list." << endl;
 			exit(1);
 		}
 		else {
@@ -191,20 +198,20 @@ bool FinalModelConstruction::isLowR9cat(){
 
 void FinalModelConstruction::printSignalSystematics(){
 
-	cout << "Signal systematics info..." << endl;
+	cout << "[INFO] Signal systematics info..." << endl;
 	// names in systematicsList
-	cout << "The following systematic names are stored" << endl;
+	cout << "[INFO] The following systematic names are stored" << endl;
 	for (vector<string>::iterator sys=systematicsList.begin(); sys!=systematicsList.end(); sys++){
 		if (isGlobalSyst(*sys)) cout << "\t " << Form("%-50s -- global",sys->c_str()) << endl;
 		if (isPerCatSyst(*sys)) cout << "\t " << Form("%-50s -- photon cat",sys->c_str()) << endl;
 	}
 	// nuisance parameters
-	cout << "Implementing the following floating nuisance parameters" << endl;
+	cout << "[INFO] Implementing the following floating nuisance parameters" << endl;
 	for (map<string,RooAbsReal*>::iterator sys=photonSystematics.begin(); sys!=photonSystematics.end(); sys++){
 		cout << "\t " << Form("%-50s",sys->first.c_str()) << " -- "; sys->second->Print();
 	}
 	// const parameters
-	cout << "Implementing the following constant parameters" << endl;
+	cout << "[INFO] Implementing the following constant parameters" << endl;
 	for (map<string,RooConstVar*>::iterator sys=photonSystematicConsts.begin(); sys!=photonSystematicConsts.end(); sys++){
 		cout << "\t " << Form("%-50s",sys->first.c_str()) << " -- "; sys->second->Print();
 	}
@@ -217,7 +224,7 @@ void FinalModelConstruction::loadSignalSystematics(string filename){
 	ifstream datfile;
 	datfile.open(filename.c_str());
 	if (datfile.fail()) {
-		cout << "Failed to load " << filename.c_str();
+		cout << "[ERROR] Failed to load " << filename.c_str();
 		exit(1);
 	}
 	while (datfile.good()){
@@ -235,7 +242,7 @@ void FinalModelConstruction::loadSignalSystematics(string filename){
 			vector<string>::iterator beg = split_append(photonCatScales,line,boost::is_any_of(","));
 			addToSystematicsList(beg,photonCatScales.end());
 			if (verbosity_){
-				cout << "PhotonCatScales: ";
+				cout << "[INFO] PhotonCatScales: ";
 				if (verbosity_) printVec(photonCatScales);
 			}
 		}
@@ -245,7 +252,7 @@ void FinalModelConstruction::loadSignalSystematics(string filename){
 			vector<string>::iterator beg = split_append(photonCatScalesCorr,line,boost::is_any_of(","));
 			addToSystematicsList(beg,photonCatScalesCorr.end());
 			if (verbosity_){
-				cout << "PhotonCatScalesCorr: ";
+				cout << "[INFO] PhotonCatScalesCorr: ";
 				if (verbosity_) printVec(photonCatScalesCorr);
 			}
 		}
@@ -255,7 +262,7 @@ void FinalModelConstruction::loadSignalSystematics(string filename){
 			vector<string>::iterator beg = split_append(photonCatSmears,line,boost::is_any_of(","));
 			addToSystematicsList(beg,photonCatSmears.end());
 			if (verbosity_){
-				cout << "PhotonCatSmears: ";
+				cout << "[INFO] PhotonCatSmears: ";
 				if (verbosity_) printVec(photonCatSmears);
 			}
 		}
@@ -265,7 +272,7 @@ void FinalModelConstruction::loadSignalSystematics(string filename){
 			vector<string>::iterator beg = split_append(photonCatSmearsCorr,line,boost::is_any_of(","));
 			addToSystematicsList(beg,photonCatSmearsCorr.end());
 			if (verbosity_){
-				cout << "PhotonCatSmearsCorr: ";
+				cout << "[INFO] PhotonCatSmearsCorr: ";
 				if (verbosity_) printVec(photonCatSmearsCorr);
 			}
 		}
@@ -275,7 +282,7 @@ void FinalModelConstruction::loadSignalSystematics(string filename){
 			// split first by comma and then by colon for specific options
 			vector<string> temp;
 			split(temp,line,boost::is_any_of(","));
-			if (verbosity_) cout << "GlobalScales: ";
+			if (verbosity_) cout << " [INFO] GlobalScales: ";
 			for (vector<string>::iterator strIt=temp.begin(); strIt!=temp.end(); strIt++){
 				vector<string> opts;
 				vector<pair<int,float> > optDetails;
@@ -298,7 +305,7 @@ void FinalModelConstruction::loadSignalSystematics(string filename){
 			// split first by comma and then by colon for specific options
 			vector<string> temp;
 			split(temp,line,boost::is_any_of(","));
-			if (verbosity_) cout << "GlobalScalesCorr: ";
+			if (verbosity_) cout << "[INFO] GlobalScalesCorr: ";
 			for (vector<string>::iterator strIt=temp.begin(); strIt!=temp.end(); strIt++){
 				vector<string> opts;
 				vector<pair<int,float> > optDetails;
@@ -322,7 +329,7 @@ void FinalModelConstruction::loadSignalSystematics(string filename){
 		// And the process
 		else if (starts_with(line,"proc")){
 			proc = line.substr(line.find('=')+1,string::npos);
-			if (verbosity_) cout << "Process:  " << proc << "  DiphoCat: " << diphotonCat << endl;
+			if (verbosity_) cout << "[INFO] Process:  " << proc << "  DiphoCat: " << diphotonCat << endl;
 		}
 		// Then read values
 		else {
@@ -331,7 +338,7 @@ void FinalModelConstruction::loadSignalSystematics(string filename){
 			split(els,line,boost::is_any_of(" "));
 			if (verbosity_) {cout << "\t"; printVec(els);}
 			if (els.size()!=4) {
-				cout << "I cant read this datfile " << line << endl;
+				cout << "[ERROR] I cant read this datfile " << line << endl;
 				exit(1);
 			}
 			string phoSystName = els[0];
@@ -343,20 +350,31 @@ void FinalModelConstruction::loadSignalSystematics(string filename){
 				meanCh = 0.;
 			}
 			if( meanCh != 0. ) { 
+	string catname;
+	if (sqrts_==8 || sqrts_==7) catname=Form("cat%d",diphotonCat);
+	if (sqrts_ ==13) catname = Form("%s",flashggCats_[diphotonCat].c_str());
+			
 				addToSystMap(meanSysts,proc,diphotonCat,phoSystName,meanCh);
-				RooConstVar *meanChVar = new RooConstVar(Form("const_%s_cat%d_%dTeV_mean_%s",proc.c_str(),diphotonCat,sqrts_,phoSystName.c_str()),Form("const_%s_cat%d_%dTeV_mean_%s",proc.c_str(),diphotonCat,sqrts_,phoSystName.c_str()),meanCh);
+		
+				RooConstVar *meanChVar = new RooConstVar(Form("const_%s_%s_%dTeV_mean_%s",proc.c_str(),catname.c_str(),sqrts_,phoSystName.c_str()),Form("const_%s_%s_%dTeV_mean_%s",proc.c_str(),catname.c_str(),sqrts_,phoSystName.c_str()),meanCh);
 				photonSystematicConsts.insert(make_pair(meanChVar->GetName(),meanChVar));
 			}
 			double sigmaCh = lexical_cast<double>(els[2]);
 			if( sigmaCh != 0. ) {
+	string catname;
+	if (sqrts_==8 || sqrts_==7) catname=Form("cat%d",diphotonCat);
+	if (sqrts_ ==13) catname = Form("%s",flashggCats_[diphotonCat].c_str());
 				addToSystMap(sigmaSysts,proc,diphotonCat,phoSystName,sigmaCh);
-				RooConstVar *sigmaChVar = new RooConstVar(Form("const_%s_cat%d_%dTeV_sigma_%s",proc.c_str(),diphotonCat,sqrts_,phoSystName.c_str()),Form("const_%s_cat%d_%dTeV_sigma_%s",proc.c_str(),diphotonCat,sqrts_,phoSystName.c_str()),sigmaCh);
+				RooConstVar *sigmaChVar = new RooConstVar(Form("const_%s_%s_%dTeV_sigma_%s",proc.c_str(),catname.c_str(),sqrts_,phoSystName.c_str()),Form("const_%s_%s_%dTeV_sigma_%s",proc.c_str(),catname.c_str(),sqrts_,phoSystName.c_str()),sigmaCh);
 				photonSystematicConsts.insert(make_pair(sigmaChVar->GetName(),sigmaChVar));
 			}
 			double rateCh = lexical_cast<double>(els[3]);
 			if( rateCh != 0. ) {
+	string catname;
+	if (sqrts_==8 || sqrts_==7) catname=Form("cat%d",diphotonCat);
+	if (sqrts_ ==13) catname = Form("%s",flashggCats_[diphotonCat].c_str());
 				addToSystMap(rateSysts,proc,diphotonCat,phoSystName,rateCh);
-				RooConstVar *rateChVar = new RooConstVar(Form("const_%s_cat%d_%dTeV_rate_%s",proc.c_str(),diphotonCat,sqrts_,phoSystName.c_str()),Form("const_%s_cat%d_%dTeV_rate_%s",proc.c_str(),diphotonCat,sqrts_,phoSystName.c_str()),rateCh);
+				RooConstVar *rateChVar = new RooConstVar(Form("const_%s_%s_%dTeV_rate_%s",proc.c_str(),catname.c_str(),sqrts_,phoSystName.c_str()),Form("const_%s_%s_%dTeV_rate_%s",proc.c_str(),catname.c_str(),sqrts_,phoSystName.c_str()),rateCh);
 				photonSystematicConsts.insert(make_pair(rateChVar->GetName(),rateChVar));
 			}
 		}
@@ -478,7 +496,7 @@ vector<int> FinalModelConstruction::getAllMH(){
   vector<int> result;
   for (int m=mhLow_; m<=mhHigh_; m+=5){
 		if (skipMass(m)) continue;
-    if (verbosity_>=1) cout << "FinalModelConstruction - Adding mass: " << m << endl;
+    if (verbosity_>=1) cout << "[INFO] FinalModelConstruction - Adding mass: " << m << endl;
     result.push_back(m);
   }
   return result;
@@ -495,15 +513,16 @@ void FinalModelConstruction::setSecondaryModelVars(RooRealVar *mh_sm, RooRealVar
 	brSpline_2 = graphToSpline(Form("fbr_%dTeV_2",sqrts_),brGraph,MH_2);
 	brSpline_NW = graphToSpline(Form("fbr_%dTeV_NW",sqrts_),brGraph,MH);
   
-	string procs[8] = {"ggh","vbf","wzh","wh","zh","tth","gg_grav","qq_grav"};
-  for (int i=0; i<8; i++){
-    TGraph *xsGraph = norm->GetSigmaGraph(procs[i].c_str());
-    RooSpline1D *xsSpline_SM = graphToSpline(Form("fxs_%s_%dTeV_SM",procs[i].c_str(),sqrts_),xsGraph,MH_SM);
-    RooSpline1D *xsSpline_2 = graphToSpline(Form("fxs_%s_%dTeV_2",procs[i].c_str(),sqrts_),xsGraph,MH_2); 
-    RooSpline1D *xsSpline_NW = graphToSpline(Form("fxs_%s_%dTeV_NW",procs[i].c_str(),sqrts_),xsGraph,MH);
-    xsSplines_SM.insert(pair<string,RooSpline1D*>(procs[i],xsSpline_SM));
-    xsSplines_2.insert(pair<string,RooSpline1D*>(procs[i],xsSpline_2));
-    xsSplines_NW.insert(pair<string,RooSpline1D*>(procs[i],xsSpline_NW));
+	//string procs[8] = {"ggh","vbf","wzh","wh","zh","tth","gg_grav","qq_grav"};
+	//string procs[2] = {"ggH","VBF"};//,"wzh","wh","zh","tth","gg_grav","qq_grav"};//FIXME
+  for (unsigned int i=0; i<procs_.size(); i++){
+    TGraph *xsGraph = norm->GetSigmaGraph(procs_[i].c_str());
+    RooSpline1D *xsSpline_SM = graphToSpline(Form("fxs_%s_%dTeV_SM",procs_[i].c_str(),sqrts_),xsGraph,MH_SM);
+    RooSpline1D *xsSpline_2 = graphToSpline(Form("fxs_%s_%dTeV_2",procs_[i].c_str(),sqrts_),xsGraph,MH_2); 
+    RooSpline1D *xsSpline_NW = graphToSpline(Form("fxs_%s_%dTeV_NW",procs_[i].c_str(),sqrts_),xsGraph,MH);
+    xsSplines_SM.insert(pair<string,RooSpline1D*>(procs_[i],xsSpline_SM));
+    xsSplines_2.insert(pair<string,RooSpline1D*>(procs_[i],xsSpline_2));
+    xsSplines_NW.insert(pair<string,RooSpline1D*>(procs_[i],xsSpline_NW));
   }
   secondaryModelVarsSet=true;
 }
@@ -532,13 +551,16 @@ void FinalModelConstruction::getRvFractionFunc(string name){
 }
 
 RooAbsReal* FinalModelConstruction::getMeanWithPhotonSyst(RooAbsReal *dm, string name, bool isMH2, bool isMHSM){
+	string catname;
+	if (sqrts_==8 || sqrts_==7) catname=Form("cat%d",cat_);
+	if (sqrts_ ==13) catname = Form("%s",flashggCats_[cat_].c_str());
 
 	if (!doSecondaryModels && (isMH2 || isMHSM)) {
-		cout << "ERROR -- for some reason your asking for a dependence on MH_2 or MH_SM but are not running secondary models" << endl;
+		cout << "[ERROR] -- for some reason your asking for a dependence on MH_2 or MH_SM but are not running secondary models" << endl;
 		exit(1);
 	}
 	if (isMH2 && isMHSM) {
-		cout << "ERROR -- for some reason your asking for a dependence on MH_2 and MH_SM but both cannot be true" << endl;
+		cout << "[ERROR] -- for some reason your asking for a dependence on MH_2 and MH_SM but both cannot be true" << endl;
 		exit(1);
 	}
 
@@ -568,11 +590,12 @@ RooAbsReal* FinalModelConstruction::getMeanWithPhotonSyst(RooAbsReal *dm, string
 		int formPlace = dependents->getSize();
 		bool hasEffect = false;
 		if (isPerCatSyst(syst)) {
-			if (photonSystematicConsts.find(Form("const_%s_cat%d_%dTeV_mean_%s",proc_.c_str(),cat_,sqrts_,syst.c_str())) != photonSystematicConsts.end() ) {
-				RooConstVar *constVar = photonSystematicConsts[Form("const_%s_cat%d_%dTeV_mean_%s",proc_.c_str(),cat_,sqrts_,syst.c_str())];
+
+			if (photonSystematicConsts.find(Form("const_%s_%s_%dTeV_mean_%s",proc_.c_str(),catname.c_str(),sqrts_,syst.c_str())) != photonSystematicConsts.end() ) {
+				RooConstVar *constVar = photonSystematicConsts[Form("const_%s_%s_%dTeV_mean_%s",proc_.c_str(),catname.c_str(),sqrts_,syst.c_str())];
 				RooAbsReal *nuisVar = photonSystematics[Form("CMS_hgg_nuisance_%s",syst.c_str())];
 				if( verbosity_ ) { 
-					std::cout << "Systematic " << syst << std::endl;
+					std::cout << "[INFO] Systematic " << syst << std::endl;
 					nuisVar->Print("V");
 				}
 				if ( fabs(constVar->getVal())>=5.e-5) { 
@@ -583,7 +606,7 @@ RooAbsReal* FinalModelConstruction::getMeanWithPhotonSyst(RooAbsReal *dm, string
 				}
 			}
 			if (verbosity_ && !hasEffect) {
-				cout << "WARNING -- systematic " << syst << " is found to have no effect on the scale for category " << cat_ << " and process " << proc_ << " so it is being skipped." << endl;
+				cout << "[WARNING] -- systematic " << syst << " is found to have no effect on the scale for category " << catname.c_str() << " and process " << proc_ << " so it is being skipped." << endl;
 			}
 		}
 	}
@@ -593,6 +616,9 @@ RooAbsReal* FinalModelConstruction::getMeanWithPhotonSyst(RooAbsReal *dm, string
 }
 
 RooAbsReal* FinalModelConstruction::getSigmaWithPhotonSyst(RooAbsReal *sig_fit, string name){
+	string catname;
+	if (sqrts_==8 || sqrts_==7) catname=Form("cat%d",cat_);
+	if (sqrts_ ==13) catname = Form("%s",flashggCats_[cat_].c_str());
 
 	string formula="@0*";
 	RooArgList *dependents = new RooArgList();
@@ -605,8 +631,8 @@ RooAbsReal* FinalModelConstruction::getSigmaWithPhotonSyst(RooAbsReal *sig_fit, 
 		int formPlace = dependents->getSize();
 		bool hasEffect = false;
 		if (isPerCatSyst(syst)) {
-			if (photonSystematicConsts.find(Form("const_%s_cat%d_%dTeV_sigma_%s",proc_.c_str(),cat_,sqrts_,syst.c_str())) != photonSystematicConsts.end() ) {
-				RooConstVar *constVar = photonSystematicConsts[Form("const_%s_cat%d_%dTeV_sigma_%s",proc_.c_str(),cat_,sqrts_,syst.c_str())];
+			if (photonSystematicConsts.find(Form("const_%s_%s_%dTeV_sigma_%s",proc_.c_str(),catname.c_str(),sqrts_,syst.c_str())) != photonSystematicConsts.end() ) {
+				RooConstVar *constVar = photonSystematicConsts[Form("const_%s_%s_%dTeV_sigma_%s",proc_.c_str(),catname.c_str(),sqrts_,syst.c_str())];
 				RooAbsReal *nuisVar = photonSystematics[Form("CMS_hgg_nuisance_%s",syst.c_str())];
 				if (constVar->getVal()>=1.e-4) {
 					hasEffect = true;
@@ -620,7 +646,7 @@ RooAbsReal* FinalModelConstruction::getSigmaWithPhotonSyst(RooAbsReal *sig_fit, 
 				}
 			}
 			if (verbosity_ && !hasEffect) {
-				cout << "WARNING -- systematic " << syst << " is found to have no effect on the resolution for category " << cat_ << " and process " << proc_ << " so it is being skipped." << endl;
+				cout << "[WARNING] -- systematic " << syst << " is found to have no effect on the resolution for category " << catname.c_str() << " and process " << proc_ << " so it is being skipped." << endl;
 			}
 		}
 	}
@@ -630,6 +656,9 @@ RooAbsReal* FinalModelConstruction::getSigmaWithPhotonSyst(RooAbsReal *sig_fit, 
 }
 
 RooAbsReal* FinalModelConstruction::getRateWithPhotonSyst(string name){
+	string catname;
+	if (sqrts_==8 || sqrts_==7) catname=Form("cat%d",cat_);
+	if (sqrts_ ==13) catname = Form("%s",flashggCats_[cat_].c_str());
 	
 	string formula="(1.";
 	RooArgList *dependents = new RooArgList();
@@ -639,8 +668,8 @@ RooAbsReal* FinalModelConstruction::getRateWithPhotonSyst(string name){
 		int formPlace = dependents->getSize();
 		bool hasEffect = false;
 		if (isPerCatSyst(syst)) {
-			if (photonSystematicConsts.find(Form("const_%s_cat%d_%dTeV_rate_%s",proc_.c_str(),cat_,sqrts_,syst.c_str())) != photonSystematicConsts.end() ) {
-				RooConstVar *constVar = photonSystematicConsts[Form("const_%s_cat%d_%dTeV_rate_%s",proc_.c_str(),cat_,sqrts_,syst.c_str())];
+			if (photonSystematicConsts.find(Form("const_%s_%s_%dTeV_rate_%s",proc_.c_str(),catname.c_str(),sqrts_,syst.c_str())) != photonSystematicConsts.end() ) {
+				RooConstVar *constVar = photonSystematicConsts[Form("const_%s_%s_%dTeV_rate_%s",proc_.c_str(),catname.c_str(),sqrts_,syst.c_str())];
 				RooAbsReal *nuisVar = photonSystematics[Form("CMS_hgg_nuisance_%s",syst.c_str())];
 				if (constVar->getVal()>=5.e-4) {
 					hasEffect = true;
@@ -650,7 +679,7 @@ RooAbsReal* FinalModelConstruction::getRateWithPhotonSyst(string name){
 				}
 			}
 			if (verbosity_ && !hasEffect) {
-				cout << "WARNING -- systematic " << syst << " is found to have no effect on the rate for category " << cat_ << " and process " << proc_ << " so it is being skipped." << endl;
+				cout << "[WARNING] -- systematic " << syst << " is found to have no effect on the rate for category " << catname.c_str() << " and process " << proc_ << " so it is being skipped." << endl;
 			}
 		}
 	}
@@ -698,32 +727,38 @@ void FinalModelConstruction::buildStdPdf(string name, int nGaussians, bool recur
 }
 
 void FinalModelConstruction::buildRvWvPdf(string name, int nGrv, int nGwv, bool recursive){
+	string catname;
+	if (sqrts_==8 || sqrts_==7) catname=Form("cat%d",cat_);
+	if (sqrts_ ==13) catname = Form("%s",flashggCats_[cat_].c_str());
 
-  if (!rvFractionSet_) getRvFractionFunc(Form("%s_%s_cat%d_rvFracFunc",name.c_str(),proc_.c_str(),cat_));
+  if (!rvFractionSet_) getRvFractionFunc(Form("%s_%s_%s_rvFracFunc",name.c_str(),proc_.c_str(),catname.c_str()));
   if (!systematicsSet_) setupSystematics();
-  RooFormulaVar *rvFraction = new RooFormulaVar(Form("%s_%s_cat%d_rvFrac",name.c_str(),proc_.c_str(),cat_),Form("%s_%s_cat%d_rvFrac",name.c_str(),proc_.c_str(),cat_),"TMath::Min(@0+@1,1.0)",RooArgList(*vertexNuisance,*rvFracFunc));
+  RooFormulaVar *rvFraction = new RooFormulaVar(Form("%s_%s_%s_rvFrac",name.c_str(),proc_.c_str(),catname.c_str()),Form("%s_%s_%s_rvFrac",name.c_str(),proc_.c_str(),catname.c_str()),"TMath::Min(@0+@1,1.0)",RooArgList(*vertexNuisance,*rvFracFunc));
   vector<RooAddPdf*> rvPdfs = buildPdf(name,nGrv,recursive,rvSplines,Form("_rv_%dTeV",sqrts_)); 
   vector<RooAddPdf*> wvPdfs = buildPdf(name,nGwv,recursive,wvSplines,Form("_wv_%dTeV",sqrts_)); 
-  finalPdf = new RooAddPdf(Form("%s_%s_cat%d",name.c_str(),proc_.c_str(),cat_),Form("%s_%s_cat%d",name.c_str(),proc_.c_str(),cat_),RooArgList(*rvPdfs[0],*wvPdfs[0]),RooArgList(*rvFraction));
+  finalPdf = new RooAddPdf(Form("%s_%s_%s",name.c_str(),proc_.c_str(),catname.c_str()),Form("%s_%s_%s",name.c_str(),proc_.c_str(),catname.c_str()),RooArgList(*rvPdfs[0],*wvPdfs[0]),RooArgList(*rvFraction));
   if (doSecondaryModels){
     assert(secondaryModelVarsSet);
-		RooFormulaVar *rvFraction_SM = new RooFormulaVar(Form("%s_%s_cat%d_rvFrac_SM",name.c_str(),proc_.c_str(),cat_),Form("%s_%s_cat%d_rvFrac",name.c_str(),proc_.c_str(),cat_),"TMath::Min(@0+@1,1.0)",RooArgList(*vertexNuisance,*rvFracFunc_SM));
-		RooFormulaVar *rvFraction_2 = new RooFormulaVar(Form("%s_%s_cat%d_rvFrac_2",name.c_str(),proc_.c_str(),cat_),Form("%s_%s_cat%d_rvFrac",name.c_str(),proc_.c_str(),cat_),"TMath::Min(@0+@1,1.0)",RooArgList(*vertexNuisance,*rvFracFunc_2));
-		RooFormulaVar *rvFraction_NW = new RooFormulaVar(Form("%s_%s_cat%d_rvFrac_NW",name.c_str(),proc_.c_str(),cat_),Form("%s_%s_cat%d_rvFrac",name.c_str(),proc_.c_str(),cat_),"TMath::Min(@0+@1,1.0)",RooArgList(*vertexNuisance,*rvFracFunc_NW));
+		RooFormulaVar *rvFraction_SM = new RooFormulaVar(Form("%s_%s_%s_rvFrac_SM",name.c_str(),proc_.c_str(),catname.c_str()),Form("%s_%s_%s_rvFrac",name.c_str(),proc_.c_str(),catname.c_str()),"TMath::Min(@0+@1,1.0)",RooArgList(*vertexNuisance,*rvFracFunc_SM));
+		RooFormulaVar *rvFraction_2 = new RooFormulaVar(Form("%s_%s_%s_rvFrac_2",name.c_str(),proc_.c_str(),catname.c_str()),Form("%s_%s_%s_rvFrac",name.c_str(),proc_.c_str(),catname.c_str()),"TMath::Min(@0+@1,1.0)",RooArgList(*vertexNuisance,*rvFracFunc_2));
+		RooFormulaVar *rvFraction_NW = new RooFormulaVar(Form("%s_%s_%s_rvFrac_NW",name.c_str(),proc_.c_str(),catname.c_str()),Form("%s_%s_%s_rvFrac",name.c_str(),proc_.c_str(),catname.c_str()),"TMath::Min(@0+@1,1.0)",RooArgList(*vertexNuisance,*rvFracFunc_NW));
 		// buildNew Pdfs
-    finalPdf_SM = new RooAddPdf(Form("%s_%s_cat%d_SM",name.c_str(),proc_.c_str(),cat_),Form("%s_%s_cat%d_SM",name.c_str(),proc_.c_str(),cat_),RooArgList(*rvPdfs[1],*wvPdfs[1]),RooArgList(*rvFraction_SM));
-    finalPdf_2 = new RooAddPdf(Form("%s_%s_cat%d_2",name.c_str(),proc_.c_str(),cat_),Form("%s_%s_cat%d_2",name.c_str(),proc_.c_str(),cat_),RooArgList(*rvPdfs[2],*wvPdfs[2]),RooArgList(*rvFraction_2));
-    finalPdf_NW = new RooAddPdf(Form("%s_%s_cat%d_NW",name.c_str(),proc_.c_str(),cat_),Form("%s_%s_cat%d_NW",name.c_str(),proc_.c_str(),cat_),RooArgList(*rvPdfs[3],*wvPdfs[3]),RooArgList(*rvFraction_NW));
+    finalPdf_SM = new RooAddPdf(Form("%s_%s_%s_SM",name.c_str(),proc_.c_str(),catname.c_str()),Form("%s_%s_%s_SM",name.c_str(),proc_.c_str(),catname.c_str()),RooArgList(*rvPdfs[1],*wvPdfs[1]),RooArgList(*rvFraction_SM));
+    finalPdf_2 = new RooAddPdf(Form("%s_%s_%s_2",name.c_str(),proc_.c_str(),catname.c_str()),Form("%s_%s_%s_2",name.c_str(),proc_.c_str(),catname.c_str()),RooArgList(*rvPdfs[2],*wvPdfs[2]),RooArgList(*rvFraction_2));
+    finalPdf_NW = new RooAddPdf(Form("%s_%s_%s_NW",name.c_str(),proc_.c_str(),catname.c_str()),Form("%s_%s_%s_NW",name.c_str(),proc_.c_str(),catname.c_str()),RooArgList(*rvPdfs[3],*wvPdfs[3]),RooArgList(*rvFraction_NW));
   }
 }
 
 vector<RooAddPdf*> FinalModelConstruction::buildPdf(string name, int nGaussians, bool recursive, map<string,RooSpline1D*> splines, string add){
   
   vector<RooAddPdf*> result;
+	string catname;
+	if (sqrts_==8 || sqrts_==7) catname=Form("cat%d",cat_);
+	if (sqrts_ ==13) catname = Form("%s",flashggCats_[cat_].c_str());
 
   RooArgList *gaussians = new RooArgList();
   RooArgList *coeffs = new RooArgList();
-  string ext = Form("%s_cat%d%s",proc_.c_str(),cat_,add.c_str());
+  string ext = Form("%s_%s%s",proc_.c_str(),catname.c_str(),add.c_str());
   
   // for SM Higgs as Background
   RooArgList *gaussians_SM = new RooArgList();
@@ -837,19 +872,25 @@ void FinalModelConstruction::setSTDdatasets(map<int,RooDataSet*> data){
 }
 
 void FinalModelConstruction::makeSTDdatasets(){
+	string catname;
+	if (sqrts_==8 || sqrts_==7) catname=Form("cat%d",cat_);
+	if (sqrts_ ==13) catname = Form("%s",flashggCats_[cat_].c_str());
   for (unsigned int i=0; i<allMH_.size(); i++){
     int mh=allMH_[i];
-		RooDataSet *data = (RooDataSet*)rvDatasets[mh]->Clone(Form("sig_%s_mass_m%d_cat%d",proc_.c_str(),mh,cat_));
+		RooDataSet *data = (RooDataSet*)rvDatasets[mh]->Clone(Form("sig_%s_mass_m%d_%s",proc_.c_str(),mh,catname.c_str()));
 		data->append(*wvDatasets[mh]);
 		stdDatasets.insert(pair<int,RooDataSet*>(mh,data));
 	}	
 }
 
 void FinalModelConstruction::plotPdf(string outDir){
+	string catname;
+	if (sqrts_==8 || sqrts_==7) catname=Form("cat%d",cat_);
+	if (sqrts_ ==13) catname = Form("%s",flashggCats_[cat_].c_str());
   system(Form("mkdir -p %s",outDir.c_str()));
   
   TCanvas *canv = new TCanvas();
-  RooPlot *dataPlot = mass->frame(Title(Form("%s_cat%d",proc_.c_str(),cat_)),Range(100,160));
+  RooPlot *dataPlot = mass->frame(Title(Form("%s_%s",proc_.c_str(),catname.c_str())),Range(100,160));
   for (unsigned int i=0; i<allMH_.size(); i++){
     int mh=allMH_[i];
     stdDatasets[mh]->plotOn(dataPlot,Binning(160));
@@ -857,10 +898,10 @@ void FinalModelConstruction::plotPdf(string outDir){
     extendPdf->plotOn(dataPlot);
   }
   dataPlot->Draw();
-  canv->Print(Form("%s/%s_cat%d_fits.pdf",outDir.c_str(),proc_.c_str(),cat_));
-  canv->Print(Form("%s/%s_cat%d_fits.png",outDir.c_str(),proc_.c_str(),cat_));
+  canv->Print(Form("%s/%s_%s_fits.pdf",outDir.c_str(),proc_.c_str(),catname.c_str()));
+  canv->Print(Form("%s/%s_%s_fits.png",outDir.c_str(),proc_.c_str(),catname.c_str()));
   
-  RooPlot *pdfPlot = mass->frame(Title(Form("%s_cat%d",proc_.c_str(),cat_)),Range(100,160));
+  RooPlot *pdfPlot = mass->frame(Title(Form("%s_%s",proc_.c_str(),catname.c_str())),Range(100,160));
 	pdfPlot->GetYaxis()->SetTitle(Form("Pdf projection / %2.1f GeV",(mass->getMax()-mass->getMin())/160.));
   for (int mh=mhLow_; mh<=mhHigh_; mh++){
     MH->setVal(mh);
@@ -868,8 +909,8 @@ void FinalModelConstruction::plotPdf(string outDir){
     extendPdf->plotOn(pdfPlot,Normalization(mass->getBins()/160.*(mass->getMax()-mass->getMin())/60.,RooAbsReal::RelativeExpected));
   }
   pdfPlot->Draw();
-  canv->Print(Form("%s/%s_cat%d_interp.pdf",outDir.c_str(),proc_.c_str(),cat_));
-  canv->Print(Form("%s/%s_cat%d_interp.png",outDir.c_str(),proc_.c_str(),cat_));
+  canv->Print(Form("%s/%s_%s_interp.pdf",outDir.c_str(),proc_.c_str(),catname.c_str()));
+  canv->Print(Form("%s/%s_%s_interp.png",outDir.c_str(),proc_.c_str(),catname.c_str()));
   delete canv;
 
 }
@@ -897,14 +938,28 @@ RooSpline1D* FinalModelConstruction::graphToSpline(string name, TGraph *graph, R
 }
 
 void FinalModelConstruction::getNormalization(){
- 
+	string catname;
+	if (sqrts_==8 || sqrts_==7) catname=Form("cat%d",cat_);
+	if (sqrts_ ==13) catname = Form("%s",flashggCats_[cat_].c_str());
+	
+	std::string procLowerCase_ = proc_;
+  std::transform(procLowerCase_.begin(), procLowerCase_.end(), procLowerCase_.begin(), ::tolower); 
   TGraph *temp = new TGraph();
   TF1 *pol2 = new TF1("pol","pol2",110,150);
   for (unsigned int i=0; i<allMH_.size(); i++){
     double mh = double(allMH_[i]);
     RooDataSet *data = stdDatasets[mh];
+	double effAcc =0.;
+	if (intLumi) {
     // calcu eA as sumEntries / totalxs * totalbr * intL
-    double effAcc = (data->sumEntries()/(intLumi->getVal()*norm->GetXsection(mh,proc_)*norm->GetBR(mh)));
+    effAcc = (data->sumEntries()/(intLumi->getVal()*norm->GetXsection(mh,procLowerCase_)*norm->GetBR(mh)));
+		std::cout << "[INFO] (FinalModelConstruction) intLumi " << intLumi->getVal() <<", effAcc " << effAcc << std::endl;
+		} else {
+		std::cout << "[ERROR] IntLumi rooRealVar is not in this workspace. exit." << std::endl;
+		return ;
+		//double intLumiVal =19700.;
+    //effAcc = (data->sumEntries()/(intLumiVal*norm->GetXsection(mh,procLowerCase_)*norm->GetBR(mh)));
+		}
     temp->SetPoint(i,mh,effAcc);
   }
   verbosity_ >=2 ?
@@ -912,33 +967,41 @@ void FinalModelConstruction::getNormalization(){
     temp->Fit(pol2,"QEMFEX0")
   ;
   TGraph *eaGraph = new TGraph(pol2);
-  RooSpline1D *eaSpline = graphToSpline(Form("fea_%s_cat%d_%dTeV",proc_.c_str(),cat_,sqrts_),eaGraph);
+  RooSpline1D *eaSpline = graphToSpline(Form("fea_%s_%s_%dTeV",proc_.c_str(),catname.c_str(),sqrts_),eaGraph);
   RooSpline1D *xs = xsSplines[proc_];
-	RooAbsReal *rateNuisTerm = getRateWithPhotonSyst(Form("rate_%s_cat%d_%dTeV",proc_.c_str(),cat_,sqrts_));
-  
+	RooAbsReal *rateNuisTerm = getRateWithPhotonSyst(Form("rate_%s_%s_%dTeV",proc_.c_str(),catname.c_str(),sqrts_));
+	if (!(xs && brSpline && eaSpline && rateNuisTerm && intLumi)){
+	std::cout << "[ERROR] some of the following are not set properly. exit." << std::endl;
+	if( verbosity_) std::cout << "[INFO] xs " << xs << ", brSpline " << brSpline << ", eaSpline " << eaSpline << ", rateNuisTerm " << rateNuisTerm << ", intLumi " << intLumi << std::endl;
+	exit(1);
+	}
 	finalNorm = new RooFormulaVar(Form("%s_norm",finalPdf->GetName()),Form("%s_norm",finalPdf->GetName()),"@0*@1*@2*@3",RooArgList(*xs,*brSpline,*eaSpline,*rateNuisTerm));
+	//finalNorm = new RooFormulaVar(Form("%s_norm",finalPdf->GetName()),Form("%s_norm",finalPdf->GetName()),"@0*@1*@2",RooArgList(*xs,*brSpline,*eaSpline));
   // these are for plotting
   finalNormThisLum = new RooFormulaVar(Form("%s_normThisLumi",finalPdf->GetName()),Form("%s_normThisLumi",finalPdf->GetName()),"@0*@1*@2*@3*@4",RooArgList(*xs,*brSpline,*eaSpline,*rateNuisTerm,*intLumi));
-  
+  //finalNormThisLum = new RooFormulaVar(Form("%s_normThisLumi",finalPdf->GetName()),Form("%s_normThisLumi",finalPdf->GetName()),"@0*@1*@2*@3",RooArgList(*xs,*brSpline,*eaSpline,*intLumi));
+	
 	extendPdfRel = new RooExtendPdf(Form("extend%s",finalPdf->GetName()),Form("extend%s",finalPdf->GetName()),*finalPdf,*finalNorm);
   extendPdf = new RooExtendPdf(Form("extend%sThisLumi",finalPdf->GetName()),Form("extend%sThisLumi",finalPdf->GetName()),*finalPdf,*finalNormThisLum);
   // do secondary models
   if (doSecondaryModels){
     assert(secondaryModelVarsSet);
     // sm higgs as bkg
-    RooSpline1D *eaSpline_SM = graphToSpline(Form("fea_%s_cat%d_%dTeV_SM",proc_.c_str(),cat_,sqrts_),eaGraph,MH_SM);
+    RooSpline1D *eaSpline_SM = graphToSpline(Form("fea_%s_%s_%dTeV_SM",proc_.c_str(),catname.c_str(),sqrts_),eaGraph,MH_SM);
     RooSpline1D *xs_SM = xsSplines_SM[proc_];
     finalNorm_SM = new RooFormulaVar(Form("%s_norm",finalPdf_SM->GetName()),Form("%s_norm",finalPdf_SM->GetName()),"@0*@1*@2*@3",RooArgList(*xs_SM,*brSpline_SM,*eaSpline_SM,*rateNuisTerm));
+    //finalNorm_SM = new RooFormulaVar(Form("%s_norm",finalPdf_SM->GetName()),Form("%s_norm",finalPdf_SM->GetName()),"@0*@1*@2",RooArgList(*xs_SM,*brSpline_SM,*eaSpline_SM));
     // second degen higgs
-    RooSpline1D *eaSpline_2 = graphToSpline(Form("fea_%s_cat%d_%dTeV_2",proc_.c_str(),cat_,sqrts_),eaGraph,MH_2);
+    RooSpline1D *eaSpline_2 = graphToSpline(Form("fea_%s_%s_%dTeV_2",proc_.c_str(),catname.c_str(),sqrts_),eaGraph,MH_2);
     RooSpline1D *xs_2 = xsSplines_2[proc_];
     finalNorm_2 = new RooFormulaVar(Form("%s_norm",finalPdf_2->GetName()),Form("%s_norm",finalPdf_2->GetName()),"@0*@1*@2*@3",RooArgList(*xs_2,*brSpline_2,*eaSpline_2,*rateNuisTerm));
+   // finalNorm_2 = new RooFormulaVar(Form("%s_norm",finalPdf_2->GetName()),Form("%s_norm",finalPdf_2->GetName()),"@0*@1*@2",RooArgList(*xs_2,*brSpline_2,*eaSpline_2));
     // natural width
-    RooSpline1D *eaSpline_NW = graphToSpline(Form("fea_%s_cat%d_%dTeV_NW",proc_.c_str(),cat_,sqrts_),eaGraph,MH);
+    RooSpline1D *eaSpline_NW = graphToSpline(Form("fea_%s_%s_%dTeV_NW",proc_.c_str(),catname.c_str(),sqrts_),eaGraph,MH);
     RooSpline1D *xs_NW = xsSplines_NW[proc_];
     finalNorm_NW = new RooFormulaVar(Form("%s_norm",finalPdf_NW->GetName()),Form("%s_norm",finalPdf_NW->GetName()),"@0*@1*@2*@3",RooArgList(*xs_NW,*brSpline_NW,*eaSpline_NW,*rateNuisTerm));
+   // finalNorm_NW = new RooFormulaVar(Form("%s_norm",finalPdf_NW->GetName()),Form("%s_norm",finalPdf_NW->GetName()),"@0*@1*@2",RooArgList(*xs_NW,*brSpline_NW,*eaSpline_NW));
   }
-
 }
 
 void FinalModelConstruction::save(RooWorkspace *work){

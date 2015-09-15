@@ -25,7 +25,7 @@ class FinalModelConstruction {
 
   public:
     
-    FinalModelConstruction(RooRealVar *massVar, RooRealVar *MHvar, RooRealVar *intL, int mhLow, int mhHigh, std::string proc, int cat, bool doSecMods, std::string systematicsFileName, std::vector<int> skipMasses, int verbosity, bool isCB=false, bool is2011=false, bool quadraticSigmaSum=false);
+    FinalModelConstruction(RooRealVar *massVar, RooRealVar *MHvar, RooRealVar *intL, int mhLow, int mhHigh, std::string proc, int cat, bool doSecMods, std::string systematicsFileName, std::vector<int> skipMasses, int verbosity, std::vector<std::string> procsList, std::vector<std::string> flashggCats ,bool isCB=false, int sqrts=13, bool quadraticSigmaSum=false);
     ~FinalModelConstruction();
 
 		void loadSignalSystematics(std::string filename);
@@ -74,11 +74,14 @@ class FinalModelConstruction {
     bool secondaryModelVarsSet;
     bool isCutBased_;
 		bool is2011_;
+		bool is2012_;
+		bool isFlashgg_;
 		int sqrts_;
 		bool quadraticSigmaSum_;
 		std::vector<int> skipMasses_;
     std::vector<int> allMH_;
     std::vector<int> getAllMH();
+    std::vector<string> flashggCats_;
 		bool skipMass(int mh);
     int verbosity_;
     Normalization_8TeV *norm;
@@ -116,6 +119,7 @@ class FinalModelConstruction {
 
     bool systematicsSet_;
     bool rvFractionSet_;
+		std::vector<std::string> procs_;
 
     RooSpline1D *graphToSpline(string name, TGraph *graph);
     RooSpline1D *graphToSpline(string name, TGraph *graph, RooAbsReal *var);

@@ -99,8 +99,8 @@ void printOptionsMap(vector<pair<int,pair<string,string> > > opts){
 }
 
 int main(int argc, char* argv[]){
-
-  string bkgFileName;
+  
+	string bkgFileName;
   string sigFileName;
   string sigWSName;
   string bkgWSName;
@@ -175,6 +175,7 @@ int main(int argc, char* argv[]){
     RooMsgService::instance().setSilentMode(true);
   }
   
+std::cout << "DEBUG LC 0 " <<std::endl;
   TFile *bkgFile = TFile::Open(bkgFileName.c_str());
   TFile *sigFile = TFile::Open(sigFileName.c_str());
 
@@ -182,6 +183,7 @@ int main(int argc, char* argv[]){
   RooWorkspace *bkgWS = (RooWorkspace*)bkgFile->Get(bkgWSName.c_str());
   RooWorkspace *sigWS = (RooWorkspace*)sigFile->Get(sigWSName.c_str());
 
+std::cout << "DEBUG LC 1 " <<std::endl;
   if (!bkgWS || !sigWS){
     cerr << "ERROR - one of signal or background workspace is NULL" << endl;
     cerr << " (looked for ) signal = " << sigWSName.c_str() << ", background = " << bkgWSName.c_str() <<endl;
@@ -191,6 +193,7 @@ int main(int argc, char* argv[]){
   RooRealVar *mass = (RooRealVar*)bkgWS->var("CMS_hgg_mass");
   RooRealVar *mu = new RooRealVar("mu","mu",0.,mu_low,mu_high);
 
+std::cout << "DEBUG LC 2 " <<std::endl;
   TFile *outFile = new TFile(outFileName.c_str(),"RECREATE");
   TTree *muTree = new TTree("muTree","muTree");
   int toyn;
@@ -207,6 +210,7 @@ int main(int argc, char* argv[]){
   vector<double> muPaulErrHigh;
   vector<double> muChi2ErrHigh;
   vector<double> muAICErrHigh;
+std::cout << "DEBUG LC 2.1 " <<std::endl;
   muTree->Branch("jobn",&jobn);
   muTree->Branch("toyn",&toyn);
   muTree->Branch("truthModel",&truthModel);
@@ -222,6 +226,7 @@ int main(int argc, char* argv[]){
   muTree->Branch("muPaulErrHigh",&muPaulErrHigh);
   muTree->Branch("muChi2ErrHigh",&muChi2ErrHigh);
   muTree->Branch("muAICErrHigh",&muAICErrHigh);
+  std::cout << "debug lc 2.2 " <<std::endl;
   
   //TH1F *muDistFab = new TH1F("muDistFab","muDistFab",int(20*(mu_high-mu_low)),mu_low,mu_high);
   //TH1F *muDistPaul = new TH1F("muDistPaul","muDistPaul",int(20*(mu_high-mu_low)),mu_low,mu_high);
@@ -230,12 +235,16 @@ int main(int argc, char* argv[]){
   
   mass->setBins(160); // is this too fine for the signal MC?
   RooDataSet *data = (RooDataSet*)bkgWS->data(Form("data_mass_cat%d",cat));
+  std::cout << "debug lc 2.2.1 , cat "<< cat <<std::endl;
   //RooDataSet *data = (RooDataSet*)bkgWS->data(Form("data_cat%d_7TeV",cat));
   RooDataHist *dataBinned = new RooDataHist(Form("roohist_data_mass_cat%d",cat),Form("roohist_data_mass_cat%d",cat),RooArgSet(*mass),*data);
+  std::cout << "debug lc 2.2.1.1 " <<std::endl;
   RooDataSet *sigMC = (RooDataSet*)sigWS->data(Form("sig_ggh_mass_m%d_cat%d",expectSignalMass,cat));
+  std::cout << "debug lc 2.2.2 " <<std::endl;
   RooDataSet *sigMC_vbf = (RooDataSet*)sigWS->data(Form("sig_vbf_mass_m%d_cat%d",expectSignalMass,cat));
   RooDataSet *sigMC_wh = (RooDataSet*)sigWS->data(Form("sig_wh_mass_m%d_cat%d",expectSignalMass,cat));
   RooDataSet *sigMC_zh = (RooDataSet*)sigWS->data(Form("sig_zh_mass_m%d_cat%d",expectSignalMass,cat));
+  std::cout << "debug lc 2.2.3 " <<std::endl;
   RooDataSet *sigMC_tth = (RooDataSet*)sigWS->data(Form("sig_tth_mass_m%d_cat%d",expectSignalMass,cat));
   std::cout << "Signal Model Building " << std::endl; 
   sigMC->Print(); sigMC_vbf->Print(); sigMC_wh->Print();sigMC_zh->Print();sigMC_tth->Print();
@@ -249,6 +258,7 @@ int main(int argc, char* argv[]){
   //RooExtendPdf *tth_pdf = (RooExtendPdf*)sigWS->pdf(Form("sigpdfsmrel_cat%d_7TeV_tth",cat));
   //RooAbsPdf *sigPdf = new RooAddPdf(Form("sigpdfsmrel_cat%d_7TeV",cat),Form("sigpdfsmrel_cat%d_7TeV",cat),RooArgList(*ggh_pdf,*vbf_pdf,*wzh_pdf,*tth_pdf));
   
+std::cout << "DEBUG LC 3 " <<std::endl;
   if (!dataBinned || !sigMC){
     cerr << "ERROR -- one of data or signal is NULL" << endl;
     exit(1);
@@ -304,6 +314,7 @@ int main(int argc, char* argv[]){
   map<string,RooAbsPdf*> fabianBkgPdfs = fabianModel.getBkgPdfs();
   map<string,RooAbsPdf*> fabianSBPdfs = fabianModel.getSBPdfs();
 
+std::cout << "DEBUG LC 4 " <<std::endl;
   // set of models to profile 
   PdfModelBuilder paulModel;
   paulModel.setObsVar(mass);

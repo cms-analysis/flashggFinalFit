@@ -21,7 +21,7 @@ class Normalization_8TeV {
   public:
 	Normalization_8TeV();
 
-	void Init(int sqrtS);
+	int Init(int sqrtS);
 	
 	double GetBR(double);
 	// double GetBR(int);

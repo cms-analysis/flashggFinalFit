@@ -1,0 +1,15 @@
+# NOTICE THAT TO PASS AN = SIGN IN A STRING USE \= e.g #sqrt{s}\=8TeV
+#method=pval:files=exp1.root,exp2.root,obs1.root,obs2.root:colors=2,4,2,4:styles=2,2,1,1:widths=2,2,2,2:names=Expected 1,Expected 2,Observed 1,Observed 2:text=#sqrt{s}\=8TeV L\=19.6fb^{-1}
+
+method=pval:files=combineJobs7TeVLC/ProfileLikelihood/ProfileLikelihood.root:colors=2:styles=2:widths=2:names=Observed 7TeV:outname=pval_7and8TeV
+
+#,Observed 8TeV:text=#splitline{#sqrt{s}\=7TeV L\=5.1fb^{-1}}{#sqrt{s}\=8TeV L\=19.6fb^{-1}}:outname=pval_7and8TeV
+
+method=limit:files=combineJobs7TeVLC/Asymptotic/Asymptotic.root:outnamename=limitObserved7TeV
+#:text=#splitline{#sqrt{s}\=7TeV L\=5.1fb^{-1}}{#sqrt{s}\=8TeV L\=19.6fb^{-1}}:outname=limit_7TeV
+
+method=mumh:files=combineJobs7TeVLC/MuMHScan/MuMHScan.root:outname=mumhObserved7TeV
+#:text=#splitline{#sqrt{s}\=7TeV L\=5.1fb^{-1}}{#sqrt{s}\=8TeV L\=19.6fb^{-1}}:outname=maxlh_7and8TeV
+
+method=rvrf:files=combineJobs7TeVLC/RVRFScan/RVRFScan.root:outname=rvrfObserved7TeV
+#:text=#splitline{#sqrt{s}\=7TeV L\=5.1fb^{-1}}{#sqrt{s}\=8TeV L\=19.6fb^{-1}}:outname=maxlh_7and8TeV

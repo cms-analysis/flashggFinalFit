@@ -305,7 +305,9 @@ string runQuickRejig(string oldfilename, int ncats){
   TFile *newFile = new TFile(newfilename.c_str(),"RECREATE");
 
   RooWorkspace *oldWS = (RooWorkspace*)oldFile->Get("cms_hgg_workspace");
+	
   RooWorkspace *newWS = new RooWorkspace("wsig_8TeV");
+
   
   RooRealVar *mass = (RooRealVar*)oldWS->var("CMS_hgg_mass");
 
@@ -362,23 +364,23 @@ string runQuickRejig(string oldfilename, int ncats){
 
 }
 
-void printInfo(map<string,RooDataSet*> data, map<string,RooAddPdf*> pdfs){
+void printinfo(map<string,roodataset*> data, map<string,rooaddpdf*> pdfs){
   
-  for (map<string,RooDataSet*>::iterator dat=data.begin(); dat!=data.end(); dat++){
+  for (map<string,roodataset*>::iterator dat=data.begin(); dat!=data.end(); dat++){
     if (!dat->second) {
-      cout << "Dataset for " << dat->first << " not found" << endl;
+      cout << "dataset for " << dat->first << " not found" << endl;
       exit(1);
     }
     cout << dat->first << " : ";
-    dat->second->Print();
+    dat->second->print();
   }
-  for (map<string,RooAddPdf*>::iterator pdf=pdfs.begin(); pdf!=pdfs.end(); pdf++){
+  for (map<string,rooaddpdf*>::iterator pdf=pdfs.begin(); pdf!=pdfs.end(); pdf++){
     if (!pdf->second) {
-      cout << "Pdf for " << pdf->first << " not found" << endl;
+      cout << "pdf for " << pdf->first << " not found" << endl;
       exit(1);
     }
     cout << pdf->first << " : ";
-    pdf->second->Print();
+    pdf->second->print();
   }
 
 }
@@ -386,10 +388,28 @@ void printInfo(map<string,RooDataSet*> data, map<string,RooAddPdf*> pdfs){
 map<string,RooDataSet*> getGlobeData(RooWorkspace *work, int ncats, int m_hyp){
   
   map<string,RooDataSet*> result;
+	string catname;
+	
   for (int cat=0; cat<ncats; cat++){
     result.insert(pair<string,RooDataSet*>(Form("cat%d",cat),(RooDataSet*)work->data(Form("sig_mass_m%3d_cat%d",m_hyp,cat))));
+		std::cout << "DEBUG MACRO " << Form("sig_VBF_mass_m%3d_cat%d",m_hyp,cat) <<std::endl; 
   }
   result.insert(pair<string,RooDataSet*>("all",(RooDataSet*)work->data(Form("sig_mass_m%3d_AllCats",m_hyp))));
+		std::cout << "DEBUG MACRO " << Form("sig_VBF_mass_m%3d_AllCats",m_hyp) << (RooDataSet*)work->data(Form("sig_VBF_mass_m%3d_AllCats",m_hyp))<<std::endl; 
+
+  return result;
+}
+
+map<string,RooDataSet*> getFlashggData(RooWorkspace *work, int ncats, int m_hyp, std::vector<string> flashggCats){
+  
+  map<string,RooDataSet*> result;
+	
+  for (int cat=0; cat<ncats; cat++){
+    result.insert(pair<string,RooDataSet*>(Form("%s",flashggCats[cat]),(RooDataSet*)work->data(Form("sig_mass_m%3d_%s",m_hyp,flashggCats[cat]))));
+		std::cout << "DEBUG MACRO " << Form("sig_VBF_mass_m%3d_%s",m_hyp,flashggCats[cat]) <<std::endl; 
+  }
+  result.insert(pair<string,RooDataSet*>("all",(RooDataSet*)work->data(Form("sig_mass_m%3d_AllCats",m_hyp))));
+		std::cout << "DEBUG MACRO " << Form("sig_VBF_mass_m%3d_AllCats",m_hyp) << (RooDataSet*)work->data(Form("sig_VBF_mass_m%3d_AllCats",m_hyp))<<std::endl; 
 
   return result;
 }
@@ -399,6 +419,17 @@ map<string,RooAddPdf*> getGlobePdfs(RooWorkspace *work, int ncats){
   map<string,RooAddPdf*> result;
   for (int cat=0; cat<ncats; cat++){
     result.insert(pair<string,RooAddPdf*>(Form("cat%d",cat),(RooAddPdf*)work->pdf(Form("sigpdfrelcat%d_allProcs",cat))));
+  }
+  result.insert(pair<string,RooAddPdf*>("all",(RooAddPdf*)work->pdf("sigpdfrelAllCats_allProcs")));
+
+  return result;
+}
+
+map<string,RooAddPdf*> getFlashggPdfs(RooWorkspace *work, int ncats,std::vector<string> flashggCats){
+
+  map<string,RooAddPdf*> result;
+  for (int cat=0; cat<ncats; cat++){
+    result.insert(pair<string,RooAddPdf*>(Form("%s",cat),(RooAddPdf*)work->pdf(Form("sigpdfrel%s_allProcs",flashggCats[cat]))));
   }
   result.insert(pair<string,RooAddPdf*>("all",(RooAddPdf*)work->pdf("sigpdfrelAllCats_allProcs")));
 
@@ -1407,6 +1438,8 @@ void getNCats(RooWorkspace *ws, int mh, int &ncats){
 // main function
 void makeParametricSignalModelPlots(string sigFitFileName, string outPathName, int m_hyp=125, bool blind=true, bool doTable=false, string bkgdatFileName="0", int ncats=9, bool is2011=false, bool splitVH=false, bool isMassFac=true, int raiseVHdijet=0, bool spin=false, string spinProc="", string binnedSigFileName="", bool doCrossCheck=false, bool doMIT=false, bool rejig=false){
 
+
+std::vector<string> ={"DiPhotonUntaggedCategory_0","DiPhotonUntaggedCategory_1","DiPhotonUntaggedCategory_2","DiPhotonUntaggedCategory_3","DiPhotonUntaggedCategory_4","VBFTag_0","VBFTag_1","VBFTag_2"};
   gROOT->SetBatch();
   gStyle->SetTextFont(42);
 
@@ -1415,6 +1448,7 @@ void makeParametricSignalModelPlots(string sigFitFileName, string outPathName, i
   else newFileName = sigFitFileName;
 
   TFile *hggFile = TFile::Open(newFileName.c_str());
+	std::cout << "hggFile is Open " << hggFile->IsOpen() << std::endl;
 
   getConfigFromFile(hggFile,is2011,splitVH,isMassFac);
   
@@ -1425,6 +1459,16 @@ void makeParametricSignalModelPlots(string sigFitFileName, string outPathName, i
   RooWorkspace *hggWS;
   if (is2011) hggWS = (RooWorkspace*)hggFile->Get(Form("wsig_%s",sqrts.c_str()));
   else        hggWS = (RooWorkspace*)hggFile->Get(Form("wsig_%s",sqrts.c_str()));
+	if (!hggWS) {
+	
+	sqrts="13TeV";
+	hggWS = (RooWorkspace*)hggFile->Get(Form("wsig_%s",sqrts.c_str()));
+	}
+			
+		/*	std::list<RooAbsData*> data2 =  (hggWS->allData()) ;
+			for (std::list<RooAbsData*>::const_iterator iterator = data.begin(), end = data.end(); iterator != end; ++iterator) {
+			std::cout << **iterator << std::endl;
+			}*/
  
   if (!hggWS) {
     cerr << "Workspace is null" << endl;
