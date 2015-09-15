@@ -16,6 +16,7 @@ PSEUDODATADAT=""
 SIGFILE=""
 BKGPLOTSONLY=0
 SEED=0
+INTLUMI=1
 
 usage(){
 	echo "The script runs background scripts:"
@@ -32,6 +33,7 @@ echo "--pseudoDataDat)"
 echo "--sigFile) "
 echo "--bkgPlotsOnly)"
 echo "--seed) for pseudodata random number gen seed (default $SEED)"
+echo "--intLumi) specified in fb^-{1} (default $INTLUMI)) "
 }
 
 
@@ -39,7 +41,7 @@ echo "--seed) for pseudodata random number gen seed (default $SEED)"
 
 
 # options may be followed by one colon to indicate they have a required argument
-if ! options=$(getopt -u -o hi:p:f: -l help,inputFile:,procs:,flashggCats:,ext:,fTestOnly,pseudoDataOnly,bkgPlotsOnly,pseudoDataDat:,sigFile:,seed: -- "$@")
+if ! options=$(getopt -u -o hi:p:f: -l help,inputFile:,procs:,flashggCats:,ext:,fTestOnly,pseudoDataOnly,bkgPlotsOnly,pseudoDataDat:,sigFile:,seed:,intLumi: -- "$@")
 then
 # something went wrong, getopt will put out an error message for us
 exit 1
@@ -60,6 +62,7 @@ case $1 in
 --sigFile) SIGFILE=$2; shift;;
 --bkgPlotsOnly) BKGPLOTSONLY=1;;
 --seed) SEED=$2; shift;;
+--intLumi) INTLUMI=$2; shift;;
 
 (--) shift; break;;
 (-*) usage; echo "$0: error - unrecognized option $1" 1>&2; usage >> /dev/stderr; exit 1;;
@@ -96,11 +99,12 @@ mkdir -p $OUTDIR/pseudoData
 echo "--------------------------------------"
 echo "Running Pseudodata"
 echo "--> Create fake data by fitting simulations, throwing toys and adding datasets"
+echo "--> generating $INTLUMI fb^{-1} of pseudodata."
 echo "--------------------------------------"
 
-./bin/pseudodataMaker -i $PSEUDODATADAT --pseudodata 1 --plotdir $OUTDIR/pseudoData -f $CATS --seed $SEED
+./bin/pseudodataMaker -i $PSEUDODATADAT --pseudodata 1 --plotdir $OUTDIR/pseudoData -f $CATS --seed $SEED --intLumi $INTLUMI
 
-FILE=pseudoWS.root
+FILE=$OUTDIR/pseudoData/pseudoWS.root
 
 fi
 
@@ -131,7 +135,7 @@ if [ "$SIGFILE" != "" ]; then
 SIG="-s $SIGFILE"
 fi
 echo "./scripts/subBkgPlots.py -b CMS-HGG_multipdf_$EXT.root -d $OUTDIR/bkgPlots -S 13 --isMultiPdf --useBinnedData --runLocal -c 9 $SIG"
-./scripts/subBkgPlots.py -b CMS-HGG_multipdf_$EXT.root -d $OUTDIR/bkgPlots -S 13 --isMultiPdf --useBinnedData  --doBands --runLocal -c 9 --massStep 2 $SIG -L 120 -H 130 -f $CATS #for now
+./scripts/subBkgPlots.py -b CMS-HGG_multipdf_$EXT.root -d $OUTDIR/bkgPlots -S 13 --isMultiPdf --useBinnedData  --doBands --runLocal  --massStep 2 $SIG -L 120 -H 130 -f $CATS -l $CATS #for now
 
 fi
 

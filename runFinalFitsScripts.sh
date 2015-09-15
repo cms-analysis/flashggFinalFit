@@ -18,6 +18,9 @@ DATACARDONLY=1
 COMBINEONLY=1
 COMBINEPLOTSONLY=0
 SUPERLOOP=1
+COUNTER=0
+CONTINUELOOP=0
+INTLUMI=1
 
 usage(){
 	echo "The script runs background scripts:"
@@ -35,6 +38,8 @@ echo "--superloop) Used to loop over the whole process N times (default $SUPERLO
 echo "--signalOnly)"
 echo "--backgroundOnly) "
 echo "--datacardOnly)"
+echo "--continueLoop) specify which iteration to start loop at (default $COUNTER)"
+echo "--intLumi) specified in fb^-{1} (default $INTLUMI)) "
 }
 
 
@@ -42,7 +47,7 @@ echo "--datacardOnly)"
 
 
 # options may be followed by one colon to indicate they have a required argument
-if ! options=$(getopt -u -o hi:p:f: -l help,inputFile:,procs:,flashggCats:,ext:,,pseudoDataDat:,sigFile:,combine,combineOnly,combinePlotsOnly,signalOnly,backgroundOnly,datacardOnly,superloop: -- "$@")
+if ! options=$(getopt -u -o hi:p:f: -l help,inputFile:,procs:,flashggCats:,ext:,,pseudoDataDat:,sigFile:,combine,combineOnly,combinePlotsOnly,signalOnly,backgroundOnly,datacardOnly,superloop:,continueLoop:,intLumi: -- "$@")
 then
 # something went wrong, getopt will put out an error message for us
 exit 1
@@ -65,6 +70,8 @@ case $1 in
 --combineOnly) COMBINEONLY=1;BKGONLY=0;SIGONLY=0;DATACARDONLY=0;;
 --combinePlotsOnly) COMBINEPLOTSONLY=1;COMBINEONLY=1;BKGONLY=0;SIGONLY=0;DATACARDONLY=0;;
 --superloop) SUPERLOOP=$2 ; shift;;
+--continueLoop) COUNTER=$2; CONTINUELOOP=1 ; shift;;
+--intLumi) INTLUMI=$2; shift ;;
 
 (--) shift; break;;
 (-*) usage; echo "$0: error - unrecognized option $1" 1>&2; usage >> /dev/stderr; exit 1;;
@@ -93,7 +100,7 @@ echo "[INFO] outdir is $OUTDIR"
 ####################################################
 ##################### SIGNAL #######################
 ####################################################
-
+if [ $CONTINUELOOP == 0 ]; then
 if [ $SIGONLY == 1 ]; then
 
 echo "------------------------------------------------"
@@ -101,14 +108,15 @@ echo "------------>> Running SIGNAL"
 echo "------------------------------------------------"
 
 cd Signal
-./runSignalScripts.sh -i $FILE -p $PROCS -f $CATS --ext $EXT
+./runSignalScripts.sh -i $FILE -p $PROCS -f $CATS --ext $EXT --intLumi $INTLUMI
 cd -
+fi
 fi
 
 ##Signal script only need to be run once, outside of superloop
-COUNTER=0
 while [ $COUNTER -lt $SUPERLOOP ]; do
-echo "[INFO] on loop number $COUNTER"
+echo "[INFO] on loop number $COUNTER/$SUPERLOOP"
+
 
 
 ####################################################
@@ -121,7 +129,8 @@ echo "-------------> Running BACKGROUND"
 echo "------------------------------------------------"
 
 cd Background
-./runBackgroundScripts.sh -p $PROCS -f $CATS --ext $EXT --pseudoDataDat $PSEUDODATADAT --sigFile ../Signal/$OUTDIR/CMS-HGG_sigfit_$EXT.root --seed $COUNTER 
+./runBackgroundScripts.sh -p $PROCS -f $CATS --ext $EXT --pseudoDataDat $PSEUDODATADAT --sigFile ../Signal/$OUTDIR/CMS-HGG_sigfit_$EXT.root --seed $COUNTER --intLumi $INTLUMI
+
 cd -
 fi
 
@@ -136,7 +145,8 @@ echo "------------> Create DATACARD"
 echo "------------------------------------------------"
 
 cd Datacard
-./makeParametricModelDatacardFLASHgg.py -i ../Signal/$OUTDIR/CMS-HGG_sigfit_$EXT.root  -o Datacard_13TeV_$EXT.txt -p $PROCS -c $CATS --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf
+./makeParametricModelDatacardFLASHgg.py -i ../Signal/$OUTDIR/CMS-HGG_sigfit_$EXT.root  -o Datacard_13TeV_$EXT.txt -p $PROCS -c $CATS --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf # --intLumi $INTLUMI
+
 cd -
 fi
 
@@ -157,9 +167,11 @@ cp ../../Datacard/Datacard_13TeV_$EXT.txt CMS-HGG_mva_13TeV_datacard.txt
 
 cp combineHarvesterOptions13TeV_Template.dat combineHarvesterOptions13TeV_$EXT.dat
 sed -i "s/!EXT!/$EXT/g" combineHarvesterOptions13TeV_$EXT.dat 
+sed -i "s/!INTLUMI!/$INTLUMI/g" combineHarvesterOptions13TeV_$EXT.dat 
 
 cp combinePlotsOptions_Template.dat combinePlotsOptions_$EXT.dat
 sed -i "s/!EXT!/$EXT/g" combinePlotsOptions_$EXT.dat
+sed -i "s/!INTLUMI!/$INTLUMI/g" combinePlotsOptions_$INTLUMI.dat
 
 if [ $COMBINEPLOTSONLY == 0 ]; then
 ./combineHarvester.py -d combineHarvesterOptions13TeV_$EXT.dat -q 1nh
@@ -190,7 +202,7 @@ LEDGER=" --it $COUNTER --itLedger itLedger_$EXT.txt"
 #./makeCombinePlots.py -f combineJobs13TeV_pilottest090915/Asymptotic/Asymptotic.root --limit -b
 #./makeCombinePlots.py -f combineJobs13TeV_pilottest090915/ExpProfileLikelihood/ExpProfileLikelihood.root --pval -b
 ./makeCombinePlots.py -d combinePlotsOptions_$EXT.dat -b $LEDGER 
-./makeCombinePlots.py -f combineJobs13TeV_$EXT/MuScan/MuScan.root --mu -t "#sqrt{s}\=13TeV L\=19.6fb^{-1}" -o mu -b $LEDGER #for some reason doesn't work in datfile
+./makeCombinePlots.py -f combineJobs13TeV_$EXT/MuScan/MuScan.root --mu -t "#sqrt{s}\=13TeV L\=$INTLUMI fb^{-1}" -o mu -b $LEDGER #for some reason doesn't work in datfile
 
 python superloopPlots.py itLedger_$EXT.txt -b 
 
@@ -203,6 +215,8 @@ rm *png
 if [ $USER == "lcorpe" ]; then
 cp -r $OUTDIR ~/www/.
 cp ~lcorpe/public/index.php ~/www/$OUTDIR/combinePlots/.
+echo "plots available at: "
+echo "https://lcorpe.web.cern.ch/lcorpe/$OUTDIR"
 fi
 
 cd -
@@ -210,12 +224,10 @@ cd -
 fi
 
 echo "signal output at Signal/$OUTDIR"
-echo "background output at Signal/$OUTDIR"
-echo "comibe output at Signal/$OUTDIR"
-echo "plots available at: "
-echo "https://lcorpe.web.cern.ch/lcorpe/$OUTDIR"
+echo "background output at Background/$OUTDIR"
+echo "combine output at Plots/FinalResuls/$OUTDIR"
+
 
 COUNTER=$[COUNTER + 1]
 done
 
-mv *Ledger* $OUTDIR/combinePlots/.

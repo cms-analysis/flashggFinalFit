@@ -80,13 +80,16 @@ elif options.is2012:
 	tthHadCat = [12]
 	tthCats = [11,12]
 	vhHadCat = [13]
-else:  #FLASHGG
+else:  #FLASHG #FIXME
 	incCats = [0,1,2,3,4]
 	dijetCats = [5,6,7]
-	tightLepCat = [-1]
-	looseLepCat = [-1]
-	tthCats = [-1]
-	vhHadCat = [-1]
+	tthLepCat = [8]
+	tthHadCat = [8]
+	tthCats = [11,12]
+	vhHadCat = [9]
+	tightLepCat = [10]
+	looseLepCat = [11]
+	metCat = [12]
 
 options.procs += ',bkg_mass'
 options.procs = [combProc[p] for p in options.procs.split(',')]
@@ -108,7 +111,7 @@ else: options.globalScalesCorr = options.globalScalesCorr.split(',')
 
 inWS = inFile.Get('wsig_13TeV')
 intL = inWS.var('IntLumi').getVal() #FIXME
-print "[INFO] Get Intlumi from file, value : ", intL
+print "[INFO] Get Intlumi from file, value : ", intL," pb^{-1}"
 #intL = 19700 #FIXME
 
 # info = [file,workspace,name]

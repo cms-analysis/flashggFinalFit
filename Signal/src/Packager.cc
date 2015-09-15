@@ -24,12 +24,12 @@ Packager::Packager(RooWorkspace *ws, vector<string> procs, int nCats, int mhLow,
   procs_(procs),
   nCats_(nCats),
   cats_(cats),
-  sqrts_(sqrts),
   flashggCats_(flashggCats),
   mhLow_(mhLow),
   mhHigh_(mhHigh),
 	skipPlots_(skipPlots),
   outDir_(outDir),
+  sqrts_(sqrts),
   skipMasses_(skipMasses)
 {
 	normalization = new Normalization_8TeV();
@@ -68,7 +68,7 @@ void Packager::packageOutput(){
 					tempData = (RooDataSet*)outWS->data(Form("sig_%s_mass_m%d_%s",proc->c_str(),mh,catname.c_str()));
 				}
 				if (!tempData) {
-					cerr << "WARNING -- dataset: " << Form("sig_%s_mass_m%d_%s",proc->c_str(),mh,catname.c_str()) << " not found. It will be skipped" << endl;
+					cerr << "[WARNING] -- dataset: " << Form("sig_%s_mass_m%d_%s",proc->c_str(),mh,catname.c_str()) << " not found. It will be skipped" << endl;
 					expectedObjectsNotFound.push_back(Form("sig_%s_mass_m%d_%s",proc->c_str(),mh,catname.c_str()));
 					continue;
 				}
@@ -78,13 +78,13 @@ void Packager::packageOutput(){
 				else allDataThisCat->append(*tempData);
 			}
 			if (!allDataThisCat) {
-				cerr << "WARNING -- allData for cat " << catname.c_str() << " is NULL. Probably because the relevant datasets couldn't be found. Skipping.. " << endl;
+				cerr << "[WARNING] -- allData for cat " << catname.c_str() << " is NULL. Probably because the relevant datasets couldn't be found. Skipping.. " << endl;
 				continue;
 			}
 			outWS->import(*allDataThisCat);
 		}
 		if (!allDataThisMass) {
-			cerr << "WARNING -- allData for mass " << mh << " is NULL. Probably because the relevant datasets couldn't be found. Skipping.. " << endl;
+			cerr << "[WARNING] -- allData for mass " << mh << " is NULL. Probably because the relevant datasets couldn't be found. Skipping.. " << endl;
 			continue;
 		}
 		outWS->import(*allDataThisMass);
@@ -105,7 +105,7 @@ void Packager::packageOutput(){
 			// sum eA
 			RooSpline1D *norm = (RooSpline1D*)inWS->function(Form("hggpdfsmrel_%dTeV_%s_%s_norm",sqrts_,proc->c_str(),catname.c_str()));
 			if (!norm) {
-				cerr << "WARNING -- ea: " << Form("hggpdfsmrel_%dTeV_%s_%s_norm",sqrts_,proc->c_str(),catname.c_str()) << " not found. It will be skipped" << endl;
+				cerr << "[WARNING] -- ea: " << Form("hggpdfsmrel_%dTeV_%s_%s_norm",sqrts_,proc->c_str(),catname.c_str()) << " not found. It will be skipped" << endl;
 			}
 			else {
 				runningNormSum->add(*norm);
@@ -114,7 +114,7 @@ void Packager::packageOutput(){
 			// sum pdf
 			RooExtendPdf *tempPdf = (RooExtendPdf*)inWS->pdf(Form("extendhggpdfsmrel_%dTeV_%s_%sThisLumi",sqrts_,proc->c_str(),catname.c_str()));
 			if (!tempPdf) {
-				cerr << "WARNING -- pdf: " << Form("extendhggpdfsmrel_%dTeV_%s_%s",sqrts_,proc->c_str(),catname.c_str()) << " not found. It will be skipped" << endl;
+				cerr << "[WARNING] -- pdf: " << Form("extendhggpdfsmrel_%dTeV_%s_%s",sqrts_,proc->c_str(),catname.c_str()) << " not found. It will be skipped" << endl;
 				expectedObjectsNotFound.push_back(Form("extendhggpdfsmrel_%dTeV_%s_%s",sqrts_,proc->c_str(),catname.c_str()));
 				continue;
 			}
@@ -126,7 +126,7 @@ void Packager::packageOutput(){
 			sumPdfs->add(*tempPdf);
 		}
 		if (sumPdfsThisCat->getSize()==0){
-			cerr << "WARNING -- sumPdfs for cat " << catname.c_str() << " is EMPTY. Probably because the relevant pdfs couldn't be found. Skipping.. " << endl;
+			cerr << "[WARNING] -- sumPdfs for cat " << catname.c_str() << " is EMPTY. Probably because the relevant pdfs couldn't be found. Skipping.. " << endl;
 			continue;
 		}
 		// Dont put sqrts here as combine never uses this (but our plotting scripts do)
@@ -134,7 +134,7 @@ void Packager::packageOutput(){
 		outWS->import(*sumPdfsPerCat,RecycleConflictNodes());
 	}
 	if (sumPdfs->getSize()==0){
-		cerr << "WARNING -- sumAllPdfs is EMPTY. Probably because the relevant pdfs couldn't be found. Skipping.. " << endl;
+		cerr << "[WARNING] -- sumAllPdfs is EMPTY. Probably because the relevant pdfs couldn't be found. Skipping.. " << endl;
 	}
 	else {
 		// Dont put sqrts here as combine never uses this (but our plotting scripts do)
@@ -143,7 +143,7 @@ void Packager::packageOutput(){
 	}
 
 	if (runningNormSum->getSize()==0){
-		cerr << "WARNING -- runningNormSum is EMPTY. Probably because the relevant normalizations couldn't be found. Skipping.. " << endl;
+		cerr << "[WARNING] -- runningNormSum is EMPTY. Probably because the relevant normalizations couldn't be found. Skipping.. " << endl;
 	}
 	else {
 		RooAddition *normSum = new RooAddition("normSum","normSum",*runningNormSum);
@@ -160,14 +160,16 @@ void Packager::packageOutput(){
 				double intLumiVal = 0.;
 				if (intLumi){
 					intLumiVal = intLumi->getVal();//FIXME
-				std::cout << "[INFO] intlumi value is " << intLumiVal << std::endl;
+				//std::cout << "[INFO] (packager) intlumi value is " << intLumiVal << std::endl;
 				} else {
-					std::cout  << "[WARNING] IntLumi missing from workspace, artifically set to 19700 "<< std::endl;
-					intLumiVal = 19700;
+					std::cout  << "[ERROR] IntLumi missing from workspace, exit "<< std::endl;
+					//intLumiVal = 1000;
+					return ;
 				}
 				MH->setVal(mh);
 				expEventsGraph->SetPoint(p,mh,intLumiVal*norm->getVal());
 				effAccGraph->SetPoint(p,mh,norm->getVal()/(normalization->GetXsection(mh)*normalization->GetBR(mh)));
+				std::cout << " [INFO] eff*acc " << norm->getVal()/(normalization->GetXsection(mh)*normalization->GetBR(mh)) << std::endl;
 				p++;
 			}
 			TCanvas *canv = new TCanvas();
@@ -179,13 +181,13 @@ void Packager::packageOutput(){
 			canv->Print(Form("%s/effAccCheck.png",outDir_.c_str()));
 			expEventsGraph->SetLineWidth(3);
 			expEventsGraph->GetXaxis()->SetTitle("m_{H} (GeV)");
-			double intLumiVal = 19700;
+			double intLumiVal = 1000;
 			if (intLumi){
-				intLumiVal = intLumi->getVal();//FIXME
+				intLumiVal = intLumi->getVal();
 				std::cout << "[INFO] intlumi value is " << intLumiVal << std::endl;
 			} else {
-				std::cout  << "[WARNING] IntLumi missing from workspace, artifically set to 19700 "<< std::endl;
-				intLumiVal = 19700;
+				std::cout  << "[ERROR] could not find IntLumi var. Exit "<< std::endl;
+				return ;
 			}
 			expEventsGraph->GetYaxis()->SetTitle(Form("Expected Events for %4.1ffb^{-1}",intLumiVal/1000.));
 			expEventsGraph->Draw("AL");

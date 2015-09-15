@@ -14,6 +14,7 @@ FTESTONLY=0
 CALCPHOSYSTONLY=0
 SIGFITONLY=0
 SIGPLOTSONLY=0
+INTLUMI=1
 
 usage(){
 	echo "The script runs three signal scripts in this order:"
@@ -30,6 +31,7 @@ usage(){
 		echo "--calcPhoSystOnly) "
 		echo "--sigFitOnly) "
 		echo "--sigPlotsOnly) "
+		echo "--intLumi) specified in fb^-{1} (default $INTLUMI)) "
 }
 
 
@@ -37,7 +39,7 @@ usage(){
 
 
 # options may be followed by one colon to indicate they have a required argument
-if ! options=$(getopt -u -o hi:p:f: -l help,inputFile:,procs:,flashggCats:,ext:,fTestOnly,calcPhoSystOnly,sigFitOnly,sigPlotsOnly -- "$@")
+if ! options=$(getopt -u -o hi:p:f: -l help,inputFile:,procs:,flashggCats:,ext:,fTestOnly,calcPhoSystOnly,sigFitOnly,sigPlotsOnly,intLumi: -- "$@")
 then
 # something went wrong, getopt will put out an error message for us
 exit 1
@@ -56,6 +58,7 @@ case $1 in
 --calcPhoSystOnly) CALCPHOSYSTONLY=1;;
 --sigFitOnly) SIGFITONLY=1;;
 --sigPlotsOnly) SIGPLOTSONLY=1;;
+--intLumi) INTLUMI=$2; shift ;;
 
 (--) shift; break;;
 (-*) usage; echo "$0: error - unrecognized option $1" 1>&2; usage >> /dev/stderr; exit 1;;
@@ -111,7 +114,7 @@ echo "Running calcPho"
 echo "-->Determine effect of photon systematics"
 echo "=============================="
 
-echo "./bin/calcPhotonSystConsts -i $FILE -o dat/photonCatSyst_$EXT.dat -p $PROCS -s $SCALES -r $SMEARS"
+echo "./bin/calcPhotonSystConsts -i $FILE -o dat/photonCatSyst_$EXT.dat -p $PROCS -s $SCALES -r $SMEARS -D $OUTDIR -f $CATS"
 ./bin/calcPhotonSystConsts -i $FILE -o dat/photonCatSyst_$EXT.dat -p $PROCS -s $SCALES -r $SMEARS -D $OUTDIR -f $CATS 
 
 cp dat/photonCatSyst_$EXT.dat $OUTDIR/dat/copy_photonCatSyst_$EXT.dat
@@ -127,8 +130,8 @@ echo "Running SignalFit"
 echo "-->Create actual signal model"
 echo "=============================="
 
-echo "./bin/SignalFit -i $FILE -d dat/newConfig_$EXT.dat  --mhLow=120 --mhHigh=130 -s dat/photonCatSyst_$EXT.dat --procs $PROCS -o $OUTDIR/CMS-HGG_sigfit_$EXT.root -p $OUTDIR/sigfit -f $CATS"
-./bin/SignalFit -i $FILE -d dat/newConfig_$EXT.dat  --mhLow=120 --mhHigh=130 -s dat/photonCatSyst_$EXT.dat --procs $PROCS -o $OUTDIR/CMS-HGG_sigfit_$EXT.root -p $OUTDIR/sigfit -f $CATS
+echo "./bin/SignalFit -i $FILE -d dat/newConfig_$EXT.dat  --mhLow=120 --mhHigh=130 -s dat/photonCatSyst_$EXT.dat --procs $PROCS -o $OUTDIR/CMS-HGG_sigfit_$EXT.root -p $OUTDIR/sigfit -f $CATS --changeIntLumi $INTLUMI"
+./bin/SignalFit -i $FILE -d dat/newConfig_$EXT.dat  --mhLow=120 --mhHigh=130 -s dat/photonCatSyst_$EXT.dat --procs $PROCS -o $OUTDIR/CMS-HGG_sigfit_$EXT.root -p $OUTDIR/sigfit -f $CATS --changeIntLumi $INTLUMI
 
 fi
 

@@ -47,7 +47,7 @@ int mass_;
 int pseudodata_;
 int append_;
 int draw_;
-int intlumi_;
+float intlumi_;
 int print_;
 float seed_;
 string procString_;
@@ -68,7 +68,7 @@ void OptionParser(int argc, char *argv[]){
 		("help,h",                                                                                "Show help")
 		("infilename,i", po::value<string>(&filenameStr_),                                           "Input file name")
 		("draw", po::value<int>(&draw_)->default_value(0),                                    "Draw some plots")
-		("intlumi", po::value<int>(&intlumi_)->default_value(0),                                    "Draw some plots")
+		("intLumi", po::value<float>(&intlumi_)->default_value(0),                                    "Specify hwo much pseudodata to generate (in fb^{-1}")
 		("print", po::value<int>(&print_)->default_value(0),                                    "print contents of ws")
 		("append", po::value<int>(&pseudodata_)->default_value(0),                                    "make pseudodata from inputfiles")
 		("seed", po::value<float>(&seed_)->default_value(0.),                                    "seed for pseudodata gandom number generator")
@@ -120,6 +120,8 @@ int main(int argc, char *argv[]){
 	}
 	}
 	 system(Form("mkdir -p %s/",plotDir_.c_str()));
+	 system(Form("mkdir -p %s/gaussians",plotDir_.c_str()));
+	 system(Form("mkdir -p %s/berns",plotDir_.c_str()));
 	// check input file and push back datasets
 	ifstream infile;
 	infile.open(filenameStr_.c_str());
@@ -146,12 +148,12 @@ int main(int argc, char *argv[]){
 	RooRealVar  sqrts("SqrtS","SqrtS",0,14) ;
 	RooRealVar  intlumi("IntLumi","IntLumi",0,300000) ;
 	sqrts.setVal(13);
-	intlumi.setVal(1);
+	intlumi.setVal(intlumi_*1000);
 	outWS->import(sqrts);
 	outWS->import(intlumi);
 
 	// new file for our workspace
-	TFile *outFile = TFile::Open("pseudoWS.root","RECREATE");
+	TFile *outFile = TFile::Open((plotDir_+"/pseudoWS.root").c_str(),"RECREATE");
 
 	// loop over input files
 	for (unsigned int ifile =0; ifile < filename_.size() ; ifile++){
@@ -189,14 +191,20 @@ int main(int argc, char *argv[]){
 
 		//set intLumi
 		if (intlumi_){
-			RooRealVar *lumi = (RooRealVar*)inWS->var("IntLumi");
-			if (lumi){
-				std::cout << "[INFO] Intlumi val "<< lumi->getVal() << std::endl;
+	//		RooRealVar *lumi = (RooRealVar*)inWS->var("IntLumi");
+	//		if (lumi){
+	   //		inWS->import(intlumi);
+		//		TDirectory *savdir = gDirectory;
+		//		TDirectory *adir = savdir->mkdir("diphotonDumper");
+		//		adir->cd();
+       //	inWS->Write("cms_hgg_13TeV");
+				std::cout << "[INFO] Intlumi val "<< intlumi.getVal() << " pb ^{-1}" <<  std::endl;
+			//	return 0;
 			} else {
 				std::cout << "[INFO] no IntLumi variable, exit." << std::endl;
 				return 0;
 			}
-		}
+		
 
 		// This will just append the required datasets together, throwing no toys..
 		if (append_){
@@ -330,19 +338,19 @@ int main(int argc, char *argv[]){
 				//	std::cout <<" try also gaussian " << gauss << std::endl;
 
 
-				RooFitResult *fitTest = p2->fitTo(*dataPlot,RooFit::Save(1),RooFit::Verbose(0),RooFit::SumW2Error(kTRUE), RooFit::Minimizer("Minuit2","minimize")); //FIXME
-				float bernsnll = fitTest->minNll();
-				RooFitResult *fitTestGaus = gauss->fitTo(*dataPlot,RooFit::Save(1),RooFit::Verbose(0),RooFit::SumW2Error(kTRUE), RooFit::Minimizer("Minuit2","minimize")); //FIXME
-				float gausnll = fitTestGaus->minNll();
 				RooDataSet* dataFit;
 				//if (gausnll < bernsnll)
 				RooRandom::randomGenerator()->SetSeed(seed_);
 				if (isSig) {
-					dataFit = gauss->generate(newmass,sumEntries)  ;
+				RooFitResult *fitTestGaus = gauss->fitTo(*dataPlot,RooFit::Save(1),RooFit::Verbose(0),RooFit::SumW2Error(kTRUE), RooFit::Minimizer("Minuit2","minimize")); //FIXME
+				float gausnll = fitTestGaus->minNll();
+					dataFit = gauss->generate(newmass,intlumi_*sumEntries)  ; //intLumi is in pb^-1. Use directly as mustiplicative factor since default is for 1 pb^-1
 					gauss->plotOn(mframe) ;
 					std::cout << " [INFO] sig - gaussian simgma" << a2.getVal() << ", gaussian mean " << a1.getVal() <<  ", nEvents in +/-1 sig " << dataFit->sumEntries() << std::endl;
 				} else {
-					dataFit = p2->generate(newmass,sumEntries)  ;
+				RooFitResult *fitTest = p2->fitTo(*dataPlot,RooFit::Save(1),RooFit::Verbose(0),RooFit::SumW2Error(kTRUE), RooFit::Minimizer("Minuit2","minimize")); //FIXME
+				float bernsnll = fitTest->minNll();
+					dataFit = p2->generate(newmass,intlumi_*sumEntries)  ;
 					p2->plotOn(mframe) ;
 				}
 				dataFit->plotOn(mframe,LineColor(kRed), FillColor(kRed), MarkerColor(kRed));
@@ -350,8 +358,13 @@ int main(int argc, char *argv[]){
 
 				mframe->Draw();
 				std::ostringstream name;
-				if (isSig)	name << plotDir_<<"/gaussians/testGaus"<<outData[i]->GetName()<<ifile<<".pdf";
-			//		c1->SaveAs((name).str().c_str());
+				if (isSig) {	
+				name << plotDir_<<"/gaussians/testGaus"<<outData[i]->GetName()<<"_file"<<ifile<<".pdf";
+				}
+				else {
+				name << plotDir_<<"/berns/testBern"<<outData[i]->GetName()<<"_file"<<ifile<<".pdf";
+				}
+					c1->SaveAs((name).str().c_str());
 
 
 				//	if (ifile==0){ // first iteration, we want to create a new list of datasets to store in the otuput file 

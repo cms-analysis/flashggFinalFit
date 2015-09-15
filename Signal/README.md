@@ -1,128 +1,88 @@
-# Running Final Fits Plots - Notes
-
-## Different File Types
-
-We have several types of files, which can be differentiated by their suffix:
-
-* `_Bkg.root`        
--> Output of running over Background MC. Used as input to `./Background/bin/BiasStudy`.
-
-* `_Data.root` or `_data.root`            
--> Output of running over Data. Used as input to `./Background/bin/fTest` to produce `_multipdf.root` files.
-
-* `_Sig.root`
--> Output of running over signal MC without systematic variations. This is used as input to the scripts `./Signal/bin/SignalFit` to create `_sigfit.root` files and `./Signal/bin/signalFTest` to create plots (which help to determine `dat/newConfig.dat`). Also used in Used as input to `./Background/bin/BiasStudy`.
-
-* `_Syst.root`
--> Input for `./Signal/bin/calcPhotonSystConsts` to create `Signal/dat/photonCatSyst.dat`
-
-* `_multipdf.root`
--> Not used for signal model workflow (for Background model).
-
-* `_sigfit.root`
--> Output of `./Signal/binSignalFit`, used as input for `Plots/makeParametricSignalModelPlots.C` to make Signal Plots.
-
-For now, for FLASHgg `_Sig.root` and `_Syst.root` are in the same file.
-
+# Signal Scripts
+This is where the signal model determined. Including interpolation between mass points. 
 ## Signal workflow
 
-The workflow looks like this: 
+The workflow looks like this:
+* Starting from flashgg output root file
+* Generate `dat/config.dat` using `./bin/signalFTest` (number of gaussians to fit)
+* Generate `./bin/calcPhotonSystConsts` using `dat/photonCatSyst.dat` (photon systematics config file)
+* Generate signal model file using `./bin/SignalFit` and the output of teh above.
+* Make validation plots using `./bin/makeParametricSignalModelPlots`
 
-                              flashgg output
-                              /          \ 
-                             /            \
-                   		_Sig.root        _Syst.root     
-                   		/    \                     \
-		               	/       \                      \
-	  	  	./bin/signalFTest   \                 ./bin/calcPhotonSystConsts
-	               		|           \                        |
-		                |            \                       |
-	        		dat/config.dat       \            dat/photonCatSyst.dat
-		                    	\         \             /
-	                       	 \          \          /    
-	                      	   \          \       /   
-		                            ./bin/SignalFit
-		                                   	|
-		                                  	|
-	                           		_sigfit.root
-	                                   		|
-	                                  		|
-	               		../Plots/makeParametricSignalModelPlots.C                                          
-		                                  	|
-		                                  	|
-                    	            		Plots
+Thankfully this whole process can be run in one command using the signal pilot script `runSignalScripts.sh`
 
-## Generating the dat/config.dat file.	
+## Quickstart
 
-One can use the `./bin/signalFTest` script to regenerate this. Example output is provided here 
-http://www.hep.ph.imperial.ac.uk/~lc1113/FinalFit_010615/Signal/fTest/
+To runa  basic version of the signal workflow you can use the `runSignalScripts.sh` script. 
+```
+cmsenv
+FILE=/afs/cern.ch/user/l/lcorpe/work/public/test_jobs_v8/everythingWithLumi.root
+/runSignalScripts.sh -i $FILE -p ggh -f UntaggedTag_0 --ext test --intLumi 1
+```
+The available options can be seen by doing `runSignalScripts.sh -h`. They are all self-explanatory, aside from `--intLumi`: This can be used to over-ride the built in value of IntLumi and amend the MC event weights as needed.
+
+## Script-byscript guide
+### Generating the dat/config.dat file.
+
+One can use the `./bin/signalFTest` script to regenerate this. Example output is provided here.
+
+The signalFtest has as its purpose to detrmine how many gaussians should be used to fit the mgg distribution for each tag,process, both in the cases that the "right vertex" and "wrong vertex" have been selected (this uses a `dZ<1` cut).
+The output is the `dat/newConfig.dat` file which lists this information. At present, the script always returns 3 gaussians for the right vertex and 2 gaussians for the wrong vertex, with the idea beaing that the user can change the values as they like after inspecting the output plots. Efforts are underway to automatise this further usign a chi2/ndof method (or similar).
 
 Working FLASHgg example:
 ```
-file=/afs/cern.ch/work/s/sethzenz/public/test_jobs_3/output_GluGluHToGG_M-125_13TeV_powheg_pythia8.root
-./bin/signalFTest -i $file -d dat/newConfig_LCTest2.dat -p ggh
+file=/afs/cern.ch/user/l/lcorpe/work/public/test_jobs_v8/everythingWithLumi.root
+./bin/signalFTest -i $file -d dat/newConfig.dat -p ggh -f UntaggedTag_0 -o test
 ```
-
-Working h2gglobe example:
-
-You will need to get hold of the h2gglobe files on eos. One way to do this is:
+Example output can be found at:
 ```
-eosmount $HOME/eos
+https://lcorpe.web.cern.ch/lcorpe/outdir_intlumitest1fb/sigfTest/
 ```
-and then substitute lcorpe for your username in the below.
-```
-./bin/signalFTest -i /afs/cern.ch/user/l/lcorpe//eos/cms/store/group/phys_higgs/cmshgg/analyzed/workspace_store/legacy_freeze_v6/CMS-HGG_mva_8TeV_Sig_2014_01_13.root -d dat/newConfig_LCTest2.dat -p ggh,vbf -n 9 --isFlashgg 0
-```
+### Generating the dat/photonCatSyst.dat file
 
+The script `./bin/calcPhotonSystConsts` generates the photon category systematics config file, taking as input the flashgg signal workspaces.
 
-## Generating the dat/photonCatSyst.dat file
-
-The script `./bin/calcPhotonSystConsts` generates this config file, taking as input files of the type “_Syst.root”. Produces output like this:
-http://www.hep.ph.imperial.ac.uk/~lc1113/FinalFit_010615/Signal/Systematics/
-
-NB: The systematics functionality is currently only supported for Photon Energy Scale for flashgg.
-The code will be updated to allow other types in due course. For h22globe, this is still possible.
+NB: The systematics functionality is currently only supported for Photon Energy Scale and Photon Energy Smear for flashgg. The code will be updated to allow other types (eg gloval scale, global smearing, material effects) in due course.
 
 FLASHgg working example:
 ```
-./bin/calcPhotonSystConsts -i $file -o dat/photonCatSyst_LCTest.dat -p ggh,tth -s HighR9EE,LowR9EE,HighR9EB,LowR9EB -r HighR9EE,LowR9EE,HighR9EBRho,LowR9EBRho,HighR9EBPhi,LowR9EBPhi
-```
-h2gglobe working example:
-```
-./bin/calcPhotonSystConsts -i /afs/cern.ch/user/l/lcorpe/eos/cms/store/group/phys_higgs/cmshgg/analyzed/workspace_store/legacy_freeze_v6/CMS-HGG_mva_8TeV_Syst_2014_01_13.root -o dat/photonCatSyst_LCTest2.dat --isFlashgg 0
+file=/afs/cern.ch/user/l/lcorpe/work/public/test_jobs_v8/everythingWithLumi.root
+/bin/calcPhotonSystConsts -i $file -o dat/photonCatSyst.dat -p ggh -f UntaggedTag_0 -s HighR9EE,LowR9EE,HighR9EB,LowR9EB -r HighR9EE,LowR9EE,HighR9EBRho,LowR9EBRho,HighR9EBPhi,LowR9EBPhi -D plotsDir 
 ```
 
-## Signal Fit
+Example output can be found at:
+```
+https://lcorpe.web.cern.ch/lcorpe/outdir_intlumitest1fb/systematics/
+```
+
+### Signal Fit
 The main script is SignalFit. This takes as input two dat files and a root file.
 
-* `-d datfile`, which specifies information about how many gaussians to fit in each category under right vertex and wring vertex hypotheses. an example file which can be found at `dat/newConfig.dat`. This file can also be generated using the script  `./bin/SignaFTest`. 
-* `-s systematics datfile`, which tells how to propagate single photon systematics to diphoton categories. Default is example file at `dat/photonCatSyst.dat`. These configs can be generated using `./bin/calcPhotonSystConsts`. 
+* `-d datfile`, which specifies information about how many gaussians to fit in each category under right vertex and wring vertex hypotheses. an example file which can be found at `dat/newConfig.dat`. This file can also be generated using the script  `./bin/SignaFTest`.
+* `-s systematics datfile`, which tells how to propagate single photon systematics to diphoton categories. Default is example file at `dat/photonCatSyst.dat`. These configs can be generated using `./bin/calcPhotonSystConsts`.
 
-`./bin/SignalFit` should run locally in <1hr. (Experimentally, I find ~15min).The output looks something like  `_sigfit.root`
+`./bin/SignalFit` should run locally in < 1hr. 
 
-Plots can be obtained by using the Plots/makeParametricSignalModelPlots.C
-http://www.hep.ph.imperial.ac.uk/~lc1113/FinalFit_010615/Signal/FinalModel/
+The `--changeIntLumi` can be used to over-ride the existing value of IntLumi in the workspace and scale the event weights appropriately. it shoudl be specified in fb^{-1}.
 
 FLASHgg working example:
 ```
-./bin/SignalFit -i $file -d dat/newConfig_LCTest2.dat  --mhLow=120 --mhHigh=130 -s dat/photonCatSyst_LCTest.dat --procs ggh,tth
+file=/afs/cern.ch/user/l/lcorpe/work/public/test_jobs_v8/everythingWithLumi.root
+./bin/SignalFit -i $file -d dat/newConfig.dat  --mhLow=120 --mhHigh=130 -s dat/photonCatSyst.dat --procs ggh -f UntaggedTag_0 -o CMS-HGG_sigfit.root -p sigfit  --changeIntLumi 1
+```
+Example output cna be found here:
+```
+https://lcorpe.web.cern.ch/lcorpe/outdir_intlumitest1fb/sigfit/
 ```
 
-h2gglobe working example:
-```
-./bin/SignalFit -i  -d dat/newConfigMinimal.dat  --mhLow=120 --mhHigh=130 -s dat/photonCatSyst.dat --procs vbf,ggh --isFlashgg 0
+### Making the Signal Plots
 
+To generate validation plots, one can use the `./bin/makeParametricSignalModelPlots` script, which is used as follows.
 ```
-
-## Making the Signal Plots
-
-To actually generate plots, there is a macro stored in Plots. Use it like this(for FLASHgg and, just replace file path for h2gglobe):
-```
-cd ../Plots
-root
-root [0] gSystem->SetIncludePath("-I$ROOTSYS/include -I$ROOFITSYS/include -I$CMSSW_BASE/src");
-root [0] .L $CMSSW_BASE/lib/$SCRAM_ARCH/libHiggsAnalysisCombinedLimit.so
-root [0] .L makeParametricSignalModelPlots.C+g
-root [0] makeParametricSignalModelPlots("../Signal/CMS-HGG_sigfit.root","outputdir")
+./bin/makeParametricSignalModelPlots -i CMS-HGG_sigfit.root  -o outdir_intlumitest1fb -p ggh -f UntaggedTag_0
 ```
 
+Example output can be found here:
+```
+https://lcorpe.web.cern.ch/lcorpe/outdir_intlumitest1fb/sigplots/
+```

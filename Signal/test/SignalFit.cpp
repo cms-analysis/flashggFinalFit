@@ -76,6 +76,8 @@ bool isFlashgg_;
 string flashggCatsStr_;
 vector<string> flashggCats_;
 bool check_;
+float changeIntLumi;
+float originalIntLumi;
 
 void OptionParser(int argc, char *argv[]){
   po::options_description desc1("Allowed options");
@@ -104,6 +106,7 @@ void OptionParser(int argc, char *argv[]){
     ("verbose,v", po::value<int>(&verbose_)->default_value(0),                                			"Verbosity level: 0 (lowest) - 3 (highest)")
 		("isFlashgg",	po::value<bool>(&isFlashgg_)->default_value(true),														"Use flashgg format")
 		("check",	po::value<bool>(&check_)->default_value(false),														"Use flashgg format (default false)")
+		("changeIntLumi",	po::value<float>(&changeIntLumi)->default_value(0),														"If you want to specify an intLumi other than the one in the file. The event weights and rooRealVar IntLumi are both changed accordingly. (Specify new intlumi in fb^{-1})")
     ("flashggCats,f", po::value<string>(&flashggCatsStr_)->default_value("UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,UntaggedTag_4,VBFTag_0,VBFTag_1,VBFTag_2,TTHHadronicTag,TTHLeptonicTag,VHHadronicTag,VHTightTag,VHLooseTag,VHEtTag"),       "Flashgg categories if used") 
   ;                                                                                             		
 	po::options_description desc2("Options kept for backward compatibility");
@@ -317,17 +320,32 @@ int main(int argc, char *argv[]){
 			//std::cout << " WS contains " << *inWS->allData() << std::endl;
 		}
 	}
-	if (inWS) { std::cout << "[INFO] workspace opened correctly" << std::endl;}
+	if (inWS) { std::cout << "[INFO] Workspace opened correctly" << std::endl;}
 	else { std::cout << "[EXIT] Workspace is null pointer. exit" << std::endl; return 0;}
 
 	RooRealVar *mass = (RooRealVar*)inWS->var("CMS_hgg_mass");
 	RooRealVar *weight = (RooRealVar*)inWS->var("weight:weight");
-	RooRealVar *weight0 = (RooRealVar*)inWS->var("weight");
-	if (verbose_) std::cout << "[INFO] RooRealVars mass and weight found ? " << mass << ", " << weight << ", " << weight0 << std::endl;
+	RooRealVar *dZ = (RooRealVar*)inWS->var("dZ");
+	RooRealVar *weight0 = new RooRealVar("weight","weight",-100000,1000000);
+	//RooRealVar *weight0 = (RooRealVar*)inWS->var("weight");
+	if (verbose_) std::cout << "[INFO] RooRealVars mass, weight and dZ, found ? " << mass << ", " << weight0  << ", "<< dZ<<  std::endl;
 	//	if ((!mass) || (!weight) || (!weight0)) return 0;
 	mass->SetTitle("m_{#gamma#gamma}");
 	mass->setUnit("GeV");
 	RooRealVar *intLumi = (RooRealVar*)inWS->var("IntLumi");
+	if (intLumi) {
+		std::cout << "[INFO] Was able to access IntLumi directlly from WS. IntLumi " << intLumi->getVal() << "pb^{-1}" << std::endl;
+		originalIntLumi =intLumi->getVal();
+		if (changeIntLumi){
+			changeIntLumi= changeIntLumi*1000; // specify in pb instead of fb.
+		  originalIntLumi =intLumi->getVal();
+			intLumi->setVal(changeIntLumi);
+			std::cout << "[INFO] Changing IntLumi as specified in options list. IntLumi  " << intLumi->getVal() <<  " pb^{-1}" << std::endl;
+		} else {
+			std::cout << "[ERROR] Could not access IntLumi from file" <<std::endl;
+		return 0;
+	}
+	}
 	RooRealVar *MH = new RooRealVar("MH","m_{H}",mhLow_,mhHigh_);
 	MH->setUnit("GeV");
 	MH->setConstant(true);
@@ -423,7 +441,7 @@ int main(int argc, char *argv[]){
 				//	dataRV = (RooDataSet*)inWS->data(Form("%s_%d_13TeV_flashgg%s",proc.c_str(),mh,flashggCats_[cat].c_str())); //FIXME
 				//	dataWV = (RooDataSet*)inWS->data(Form("%s_%d_13TeV_flashgg%s",proc.c_str(),mh,flashggCats_[cat].c_str())); // FIXME
 				//std::cout << "[WARNING] FIXME - Artificially adding weight 0.085 (~correct weight for hgg events with 9000 MC events, 20/fb of data and e*a of 0.5) to signal sample events. Should eventually be included in workspace by default " << std::endl;
-				if (verbose_)std::cout << "[INFO] opening dataset called "<< Form("%s_%d_13TeV_flashgg%s_",proc.c_str(),mh,flashggCats_[cat].c_str()) << " in in WS " << inWS << std::endl;
+				if (verbose_)std::cout << "[INFO] Opening dataset called "<< Form("%s_%d_13TeV_flashgg%s_",proc.c_str(),mh,flashggCats_[cat].c_str()) << " in in WS " << inWS << std::endl;
 				RooDataSet *data0   = (RooDataSet*)inWS->data(Form("%s_%d_13TeV_flashgg%s_",proc.c_str(),mh,flashggCats_[cat].c_str()));
 				//		if (verbose_) std::cout << "[INFO] dataset "<<  Form("%s_%d_13TeV_flashgg%s_",proc.c_str(),mh,flashggCats_[cat].c_str()) << " for RV+WV open ? " << *data0 <<  " with weight " << data0->weight() << std::endl;
 				//		RooDataSet *dataRV0 = new RooDataSet("dataRV","dataRV",&*data0,*(data0->get()),"(dZ<1)*(weight:weight)","weight:weight");
@@ -436,13 +454,31 @@ int main(int argc, char *argv[]){
 				//		RooRealVar* w = (RooRealVar*) data0->addColumn(wFunc); 
 				//		RooRealVar* wrv = (RooRealVar*) dataRV0->addColumn(wFunc); 
 				//		RooRealVar* wwv = (RooRealVar*) dataWV0->addColumn(wFunc);
-				data = (RooDataSet*) data0->Clone();
+
+
+				if (changeIntLumi){
+					double factor = changeIntLumi/originalIntLumi;
+					std::cout << "[INFO] Changing weights of dataset by a factor " << factor << " as per changeIntLumi option" << std::endl;
+					//*data =  RooDataSet( Form("%s_%d_13TeV_flashgg%s_",proc.c_str(),mh,flashggCats_[cat].c_str()),Form("%s_%d_13TeV_flashgg%s_",proc.c_str(),mh,flashggCats_[cat].c_str()), RooArgSet(*mass,*dZ,*weight), weight->GetName() ); 
+					data = (RooDataSet*) data0->emptyClone();
+				  for (int i = 0; i < data0->numEntries(); i++) {
+						mass->setVal(data0->get(i)->getRealValue("CMS_hgg_mass"));
+						dZ->setVal(data0->get(i)->getRealValue("dZ"));
+					weight0->setVal(factor * data0->weight() ); // <--- is this correct?
+						data->add( RooArgList(*mass, *dZ, *weight0), weight0->getVal() );
+					}
+					if (verbose_) std::cout << "[INFO] Old dataset (before intLumi change): " << *data0 << std::endl;
+					if (verbose_) std::cout << "[INFO] New dataset (intLumi change x"<< factor <<"): " << *data << std::endl;
+				} else {
+					data = (RooDataSet*) data0->Clone();
+				}
+
 				dataRV = (RooDataSet*) data->reduce(Cut("dZ<1."));
 				dataWV = (RooDataSet*) data->reduce(Cut("dZ>=1."));
 
-				if (verbose_) std::cout << "[INFO] datasets? " << *data << std::endl;
-				if (verbose_) std::cout << "[INFO] datasets? " << *dataRV << std::endl;
-				if (verbose_) std::cout << "[INFO] datasets? " << *dataWV << std::endl;
+				if (verbose_) std::cout << "[INFO] Datasets ? " << *data << std::endl;
+				if (verbose_) std::cout << "[INFO] Datasets (right vertex) ? " << *dataRV << std::endl;
+				if (verbose_) std::cout << "[INFO] Datasets (wrong vertex) ? " << *dataWV << std::endl;
 
 				//FIXME above I artificially add in a weight to the 
 
@@ -530,10 +566,10 @@ int main(int argc, char *argv[]){
 			// this guy constructs the final model with systematics, eff*acc etc.
 
 			if (isFlashgg_){
-				intLumi = new RooRealVar("IntLumi","IntLumi",0,3000000); //FIXME
-				//	intLumi->setVal(1000);
-				//	std::cout << "[INFO] Artificially setting intLumi to " << intLumi->getVal() << ". FIXME before using on data"<< std::endl;
-				//	outWS->import(*intLumi);
+				//intLumi = new RooRealVar("IntLumi","IntLumi",0,3000000); //FIXME
+				//	intLumi->setVal(changeIntLumi);
+				std::cout << "[INFO] IntLumi is" << intLumi->getVal() << ". CHECK before using on data"<< std::endl;
+				outWS->import(*intLumi);
 				FinalModelConstruction finalModel(mass,MH,intLumi,mhLow_,mhHigh_,proc,cat,doSecondaryModels_,systfilename_,skipMasses_,verbose_,procs_, flashggCats_,isCutBased_,sqrts_,doQuadraticSigmaSum_);
 				if (isCutBased_){
 					finalModel.setHighR9cats(highR9cats_);
@@ -604,7 +640,7 @@ int main(int argc, char *argv[]){
 		packager.packageOutput();
 		sw.Stop();
 		cout << "[INFO] Combination complete." << endl;
-		cout << "[INFO ]Whole process took..." << endl;
+		cout << "[INFO] Whole process took..." << endl;
 		cout << "\t";
 		sw.Print();
 	}

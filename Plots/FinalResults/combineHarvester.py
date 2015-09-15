@@ -555,7 +555,6 @@ def writeMultiDimFit(method=None,wsOnly=False):
     "RDiffXsScan"  : "--floatOtherPOIs=1 -P %s"%(opts.poix), # need to add option to run specific topologic categories
     }
         par_ranges = {}
-        print "LC DEBUG 1"
         if opts.rvLow!=None and opts.rvHigh!=None and opts.rfLow!=None and opts.rfHigh!=None:
           par_ranges["RVRFScan"]  = "RV=%4.2f,%4.2f:RF=%4.2f,%4.2f"%(opts.rvLow,opts.rvHigh,opts.rfLow,opts.rfHigh)
         if opts.rvLow!=None and opts.rvHigh!=None:
@@ -647,7 +646,6 @@ def writeMultiDimFit(method=None,wsOnly=False):
               
                   
                   
-        print "LC DEBUG 2"
         # make job scripts
         for i in range(opts.jobs):
           file = open('%s/sub_m%1.5g_job%d.sh'%(opts.outDir,getattr(opts,"mh",0.),i),'w')

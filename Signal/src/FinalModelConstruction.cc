@@ -44,11 +44,11 @@ FinalModelConstruction::FinalModelConstruction(RooRealVar *massVar, RooRealVar *
   cat_(cat),
   doSecondaryModels(doSecMods),
   isCutBased_(isCB),
-  flashggCats_(flashggCats),
 	//is2011_(is2011),
 	sqrts_(sqrts),
 	quadraticSigmaSum_(quadraticSigmaSum),
 	skipMasses_(skipMasses),
+  flashggCats_(flashggCats),
   verbosity_(verbosity),
   systematicsSet_(false),
   rvFractionSet_(false),
@@ -953,10 +953,12 @@ void FinalModelConstruction::getNormalization(){
 	if (intLumi) {
     // calcu eA as sumEntries / totalxs * totalbr * intL
     effAcc = (data->sumEntries()/(intLumi->getVal()*norm->GetXsection(mh,procLowerCase_)*norm->GetBR(mh)));
+		std::cout << "[INFO] (FinalModelConstruction) intLumi " << intLumi->getVal() <<", effAcc " << effAcc << std::endl;
 		} else {
-		std::cout << "[WARNING] IntLumi rooRealVar is not in this workspace. Set to " << intLumi->getVal() << " for now." << std::endl;
-		double intLumiVal =19700.;
-    effAcc = (data->sumEntries()/(intLumiVal*norm->GetXsection(mh,procLowerCase_)*norm->GetBR(mh)));
+		std::cout << "[ERROR] IntLumi rooRealVar is not in this workspace. exit." << std::endl;
+		return ;
+		//double intLumiVal =19700.;
+    //effAcc = (data->sumEntries()/(intLumiVal*norm->GetXsection(mh,procLowerCase_)*norm->GetBR(mh)));
 		}
     temp->SetPoint(i,mh,effAcc);
   }

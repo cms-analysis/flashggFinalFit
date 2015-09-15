@@ -692,6 +692,7 @@ int main(int argc, char* argv[]){
 	int mhLow;
 	int mhHigh;
 	int sqrts;
+	float intLumi;
 	double mhvalue_;
 	int isFlashgg_ =1;
 	string flashggCatsStr_;
@@ -716,6 +717,7 @@ int main(int argc, char* argv[]){
 		("mhLow,L", po::value<int>(&mhLow)->default_value(100),															"Starting point for scan")
 		("mhHigh,H", po::value<int>(&mhHigh)->default_value(180),														"End point for scan")
 		("mhVal", po::value<double>(&mhvalue_)->default_value(125.),														"Choose the MH for the plots")
+		("intLumi", po::value<float>(&intLumi)->default_value(1.),																"What intLumi in fb^{-1}")
 		("sqrts,S", po::value<int>(&sqrts)->default_value(8),																"Which centre of mass is this data from?")
 		("isFlashgg",  po::value<int>(&isFlashgg_)->default_value(1),  								    	        "Use Flashgg output ")
 		("flashggCats,f", po::value<string>(&flashggCatsStr_)->default_value("UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,UntaggedTag_4,VBFTag_0,VBFTag_1,VBFTag_2,TTHHadronicTag,TTHLeptonicTag,VHHadronicTag,VHTightTag,VHLooseTag,VHEtTag"),       "Flashgg category names to consider")
@@ -934,6 +936,7 @@ int main(int argc, char* argv[]){
 		outWS->import(*data);
 
 		TCanvas *canv = new TCanvas("c","",800,800);
+		RooRealVar *lumi = (RooRealVar*)inWS->var("IntLumi");
 		plot->Draw();
 
 		if (blind) {
@@ -1000,8 +1003,11 @@ int main(int argc, char* argv[]){
 				RooAbsPdf *sigPDF = (RooAbsPdf*)w_sig->pdf(Form("sigpdfrel%s_allProcs",catname.c_str()));
 				MH->setVal(mhvalue_);
 				sigPDF->plotOn(plot,Normalization(1.0,RooAbsReal::RelativeExpected),LineColor(kBlue),LineWidth(3));
-				sigPDF->plotOn(plotLC,Normalization(1.0,RooAbsReal::RelativeExpected),LineColor(kBlue),LineWidth(3));
 				sigPDF->plotOn(plot,Normalization(1.0,RooAbsReal::RelativeExpected),LineColor(kBlue),LineWidth(3),FillColor(38),FillStyle(3001),DrawOption("F"));
+				std::cout << "[INFO] expected number of events in signal PDF " << sigPDF->expectedEvents(*MH) << std::endl;	
+				//sigPDF->plotOn(plot,Normalization(0.001*lumi->getVal()/*get intlumi (/fb) from ws, and divide by 100 for /pb */,RooAbsReal::RelativeExpected),LineColor(kBlue),LineWidth(3));
+				//sigPDF->plotOn(plot,Normalization(0.001*lumi->getVal(),RooAbsReal::RelativeExpected),LineColor(kBlue),LineWidth(3),FillColor(38),FillStyle(3001),DrawOption("F"));
+				sigPDF->plotOn(plotLC,Normalization(1.0,RooAbsReal::RelativeExpected),LineColor(kBlue),LineWidth(3));
 				TObject *sigLeg = (TObject*)plot->getObject(plot->numItems()-1);
 				leg->AddEntry(sigLeg,Form("Sig model m_{H}=%.1fGeV",MH->getVal()),"L");
 				outWS->import(*sigPDF);
@@ -1017,7 +1023,6 @@ int main(int argc, char* argv[]){
 		TLatex *cmslatex = new TLatex();
 		cmslatex->SetTextSize(0.03);
 		cmslatex->SetNDC();
-		RooRealVar *lumi = (RooRealVar*)inWS->var("IntLumi");
 		std::cout << "[INFO] intLumi " << lumi->getVal() << std::endl;
 		cmslatex->DrawLatex(0.2,0.85,Form("#splitline{CMS Preliminary}{#sqrt{s} = %dTeV L = %2.1ffb^{-1}}",sqrts,lumi->getVal()/1000.));
 		latex->DrawLatex(0.2,0.78,catLabel.c_str());
