@@ -110,6 +110,9 @@ echo "------------------------------------------------"
 cd Signal
 ./runSignalScripts.sh -i $FILE -p $PROCS -f $CATS --ext $EXT --intLumi $INTLUMI
 cd -
+if [ $USER == lcorpe ]; then
+echo " Processing of the Signal model for final fit exercice $EXT is done, see output here: https://lcorpe.web.cern.ch/lcorpe/$OUTDIR/ " |  mail -s "FINAL FITS: $EXT " lc1113@imperial.ac.uk
+fi
 fi
 fi
 
@@ -132,6 +135,9 @@ cd Background
 ./runBackgroundScripts.sh -p $PROCS -f $CATS --ext $EXT --pseudoDataDat $PSEUDODATADAT --sigFile ../Signal/$OUTDIR/CMS-HGG_sigfit_$EXT.root --seed $COUNTER --intLumi $INTLUMI
 
 cd -
+if [ $USER == lcorpe ]; then
+echo " Processing of the Background model for final fit exercice $EXT is done, see output here: https://lcorpe.web.cern.ch/lcorpe/$OUTDIR/ " |  mail -s "FINAL FITS: $EXT " lc1113@imperial.ac.uk
+fi
 fi
 
 ####################################################
@@ -221,6 +227,9 @@ fi
 
 cd -
 
+fi
+if [ $USER == lcorpe ]; then
+echo " All stages of the final fit exercice $EXT  are done, see output here: https://lcorpe.web.cern.ch/lcorpe/$OUTDIR/ " |  mail -s "FINAL FITS: $EXT " lc1113@imperial.ac.uk
 fi
 
 echo "signal output at Signal/$OUTDIR"

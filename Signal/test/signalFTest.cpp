@@ -172,8 +172,8 @@ int main(int argc, char *argv[]){
 	RooWorkspace *inWS;
 	RooRealVar *mass; 
 	if (isFlashgg_){
-		if (verbose_) std::cout << "[INFO] Opening workspace diphotonDumper/cms_hgg_13TeV"<<std::endl;
-		inWS = (RooWorkspace*)inFile->Get("diphotonDumper/cms_hgg_13TeV");
+		if (verbose_) std::cout << "[INFO] Opening workspace tagsDumper/cms_hgg_13TeV"<<std::endl;
+		inWS = (RooWorkspace*)inFile->Get("tagsDumper/cms_hgg_13TeV");
 		if (verbose_) std::cout << "[INFO] Workspace Open "<< inWS << std::endl;
 		mass = (RooRealVar*)inWS->var("CMS_hgg_mass");
 		if (verbose_) std::cout << "[INFO] Got mass var from ws"<<std::endl;
@@ -223,7 +223,7 @@ int main(int argc, char *argv[]){
 			if (isFlashgg_){
 				//		dataRV = (RooDataSet*)inWS->data(Form("%s_%d_13TeV_flashgg%s",proc.c_str(),mass_,flashggCats_[cat].c_str()));
 				//		dataWV = (RooDataSet*)inWS->data(Form("%s_%d_13TeV_flashgg%s",proc.c_str(),mass_,flashggCats_[cat].c_str()));
-				data   = (RooDataSet*)inWS->data(Form("%s_%d_13TeV_flashgg%s_",proc.c_str(),mass_,flashggCats_[cat].c_str()));
+				data   = (RooDataSet*)inWS->data(Form("%s_%d_13TeV_%s",proc.c_str(),mass_,flashggCats_[cat].c_str()));
 				if (verbose_) {
 
 					std::cout << "[INFO] Workspace contains : " << std::endl;
@@ -234,7 +234,7 @@ int main(int argc, char *argv[]){
 
 
 				}
-				if (verbose_) std::cout << "[INFO] Retrieved combined RV/WV data "<< Form("%s_%d_13TeV_flashgg%s_",proc.c_str(),mass_,flashggCats_[cat].c_str()) << "? "<< data<<std::endl;
+				if (verbose_) std::cout << "[INFO] Retrieved combined RV/WV data "<< Form("%s_%d_13TeV_%s",proc.c_str(),mass_,flashggCats_[cat].c_str()) << "? "<< data<<std::endl;
 				dataRV = new RooDataSet("dataRV","dataRV",&*data,*(data->get()),"dZ<1");
 				if (verbose_) std::cout << "[INFO] Retrieved combined RV data"<<std::endl;
 				dataWV = new RooDataSet("dataWV","dataWV",&*data,*(data->get()),"dZ>=1");

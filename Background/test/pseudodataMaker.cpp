@@ -48,6 +48,8 @@ int pseudodata_;
 int append_;
 int draw_;
 float intlumi_;
+float intlumiOLD_;
+float lumifactor_;
 int print_;
 float seed_;
 string procString_;
@@ -97,6 +99,10 @@ void OptionParser(int argc, char *argv[]){
 
 /////////------------> Begin Main function <--------------/////////
 int main(int argc, char *argv[]){
+	
+	vector<string> tags;
+	vector<string> processes;
+	vector<float> yields;
 
 	float progress=0;
 	OptionParser(argc,argv);
@@ -180,7 +186,7 @@ int main(int argc, char *argv[]){
 		if (! inWS) inWS = (RooWorkspace*)inFile->Get("multipdf");
 		if (! inWS) inWS = (RooWorkspace*)inFile->Get("wsig_8TeV");
 		if (! inWS) inWS = (RooWorkspace*)inFile->Get("wsig_13TeV");
-		if (! inWS) inWS = (RooWorkspace*)inFile->Get("diphotonDumper/cms_hgg_13TeV");
+		if (! inWS) inWS = (RooWorkspace*)inFile->Get("tagsDumper/cms_hgg_13TeV");
 		if (! inWS) return 0; // if not, quit.
 
 		if( verbose_) std::cout << "[INFO] Workspace Open "<< inWS << std::endl;
@@ -195,10 +201,16 @@ int main(int argc, char *argv[]){
 	//		if (lumi){
 	   //		inWS->import(intlumi);
 		//		TDirectory *savdir = gDirectory;
-		//		TDirectory *adir = savdir->mkdir("diphotonDumper");
+		//		TDirectory *adir = savdir->mkdir("tagsDumper");
 		//		adir->cd();
        //	inWS->Write("cms_hgg_13TeV");
 				std::cout << "[INFO] Intlumi val "<< intlumi.getVal() << " pb ^{-1}" <<  std::endl;
+	RooRealVar *intLumiREAD;
+	intLumiREAD = (RooRealVar*)inWS->var("IntLumi");
+	intlumiOLD_ = intLumiREAD->getVal();
+	lumifactor_= intlumi_*1000/intlumiOLD_;
+				std::cout << "[INFO] OLD intlumi val " << intlumiOLD_ << " pb ^{-1}" <<  std::endl;
+				std::cout << "[INFO] factor " << lumifactor_ <<  std::endl;
 			//	return 0;
 			} else {
 				std::cout << "[INFO] no IntLumi variable, exit." << std::endl;
@@ -344,14 +356,20 @@ int main(int argc, char *argv[]){
 				if (isSig) {
 				RooFitResult *fitTestGaus = gauss->fitTo(*dataPlot,RooFit::Save(1),RooFit::Verbose(0),RooFit::SumW2Error(kTRUE), RooFit::Minimizer("Minuit2","minimize")); //FIXME
 				float gausnll = fitTestGaus->minNll();
-					dataFit = gauss->generate(newmass,intlumi_*sumEntries)  ; //intLumi is in pb^-1. Use directly as mustiplicative factor since default is for 1 pb^-1
+					dataFit = gauss->generate(newmass,lumifactor_*sumEntries)  ; //intLumi is in pb^-1. Use directly as mustiplicative factor since default is for 1 pb^-1
 					gauss->plotOn(mframe) ;
 					std::cout << " [INFO] sig - gaussian simgma" << a2.getVal() << ", gaussian mean " << a1.getVal() <<  ", nEvents in +/-1 sig " << dataFit->sumEntries() << std::endl;
+				processes.push_back(filename_[ifile]);
+				tags.push_back(dataPlot->GetName());
+				yields.push_back(dataFit->sumEntries());
 				} else {
 				RooFitResult *fitTest = p2->fitTo(*dataPlot,RooFit::Save(1),RooFit::Verbose(0),RooFit::SumW2Error(kTRUE), RooFit::Minimizer("Minuit2","minimize")); //FIXME
 				float bernsnll = fitTest->minNll();
-					dataFit = p2->generate(newmass,intlumi_*sumEntries)  ;
+					dataFit = p2->generate(newmass,lumifactor_*sumEntries)  ;
 					p2->plotOn(mframe) ;
+				processes.push_back(filename_[ifile]);
+				tags.push_back(dataPlot->GetName());
+				yields.push_back(dataFit->sumEntries());
 				}
 				dataFit->plotOn(mframe,LineColor(kRed), FillColor(kRed), MarkerColor(kRed));
 				dataFit->SetName(outData[i]->GetName());
@@ -477,5 +495,14 @@ int main(int argc, char *argv[]){
 	outWS->Write("cms_hgg_workspace");
 	std::cout << endl;
 	outFile->Close();
+		
+	std::cerr << "PROCESS/SAMPLE " << "	"<< "TAG" << "	" << "YIELDS" << std::endl;
+	std::cout << "PROCESS/SAMPLE " << "	"<< "TAG" << "	" << "YIELDS" << std::endl;
+	for(int i =0; i < processes.size(); i++){
+
+	std::cerr <<"YIELDS " <<  processes[i] << "	"<< tags[i] << "	" << yields[i] << std::endl;
+	std::cout <<"YIELDS " <<  processes[i] << "	"<< tags[i] << "	" << yields[i] << std::endl;
+	}
+
 }
 

@@ -102,6 +102,7 @@ echo "--> Create fake data by fitting simulations, throwing toys and adding data
 echo "--> generating $INTLUMI fb^{-1} of pseudodata."
 echo "--------------------------------------"
 
+echo " ./bin/pseudodataMaker -i $PSEUDODATADAT --pseudodata 1 --plotdir $OUTDIR/pseudoData -f $CATS --seed $SEED --intLumi $INTLUMI "
 ./bin/pseudodataMaker -i $PSEUDODATADAT --pseudodata 1 --plotdir $OUTDIR/pseudoData -f $CATS --seed $SEED --intLumi $INTLUMI
 
 FILE=$OUTDIR/pseudoData/pseudoWS.root

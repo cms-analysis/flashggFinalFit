@@ -108,15 +108,19 @@ int main(int argc, char *argv[]){
 	TFile *inFile = TFile::Open(filename_.c_str());
 	RooWorkspace *inWS;
 	RooRealVar *mass;
+	RooRealVar *intLumiREAD;
 	inWS = (RooWorkspace*)inFile->Get("cms_hgg_workspace");
 	if (! inWS) inWS = (RooWorkspace*)inFile->Get("multipdf");
 	if (! inWS) inWS = (RooWorkspace*)inFile->Get("wsig_8TeV");
 	if (! inWS) inWS = (RooWorkspace*)inFile->Get("wsig_13TeV");
+	if (! inWS) inWS = (RooWorkspace*)inFile->Get("tagsDumper/cms_hgg_13TeV");
 	if (! inWS) inWS = (RooWorkspace*)inFile->Get("diphotonDumper/cms_hgg_13TeV");
-	if (! inWS) return 0;
+	if (! inWS) {std::cout << "ERROR could not find ws " << std::endl;return 0;}
 	std::cout << "[INFO] Workspace Open "<< inWS << std::endl;
 	mass = (RooRealVar*)inWS->var("CMS_hgg_mass");
+	intLumiREAD = (RooRealVar*)inWS->var("IntLumi");
 	std::cout << "[INFO] Got mass var from ws"<<std::endl;
+	std::cout << "[INFO] Got intLumi var from ws, value "<< intLumiREAD->getVal()<<std::endl;
 
 	RooWorkspace *outWS = new RooWorkspace();
 	RooRealVar  newmass("CMS_hgg_mass","CMS_hgg_mass",100,180) ;
@@ -124,15 +128,25 @@ int main(int argc, char *argv[]){
 	RooRealVar  sqrts("SqrtS","SqrtS",0,14) ;
 	RooRealVar  intlumi("IntLumi","IntLumi",0,300000) ;
 	sqrts.setVal(13);
-	intlumi.setVal(19700);
+	intlumi.setVal(intlumi_);
 	outWS->import(sqrts);
-	outWS->import(intlumi);
+	inWS->import(sqrts);
+	//outWS->import(intlumi);
+	//inWS->Write("cms_hgg_workspace");
 	
 	if (intlumi_){
+	inWS->import(intlumi);
 	RooRealVar *lumi = (RooRealVar*)inWS->var("IntLumi");
 	if (lumi){
 
 std::cout << "[INFO] Intlumi val "<< lumi->getVal() << std::endl;
+TFile *outFile0 = TFile::Open(("withIntLumi.root"),"RECREATE");
+				TDirectory *savdir = gDirectory;
+				TDirectory *adir = savdir->mkdir("diphotonDumper");
+				adir->cd();
+       	inWS->Write("cms_hgg_13TeV");
+	outFile0->Close();
+	std::cout << "[INFO] saved file withIntLumi.root. exit "<< std::endl; 
 
 	} else {
 std::cout << "[INFO] no IntLui variable, exit." << std::endl;

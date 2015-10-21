@@ -31,8 +31,8 @@ The FLASHgg Finals Fits package contains several subfolders which care sused for
 
 	In theory each of the above shoudl be run one by one. You will find sintructions for each in individual `README.md` files in each relevant subdir. Thankfully, if you just want to run a basic version of the Final Fits, you can use a dedicated pilot script: `runFinalFitsScripts.sh`
 	```
-	file=/afs/cern.ch/user/l/lcorpe/work/public/test_jobs_v8/everythingWithLumi.root
-	samples=samples=/afs/cern.ch/user/l/lcorpe/work/public/test_jobs_v8/samplesv8.dat
+	file=/afs/cern.ch/user/l/lcorpe/work/public/big_test_jobs_2/everything.root
+	samples=samples=/afs/cern.ch/user/l/lcorpe/work/public/big_test_jobs_2/samples.txt
 	./runFinalFitsScripts.sh -i $file -p ggh -f UntaggedTag_0 --ext intlumitest1fb --pseudoDataDat $samples --intLumi 1
 	```
 	This script will run all parts of the analysis, and produce the output plots as needed.
