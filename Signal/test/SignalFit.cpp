@@ -292,7 +292,7 @@ int main(int argc, char *argv[]){
 	TFile *inFile = TFile::Open(filename_[0].c_str());
 	if (check_){
 		//RooWorkspace *	inWS0 = (RooWorkspace*)inFile->Get(Form("wsig_8TeV"));
-		RooWorkspace *	inWS0 = (RooWorkspace*)inFile->Get(Form("diphotonDumper/cms_hgg_13TeV"));
+		RooWorkspace *	inWS0 = (RooWorkspace*)inFile->Get(Form("tagsDumper/cms_hgg_13TeV"));
 		std::list<RooAbsData*> data =  (inWS0->allData()) ;
 		for (std::list<RooAbsData*>::const_iterator iterator = data.begin(), end = data.end(); iterator != end; ++iterator) {
 			if(verbose_) std::cout << "[INFO] " <<**iterator << std::endl;
@@ -301,7 +301,7 @@ int main(int argc, char *argv[]){
 	}
 	RooWorkspace *inWS;
 	if (isFlashgg_){
-		inWS = (RooWorkspace*)inFile->Get("diphotonDumper/cms_hgg_13TeV");
+		inWS = (RooWorkspace*)inFile->Get("tagsDumper/cms_hgg_13TeV");
 		std::list<RooAbsData*> test =  (inWS->allData()) ;
 		if (verbose_) {
 			std::cout << " [INFO] WS contains " << std::endl;
@@ -335,11 +335,12 @@ int main(int argc, char *argv[]){
 	RooRealVar *intLumi = (RooRealVar*)inWS->var("IntLumi");
 	if (intLumi) {
 		std::cout << "[INFO] Was able to access IntLumi directlly from WS. IntLumi " << intLumi->getVal() << "pb^{-1}" << std::endl;
-		originalIntLumi =intLumi->getVal();
+		originalIntLumi =intLumi->getVal();/// 1/pb  
 		if (changeIntLumi){
-			changeIntLumi= changeIntLumi*1000; // specify in pb instead of fb.
-		  originalIntLumi =intLumi->getVal();
-			intLumi->setVal(changeIntLumi);
+			originalIntLumi =(intLumi->getVal());// specify in 1/pb
+			changeIntLumi= changeIntLumi*1000; // specify in 1/pb instead of 1/fb.
+			intLumi->setVal(changeIntLumi);	
+
 			std::cout << "[INFO] Changing IntLumi as specified in options list. IntLumi  " << intLumi->getVal() <<  " pb^{-1}" << std::endl;
 		} else {
 			std::cout << "[ERROR] Could not access IntLumi from file" <<std::endl;
@@ -438,11 +439,8 @@ int main(int argc, char *argv[]){
 			RooDataSet *data;  
 
 			if (isFlashgg_){
-				//	dataRV = (RooDataSet*)inWS->data(Form("%s_%d_13TeV_flashgg%s",proc.c_str(),mh,flashggCats_[cat].c_str())); //FIXME
-				//	dataWV = (RooDataSet*)inWS->data(Form("%s_%d_13TeV_flashgg%s",proc.c_str(),mh,flashggCats_[cat].c_str())); // FIXME
-				//std::cout << "[WARNING] FIXME - Artificially adding weight 0.085 (~correct weight for hgg events with 9000 MC events, 20/fb of data and e*a of 0.5) to signal sample events. Should eventually be included in workspace by default " << std::endl;
-				if (verbose_)std::cout << "[INFO] Opening dataset called "<< Form("%s_%d_13TeV_flashgg%s_",proc.c_str(),mh,flashggCats_[cat].c_str()) << " in in WS " << inWS << std::endl;
-				RooDataSet *data0   = (RooDataSet*)inWS->data(Form("%s_%d_13TeV_flashgg%s_",proc.c_str(),mh,flashggCats_[cat].c_str()));
+				if (verbose_)std::cout << "[INFO] Opening dataset called "<< Form("%s_%d_13TeV_%s",proc.c_str(),mh,flashggCats_[cat].c_str()) << " in in WS " << inWS << std::endl;
+				RooDataSet *data0   = (RooDataSet*)inWS->data(Form("%s_%d_13TeV_%s",proc.c_str(),mh,flashggCats_[cat].c_str()));
 				//		if (verbose_) std::cout << "[INFO] dataset "<<  Form("%s_%d_13TeV_flashgg%s_",proc.c_str(),mh,flashggCats_[cat].c_str()) << " for RV+WV open ? " << *data0 <<  " with weight " << data0->weight() << std::endl;
 				//		RooDataSet *dataRV0 = new RooDataSet("dataRV","dataRV",&*data0,*(data0->get()),"(dZ<1)*(weight:weight)","weight:weight");
 				//		if (verbose_) std::cout << "[INFO] dataset RV open ? " << dataRV0 << std::endl;
@@ -458,9 +456,16 @@ int main(int argc, char *argv[]){
 
 				if (changeIntLumi){
 					double factor = changeIntLumi/originalIntLumi;
+					std::cout << "[INFO] Old int lumi " << originalIntLumi  <<", new int lumi " << changeIntLumi<< std::endl;
 					std::cout << "[INFO] Changing weights of dataset by a factor " << factor << " as per changeIntLumi option" << std::endl;
 					//*data =  RooDataSet( Form("%s_%d_13TeV_flashgg%s_",proc.c_str(),mh,flashggCats_[cat].c_str()),Form("%s_%d_13TeV_flashgg%s_",proc.c_str(),mh,flashggCats_[cat].c_str()), RooArgSet(*mass,*dZ,*weight), weight->GetName() ); 
+					std::cout << "[DEBUG] data0 " << *data0 <<std::endl;
+					std::cout << "[DEBUG] intLumi " << intLumi<<std::endl;
 					data = (RooDataSet*) data0->emptyClone();
+					std::cout << "[DEBUG] data " << *data <<std::endl;
+					std::cout << "[DEBUG] mass " << mass->getVal() <<std::endl;
+					std::cout << "[DEBUG] dZ " << dZ->getVal() <<std::endl;
+					std::cout << "[DEBUG] weight0 " << weight0->getVal()  <<std::endl;
 				  for (int i = 0; i < data0->numEntries(); i++) {
 						mass->setVal(data0->get(i)->getRealValue("CMS_hgg_mass"));
 						dZ->setVal(data0->get(i)->getRealValue("dZ"));
@@ -536,17 +541,21 @@ int main(int argc, char *argv[]){
 			if (!skipPlots_) initFitWV.plotFits(Form("%s/initialFits/%s_cat%d_wv",plotDir_.c_str(),proc.c_str(),cat));
 		}
 		parlist_t fitParamsWV = initFitWV.getFitParams();
+			std::cout << "DEBUG 0" << std::endl;
 
+			std::cout << "DEBUG 1" << std::endl;
 		allParameters[ make_pair(proc,cat) ] = make_pair(fitParamsRV,fitParamsWV);
 
 		if (!runInitialFitsOnly_) {
 			//these guys do the interpolation
 			map<string,RooSpline1D*> splinesRV;
+			std::cout << "DEBUG 2" << std::endl;
 			map<string,RooSpline1D*> splinesWV;
 
 			if (!cloneFits_){
 				// right vertex
 				LinearInterp linInterpRV(MH,mhLow_,mhHigh_,fitParamsRV,doSecondaryModels_,skipMasses_);
+			std::cout << "DEBUG 3" << std::endl;
 				linInterpRV.setVerbosity(verbose_);
 				linInterpRV.setSecondaryModelVars(MH_SM,DeltaM,MH_2,higgsDecayWidth);
 				linInterpRV.interpolate(nGaussiansRV);
@@ -561,10 +570,11 @@ int main(int argc, char *argv[]){
 			}
 			else {
 				splinesRV = cloneSplinesMapRV[make_pair(proc,cat)];
+			std::cout << "DEBUG 4" << std::endl;
 				splinesWV = cloneSplinesMapWV[make_pair(proc,cat)];
 			}
 			// this guy constructs the final model with systematics, eff*acc etc.
-
+			std::cout << "DEBUG 5" << std::endl;
 			if (isFlashgg_){
 				//intLumi = new RooRealVar("IntLumi","IntLumi",0,3000000); //FIXME
 				//	intLumi->setVal(changeIntLumi);

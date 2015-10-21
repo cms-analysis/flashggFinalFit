@@ -16,7 +16,7 @@ Thankfully this whole process can be run in one command using the signal pilot s
 To runa  basic version of the signal workflow you can use the `runSignalScripts.sh` script. 
 ```
 cmsenv
-FILE=/afs/cern.ch/user/l/lcorpe/work/public/test_jobs_v8/everythingWithLumi.root
+FILE=/afs/cern.ch/user/l/lcorpe/work/public/big_test_jobs_2/everything.root
 /runSignalScripts.sh -i $FILE -p ggh -f UntaggedTag_0 --ext test --intLumi 1
 ```
 The available options can be seen by doing `runSignalScripts.sh -h`. They are all self-explanatory, aside from `--intLumi`: This can be used to over-ride the built in value of IntLumi and amend the MC event weights as needed.
@@ -31,7 +31,7 @@ The output is the `dat/newConfig.dat` file which lists this information. At pres
 
 Working FLASHgg example:
 ```
-file=/afs/cern.ch/user/l/lcorpe/work/public/test_jobs_v8/everythingWithLumi.root
+file=/afs/cern.ch/user/l/lcorpe/work/public/big_test_jobs_2/everything.root
 ./bin/signalFTest -i $file -d dat/newConfig.dat -p ggh -f UntaggedTag_0 -o test
 ```
 Example output can be found at:
@@ -46,8 +46,8 @@ NB: The systematics functionality is currently only supported for Photon Energy 
 
 FLASHgg working example:
 ```
-file=/afs/cern.ch/user/l/lcorpe/work/public/test_jobs_v8/everythingWithLumi.root
-/bin/calcPhotonSystConsts -i $file -o dat/photonCatSyst.dat -p ggh -f UntaggedTag_0 -s HighR9EE,LowR9EE,HighR9EB,LowR9EB -r HighR9EE,LowR9EE,HighR9EBRho,LowR9EBRho,HighR9EBPhi,LowR9EBPhi -D plotsDir 
+file=/afs/cern.ch/user/l/lcorpe/work/public/big_test_jobs_2/everything.root
+./bin/calcPhotonSystConsts -i $file -o dat/photonCatSyst.dat -p ggh -f UntaggedTag_0 -s HighR9EE,LowR9EE,HighR9EB,LowR9EB -r HighR9EE,LowR9EE,HighR9EBRho,LowR9EBRho,HighR9EBPhi,LowR9EBPhi -D plotsDir 
 ```
 
 Example output can be found at:
@@ -67,7 +67,7 @@ The `--changeIntLumi` can be used to over-ride the existing value of IntLumi in 
 
 FLASHgg working example:
 ```
-file=/afs/cern.ch/user/l/lcorpe/work/public/test_jobs_v8/everythingWithLumi.root
+file=/afs/cern.ch/user/l/lcorpe/work/public/big_test_jobs_2/everything.root
 ./bin/SignalFit -i $file -d dat/newConfig.dat  --mhLow=120 --mhHigh=130 -s dat/photonCatSyst.dat --procs ggh -f UntaggedTag_0 -o CMS-HGG_sigfit.root -p sigfit  --changeIntLumi 1
 ```
 Example output cna be found here:

@@ -18,8 +18,8 @@ WARNING: the pseudodata generation assumes that the background and signal sample
 To run a basic version of the background workflow you can use the `./runBackgroundScripts.sh` script. 
 ```
 cmsenv
-FILE=/afs/cern.ch/user/l/lcorpe/work/public/test_jobs_v8/everythingWithLumi.root
-SAMPLES=/afs/cern.ch/user/l/lcorpe/work/public/test_jobs_v8/samplesv8.dat
+FILE=/afs/cern.ch/user/l/lcorpe/work/public/big_test_jobs_2/everything.root
+SAMPLES=/afs/cern.ch/user/l/lcorpe/work/public/big_test_jobs_2/samples.txt
 ./runBackgroundScripts.sh -p ggh -f UntaggedTag_0 --ext test --pseudoDataDat $SAMPLES --sigFile ../Signal/CMS-HGG_sigfit.root --seed 0 --intLumi 1
 ```
 The available options can be seen by doing `runSignalScripts.sh -h`. They are all self-explanatory, aside from 
@@ -45,7 +45,7 @@ The options are self explanatory, aside from the two listed below which probably
 
 Working FLASHgg example:
 ```
-SAMPLES=/afs/cern.ch/user/l/lcorpe/work/public/test_jobs_v8/samplesv8.dat
+SAMPLES=/afs/cern.ch/user/l/lcorpe/work/public/big_test_jobs_2/samples.txt
 /bin/pseudodataMaker -i $SAMPLES --pseudodata 1 --plotdir plots -f UntaggedTag_0 --seed 0 --intLumi 1
 ```
 Example of output plots can be found at:
