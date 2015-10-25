@@ -8,6 +8,9 @@ cmsenv
 git clone https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit
 git clone git@github.com:sethzenz/flashggFinalFit.git flashggFinalFit
 scram b -j 9
+cd ${CMSSW_BASE}/src/flashggFinalFit/
+chmod +x convertXS.py
+./convertXS.py # create 13TeV XS from 8TeV as placeholder
 ```
 
 Two packages need to be built with their own makefiles, if needed.  Please note that there will be verbose warnings from BOOST etc:

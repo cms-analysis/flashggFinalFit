@@ -537,6 +537,7 @@ int main(int argc, char* argv[]){
 	int isFlashgg_ =1;
 string flashggCatsStr_;
 vector<string> flashggCats_;
+ bool isData_ =0;
 
   po::options_description desc("Allowed options");
   desc.add_options()
@@ -552,6 +553,7 @@ vector<string> flashggCats_;
     ("is2012",                                                                                  "Run 2012 config")
     ("unblind",  									        "Dont blind plots")
     ("isFlashgg",  po::value<int>(&isFlashgg_)->default_value(1),  								    	        "Use Flashgg output ")
+    ("isData",  po::value<bool>(&isData_)->default_value(0),  								    	        "Use Data not MC ")
 		("flashggCats,f", po::value<string>(&flashggCatsStr_)->default_value("UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,UntaggedTag_4,VBFTag_0,VBFTag_1,VBFTag_2,TTHHadronicTag,TTHLeptonicTag,VHHadronicTag,VHTightTag,VHLooseTag,VHEtTag"),       "Flashgg category names to consider")
     ("verbose,v",                                                                               "Run with more output")
   ;
@@ -597,115 +599,121 @@ vector<string> flashggCats_;
   TFile *inFile = TFile::Open(fileName.c_str());
   RooWorkspace *inWS;
 	if(isFlashgg_){
-	inWS = (RooWorkspace*)inFile->Get("cms_hgg_workspace");
+		if (isData_){
+			inWS = (RooWorkspace*)inFile->Get("tagsDumper/cms_hgg_13TeV");
+		} else {
+			inWS = (RooWorkspace*)inFile->Get("cms_hgg_workspace");
+		}
 	} else {
-	inWS = (RooWorkspace*)inFile->Get("cms_hgg_workspace");//FIXME
+		inWS = (RooWorkspace*)inFile->Get("cms_hgg_workspace");//FIXME
 	}
 	if (verbose) std::cout << "[INFO]  inWS open " << inWS << std::endl;
-  if (saveMultiPdf){
-	transferMacros(inFile,outputfile);
+	if (saveMultiPdf){
+		transferMacros(inFile,outputfile);
 
-RooRealVar *intL; 
-RooRealVar *sqrts;
+		RooRealVar *intL; 
+		RooRealVar *sqrts;
 
-	if (isFlashgg_){
-	intL  = (RooRealVar*)inWS->var("IntLumi");
-	sqrts = (RooRealVar*)inWS->var("SqrtS");
+		if (isFlashgg_){
+			intL  = (RooRealVar*)inWS->var("IntLumi");
+			sqrts = (RooRealVar*)inWS->var("SqrtS");
+			if (!sqrts){ sqrts = new RooRealVar("SqrtS","SqrtS",13); }
+		std::cout << "[INFO] got intL and sqrts " << intL << ", " << sqrts << std::endl;
 
 
-	} else {
-	intL  = (RooRealVar*)inWS->var("IntLumi");
-	sqrts = (RooRealVar*)inWS->var("Sqrts");
+		} else {
+			intL  = (RooRealVar*)inWS->var("IntLumi");
+			sqrts = (RooRealVar*)inWS->var("Sqrts");
+		}
+		outputws->import(*intL);
+		outputws->import(*sqrts);
+		std::cout << "[INFO] got intL and sqrts " << intL << ", " << sqrts << std::endl;
 	}
-	outputws->import(*intL);
-	outputws->import(*sqrts);
-	std::cout << "[INFO] got intL and sqrts " << intL << ", " << sqrts << std::endl;
-  }
-  
-  vector<string> functionClasses;
-  functionClasses.push_back("Bernstein");
-  functionClasses.push_back("Exponential");
-  functionClasses.push_back("PowerLaw");
-  functionClasses.push_back("Laurent");
-  map<string,string> namingMap;
-  namingMap.insert(pair<string,string>("Bernstein","pol"));
-  namingMap.insert(pair<string,string>("Exponential","exp"));
-  namingMap.insert(pair<string,string>("PowerLaw","pow"));
-  namingMap.insert(pair<string,string>("Laurent","lau"));
-  vector<pair<string,int> > fabChoice;
-  if (is2011) {
-    fabChoice.push_back(pair<string,int>("Bernstein",4));
-    fabChoice.push_back(pair<string,int>("Bernstein",5));
-    fabChoice.push_back(pair<string,int>("Bernstein",5));
-    fabChoice.push_back(pair<string,int>("Bernstein",5));
-    fabChoice.push_back(pair<string,int>("Bernstein",3));
-    fabChoice.push_back(pair<string,int>("Bernstein",3));
-    fabChoice.push_back(pair<string,int>("Bernstein",3));
-    fabChoice.push_back(pair<string,int>("Bernstein",3));
-    fabChoice.push_back(pair<string,int>("Bernstein",3));
-    fabChoice.push_back(pair<string,int>("Bernstein",3));
-    fabChoice.push_back(pair<string,int>("Bernstein",3));
-    fabChoice.push_back(pair<string,int>("Bernstein",3));
-    fabChoice.push_back(pair<string,int>("Bernstein",3));
-    fabChoice.push_back(pair<string,int>("Bernstein",3));
-    fabChoice.push_back(pair<string,int>("Bernstein",3));
-    fabChoice.push_back(pair<string,int>("Bernstein",3));
-    fabChoice.push_back(pair<string,int>("Bernstein",3));
-    fabChoice.push_back(pair<string,int>("Bernstein",3));
-    fabChoice.push_back(pair<string,int>("Bernstein",3));
-    fabChoice.push_back(pair<string,int>("Bernstein",3));
-    fabChoice.push_back(pair<string,int>("Bernstein",3));
-    fabChoice.push_back(pair<string,int>("Bernstein",3));
-    fabChoice.push_back(pair<string,int>("Bernstein",3));
-  }
-  else {
-    fabChoice.push_back(pair<string,int>("Bernstein",5));
-    fabChoice.push_back(pair<string,int>("Bernstein",5));
-    fabChoice.push_back(pair<string,int>("Bernstein",5));
-    fabChoice.push_back(pair<string,int>("Bernstein",5));
-    fabChoice.push_back(pair<string,int>("Bernstein",4));
-    fabChoice.push_back(pair<string,int>("Bernstein",4));
-    fabChoice.push_back(pair<string,int>("Bernstein",3));
-    fabChoice.push_back(pair<string,int>("Bernstein",3));
-    fabChoice.push_back(pair<string,int>("Bernstein",3));
-    fabChoice.push_back(pair<string,int>("Bernstein",5));
-    fabChoice.push_back(pair<string,int>("Bernstein",5));
-    fabChoice.push_back(pair<string,int>("Bernstein",5));
-    fabChoice.push_back(pair<string,int>("Bernstein",5));
-    fabChoice.push_back(pair<string,int>("Bernstein",4));
-    fabChoice.push_back(pair<string,int>("Bernstein",4));
-    fabChoice.push_back(pair<string,int>("Bernstein",3));
-    fabChoice.push_back(pair<string,int>("Bernstein",3));
-    fabChoice.push_back(pair<string,int>("Bernstein",3));
-    fabChoice.push_back(pair<string,int>("Bernstein",3));
-    fabChoice.push_back(pair<string,int>("Bernstein",3));
-    fabChoice.push_back(pair<string,int>("Bernstein",3));
-    fabChoice.push_back(pair<string,int>("Bernstein",3));
-    fabChoice.push_back(pair<string,int>("Bernstein",3));
-    fabChoice.push_back(pair<string,int>("Bernstein",3));
-    fabChoice.push_back(pair<string,int>("Bernstein",3));
-    fabChoice.push_back(pair<string,int>("Bernstein",3));
-  }
 
-  // store results here
-  
-  FILE *resFile ;
-  if  (singleCategory >-1) resFile = fopen(Form("%s/fTestResults_%s.txt",outDir.c_str(),flashggCats_[singleCategory].c_str()),"w");
-  else resFile = fopen(Form("%s/fTestResults.txt",outDir.c_str()),"w");
-  vector<map<string,int> > choices_vec;
-  vector<map<string,std::vector<int> > > choices_envelope_vec;
-  vector<map<string,RooAbsPdf*> > pdfs_vec;
+	vector<string> functionClasses;
+	functionClasses.push_back("Bernstein");
+	functionClasses.push_back("Exponential");
+	functionClasses.push_back("PowerLaw");
+	functionClasses.push_back("Laurent");
+	map<string,string> namingMap;
+	namingMap.insert(pair<string,string>("Bernstein","pol"));
+	namingMap.insert(pair<string,string>("Exponential","exp"));
+	namingMap.insert(pair<string,string>("PowerLaw","pow"));
+	namingMap.insert(pair<string,string>("Laurent","lau"));
+	vector<pair<string,int> > fabChoice;
+	if (is2011) {
+		fabChoice.push_back(pair<string,int>("Bernstein",4));
+		fabChoice.push_back(pair<string,int>("Bernstein",5));
+		fabChoice.push_back(pair<string,int>("Bernstein",5));
+		fabChoice.push_back(pair<string,int>("Bernstein",5));
+		fabChoice.push_back(pair<string,int>("Bernstein",3));
+		fabChoice.push_back(pair<string,int>("Bernstein",3));
+		fabChoice.push_back(pair<string,int>("Bernstein",3));
+		fabChoice.push_back(pair<string,int>("Bernstein",3));
+		fabChoice.push_back(pair<string,int>("Bernstein",3));
+		fabChoice.push_back(pair<string,int>("Bernstein",3));
+		fabChoice.push_back(pair<string,int>("Bernstein",3));
+		fabChoice.push_back(pair<string,int>("Bernstein",3));
+		fabChoice.push_back(pair<string,int>("Bernstein",3));
+		fabChoice.push_back(pair<string,int>("Bernstein",3));
+		fabChoice.push_back(pair<string,int>("Bernstein",3));
+		fabChoice.push_back(pair<string,int>("Bernstein",3));
+		fabChoice.push_back(pair<string,int>("Bernstein",3));
+		fabChoice.push_back(pair<string,int>("Bernstein",3));
+		fabChoice.push_back(pair<string,int>("Bernstein",3));
+		fabChoice.push_back(pair<string,int>("Bernstein",3));
+		fabChoice.push_back(pair<string,int>("Bernstein",3));
+		fabChoice.push_back(pair<string,int>("Bernstein",3));
+		fabChoice.push_back(pair<string,int>("Bernstein",3));
+	}
+	else {
+		fabChoice.push_back(pair<string,int>("Bernstein",5));
+		fabChoice.push_back(pair<string,int>("Bernstein",5));
+		fabChoice.push_back(pair<string,int>("Bernstein",5));
+		fabChoice.push_back(pair<string,int>("Bernstein",5));
+		fabChoice.push_back(pair<string,int>("Bernstein",4));
+		fabChoice.push_back(pair<string,int>("Bernstein",4));
+		fabChoice.push_back(pair<string,int>("Bernstein",3));
+		fabChoice.push_back(pair<string,int>("Bernstein",3));
+		fabChoice.push_back(pair<string,int>("Bernstein",3));
+		fabChoice.push_back(pair<string,int>("Bernstein",5));
+		fabChoice.push_back(pair<string,int>("Bernstein",5));
+		fabChoice.push_back(pair<string,int>("Bernstein",5));
+		fabChoice.push_back(pair<string,int>("Bernstein",5));
+		fabChoice.push_back(pair<string,int>("Bernstein",4));
+		fabChoice.push_back(pair<string,int>("Bernstein",4));
+		fabChoice.push_back(pair<string,int>("Bernstein",3));
+		fabChoice.push_back(pair<string,int>("Bernstein",3));
+		fabChoice.push_back(pair<string,int>("Bernstein",3));
+		fabChoice.push_back(pair<string,int>("Bernstein",3));
+		fabChoice.push_back(pair<string,int>("Bernstein",3));
+		fabChoice.push_back(pair<string,int>("Bernstein",3));
+		fabChoice.push_back(pair<string,int>("Bernstein",3));
+		fabChoice.push_back(pair<string,int>("Bernstein",3));
+		fabChoice.push_back(pair<string,int>("Bernstein",3));
+		fabChoice.push_back(pair<string,int>("Bernstein",3));
+		fabChoice.push_back(pair<string,int>("Bernstein",3));
+	}
 
-  PdfModelBuilder pdfsModel;
-  RooRealVar *mass = (RooRealVar*)inWS->var("CMS_hgg_mass");
+	// store results here
+
+	FILE *resFile ;
+	if  (singleCategory >-1) resFile = fopen(Form("%s/fTestResults_%s.txt",outDir.c_str(),flashggCats_[singleCategory].c_str()),"w");
+	else resFile = fopen(Form("%s/fTestResults.txt",outDir.c_str()),"w");
+	vector<map<string,int> > choices_vec;
+	vector<map<string,std::vector<int> > > choices_envelope_vec;
+	vector<map<string,RooAbsPdf*> > pdfs_vec;
+
+	PdfModelBuilder pdfsModel;
+	RooRealVar *mass = (RooRealVar*)inWS->var("CMS_hgg_mass");
 	std:: cout << "[INFO] Got mass from ws " << mass << std::endl;
-  pdfsModel.setObsVar(mass);
-  double upperEnvThreshold = 0.1; // upper threshold on delta(chi2) to include function in envelope (looser than truth function)
-  
-  fprintf(resFile,"Truth Model & d.o.f & $\\Delta NLL_{N+1}$ & $p(\\chi^{2}>\\chi^{2}_{(N\\rightarrow N+1)})$ \\\\\n");
-  fprintf(resFile,"\\hline\n");
+	pdfsModel.setObsVar(mass);
+	double upperEnvThreshold = 0.1; // upper threshold on delta(chi2) to include function in envelope (looser than truth function)
 
-  std::string ext = is2011 ? "7TeV" : "8TeV";
+	fprintf(resFile,"Truth Model & d.o.f & $\\Delta NLL_{N+1}$ & $p(\\chi^{2}>\\chi^{2}_{(N\\rightarrow N+1)})$ \\\\\n");
+	fprintf(resFile,"\\hline\n");
+
+	std::string ext = is2011 ? "7TeV" : "8TeV";
 	if (isFlashgg_) ext = "13TeV";
 	for (int cat=startingCategory; cat<ncats; cat++){
 
@@ -713,33 +721,34 @@ RooRealVar *sqrts;
 		map<string,std::vector<int> > choices_envelope;
 		map<string,RooAbsPdf*> pdfs;
 		map<string,RooAbsPdf*> allPdfs;
-			string catname;
-			if (isFlashgg_){
+		string catname;
+		if (isFlashgg_){
 			catname = Form("%s",flashggCats_[cat].c_str());
-			} else {
+		} else {
 			catname = Form("cat%d",cat);
-			}
+		}
 		RooDataSet *dataFull;
-		dataFull = (RooDataSet*)inWS->data(Form("data_mass_%s",catname.c_str()));
-		
+		if (isData_) dataFull = (RooDataSet*)inWS->data(Form("data_13TeV_%s",catname.c_str()));
+		else dataFull = (RooDataSet*)inWS->data(Form("data_mass_%s",catname.c_str()));
+
 		if (verbose) std::cout << "[INFO] opened data for  "  << Form("data_mass_%s",catname.c_str()) <<" - " << dataFull <<std::endl;
-		
+
 		mass->setBins(nBinsForMass);
 		RooDataSet *data;
-	//	RooDataHist thisdataBinned(Form("roohist_data_mass_cat%d",cat),"data",*mass,*dataFull);
-	//	RooDataSet *data = (RooDataSet*)&thisdataBinned;
-	 string thisdataBinned_name;
+		//	RooDataHist thisdataBinned(Form("roohist_data_mass_cat%d",cat),"data",*mass,*dataFull);
+		//	RooDataSet *data = (RooDataSet*)&thisdataBinned;
+		string thisdataBinned_name;
 
 		if ( isFlashgg_){
-		thisdataBinned_name =Form("roohist_data_mass_%s",flashggCats_[cat].c_str());
-	//	RooDataHist thisdataBinned(Form("roohist_data_mass_cat%d",cat),"data",*mass,*dataFull);
-	//	data = (RooDataSet*)&thisdataBinned;
-//		std::cout << "debug " << thisdataBinned.GetName() << std::endl;
+			thisdataBinned_name =Form("roohist_data_mass_%s",flashggCats_[cat].c_str());
+			//	RooDataHist thisdataBinned(Form("roohist_data_mass_cat%d",cat),"data",*mass,*dataFull);
+			//	data = (RooDataSet*)&thisdataBinned;
+			//		std::cout << "debug " << thisdataBinned.GetName() << std::endl;
 
-		//RooDataSet *data = (RooDataSet*)dataFull;
+			//RooDataSet *data = (RooDataSet*)dataFull;
 		} else {
 			thisdataBinned_name= Form("roohist_data_mass_cat%d",cat);
-		//RooDataSet *data = (RooDataSet*)dataFull;
+			//RooDataSet *data = (RooDataSet*)dataFull;
 		}
 		RooDataHist thisdataBinned(thisdataBinned_name.c_str(),"data",*mass,*dataFull);
 		data = (RooDataSet*)&thisdataBinned;
@@ -764,7 +773,7 @@ RooRealVar *sqrts;
 			std::vector<int> pdforders;
 
 			int counter =0;
-		//	while (prob<0.05){
+			//	while (prob<0.05){
 			while (prob<0.05 && counter < 10){ //FIXME
 				RooAbsPdf *bkgPdf = getPdf(pdfsModel,*funcType,order,Form("ftest_pdf_%d_%s",cat,ext.c_str()));
 				if (!bkgPdf){
@@ -799,7 +808,7 @@ RooRealVar *sqrts;
 					prev_pdf=bkgPdf;
 					order++;
 				}
-			counter++;
+				counter++;
 			}
 
 			fprintf(resFile,"%15s & %d & %5.2f & %5.2f \\\\\n",funcType->c_str(),cache_order+1,chi2,prob);
@@ -891,11 +900,11 @@ RooRealVar *sqrts;
 			string catindexname;
 			string catname;
 			if (isFlashgg_){
-			catindexname = Form("pdfindex_%s_%s",flashggCats_[cat].c_str(),ext.c_str());
-			catname = Form("%s",flashggCats_[cat].c_str());
+				catindexname = Form("pdfindex_%s_%s",flashggCats_[cat].c_str(),ext.c_str());
+				catname = Form("%s",flashggCats_[cat].c_str());
 			} else {
-			catindexname = Form("pdfindex_%d_%s",cat,ext.c_str());
-			catname = Form("cat%d",cat);
+				catindexname = Form("pdfindex_%d_%s",cat,ext.c_str());
+				catname = Form("cat%d",cat);
 			}
 			RooCategory catIndex(catindexname.c_str(),"c");
 			RooMultiPdf *pdf = new RooMultiPdf(Form("CMS_hgg_%s_%s_bkgshape",catname.c_str(),ext.c_str()),"all pdfs",catIndex,storedPdfs);
@@ -924,34 +933,34 @@ RooRealVar *sqrts;
 
 		}
 
-	}
-	if (saveMultiPdf){
-		outputfile->cd();
-		outputws->Write();
-		outputfile->Close();	
-	}
-
-	FILE *dfile = fopen(datfile.c_str(),"w");
-	cout << "[RESULT] Recommended options" << endl;
-
-	for (int cat=startingCategory; cat<ncats; cat++){
-		cout << "Cat " << cat << endl;
-		fprintf(dfile,"cat=%d\n",cat); 
-		for (map<string,int>::iterator it=choices_vec[cat-startingCategory].begin(); it!=choices_vec[cat-startingCategory].end(); it++){
-			cout << "\t" << it->first << " - " << it->second << endl;
-			fprintf(dfile,"truth=%s:%d:%s%d\n",it->first.c_str(),it->second,namingMap[it->first].c_str(),it->second);
 		}
-		fprintf(dfile,"fabian=%s:%d:%s%d\n",fabChoice[cat-startingCategory].first.c_str()
-				,fabChoice[cat-startingCategory].second,namingMap[fabChoice[cat-startingCategory].first].c_str(),fabChoice[cat-startingCategory].second);
-		for (map<string,std::vector<int> >::iterator it=choices_envelope_vec[cat-startingCategory].begin(); it!=choices_envelope_vec[cat-startingCategory].end(); it++){
-			std::vector<int> ords = it->second;
-			for (std::vector<int>::iterator ordit=ords.begin(); ordit!=ords.end(); ordit++){
-				fprintf(dfile,"paul=%s:%d:%s%d\n",it->first.c_str(),*ordit,namingMap[it->first].c_str(),*ordit);
+		if (saveMultiPdf){
+			outputfile->cd();
+			outputws->Write();
+			outputfile->Close();	
+		}
+
+		FILE *dfile = fopen(datfile.c_str(),"w");
+		cout << "[RESULT] Recommended options" << endl;
+
+		for (int cat=startingCategory; cat<ncats; cat++){
+			cout << "Cat " << cat << endl;
+			fprintf(dfile,"cat=%d\n",cat); 
+			for (map<string,int>::iterator it=choices_vec[cat-startingCategory].begin(); it!=choices_vec[cat-startingCategory].end(); it++){
+				cout << "\t" << it->first << " - " << it->second << endl;
+				fprintf(dfile,"truth=%s:%d:%s%d\n",it->first.c_str(),it->second,namingMap[it->first].c_str(),it->second);
 			}
+			fprintf(dfile,"fabian=%s:%d:%s%d\n",fabChoice[cat-startingCategory].first.c_str()
+					,fabChoice[cat-startingCategory].second,namingMap[fabChoice[cat-startingCategory].first].c_str(),fabChoice[cat-startingCategory].second);
+			for (map<string,std::vector<int> >::iterator it=choices_envelope_vec[cat-startingCategory].begin(); it!=choices_envelope_vec[cat-startingCategory].end(); it++){
+				std::vector<int> ords = it->second;
+				for (std::vector<int>::iterator ordit=ords.begin(); ordit!=ords.end(); ordit++){
+					fprintf(dfile,"paul=%s:%d:%s%d\n",it->first.c_str(),*ordit,namingMap[it->first].c_str(),*ordit);
+				}
+			}
+			fprintf(dfile,"\n");
 		}
-		fprintf(dfile,"\n");
-	}
-	inFile->Close();
+		inFile->Close();
 
-	return 0;
-}
+		return 0;
+	}

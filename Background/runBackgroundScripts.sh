@@ -17,6 +17,8 @@ SIGFILE=""
 BKGPLOTSONLY=0
 SEED=0
 INTLUMI=1
+ISDATA=0
+UNBLIND=0
 
 usage(){
 	echo "The script runs background scripts:"
@@ -25,7 +27,7 @@ usage(){
 echo "-h|--help)"
 echo "-i|--inputFile)"
 echo "-p|--procs ) (default= ggh)"
-echo "-f|--flashggCats) (defualt= UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,UntaggedTag_4,VBFTag_0,VBFTag_1,VBFTag_2,TTHHadronicTag,TTHLeptonicTag,VHHadronicTag,VHTightTag,VHLooseTag,VHEtTag)"
+echo "-f|--flashggCats) (default= UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,UntaggedTag_4,VBFTag_0,VBFTag_1,VBFTag_2,TTHHadronicTag,TTHLeptonicTag,VHHadronicTag,VHTightTag,VHLooseTag,VHEtTag)"
 echo "--ext)  (default= auto)"
 echo "--fTestOnly) "
 echo "--pseudoDataOnly) "
@@ -34,6 +36,8 @@ echo "--sigFile) "
 echo "--bkgPlotsOnly)"
 echo "--seed) for pseudodata random number gen seed (default $SEED)"
 echo "--intLumi) specified in fb^-{1} (default $INTLUMI)) "
+echo "--isData) specified in fb^-{1} (default $DATA)) "
+echo "--unblind) specified in fb^-{1} (default $UNBLIND)) "
 }
 
 
@@ -41,7 +45,7 @@ echo "--intLumi) specified in fb^-{1} (default $INTLUMI)) "
 
 
 # options may be followed by one colon to indicate they have a required argument
-if ! options=$(getopt -u -o hi:p:f: -l help,inputFile:,procs:,flashggCats:,ext:,fTestOnly,pseudoDataOnly,bkgPlotsOnly,pseudoDataDat:,sigFile:,seed:,intLumi: -- "$@")
+if ! options=$(getopt -u -o hi:p:f: -l help,inputFile:,procs:,flashggCats:,ext:,fTestOnly,pseudoDataOnly,bkgPlotsOnly,pseudoDataDat:,sigFile:,seed:,intLumi:,unblind,isData -- "$@")
 then
 # something went wrong, getopt will put out an error message for us
 exit 1
@@ -63,6 +67,8 @@ case $1 in
 --bkgPlotsOnly) BKGPLOTSONLY=1;;
 --seed) SEED=$2; shift;;
 --intLumi) INTLUMI=$2; shift;;
+--isData) ISDATA=1;;
+--unblind) UNBLIND=1;;
 
 (--) shift; break;;
 (-*) usage; echo "$0: error - unrecognized option $1" 1>&2; usage >> /dev/stderr; exit 1;;
@@ -73,7 +79,7 @@ done
 
 
 OUTDIR="outdir_$EXT"
-echo "[INFO] outdir is $OUTDIR" 
+echo "[INFO] outdir is $OUTDIR, INTLUMI $INTLUMI" 
 #if [ "$FILE" == "" ];then
 #	echo "ERROR, input file (--inputFile or -i) is mandatory!"
 #	exit 0
@@ -92,7 +98,7 @@ fi
 ################## PSEUDODATAONLY ###################
 ####################################################
 
-if [ $PSEUDODATAONLY == 1 ]; then
+if [ $PSEUDODATAONLY == 1 ] && [ $ISDATA == 0 ]; then
 
 mkdir -p $OUTDIR/pseudoData
 
@@ -118,9 +124,20 @@ echo "--------------------------------------"
 echo "Running Background F-Test"
 echo "-->Greate background model"
 echo "--------------------------------------"
+if [ $UNBLIND == 1 ]; then
+OPT=" --unblind"
+fi
+if [ $ISDATA == 0 ]; then
+FILE=$OUTDIR/pseudoData/pseudoWS.root
+fi
+if [ $ISDATA == 1 ]; then
+OPT=" --isData 1"
+fi
 
-./bin/fTest -i $FILE --saveMultiPdf CMS-HGG_multipdf_$EXT.root  -D $OUTDIR/bkgfTest -f $CATS 
+echo "./bin/fTest -i $FILE --saveMultiPdf CMS-HGG_multipdf_$EXT.root  -D $OUTDIR/bkgfTest -f $CATS $OPT"
+./bin/fTest -i $FILE --saveMultiPdf CMS-HGG_multipdf_$EXT.root  -D $OUTDIR/bkgfTest -f $CATS $OPT
 
+OPT=""
 fi
 
 ####################################################
@@ -135,9 +152,13 @@ echo "--------------------------------------"
 if [ "$SIGFILE" != "" ]; then
 SIG="-s $SIGFILE"
 fi
-echo "./scripts/subBkgPlots.py -b CMS-HGG_multipdf_$EXT.root -d $OUTDIR/bkgPlots -S 13 --isMultiPdf --useBinnedData --runLocal -c 9 $SIG"
-./scripts/subBkgPlots.py -b CMS-HGG_multipdf_$EXT.root -d $OUTDIR/bkgPlots -S 13 --isMultiPdf --useBinnedData  --doBands --runLocal  --massStep 2 $SIG -L 120 -H 130 -f $CATS -l $CATS #for now
+if [ $UNBLIND == 1 ]; then
+OPT=" --unblind"
+fi
+echo "./scripts/subBkgPlots.py -b CMS-HGG_multipdf_$EXT.root -d $OUTDIR/bkgPlots -S 13 --isMultiPdf --useBinnedData  --doBands --runLocal  --massStep 2 $SIG -L 120 -H 130 -f $CATS -l $CATS --intLumi $INTLUMI $OPT #for now"
+./scripts/subBkgPlots.py -b CMS-HGG_multipdf_$EXT.root -d $OUTDIR/bkgPlots -S 13 --isMultiPdf --useBinnedData  --doBands --runLocal  --massStep 2 $SIG -L 100 -H 180 -f $CATS -l $CATS --intLumi $INTLUMI $OPT #for now
 
+OPT=""
 fi
 
 

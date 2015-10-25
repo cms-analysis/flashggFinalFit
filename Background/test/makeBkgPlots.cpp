@@ -628,7 +628,7 @@ void profileExtendTerm(RooRealVar *mgg, RooAbsData *data, RooMultiPdf *mpdf, Roo
 	}
 }
 
-void plotAllPdfs(RooRealVar *mgg, RooAbsData *data, RooMultiPdf *mpdf, RooCategory *mcat, string name, int cat, bool blind, int isFlashgg, std::vector<string> flashggCats){
+void plotAllPdfs(RooRealVar *mgg, RooAbsData *data, RooMultiPdf *mpdf, RooCategory *mcat, string name, int cat, bool unblind, int isFlashgg, std::vector<string> flashggCats){
 	string catname;
 	if (isFlashgg){
 		catname = Form("%s",flashggCats[cat].c_str());
@@ -638,7 +638,7 @@ void plotAllPdfs(RooRealVar *mgg, RooAbsData *data, RooMultiPdf *mpdf, RooCatego
 	RooPlot *plot = mgg->frame();
 	plot->SetTitle(Form("Background functions profiled for category %s",catname.c_str()));
 	plot->GetXaxis()->SetTitle("m_{#gamma#gamma} (GeV)");
-	if (blind) {
+	if (!unblind) {
 		mgg->setRange("unblind_up",150,180);
 		mgg->setRange("unblind_down",100,110);
 		data->plotOn(plot,Binning(80),CutRange("unblind_down,unblind_up"));
@@ -663,7 +663,7 @@ void plotAllPdfs(RooRealVar *mgg, RooAbsData *data, RooMultiPdf *mpdf, RooCatego
 
 	TCanvas *canv = new TCanvas();
 	plot->Draw();
-	if (blind) plot->SetMinimum(0.0001);
+	if (!unblind) plot->SetMinimum(0.0001);
 	leg->Draw();
 	canv->Modified();
 	canv->Update();
@@ -687,7 +687,7 @@ int main(int argc, char* argv[]){
 	bool useBinnedData=false;
 	bool isMultiPdf=false;
 	bool doSignal=false;
-	bool blind=false;
+	bool unblind=false;
 	bool makeCrossCheckProfPlots=false;
 	int mhLow;
 	int mhHigh;
@@ -709,7 +709,7 @@ int main(int argc, char* argv[]){
 		("catLabel,l", po::value<string>(&catLabel),																	 			"Label category")
 		("doBands",																																		 			"Do error bands")
 		("isMultiPdf",																																			"Is this a multipdf ws?")
-		("blind",																																						"Blind central mass region")
+		("unblind",																																						"un blind central mass region")
 		("useBinnedData",																															 			"Data binned")
 		("makeCrossCheckProfPlots",																													"Make some cross check plots -- very slow!")
 		("massStep,m", po::value<double>(&massStep)->default_value(0.5),						   			"Mass step for calculating bands. Use a large number like 5 for quick running")
@@ -717,7 +717,7 @@ int main(int argc, char* argv[]){
 		("mhLow,L", po::value<int>(&mhLow)->default_value(100),															"Starting point for scan")
 		("mhHigh,H", po::value<int>(&mhHigh)->default_value(180),														"End point for scan")
 		("mhVal", po::value<double>(&mhvalue_)->default_value(125.),														"Choose the MH for the plots")
-		("intLumi", po::value<float>(&intLumi)->default_value(1.),																"What intLumi in fb^{-1}")
+		("intLumi", po::value<float>(&intLumi)->default_value(0.),																"What intLumi in fb^{-1}")
 		("sqrts,S", po::value<int>(&sqrts)->default_value(8),																"Which centre of mass is this data from?")
 		("isFlashgg",  po::value<int>(&isFlashgg_)->default_value(1),  								    	        "Use Flashgg output ")
 		("flashggCats,f", po::value<string>(&flashggCatsStr_)->default_value("UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,UntaggedTag_4,VBFTag_0,VBFTag_1,VBFTag_2,TTHHadronicTag,TTHLeptonicTag,VHHadronicTag,VHTightTag,VHLooseTag,VHEtTag"),       "Flashgg category names to consider")
@@ -730,7 +730,7 @@ int main(int argc, char* argv[]){
 	if (vm.count("doBands")) doBands=true;
 	if (vm.count("isMultiPdf")) isMultiPdf=true;
 	if (vm.count("makeCrossCheckProfPlots")) makeCrossCheckProfPlots=true;
-	if (vm.count("blind")) blind=true;
+	if (vm.count("unblind")) unblind=true;
 	if (vm.count("useBinnedData")) useBinnedData=true;
 	if (vm.count("sigFileName")) doSignal=true;
 	if (vm.count("verbose")) verbose_=true;
@@ -791,7 +791,7 @@ int main(int argc, char* argv[]){
 	cout << "[INFO] "<< "\t"; data->Print();
 
 	// plot all the pdfs for reference
-	if (isMultiPdf || verbose_) plotAllPdfs(mgg,data,mpdf,mcat,Form("%s/allPdfs_%s",outDir.c_str(),catname.c_str()),cat,blind, isFlashgg_, flashggCats_);
+	if (isMultiPdf || verbose_) plotAllPdfs(mgg,data,mpdf,mcat,Form("%s/allPdfs_%s",outDir.c_str(),catname.c_str()),cat,unblind, isFlashgg_, flashggCats_);
 
 	// include normalization hack RooBernsteinFast;
 	/*
@@ -939,7 +939,7 @@ int main(int argc, char* argv[]){
 		RooRealVar *lumi = (RooRealVar*)inWS->var("IntLumi");
 		plot->Draw();
 
-		if (blind) {
+		if (!unblind) {
 			mgg->setRange("unblind_up",150,180);
 			mgg->setRange("unblind_down",100,110);
 			data->plotOn(plot,Binning(80),CutRange("unblind_down,unblind_up"));
@@ -1023,12 +1023,12 @@ int main(int argc, char* argv[]){
 		TLatex *cmslatex = new TLatex();
 		cmslatex->SetTextSize(0.03);
 		cmslatex->SetNDC();
-		std::cout << "[INFO] intLumi " << lumi->getVal() << std::endl;
-		cmslatex->DrawLatex(0.2,0.85,Form("#splitline{CMS Preliminary}{#sqrt{s} = %dTeV L = %2.1ffb^{-1}}",sqrts,lumi->getVal()/1000.));
+		std::cout << "[INFO] intLumi " << intLumi << std::endl;
+		cmslatex->DrawLatex(0.2,0.85,Form("#splitline{CMS Preliminary}{#sqrt{s} = %dTeV L = %2.3ffb^{-1}}",sqrts,intLumi));
 		latex->DrawLatex(0.2,0.78,catLabel.c_str());
 		outWS->import(*lumi,RecycleConflictNodes());
 
-		if (blind) plot->SetMinimum(0.0001);
+		if (unblind) plot->SetMinimum(0.0001);
 		plot->GetYaxis()->SetTitleOffset(1.3);
 		canv->Modified();
 		canv->Update();

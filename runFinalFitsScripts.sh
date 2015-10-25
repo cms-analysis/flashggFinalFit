@@ -21,7 +21,9 @@ SUPERLOOP=1
 COUNTER=0
 CONTINUELOOP=0
 INTLUMI=1
-
+DATAFILE=""
+UNBLIND=0
+ISDATA=0
 usage(){
 	echo "The script runs background scripts:"
 		echo "options:"
@@ -40,6 +42,9 @@ echo "--backgroundOnly) "
 echo "--datacardOnly)"
 echo "--continueLoop) specify which iteration to start loop at (default $COUNTER)"
 echo "--intLumi) specified in fb^-{1} (default $INTLUMI)) "
+echo "--isData) specified in fb^-{1} (default $DATA)) "
+echo "--unblind) specified in fb^-{1} (default $UNBLIND)) "
+echo "--dataFile) specified in fb^-{1} (default $DATAFILE)) "
 }
 
 
@@ -47,7 +52,7 @@ echo "--intLumi) specified in fb^-{1} (default $INTLUMI)) "
 
 
 # options may be followed by one colon to indicate they have a required argument
-if ! options=$(getopt -u -o hi:p:f: -l help,inputFile:,procs:,flashggCats:,ext:,,pseudoDataDat:,sigFile:,combine,combineOnly,combinePlotsOnly,signalOnly,backgroundOnly,datacardOnly,superloop:,continueLoop:,intLumi: -- "$@")
+if ! options=$(getopt -u -o hi:p:f: -l help,inputFile:,procs:,flashggCats:,ext:,,pseudoDataDat:,sigFile:,combine,combineOnly,combinePlotsOnly,signalOnly,backgroundOnly,datacardOnly,superloop:,continueLoop:,intLumi:,unblind,isData,dataFile: -- "$@")
 then
 # something went wrong, getopt will put out an error message for us
 exit 1
@@ -63,6 +68,7 @@ case $1 in
 -f|--flashggCats) CATS=$2; shift ;;
 --ext) EXT=$2; echo "test" ; shift ;;
 --pseudoDataDat) PSEUDODATADAT=$2; shift;;
+--dataFile) DATAFILE=$2; shift;;
 --signalOnly) COMBINEONLY=0;BKGONLY=0;SIGONLY=1;DATACARDONLY=0; shift;;
 --backgroundOnly) COMBINEONLY=0;BKGONLY=1;SIGONLY=0;DATACARDONLY=0; shift;;
 --datacardOnly) COMBINEONLY=0;BKGONLY=0;SIGONLY=0;DATACARDONLY=1; shift;;
@@ -72,6 +78,8 @@ case $1 in
 --superloop) SUPERLOOP=$2 ; shift;;
 --continueLoop) COUNTER=$2; CONTINUELOOP=1 ; shift;;
 --intLumi) INTLUMI=$2; shift ;;
+--isData) ISDATA=1;; 
+--unblind) INTLUMI=1;;
 
 (--) shift; break;;
 (-*) usage; echo "$0: error - unrecognized option $1" 1>&2; usage >> /dev/stderr; exit 1;;
@@ -130,9 +138,20 @@ if [ $BKGONLY == 1 ]; then
 echo "------------------------------------------------"
 echo "-------------> Running BACKGROUND"
 echo "------------------------------------------------"
+if [ $UNBLIND == 1 ]; then
+BLINDINGOPT=" --unblind"
+fi
+if [ $ISDATA == 1 ]; then
+DATAOPT=" --isData"
+DATAFILEOPT= " -i $DATAFILE"
+else
+PSEUDODATAOPT="  --pseudoDataDat $PSEUDODATADAT"
+fi
+
 
 cd Background
-./runBackgroundScripts.sh -p $PROCS -f $CATS --ext $EXT --pseudoDataDat $PSEUDODATADAT --sigFile ../Signal/$OUTDIR/CMS-HGG_sigfit_$EXT.root --seed $COUNTER --intLumi $INTLUMI
+echo "./runBackgroundScripts.sh -p $PROCS -f $CATS --ext $EXT --sigFile ../Signal/$OUTDIR/CMS-HGG_sigfit_$EXT.root --seed $COUNTER --intLumi $INTLUMI $BLINDINGOPT $PSEUDODATAOPT $DATAOPT"
+./runBackgroundScripts.sh -p $PROCS -f $CATS --ext $EXT --sigFile ../Signal/$OUTDIR/CMS-HGG_sigfit_$EXT.root --seed $COUNTER --intLumi $INTLUMI $BLINDINGOPT $PSEUDODATAOPT $DATAOPT
 
 cd -
 if [ $USER == lcorpe ]; then

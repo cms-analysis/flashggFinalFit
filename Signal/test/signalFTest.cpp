@@ -262,13 +262,16 @@ int main(int argc, char *argv[]){
 			int prev_order=0;
 			int cache_order=0;
 			double thisNll=0.;
-			double prevNll=1.e6;
+			//double prevNll=1.e6;
+			double prevNll=0;
 			double chi2=0.;
 			double prob=0.;
+			std::vector<pair<int,float> > rv_results;
+			float rv_prob_limit =0.8;
 
 			dataRV->plotOn(plotsRV[proc][cat]);
-			//while (prob<0.8) 
-			while (order<5) {
+			while (prob<rv_prob_limit && order <5){ 
+			//while (order<5) 
 				RooAddPdf *pdf = buildSumOfGaussians(Form("cat%d_g%d",cat,order),mass,MH,order);
 				RooFitResult *fitRes = pdf->fitTo(*dataRV,Save(true),/*SumW2Error(true),*/Verbose(false));//,Range(mass_-10,mass_+10));
 				double myNll=0.;
@@ -281,30 +284,49 @@ int main(int argc, char *argv[]){
 				//thisNll = nll->getVal();
 				//plot(Form("plots/fTest/%s_cat%d_g%d_rv",proc.c_str(),cat,order),mass_,mass,dataRV,pdf);
 				pdf->plotOn(plotsRV[proc][cat],LineColor(colors[order-1]));
+				float chi2_bis= (plotsRV[proc][cat])->chiSquare();
 				chi2 = 2.*(prevNll-thisNll);
-				//if (chi2<0. && order>1) chi2=0.;
+				if (chi2<0. && order>1) chi2=0.;
 				int diffInDof = (2*order+(order-1))-(2*prev_order+(prev_order-1));
-				prob = TMath::Prob(chi2,diffInDof);
-				cout << "[INFO] \t RV: " << cat << " " << order << " " << diffInDof << " " << prevNll << " " << thisNll << " " << myNll << " " << chi2 << " " << prob << endl;
+			  //int diffInDof = (order- prev_order);
+				//prob = TMath::Prob(chi2,diffInDof);
+				float prob_old = TMath::Prob(chi2,diffInDof);
+				prob = TMath::Prob(chi2_bis,2*order+(order-1));
+				//Wilk's theorem
+				cout << "[INFO] \t RV: proc " << proc << " cat " << cat << " order " << order << " diffinDof " << diffInDof << " prevNll " << prevNll << " this Nll " << thisNll << " myNll " << myNll << " chi2 " << chi2 << " chi2_bis " << chi2_bis<<  " prob_old " << prob_old << ", prob_new " <<  prob << endl;
+				rv_results.push_back(std::make_pair(order,prob));
 				prevNll=thisNll;
-				cache_order=prev_order;
+				cache_order=order;
 				prev_order=order;
 				order++;
 			}
+			if (prob <rv_prob_limit){
+				float maxprob=-1;
+				for(unsigned int i =0; i<rv_results.size(); i++){
+					if (rv_results[i].second > maxprob){
+				  maxprob=rv_results[i].second;
+					rvChoice=rv_results[i].first;
+					}
+				}
+			}else {
 			rvChoice=cache_order;
+			}
 
 			// wrong vertex
 			order=1;
 			prev_order=0;
 			cache_order=0;
 			thisNll=0.;
-			prevNll=1.e6;
+			//prevNll=1.e6;
+			prevNll=0;
 			chi2=0.;
 			prob=0.;
+			std::vector<pair<int,float> > wv_results;
+			float wv_prob_limit = 0.8;
 
 			dataWV->plotOn(plotsWV[proc][cat]);
-			while (order<4) {
-				//while (prob<0.8) 
+			//while (order<4) 
+				while (prob<wv_prob_limit && order <4){ 
 				RooAddPdf *pdf = buildSumOfGaussians(Form("cat%d_g%d",cat,order),mass,MH,order);
 				RooFitResult *fitRes = pdf->fitTo(*dataWV,Save(true),/*SumW2Error(true),*/Verbose(false));//,Range(mass_-10,mass_+10));
 				double myNll=0.;
@@ -318,16 +340,32 @@ int main(int argc, char *argv[]){
 				//plot(Form("plots/fTest/%s_cat%d_g%d_wv",proc.c_str(),cat,order),mass_,mass,dataWV,pdf);
 				pdf->plotOn(plotsWV[proc][cat],LineColor(colors[order-1]));
 				chi2 = 2.*(prevNll-thisNll);
-				//if (chi2<0. && order>1) chi2=0.;
+				float chi2_bis= (plotsWV[proc][cat])->chiSquare();
+				if (chi2<0. && order>1) chi2=0.;
 				int diffInDof = (2*order+(order-1))-(2*prev_order+(prev_order-1));
-				prob = TMath::Prob(chi2,diffInDof);
-				cout << "[INFO] \t WV: " << cat << " " << order << " " << diffInDof << " " << prevNll << " " << thisNll << " " << myNll << " " << chi2 << " " << prob << endl;
+				//int diffInDof = (order-prev_order);
+				//prob = TMath::Prob(chi2,diffInDof);
+				float prob_old = TMath::Prob(chi2,diffInDof);
+				prob  = TMath::Prob(chi2_bis,2*order+(order-1));
+				//Wilk's theorem
+				cout << "[INFO] \t WV: proc " << proc <<" cat " << cat << " order " << order << " diffinDof " << diffInDof << " prevNll " << prevNll << " thosNll " << thisNll << " myNll" << myNll << " chi2" << chi2 << " chi2 bis " << chi2_bis << " prob_old " << prob_old << " prob_new " << prob <<  endl;
+				wv_results.push_back(std::make_pair(order,prob));
 				prevNll=thisNll;
-				cache_order=prev_order;
+				cache_order=order;
 				prev_order=order;
 				order++;
 			}
+			if (prob <wv_prob_limit){
+				float maxprob=-1;
+				for(unsigned int i =0; i<wv_results.size(); i++){
+					if (wv_results[i].second > maxprob){
+				  maxprob=wv_results[i].second;
+					wvChoice=wv_results[i].first;
+					}
+				}
+			}else {
 			wvChoice=cache_order;
+			}
 
 			choices.insert(pair<string,pair<int,int> >(Form("%s %d",proc.c_str(),cat),make_pair(rvChoice,wvChoice)));
 		} 
