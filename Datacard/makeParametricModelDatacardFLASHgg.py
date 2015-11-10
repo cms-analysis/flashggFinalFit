@@ -25,6 +25,7 @@ parser.add_option("--isMultiPdf",default=False,action="store_true")
 parser.add_option("--isBinnedSignal",default=False,action="store_true")
 parser.add_option("--is2011",default=False,action="store_true")
 parser.add_option("--is2012",default=False,action="store_true")
+parser.add_option("--simplePdfWeights",default=False,action="store_true",help="Condense pdfWeight systematics into 1 line instead of full shape systematic" )
 parser.add_option("--scaleFactors",help="Scale factor for spin model pass as e.g. gg_grav:1.351,qq_grav:1.027")
 parser.add_option("--quadInterpolate",type="int",default=0,help="Do a quadratic interpolation of flashgg templates back to 1 sigma from this sigma. 0 means off (default: %default)")
 (options,args)=parser.parse_args()
@@ -110,6 +111,7 @@ if options.globalScalesCorr=='': options.globalScalesCorr = []
 else: options.globalScalesCorr = options.globalScalesCorr.split(',')
 
 inWS = inFile.Get('wsig_13TeV')
+#inWS = inFile.Get('tagsDumper/cms_hgg_13TeV')
 intL = inWS.var('IntLumi').getVal() #FIXME
 print "[INFO] Get Intlumi from file, value : ", intL," pb^{-1}"
 #intL = 19700 #FIXME
@@ -264,10 +266,10 @@ if options.isSpinModel:
 	flashggSysts['ptSpin'] = 'n_pt'
 
 # QCD scale and PDF variations on PT-Y (replaced k-Factor PT variation) 
-#if not options.isBinnedSignal: #FIXME
-	#flashggSysts['pdfWeight_QCDscale'] = 'n_sc' #FIXME
-	#for pdfi in range(1,27): #FIXME
-		#flashggSysts['pdfWeight_pdfset%d'%pdfi] = 'n_pdf_%d'%pdfi #FIXME, not currently supported by flashgg 
+if not options.isBinnedSignal: #FIXME
+	flashggSysts['pdfWeight_QCDscale'] = 'n_sc' #FIXME
+	for pdfi in range(1,27): #FIXME
+		flashggSysts['pdfWeight_pdfset%d'%pdfi] = 'n_pdf_%d'%pdfi #FIXME, not currently supported by flashgg 
 
 # vbf uncertainties - vbfSysts['name'] = [ggEffect,qqEffect] - append migration effects
 # naming is important to correlate with combination
@@ -400,6 +402,19 @@ def interp1Sigma(th1f_nom,th1f_down,th1f_up):
 	if options.quadInterpolate!=0:
 		downE = quadInterpolate(-1.,-1.*options.quadInterpolate,0.,1.*options.quadInterpolate,th1f_down.Integral(),th1f_nom.Integral(),th1f_up.Integral())
 		upE = quadInterpolate(1.,-1.*options.quadInterpolate,0.,1.*options.quadInterpolate,th1f_down.Integral(),th1f_nom.Integral(),th1f_up.Integral())
+		if upE != upE: upE=1.000
+		if downE != downE: downE=1.000
+	return [downE,upE]
+
+def interp1SigmaDataset(d_nom,d_down,d_up):
+	nomE = d_nom.sumEntries()
+	if nomE==0:
+		return [1.000,1.000]
+	downE = d_down.sumEntries()/nomE
+	upE = d_up.sumEntries()/nomE
+	if options.quadInterpolate!=0:
+		downE = quadInterpolate(-1.,-1.*options.quadInterpolate,0.,1.*options.quadInterpolate,d_down.sumEntries(),d_nom.sumEntries(),s_up.sumEntries())
+		upE = quadInterpolate(1.,-1.*options.quadInterpolate,0.,1.*options.quadInterpolate,d_down.sumEntries(),d_nom.sumEntries(),d_up.sumEntries())
 		if upE != upE: upE=1.000
 		if downE != downE: downE=1.000
 	return [downE,upE]
@@ -583,15 +598,46 @@ def getGlobeLine(proc,cat,name):
 	#th1f_nom = inFile.Get('th1f_sig_%s_mass_m125_cat%s'%(proc,cat))
 	#th1f_up  = inFile.Get('th1f_sig_%s_mass_m125_cat%s_%sUp01_sigma'%(proc,cat,name))
 	#th1f_dn  = inFile.Get('th1f_sig_%s_mass_m125_cat%s_%sDown01_sigma'%(proc,cat,name))
-	th1f_nom = inFile.Get('diphotonDumper/histograms/%s_125_13TeV_flashgg%smass'%(proc,cat))
-	th1f_up  = inFile.Get('diphotonDumper_%sUp01sigma/histograms/%s_125_13TeV_flashgg%smass'%(name,proc,cat))
-	th1f_dn  = inFile.Get('diphotonDumper_%sDown01sigma/histograms/%s_125_13TeV_flashgg%smass'%(name,proc,cat))
-	print "FIXME getGlobeLine"
-	print 'diphotonDumper/histograms/%s_125_13TeV_flashgg%smass'%(proc,cat), ' ', th1f_nom
-	print 'diphotonDumper_%sUp01sigma/histograms/%s_125_13TeV_flashgg%smass'%(name,proc,cat), ' ', th1f_up
-	print 'diphotonDumper_%sDown01sigma/histograms/%s_125_13TeV_flashgg%smass'%(name,proc,cat), ' ', th1f_dn
-	systVals = interp1Sigma(th1f_nom,th1f_dn,th1f_up)
-	flashggSystDump.write('%s nom: %5.3f up: %5.3f down: %5.3f vals: [%5.3f,%5.3f] \n'%(name,th1f_nom.Integral(),th1f_up.Integral(),th1f_dn.Integral(),systVals[0],systVals[1]))
+	#th1f_nom = inFile.Get('diphotonDumper/histograms/%s_125_13TeV_flashgg%smass'%(proc,cat))
+	#ws =  inFile.Get("wsig_13TeV");
+	n = 0
+	m = 0
+	if ( "pdfset" in name ) : 
+		n = int(name[name.find("pdfset")+6:])
+		m = n+1
+	ws =  inFile.Get("tagsDumper/cms_hgg_13TeV");
+#	if (ws) : print "got ws!"
+	data_nominal = ws.data("test_13TeV_%s"%(cat))
+	data_nominal_sum = data_nominal.sumEntries()
+	data_nominal_num = data_nominal.numEntries()
+#	print "LC DEBUG - nominal " , data_nominal , " sumEntries " , data_nominal_sum, " numEntries ", data_nominal_num
+	data_up = data_nominal.emptyClone();
+	data_down = data_nominal.emptyClone();
+	mass = ws.var("CMS_hgg_mass")
+	weight = r.RooRealVar("weight","weight",0)
+	#weight_up = r.RooRealVar("weight_up","weight_up",0)
+	weight_up = ws.var("pdfWeight_1")
+	#weight_down = r.RooRealVar("weight_down","weight_down",0)
+	weight_down = ws.var("pdfWeight_2")
+	for i in range(0,int(data_nominal.numEntries())):
+		mass.setVal(data_nominal.get(i).getRealValue("CMS_hgg_mass"))
+		centralweight =data_nominal.weight()
+		factor_down = data_nominal.get(i).getRealValue("pdfWeight_%d"%n)
+		factor_up = data_nominal.get(i).getRealValue("pdfWeight_%d"%(m))
+		weight_down.setVal(centralweight*factor_down)
+		weight_up.setVal(centralweight*factor_up)
+		data_up.add(r.RooArgSet(mass,weight_up),weight_up.getVal())
+		data_down.add(r.RooArgSet(mass,weight_down),weight_down.getVal())
+	#	print "DEBUG - dataset entry ", i, " central weight ", centralweight, " factor up " , factor_up, " factor down ", factor_down
+
+	
+	#systVals = interp1Sigma(th1f_nom,th1f_dn,th1f_up)
+#print "LC DEBUG dataset nominal " , data_nominal.Print()
+#	print "LC DEBUG dataset  " , data_up.Print() 
+#	print "LC DEBUG dataset down " , data_down.Print() 
+	systVals = interp1SigmaDataset(data_nominal,data_down,data_up)
+	flashggSystDump.write('%s nominal: %5.3f up: %5.3f down: %5.3f vals: [%5.3f,%5.3f] \n'%(name,data_nominal.sumEntries(),data_up.sumEntries(),data_down.sumEntries(),systVals[0],systVals[1]))
+
 	if options.isBinnedSignal: 
 		line = '0.333 '
 	else:
@@ -599,14 +645,19 @@ def getGlobeLine(proc,cat,name):
 			line = '- '
 		else:
 			line = '%5.3f/%5.3f '%(systVals[0],systVals[1])
+#			print " [DEBUG] -- ", line
 	return line
 
 def printGlobeSysts():
 	print '[INFO] Efficiencies...'
+	print '[INFO] Efficiencies...0'
 	for flashggSyst, paramSyst in flashggSysts.items():
+#		print '[DEBUG] flashggSyst, paramsyst ', flashggSyst," ", paramSyst
 	#	continue
 		if 'pdfWeight' and 'QCDscale' in flashggSyst: # special case
+#			print " [DEBUG] pdfWeight and QCDScale in flashggSyst"
 			if options.isBinnedSignal: 
+#				print " [DEBUG] pdfWeight and QCDScale in flashggSyst --- binned Signal"
 				outFile.write('%-25s   shape   '%(flashggSyst))
 				for c in options.cats:
 					for p in options.procs:
@@ -616,6 +667,7 @@ def printGlobeSysts():
 						else:
 							outFile.write('0.333 ')
 			else: 
+#				print " [DEBUG] pdfWeight and QCDScale in flashggSyst --- UNbinned Signal"
 				outFile.write('%-35s   lnN   '%('CMS_hgg_%s_ggH'%paramSyst))
 				for c in options.cats:
 					for p in options.procs:
@@ -632,16 +684,22 @@ def printGlobeSysts():
 						if p=='qqH': outFile.write(getGlobeLine(p,c,flashggSyst))
 						else: outFile.write('- ')
 		else:		
+#			print " [DEBUG] pdfWeight and QCDScale NOT in flashggSyst"
 			if options.isBinnedSignal:
+#				print " [DEBUG] pdfWeight and QCDScale NOT  in flashggSyst --- binned Signal"
 				outFile.write('%-25s   shape   '%(flashggSyst))
 			else:
+#				print " [DEBUG] pdfWeight and QCDScale NOT  in flashggSyst --- UNbinned Signal"
 				outFile.write('%-35s   lnN   '%('CMS_hgg_%s'%paramSyst))
 			for c in options.cats:
 				for p in options.procs:
+#					print " [DEBUG] pdfWeight and QCDScale NOT  in flashggSyst --- cat ", c, " -- p ", p
 					if '%s:%s'%(p,c) in options.toSkip: continue
 					if p in bkgProcs or ('pdfWeight' in flashggSyst and (p!='ggH' and p!='qqH')):
+#						print " [DEBUG] ", p ," in bkgProcs or ", "('pdfWeight' in flashggSyst and (p!='ggH' and p!='qqH')) "
 						outFile.write('- ')
 					else:
+#						print "[DEBUG] (getGlobeLine(",flashggProc[p],",",c,",",flashggSyst,"))" 
 						#outFile.write(getGlobeLine(flashggProc[p],c,flashggSyst))
 						outFile.write(getGlobeLine(p,c,flashggSyst))
 		outFile.write('\n')

@@ -10,6 +10,7 @@
 #include "TStopwatch.h"
 #include "RooWorkspace.h"
 #include "RooDataSet.h"
+#include "RooDataHist.h"
 #include "TKey.h"
 #include "TMacro.h"
 #include "TClass.h"
@@ -70,6 +71,7 @@ string lowR9cats_;
 int verbose_=0;
 int ncpu_=1;
 int sqrts_=13;
+int pdfWeights_=26;
 vector<int> cats_;
 string catsStr_;
 bool isFlashgg_;
@@ -96,6 +98,7 @@ void OptionParser(int argc, char *argv[]){
    // ("nCats,n", po::value<int>(&nCats_)->default_value(9),                                    			"Number of total categories")
     ("constraintValue,C", po::value<float>(&constraintValue_)->default_value(0.1),            			"Constraint value")
     ("constraintValueMass,M", po::value<int>(&constraintValueMass_)->default_value(125),                        "Constraint value mass")
+    ("pdfWeights", po::value<int>(&pdfWeights_)->default_value(0),                        "If pdf systematics should be considered, say how many (default 0 = off)")
     ("skipSecondaryModels",                                                                   			"Turn off creation of all additional models")
     ("doQuadraticSigmaSum",  										        "Add sigma systematic terms in quadrature")
     ("procs", po::value<string>(&procStr_)->default_value("ggh,vbf,wh,zh,tth"),					"Processes (comma sep)")
@@ -437,6 +440,7 @@ int main(int argc, char *argv[]){
 			RooDataSet *dataRV; 
 			RooDataSet *dataWV; 
 			RooDataSet *data;  
+			RooDataHist *dataH;  
 
 			if (isFlashgg_){
 				if (verbose_)std::cout << "[INFO] Opening dataset called "<< Form("%s_%d_13TeV_%s",proc.c_str(),mh,flashggCats_[cat].c_str()) << " in in WS " << inWS << std::endl;
@@ -453,7 +457,23 @@ int main(int argc, char *argv[]){
 				//		RooRealVar* wrv = (RooRealVar*) dataRV0->addColumn(wFunc); 
 				//		RooRealVar* wwv = (RooRealVar*) dataWV0->addColumn(wFunc);
 
+				if (pdfWeights_){
+					
+					for (int ipdf =0 ;ipdf< pdfWeights_ ; ipdf++){
+					dataH = ((RooDataSet*) data0->emptyClone()->reduce(RooArgSet(*mass, *dZ, *weight0),"1"))->binnedClone();
+					dataH->SetNameTitle(Form("roohist_pdf_%d_%s_%d_13TeV_%s",ipdf,proc.c_str(),mh,flashggCats_[cat].c_str()),Form("roohist_pdf_%d_%s_%d_13TeV_%s",ipdf,proc.c_str(),mh,flashggCats_[cat].c_str()));
+	        RooRealVar *w_pdf = (RooRealVar*)inWS->var(Form("pdfWeight_%d",ipdf));
+				  for (int i = 0; i < data0->numEntries(); i++) {
+						mass->setVal(data0->get(i)->getRealValue("CMS_hgg_mass"));
+						w_pdf->setVal(data0->get(i)->getRealValue(Form("pdfWeight_%d",ipdf)));
+					  weight0->setVal(w_pdf->getVal() * data0->weight() ); // <--- is this correct?
+						dataH->add( RooArgList(*mass, *dZ, *weight0), weight0->getVal() );
+						
+					}
+					outWS->import(*dataH);
+        }
 
+				}
 				if (changeIntLumi){
 					double factor = changeIntLumi/originalIntLumi;
 					std::cout << "[INFO] Old int lumi " << originalIntLumi  <<", new int lumi " << changeIntLumi<< std::endl;

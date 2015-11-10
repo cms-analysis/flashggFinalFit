@@ -186,10 +186,10 @@ void InitialFit::runFits(int ncpu){
     data->Print();
     RooFitResult *fitRes;
     verbosity_ >=3 ?
-      fitRes = fitModel->fitTo(*data,NumCPU(ncpu),SumW2Error(true),Save(true)) :
+      fitRes = fitModel->fitTo(*data,NumCPU(ncpu),RooFit::Minimizer("Minuit","minimize"),SumW2Error(true),Save(true)) :
       verbosity_ >=2 ?
-        fitRes = fitModel->fitTo(*data,NumCPU(ncpu),SumW2Error(true),Save(true),PrintLevel(-1)) :
-        fitRes = fitModel->fitTo(*data,NumCPU(ncpu),SumW2Error(true),Save(true),PrintLevel(-1),PrintEvalErrors(-1))
+        fitRes = fitModel->fitTo(*data,NumCPU(ncpu),RooFit::Minimizer("Minuit","minimize"),SumW2Error(true),Save(true),PrintLevel(-1)) :
+        fitRes = fitModel->fitTo(*data,NumCPU(ncpu),RooFit::Minimizer("Minuit","minimize"),SumW2Error(true),Save(true),PrintLevel(-1),PrintEvalErrors(-1))
     ;
     fitResults.insert(pair<int,RooFitResult*>(mh,fitRes));
   }

@@ -16,7 +16,7 @@ transportFactors=[]
 
 from optparse import OptionParser
 parser = OptionParser()
-parser.add_option("-d","--dir")
+parser.add_option("-d","--dir",default="./")
 parser.add_option("-i","--input",default="workspaceContents.txt")
 parser.add_option("-r","--fromroot",default="")
 parser.add_option("-f","--flashggCats",default="UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,UntaggedTag_4,VBFTag_0,VBFTag_1,VBFTag_2,TTHHadronicTag,TTHLeptonicTag,VHHadronicTag,VHTightTag,VHLooseTag,VHEtTag")
@@ -40,8 +40,8 @@ for proc in procs:
 procCounter=-1
 for proc in procs:
 	procCounter=procCounter+1
-	xsFile=options.dir+"../../HiggsAnalysis/CombinedLimit/data/lhc-hxswg/sm/xs/"+str(initialSqrts)+"TeV/"+str(initialSqrts)+"TeV-"+proc+".txt"
-	outFile=options.dir+"../../HiggsAnalysis/CombinedLimit/data/lhc-hxswg/sm/xs/"+str(targetSqrts)+"TeV/"+str(targetSqrts)+"TeV-"+proc+".txt"
+	xsFile=options.dir+"../HiggsAnalysis/CombinedLimit/data/lhc-hxswg/sm/xs/"+str(initialSqrts)+"TeV/"+str(initialSqrts)+"TeV-"+proc+".txt"
+	outFile=options.dir+"../HiggsAnalysis/CombinedLimit/data/lhc-hxswg/sm/xs/"+str(targetSqrts)+"TeV/"+str(targetSqrts)+"TeV-"+proc+".txt"
 	f = open(outFile, 'w')
 	f.write("mH_GeV  XS_pb    Err_Hi     Err_Lo Sca_Hi  Sca_Lo  Pdf_Hi  Pdf_Lo\n")
 	with open(xsFile) as i:
