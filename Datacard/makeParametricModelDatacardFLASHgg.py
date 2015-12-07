@@ -266,10 +266,10 @@ if options.isSpinModel:
 	flashggSysts['ptSpin'] = 'n_pt'
 
 # QCD scale and PDF variations on PT-Y (replaced k-Factor PT variation) 
-if not options.isBinnedSignal: #FIXME
-	flashggSysts['pdfWeight_QCDscale'] = 'n_sc' #FIXME
-	for pdfi in range(1,27): #FIXME
-		flashggSysts['pdfWeight_pdfset%d'%pdfi] = 'n_pdf_%d'%pdfi #FIXME, not currently supported by flashgg 
+#if not options.isBinnedSignal: #FIXME
+#	flashggSysts['pdfWeight_QCDscale'] = 'n_sc' #FIXME
+#	for pdfi in range(1,27): #FIXME
+#		flashggSysts['pdfWeight_pdfset%d'%pdfi] = 'n_pdf_%d'%pdfi #FIXME, not currently supported by flashgg 
 
 # vbf uncertainties - vbfSysts['name'] = [ggEffect,qqEffect] - append migration effects
 # naming is important to correlate with combination

@@ -24,35 +24,36 @@ parser.add_option("-f","--flashggCats",default="UntaggedTag_0,UntaggedTag_1,Unta
 
 procCounter=-1
 for proc in procs:
-	procCounter=procCounter+1
-	xsFile=options.dir+"../HiggsAnalysis/CombinedLimit/data/lhc-hxswg/sm/xs/"+str(initialSqrts)+"TeV/"+str(initialSqrts)+"TeV-"+proc+".txt"
-	with open(xsFile) as i:
-		lines = i.readlines()
-		for line in lines:
-			words=line.split("	")
-			if not ("125.0" in words[0]) : continue
-			print "proc " , proc , " found ", words[0], " xs ", words[1]
-			xs=(float(words[1]))
-			initialValues.append(xs)
-			transportFactors.append(targetValues[procCounter]/xs)
+  procCounter=procCounter+1
+  xsFile=options.dir+"../HiggsAnalysis/CombinedLimit/data/lhc-hxswg/sm/xs/"+str(initialSqrts)+"TeV/"+str(initialSqrts)+"TeV-"+proc+".txt"
+  with open(xsFile) as i:
+    lines = i.readlines()
+    for line in lines:
+      words=line.split("	")
+      if not ("125.0" in words[0]) : continue
+      print "proc " , proc , " found ", words[0], " xs ", words[1]
+      xs=(float(words[1]))
+      initialValues.append(xs)
+      transportFactors.append(targetValues[procCounter]/xs)
 
 
 procCounter=-1
 for proc in procs:
-	procCounter=procCounter+1
-	xsFile=options.dir+"../HiggsAnalysis/CombinedLimit/data/lhc-hxswg/sm/xs/"+str(initialSqrts)+"TeV/"+str(initialSqrts)+"TeV-"+proc+".txt"
-	outFile=options.dir+"../HiggsAnalysis/CombinedLimit/data/lhc-hxswg/sm/xs/"+str(targetSqrts)+"TeV/"+str(targetSqrts)+"TeV-"+proc+".txt"
-	f = open(outFile, 'w')
-	f.write("mH_GeV  XS_pb    Err_Hi     Err_Lo Sca_Hi  Sca_Lo  Pdf_Hi  Pdf_Lo\n")
-	with open(xsFile) as i:
-		lines = i.readlines()
-		for line in lines:
-			if  ("mH" in line) : continue
-			words=line.split("	")
-			#if not("0" in line ) : continue
-			#print line
-			oldxs=(float(words[1]))
-			newxs=oldxs * transportFactors[procCounter]
-			print "proc " , proc , " found ", words[0], " xs ", oldxs, " new XS ",newxs
-			f.write(line.replace(str(oldxs),str("%2.2f"%newxs)))
-	f.close()
+  procCounter=procCounter+1
+  xsFile=options.dir+"../HiggsAnalysis/CombinedLimit/data/lhc-hxswg/sm/xs/"+str(initialSqrts)+"TeV/"+str(initialSqrts)+"TeV-"+proc+".txt"
+  outFile=options.dir+"../HiggsAnalysis/CombinedLimit/data/lhc-hxswg/sm/xs/"+str(targetSqrts)+"TeV/"+str(targetSqrts)+"TeV-"+proc+".txt"
+  os.system('mkdir -p "../HiggsAnalysis/CombinedLimit/data/lhc-hxswg/sm/xs/%sTeV/"'%str(targetSqrts))  
+  f = open(outFile, 'w')
+  f.write("mH_GeV  XS_pb    Err_Hi     Err_Lo Sca_Hi  Sca_Lo  Pdf_Hi  Pdf_Lo\n")
+  with open(xsFile) as i:
+    lines = i.readlines()
+    for line in lines:
+      if  ("mH" in line) : continue
+      words=line.split("	")
+      #if not("0" in line ) : continue
+      #print line
+      oldxs=(float(words[1]))
+      newxs=oldxs * transportFactors[procCounter]
+      print "proc " , proc , " found ", words[0], " xs ", oldxs, " new XS ",newxs
+      f.write(line.replace(str(oldxs),str("%2.2f"%newxs)))
+  f.close()

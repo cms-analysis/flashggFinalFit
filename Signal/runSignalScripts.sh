@@ -94,10 +94,35 @@ echo "Running Signal F-Test"
 echo "-->Determine Number of gaussians"
 echo "=============================="
 
-echo "./bin/signalFTest -i $FILE -d dat/newConfig_$EXT.dat -p $PROCS -f $CATS "
+echo "./bin/signalFTest -i $FILE -d dat/newConfig_$EXT.dat -p $PROCS -f $CATS -o $OUTDIR"
 ./bin/signalFTest -i $FILE -d dat/newConfig_$EXT.dat -p $PROCS -f $CATS -o $OUTDIR
+'''
+./python/submitSignaFTest.py --procs $PROCS --flashggCats $CATS --outDir $OUTDIR --i $FILE --batch IC -q hepshort.q
+echo "./python/submitSignaFTest.py --procs $PROCS --flashggCats $CATS --outDir $OUTDIR --i $FILE --batch IC -q hepshort.q"
 
+PEND=`ls -l $OUTDIR/fTestJobs/sub*| grep -v run | grep -v done | grep -v fail | grep -v err |grep -v log  |wc -l`
+while (( $PEND > 0 )) ;
+do
+PEND=`ls -l $OUTDIR/fTestJobs/sub* | grep -v run | grep -v done | grep -v fail | grep -v err | grep -v log |wc -l`
+RUN=`ls -l $OUTDIR/fTestJobs/sub* | grep run |wc -l`
+FAIL=`ls -l $OUTDIR/fTestJobs/sub* | grep fail |wc -l`
+DONE=`ls -l $OUTDIR/fTestJobs/sub* | grep done |wc -l`
+(( PEND=$PEND-$RUN-$FAIL-$DONE ))
+echo " PEND $PEND - RUN $RUN - DONE $DONE - FAIL $FAIL"
+if (( $RUN > 0 )) ; then PEND=1 ; fi
+if (( $FAIL > 0 )) ; then 
+echo "ERROR at least one job failed :"
+ls -l $OUTDIR/fTestJobs/sub* | grep fail
+exit 1
+fi
+sleep 10
+
+done
+'''
 mkdir -p $OUTDIR/dat
+cat $OUTDIR/fTestJobs/outputs/* > dat/newConfig_$EXT.dat
+sort -u dat/newConfig_$EXT.dat  > dat/tmp_newConfig_$EXT.dat 
+mv dat/tmp_newConfig_$EXT.dat dat/newConfig_$EXT.dat
 cp dat/newConfig_$EXT.dat $OUTDIR/dat/copy_newConfig_$EXT.dat
 rm -rf $OUTDIR/sigfTest
 mv $OUTDIR/fTest $OUTDIR/sigfTest
@@ -132,7 +157,7 @@ echo "=============================="
 
 echo "./bin/SignalFit -i $FILE -d dat/newConfig_$EXT.dat  --mhLow=120 --mhHigh=130 -s dat/photonCatSyst_$EXT.dat --procs $PROCS -o $OUTDIR/CMS-HGG_sigfit_$EXT.root -p $OUTDIR/sigfit -f $CATS --changeIntLumi $INTLUMI "
 
-./bin/SignalFit -i $FILE -d dat/newConfig_$EXT.dat  --mhLow=120 --mhHigh=130 -s dat/photonCatSyst_$EXT.dat --procs $PROCS -o $OUTDIR/CMS-HGG_sigfit_$EXT.root -p $OUTDIR/sigfit -f $CATS --changeIntLumi $INTLUMI --pdfWeights 26
+./bin/SignalFit -i $FILE -d dat/newConfig_$EXT.dat  --mhLow=120 --mhHigh=130 -s dat/photonCatSyst_$EXT.dat --procs $PROCS -o $OUTDIR/CMS-HGG_sigfit_$EXT.root -p $OUTDIR/sigfit -f $CATS --changeIntLumi $INTLUMI #--pdfWeights 26
 
 fi
 
@@ -163,4 +188,14 @@ cp ~lcorpe/public/index.php ~/www/$OUTDIR/sigfTest/.
 echo "plots available at: "
 echo "https://lcorpe.web.cern.ch/lcorpe/$OUTDIR"
 
+fi
+
+if [ $USER == "lc1113" ]; then
+cp -r $OUTDIR ~lc1113/public_html/.
+cp ~lc1113/index.php ~lc1113/public_html/$OUTDIR/sigplots/.
+cp ~lc1113/index.php ~lc1113/public_html/$OUTDIR/systematics/.
+cp ~lc1113/index.php ~lc1113/public_html/$OUTDIR/sigfit/.
+cp ~lc1113/index.php ~lc1113/public_html/$OUTDIR/sigfTest/.
+echo "plots available at: "
+echo "http://www.hep.ph.imperial.ac.uk/~lc1113/$OUTDIR"
 fi

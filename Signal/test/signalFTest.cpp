@@ -42,6 +42,8 @@ int ncats_;
 bool recursive_=false;
 string flashggCatsStr_;
 vector<string> flashggCats_;
+string considerOnlyStr_;
+vector<string> considerOnly_;
 bool forceFracUnity_=false;
 bool isFlashgg_;
 bool verbose_;
@@ -61,6 +63,7 @@ void OptionParser(int argc, char *argv[]){
 		("isFlashgg",	po::value<bool>(&isFlashgg_)->default_value(true),													"Use flashgg format")
 		("verbose",	po::value<bool>(&verbose_)->default_value(false),													"Use flashgg format")
 		("flashggCats,f", po::value<string>(&flashggCatsStr_)->default_value("UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,UntaggedTag_4,VBFTag_0,VBFTag_1,VBFTag_2,TTHHadronicTag,TTHLeptonicTag,VHHadronicTag,VHTightTag,VHLooseTag,VHEtTag"),       "Flashgg category names to consider")
+		("considerOnly", po::value<string>(&considerOnlyStr_)->default_value("All"),       "If you wish to only consider a subset cat in the list, list them as separated by commas. ")
 		;
 
 	po::options_description desc2("Options kept for backward compatibility");
@@ -162,10 +165,14 @@ int main(int argc, char *argv[]){
 	vector<string> procs;
 	split(procs,procString_,boost::is_any_of(","));
 	split(flashggCats_,flashggCatsStr_,boost::is_any_of(","));
+	split(considerOnly_,considerOnlyStr_,boost::is_any_of(","));
 
 	if (isFlashgg_){
 		ncats_ =flashggCats_.size();
 		// Ensure that the loop over the categories does not go out of scope. 
+	}
+	for (unsigned int j =0; j <considerOnly_.size() ; j++){
+			std::cout << " [INFO] considering only "  << considerOnly_[j]<<std::endl;
 	}
 
 	TFile *inFile = TFile::Open(filename_.c_str());
@@ -214,8 +221,18 @@ int main(int argc, char *argv[]){
 	colors.push_back(kRed);
 	colors.push_back(kGreen+2);
 	colors.push_back(kMagenta+1);
-
+	bool continueFlag =0;
 	for (int cat=0; cat<ncats_; cat++){
+
+		if ( (considerOnly_[0]).compare("All") != 0 ){
+			for (unsigned int j =0; j <considerOnly_.size() ; j++){
+				if ( (considerOnly_[j]).compare(flashggCats_[cat]) != 0) { 
+					std::cout << " [INFO] skipping " <<  flashggCats_[cat] << std::endl;
+					continueFlag=1;
+				}
+			}
+		}
+		if (continueFlag){ continueFlag=0; continue;}
 		for (unsigned int p=0; p<procs.size(); p++){
 			string proc = procs[p];
 			RooDataSet *data;  
@@ -272,7 +289,7 @@ int main(int argc, char *argv[]){
 
 			dataRV->plotOn(plotsRV[proc][cat]);
 			while (prob<rv_prob_limit && order <5){ 
-			//while (order<5) 
+				//while (order<5) 
 				RooAddPdf *pdf = buildSumOfGaussians(Form("cat%d_g%d",cat,order),mass,MH,order);
 				//RooFitResult *fitRes = pdf->fitTo(*dataRV,Save(true),SumW2Error(true),Verbose(true));//,Range(mass_-10,mass_+10));
 				RooFitResult *fitRes = pdf->fitTo(*dataRV,Save(true),RooFit::Minimizer("Minuit","minimize"),SumW2Error(true),Verbose(false));//,Range(mass_-10,mass_+10));
@@ -292,7 +309,7 @@ int main(int argc, char *argv[]){
 				chi2 = 2.*(prevNll-thisNll);
 				if (chi2<0. && order>1) chi2=0.;
 				int diffInDof = (2*order+(order-1))-(2*prev_order+(prev_order-1));
-			  //int diffInDof = (order- prev_order);
+				//int diffInDof = (order- prev_order);
 				//prob = TMath::Prob(chi2,diffInDof);
 				float prob_old = TMath::Prob(chi2,diffInDof);
 				prob = TMath::Prob(chi2_bis,2*order+(order-1));
@@ -308,12 +325,12 @@ int main(int argc, char *argv[]){
 				float maxprob=-1;
 				for(unsigned int i =0; i<rv_results.size(); i++){
 					if (rv_results[i].second > maxprob){
-				  maxprob=rv_results[i].second;
-					rvChoice=rv_results[i].first;
+						maxprob=rv_results[i].second;
+						rvChoice=rv_results[i].first;
 					}
 				}
 			}else {
-			rvChoice=cache_order;
+				rvChoice=cache_order;
 			}
 
 			// wrong vertex
@@ -330,7 +347,7 @@ int main(int argc, char *argv[]){
 
 			dataWV->plotOn(plotsWV[proc][cat]);
 			//while (order<4) 
-				while (prob<wv_prob_limit && order <5){ 
+			while (prob<wv_prob_limit && order <5){ 
 				RooAddPdf *pdf = buildSumOfGaussians(Form("cat%d_g%d",cat,order),mass,MH,order);
 				RooFitResult *fitRes = pdf->fitTo(*dataWV,Save(true),RooFit::Minimizer("Minuit","minimize"),SumW2Error(true),Verbose(false));//,Range(mass_-10,mass_+10));
 				double myNll=0.;
@@ -363,12 +380,12 @@ int main(int argc, char *argv[]){
 				float maxprob=-1;
 				for(unsigned int i =0; i<wv_results.size(); i++){
 					if (wv_results[i].second > maxprob){
-				  maxprob=wv_results[i].second;
-					wvChoice=wv_results[i].first;
+						maxprob=wv_results[i].second;
+						wvChoice=wv_results[i].first;
 					}
 				}
 			}else {
-			wvChoice=cache_order;
+				wvChoice=cache_order;
 			}
 
 			choices.insert(pair<string,pair<int,int> >(Form("%s %d",proc.c_str(),cat),make_pair(rvChoice,wvChoice)));
@@ -395,6 +412,15 @@ int main(int argc, char *argv[]){
 	for (map<string,vector<RooPlot*> >::iterator plotIt=plotsRV.begin(); plotIt!=plotsRV.end(); plotIt++){
 		string proc = plotIt->first;
 		for (int cat=0; cat<ncats_; cat++){
+		if ( (considerOnly_[0]).compare("All") != 0 ){
+			for (unsigned int j =0; j <considerOnly_.size() ; j++){
+				if ( (considerOnly_[j]).compare(flashggCats_[cat]) != 0) { 
+					//std::cout << " [INFO] skipping " <<  flashggCats_[cat] << std::endl;
+					continueFlag=1;
+				}
+			}
+		}
+		if (continueFlag){ continueFlag=0; continue;}
 			RooPlot *plot = plotIt->second.at(cat);
 			plot->Draw();
 			leg->Draw();
@@ -405,6 +431,15 @@ int main(int argc, char *argv[]){
 	for (map<string,vector<RooPlot*> >::iterator plotIt=plotsWV.begin(); plotIt!=plotsWV.end(); plotIt++){
 		string proc = plotIt->first;
 		for (int cat=0; cat<ncats_; cat++){
+		if ( (considerOnly_[0]).compare("All") != 0 ){
+			for (unsigned int j =0; j <considerOnly_.size() ; j++){
+				if ( (considerOnly_[j]).compare(flashggCats_[cat]) != 0) { 
+					//std::cout << " [INFO] skipping " <<  flashggCats_[cat] << std::endl;
+					continueFlag=1;
+				}
+			}
+		}
+		if (continueFlag){ continueFlag=0; continue;}
 			RooPlot *plot = plotIt->second.at(cat);
 			plot->Draw();
 			leg->Draw();
