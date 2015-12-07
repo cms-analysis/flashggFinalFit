@@ -11,12 +11,12 @@ lumi=0.
 initialSqrts=8
 procs=["ggH","vbfH","WH","ZH","ttH"]
 targetValues=[43.92,3.748,1.380,0.8696,0.5085] #at 125.
-initialValues=[]
+#initialValues=[]
 transportFactors=[]
 
 from optparse import OptionParser
 parser = OptionParser()
-parser.add_option("-d","--dir",default="./")
+parser.add_option("-d","--dir",default="")
 parser.add_option("-i","--input",default="workspaceContents.txt")
 parser.add_option("-r","--fromroot",default="")
 parser.add_option("-f","--flashggCats",default="UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,UntaggedTag_4,VBFTag_0,VBFTag_1,VBFTag_2,TTHHadronicTag,TTHLeptonicTag,VHHadronicTag,VHTightTag,VHLooseTag,VHEtTag")
@@ -33,13 +33,15 @@ for proc in procs:
       if not ("125.0" in words[0]) : continue
       print "proc " , proc , " found ", words[0], " xs ", words[1]
       xs=(float(words[1]))
-      initialValues.append(xs)
+      #initialValues.append(xs)
       transportFactors.append(targetValues[procCounter]/xs)
 
 
 procCounter=-1
 for proc in procs:
   procCounter=procCounter+1
+  if not os.path.exists(options.dir+"../HiggsAnalysis/CombinedLimit/data/lhc-hxswg/sm/xs/"+str(targetSqrts)+"TeV"):
+      os.mkdir(options.dir+"../HiggsAnalysis/CombinedLimit/data/lhc-hxswg/sm/xs/"+str(targetSqrts)+"TeV")
   xsFile=options.dir+"../HiggsAnalysis/CombinedLimit/data/lhc-hxswg/sm/xs/"+str(initialSqrts)+"TeV/"+str(initialSqrts)+"TeV-"+proc+".txt"
   outFile=options.dir+"../HiggsAnalysis/CombinedLimit/data/lhc-hxswg/sm/xs/"+str(targetSqrts)+"TeV/"+str(targetSqrts)+"TeV-"+proc+".txt"
   os.system('mkdir -p "../HiggsAnalysis/CombinedLimit/data/lhc-hxswg/sm/xs/%sTeV/"'%str(targetSqrts))  
