@@ -9,7 +9,8 @@ PROCS="ggh"
 CATS="UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,UntaggedTag_4,VBFTag_0,VBFTag_1,VBFTag_2"
 #CATS="UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,UntaggedTag_4,VBFTag_0,VBFTag_1,VBFTag_2,VHHadronicTag,VHTightTag,VHLooseTag"
 SCALES="HighR9EE,LowR9EE,HighR9EB,LowR9EB"
-SMEARS="HighR9EE,LowR9EE,HighR9EBRho,LowR9EBRho,HighR9EBPhi,LowR9EBPhi"
+#SMEARS="HighR9EE,LowR9EE,HighR9EBRho,LowR9EBRho,HighR9EBPhi,LowR9EBPhi"
+SMEARS="HighR9EE,LowR9EE,HighR9EB,LowR9EB" #DRY RUN
 FTESTONLY=0
 CALCPHOSYSTONLY=0
 SIGFITONLY=0
@@ -87,7 +88,7 @@ fi
 ################## SIGNAL F-TEST ###################
 ####################################################
 if [ $FTESTONLY == 1 ]; then
-
+mkdir -p $OUTDIR/fTest
 
 echo "=============================="
 echo "Running Signal F-Test"
@@ -95,30 +96,31 @@ echo "-->Determine Number of gaussians"
 echo "=============================="
 
 echo "./bin/signalFTest -i $FILE -d dat/newConfig_$EXT.dat -p $PROCS -f $CATS -o $OUTDIR"
-./bin/signalFTest -i $FILE -d dat/newConfig_$EXT.dat -p $PROCS -f $CATS -o $OUTDIR
-'''
-./python/submitSignaFTest.py --procs $PROCS --flashggCats $CATS --outDir $OUTDIR --i $FILE --batch IC -q hepshort.q
+#./bin/signalFTest -i $FILE -d dat/newConfig_$EXT.dat -p $PROCS -f $CATS -o $OUTDIR
+
+#./python/submitSignaFTest.py --procs $PROCS --flashggCats $CATS --outDir $OUTDIR --i $FILE --batch IC -q hepshort.q
 echo "./python/submitSignaFTest.py --procs $PROCS --flashggCats $CATS --outDir $OUTDIR --i $FILE --batch IC -q hepshort.q"
 
-PEND=`ls -l $OUTDIR/fTestJobs/sub*| grep -v run | grep -v done | grep -v fail | grep -v err |grep -v log  |wc -l`
+PEND=`ls -l $OUTDIR/fTestJobs/sub*| grep -v "\.run" | grep -v "\.done" | grep -v "\.fail" | grep -v "\.err" |grep -v "\.log"  |wc -l`
+echo "PEND $PEND"
 while (( $PEND > 0 )) ;
 do
-PEND=`ls -l $OUTDIR/fTestJobs/sub* | grep -v run | grep -v done | grep -v fail | grep -v err | grep -v log |wc -l`
-RUN=`ls -l $OUTDIR/fTestJobs/sub* | grep run |wc -l`
-FAIL=`ls -l $OUTDIR/fTestJobs/sub* | grep fail |wc -l`
-DONE=`ls -l $OUTDIR/fTestJobs/sub* | grep done |wc -l`
+PEND=`ls -l $OUTDIR/fTestJobs/sub* | grep -v "\.run" | grep -v "\.done" | grep -v "\.fail" | grep -v "\.err" | grep -v "\.log" |wc -l`
+RUN=`ls -l $OUTDIR/fTestJobs/sub* | grep "\.run" |wc -l`
+FAIL=`ls -l $OUTDIR/fTestJobs/sub* | grep "\.fail" |wc -l`
+DONE=`ls -l $OUTDIR/fTestJobs/sub* | grep "\.done" |wc -l`
 (( PEND=$PEND-$RUN-$FAIL-$DONE ))
 echo " PEND $PEND - RUN $RUN - DONE $DONE - FAIL $FAIL"
 if (( $RUN > 0 )) ; then PEND=1 ; fi
 if (( $FAIL > 0 )) ; then 
 echo "ERROR at least one job failed :"
-ls -l $OUTDIR/fTestJobs/sub* | grep fail
+ls -l $OUTDIR/fTestJobs/sub* | grep "\.fail"
 exit 1
 fi
 sleep 10
 
 done
-'''
+
 mkdir -p $OUTDIR/dat
 cat $OUTDIR/fTestJobs/outputs/* > dat/newConfig_$EXT.dat
 sort -u dat/newConfig_$EXT.dat  > dat/tmp_newConfig_$EXT.dat 

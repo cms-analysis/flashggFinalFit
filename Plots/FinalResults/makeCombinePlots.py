@@ -266,17 +266,23 @@ def pvalPlot(allVals):
   for k, values in enumerate(allVals):
     minpvalue=99999.
     minpvalueX=99999.
+    pvalat125=999999.
     graph = r.TGraph()
     for j in range(len(values)):
       graph.SetPoint(j,values[j][0],values[j][1])
       if (minpvalue > values[j][1]): 
         minpvalue = values[j][1]
         minpvalueX =values[j][0]
-      if options.verbose or values[j][0]==125: print '\t', j, values[j][0], values[j][1], r.RooStats.PValueToSignificance(values[j][1])
+      if options.verbose or values[j][0]==125: 
+        print '\t', j, values[j][0], values[j][1], r.RooStats.PValueToSignificance(values[j][1])
+        pvalat125=values[j][1]
       print "debug minpval", minpvalue
     
     with open(options.itLedger, "a") as myfile:
-		    myfile.write("%s %f %f\n" % ( (options.names[k].replace(" ","_"))+" "+options.it, minpvalue,minpvalueX ))
+        myfile.write("%s %f %f\n" % ( (options.names[k].replace(" ","_"))+" "+options.it, minpvalue,minpvalueX ))
+        if ("Obs" in options.names[k] ) :
+          myfile.write("%s %f %f\n" % ( (options.names[k].replace(" ","_"))+"_at125"+" "+options.it, pvalat125,125. ))
+
     graph.SetLineColor(int(options.colors[k]))
     graph.SetLineStyle(int(options.styles[k]))
     graph.SetLineWidth(int(options.widths[k]))

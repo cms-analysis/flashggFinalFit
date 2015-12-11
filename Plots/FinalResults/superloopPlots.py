@@ -63,7 +63,7 @@ for line in d.readlines():
     if line.startswith('#'): continue
     if line=='\n': continue
     words=line.split(' ')
-    print "already considered", list1
+    #print "already considered", list1
     if (len(index_vec)-1)<int(words[1]) :
       index_vec.append(int(words[1]))
       mh_vec.append(-1.)
@@ -71,7 +71,7 @@ for line in d.readlines():
       obs_vec.append(-1.)
       exp_125_vec.append(-1.)
       exp_vec.append(-1.)
-    print "check if " ,words[1] , " is in list1" , (words[1] in list1)
+    #print "check if " ,words[1] , " is in list1" , (words[1] in list1)
     if (words[0]+words[1]) in list1 : continue
     list1.append(words[0]+words[1])
     if words[0]=="mh":
@@ -86,7 +86,7 @@ for line in d.readlines():
       dmH=(mhvalue -125.)/(mherrorsLo+mherrorsHi)
       mh_h.Fill(dmH)
       mh_vec[int(words[1])]=mhvalue
-      print words[1], "MH: ",mherrorsLo ,", ", mhvalue ,", ", mherrorsHi, "deltaMh/sigma ",dmH
+      #print words[1], "MH: ",mherrorsLo ,", ", mhvalue ,", ", mherrorsHi, "deltaMh/sigma ",dmH
       countermh+=1
     if words[0]=="mu":
       muvalue = (float(words[2]))
@@ -101,7 +101,7 @@ for line in d.readlines():
       dmu=(muvalue -1.)/(muerrorsLo+muerrorsHi)
       mu_h.Fill(dmu)
       mu_vec[int(words[1])]=muvalue
-      print words[1], "MU: ",muerrorsLo ,", ", muvalue ,", ", muerrorsHi, "dmu/sigma ", dmu
+      #print words[1], "MU: ",muerrorsLo ,", ", muvalue ,", ", muerrorsHi, "dmu/sigma ", dmu
       countermu+=1
     if words[0]=="Expected_mh125_13TeV":
       exppval.SetPoint(int(words[1]),int(words[1]),float(words[2])  )
@@ -114,7 +114,7 @@ for line in d.readlines():
       dpval=pexpval - pobsval
       pval_h.Fill(dpval)
       obs_vec[int(words[1])]= pobsval
-      print words[1]," PVAL obs ", pobsval, ", exp ", pexpval, ", dpval ", dpval, " counter " , counter
+      #print words[1]," PVAL obs ", pobsval, ", exp ", pexpval, ", dpval ", dpval, " counter " , counter
       counter=counter+1
 
 
@@ -309,26 +309,34 @@ print "exp_125_vec"
 print exp_125_vec
 print "###################################"
 
-f = r.TFile( 'test.root', 'recreate' )
+#f = r.TFile( 'test.root', 'recreate' )
+f = r.TFile( file0.replace("txt","root"), 'recreate' )
 tree = r.TTree("t1","t1") 
 maxn = len(index_vec)
-a = array( 'i', [ 0 ] )
-b = array( 'f', [ 0. ] )
-c = array( 'f', [ 0. ] )
-d = array( 'f', [ 0. ] )
-e = array( 'f', [ 0. ] )
-tree.Branch( 'index', a, 'index/I' )
-tree.Branch( 'mh', b, 'mh/F' )
-tree.Branch( 'mu', c, 'mu/F' )
-tree.Branch( 'exp_125', d, 'obs_125/F' )
-tree.Branch( 'obs', e, 'exp/F' )
+lindex = array( 'i', [ 0 ] )
+lmh = array( 'f', [ 0. ] )
+lmu = array( 'f', [ 0. ] )
+lexp_125 = array( 'f', [ 0. ] )
+lexp_125_sigma = array( 'f', [ 0. ] )
+lobs = array( 'f', [ 0. ] )
+lobs_sigma = array( 'f', [ 0. ] )
+tree.Branch( 'index', lindex, 'index/I' )
+tree.Branch( 'mh', lmh, 'mh/F' )
+tree.Branch( 'mu', lmu, 'mu/F' )
+tree.Branch( 'exp_125', lexp_125, 'exp_125/F' )
+tree.Branch( 'exp_125_sigma', lexp_125_sigma, 'exp_125_sigma/F' )
+tree.Branch( 'obs', lobs, 'obs/F' )
+tree.Branch( 'obs_sigma', lobs_sigma, 'obs_sigma/F' )
 
 for i in range(maxn):
-  a[0] = int(index_vec[i])
-  b[0] = mh_vec[i]
-  c[0] = mu_vec[i]
-  d[0] = exp_125_vec[i]
-  e[0] = obs_vec[i]
+  lindex[0] = int(index_vec[i])
+  lmh[0] = mh_vec[i]
+  lmu[0] = mu_vec[i]
+  lexp_125[0] = exp_125_vec[i]
+  lexp_125_sigma[0] = r.RooStats.PValueToSignificance(exp_125_vec[i])
+  lobs[0] = obs_vec[i]
+  lobs_sigma[0] = r.RooStats.PValueToSignificance(obs_vec[i])
+  print "exp_125 : ", lexp_125[0] , " ie " , lexp_125_sigma[0] ," sigma , obs " , lobs[0] , " ie " , lobs_sigma[0] ," sigma"
   tree.Fill()
 
 f.Write()
