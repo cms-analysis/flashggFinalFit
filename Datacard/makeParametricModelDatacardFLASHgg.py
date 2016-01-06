@@ -363,8 +363,8 @@ vbfSysts['JetVeto'] =[]
 for dijetCat in dijetCats: #each entry will represent a different migration
    vbfSysts['JER'].append([1.,1.])  #value of 1 given gor both ggh and qqh, since vairations are taken from histograms directly
    vbfSysts['JEC'].append([1.,1.]) #value of 1 given gor both ggh and qqh, since vairations are taken from histograms directly
-vbfSysts['JetVeto'].append([0.3,0.3]) # adhoc for ggh<->vbf
-vbfSysts['JetVeto'].append([0.15,0.15]) # adhoc for vbf0<->vbf1
+vbfSysts['JetVeto'].append([0.3,0.0]) # adhoc for ggh<->vbf ##as suggested my Martina, this onyl applies to VBF, not ggh.
+vbfSysts['JetVeto'].append([0.15,0.0]) # adhoc for vbf0<->vbf1
 #vbfSysts['QCDscale_gg2in'] = [] # on the hgg twiki this is referred to JetVeto_QCDscale
 #vbfSysts['UEPS'] = []
 #vbfSysts['QCDscale_gg2in'].append([0.30,0.]) # All VBF cats -> inclusive

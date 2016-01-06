@@ -75,6 +75,7 @@ parser.add_option("--skipWorkspace",default=False,action="store_true",help="Dont
 parser.add_option("--hadd",help="Trawl passed directory and hadd files. To be used when jobs are complete.")
 parser.add_option("-v","--verbose",default=False,action="store_true")
 parser.add_option("--poix",default="r")
+parser.add_option("--S0",default=False,action="store_true",help="Stats only")
 parser.add_option("--catsMap",default="")
 parser.add_option("--nBins",default=7)
 parser.add_option("--batch",default="LSF",help="Which batch system to use (LSF,IC)")
@@ -284,6 +285,7 @@ def writePreamble(sub_file):
 def writePostamble(sub_file, exec_line):
 
   #print "[INFO] writing to postamble"
+  if opts.S0: exec_line += ' -S 0 '
   sub_file.write('if ( %s ) then\n'%exec_line)
   sub_file.write('\t mv higgsCombine*.root %s\n'%os.path.abspath(opts.outDir))
   sub_file.write('\t touch %s.done\n'%os.path.abspath(sub_file.name))
@@ -323,6 +325,7 @@ def writeAsymptotic():
     exec_line = ''
     for mass in mass_set:
       exec_line +=  'combine %s -M Asymptotic -m %6.2f --cminDefaultMinimizerType=Minuit2'%(opts.datacard,mass)
+      if opts.S0: exec_line += ' --S0 '
       if opts.additionalOptions: exec_line += ' %s'%opts.additionalOptions
       if opts.expected: exec_line += ' --run=expected'
       if mass!=mass_set[-1]: exec_line += ' && '
@@ -343,6 +346,8 @@ def writeAsymptoticGrid():
   if not opts.skipWorkspace:
     print '[INFO] Creating workspace for %s...'%opts.method
     ws_exec_line = 'text2workspace.py %s -o %s'%(os.path.abspath(opts.datacard),os.path.abspath(opts.datacard).replace('.txt','.root')) 
+    print " WS EXEC LINE "
+    print ws_exec_line
     system(ws_exec_line)
   opts.datacard = opts.datacard.replace('.txt','.root')
 

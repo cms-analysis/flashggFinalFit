@@ -156,15 +156,15 @@ BLINDINGOPT=" --unblind"
 fi
 if [ $ISDATA == 1 ]; then
 DATAOPT=" --isData"
-DATAFILEOPT= " -i $DATAFILE"
+DATAFILEOPT=" -i $DATAFILE"
 else
 PSEUDODATAOPT="  --pseudoDataDat $PSEUDODATADAT"
 fi
 
 
 cd Background
-echo "./runBackgroundScripts.sh -p $PROCS -f $CATS --ext $EXT --sigFile ../Signal/$OUTDIR/CMS-HGG_sigfit_$EXT.root --seed $COUNTER --intLumi $INTLUMI $BLINDINGOPT $PSEUDODATAOPT $DATAOPT"
-./runBackgroundScripts.sh -p $PROCS -f $CATS --ext $EXT --sigFile ../Signal/$OUTDIR/CMS-HGG_sigfit_$EXT.root --seed $COUNTER --intLumi $INTLUMI $BLINDINGOPT $PSEUDODATAOPT $DATAOPT
+echo "./runBackgroundScripts.sh -p $PROCS -f $CATS --ext $EXT --sigFile ../Signal/$OUTDIR/CMS-HGG_sigfit_$EXT.root --seed $COUNTER --intLumi $INTLUMI $BLINDINGOPT $PSEUDODATAOPT $DATAOPT $DATAFILEOPT"
+./runBackgroundScripts.sh -p $PROCS -f $CATS --ext $EXT --sigFile ../Signal/$OUTDIR/CMS-HGG_sigfit_$EXT.root --seed $COUNTER --intLumi $INTLUMI $BLINDINGOPT $PSEUDODATAOPT $DATAOPT $DATAFILEOPT
 
 cd -
 if [ $USER == lcorpe ]; then
@@ -201,9 +201,9 @@ echo "------------> Create COMBINE"
 echo "------------------------------------------------"
 
 cd Plots/FinalResults
-cp ../../Signal/$OUTDIR/CMS-HGG_sigfit_$EXT.root CMS-HGG_mva_13TeV_sigfit.root
+#cp ../../Signal/$OUTDIR/CMS-HGG_sigfit_$EXT.root CMS-HGG_mva_13TeV_sigfit.root
 cp ../../Background/CMS-HGG_multipdf_$EXT.root CMS-HGG_mva_13TeV_multipdf.root
-cp ../../Datacard/Datacard_13TeV_$EXT.txt CMS-HGG_mva_13TeV_datacard.txt
+#cp ../../Datacard/Datacard_13TeV_$EXT.txt CMS-HGG_mva_13TeV_datacard.txt
 
 cp combineHarvesterOptions13TeV_Template.dat combineHarvesterOptions13TeV_$EXT.dat
 sed -i "s/!EXT!/$EXT/g" combineHarvesterOptions13TeV_$EXT.dat 
@@ -214,7 +214,8 @@ sed -i "s/!EXT!/$EXT/g" combinePlotsOptions_$EXT.dat
 sed -i "s/!INTLUMI!/$INTLUMI/g" combinePlotsOptions_$INTLUMI.dat
 
 if [ $COMBINEPLOTSONLY == 0 ]; then
-./combineHarvester.py -d combineHarvesterOptions13TeV_$EXT.dat -q $DEFAULTQUEUE --batch $BATCH --verbose
+echo "./combineHarvester.py -d combineHarvesterOptions13TeV_$EXT.dat -q $DEFAULTQUEUE --batch $BATCH --verbose"
+./combineHarvester.py -d combineHarvesterOptions13TeV_$EXT.dat -q $DEFAULTQUEUE --batch $BATCH --verbose --S0
 
 JOBS=999
 RUN=999
@@ -252,7 +253,7 @@ LEDGER=" --it $COUNTER --itLedger itLedger_$EXT.txt"
 #./makeCombinePlots.py -f combineJobs13TeV_pilottest090915/ExpProfileLikelihood/ExpProfileLikelihood.root --pval -b
 echo "./makeCombinePlots.py -d combinePlotsOptions_$EXT.dat -b $LEDGER "
 ./makeCombinePlots.py -d combinePlotsOptions_$EXT.dat -b $LEDGER 
-./makeCombinePlots.py -f combineJobs13TeV_$EXT/MuScan/MuScan.root --mu -t "#sqrt{s}\=13TeV L\=$INTLUMI fb^{-1}" -o mu -b $LEDGER #for some reason doesn't work in datfile
+#./makeCombinePlots.py -f combineJobs13TeV_$EXT/MuScan/MuScan.root --mu -t "#sqrt{s}\=13TeV L\=$INTLUMI fb^{-1}" -o mu -b $LEDGER #for some reason doesn't work in datfile
 
 python superloopPlots.py itLedger_$EXT.txt -b 
 ./datacardChecker.py -i CMS-HGG_mva_13TeV_datacard.txt

@@ -86,6 +86,12 @@ echo "[INFO] outdir is $OUTDIR, INTLUMI $INTLUMI"
 #	exit 0
 #fi
 
+if [ $ISDATA == 1 ]; then
+DATAEXT="-Data"
+fi
+echo "INTLUMI is $intLumi"
+OUTDIR="outdir_${EXT}"
+
 mkdir -p $OUTDIR
 
 if [ $FTESTONLY == 0 -a $PSEUDODATAONLY == 0 -a $BKGPLOTSONLY == 0 ]; then
@@ -134,8 +140,8 @@ if [ $ISDATA == 1 ]; then
 OPT=" --isData 1"
 fi
 
-echo "./bin/fTest -i $FILE --saveMultiPdf CMS-HGG_multipdf_$EXT.root  -D $OUTDIR/bkgfTest -f $CATS $OPT"
-./bin/fTest -i $FILE --saveMultiPdf CMS-HGG_multipdf_$EXT.root  -D $OUTDIR/bkgfTest -f $CATS $OPT
+echo " ./bin/fTest -i $FILE --saveMultiPdf CMS-HGG_multipdf_$EXT.root  -D $OUTDIR/bkgfTest$DATAEXT -f $CATS $OPT"
+./bin/fTest -i $FILE --saveMultiPdf CMS-HGG_multipdf_$EXT.root  -D $OUTDIR/bkgfTest$DATAEXT -f $CATS $OPT
 
 OPT=""
 fi
@@ -155,8 +161,8 @@ fi
 if [ $UNBLIND == 1 ]; then
 OPT=" --unblind"
 fi
-echo "./scripts/subBkgPlots.py -b CMS-HGG_multipdf_$EXT.root -d $OUTDIR/bkgPlots -S 13 --isMultiPdf --useBinnedData  --doBands --runLocal  --massStep 2 $SIG -L 120 -H 130 -f $CATS -l $CATS --intLumi $INTLUMI $OPT #for now"
-./scripts/subBkgPlots.py -b CMS-HGG_multipdf_$EXT.root -d $OUTDIR/bkgPlots -S 13 --isMultiPdf --useBinnedData  --doBands --runLocal  --massStep 2 $SIG -L 120 -H 130 -f $CATS -l $CATS --intLumi $INTLUMI $OPT #for now
+echo "./scripts/subBkgPlots.py -b CMS-HGG_multipdf_$EXT.root -d $OUTDIR/bkgPlots$DATAEXT -S 13 --isMultiPdf --useBinnedData  --doBands --runLocal  --massStep 2 $SIG -L 100 -H 180 -f $CATS -l $CATS --intLumi $INTLUMI $OPT #for now"
+./scripts/subBkgPlots.py -b CMS-HGG_multipdf_$EXT.root -d $OUTDIR/bkgPlots$DATAEXT -S 13 --isMultiPdf --useBinnedData  --doBands --runLocal  --massStep 2 $SIG -L 100 -H 180 -f $CATS -l $CATS --intLumi $INTLUMI $OPT #for now
 
 OPT=""
 fi
@@ -167,6 +173,8 @@ cp -r ${OUTDIR} ~/www/${OUTDIR}_${SEED}
 cp -r $OUTDIR ~/www/.
 cp ~lcorpe/public/index.php ~/www/$OUTDIR/pseudoData/.
 cp ~lcorpe/public/index.php ~/www/$OUTDIR/bkgPlots/.
+cp ~lcorpe/public/index.php ~/www/$OUTDIR/bkgPlot$DATAEXT/.
+cp ~lcorpe/public/index.php ~/www/$OUTDIR/bkgfTest$DATAEXT/.
 cp ~lcorpe/public/index.php ~/www/$OUTDIR/bkgfTest/.
 cp ~lcorpe/public/index.php ~/www/${OUTDIR}_${SEED}/pseudoData/.
 cp ~lcorpe/public/index.php ~/www/${OUTDIR}_${SEED}/bkgPlots/.
@@ -186,6 +194,8 @@ cp -r $OUTDIR ~lc1113/public_html/.
 cp ~lc1113/index.php ~lc1113/public_html/$OUTDIR/pseudoData/.
 cp ~lc1113/index.php ~lc1113/public_html/$OUTDIR/bkgPlots/.
 cp ~lc1113/index.php ~lc1113/public_html/$OUTDIR/bkgfTest/.
+cp ~lc1113/index.php ~lc1113/public_html/$OUTDIR/bkgPlots$DATAEXT/.
+cp ~lc1113/index.php ~lc1113/public_html/$OUTDIR/bkgfTest$DATAEXT/
 echo "plots available at: "
 echo "http://www.hep.ph.imperial.ac.uk/~lc1113/${OUTDIR}_${SEED}"
 fi
