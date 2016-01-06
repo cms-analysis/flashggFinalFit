@@ -148,7 +148,7 @@ void Packager::packageOutput(){
 	}
 	else {
 		RooAddition *normSum = new RooAddition("normSum","normSum",*runningNormSum);
-	//	outWS->import(*normSum,RecycleConflictNodes()); //FIXME
+		outWS->import(*normSum,RecycleConflictNodes()); //FIXME
 
 		if (!skipPlots_) {
 			RooRealVar *MH = (RooRealVar*)outWS->var("MH");
