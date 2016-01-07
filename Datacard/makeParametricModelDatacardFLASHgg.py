@@ -45,7 +45,7 @@ if options.quadInterpolate:
   r.gROOT.ProcessLine(".L quadInterpolate.C+g")
   from ROOT import quadInterpolate
 r.gROOT.ProcessLine(".L $CMSSW_BASE/lib/$SCRAM_ARCH/libHiggsAnalysisCombinedLimit.so")
-r.gROOT.ProcessLine(".L ../libLoopAll.so")
+#r.gROOT.ProcessLine(".L ../libLoopAll.so")
 ###############################################################################
 
 ###############################################################################
@@ -142,9 +142,9 @@ else: options.globalScalesCorr = options.globalScalesCorr.split(',')
 
 ###############################################################################
 ## OPEN WORKSPACE AND EXTRACT INFO # ##########################################
-#inWS = inFile.Get('wsig_13TeV')
 sqrts=13
-inWS = inFile.Get('tagsDumper/cms_hgg_%sTeV'%sqrts)
+inWS = inFile.Get('wsig_13TeV')
+if (inWS==None) : inWS = inFile.Get('tagsDumper/cms_hgg_%sTeV'%sqrts)
 intL = inWS.var('IntLumi').getVal() #FIXME
 #sqrts = inWS.var('IntLumi').getVal() #FIXME
 print "[INFO] Get Intlumi from file, value : ", intL," pb^{-1}", " sqrts ", sqrts

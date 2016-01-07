@@ -652,8 +652,6 @@ RooAbsReal* FinalModelConstruction::getSigmaWithPhotonSyst(RooAbsReal *sig_fit, 
 	}
 	formula+="))";
 	RooFormulaVar *formVar = new RooFormulaVar(name.c_str(),name.c_str(),formula.c_str(),*dependents);
-  std::cout << "DEBUG 111215 formVar "  <<std::endl;
-  formVar->dumpFormula();
 	return formVar;
 }
 
@@ -781,7 +779,6 @@ vector<RooAddPdf*> FinalModelConstruction::buildPdf(string name, int nGaussians,
     RooAbsReal *sig_fit = splines[Form("sigma_g%d",g)];
     sig_fit->SetName(Form("sigma_g%d_%s",g,ext.c_str()));
     RooAbsReal *sigma = getSigmaWithPhotonSyst(sig_fit,Form("sig_g%d_%s",g,ext.c_str()));
-   // std::cout << "DEBUG 111215 sigma" << sigma << std::endl;
 		RooGaussian *gaus = new RooGaussian(Form("gaus_g%d_%s",g,ext.c_str()),Form("gaus_g%d_%s",g,ext.c_str()),*mass,*mean,*sigma);
     gaussians->add(*gaus);
     // add secondary models as well

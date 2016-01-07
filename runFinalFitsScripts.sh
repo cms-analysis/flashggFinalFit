@@ -94,7 +94,7 @@ esac
 shift
 done
 
-if [ $BATCH = "IC" ]; then
+if [ $BATCH == "IC" ]; then
 DEFAULTQUEUE=hepshort.q
 BATCHQUERY="qstat -u $USER -q hepshort.q"
 fi
@@ -185,7 +185,7 @@ echo "------------------------------------------------"
 cd Datacard
 echo "./makeParametricModelDatacardFLASHgg.py -i ../Signal/$OUTDIR/CMS-HGG_sigfit_$EXT.root  -o Datacard_13TeV_$EXT.txt -p $PROCS -c $CATS --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf # --intLumi $INTLUMI"
 ./makeParametricModelDatacardFLASHgg.py -i ../Signal/$OUTDIR/CMS-HGG_sigfit_$EXT.root  -o Datacard_13TeV_$EXT.txt -p $PROCS -c $CATS --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf  #--intLumi $INTLUMI
-./makeParametricModelDatacardFLASHgg.old.py -i ../Signal/$OUTDIR/CMS-HGG_sigfit_$EXT.root  -o Datacard_13TeV_$EXT.old.txt -p $PROCS -c $CATS --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf  #--intLumi $INTLUMI
+#./makeParametricModelDatacardFLASHgg.old.py -i ../Signal/$OUTDIR/CMS-HGG_sigfit_$EXT.root  -o Datacard_13TeV_$EXT.old.txt -p $PROCS -c $CATS --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf  #--intLumi $INTLUMI
 
 cd -
 fi

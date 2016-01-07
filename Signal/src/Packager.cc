@@ -120,8 +120,8 @@ void Packager::packageOutput(){
 				continue;
 			}
 			if( merge ) {
-			//	outWS->import(*norm); //FIXME
-			//	outWS->import(*tempPdf,RecycleConflictNodes()); //FIXME
+				outWS->import(*norm); //FIXME
+				outWS->import(*tempPdf,RecycleConflictNodes()); //FIXME
 			}
 			sumPdfsThisCat->add(*tempPdf);
 			sumPdfs->add(*tempPdf);

@@ -16,6 +16,8 @@ CALCPHOSYSTONLY=0
 SIGFITONLY=0
 SIGPLOTSONLY=0
 INTLUMI=1
+BATCH=""
+DEFAULTQUEUE=""
 
 usage(){
 	echo "The script runs three signal scripts in this order:"
@@ -33,6 +35,7 @@ usage(){
 		echo "--sigFitOnly) "
 		echo "--sigPlotsOnly) "
 		echo "--intLumi) specified in fb^-{1} (default $INTLUMI)) "
+		echo "--batch) which batch system to use (None (''),LSF,IC) (default '$BATCH')) "
 }
 
 
@@ -40,7 +43,7 @@ usage(){
 
 
 # options may be followed by one colon to indicate they have a required argument
-if ! options=$(getopt -u -o hi:p:f: -l help,inputFile:,procs:,flashggCats:,ext:,fTestOnly,calcPhoSystOnly,sigFitOnly,sigPlotsOnly,intLumi: -- "$@")
+if ! options=$(getopt -u -o hi:p:f: -l help,inputFile:,procs:,flashggCats:,ext:,fTestOnly,calcPhoSystOnly,sigFitOnly,sigPlotsOnly,intLumi:,batch: -- "$@")
 then
 # something went wrong, getopt will put out an error message for us
 exit 1
@@ -60,6 +63,7 @@ case $1 in
 --sigFitOnly) SIGFITONLY=1;;
 --sigPlotsOnly) SIGPLOTSONLY=1;;
 --intLumi) INTLUMI=$2; shift ;;
+--batch) BATCH=$2; shift;;
 
 (--) shift; break;;
 (-*) usage; echo "$0: error - unrecognized option $1" 1>&2; usage >> /dev/stderr; exit 1;;
@@ -84,6 +88,15 @@ SIGFITONLY=1
 SIGPLOTSONLY=1
 fi
 
+if [ $BATCH=="IC" ]; then
+DEFAULTQUEUE=hepshort.q
+BATCHQUERY="qstat -u $USER -q hepshort.q"
+fi
+if [ $BATCH=="LSF" ]; then
+DEFAULTQUEUE=1nh
+BATCHQUERY="bjobs"
+fi
+
 ####################################################
 ################## SIGNAL F-TEST ###################
 ####################################################
@@ -95,11 +108,13 @@ echo "Running Signal F-Test"
 echo "-->Determine Number of gaussians"
 echo "=============================="
 
-echo "./bin/signalFTest -i $FILE -d dat/newConfig_$EXT.dat -p $PROCS -f $CATS -o $OUTDIR"
-#./bin/signalFTest -i $FILE -d dat/newConfig_$EXT.dat -p $PROCS -f $CATS -o $OUTDIR
 
-#./python/submitSignaFTest.py --procs $PROCS --flashggCats $CATS --outDir $OUTDIR --i $FILE --batch IC -q hepshort.q
-echo "./python/submitSignaFTest.py --procs $PROCS --flashggCats $CATS --outDir $OUTDIR --i $FILE --batch IC -q hepshort.q"
+if [ $BATCH=="" ]; then
+echo "./bin/signalFTest -i $FILE -d dat/newConfig_$EXT.dat -p $PROCS -f $CATS -o $OUTDIR"
+./bin/signalFTest -i $FILE -d dat/newConfig_$EXT.dat -p $PROCS -f $CATS -o $OUTDIR
+else
+echo "./python/submitSignaFTest.py --procs $PROCS --flashggCats $CATS --outDir $OUTDIR --i $FILE --batch $BATCH -q $DEFAULTQUEUE"
+./python/submitSignaFTest.py --procs $PROCS --flashggCats $CATS --outDir $OUTDIR --i $FILE --batch $BATCH -q $DEFAULTQUEUE
 
 PEND=`ls -l $OUTDIR/fTestJobs/sub*| grep -v "\.run" | grep -v "\.done" | grep -v "\.fail" | grep -v "\.err" |grep -v "\.log"  |wc -l`
 echo "PEND $PEND"
@@ -120,7 +135,7 @@ fi
 sleep 10
 
 done
-
+fi
 mkdir -p $OUTDIR/dat
 cat $OUTDIR/fTestJobs/outputs/* > dat/newConfig_$EXT.dat
 sort -u dat/newConfig_$EXT.dat  > dat/tmp_newConfig_$EXT.dat 
