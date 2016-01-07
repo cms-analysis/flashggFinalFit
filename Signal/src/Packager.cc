@@ -57,13 +57,14 @@ void Packager::packageOutput(){
 			string catname;
 			if (sqrts_==8 || sqrts_==7) catname=Form("cat%d",cat);
 			if (sqrts_ ==13) catname = Form("%s",flashggCats_[cat].c_str());
+      std::cout << "INFO catname " << catname<< std::endl;
 			RooDataSet *allDataThisCat = NULL;
 			bool merge = mergeWS != 0 && ( find(cats_.begin(),cats_.end(),cat) == cats_.end() );
 			for (vector<string>::iterator proc=procs_.begin(); proc!=procs_.end(); proc++){
 				RooDataSet *tempData = 0;
 				if( merge ) { 
 					tempData = (RooDataSet*)mergeWS->data(Form("sig_%s_mass_m%d_%s",proc->c_str(),mh,catname.c_str()));
-					outWS->import(*tempData);
+					// outWS->import(*tempData); //FIXME
 				} else {
 					tempData = (RooDataSet*)outWS->data(Form("sig_%s_mass_m%d_%s",proc->c_str(),mh,catname.c_str()));
 				}
@@ -119,8 +120,8 @@ void Packager::packageOutput(){
 				continue;
 			}
 			if( merge ) {
-				outWS->import(*norm);
-				outWS->import(*tempPdf,RecycleConflictNodes());
+				outWS->import(*norm); //FIXME
+				outWS->import(*tempPdf,RecycleConflictNodes()); //FIXME
 			}
 			sumPdfsThisCat->add(*tempPdf);
 			sumPdfs->add(*tempPdf);
@@ -147,7 +148,7 @@ void Packager::packageOutput(){
 	}
 	else {
 		RooAddition *normSum = new RooAddition("normSum","normSum",*runningNormSum);
-		outWS->import(*normSum,RecycleConflictNodes());
+		outWS->import(*normSum,RecycleConflictNodes()); //FIXME
 
 		if (!skipPlots_) {
 			RooRealVar *MH = (RooRealVar*)outWS->var("MH");

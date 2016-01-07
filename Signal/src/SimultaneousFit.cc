@@ -1074,10 +1074,10 @@ void SimultaneousFit::runFit(string proc, int cat, int nGaussians, int dmOrder, 
       if (loadPriorConstraints_) loadPriorConstraints(Form("dat/in/initFit_%s_cat%d.dat",proc.c_str(),cat),mh);
       RooFitResult *fitRes;
       verbose_ >=2 ?
-        fitRes = sigModel->fitTo(*data,NumCPU(fork_),SumW2Error(true),Save(true)) :
+        fitRes = sigModel->fitTo(*data,NumCPU(fork_),RooFit::Minimizer("Minuit","minimize"),SumW2Error(true),Save(true)) :
         verbose_ >=1 ?
-          fitRes = sigModel->fitTo(*data,NumCPU(fork_),SumW2Error(true),Save(true),PrintLevel(-1)) :
-          fitRes = sigModel->fitTo(*data,NumCPU(fork_),SumW2Error(true),Save(true),PrintLevel(-1),PrintEvalErrors(-1))
+          fitRes = sigModel->fitTo(*data,NumCPU(fork_),RooFit::Minimizer("Minuit","minimize"),SumW2Error(true),Save(true),PrintLevel(-1)) :
+          fitRes = sigModel->fitTo(*data,NumCPU(fork_),RooFit::Minimizer("Minuit","minimize"),SumW2Error(true),Save(true),PrintLevel(-1),PrintEvalErrors(-1))
       ;
       
       fitRes->floatParsFinal().Print("v");
@@ -1184,10 +1184,10 @@ void SimultaneousFit::runFit(string proc, int cat, int nGaussians, int dmOrder, 
     cout << "----------------------------------------" << endl;
     RooFitResult *simFitRes;
     verbose_ >=2 ?
-      simFitRes = simFitCombPdf->fitTo(*simFitCombData,NumCPU(fork_),SumW2Error(true),Save(true)) :
+      simFitRes = simFitCombPdf->fitTo(*simFitCombData,NumCPU(fork_),RooFit::Minimizer("Minuit","minimize"),SumW2Error(true),Save(true)) :
       verbose_ >=1 ?
-        simFitRes = simFitCombPdf->fitTo(*simFitCombData,NumCPU(fork_),SumW2Error(true),Save(true),PrintLevel(-1)) :
-        simFitRes = simFitCombPdf->fitTo(*simFitCombData,NumCPU(fork_),SumW2Error(true),Save(true),PrintLevel(-1),PrintEvalErrors(-1)) 
+        simFitRes = simFitCombPdf->fitTo(*simFitCombData,NumCPU(fork_),RooFit::Minimizer("Minuit","minimize"),SumW2Error(true),Save(true),PrintLevel(-1)) :
+        simFitRes = simFitCombPdf->fitTo(*simFitCombData,NumCPU(fork_),RooFit::Minimizer("Minuit","minimize"),SumW2Error(true),Save(true),PrintLevel(-1),PrintEvalErrors(-1)) 
     ;
       
     simFitRes->floatParsFinal().Print("v");
@@ -1230,10 +1230,10 @@ void SimultaneousFit::runFit(string proc, int cat, int nGaussians, int dmOrder, 
     MH->setConstant(false);
     RooFitResult *mhFitRes;
     verbose_ >=2 ?
-    mhFitRes = mhFitCombPdf->fitTo(*mhFitCombData,NumCPU(fork_),SumW2Error(true),Save(true)) :
+    mhFitRes = mhFitCombPdf->fitTo(*mhFitCombData,NumCPU(fork_),RooFit::Minimizer("Minuit","minimize"),SumW2Error(true),Save(true)) :
     verbose_ >=1 ?
-      mhFitRes = mhFitCombPdf->fitTo(*mhFitCombData,NumCPU(fork_),SumW2Error(true),Save(true),PrintLevel(-1)) :
-      mhFitRes = mhFitCombPdf->fitTo(*mhFitCombData,NumCPU(fork_),SumW2Error(true),Save(true),PrintLevel(-1),PrintEvalErrors(-1)) 
+      mhFitRes = mhFitCombPdf->fitTo(*mhFitCombData,NumCPU(fork_),RooFit::Minimizer("Minuit","minimize"),SumW2Error(true),Save(true),PrintLevel(-1)) :
+      mhFitRes = mhFitCombPdf->fitTo(*mhFitCombData,NumCPU(fork_),RooFit::Minimizer("Minuit","minimize"),SumW2Error(true),Save(true),PrintLevel(-1),PrintEvalErrors(-1)) 
     ;
       
     mhFitRes->floatParsFinal().Print("v");

@@ -256,7 +256,7 @@ double getGoodnessOfFit(RooRealVar *mass, RooAbsPdf *mpdf, RooDataSet *data, std
     int npass =0;
     std::vector<double> toy_chi2;
     for (int itoy = 0 ; itoy < ntoys ; itoy++){
-      std::cout << "[INFO] " <<Form("\t.. %.1f %% complete\r",100*float(itoy)/ntoys) << std::flush;
+    //  std::cout << "[INFO] " <<Form("\t.. %.1f %% complete\r",100*float(itoy)/ntoys) << std::flush;
       params->assignValueOnly(preParams);
       int nToyEvents = RandomGen->Poisson(ndata);
       RooDataHist *binnedtoy = pdf->generateBinned(RooArgSet(*mass),nToyEvents,0,1);
@@ -728,10 +728,15 @@ vector<string> flashggCats_;
 			catname = Form("cat%d",cat);
 		}
 		RooDataSet *dataFull;
-		if (isData_) dataFull = (RooDataSet*)inWS->data(Form("data_13TeV_%s",catname.c_str()));
-		else dataFull = (RooDataSet*)inWS->data(Form("data_mass_%s",catname.c_str()));
-
+		if (isData_) {
+    dataFull = (RooDataSet*)inWS->data(Form("Data_13TeV_%s",catname.c_str()));
+		if (verbose) std::cout << "[INFO] opened data for  "  << Form("Data_%s",catname.c_str()) <<" - " << dataFull <<std::endl;
+    }
+		else 
+    {dataFull = (RooDataSet*)inWS->data(Form("data_mass_%s",catname.c_str()));
 		if (verbose) std::cout << "[INFO] opened data for  "  << Form("data_mass_%s",catname.c_str()) <<" - " << dataFull <<std::endl;
+    }
+
 
 		mass->setBins(nBinsForMass);
 		RooDataSet *data;
@@ -774,7 +779,7 @@ vector<string> flashggCats_;
 
 			int counter =0;
 			//	while (prob<0.05){
-			while (prob<0.05 && counter < 10){ //FIXME
+			while (prob<0.05 && order < 7){ //FIXME
 				RooAbsPdf *bkgPdf = getPdf(pdfsModel,*funcType,order,Form("ftest_pdf_%d_%s",cat,ext.c_str()));
 				if (!bkgPdf){
 					// assume this order is not allowed
@@ -833,7 +838,7 @@ vector<string> flashggCats_;
 					RooAbsPdf *bkgPdf = getPdf(pdfsModel,*funcType,order,Form("env_pdf_%d_%s",cat,ext.c_str()));
 					if (!bkgPdf ){
 						// assume this order is not allowed
-						if (order >10) { std::cout << " [WARNING] could not add ] " << std::endl; break ;}
+						if (order >6) { std::cout << " [WARNING] could not add ] " << std::endl; break ;}
 						order++;
 					}
 

@@ -266,17 +266,23 @@ def pvalPlot(allVals):
   for k, values in enumerate(allVals):
     minpvalue=99999.
     minpvalueX=99999.
+    pvalat125=999999.
     graph = r.TGraph()
     for j in range(len(values)):
       graph.SetPoint(j,values[j][0],values[j][1])
       if (minpvalue > values[j][1]): 
         minpvalue = values[j][1]
         minpvalueX =values[j][0]
-      if options.verbose or values[j][0]==125: print '\t', j, values[j][0], values[j][1], r.RooStats.PValueToSignificance(values[j][1])
+      if options.verbose or values[j][0]==125: 
+        print '\t', j, values[j][0], values[j][1], r.RooStats.PValueToSignificance(values[j][1])
+        pvalat125=values[j][1]
       print "debug minpval", minpvalue
     
-    with open(options.itLedger, "a") as myfile:
-		    myfile.write("%s %f %f\n" % ( (options.names[k].replace(" ","_"))+" "+options.it, minpvalue,minpvalueX ))
+  #  with open(options.itLedger, "a") as myfile:
+  #      myfile.write("%s %f %f\n" % ( (options.names[k].replace(" ","_"))+" "+options.it, minpvalue,minpvalueX ))
+  #      if ("Obs" in options.names[k] ) :
+  #        myfile.write("%s %f %f\n" % ( (options.names[k].replace(" ","_"))+"_at125"+" "+options.it, pvalat125,125. ))
+
     graph.SetLineColor(int(options.colors[k]))
     graph.SetLineStyle(int(options.styles[k]))
     graph.SetLineWidth(int(options.widths[k]))
@@ -292,6 +298,7 @@ def pvalPlot(allVals):
   else:
     dummyHist.SetMinimum(float(options.yaxis.split(',')[0]))
     dummyHist.SetMaximum(float(options.yaxis.split(',')[1]))
+    print "y1,y2", options.yaxis.split(',')[0], " , ", options.yaxis.split(',')[1]
     
   dummyHist.SetLineColor(0)
   dummyHist.SetStats(0)
@@ -751,9 +758,10 @@ def plot1DNLL(returnErrors=False,xvar="", ext=""):
 
     print "%15s : %4.4f +%4.4g -%4.4g" % ( ntitle+" "+ext, xmin, eplus , eminus )
     #Write in the ledger
-    with open(options.itLedger, "a") as myfile:
-		    myfile.write("%s %f %f %f\n" % ( options.method+" "+options.it, xmin, eplus , eminus ))
+    #with open(options.itLedger, "a") as myfile:
+		#    myfile.write("%s %f %f %f\n" % ( options.method+" "+options.it, xmin, eplus , eminus ))
 
+    canv.SetLogy(False)
 
 
     if returnErrors:

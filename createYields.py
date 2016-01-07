@@ -18,8 +18,8 @@ parser.add_option("-f","--flashggCats",default="UntaggedTag_0,UntaggedTag_1,Unta
 
 if not (options.fromroot ==""):
 	print "execute"
-	os.system("./bin/workspaceTool -i %s --print 1 | grep RooData | grep it > %s"%(options.fromroot,options.input))
-	os.system("./bin/workspaceTool -i %s --print 1 | grep intLumi >> %s"%(options.fromroot,options.input))
+	os.system("./Background/bin/workspaceTool -i %s --print 1 | grep RooData | grep it > %s"%(options.fromroot,options.input))
+	os.system("./Background/bin/workspaceTool -i %s --print 1 | grep intLumi >> %s"%(options.fromroot,options.input))
 
 procs=[]
 tags=[]

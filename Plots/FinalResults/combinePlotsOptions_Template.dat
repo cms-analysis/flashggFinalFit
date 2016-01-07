@@ -2,11 +2,15 @@
 #method=pval:files=exp1.root,exp2.root,obs1.root,obs2.root:colors=2,4,2,4:styles=2,2,1,1:widths=2,2,2,2:names=Expected 1,Expected 2,Observed 1,Observed 2:text=#sqrt{s}\=13TeV L\=!INTLUMI!fb^{-1}
 
 
-method=pval:files=combineJobs13TeV_!EXT!/ExpProfileLikelihood/ExpProfileLikelihood.root,combineJobs13TeV_!EXT!/ExpProfileLikelihood_m125/ExpProfileLikelihood_m125.root,combineJobs13TeV_!EXT!/ProfileLikelihood/ProfileLikelihood.root:colors=2,3,4:styles=2,2,2:widths=2,2,2:names=Expected 13TeV,Expected mh125 13TeV,Observed 13TeV:text=#sqrt{s}\=13TeV L\=!INTLUMI!b^{-1}:outname=pval13TeV
+##method=pval:files=combineJobs13TeV_!EXT!/ExpProfileLikelihood/ExpProfileLikelihood.root,combineJobs13TeV_!EXT!/ExpProfileLikelihood_m125/ExpProfileLikelihood_m125.root,combineJobs13TeV_!EXT!/ProfileLikelihood/ProfileLikelihood.root:colors=2,3,4:styles=2,2,2:widths=2,2,2:names=Expected 13TeV,Expected mh125 13TeV,Observed 13TeV:text=#sqrt{s}\=13TeV L\=!INTLUMI!b^{-1}:outname=pval13TeV
+#method=pval:files=combineJobs13TeV_!EXT!/ExpProfileLikelihood/ExpProfileLikelihood.root,combineJobs13TeV_!EXT!/ExpProfileLikelihood_m125/ExpProfileLikelihood_m125.root:colors=2,3:styles=2,2:widths=2,2:names=Expected 13TeV,Expected mh125 13TeV:text=#sqrt{s}\=13TeV L\=!INTLUMI!b^{-1}:outname=pval13TeV
+method=pval:files=combineJobs13TeV_!EXT!/ExpProfileLikelihood/ExpProfileLikelihood.root,combineJobs13TeV_!EXT!/ExpProfileLikelihood_m125/ExpProfileLikelihood_m125.root,combineJobs13TeV_!EXT!/ExpProfileLikelihood_S0/ExpProfileLikelihood_S0.root,combineJobs13TeV_!EXT!/ExpProfileLikelihood_m125_S0/ExpProfileLikelihood_m125_S0.root:colors=2,3,2,3:styles=1,1,2,2:widths=1,1,2,2:names=Expected 13TeV,Expected mh125 13TeV,Expected 13TeV S0,Expected mh125 13TeV S0,:text=#sqrt{s}\=13TeV L\=!INTLUMI!fb^{-1}:outname=pval13TeV
 
-method=limit:files=combineJobs13TeV_!EXT!/Asymptotic/Asymptotic.root:text=#sqrt{s}\=13TeV L\=!INTLUMI!fb^{-1}:outname=limit
+##method=limit:files=combineJobs13TeV_!EXT!/Asymptotic/Asymptotic.root:text=#sqrt{s}\=13TeV L\=!INTLUMI!fb^{-1}:outname=limit
 
 #method=mu:files=combineJobs13TeV_!EXT!/MuScan/MuScan.root:text=#sqrt{s}\=13TeV L\=!INTLUMI!fb^{-1}:outname=mu
-method=mh:files=combineJobs13TeV_!EXT!/MHScan/MHScan.root:text=#sqrt{s}\=13TeV L\=!INTLUMI!fb^{-1}:outname=mh:xvar=MH
+#method=mh:files=combineJobs13TeV_!EXT!/MHScan/MHScan.root:text=#sqrt{s}\=13TeV L\=!INTLUMI!fb^{-1}:outname=mh:xvar=MH
+#method=mh:files=combineJobs13TeV_!EXT!/MHScan/MHScan.root:text=#sqrt{s}\=13TeV L\=!INTLUMI!fb^{-1}:outname=mh:xvar=MH
+method=mh:files=combineJobs13TeV_!EXT!/MHScan/MHScan.root,combineJobs13TeV_!EXT!/MHScan_S0/MHScan_S0.root:text=#sqrt{s}\=13TeV L\=!INTLUMI!fb^{-1}:colors=2,2:styles=1,2:widths=1,2:names=Expected 13TeV,Expected 13TeV S0:outname=mh:xvar=MH
 
 

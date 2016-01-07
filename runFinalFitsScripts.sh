@@ -9,7 +9,8 @@ CATS="UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,UntaggedTag_4,VBFT
 #CATS="UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,UntaggedTag_4,VBFTag_0,VBFTag_1,VBFTag_2,TTHLeptonicTag,VHHadronicTag,VHTightTag,VHLooseTag"
 #CATS="UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,UntaggedTag_4,VBFTag_0,VBFTag_1,VBFTag_2,VHHadronicTag,VHTightTag,VHLooseTag"
 SCALES="HighR9EE,LowR9EE,HighR9EB,LowR9EB"
-SMEARS="HighR9EE,LowR9EE,HighR9EBRho,LowR9EBRho,HighR9EBPhi,LowR9EBPhi"
+#SMEARS="HighR9EE,LowR9EE,HighR9EBRho,LowR9EBRho,HighR9EBPhi,LowR9EBPhi"
+SMEARS="HighR9EE,LowR9EE,HighR9EB,LowR9EB" #DRY RUN
 PSEUDODATADAT=""
 SIGFILE=""
 SIGONLY=1
@@ -24,6 +25,9 @@ INTLUMI=1
 DATAFILE=""
 UNBLIND=0
 ISDATA=0
+BATCH="LSF"
+DEFAULTQUEUE="1nh"
+BATCHQUERY="bjobs"
 usage(){
 	echo "The script runs background scripts:"
 		echo "options:"
@@ -45,6 +49,7 @@ echo "--intLumi) specified in fb^-{1} (default $INTLUMI)) "
 echo "--isData) specified in fb^-{1} (default $DATA)) "
 echo "--unblind) specified in fb^-{1} (default $UNBLIND)) "
 echo "--dataFile) specified in fb^-{1} (default $DATAFILE)) "
+echo "--batch) which batch system to use (LSF,IC) (default $BATCH)) "
 }
 
 
@@ -52,7 +57,7 @@ echo "--dataFile) specified in fb^-{1} (default $DATAFILE)) "
 
 
 # options may be followed by one colon to indicate they have a required argument
-if ! options=$(getopt -u -o hi:p:f: -l help,inputFile:,procs:,flashggCats:,ext:,,pseudoDataDat:,sigFile:,combine,combineOnly,combinePlotsOnly,signalOnly,backgroundOnly,datacardOnly,superloop:,continueLoop:,intLumi:,unblind,isData,dataFile: -- "$@")
+if ! options=$(getopt -u -o hi:p:f: -l help,inputFile:,procs:,flashggCats:,ext:,,pseudoDataDat:,sigFile:,combine,combineOnly,combinePlotsOnly,signalOnly,backgroundOnly,datacardOnly,superloop:,continueLoop:,intLumi:,unblind,isData,dataFile:,batch: -- "$@")
 then
 # something went wrong, getopt will put out an error message for us
 exit 1
@@ -69,17 +74,18 @@ case $1 in
 --ext) EXT=$2; echo "test" ; shift ;;
 --pseudoDataDat) PSEUDODATADAT=$2; shift;;
 --dataFile) DATAFILE=$2; shift;;
---signalOnly) COMBINEONLY=0;BKGONLY=0;SIGONLY=1;DATACARDONLY=0; shift;;
---backgroundOnly) COMBINEONLY=0;BKGONLY=1;SIGONLY=0;DATACARDONLY=0; shift;;
---datacardOnly) COMBINEONLY=0;BKGONLY=0;SIGONLY=0;DATACARDONLY=1; shift;;
+--batch) BATCH=$2; shift;;
+--signalOnly) COMBINEONLY=0;BKGONLY=0;SIGONLY=1;DATACARDONLY=0;;
+--backgroundOnly) COMBINEONLY=0;BKGONLY=1;SIGONLY=0;DATACARDONLY=0;;
+--datacardOnly) COMBINEONLY=0;BKGONLY=0;SIGONLY=0;DATACARDONLY=1;;
 --combine) COMBINEONLY=1;;#;BKGONLY=0;SIGONLY=0;DATACARDONLY=0;;
 --combineOnly) COMBINEONLY=1;BKGONLY=0;SIGONLY=0;DATACARDONLY=0;;
 --combinePlotsOnly) COMBINEPLOTSONLY=1;COMBINEONLY=1;BKGONLY=0;SIGONLY=0;DATACARDONLY=0;;
 --superloop) SUPERLOOP=$2 ; shift;;
 --continueLoop) COUNTER=$2; CONTINUELOOP=1 ; shift;;
---intLumi) INTLUMI=$2; shift ;;
+--intLumi) INTLUMI=$2; echo " test $INTLUMI" ;shift ;;
 --isData) ISDATA=1;; 
---unblind) INTLUMI=1;;
+--unblind) UNBLIND=1;;
 
 (--) shift; break;;
 (-*) usage; echo "$0: error - unrecognized option $1" 1>&2; usage >> /dev/stderr; exit 1;;
@@ -88,8 +94,14 @@ esac
 shift
 done
 
+if [ $BATCH == "IC" ]; then
+DEFAULTQUEUE=hepshort.q
+BATCHQUERY="qstat -u $USER -q hepshort.q"
+fi
 
-OUTDIR="outdir_$EXT"
+echo "[INFO] INTLUMI $INTLUMI"
+
+OUTDIR="outdir_${EXT}"
 echo "[INFO] outdir is $OUTDIR" 
 #if [ "$FILE" == "" ];then
 #	echo "ERROR, input file (--inputFile or -i) is mandatory!"
@@ -116,6 +128,7 @@ echo "------------>> Running SIGNAL"
 echo "------------------------------------------------"
 
 cd Signal
+echo "./runSignalScripts.sh -i $FILE -p $PROCS -f $CATS --ext $EXT --intLumi $INTLUMI"
 ./runSignalScripts.sh -i $FILE -p $PROCS -f $CATS --ext $EXT --intLumi $INTLUMI
 cd -
 if [ $USER == lcorpe ]; then
@@ -143,15 +156,15 @@ BLINDINGOPT=" --unblind"
 fi
 if [ $ISDATA == 1 ]; then
 DATAOPT=" --isData"
-DATAFILEOPT= " -i $DATAFILE"
+DATAFILEOPT=" -i $DATAFILE"
 else
 PSEUDODATAOPT="  --pseudoDataDat $PSEUDODATADAT"
 fi
 
 
 cd Background
-echo "./runBackgroundScripts.sh -p $PROCS -f $CATS --ext $EXT --sigFile ../Signal/$OUTDIR/CMS-HGG_sigfit_$EXT.root --seed $COUNTER --intLumi $INTLUMI $BLINDINGOPT $PSEUDODATAOPT $DATAOPT"
-./runBackgroundScripts.sh -p $PROCS -f $CATS --ext $EXT --sigFile ../Signal/$OUTDIR/CMS-HGG_sigfit_$EXT.root --seed $COUNTER --intLumi $INTLUMI $BLINDINGOPT $PSEUDODATAOPT $DATAOPT
+echo "./runBackgroundScripts.sh -p $PROCS -f $CATS --ext $EXT --sigFile ../Signal/$OUTDIR/CMS-HGG_sigfit_$EXT.root --seed $COUNTER --intLumi $INTLUMI $BLINDINGOPT $PSEUDODATAOPT $DATAOPT $DATAFILEOPT"
+./runBackgroundScripts.sh -p $PROCS -f $CATS --ext $EXT --sigFile ../Signal/$OUTDIR/CMS-HGG_sigfit_$EXT.root --seed $COUNTER --intLumi $INTLUMI $BLINDINGOPT $PSEUDODATAOPT $DATAOPT $DATAFILEOPT
 
 cd -
 if [ $USER == lcorpe ]; then
@@ -170,7 +183,9 @@ echo "------------> Create DATACARD"
 echo "------------------------------------------------"
 
 cd Datacard
-./makeParametricModelDatacardFLASHgg.py -i ../Signal/$OUTDIR/CMS-HGG_sigfit_$EXT.root  -o Datacard_13TeV_$EXT.txt -p $PROCS -c $CATS --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf # --intLumi $INTLUMI
+echo "./makeParametricModelDatacardFLASHgg.py -i ../Signal/$OUTDIR/CMS-HGG_sigfit_$EXT.root  -o Datacard_13TeV_$EXT.txt -p $PROCS -c $CATS --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf # --intLumi $INTLUMI"
+./makeParametricModelDatacardFLASHgg.py -i ../Signal/$OUTDIR/CMS-HGG_sigfit_$EXT.root  -o Datacard_13TeV_$EXT.txt -p $PROCS -c $CATS --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf  #--intLumi $INTLUMI
+#./makeParametricModelDatacardFLASHgg.old.py -i ../Signal/$OUTDIR/CMS-HGG_sigfit_$EXT.root  -o Datacard_13TeV_$EXT.old.txt -p $PROCS -c $CATS --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf  #--intLumi $INTLUMI
 
 cd -
 fi
@@ -191,15 +206,16 @@ cp ../../Background/CMS-HGG_multipdf_$EXT.root CMS-HGG_mva_13TeV_multipdf.root
 cp ../../Datacard/Datacard_13TeV_$EXT.txt CMS-HGG_mva_13TeV_datacard.txt
 
 cp combineHarvesterOptions13TeV_Template.dat combineHarvesterOptions13TeV_$EXT.dat
-sed -i "s/!EXT!/$EXT/g" combineHarvesterOptions13TeV_$EXT.dat 
-sed -i "s/!INTLUMI!/$INTLUMI/g" combineHarvesterOptions13TeV_$EXT.dat 
+sed -i -e "s/\!EXT\!/$EXT/g" combineHarvesterOptions13TeV_$EXT.dat 
+sed -i -e "s/\!INTLUMI\!/$INTLUMI/g" combineHarvesterOptions13TeV_$EXT.dat 
 
 cp combinePlotsOptions_Template.dat combinePlotsOptions_$EXT.dat
-sed -i "s/!EXT!/$EXT/g" combinePlotsOptions_$EXT.dat
-sed -i "s/!INTLUMI!/$INTLUMI/g" combinePlotsOptions_$INTLUMI.dat
+sed -i -e "s/\!EXT\!/$EXT/g" combinePlotsOptions_$EXT.dat
+sed -i -e "s/\!INTLUMI\!/$INTLUMI/g" combinePlotsOptions_$EXT.dat
 
 if [ $COMBINEPLOTSONLY == 0 ]; then
-./combineHarvester.py -d combineHarvesterOptions13TeV_$EXT.dat -q 1nh
+echo "./combineHarvester.py -d combineHarvesterOptions13TeV_$EXT.dat -q $DEFAULTQUEUE --batch $BATCH --verbose"
+./combineHarvester.py -d combineHarvesterOptions13TeV_$EXT.dat -q $DEFAULTQUEUE --batch $BATCH --verbose --S0
 
 JOBS=999
 RUN=999
@@ -207,13 +223,22 @@ PEND=999
 FAIL=999
 DONE=999
 
-while [ $JOBS != 0 ];do
-#bjobs
+while (( $RUN > 0 ));do
+#$BATCHQUERY
+#JOBS=`$BATCHQUERY | grep $USER | wc -l`
+#RUN=`$BATCHQUERY | grep RUN | wc -l`
+#PEND=`$BATCHQUERY | grep PEND | wc -l`
+#FAIL=`ls -R  combineJobs13TeV_$EXT |grep fail |wc -l`
+JOBS=`find combineJobs13TeV_$EXT/   -name "*.sh" | wc -l`
+#echo "JOBS=`find combineJobs13TeV_$EXT/ -name "*.sh" | wc -l`"
+DONE=`find combineJobs13TeV_$EXT/   -name "*.sh.done" | wc -l`
+FAIL=`find combineJobs13TeV_$EXT/   -name "*.sh.fail" | wc -l`
+((RUN=$JOBS-$DONE-$FAIL-1))
+echo "RUN=$RUN"
+echo "JOBS=$JOBS"
+echo "DONE=$DONE"
+echo "FAIL=$FAIL"
 sleep 10
-JOBS=`bjobs | grep $USER | wc -l`
-RUN=`bjobs | grep RUN | wc -l`
-PEND=`bjobs | grep PEND | wc -l`
-FAIL=`ls -R  combineJobs13TeV_$EXT |grep fail |wc -l`
 
 echo "[INFO] Processing $JOBS jobs: PEND $PEND, RUN $RUN, FAIL $FAIL"
 done
@@ -226,10 +251,12 @@ LEDGER=" --it $COUNTER --itLedger itLedger_$EXT.txt"
 
 #./makeCombinePlots.py -f combineJobs13TeV_pilottest090915/Asymptotic/Asymptotic.root --limit -b
 #./makeCombinePlots.py -f combineJobs13TeV_pilottest090915/ExpProfileLikelihood/ExpProfileLikelihood.root --pval -b
+echo "./makeCombinePlots.py -d combinePlotsOptions_$EXT.dat -b $LEDGER "
 ./makeCombinePlots.py -d combinePlotsOptions_$EXT.dat -b $LEDGER 
-./makeCombinePlots.py -f combineJobs13TeV_$EXT/MuScan/MuScan.root --mu -t "#sqrt{s}\=13TeV L\=$INTLUMI fb^{-1}" -o mu -b $LEDGER #for some reason doesn't work in datfile
-
-python superloopPlots.py itLedger_$EXT.txt -b 
+#./makeCombinePlots.py -f combineJobs13TeV_$EXT/MuScan/MuScan.root --mu -t "#sqrt{s}\=13TeV L\=$INTLUMI fb^{-1}" -o mu -b $LEDGER #for some reason doesn't work in datfile
+#touch itLedger_$EXT.txt
+#python superloopPlots.py itLedger_$EXT.txt -b 
+#./datacardChecker.py -i CMS-HGG_mva_13TeV_datacard.txt
 
 mkdir -p $OUTDIR/combinePlots
 cp *pdf $OUTDIR/combinePlots/.
@@ -238,17 +265,29 @@ rm *pdf
 rm *png
 
 if [ $USER == "lcorpe" ]; then
-cp -r $OUTDIR ~/www/.
+cp -r $OUTDIR ~/www/${OUTDIR}
+cp -r $OUTDIR ~/www/${OUTDIR}_${COUNTER}
 cp ~lcorpe/public/index.php ~/www/$OUTDIR/combinePlots/.
+cp ~lcorpe/public/index.php ~/www/${OUTDIR}_${COUNTER}/combinePlots/.
 echo "plots available at: "
 echo "https://lcorpe.web.cern.ch/lcorpe/$OUTDIR"
+echo "or https://lcorpe.web.cern.ch/lcorpe/${OUTDIR}_${COUNTER}"
 fi
+if [ $USER == "lc1113" ]; then
+cp -r $OUTDIR ~lc1113/public_html/
+cp -r $OUTDIR ~lc1113/public_html/${OUTDIR}_${COUNTER}
+cp ~lc1113/index.php ~lc1113/public_html/$OUTDIR/combinePlots/.
+cp ~lc1113/index.php ~lc1113/public_html/${OUTDIR}_$COUNTER/combinePlots/.
+echo "plots available at: "
+echo "http://www.hep.ph.imperial.ac.uk/~lc1113/$OUTDIR"
+echo "or http://www.hep.ph.imperial.ac.uk/~lc1113/${OUTDIR}_${COUNTER}"
 
+fi
 cd -
-
 fi
-if [ $USER == lcorpe ]; then
-echo " All stages of the final fit exercice $EXT  are done, see output here: https://lcorpe.web.cern.ch/lcorpe/$OUTDIR/ " |  mail -s "FINAL FITS: $EXT " lc1113@imperial.ac.uk
+
+if [ $USER == lcorpe ] || [ $USER == lc1113 ]; then
+echo " All stages of the final fit exercice $EXT  are done, see output here: https://lcorpe.web.cern.ch/lcorpe/$OUTDIR/  or  http://www.hep.ph.imperial.ac.uk/~lc1113/$OUTDIR " |  mail -s "FINAL FITS: $EXT " lc1113@imperial.ac.uk
 fi
 
 echo "signal output at Signal/$OUTDIR"

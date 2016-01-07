@@ -1,11 +1,13 @@
+#datacard=CMS-HGG_mva_13TeV_datacard!EXT!.txt
 datacard=CMS-HGG_mva_13TeV_datacard.txt
 files=CMS-HGG_mva_13TeV_sigfit.root,CMS-HGG_mva_13TeV_multipdf.root
 
 # limit
-outDir=combineJobs13TeV_!EXT!/Asymptotic											method=Asymptotic expected=0 mhLow=120. mhHigh=130. mhStep=1. jobs=11
+##outDir=combineJobs13TeV_!EXT!/Asymptotic											method=Asymptotic expected=0 mhLow=110. mhHigh=150. mhStep=1. jobs=31
 
 # exp pval
 outDir=combineJobs13TeV_!EXT!/ExpProfileLikelihood 					method=ProfileLikelihood expected=1 expectSignal=1 mhLow=120. mhHigh=130. mhStep=1. jobs=11 
+outDir=combineJobs13TeV_!EXT!/ExpProfileLikelihood_S0 					method=ProfileLikelihood expected=1 expectSignal=1 mhLow=120. mhHigh=130. mhStep=1. jobs=11 S0
 
 #outDir=combineJobs13TeV_!EXT!/ExpProfileLikelihood/inc 			method=ProfileLikelihood expected=1 expectSignal=1 mhLow=120. mhHigh=130. mhStep=1. jobs=21 splitChannels=ch1_cat0_7TeV,ch1_cat1_7TeV,ch1_cat2_7TeV,ch1_cat3_7TeV,ch2_cat0_8TeV,ch2_cat1_8TeV,ch2_cat2_8TeV,ch2_cat3_8TeV
 #outDir=combineJobs13TeV_!EXT!/ExpProfileLikelihood/inc 			method=ProfileLikelihood expected=1 expectSignal=1 mhLow=120. mhHigh=130. mhStep=1. jobs=11 splitChannels=ch2_cat0_8TeV,ch2_cat1_8TeV,ch2_cat2_8TeV,ch2_cat3_8TeV
@@ -15,9 +17,10 @@ outDir=combineJobs13TeV_!EXT!/ExpProfileLikelihood 					method=ProfileLikelihood
 
 # exp pval @ 125
 outDir=combineJobs13TeV_!EXT!/ExpProfileLikelihood_m125 			method=ProfileLikelihood expected=1 expectSignal=1 expectSignalMass=125 mhLow=120. mhHigh=130. mhStep=1. jobs=11 
+outDir=combineJobs13TeV_!EXT!/ExpProfileLikelihood_m125_S0 			method=ProfileLikelihood expected=1 expectSignal=1 expectSignalMass=125 mhLow=120. mhHigh=130. mhStep=1. jobs=11 S0
 
 # obs pval
-outDir=combineJobs13TeV_!EXT!/ProfileLikelihood 							method=ProfileLikelihood expected=0 mhLow=120. mhHigh=130. mhStep=1. jobs=11 
+#outDir=combineJobs13TeV_!EXT!/ProfileLikelihood 							method=ProfileLikelihood expected=0 mhLow=120. mhHigh=130. mhStep=1. jobs=11 
 
 #outDir=combineJobs13TeV_!EXT!/ProfileLikelihood/inc 					method=ProfileLikelihood expected=0 mhLow=120. mhHigh=130. mhStep=1. jobs=21 splitChannels=ch1_cat0_7TeV,ch1_cat1_7TeV,ch1_cat2_7TeV,ch1_cat3_7TeV,ch2_cat0_8TeV,ch2_cat1_8TeV,ch2_cat2_8TeV,ch2_cat3_8TeV
 #outDir=combineJobs13TeV_!EXT!/ProfileLikelihood/inc 					method=ProfileLikelihood expected=0 mhLow=120. mhHigh=130. mhStep=1. jobs=11 splitChannels=ch2_cat0_8TeV,ch2_cat1_8TeV,ch2_cat2_8TeV,ch2_cat3_8TeV
@@ -26,8 +29,10 @@ outDir=combineJobs13TeV_!EXT!/ProfileLikelihood 							method=ProfileLikelihood 
 #outDir=combineJobs13TeV_!EXT!/ProfileLikelihood/ass					method=ProfileLikelihood expected=0 mhLow=120. mhHigh=130. mhStep=1. jobs=11 splitChannels=ch2_cat6_8TeV,ch2_cat7_8TeV,ch2_cat8_8TeV
 
 # nll scans
-outDir=combineJobs13TeV_!EXT!/MuScan													method=MuScan	expected=0 mh=125 muLow=0. muHigh=2. jobs=5 pointsperjob=10 opts=--squareDistPoi
-outDir=combineJobs13TeV_!EXT!/MHScan													method=MHScan	expected=0 mhLow=120. mhHigh=130. jobs=5 pointsperjob=10 opts=--squareDistPoi
+##outDir=combineJobs13TeV_!EXT!/MuScan													method=MuScan	expected=0 mh=125 muLow=0. muHigh=2. jobs=5 pointsperjob=10 opts=--squareDistPoi
+outDir=combineJobs13TeV_!EXT!/MHScan_S0													method=MHScan	expected=1 expectSignal=1 mh=130 postFit mhLow=120. mhHigh=130. jobs=5 pointsperjob=10 opts=--squareDistPoi S0
+outDir=combineJobs13TeV_!EXT!/MHScan    												method=MHScan	expected=1 expectSignal=1 mh=130 postFit mhLow=120. mhHigh=130. jobs=5 pointsperjob=10 opts=--squareDistPoi
+##outDir=combineJobs13TeV_!EXT!/MHScan													method=MHScan	expected=1 expectSignal=1 mh=130 postFit mhLow=120. mhHigh=130. jobs=5 pointsperjob=10 opts=--squareDistPoi freezeNuisances=JetVeto_migration0,JetVeto_migration1,pdfindex_UntaggedTag_0_13TeV,pdfindex_UntaggedTag_1_13TeV,pdfindex_UntaggedTag_2_13TeV,pdfindex_UntaggedTag_3_13TeV,pdfindex_VBFTag_0_13TeV,pdfindex_VBFTag_1_13TeV ## attempt to freeze pdfIndices
 #outDir=combineJobs13TeV_!EXT!/RVScan													method=RVScan expected=0 mh=125 rvLow=-2. rvHigh=3. jobs=5 pointsperjob=10 opts=--squareDistPoi
 #outDir=combineJobs13TeV_!EXT!/RVRFScan												method=RVRFScan expected=0 mh=125 rvLow=-1. rvHigh=4.5 rfLow=-1. rfHigh=2.5 jobs=100 pointsperjob=50
 #outDir=combineJobs13TeV_!EXT!/MuMHScan												method=MuMHScan	expected=0 muLow=0. muHigh=2. mhLow=122. mhHigh=128.	jobs=100 pointsperjob=50

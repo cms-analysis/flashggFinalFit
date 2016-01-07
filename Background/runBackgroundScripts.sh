@@ -9,7 +9,8 @@ PROCS="ggh"
 #CATS="UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,UntaggedTag_4,VBFTag_0,VBFTag_1,VBFTag_2,TTHLeptonicTag,VHHadronicTag,VHTightTag,VHLooseTag"
 CATS="UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,UntaggedTag_4,VBFTag_0,VBFTag_1,VBFTag_2,VHHadronicTag,VHTightTag,VHLooseTag"
 SCALES="HighR9EE,LowR9EE,HighR9EB,LowR9EB"
-SMEARS="HighR9EE,LowR9EE,HighR9EBRho,LowR9EBRho,HighR9EBPhi,LowR9EBPhi"
+#SMEARS="HighR9EE,LowR9EE,HighR9EBRho,LowR9EBRho,HighR9EBPhi,LowR9EBPhi"
+SMEARS="HighR9EE,LowR9EE,HighR9EB,LowR9EB" #DRY RUN
 FTESTONLY=0
 PSEUDODATAONLY=0
 PSEUDODATADAT=""
@@ -78,12 +79,18 @@ shift
 done
 
 
-OUTDIR="outdir_$EXT"
+OUTDIR="outdir_${EXT}"
 echo "[INFO] outdir is $OUTDIR, INTLUMI $INTLUMI" 
 #if [ "$FILE" == "" ];then
 #	echo "ERROR, input file (--inputFile or -i) is mandatory!"
 #	exit 0
 #fi
+
+if [ $ISDATA == 1 ]; then
+DATAEXT="-Data"
+fi
+echo "INTLUMI is $intLumi"
+OUTDIR="outdir_${EXT}"
 
 mkdir -p $OUTDIR
 
@@ -109,8 +116,7 @@ echo "--> generating $INTLUMI fb^{-1} of pseudodata."
 echo "--------------------------------------"
 
 echo " ./bin/pseudodataMaker -i $PSEUDODATADAT --pseudodata 1 --plotdir $OUTDIR/pseudoData -f $CATS --seed $SEED --intLumi $INTLUMI "
-./bin/pseudodataMaker -i $PSEUDODATADAT --pseudodata 1 --plotdir $OUTDIR/pseudoData -f $CATS --seed $SEED --intLumi $INTLUMI
-
+./bin/pseudodataMaker -i $PSEUDODATADAT --pseudodata 1 --plotdir $OUTDIR/pseudoData -f $CATS --seed $SEED --intLumi $INTLUMI  -y $OUTDIR/pseudoData/yields_pseudodata.txt
 FILE=$OUTDIR/pseudoData/pseudoWS.root
 
 fi
@@ -134,8 +140,8 @@ if [ $ISDATA == 1 ]; then
 OPT=" --isData 1"
 fi
 
-echo "./bin/fTest -i $FILE --saveMultiPdf CMS-HGG_multipdf_$EXT.root  -D $OUTDIR/bkgfTest -f $CATS $OPT"
-./bin/fTest -i $FILE --saveMultiPdf CMS-HGG_multipdf_$EXT.root  -D $OUTDIR/bkgfTest -f $CATS $OPT
+echo " ./bin/fTest -i $FILE --saveMultiPdf CMS-HGG_multipdf_$EXT.root  -D $OUTDIR/bkgfTest$DATAEXT -f $CATS $OPT"
+./bin/fTest -i $FILE --saveMultiPdf CMS-HGG_multipdf_$EXT.root  -D $OUTDIR/bkgfTest$DATAEXT -f $CATS $OPT
 
 OPT=""
 fi
@@ -155,20 +161,41 @@ fi
 if [ $UNBLIND == 1 ]; then
 OPT=" --unblind"
 fi
-echo "./scripts/subBkgPlots.py -b CMS-HGG_multipdf_$EXT.root -d $OUTDIR/bkgPlots -S 13 --isMultiPdf --useBinnedData  --doBands --runLocal  --massStep 2 $SIG -L 120 -H 130 -f $CATS -l $CATS --intLumi $INTLUMI $OPT #for now"
-./scripts/subBkgPlots.py -b CMS-HGG_multipdf_$EXT.root -d $OUTDIR/bkgPlots -S 13 --isMultiPdf --useBinnedData  --doBands --runLocal  --massStep 2 $SIG -L 100 -H 180 -f $CATS -l $CATS --intLumi $INTLUMI $OPT #for now
+echo "./scripts/subBkgPlots.py -b CMS-HGG_multipdf_$EXT.root -d $OUTDIR/bkgPlots$DATAEXT -S 13 --isMultiPdf --useBinnedData  --doBands --runLocal  --massStep 2 $SIG -L 100 -H 180 -f $CATS -l $CATS --intLumi $INTLUMI $OPT #for now"
+./scripts/subBkgPlots.py -b CMS-HGG_multipdf_$EXT.root -d $OUTDIR/bkgPlots$DATAEXT -S 13 --isMultiPdf --useBinnedData  --doBands --runLocal  --massStep 2 $SIG -L 100 -H 180 -f $CATS -l $CATS --intLumi $INTLUMI $OPT #for now
 
 OPT=""
 fi
 
 
 if [ $USER == "lcorpe" ]; then
+cp -r ${OUTDIR} ~/www/${OUTDIR}_${SEED}
 cp -r $OUTDIR ~/www/.
 cp ~lcorpe/public/index.php ~/www/$OUTDIR/pseudoData/.
 cp ~lcorpe/public/index.php ~/www/$OUTDIR/bkgPlots/.
+cp ~lcorpe/public/index.php ~/www/$OUTDIR/bkgPlot$DATAEXT/.
+cp ~lcorpe/public/index.php ~/www/$OUTDIR/bkgfTest$DATAEXT/.
 cp ~lcorpe/public/index.php ~/www/$OUTDIR/bkgfTest/.
+cp ~lcorpe/public/index.php ~/www/${OUTDIR}_${SEED}/pseudoData/.
+cp ~lcorpe/public/index.php ~/www/${OUTDIR}_${SEED}/bkgPlots/.
+cp ~lcorpe/public/index.php ~/www/${OUTDIR}_${SEED}/bkgfTest/.
 
 echo "plots available at: "
-echo "https://lcorpe.web.cern.ch/lcorpe/$OUTDIR"
+echo "https://lcorpe.web.cern.ch/lcorpe/$OUTDIR_${SEED}"
 
+fi
+
+if [ $USER == "lc1113" ]; then
+cp -r ${OUTDIR} ~lc1113/public_html/${OUTDIR}_${SEED}
+cp ~lc1113/index.php ~lc1113/public_html/${OUTDIR}_${SEED}/pseudoData/.
+cp ~lc1113/index.php ~lc1113/public_html/${OUTDIR}_${SEED}/bkgPlots/.
+cp ~lc1113/index.php ~lc1113/public_html/${OUTDIR}_${SEED}/bkgfTest/.
+cp -r $OUTDIR ~lc1113/public_html/.
+cp ~lc1113/index.php ~lc1113/public_html/$OUTDIR/pseudoData/.
+cp ~lc1113/index.php ~lc1113/public_html/$OUTDIR/bkgPlots/.
+cp ~lc1113/index.php ~lc1113/public_html/$OUTDIR/bkgfTest/.
+cp ~lc1113/index.php ~lc1113/public_html/$OUTDIR/bkgPlots$DATAEXT/.
+cp ~lc1113/index.php ~lc1113/public_html/$OUTDIR/bkgfTest$DATAEXT/
+echo "plots available at: "
+echo "http://www.hep.ph.imperial.ac.uk/~lc1113/${OUTDIR}_${SEED}"
 fi

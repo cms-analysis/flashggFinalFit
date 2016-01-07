@@ -3,6 +3,7 @@
 #include <vector>
 #include <map>
 #include <utility>
+#include <math.h>
 
 #include "TFile.h"
 #include "TMath.h"
@@ -40,9 +41,12 @@ using namespace boost;
 namespace po = boost::program_options;
 
 string filenameStr_;
+string yieldfileStr_;
 string plotDir_;
+vector<string> yieldfile_;
 vector<string> filename_;
 vector<string> filetype_;
+vector<string> shortname_;
 int mass_;
 int pseudodata_;
 int append_;
@@ -69,6 +73,7 @@ void OptionParser(int argc, char *argv[]){
 	desc1.add_options()
 		("help,h",                                                                                "Show help")
 		("infilename,i", po::value<string>(&filenameStr_),                                           "Input file name")
+		("yieldfile,y", po::value<string>(&yieldfileStr_),                                           "Output yields")
 		("draw", po::value<int>(&draw_)->default_value(0),                                    "Draw some plots")
 		("intLumi", po::value<float>(&intlumi_)->default_value(0),                                    "Specify hwo much pseudodata to generate (in fb^{-1}")
 		("print", po::value<int>(&print_)->default_value(0),                                    "print contents of ws")
@@ -100,9 +105,11 @@ void OptionParser(int argc, char *argv[]){
 /////////------------> Begin Main function <--------------/////////
 int main(int argc, char *argv[]){
 	
+  int seedOffset =0;
 	vector<string> tags;
 	vector<string> processes;
 	vector<float> yields;
+	vector<float> weights;
 
 	float progress=0;
 	OptionParser(argc,argv);
@@ -130,7 +137,9 @@ int main(int argc, char *argv[]){
 	 system(Form("mkdir -p %s/berns",plotDir_.c_str()));
 	// check input file and push back datasets
 	ifstream infile;
+	ofstream yieldsOut;
 	infile.open(filenameStr_.c_str());
+	yieldsOut.open(yieldfileStr_.c_str());
 	if (infile.fail()) {
 		std::cout << "[ERROR] Could not open " << filenameStr_ <<std::endl;
 		exit(1);
@@ -145,6 +154,7 @@ int main(int argc, char *argv[]){
 		if (verbose_) std::cout << "[INFO] type  " <<  words[0] << ", file " << words[1] << std::endl;
 		filename_.push_back(words[1]);
 		filetype_.push_back(words[0]);
+		if (words.size() >2 ) shortname_.push_back(words[2]);
 	}
 
 	// new workspace 
@@ -325,7 +335,9 @@ int main(int argc, char *argv[]){
 				RooDataSet *dataPlot = outData[i];
 				TCanvas *c1 = new TCanvas("c","c",500,500);
 				RooPlot* mframe = newmass.frame() ;
-				int sumEntries = (int) dataPlot->sumEntries();
+				int sumEntries = (int) round(dataPlot->sumEntries()*lumifactor_);
+				float sumWeights =  dataPlot->sumEntries()*lumifactor_;
+			//	if (shortname_.size() >0) yieldsOut << shortname_[i] << " " << dataPlot->GetName() << " " << sumEntries << " " << dataPlot->sumEntries() << std::endl;
 				dataPlot->plotOn(mframe);
 
 				PdfModelBuilder pdfsModel;
@@ -352,24 +364,30 @@ int main(int argc, char *argv[]){
 
 				RooDataSet* dataFit;
 				//if (gausnll < bernsnll)
-				RooRandom::randomGenerator()->SetSeed(seed_);
+				RooRandom::randomGenerator()->SetSeed(seed_+100*seedOffset);
+        seedOffset++;
+        std::cout << "[INFO] RANDOM NUMBER SEED FOR " << dataPlot->GetName() << " IS " << RooRandom::randomGenerator()->GetSeed() << std::endl;
 				if (isSig) {
 				RooFitResult *fitTestGaus = gauss->fitTo(*dataPlot,RooFit::Save(1),RooFit::Verbose(0),RooFit::SumW2Error(kTRUE), RooFit::Minimizer("Minuit2","minimize")); //FIXME
 				float gausnll = fitTestGaus->minNll();
-					dataFit = gauss->generate(newmass,lumifactor_*sumEntries)  ; //intLumi is in pb^-1. Use directly as mustiplicative factor since default is for 1 pb^-1
+					dataFit = gauss->generate(newmass,sumEntries)  ; //intLumi is in pb^-1. Use directly as mustiplicative factor since default is for 1 pb^-1
 					gauss->plotOn(mframe) ;
 					std::cout << " [INFO] sig - gaussian simgma" << a2.getVal() << ", gaussian mean " << a1.getVal() <<  ", nEvents in +/-1 sig " << dataFit->sumEntries() << std::endl;
-				processes.push_back(filename_[ifile]);
+				if (shortname_.size()>0) processes.push_back(shortname_[ifile]);
+				else processes.push_back(filename_[ifile]);
 				tags.push_back(dataPlot->GetName());
 				yields.push_back(dataFit->sumEntries());
+				weights.push_back(sumWeights);
 				} else {
 				RooFitResult *fitTest = p2->fitTo(*dataPlot,RooFit::Save(1),RooFit::Verbose(0),RooFit::SumW2Error(kTRUE), RooFit::Minimizer("Minuit2","minimize")); //FIXME
 				float bernsnll = fitTest->minNll();
-					dataFit = p2->generate(newmass,lumifactor_*sumEntries)  ;
+					dataFit = p2->generate(newmass,sumEntries)  ;
 					p2->plotOn(mframe) ;
-				processes.push_back(filename_[ifile]);
+				if (shortname_.size()>0) processes.push_back(shortname_[ifile]);
+				else processes.push_back(filename_[ifile]);
 				tags.push_back(dataPlot->GetName());
 				yields.push_back(dataFit->sumEntries());
+				weights.push_back(sumWeights);
 				}
 				dataFit->plotOn(mframe,LineColor(kRed), FillColor(kRed), MarkerColor(kRed));
 				dataFit->SetName(outData[i]->GetName());
@@ -496,13 +514,16 @@ int main(int argc, char *argv[]){
 	std::cout << endl;
 	outFile->Close();
 		
+	yieldsOut<< "PROCESS/SAMPLE " << "	"<< "TAG" << "	" << "YIELDS" << " " << "WEIGHTS" << std::endl;
 	std::cerr << "PROCESS/SAMPLE " << "	"<< "TAG" << "	" << "YIELDS" << std::endl;
 	std::cout << "PROCESS/SAMPLE " << "	"<< "TAG" << "	" << "YIELDS" << std::endl;
 	for(int i =0; i < processes.size(); i++){
 
-	std::cerr <<"YIELDS " <<  processes[i] << "	"<< tags[i] << "	" << yields[i] << std::endl;
+	std::cerr <<"YIELDS " <<  processes[i] << "	"<< tags[i] << "	" << yields[i] <<  " (" << weights[i] <<  ")" << std::endl;
+  yieldsOut <<"YIELDS " <<  processes[i] << "	"<< tags[i] << "	" << yields[i] <<  " (" << weights[i] <<  ")" << std::endl;
 	std::cout <<"YIELDS " <<  processes[i] << "	"<< tags[i] << "	" << yields[i] << std::endl;
 	}
+
 
 }
 

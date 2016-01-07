@@ -75,8 +75,10 @@ parser.add_option("--skipWorkspace",default=False,action="store_true",help="Dont
 parser.add_option("--hadd",help="Trawl passed directory and hadd files. To be used when jobs are complete.")
 parser.add_option("-v","--verbose",default=False,action="store_true")
 parser.add_option("--poix",default="r")
+parser.add_option("--S0",default=False,action="store_true",help="Stats only")
 parser.add_option("--catsMap",default="")
 parser.add_option("--nBins",default=7)
+parser.add_option("--batch",default="LSF",help="Which batch system to use (LSF,IC)")
 parser.add_option("--catRanges",default="")
 parser.add_option("--prefix",default="./")
 parser.add_option("--freezeAll",default=False,action="store_true",help="Freeze all nuisances")
@@ -137,7 +139,7 @@ if not opts.files and opts.datacard:
     opts.files = getFilesFromDatacard(opts.datacard)
 
 defaults = copy(opts)
-
+print "INFO - queue ", opts.queue
 def system(exec_line):
   #print "[INFO] defining exec_line"
   if opts.verbose: print '\t', exec_line
@@ -268,9 +270,10 @@ def writePreamble(sub_file):
   sub_file.write('touch %s.run\n'%os.path.abspath(sub_file.name))
   sub_file.write('cd %s\n'%os.getcwd())
   sub_file.write('eval `scramv1 runtime -sh`\n')
-  sub_file.write('cd -\n')
-  sub_file.write('mkdir -p scratch\n')
-  sub_file.write('cd scratch\n')
+  #sub_file.write('cd -\n')
+  sub_file.write('number=$RANDOM\n')
+  sub_file.write('mkdir -p scratch_$number\n')
+  sub_file.write('cd scratch_$number\n')
   sub_file.write('cp -p $CMSSW_BASE/bin/$SCRAM_ARCH/combine .\n')
   sub_file.write('cp -p %s .\n'%os.path.abspath(opts.datacard))
   if opts.toysFile: 
@@ -282,6 +285,7 @@ def writePreamble(sub_file):
 def writePostamble(sub_file, exec_line):
 
   #print "[INFO] writing to postamble"
+  if opts.S0: exec_line += ' -S 0 '
   sub_file.write('if ( %s ) then\n'%exec_line)
   sub_file.write('\t mv higgsCombine*.root %s\n'%os.path.abspath(opts.outDir))
   sub_file.write('\t touch %s.done\n'%os.path.abspath(sub_file.name))
@@ -289,13 +293,17 @@ def writePostamble(sub_file, exec_line):
   sub_file.write('\t touch %s.fail\n'%os.path.abspath(sub_file.name))
   sub_file.write('fi\n')
   sub_file.write('rm -f %s.run\n'%os.path.abspath(sub_file.name))
+  sub_file.write('cd -\n')
+  sub_file.write('rm -rf scratch_$number\n')
   sub_file.close()
   system('chmod +x %s'%os.path.abspath(sub_file.name))
   if not opts.dryRun and opts.queue:
     system('rm -f %s.done'%os.path.abspath(sub_file.name))
     system('rm -f %s.fail'%os.path.abspath(sub_file.name))
     system('rm -f %s.log'%os.path.abspath(sub_file.name))
-    system('bsub -q %s -o %s.log %s'%(opts.queue,os.path.abspath(sub_file.name),os.path.abspath(sub_file.name)))
+    if (opts.batch == "LSF") : system('bsub -q %s -o %s.log %s'%(opts.queue,os.path.abspath(sub_file.name),os.path.abspath(sub_file.name)))
+    if (opts.batch == "IC") : system('qsub -q %s -o %s.log -e %s.err %s > out.txt'%(opts.queue,os.path.abspath(sub_file.name),os.path.abspath(sub_file.name),os.path.abspath(sub_file.name)))
+    #if (opts.batch == "IC") : system('qsub %s -q %s -o %s.log '%(os.path.abspath(sub_file.name),opts.queue,os.path.abspath(sub_file.name)))
   if opts.runLocal:
     if opts.parallel:
                     tmpdir = "/tmp/%s/combineHarvester%d_%d" % ( os.getlogin(), os.getpid(), parallel.njobs )
@@ -317,6 +325,7 @@ def writeAsymptotic():
     exec_line = ''
     for mass in mass_set:
       exec_line +=  'combine %s -M Asymptotic -m %6.2f --cminDefaultMinimizerType=Minuit2'%(opts.datacard,mass)
+      if opts.S0: exec_line += ' --S0 '
       if opts.additionalOptions: exec_line += ' %s'%opts.additionalOptions
       if opts.expected: exec_line += ' --run=expected'
       if mass!=mass_set[-1]: exec_line += ' && '
@@ -337,6 +346,8 @@ def writeAsymptoticGrid():
   if not opts.skipWorkspace:
     print '[INFO] Creating workspace for %s...'%opts.method
     ws_exec_line = 'text2workspace.py %s -o %s'%(os.path.abspath(opts.datacard),os.path.abspath(opts.datacard).replace('.txt','.root')) 
+    print " WS EXEC LINE "
+    print ws_exec_line
     system(ws_exec_line)
   opts.datacard = opts.datacard.replace('.txt','.root')
 
@@ -346,10 +357,14 @@ def writeAsymptoticGrid():
       system('python $CMSSW_BASE/src/HiggsAnalysis/CombinedLimit/test/makeAsymptoticGrid.py -w %s -m %6.2f -n 10 -r %3.1f %3.1f --runLimit --nCPU=3 -d %s'%(opts.datacard,mass,opts.muLow,opts.muHigh,os.path.abspath(opts.outDir)))
       sub_file_name = os.path.abspath(opts.outDir+'/limitgrid_%5.1f.sh'%(mass))
       if opts.verbose:
-        print 'bsub -q %s -n 3 -R "span[hosts=1]" -o %s.log %s'%(opts.queue,os.path.abspath(sub_file_name),os.path.abspath(sub_file_name))
+        if (opts.batch == "LSF") : print 'bsub -q %s -n 3 -R "span[hosts=1]" -o %s.log %s'%(opts.queue,os.path.abspath(sub_file_name),os.path.abspath(sub_file_name))
+        if (opts.batch == "IC") : print 'qsub -q %s -n 3 -R "span[hosts=1]" -o %s.log %s'%(opts.queue,os.path.abspath(sub_file_name),os.path.abspath(sub_file_name))
+        #if (opts.batch == "IC") : print 'qsub %s -q %s -n 3 -R "span[hosts=1]" -o %s.log '%(os.path.abspath(sub_file_name),opts.queue,os.path.abspath(sub_file_name))
       if not opts.dryRun and opts.queue:
         system('rm -f %s.log'%os.path.abspath(sub_file_name))
-        system('bsub -q %s -n 3 -R "span[hosts=1]" -o %s.log %s'%(opts.queue,os.path.abspath(sub_file_name),os.path.abspath(sub_file_name)))
+        if (opts.batch == "LSF") :    system('bsub -q %s -n 3 -R "span[hosts=1]" -o %s.log %s'%(opts.queue,os.path.abspath(sub_file_name),os.path.abspath(sub_file_name)))
+        if (opts.batch == "IC") :    system('qsub -q %s -n 3 -R "span[hosts=1]" -o %s.log /%s'%(opts.queue,os.path.abspath(sub_file_name),os.path.abspath(sub_file_name)))
+        #if (opts.batch == "IC") :    system('qsub %s -q %s -n 3 -R "span[hosts=1]" -o %s.log '%(os.path.abspath(sub_file_name),opts.queue,os.path.abspath(sub_file_name)))
       if opts.runLocal:
         system('bash %s'%os.path.abspath(sub_file_name))
 
@@ -380,7 +395,7 @@ def writeProfileLikelhood():
     for mass in mass_set:
       exec_line +=  'combine %s -M ProfileLikelihood -m %6.2f --signif --pval --cminDefaultMinimizerType=Minuit2'%(opts.datacard,mass)
       if opts.additionalOptions: exec_line += ' %s'%opts.additionalOptions
-      if opts.expected: exec_line += ' -t -1'
+      if opts.expected: exec_line += ' -t -1 '
       if opts.expectSignal: exec_line += ' --expectSignal=%3.1f'%opts.expectSignal
       if opts.expectSignalMass: exec_line += ' --expectSignalMass=%6.2f'%opts.expectSignalMass
       if opts.toysFile: exec_line += ' --toysFile %s'%toysfilestore.replace('${m}',str(mass)).replace('.0','')
@@ -595,7 +610,7 @@ def writeMultiDimFit(method=None,wsOnly=False):
           print exec_line
           if opts.postFit:
                           exec_line += '&& combine -m 125 -M MultiDimFit --saveWorkspace -n %s_postFit %s' % ( datacardname+method, os.path.abspath(opts.datacard).replace('.txt',method+'.root') )
-                          exec_line += '&& mv higgsCombine%s_postFit.MultiDimFit.mH125.root %s' % ( datacardname+method, os.path.abspath(opts.datacard).replace('.txt',method+'_postFit.root') )
+                          exec_line += '&& cp higgsCombine%s_postFit.MultiDimFit.mH125.root %s' % ( datacardname+method, os.path.abspath(opts.datacard).replace('.txt',method+'_postFit.root') )
           if opts.parallel and opts.dryRun:
                           parallel.run(system,(exec_line,))
           else:
@@ -653,7 +668,8 @@ def writeMultiDimFit(method=None,wsOnly=False):
           exec_line = 'combine %s -M MultiDimFit --cminDefaultMinimizerType Minuit2 --cminDefaultMinimizerAlgo migrad --algo=grid  %s --points=%d --firstPoint=%d --lastPoint=%d -n %sJob%d'%(opts.datacard,combine_args[method],opts.pointsperjob*opts.jobs,i*opts.pointsperjob,(i+1)*opts.pointsperjob-1,method,i)
           if method in par_ranges.keys(): exec_line+=" --setPhysicsModelParameterRanges %s "%(par_ranges[method])
           if getattr(opts,"mh",None): exec_line += ' -m %6.2f'%opts.mh
-          if opts.expected: exec_line += ' -t -1'
+          #if opts.expected: exec_line += ' -t -1 --freezeNuisances=JetVeto_migration0,JetVeto_migration1,pdfindex_UntaggedTag_0_13TeV,pdfindex_UntaggedTag_1_13TeV,pdfindex_UntaggedTag_2_13TeV,pdfindex_UntaggedTag_3_13TeV,pdfindex_VBFTag_0_13TeV,pdfindex_VBFTag_1_13TeV'
+          if opts.expected: exec_line += ' -t -1 '
           if opts.expectSignal: exec_line += ' --expectSignal %4.2f'%opts.expectSignal
           if opts.expectSignalMass: exec_line += ' --expectSignalMass %6.2f'%opts.expectSignalMass
           if opts.additionalOptions: exec_line += ' %s'%opts.additionalOptions

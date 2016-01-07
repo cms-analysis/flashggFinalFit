@@ -13,21 +13,67 @@ mh = r.TGraphAsymmErrors()
 mu = r.TGraphAsymmErrors()
 exppval = r.TGraphAsymmErrors()
 obspval = r.TGraphAsymmErrors()
+obspval_125 = r.TGraphAsymmErrors()
 mh_h = r.TH1F("mh","mh",50,-3,3)
 mu_h = r.TH1F("mu","mu",50,-3,3)
 pval_h = r.TH1F("pval","pval",50,-0.06,0.06)
 c = r.TCanvas()
 r.gStyle.SetOptStat(111111)
+list1=[]
+index_vec=[]
+mh_vec=[]
+mu_vec=[]
+obs_vec=[]
+exp_125_vec=[]
+exp_vec=[]
+
+def drawSigmas(counter,c) :
+  # draw sigma lines
+  sigmas=[1,2,3,4,5,6]
+  lines=[]
+  labels=[]
+  for i,sig in enumerate(sigmas):
+    y = r.RooStats.SignificanceToPValue(sig)
+    print "consider sigma " , i, " = ", sig ," sigma ie" , y ," in pval ","  counter " , counter
+    lines.append(r.TLine(0,y,counter,y))
+    #else : 
+    #axmin = float(options.xaxis.split(',')[0])
+    #axmax = float(options.xaxis.split(',')[1])
+    #lines.append(r.TLine(axmin,y,axmax,y))
+  
+    lines[i].SetLineWidth(2)
+    lines[i].SetLineStyle(2)
+    lines[i].SetLineColor(13) # greay Lines 
+    labels.append(r.TLatex(float(counter), y * 0.8, "%d #sigma" % (i+1)))
+    labels[i].SetTextColor(13)
+    labels[i].SetTextAlign(11);
+    #if y<=mg.GetYaxis().GetXmax() and y>=mg.GetYaxis().GetXmin():
+    #c.cd()
+    lines[i].Draw('SAME')
+    labels[i].Draw('SAME')
+    c.SaveAs("test.pdf")
 
 d = open(file0)
 countermh=0
 countermu=0
 pexpval=0.
 pobsval=0.
+counter=-1
 for line in d.readlines():
     if line.startswith('#'): continue
     if line=='\n': continue
     words=line.split(' ')
+    #print "already considered", list1
+    if (len(index_vec)-1)<int(words[1]) :
+      index_vec.append(int(words[1]))
+      mh_vec.append(-1.)
+      mu_vec.append(-1.)
+      obs_vec.append(-1.)
+      exp_125_vec.append(-1.)
+      exp_vec.append(-1.)
+    #print "check if " ,words[1] , " is in list1" , (words[1] in list1)
+    if (words[0]+words[1]) in list1 : continue
+    list1.append(words[0]+words[1])
     if words[0]=="mh":
       mhvalue = (float(words[2]))
       mhvalueX =(float(countermh))
@@ -39,7 +85,8 @@ for line in d.readlines():
       mh.SetPointError(int(words[1]),mherrorsXLo,mherrorsXHi,mherrorsLo,mherrorsHi)
       dmH=(mhvalue -125.)/(mherrorsLo+mherrorsHi)
       mh_h.Fill(dmH)
-      print words[1], "MH: ",mherrorsLo ,", ", mhvalue ,", ", mherrorsHi, "deltaMh/sigma ",dmH
+      mh_vec[int(words[1])]=mhvalue
+      #print words[1], "MH: ",mherrorsLo ,", ", mhvalue ,", ", mherrorsHi, "deltaMh/sigma ",dmH
       countermh+=1
     if words[0]=="mu":
       muvalue = (float(words[2]))
@@ -53,17 +100,22 @@ for line in d.readlines():
       mu.SetPointError(int(words[1]),muerrorsXLo,muerrorsXHi,muerrorsLo,muerrorsHi)
       dmu=(muvalue -1.)/(muerrorsLo+muerrorsHi)
       mu_h.Fill(dmu)
-      print words[1], "MU: ",muerrorsLo ,", ", muvalue ,", ", muerrorsHi, "dmu/sigma ", dmu
+      mu_vec[int(words[1])]=muvalue
+      #print words[1], "MU: ",muerrorsLo ,", ", muvalue ,", ", muerrorsHi, "dmu/sigma ", dmu
       countermu+=1
     if words[0]=="Expected_mh125_13TeV":
       exppval.SetPoint(int(words[1]),int(words[1]),float(words[2])  )
       pexpval =float(words[2]) 
+      exp_125_vec[int(words[1])]= pexpval
     if words[0]=="Observed_13TeV":
       obspval.SetPoint(int(words[1]),int(words[1]),float(words[2])  )
+      #if obspval_125.SetPoint(int(words[1]),int(words[1]),float(words[2])  )
       pobsval =float(words[2])
       dpval=pexpval - pobsval
       pval_h.Fill(dpval)
-      print words[1]," PVAL obs ", pobsval, ", exp ", pexpval, ", dpval ", dpval
+      obs_vec[int(words[1])]= pobsval
+      #print words[1]," PVAL obs ", pobsval, ", exp ", pexpval, ", dpval ", dpval, " counter " , counter
+      counter=counter+1
 
 
 l = r.TLine(0.,125,countermh+1,125)
@@ -115,12 +167,39 @@ obspval.SetMarkerStyle(20)
 obspval.SetLineColor(r.kGreen)
 obspval.SetLineWidth(2)
 obspval.GetXaxis().SetRangeUser(-1,countermu+1)
+obspval.SetMaximum(0.2)
+obspval.SetMinimum(10e-10)
 obspval.GetYaxis().SetTitle("Observed p value")
 c.SetLogy(1)
 #c.SetGrid(0)
 #r.gStyle.SetGridStyle(0)
 
 obspval.Draw("APL")
+#drawSigmas(counter,c)
+sigmas=[1,2,3,4,5,6]
+lines=[]
+labels=[]
+for i,sig in enumerate(sigmas):
+  y = r.RooStats.SignificanceToPValue(sig)
+  print "consider sigma " , i, " = ", sig ," sigma ie" , y ," in pval ","  counter " , counter
+  lines.append(r.TLine(0,y,counter,y))
+  #else : 
+  #axmin = float(options.xaxis.split(',')[0])
+  #axmax = float(options.xaxis.split(',')[1])
+  #lines.append(r.TLine(axmin,y,axmax,y))
+
+  lines[i].SetLineWidth(2)
+  lines[i].SetLineStyle(2)
+  lines[i].SetLineColor(13) # greay Lines 
+  labels.append(r.TLatex(float(counter), y * 0.8, "%d #sigma" % (i+1)))
+  labels[i].SetTextColor(13)
+  labels[i].SetTextAlign(11);
+  #if y<=mg.GetYaxis().GetXmax() and y>=mg.GetYaxis().GetXmin():
+  #c.cd()
+  lines[i].Draw('SAME')
+  labels[i].Draw('SAME')
+  c.SaveAs("test.pdf")
+
 c.SaveAs("superloopPlotobspval.pdf")
 c.SaveAs("superloopPlotobspval.png")
 
@@ -135,8 +214,34 @@ exppval.SetMarkerStyle(24)
 exppval.SetLineColor(r.kGreen)
 exppval.SetLineWidth(2)
 exppval.GetYaxis().SetTitle("expected(125) p value")
-exppval.GetYaxis().SetRangeUser(0,0.0001)
+#exppval.GetYaxis().SetRangeUser(0,0.0001)
+exppval.SetMaximum(0.2)
+exppval.SetMinimum(10e-10)
 exppval.Draw("ALP")
+#drawSigmas(counter,c)
+sigmas=[1,2,3,4,5,6]
+lines=[]
+labels=[]
+for i,sig in enumerate(sigmas):
+  y = r.RooStats.SignificanceToPValue(sig)
+  print "consider sigma " , i, " = ", sig ," sigma ie" , y ," in pval ","  counter " , counter
+  lines.append(r.TLine(0,y,counter,y))
+  #else : 
+  #axmin = float(options.xaxis.split(',')[0])
+  #axmax = float(options.xaxis.split(',')[1])
+  #lines.append(r.TLine(axmin,y,axmax,y))
+
+  lines[i].SetLineWidth(2)
+  lines[i].SetLineStyle(2)
+  lines[i].SetLineColor(13) # greay Lines 
+  labels.append(r.TLatex(float(counter), y * 0.8, "%d #sigma" % (i+1)))
+  labels[i].SetTextColor(13)
+  labels[i].SetTextAlign(11);
+  #if y<=mg.GetYaxis().GetXmax() and y>=mg.GetYaxis().GetXmin():
+  #c.cd()
+  lines[i].Draw('SAME')
+  labels[i].Draw('SAME')
+  c.SaveAs("test.pdf")
 c.SaveAs("superloopPlotexppval.pdf")
 c.SaveAs("superloopPlotexppval.png")
 
@@ -188,3 +293,51 @@ c.SaveAs("superloopPlot.png")
 
 
 #raw_input("Looks ok?") 
+
+print "###################################"
+print "index_vec"
+print index_vec
+print "mh_vec"
+print mh_vec
+print "mu_vec"
+print mu_vec
+print "obs_vec"
+print obs_vec
+print "exp_vec"
+print exp_vec
+print "exp_125_vec"
+print exp_125_vec
+print "###################################"
+
+#f = r.TFile( 'test.root', 'recreate' )
+f = r.TFile( file0.replace("txt","root"), 'recreate' )
+tree = r.TTree("t1","t1") 
+maxn = len(index_vec)
+lindex = array( 'i', [ 0 ] )
+lmh = array( 'f', [ 0. ] )
+lmu = array( 'f', [ 0. ] )
+lexp_125 = array( 'f', [ 0. ] )
+lexp_125_sigma = array( 'f', [ 0. ] )
+lobs = array( 'f', [ 0. ] )
+lobs_sigma = array( 'f', [ 0. ] )
+tree.Branch( 'index', lindex, 'index/I' )
+tree.Branch( 'mh', lmh, 'mh/F' )
+tree.Branch( 'mu', lmu, 'mu/F' )
+tree.Branch( 'exp_125', lexp_125, 'exp_125/F' )
+tree.Branch( 'exp_125_sigma', lexp_125_sigma, 'exp_125_sigma/F' )
+tree.Branch( 'obs', lobs, 'obs/F' )
+tree.Branch( 'obs_sigma', lobs_sigma, 'obs_sigma/F' )
+
+for i in range(maxn):
+  lindex[0] = int(index_vec[i])
+  lmh[0] = mh_vec[i]
+  lmu[0] = mu_vec[i]
+  lexp_125[0] = exp_125_vec[i]
+  lexp_125_sigma[0] = r.RooStats.PValueToSignificance(exp_125_vec[i])
+  lobs[0] = obs_vec[i]
+  lobs_sigma[0] = r.RooStats.PValueToSignificance(obs_vec[i])
+  print "exp_125 : ", lexp_125[0] , " ie " , lexp_125_sigma[0] ," sigma , obs " , lobs[0] , " ie " , lobs_sigma[0] ," sigma"
+  tree.Fill()
+
+f.Write()
+f.Close()
