@@ -22,6 +22,9 @@ parser.add_option("-r","--fromroot",default="")
 parser.add_option("-f","--flashggCats",default="UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,UntaggedTag_4,VBFTag_0,VBFTag_1,VBFTag_2,TTHHadronicTag,TTHLeptonicTag,VHHadronicTag,VHTightTag,VHLooseTag,VHEtTag")
 (options,args) = parser.parse_args()
 
+
+os.system('sed -i \"s/\'14TeV\'/\'13TeV\',\'14TeV\'/g\"  ../HiggsAnalysis/CombinedLimit/python/PhysicsModel.py')  
+
 procCounter=-1
 for proc in procs:
   procCounter=procCounter+1
