@@ -15,11 +15,12 @@ cd ${CMSSW_BASE}/src
 # Install Flashgg Final Fit packages
 git clone git@github.com:cms-analysis/flashggFinalFit.git flashggFinalFit
 cd ${CMSSW_BASE}/src
+cmsenv
 scram b -j 9
 cd ${CMSSW_BASE}/src/flashggFinalFit/
-# Make dummy 13TeV XS files. 
+# create 13TeV XS from 8TeV as placeholder, also add 13TeV into allowed sqrts in HiggsAnalysis/CombinedLimit/python/PhysicsModel.py
 chmod +x convertXS.py
-./convertXS.py # create 13TeV XS from 8TeV as placeholder
+./convertXS.py 
 ```
 
 Two packages need to be built with their own makefiles, if needed. Please note that there will be verbose warnings from BOOST etc:
