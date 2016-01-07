@@ -32,7 +32,7 @@ The available options can be seen by doing `runSignalScripts.sh -h`. They are al
 * `--sigFile`: Optional argument to provide a previously-produced signal model to make the validation plots with (so you can see relative size of signal and background on one plot)
 * `--pseudoDataDat`: Specify the list of available samples using the format: <type>,<filepath> where type can be `sig` or `bkg`.
 
-## Script-byi-script guide
+## Script-by-script guide
 ### Generating the pseudodata
 
 One can use the `/bin/pseudodataMaker` script to regenerate this. Example output is provided here.
@@ -57,7 +57,7 @@ samples=/afs/cern.ch/user/l/lcorpe/public/HggDryRunDec15/flashgg_source_files/sa
 Example of output plots can be found at:
 
 ```
-https://lcorpe.web.cern.ch/lcorpe/outdir_hgg_dry_run_2015/pseudoData/
+https://twiki.cern.ch/twiki/bin/view/CMS/FLASHggFramework#Background #(Under Pseudodata)
 ```
 ### Generating the background model
 
@@ -79,9 +79,9 @@ Example output can be found at:
 
 ```
 # for the data:
-https://lcorpe.web.cern.ch/lcorpe/outdir_hgg_dry_run_2015/bkgfTest-Data/
+https://twiki.cern.ch/twiki/bin/view/CMS/FLASHggFramework#Background #(Under Bkg FTest, Data)
 # for the pseudodata:
-https://lcorpe.web.cern.ch/lcorpe/outdir_hgg_dry_run_2015/bkgfTest/
+https://twiki.cern.ch/twiki/bin/view/CMS/FLASHggFramework#Background #(Under Bkg FTest, Pseudodata)
 ```
 
 ### Background Validation Plots
@@ -107,9 +107,9 @@ Example output can be found here:
 
 ```
 # for data:
-https://lcorpe.web.cern.ch/lcorpe/outdir_hgg_dry_run_2015/bkgPlots-Data/
+https://twiki.cern.ch/twiki/bin/view/CMS/FLASHggFramework#Background #(Under Bkg Validation Plots, Data)
 # For pseudodata 
-https://lcorpe.web.cern.ch/lcorpe/outdir_hgg_dry_run_2015/bkgPlots/
+https://twiki.cern.ch/twiki/bin/view/CMS/FLASHggFramework#Background #(Under Bkg Validation Plots, Pseudodata)
 ```
 
 Notes:

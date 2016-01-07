@@ -45,7 +45,7 @@ file=/afs/cern.ch/user/l/lcorpe/public/HggDryRunDec15/flashgg_source_files/allsi
 Example output can be found at:
 
 ```
-https://lcorpe.web.cern.ch/lcorpe/outdir_intlumitest1fb/sigfTest/
+https://twiki.cern.ch/twiki/bin/view/CMS/FLASHggFramework#Signal #(Under signalFTest)
 ```
 
 ### Generating the dat/photonCatSyst.dat file
@@ -64,7 +64,7 @@ file=/afs/cern.ch/user/l/lcorpe/public/HggDryRunDec15/flashgg_source_files/allsi
 Example output can be found at:
 
 ```
-https://lcorpe.web.cern.ch/lcorpe/outdir_hgg_dry_run_2015/systematics
+https://twiki.cern.ch/twiki/bin/view/CMS/FLASHggFramework#Signal #(Under Systematics)
 ```
 
 * Note: the `signalFTest` step can be very time consuming (>1h). To speed up, this process can be submitted to the batch by specifying a queue to use (eg `--batch LSF` or `--batch IC`). If this is the case, the individual Tag/Process signalFTest jobs are submitted to a default queue ( `hepshort.q` or `1nh` depending on which batch system you use) and the final results are combined into one final dat file. The status of jobs is monitored every 10s. However, if no batch system is specified, the default is to run over each Tag/Process one after another as in the example above.
@@ -91,7 +91,7 @@ file=/afs/cern.ch/user/l/lcorpe/public/HggDryRunDec15/flashgg_source_files/allsi
 Example output can be found here:
 
 ```
-https://lcorpe.web.cern.ch/lcorpe/outdir_hgg_dry_run_2015/sigfit/
+https://twiki.cern.ch/twiki/bin/view/CMS/FLASHggFramework#Signal #(Under SignalFit)
 ```
 
 Notes:
@@ -109,7 +109,7 @@ To generate validation plots, one can use the `./bin/makeParametricSignalModelPl
 Example output can be found here:
 
 ```
-https://lcorpe.web.cern.ch/lcorpe/outdir_hgg_dry_run_2015/sigplots/
+https://twiki.cern.ch/twiki/bin/view/CMS/FLASHggFramework#Signal #(Under Signal Validation Plots)
 ```
 ## Outstanding Issues
 
