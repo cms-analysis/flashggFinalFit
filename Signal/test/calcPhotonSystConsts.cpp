@@ -22,6 +22,7 @@
 #include "../interface/LinearInterp.h"
 #include "../interface/FinalModelConstruction.h"
 #include "../interface/Packager.h"
+#include "../interface/WSTFileWrapper.h"
 
 #include "boost/program_options.hpp"
 #include "boost/algorithm/string/split.hpp"
@@ -65,7 +66,8 @@ string sqrtS_;
 int quadInterpolate_;
 int verbosity_;
 bool isFlashgg_;
-RooWorkspace *inWS_;
+//RooWorkspace *inWS_;
+WSTFileWrapper * inWS_;
 RooRealVar *mass_ = new RooRealVar("CMS_hgg_mass","CMS_hgg_mass",125);
 
 void OptionParser(int argc, char *argv[]){
@@ -451,7 +453,8 @@ int main(int argc, char *argv[]){
 		if (verbosity_)	cout << "[INFO] Opened file " << infilenames_[i] << endl;
 		inFiles[i]->Print();
 	}
-	inWS_ = (RooWorkspace*)inFiles[0]->Get("tagsDumper/cms_hgg_13TeV"); //FIXME should add all workspaces together from various files
+	//	inWS_ = (RooWorkspace*)inFiles[0]->Get("tagsDumper/cms_hgg_13TeV"); //FIXME should add all workspaces together from various files
+	inWS_ = new WSTFileWrapper(infilenamesStr_,"tagsDumper/cms_hgg_13TeV");
 
 	ofstream outfile;
 	outfile.open(outfilename_.c_str());

@@ -27,6 +27,8 @@
 #include "boost/algorithm/string/classification.hpp"
 #include "boost/algorithm/string/predicate.hpp"
 
+#include "../interface/WSTFileWrapper.h"
+
 using namespace std;
 using namespace RooFit;
 using namespace boost;
@@ -175,9 +177,12 @@ int main(int argc, char *argv[]){
 			std::cout << " [INFO] considering only "  << considerOnly_[j]<<std::endl;
 	}
 
-	TFile *inFile = TFile::Open(filename_.c_str());
-	RooWorkspace *inWS;
-	RooRealVar *mass; 
+	//	TFile *inFile = TFile::Open(filename_.c_str());
+	WSTFileWrapper * inWS = new WSTFileWrapper(filename_,"tagsDumper/cms_hgg_13TeV");
+	//	RooWorkspace *inWS;
+	RooRealVar *mass = (RooRealVar*)inWS->var("CMS_hgg_mass");
+
+	/*
 	if (isFlashgg_){
 		if (verbose_) std::cout << "[INFO] Opening workspace tagsDumper/cms_hgg_13TeV"<<std::endl;
 		inWS = (RooWorkspace*)inFile->Get("tagsDumper/cms_hgg_13TeV");
@@ -186,9 +191,10 @@ int main(int argc, char *argv[]){
 		mass = (RooRealVar*)inWS->var("CMS_hgg_mass");
 		if (verbose_) std::cout << "[INFO] Got mass var from ws"<<std::endl;
 	} else {
-		inWS = (RooWorkspace*)inFile->Get("cms_hgg_workspace"); 
-		mass = (RooRealVar*)inWS->var("CMS_hgg_mass"); 
+	  inWS = (RooWorkspace*)inFile->Get("cms_hgg_workspace"); 
+	  mass = (RooRealVar*)inWS->var("CMS_hgg_mass"); 
 	}
+	*/
 
 	//mass->setBins(320);
 	//mass->setRange(mass_-10,mass_+10);
@@ -462,6 +468,6 @@ int main(int argc, char *argv[]){
 	}
 
 	output_datfile.close();
-	inFile->Close();
+	inWS->Close();
 	return 0;
 }

@@ -22,6 +22,7 @@
 #include "../interface/LinearInterp.h"
 #include "../interface/FinalModelConstruction.h"
 #include "../interface/Packager.h"
+#include "../interface/WSTFileWrapper.h"
 
 #include "boost/program_options.hpp"
 #include "boost/algorithm/string/split.hpp"
@@ -294,17 +295,20 @@ int main(int argc, char *argv[]){
 
 	TFile *inFile = TFile::Open(filename_[0].c_str());
 	if (check_){
-		//RooWorkspace *	inWS0 = (RooWorkspace*)inFile->Get(Form("wsig_8TeV"));
-		RooWorkspace *	inWS0 = (RooWorkspace*)inFile->Get(Form("tagsDumper/cms_hgg_13TeV"));
+	  //RooWorkspace *	inWS0 = (RooWorkspace*)inFile->Get(Form("wsig_8TeV"));
+	  //		RooWorkspace *	inWS0 = (RooWorkspace*)inFile->Get(Form("tagsDumper/cms_hgg_13TeV"));
+	  WSTFileWrapper * inWS0 = new WSTFileWrapper(filenameStr_,"tagsDumper/cms_hgg_13TeV");
+
 		std::list<RooAbsData*> data =  (inWS0->allData()) ;
 		for (std::list<RooAbsData*>::const_iterator iterator = data.begin(), end = data.end(); iterator != end; ++iterator) {
 			if(verbose_) std::cout << "[INFO] " <<**iterator << std::endl;
 		}
 		return 1;
 	}
-	RooWorkspace *inWS;
+	WSTFileWrapper *inWS;
 	if (isFlashgg_){
-		inWS = (RooWorkspace*)inFile->Get("tagsDumper/cms_hgg_13TeV");
+	  //		inWS = (RooWorkspace*)inFile->Get("tagsDumper/cms_hgg_13TeV");
+          inWS = new WSTFileWrapper(filenameStr_,"tagsDumper/cms_hgg_13TeV");
 		std::list<RooAbsData*> test =  (inWS->allData()) ;
 		if (verbose_) {
 			std::cout << " [INFO] WS contains " << std::endl;
@@ -313,7 +317,8 @@ int main(int argc, char *argv[]){
 			}
 		}
 	} else {
-		inWS = (RooWorkspace*)inFile->Get("cms_hgg_workspace");
+	  //		inWS = (RooWorkspace*)inFile->Get("cms_hgg_workspace");
+          inWS = new WSTFileWrapper(filenameStr_,"tagsDumper/cms_hgg_13TeV");
 		std::list<RooAbsData*> test =  (inWS->allData()) ;
 		if (verbose_) {
 			std::cout << " [INFO] WS contains " << std::endl;
@@ -667,7 +672,8 @@ int main(int argc, char *argv[]){
 	outFile->cd();
 	outWS->Write();
 	outFile->Close();
-	inFile->Close();
+	//	inFile->Close();
+	inWS->Close();
 	cout << "[INFO] Done." << endl;
 
 	return 0;
