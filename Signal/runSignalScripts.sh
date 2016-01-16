@@ -88,11 +88,12 @@ SIGFITONLY=1
 SIGPLOTSONLY=1
 fi
 
-if [ $BATCH=="IC" ]; then
-DEFAULTQUEUE=hepshort.q
+if [ $BATCH == "IC" ]; then
+#DEFAULTQUEUE=hepshort.q
+DEFAULTQUEUE=hepmedium.q
 BATCHQUERY="qstat -u $USER -q hepshort.q"
 fi
-if [ $BATCH=="LSF" ]; then
+if [ $BATCH == "LSF" ]; then
 DEFAULTQUEUE=1nh
 BATCHQUERY="bjobs"
 fi
@@ -109,12 +110,12 @@ echo "-->Determine Number of gaussians"
 echo "=============================="
 
 
-if [ $BATCH=="" ]; then
+if [ $BATCH == "" ]; then
 echo "./bin/signalFTest -i $FILE -d dat/newConfig_$EXT.dat -p $PROCS -f $CATS -o $OUTDIR"
 ./bin/signalFTest -i $FILE -d dat/newConfig_$EXT.dat -p $PROCS -f $CATS -o $OUTDIR
 else
 echo "./python/submitSignaFTest.py --procs $PROCS --flashggCats $CATS --outDir $OUTDIR --i $FILE --batch $BATCH -q $DEFAULTQUEUE"
-./python/submitSignaFTest.py --procs $PROCS --flashggCats $CATS --outDir $OUTDIR --i $FILE --batch $BATCH -q $DEFAULTQUEUE
+#./python/submitSignaFTest.py --procs $PROCS --flashggCats $CATS --outDir $OUTDIR --i $FILE --batch $BATCH -q $DEFAULTQUEUE
 
 PEND=`ls -l $OUTDIR/fTestJobs/sub*| grep -v "\.run" | grep -v "\.done" | grep -v "\.fail" | grep -v "\.err" |grep -v "\.log"  |wc -l`
 echo "PEND $PEND"
@@ -137,7 +138,7 @@ sleep 10
 done
 fi
 mkdir -p $OUTDIR/dat
-cat $OUTDIR/fTestJobs/outputs/* > dat/newConfig_$EXT.dat
+cat $OUTDIR/fTestJobs/outputs/* > dat/newConfig_${EXT}_temp.dat
 sort -u dat/newConfig_$EXT.dat  > dat/tmp_newConfig_$EXT.dat 
 mv dat/tmp_newConfig_$EXT.dat dat/newConfig_$EXT.dat
 cp dat/newConfig_$EXT.dat $OUTDIR/dat/copy_newConfig_$EXT.dat
@@ -172,12 +173,37 @@ echo "Running SignalFit"
 echo "-->Create actual signal model"
 echo "=============================="
 
-echo "./bin/SignalFit -i $FILE -d dat/newConfig_$EXT.dat  --mhLow=120 --mhHigh=130 -s dat/photonCatSyst_$EXT.dat --procs $PROCS -o $OUTDIR/CMS-HGG_sigfit_$EXT.root -p $OUTDIR/sigfit -f $CATS --changeIntLumi $INTLUMI "
 
-./bin/SignalFit -i $FILE -d dat/newConfig_$EXT.dat  --mhLow=120 --mhHigh=130 -s dat/photonCatSyst_$EXT.dat --procs $PROCS -o $OUTDIR/CMS-HGG_sigfit_$EXT.root -p $OUTDIR/sigfit -f $CATS --changeIntLumi $INTLUMI #--pdfWeights 26
+if [ $BATCH == "" ]; then
+echo "./bin/SignalFit -i $FILE -d dat/newConfig_$EXT.dat  --mhLow=120 --mhHigh=130 -s dat/photonCatSyst_$EXT.dat --procs $PROCS -o $OUTDIR/CMS-HGG_mva_13TeV_sigfit.root -p $OUTDIR/sigfit -f $CATS --changeIntLumi $INTLUMI "
+./bin/SignalFit -i $FILE -d dat/newConfig_$EXT.dat  --mhLow=120 --mhHigh=130 -s dat/photonCatSyst_$EXT.dat --procs $PROCS -o $OUTDIR/CMS-HGG_mva_13TeV_sigfit.root -p $OUTDIR/sigfit -f $CATS --changeIntLumi $INTLUMI #--pdfWeights 26
+else
+echo " ./python/submitSignalFit.py -i $FILE -d dat/newConfig_$EXT.dat  --mhLow=120 --mhHigh=130 -s dat/photonCatSyst_$EXT.dat --procs $PROCS -o $OUTDIR/CMS-HGG_sigfit_$EXT.root -p $OUTDIR/sigfit -f $CATS --changeIntLumi $INTLUMI --batch $BATCH -q $DEFAULTQUEUE "
+#./python/submitSignalFit.py -i $FILE -d dat/newConfig_$EXT.dat  --mhLow=120 --mhHigh=130 -s dat/photonCatSyst_$EXT.dat --procs $PROCS -o $OUTDIR/CMS-HGG_sigfit_$EXT.root -p $OUTDIR/sigfit -f $CATS --changeIntLumi $INTLUMI --batch $BATCH -q $DEFAULTQUEUE 
 
+PEND=`ls -l $OUTDIR/sigfit/SignalFitJobs/sub*| grep -v "\.run" | grep -v "\.done" | grep -v "\.fail" | grep -v "\.err" |grep -v "\.log"  |wc -l`
+echo "PEND $PEND"
+while (( $PEND > 0 )) ;
+do
+PEND=`ls -l $OUTDIR/sigfit/SignalFitJobs/sub* | grep -v "\.run" | grep -v "\.done" | grep -v "\.fail" | grep -v "\.err" | grep -v "\.log" |wc -l`
+RUN=`ls -l $OUTDIR/sigfit/SignalFitJobs/sub* | grep "\.run" |wc -l`
+FAIL=`ls -l $OUTDIR/sigfit/SignalFitJobs/sub* | grep "\.fail" |wc -l`
+DONE=`ls -l $OUTDIR/sigfit/SignalFitJobs/sub* | grep "\.done" |wc -l`
+(( PEND=$PEND-$RUN-$FAIL-$DONE ))
+echo " PEND $PEND - RUN $RUN - DONE $DONE - FAIL $FAIL"
+if (( $RUN > 0 )) ; then PEND=1 ; fi
+if (( $FAIL > 0 )) ; then 
+echo "ERROR at least one job failed :"
+ls -l $OUTDIR/sigfit/SignalFitJobs/sub* | grep "\.fail"
+exit 1
+fi
+sleep 10
+
+done
 fi
 
+fi
+'''
 ####################################################
 ################### SIGNAL PLOTS ###################
 ####################################################
@@ -194,6 +220,7 @@ echo " ./bin/makeParametricSignalModelPlots -i $OUTDIR/CMS-HGG_sigfit_$EXT.root 
 mv $OUTDIR/sigplots/initialFits $OUTDIR/initialFits
 
 fi
+'''
 
 if [ $USER == "lcorpe" ]; then
 cp -r $OUTDIR ~/www/.

@@ -196,12 +196,13 @@ int main(int argc, char *argv[]){
 	}
 	*/
 
-	//mass->setBins(320);
 	//mass->setRange(mass_-10,mass_+10);
 	//mass->setBins(20);
 	RooRealVar *MH = new RooRealVar("MH","MH",mass_);
 	MH->setVal(mass_);
 	MH->setConstant(true);
+	mass->setBins(80);
+	MH->setBins(80);
 
 	map<string,pair<int,int> > choices;
 	map<string,vector<RooPlot*> > plotsRV;
@@ -294,7 +295,8 @@ int main(int argc, char *argv[]){
 			float rv_prob_limit =999;
 
 			dataRV->plotOn(plotsRV[proc][cat]);
-			while (prob<rv_prob_limit && order <5){ 
+		//	while (prob<rv_prob_limit && order <5){ 
+			while (prob<rv_prob_limit && order <4){ 
 				//while (order<5) 
 				RooAddPdf *pdf = buildSumOfGaussians(Form("cat%d_g%d",cat,order),mass,MH,order);
 				//RooFitResult *fitRes = pdf->fitTo(*dataRV,Save(true),SumW2Error(true),Verbose(true));//,Range(mass_-10,mass_+10));
@@ -353,7 +355,7 @@ int main(int argc, char *argv[]){
 
 			dataWV->plotOn(plotsWV[proc][cat]);
 			//while (order<4) 
-			while (prob<wv_prob_limit && order <5){ 
+			while (prob<wv_prob_limit && order <4){ 
 				RooAddPdf *pdf = buildSumOfGaussians(Form("cat%d_g%d",cat,order),mass,MH,order);
 				RooFitResult *fitRes = pdf->fitTo(*dataWV,Save(true),RooFit::Minimizer("Minuit","minimize"),SumW2Error(true),Verbose(false));//,Range(mass_-10,mass_+10));
 				double myNll=0.;

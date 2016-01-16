@@ -10,6 +10,81 @@ import os,sys,copy
 ###############################################################################
 
 ###############################################################################
+## PARSE ROOT MACROS  #########################################################
+###############################################################################
+import ROOT as r
+#if options.quadInterpolate:
+#  r.gROOT.ProcessLine(".L quadInterpolate.C+g")
+#  from ROOT import quadInterpolate
+r.gROOT.ProcessLine(".L $CMSSW_BASE/lib/$SCRAM_ARCH/libHiggsAnalysisCombinedLimit.so")
+#r.gROOT.ProcessLine(".L ../libLoopAll.so")
+###############################################################################
+
+###############################################################################
+## WSTFileWrapper  ############################################################
+###############################################################################
+
+class WSTFileWrapper:
+   #self.fnList = [] # filename list
+   #self.fileList = [] #file list
+   #self.wsList = [] #workspace list
+
+   def __init__(self, files,wsname):
+    self.fnList = files.split(",") # [1]       
+    self.fileList = []
+    self.wsList = []
+    print files
+    print files
+    for fn in self.fnList: # [2]
+        print fn
+        f = r.TFile.Open(fn)  
+        #print " debug r.TFile.Open(fn) ", r.TFile.Open(fn)
+        thing = f.Get(wsname)
+        print "r.RooWorkspace(self.fileList[-1].Get(wsname) " , thing
+        #self.wsList.append(r.RooWorkspace(f.Get(wsname)))
+        self.wsList.append(thing)
+        print self.wsList
+        f.Close()
+
+   def data(self,dataName):
+        result = None
+        complained_yet =0 
+        for i in range(len(self.fnList)):
+          this_result_obj = self.wsList[i].data(dataName);
+          if ( result and this_result_obj and (not complained_yet) ):
+            print "[WSTFileWrapper] Uh oh, multiple RooAbsDatas from the file list with the same name: ",  dataName 
+            complained_yet = true;
+          if this_result_obj: # [3]
+             result = this_result_obj
+             print "[WSTFileWrapper]  YES Successfully found the RooAbsData with name ",  dataName 
+                      #   [ ... straightforward checks for multiple results etc ... ]
+       # if (not result) :
+              #print "[WSTFileWrapper] Uh oh, never got a good RooAbsData with name " ,dataName 
+        return result 
+   
+   def var(self,varName):
+        result = None
+        complained_yet =0 
+        for i in range(len(self.fnList)):
+          this_result_obj = self.wsList[i].var(varName);
+         # if ( result and this_result_obj and (not complained_yet) ):
+         #   print "[WSTFileWrapper] Uh oh, multiple RooAbsDatas from the file list with the same name: ",  dataName 
+         #   complained_yet = true;
+          if this_result_obj: # [3]
+             result = this_result_obj
+                      #   [ ... straightforward checks for multiple results etc ... ]
+          if (not result) :
+              print "[WSTFileWrapper] Uh oh, never got a good RooRealData with name " ,dataName 
+                
+        return result 
+
+
+###############################################################################
+
+
+
+
+###############################################################################
 ## OPTION PARSING  ############################################################
 ###############################################################################
 from optparse import OptionParser
@@ -37,21 +112,11 @@ parser.add_option("--quadInterpolate",type="int",default=0,help="Do a quadratic 
 (options,args)=parser.parse_args()
 ###############################################################################
 
-###############################################################################
-## PARSE ROOT MACROS  #########################################################
-###############################################################################
-import ROOT as r
-if options.quadInterpolate:
-  r.gROOT.ProcessLine(".L quadInterpolate.C+g")
-  from ROOT import quadInterpolate
-r.gROOT.ProcessLine(".L $CMSSW_BASE/lib/$SCRAM_ARCH/libHiggsAnalysisCombinedLimit.so")
-#r.gROOT.ProcessLine(".L ../libLoopAll.so")
-###############################################################################
 
 ###############################################################################
 ## FILE I/O ###################################################################
 ###############################################################################
-inFile = r.TFile.Open(options.infilename)
+#inFile = r.TFile.Open(options.infilename)
 outFile = open(options.outfilename,'w')
 ###############################################################################
 
@@ -143,8 +208,9 @@ else: options.globalScalesCorr = options.globalScalesCorr.split(',')
 ###############################################################################
 ## OPEN WORKSPACE AND EXTRACT INFO # ##########################################
 sqrts=13
-inWS = inFile.Get('wsig_13TeV')
-if (inWS==None) : inWS = inFile.Get('tagsDumper/cms_hgg_%sTeV'%sqrts)
+inWS = WSTFileWrapper(options.infilename,"tagsDumper/cms_hgg_%sTeV"%sqrts)
+#inWS = inFile.Get('wsig_13TeV')
+#if (inWS==None) : inWS = inFile.Get('tagsDumper/cms_hgg_%sTeV'%sqrts)
 intL = inWS.var('IntLumi').getVal() #FIXME
 #sqrts = inWS.var('IntLumi').getVal() #FIXME
 print "[INFO] Get Intlumi from file, value : ", intL," pb^{-1}", " sqrts ", sqrts
@@ -181,96 +247,158 @@ fileDetails['ttH']       = [sigFile,sigWS,'hggpdfsmrel_%dTeV_tth_$CHANNEL'%sqrts
 # --> globe info these come in specific types (as must be correlated with combination)
 # -- globe info  - see https://twiki.cern.ch/twiki/bin/viewauth/CMS/HiggsWG/HiggsCombinationConventions
 theorySyst = {}
-theorySyst['QCDscale_ggH'] = {}
-theorySyst['QCDscale_qqH'] = {}
-theorySyst['QCDscale_VH'] = {}
-theorySyst['QCDscale_ttH'] = {}
-theorySyst['pdf_gg'] = {}
-theorySyst['pdf_qqbar'] = {}
+theorySyst['scaleWeight'] = [1,2,3,4,6,8,"replicas"] #5,7 unphysical
+theorySyst['alphaSWeight'] = [0,1,"asym"]
+theorySyst['pdfWeight'] = [0,60,"sym"]
 
-# QCD scale and PDF variations on PT-Y (replaced k-Factor PT variation) 
-# flashggSysts['pdfWeight_QCDscale'] = 'n_sc' #FIXME
-# for pdfi in range(1,27): #FIXME
-# flashggSysts['pdfWeight_pdfset%d'%pdfi] = 'n_pdf_%d'%pdfi #FIXME, not currently supported by flashgg 
-'''
-# 8 TeV  #FIXME FOR 13TEV
-# scale
-theorySyst['QCDscale_ggH']['ggH'] = [0.072,-0.078]
-theorySyst['QCDscale_qqH']['qqH'] = [0.002,-0.002]
-if splitVH:
-  theorySyst['QCDscale_VH']['WH'] = [0.010,-0.010]
-  theorySyst['QCDscale_VH']['ZH'] = [0.031,-0.031]
-else:
-  theorySyst['QCDscale_VH']['VH'] = [0.031,-0.031] 
-theorySyst['QCDscale_ttH']['ttH'] = [0.038,-0.093]
-# pdf
-theorySyst['pdf_gg']['ggH'] = [0.075,-0.069] 
-theorySyst['pdf_qqbar']['qqH'] = [0.026,-0.028]
-if splitVH:
-  theorySyst['pdf_qqbar']['WH'] = [0.023,-0.023]
-  theorySyst['pdf_qqbar']['ZH'] = [0.025,-0.025]
-else:
-  theorySyst['pdf_qqbar']['VH'] = [0.034,-0.034]
-theorySyst['pdf_gg']['ttH'] = [0.081,-0.081]
-'''
 #printing function
 def printTheorySysts():
   # as these are antisymmetric lnN systematics - implement as [1/(1.+err_down)] for the lower and [1.+err_up] for the upper
   print '[INFO] Theory...'
   for systName, systDetails in theorySyst.items():
-    outFile.write('%-35s   lnN   '%systName)
-    for c in options.cats:
-      for p in options.procs:
+    print "[INFO] processing ", systName ,"s"
+    if "replicas" in systDetails[-1] :
+        name=systName
+        outFile.write('%-35s  lnN   '%(name))
+        for c in options.cats:
+          for p in options.procs:
+            if "bkg" in flashggProc[p] : 
+              outFile.write('- ')
+              continue
+            else:
+              outFile.write(getFlashggLineTheoryEnvelope(flashggProc[p],c,systName,systDetails))
+        outFile.write('\n')
+    else: #sym or asym uncertainties
+      #print "consider ", systName
+      asymmetric=("asym" in systDetails[-1])
+      for i in range(systDetails[0],systDetails[1] ):
+        name=systName+"_"+str(i)
+        if (i%10==0) : print "[INFO] processing ", name
+        outFile.write('%-35s  lnN   '%(name))
+        for c in options.cats:
+          for p in options.procs:
+            if "bkg" in flashggProc[p] : 
+              outFile.write('- ')
+              continue
+            else:
+              outFile.write(getFlashggLineTheoryWeights(flashggProc[p],c,systName,i,asymmetric))
         if '%s:%s'%(p,c) in options.toSkip: continue
-        if p in systDetails.keys():
-          outFile.write('%5.3f/%5.3f '%(1./(1.-systDetails[p][1]),1.+systDetails[p][0]))
-        else:
-          outFile.write('- ')
-    outFile.write('\n')
-  outFile.write('\n')
+        outFile.write('\n')
+      outFile.write('\n')
 
-## pdf weights printing tool #FIXME NOT USED OR READY
-def getFlashggLinePDFWeights(proc,cat,name):
-  n = 0
-  m = 0
-  if ( "pdfset" in name ) : 
-    n = int(name[name.find("pdfset")+6:])
+## pdf weights printing tool 
+def getFlashggLineTheoryWeights(proc,cat,name,i,asymmetric):
+  n = i
+  m = i
+  if ( asymmetric ) : 
     m = n+1
-  ws =  inFile.Get("tagsDumper/cms_hgg_13TeV");
-#  if (ws) : print "got ws!"
-  data_nominal = ws.data("%s_125_13TeV_%s"%(proc,cat))
-  data_nominal_sum = data_nominal.sumEntries()
+  #if (inWS) : print "got inWS!"
+  data_nominal = inWS.data("%s_125_13TeV_%s"%(proc,cat))
+  #data_nominal = inWS.data("%s_13TeV_%s"%(proc,cat))
+  #print "%s_13TeV_%s"%(proc,cat), " ", data_nominal
+  #data_nominal_sum = data_nominal.sumEntries()
   data_nominal_num = data_nominal.numEntries()
-#  print "LC DEBUG - nominal " , data_nominal , " sumEntries " , data_nominal_sum, " numEntries ", data_nominal_num
   data_up = data_nominal.emptyClone();
   data_down = data_nominal.emptyClone();
-  mass = ws.var("CMS_hgg_mass")
+  mass = inWS.var("CMS_hgg_mass")
   weight = r.RooRealVar("weight","weight",0)
   #weight_up = r.RooRealVar("weight_up","weight_up",0)
-  weight_up = ws.var("pdfWeight_1")
+  weight_up = inWS.var("%s_%d"%(name,n))
   #weight_down = r.RooRealVar("weight_down","weight_down",0)
-  weight_down = ws.var("pdfWeight_2")
+  weight_down = inWS.var("%s_%d"%(name,m))
+  weight_central = inWS.var("centralObjectWeight")
   for i in range(0,int(data_nominal.numEntries())):
     mass.setVal(data_nominal.get(i).getRealValue("CMS_hgg_mass"))
-    centralweight =data_nominal.weight()
-    factor_down = data_nominal.get(i).getRealValue("pdfWeight_%d"%n)
-    factor_up = data_nominal.get(i).getRealValue("pdfWeight_%d"%(m))
-    weight_down.setVal(centralweight*factor_down)
-    weight_up.setVal(centralweight*factor_up)
+    w_nominal =data_nominal.weight()
+    w_down = data_nominal.get(i).getRealValue("%s_%d"%(name,n))
+    w_up = data_nominal.get(i).getRealValue("%s_%d"%(name,m))
+    w_central = data_nominal.get(i).getRealValue(weight_central.GetName())
+    weight_down.setVal(w_nominal*(w_down/w_central))
+    weight_up.setVal(w_nominal*(w_up/w_central))
     data_up.add(r.RooArgSet(mass,weight_up),weight_up.getVal())
     data_down.add(r.RooArgSet(mass,weight_down),weight_down.getVal())
-  #  print "DEBUG - dataset entry ", i, " central weight ", centralweight, " factor up " , factor_up, " factor down ", factor_down
-  #systVals = interp1Sigma(th1f_nom,th1f_dn,th1f_up)
-#print "LC DEBUG dataset nominal " , data_nominal.Print()
-#  print "LC DEBUG dataset  " , data_up.Print() 
-#  print "LC DEBUG dataset down " , data_down.Print() 
-  systVals = interp1SigmaDataset(data_nominal,data_down,data_up)
-  flashggSystDump.write('%s nominal: %5.3f up: %5.3f down: %5.3f vals: [%5.3f,%5.3f] \n'%(sysr,dataNOMINAL.sumEntries(),dataUP.sumEntries(),dataDOWN.sumEntries(),systVals[0],systVals[1]))
+    #print "DEBUG - dataset entry ", i, " central weight ", centralweight, " factor up " , factor_up, " factor down ", factor_down
+    systVals = interp1SigmaDataset(data_nominal,data_down,data_up)
+    #flashggSystDump.write('%s nominal: %5.3f up: %5.3f down: %5.3f vals: [%5.3f,%5.3f] \n'%("syst",data_nominal.sumEntries(),data_up.sumEntries(),data_down.sumEntries(),systVals[0],systVals[1]))
   if systVals[0]==1 and systVals[1]==1:
       line = '- '
-  else:
+  elif (asymmetric):
       line = '%5.3f/%5.3f '%(systVals[0],systVals[1])
+  else : #symmetric
+      line = '%5.3f '%(systVals[0])
 #      print " [DEBUG] -- ", line
+  return line
+
+
+## envelope computation, for Theory scale weights
+def getFlashggLineTheoryEnvelope(proc,cat,name,details):
+  
+  indices=details[0:-1] # skip last entry whcuh is text specifying the treatment of uncertainty eg "replicas"
+  histograms=[]
+  h_nominal =None
+  nBins=80
+  #print indices
+  #if (inWS) : print "got inWS!"
+  for iReplica in indices:
+    #print "iReplica ", iReplica
+    #data_nominal = inWS.data("%s_125_13TeV_%s"%(proc,cat))
+    data_nominal = inWS.data("%s_13TeV_%s"%(proc,cat))
+    #print "%s_13TeV_%s"%(proc,cat), " ", data_nominal
+    #data_nominal_sum = data_nominal.sumEntries()
+    data_nominal_num = data_nominal.numEntries()
+    #data_new = data_nominal.emptyClone();
+    data_new_h = r.TH1F("h_%d"%iReplica,"h_%d"%iReplica,nBins,100,180);
+    data_nom_h = r.TH1F("h_nom_%d"%iReplica,"h_nom_%d"%iReplica,nBins,100,180);
+    mass = inWS.var("CMS_hgg_mass")
+    weight = r.RooRealVar("weight","weight",0)
+    #weight_up = r.RooRealVar("weight_up","weight_up",0)
+    weight_new = inWS.var("%s_%d"%(name,iReplica))
+    weight_central = inWS.var("centralObjectWeight")
+    for i in range(0,int(data_nominal.numEntries())):
+      mass.setVal(data_nominal.get(i).getRealValue("CMS_hgg_mass"))
+      mass.setBins(100)
+      w_nominal =data_nominal.weight()
+      w_new = data_nominal.get(i).getRealValue("%s_%d"%(name,iReplica))
+      w_central = data_nominal.get(i).getRealValue(weight_central.GetName())
+      weight_new.setVal(w_nominal*(w_new/w_central))
+      data_new_h.Fill(mass.getVal(),weight_new.getVal())
+      data_nom_h.Fill(mass.getVal(),w_nominal)
+    histograms.append(data_new_h)
+    if (h_nominal==None) : h_nominal=data_nom_h
+  
+  h_min = r.TH1F("h_min","h_min",nBins,100,180);
+  h_max = r.TH1F("h_max","h_max",nBins,100,180);
+  array ={}
+  for iBin in range(0, h_min.GetNbinsX()): 
+    array[iBin]=[]
+    #if (h_min.GetBinCenter(iBin) > 122 and h_min.GetBinCenter(iBin) < 128): continue
+    for iRep in range(0,len(indices)):
+      content=histograms[iRep].GetBinContent(iRep)
+      array[iBin].append(histograms[iRep].GetBinContent(iBin))
+      #if (content):  print "iBin, ", iBin, ", iRep ", iRep, ", content ", content, ", entries ", histograms[iRep].GetEntries(), " list 1" ,list1, 
+    h_min.SetBinContent(iBin,min(array[iBin]))
+    h_max.SetBinContent(iBin,max(array[iBin]))
+
+  '''
+   t = r.TCanvas("t","t",500,500)
+   h_min.SetLineColor(r.kBlue)
+   h_min.SetLineWidth(3)
+   h_max.SetLineColor(r.kRed)
+   h_max.SetLineWidth(3)
+   h_max.Draw()
+   h_min.Draw("same")
+   for hs in histograms:
+     hs.Draw("same")
+   
+   t.SaveAs("test_%s_%s.pdf"%(proc,cat))
+   '''
+    
+
+  systVals = interp1Sigma(h_nominal,h_min,h_max)
+  if systVals[0]==1 and systVals[1]==1:
+        line = '- '
+  else:
+        line = '%5.3f/%5.3f '%(systVals[0],systVals[1])
   return line
 ###############################################################################
 
@@ -278,14 +406,14 @@ def getFlashggLinePDFWeights(proc,cat,name):
 ## GENERAL ANALYSIS SYSTEMATIC SETUP  #########################################
 ###############################################################################
 # BR uncertainty
-###brSyst = [0.050,-0.049] #8TeV Values
-brSyst = [0.,0.] #FIXME FOR 13Tev!!!
+brSyst = [0.050,-0.049] #8TeV Values
+##brSyst = [0.,0.] #FIXME FOR 13Tev!!!
 # lumi syst
 ####lumiSyst = 0.026 #8TeV Values
 lumiSyst=0.026  #FIXME FOR 13Tev!!!
 #trig Eff
-####trigEff = 0.01  #8TeV Value
-trigEff = 0.0 #FIXME FOR 13Tev!!!
+trigEff = 0.01  #8TeV Value
+###trigEff = 0.0 #FIXME FOR 13Tev!!!
 
 ##Printing Functions
 def printBRSyst():
@@ -477,7 +605,7 @@ def printFileOptions():
       wsname = info[1]
       pdfname = info[2].replace('$CHANNEL','%s'%c)
       if typ not in options.procs and typ!='data_obs': continue
-      outFile.write('shapes %-10s %-15s %-30s %-30s\n'%(typ,'%s_%dTeV'%(c,sqrts),file,wsname+':'+pdfname))
+      outFile.write('shapes %-10s %-15s %-30s %-30s\n'%(typ,'%s_%dTeV'%(c,sqrts),file.replace(".root","_%s_%s.root"%(typ,c)),wsname+':'+pdfname))
   outFile.write('\n')
 ###############################################################################
 
