@@ -163,10 +163,18 @@ else
 PSEUDODATAOPT="  --pseudoDataDat $PSEUDODATADAT"
 fi
 
+#ls $PWD/Signal/$OUTDIR/CMS-HGG_sigfit_${EXT}_*.root > out.txt
+#echo "ls ../Signal/$OUTDIR/CMS-HGG_sigfit_${EXT}_*.root > out.txt"
+#while read p ; do
+#SIGFILES="$p,$SIGFILES"
+#echo $SIGFILES
+#done < out.txt
+
+SIGFILES=$PWD/Signal/$OUTDIR/CMS-HGG_sigfit_${EXT}.root
 
 cd Background
-echo "./runBackgroundScripts.sh -p $PROCS -f $CATS --ext $EXT --sigFile ../Signal/$OUTDIR/CMS-HGG_sigfit_$EXT.root --seed $COUNTER --intLumi $INTLUMI $BLINDINGOPT $PSEUDODATAOPT $DATAOPT $DATAFILEOPT"
-./runBackgroundScripts.sh -p $PROCS -f $CATS --ext $EXT --sigFile ../Signal/$OUTDIR/CMS-HGG_sigfit_$EXT.root --seed $COUNTER --intLumi $INTLUMI $BLINDINGOPT $PSEUDODATAOPT $DATAOPT $DATAFILEOPT
+echo "./runBackgroundScripts.sh -p $PROCS -f $CATS --ext $EXT --sigFile $SIGFILES --seed $COUNTER --intLumi $INTLUMI $BLINDINGOPT $PSEUDODATAOPT $DATAOPT $DATAFILEOPT"
+./runBackgroundScripts.sh -p $PROCS -f $CATS --ext $EXT --sigFile $SIGFILES --seed $COUNTER --intLumi $INTLUMI $BLINDINGOPT $PSEUDODATAOPT $DATAOPT $DATAFILEOPT
 
 cd -
 if [ $USER == lcorpe ]; then
@@ -185,9 +193,30 @@ echo "------------> Create DATACARD"
 echo "------------------------------------------------"
 
 cd Datacard
-echo "./makeParametricModelDatacardFLASHgg.py -i $FILE -o Datacard_13TeV_$EXT.txt -p $PROCS -c $CATS --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf # --intLumi $INTLUMI"
-./makeParametricModelDatacardFLASHgg.py -i $FILE  -o Datacard_13TeV_$EXT.txt -p $PROCS -c $CATS --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf  #--intLumi $INTLUMI
+echo " ./makeParametricModelDatacardFLASHgg.py -i $FILE  -o Datacard_13TeV_$EXT.txt -p $PROCS -c $CATS --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --submitSelf #--intLumi $INTLUMI"
+./makeParametricModelDatacardFLASHgg.py -i $FILE  -o Datacard_13TeV_$EXT.txt -p $PROCS -c $CATS --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --submitSelf #--intLumi $INTLUMI
 #./makeParametricModelDatacardFLASHgg.old.py -i ../Signal/$OUTDIR/CMS-HGG_sigfit_$EXT.root  -o Datacard_13TeV_$EXT.old.txt -p $PROCS -c $CATS --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf  #--intLumi $INTLUMI
+
+    PEND=`ls -l jobs/sub*| grep -v "\.run" | grep -v "\.done" | grep -v "\.fail" | grep -v "\.err" |grep -v "\.log"  |wc -l`
+    echo "PEND $PEND"
+    while (( $PEND > 0 )) ;do
+      PEND=`ls -l jobs/sub* | grep -v "\.run" | grep -v "\.done" | grep -v "\.fail" | grep -v "\.err" | grep -v "\.log" |wc -l`
+      RUN=`ls -l  jobs/sub* | grep "\.run" |wc -l`
+      FAIL=`ls -l jobs/sub* | grep "\.fail" |wc -l`
+      DONE=`ls -l jobs/sub* | grep "\.done" |wc -l`
+      (( PEND=$PEND-$RUN-$FAIL-$DONE ))
+      echo " PEND $PEND - RUN $RUN - DONE $DONE - FAIL $FAIL"
+      if (( $RUN > 0 )) ; then PEND=1 ; fi
+      if (( $FAIL > 0 )) ; then 
+        echo "ERROR at least one job failed :"
+        ls -l jobs/sub* | grep "\.fail"
+        exit 1
+      fi
+      sleep 10
+  
+    done
+   cat jobs/Datacard_13TeV_* > Datacard_13TeV_$EXT.txt.tmp
+   sort Datacard_13TeV_$EXT.txt.tmp | uniq >> Datacard_13TeV_$EXT.txt 
 
 cd -
 fi
@@ -204,6 +233,7 @@ echo "------------------------------------------------"
 
 cd Plots/FinalResults
 cp ../../Signal/$OUTDIR/CMS-HGG_*sigfit*oot .
+cp ../../Signal/$OUTDIR/CMS-HGG_sigfit_${EXT}.root CMS-HGG_mva_13TeV_sigfit.root
 cp ../../Background/CMS-HGG_multipdf_$EXT.root CMS-HGG_mva_13TeV_multipdf.root
 cp ../../Datacard/Datacard_13TeV_$EXT.txt CMS-HGG_mva_13TeV_datacard.txt
 
@@ -217,7 +247,7 @@ sed -i -e "s/\!INTLUMI\!/$INTLUMI/g" combinePlotsOptions_$EXT.dat
 
 if [ $COMBINEPLOTSONLY == 0 ]; then
 echo "./combineHarvester.py -d combineHarvesterOptions13TeV_$EXT.dat -q $DEFAULTQUEUE --batch $BATCH --verbose"
-./combineHarvester.py -d combineHarvesterOptions13TeV_$EXT.dat -q $DEFAULTQUEUE --batch $BATCH --verbose --S0
+./combineHarvester.py -d combineHarvesterOptions13TeV_$EXT.dat -q $DEFAULTQUEUE --batch $BATCH --verbose #--S0
 
 JOBS=999
 RUN=999

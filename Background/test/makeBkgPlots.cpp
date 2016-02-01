@@ -39,6 +39,7 @@
 #include "RooStats/NumberCountingUtils.h"
 #include "RooStats/RooStatsUtils.h"
 #include "RooCategory.h"
+#include "../interface/WSTFileWrapper.h"
 
 #include "boost/program_options.hpp"
 #include "boost/algorithm/string/split.hpp"
@@ -639,8 +640,8 @@ void plotAllPdfs(RooRealVar *mgg, RooAbsData *data, RooMultiPdf *mpdf, RooCatego
 	plot->SetTitle(Form("Background functions profiled for category %s",catname.c_str()));
 	plot->GetXaxis()->SetTitle("m_{#gamma#gamma} (GeV)");
 	if (!unblind) {
-		mgg->setRange("unblind_up",150,180);
-		mgg->setRange("unblind_down",100,110);
+		mgg->setRange("unblind_up",135,180);
+		mgg->setRange("unblind_down",100,115);
 		data->plotOn(plot,Binning(80),CutRange("unblind_down,unblind_up"));
 	}
 	else {
@@ -697,6 +698,7 @@ int main(int argc, char* argv[]){
 	int isFlashgg_ =1;
 	string flashggCatsStr_;
 	vector<string> flashggCats_;
+  double higgsResolution_=0.5;
 
 	po::options_description desc("Allowed options");
 	desc.add_options()
@@ -717,6 +719,7 @@ int main(int argc, char* argv[]){
 		("mhLow,L", po::value<int>(&mhLow)->default_value(100),															"Starting point for scan")
 		("mhHigh,H", po::value<int>(&mhHigh)->default_value(180),														"End point for scan")
 		("mhVal", po::value<double>(&mhvalue_)->default_value(125.),														"Choose the MH for the plots")
+		("higgsResolution", po::value<double>(&higgsResolution_)->default_value(1.),															"Starting point for scan")
 		("intLumi", po::value<float>(&intLumi)->default_value(0.),																"What intLumi in fb^{-1}")
 		("sqrts,S", po::value<int>(&sqrts)->default_value(8),																"Which centre of mass is this data from?")
 		("isFlashgg",  po::value<int>(&isFlashgg_)->default_value(1),  								    	        "Use Flashgg output ")
@@ -743,8 +746,9 @@ int main(int argc, char* argv[]){
 	if (makeCrossCheckProfPlots) system(Form("mkdir -p %s/normProfs",outDir.c_str()));
 
 	TFile *inFile = TFile::Open(bkgFileName.c_str());
-	RooWorkspace *inWS = (RooWorkspace*)inFile->Get("multipdf");
-	if (!inWS) inWS = (RooWorkspace*)inFile->Get("cms_hgg_workspace");
+	//RooWorkspace *inWS = (RooWorkspace*)inFile->Get("multipdf");
+	WSTFileWrapper * inWS = new WSTFileWrapper(bkgFileName,"multipdf");
+	//if (!inWS) inWS = (RooWorkspace*)inFile->Get("cms_hgg_workspace");
 	if (!inWS) {
 		cout << "[ERROR] "<< "Cant find the workspace" << endl;
 		exit(0);
@@ -852,12 +856,14 @@ int main(int argc, char* argv[]){
 				 double center = plot->GetXaxis()->GetBinCenter(i);
 				 */
 			double nomBkg = nomBkgCurve->interpolate(center);
-			double nllBest = getNormTermNll(mgg,data,mpdf,mcat,nomBkg,lowedge,upedge);
+			//double nomBkg_perGeV = (nomBkgCurve->Integral(center-higgsResolution_,center+higgsResolution_))/2*higgsResolution_;
+			double nomBkg_perGeV = (nomBkgCurve->average(center-higgsResolution_,center+higgsResolution_));
+      double nllBest = getNormTermNll(mgg,data,mpdf,mcat,nomBkg,lowedge,upedge);
 
 			// sensible range
 			double lowRange = TMath::Max(0.,nomBkg - 3*TMath::Sqrt(nomBkg));
 			double highRange = nomBkg + 3*TMath::Sqrt(nomBkg);
-
+       std::cout << "[FOR TABLE] ,"<<flashggCats_[cat]<<","<< mass << ","<<nomBkg_perGeV<<", assuming resolution of " << higgsResolution_ << std::endl;
 			if (verbose_) cout<< "[INFO] " << "mgg: " << center << " nomBkg: " << nomBkg << " lR: " << lowRange << " hR: " << highRange << endl;
 
 			double errLow1Value,errHigh1Value,errLow2Value,errHigh2Value;
@@ -940,8 +946,8 @@ int main(int argc, char* argv[]){
 		plot->Draw();
 
 		if (!unblind) {
-			mgg->setRange("unblind_up",150,180);
-			mgg->setRange("unblind_down",100,110);
+			mgg->setRange("unblind_up",135,180);
+			mgg->setRange("unblind_down",100,115);
 			data->plotOn(plot,Binning(80),CutRange("unblind_down,unblind_up"));
 		}
 		else {
@@ -962,16 +968,22 @@ int main(int argc, char* argv[]){
 		}
 
 		if (doSignal){
+      int SignalType=0;
 			TFile *sigFile = TFile::Open(sigFileName.c_str());
-			RooWorkspace *w_sig = (RooWorkspace*)sigFile->Get("wsig_7TeV");
-			if (!w_sig) w_sig = (RooWorkspace*)sigFile->Get("wsig_8TeV");
-			if (!w_sig) w_sig = (RooWorkspace*)sigFile->Get("wsig_13TeV");
-			if (!w_sig) w_sig = (RooWorkspace*)sigFile->Get("cms_hgg_workspace");
+		//	RooWorkspace *w_sig = (RooWorkspace*)sigFile->Get("wsig_7TeV");
+	    WSTFileWrapper *w_sig = new WSTFileWrapper(sigFileName,"wsig_13TeV");
+	//		if (!w_sig) w_sig = (RooWorkspace*)sigFile->Get("wsig_8TeV");
+	//		if (!w_sig) w_sig = (RooWorkspace*)sigFile->Get("wsig_13TeV");
+			if (!w_sig) {
+	    WSTFileWrapper *w_sig = new WSTFileWrapper(sigFileName,"cms_hgg_workspace");
+      //w_sig = (RooWorkspace*)sigFile->Get("cms_hgg_workspace");
+      if (w_sig) SignalType=1;
+      }
 			if (!w_sig) {
 				cout << "[INFO] " << "Signal workspace not found" << endl;
 				exit(0);
 			}
-			if (w_sig->GetName()==TString("cms_hgg_workspace")) {
+			if (SignalType==1) {
 				TH1F::SetDefaultSumw2();
 				TH1F *gghHist = (TH1F*)sigFile->Get(Form("th1f_sig_ggh_mass_m125_%s",catname.c_str()));
 				TH1F *vbfHist = (TH1F*)sigFile->Get(Form("th1f_sig_vbf_mass_m125_%s",catname.c_str()));

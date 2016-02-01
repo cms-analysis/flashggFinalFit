@@ -82,7 +82,7 @@ void runFit(RooAbsPdf *pdf, RooDataSet *data, double *NLL, int *stat_t, int MaxT
 	  //params_test->Print("v");
 	  //std::cout << "-----------------------------------------------------------------------" << std::endl;
 	  RooFitResult *fitTest = pdf->fitTo(*data,RooFit::Save(1)
-		,RooFit::Minimizer("Minuit2","minimize"),RooFit::SumW2Error(kTRUE)); //FIXME
+    ,RooFit::Minimizer("Minuit2","minimize"),RooFit::SumW2Error(kTRUE)); //FIXME
           stat = fitTest->status();
 	  minnll = fitTest->minNll();
 	  if (stat!=0) params_test->assignValueOnly(fitTest->randomizePars());
@@ -313,8 +313,8 @@ void plot(RooRealVar *mass, RooAbsPdf *pdf, RooDataSet *data, string name,vector
  
   *prob = getGoodnessOfFit(mass,pdf,data,name);
   RooPlot *plot = mass->frame();
-  mass->setRange("unblindReg_1",100,110);
-  mass->setRange("unblindReg_2",150,180);
+  mass->setRange("unblindReg_1",100,115);
+  mass->setRange("unblindReg_2",135,180);
   if (BLIND) {
     data->plotOn(plot,Binning(80),CutRange("unblindReg_1"));
     data->plotOn(plot,Binning(80),CutRange("unblindReg_2"));
@@ -351,8 +351,8 @@ void plot(RooRealVar *mass, RooMultiPdf *pdfs, RooCategory *catIndex, RooDataSet
   leg->SetLineColor(1);
   RooPlot *plot = mass->frame();
 
-  mass->setRange("unblindReg_1",100,110);
-  mass->setRange("unblindReg_2",150,180);
+  mass->setRange("unblindReg_1",100,115);
+  mass->setRange("unblindReg_2",135,180);
   if (BLIND) {
     data->plotOn(plot,Binning(80),CutRange("unblindReg_1"));
     data->plotOn(plot,Binning(80),CutRange("unblindReg_2"));
@@ -395,8 +395,8 @@ void plot(RooRealVar *mass, map<string,RooAbsPdf*> pdfs, RooDataSet *data, strin
   leg->SetLineColor(0);
   RooPlot *plot = mass->frame();
 
-  mass->setRange("unblindReg_1",100,110);
-  mass->setRange("unblindReg_2",150,180);
+  mass->setRange("unblindReg_1",100,115);
+  mass->setRange("unblindReg_2",135,180);
   if (BLIND) {
     data->plotOn(plot,Binning(80),CutRange("unblindReg_1"));
     data->plotOn(plot,Binning(80),CutRange("unblindReg_2"));

@@ -29,12 +29,6 @@ WSTFileWrapper::WSTFileWrapper( std::string files, std::string wsname ) {
   }
 }
 
-WSTFileWrapper::WSTFileWrapper( TFile *tf ,RooWorkspace *inWS ) {
-wsList.push_back(inWS);
-fileList.push_back(tf);
-fnList.push_back("current file");
-}
-
 std::list<RooAbsData*> WSTFileWrapper::allData() {
   std::list<RooAbsData*> result;
   for (unsigned int i = 0 ; i < fileList.size() ; i++) {
@@ -53,7 +47,7 @@ RooRealVar* WSTFileWrapper::var(std::string varName) {
 RooAbsData* WSTFileWrapper::data(std::string dataName) {
   RooAbsData* result = 0;
   bool complained_yet = 0;
-  for (unsigned int i = 0 ; i < wsList.size() ; i++) {
+  for (unsigned int i = 0 ; i < fileList.size() ; i++) {
     fileList[i]->cd();
     RooAbsData* this_result = (RooAbsData*)wsList[i]->data(dataName.c_str());
     if (result && this_result && !complained_yet) {
@@ -74,8 +68,8 @@ RooAbsData* WSTFileWrapper::data(std::string dataName) {
 RooAbsPdf* WSTFileWrapper::pdf(std::string pdfName) {
   RooAbsPdf* result = 0;
   bool complained_yet = 0;
-  for (unsigned int i = 0 ; i < wsList.size() ; i++) {
-    if (fileList.size()>i) fileList[i]->cd();
+  for (unsigned int i = 0 ; i < fileList.size() ; i++) {
+    fileList[i]->cd();
     RooAbsPdf* this_result = (RooAbsPdf*)wsList[i]->pdf(pdfName.c_str());
     if (result && this_result && !complained_yet) {
       std::cout << "[WSTFileWrapper] Uh oh, multiple RooAbsPdfs from the file list with the same name: " <<  pdfName << std::endl;
@@ -95,8 +89,8 @@ RooAbsPdf* WSTFileWrapper::pdf(std::string pdfName) {
 RooCategory* WSTFileWrapper::cat(std::string catName) {
   RooCategory* result = 0;
   bool complained_yet = 0;
-  for (unsigned int i = 0 ; i < wsList.size() ; i++) {
-    if (fileList.size()>i) fileList[i]->cd();
+  for (unsigned int i = 0 ; i < fileList.size() ; i++) {
+    fileList[i]->cd();
     RooCategory* this_result = (RooCategory*)wsList[i]->cat(catName.c_str());
     if (result && this_result && !complained_yet) {
       std::cout << "[WSTFileWrapper] Uh oh, multiple RooCategorys from the file list with the same name: " <<  catName << std::endl;
@@ -109,27 +103,6 @@ RooCategory* WSTFileWrapper::cat(std::string catName) {
   }
   if (!result) {
     std::cout << "[WSTFileWrapper] Uh oh, never got a good RooCategory with name " << catName << std::endl;
-  }
-  return result;
-}
-
-RooAbsReal* WSTFileWrapper::function(std::string functionName) {
-  RooAbsReal* result = 0;
-  bool complained_yet = 0;
-  for (unsigned int i = 0 ; i < wsList.size() ; i++) {
-    if (fileList.size()>i) fileList[i]->cd();
-    RooAbsReal* this_result = (RooAbsReal*)wsList[i]->function(functionName.c_str());
-    if (result && this_result && !complained_yet) {
-      std::cout << "[WSTFileWrapper] Uh oh, multiple RooAbsReals from the file list with the same name: " <<  functionName << std::endl;
-      complained_yet = true;
-    }
-    if (this_result) {
-      result = this_result;
-      std::cout << "[WSTFileWrapper] Got non-zero RooAbsReal from " << fnList[i] << " with name " << functionName << std::endl;
-    }
-  }
-  if (!result) {
-    std::cout << "[WSTFileWrapper] Uh oh, never got a good RooAbsReal with name " << functionName << std::endl;
   }
   return result;
 }

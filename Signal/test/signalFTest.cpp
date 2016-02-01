@@ -295,8 +295,8 @@ int main(int argc, char *argv[]){
 			float rv_prob_limit =999;
 
 			dataRV->plotOn(plotsRV[proc][cat]);
-		//	while (prob<rv_prob_limit && order <5){ 
-			while (prob<rv_prob_limit && order <4){ 
+			while (prob<rv_prob_limit && order <5){ 
+		//	while (prob<rv_prob_limit && order <4){ 
 				//while (order<5) 
 				RooAddPdf *pdf = buildSumOfGaussians(Form("cat%d_g%d",cat,order),mass,MH,order);
 				//RooFitResult *fitRes = pdf->fitTo(*dataRV,Save(true),SumW2Error(true),Verbose(true));//,Range(mass_-10,mass_+10));

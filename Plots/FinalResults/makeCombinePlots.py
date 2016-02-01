@@ -174,7 +174,7 @@ for MH in options.MHtext:
 #canv = r.TCanvas("c","c",int(options.canv.split(',')[0]),int(options.canv.split(',')[1]))
 canv = r.TCanvas("c","c") # use the default canvas style
 
-if not options.xaxis: dummyHist = r.TH1D("dummy","",1,110,150)
+if not options.xaxis: dummyHist = r.TH1D("dummy","",1,115,135)
 else: dummyHist =  r.TH1D("dummy","",1,float(options.xaxis.split(',')[0]),float(options.xaxis.split(',')[1]))
 dummyHist.GetXaxis().SetTitle('m_{H} (GeV)')
 
@@ -313,7 +313,7 @@ def pvalPlot(allVals):
   for i,sig in enumerate(sigmas):
     y = r.RooStats.SignificanceToPValue(sig)
     if options.verbose: print sig, y
-    if not options.xaxis:  lines.append(r.TLine(110,y,150,y))
+    if not options.xaxis:  lines.append(r.TLine(115,y,135,y))
     else : 
         axmin = float(options.xaxis.split(',')[0])
         axmax = float(options.xaxis.split(',')[1])
@@ -322,7 +322,7 @@ def pvalPlot(allVals):
     lines[i].SetLineWidth(2)
     lines[i].SetLineStyle(2)
     lines[i].SetLineColor(13) # greay Lines 
-    labels.append(r.TLatex(150+1, y * 0.8, "%d #sigma" % (i+1)))
+    labels.append(r.TLatex(135+1, y * 0.8, "%d #sigma" % (i+1)))
     labels[i].SetTextColor(13)
     labels[i].SetTextAlign(11);
     if not options.yaxis:
@@ -402,8 +402,8 @@ def maxlhPlot(allVals):
         axmin = float(options.xaxis.split(',')[0])
         axmax = float(options.xaxis.split(',')[1])
   else: 
-  	axmin = 110
-	axmax = 150
+  	axmin = 115
+	axmax = 135
   l = r.TLine(axmin,1.,axmax,1.)
   l.SetLineColor(13)
   l.SetLineStyle(1)
@@ -530,8 +530,8 @@ def limitPlot(allVals):
         axmin = float(options.xaxis.split(',')[0])
         axmax = float(options.xaxis.split(',')[1])
   else: 
-  	axmin = 110
-	axmax = 150
+  	axmin = 115
+	axmax = 135
   l = r.TLine(axmin,1.,axmax,1.)
   l.SetLineColor(13)
   l.SetLineWidth(2)
@@ -1382,8 +1382,8 @@ def plotMPdfMaxLH():
         axmin = float(options.xaxis.split(',')[0])
         axmax = float(options.xaxis.split(',')[1])
   else:
-  	axmin = 110
-	axmax = 150
+  	axmin = 115
+	axmax = 135
   line = r.TLine(axmin,1.,axmax,1.)
   line.SetLineColor(13)
   line.SetLineWidth(3)

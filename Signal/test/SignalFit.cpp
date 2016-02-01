@@ -47,8 +47,8 @@ string datfilename_;
 string systfilename_;
 string plotDir_;
 bool skipPlots_=false;
-int mhLow_=110;
-int mhHigh_=150;
+int mhLow_=115;
+int mhHigh_=135;
 int nCats_;
 float constraintValue_;
 int constraintValueMass_;
@@ -78,7 +78,7 @@ string catsStr_;
 bool isFlashgg_;
 string flashggCatsStr_;
 vector<string> flashggCats_;
-bool check_;
+bool checkYields_;
 bool useMerged_;
 vector<string>  split_;
 string  splitStr_;
@@ -96,9 +96,9 @@ void OptionParser(int argc, char *argv[]){
 		("systfilename,s", po::value<string>(&systfilename_)->default_value("dat/photonCatSyst.dat"),		"Systematic model numbers")
 		("plotDir,p", po::value<string>(&plotDir_)->default_value("plots"),						"Put plots in this directory")
 		("skipPlots", 																																									"Do not make any plots")
-		("mhLow,L", po::value<int>(&mhLow_)->default_value(110),                                  			"Low mass point")
+		("mhLow,L", po::value<int>(&mhLow_)->default_value(115),                                  			"Low mass point")
 		("nThreads,t", po::value<int>(&ncpu_)->default_value(ncpu_),                               			"Number of threads to be used for the fits")
-		("mhHigh,H", po::value<int>(&mhHigh_)->default_value(150),                                			"High mass point")
+		("mhHigh,H", po::value<int>(&mhHigh_)->default_value(135),                                			"High mass point")
 		// ("nCats,n", po::value<int>(&nCats_)->default_value(9),                                    			"Number of total categories")
 		("constraintValue,C", po::value<float>(&constraintValue_)->default_value(0.1),            			"Constraint value")
 		("constraintValueMass,M", po::value<int>(&constraintValueMass_)->default_value(125),                        "Constraint value mass")
@@ -112,7 +112,7 @@ void OptionParser(int argc, char *argv[]){
 		("nonRecursive",                                                                             		"Do not recursively calculate gaussian fractions")
 		("verbose,v", po::value<int>(&verbose_)->default_value(0),                                			"Verbosity level: 0 (lowest) - 3 (highest)")
 		("isFlashgg",	po::value<bool>(&isFlashgg_)->default_value(true),														"Use flashgg format")
-		("check",	po::value<bool>(&check_)->default_value(false),														"Use flashgg format (default false)")
+		("checkYields",	po::value<bool>(&checkYields_)->default_value(false),														"Use flashgg format (default false)")
       ("split", po::value<string>(&splitStr_)->default_value(""), "do just one tag,proc ")
 		("changeIntLumi",	po::value<float>(&changeIntLumi)->default_value(0),														"If you want to specify an intLumi other than the one in the file. The event weights and rooRealVar IntLumi are both changed accordingly. (Specify new intlumi in fb^{-1})")
 		("flashggCats,f", po::value<string>(&flashggCatsStr_)->default_value("UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,UntaggedTag_4,VBFTag_0,VBFTag_1,VBFTag_2,TTHHadronicTag,TTHLeptonicTag,VHHadronicTag,VHTightTag,VHLooseTag,VHEtTag"),       "Flashgg categories if used")
@@ -299,14 +299,17 @@ int main(int argc, char *argv[]){
 	}
 
 	TFile *inFile = TFile::Open(filename_[0].c_str());
-	if (check_){
+	if (checkYields_){
 	  //RooWorkspace *	inWS0 = (RooWorkspace*)inFile->Get(Form("wsig_8TeV"));
 	  //		RooWorkspace *	inWS0 = (RooWorkspace*)inFile->Get(Form("tagsDumper/cms_hgg_13TeV"));
 	  WSTFileWrapper * inWS0 = new WSTFileWrapper(filenameStr_,"tagsDumper/cms_hgg_13TeV");
 
 		std::list<RooAbsData*> data =  (inWS0->allData()) ;
 		for (std::list<RooAbsData*>::const_iterator iterator = data.begin(), end = data.end(); iterator != end; ++iterator) {
-			if(verbose_) std::cout << "[INFO] " <<**iterator << std::endl;
+    RooDataSet *dataset = dynamic_cast<RooDataSet *>( *iterator );
+    if (dataset) {
+	  std::cout <<  dataset->GetName() << "," << dataset->sumEntries() << std::endl;
+    }
 		}
 		return 1;
 	}
@@ -472,7 +475,7 @@ int main(int argc, char *argv[]){
 
       if (isFlashgg_){
         if (verbose_)std::cout << "[INFO] Opening dataset called "<< Form("%s_%d_13TeV_%s",proc.c_str(),mh,flashggCats_[cat].c_str()) << " in in WS " << inWS << std::endl;
-        RooDataSet *data0   = (RooDataSet*)inWS->data(Form("%s_%d_13TeV_%s",proc.c_str(),mh,flashggCats_[cat].c_str()));
+        RooDataSet *data0   = (RooDataSet*)inWS->data(Form("%s_%d_13TeV_%s",proc.c_str(),mh,flashggCats_[cat].c_str()))->reduce(RooArgSet(*mass, *dZ, *weight0),"1");
         //		if (verbose_) std::cout << "[INFO] dataset "<<  Form("%s_%d_13TeV_flashgg%s_",proc.c_str(),mh,flashggCats_[cat].c_str()) << " for RV+WV open ? " << *data0 <<  " with weight " << data0->weight() << std::endl;
         //		RooDataSet *dataRV0 = new RooDataSet("dataRV","dataRV",&*data0,*(data0->get()),"(dZ<1)*(weight:weight)","weight:weight");
         //		if (verbose_) std::cout << "[INFO] dataset RV open ? " << dataRV0 << std::endl;
@@ -485,7 +488,7 @@ int main(int argc, char *argv[]){
         //		RooRealVar* wrv = (RooRealVar*) dataRV0->addColumn(wFunc); 
         //		RooRealVar* wwv = (RooRealVar*) dataWV0->addColumn(wFunc);
 
-        if (pdfWeights_){
+  /*      if (pdfWeights_){
 
           for (int ipdf =0 ;ipdf< pdfWeights_ ; ipdf++){
             dataH = ((RooDataSet*) data0->emptyClone()->reduce(RooArgSet(*mass, *dZ, *weight0),"1"))->binnedClone();
@@ -501,7 +504,7 @@ int main(int argc, char *argv[]){
             outWS->import(*dataH);
           }
 
-        }
+        }*/
         if (changeIntLumi){
           double factor = changeIntLumi/originalIntLumi;
           std::cout << "[INFO] Old int lumi " << originalIntLumi  <<", new int lumi " << changeIntLumi<< std::endl;
@@ -683,9 +686,13 @@ int main(int argc, char *argv[]){
     cout << "[INFO] Starting to combine fits..." << endl;
     // this guy packages everything up
     std::cout<< "DEBUG SignalFit A" <<std::endl;
-    Packager packager(outWS,procs_,nCats_,mhLow_,mhHigh_,skipMasses_,sqrts_,skipPlots_,plotDir_,mergeWS,cats_,flashggCats_);
+    outWS->Print();
+    WSTFileWrapper *outWSWrapper = new WSTFileWrapper(outFile, outWS);
+    Packager packager(outWSWrapper, outWS,procs_,nCats_,mhLow_,mhHigh_,skipMasses_,sqrts_,skipPlots_,plotDir_,mergeWS,cats_,flashggCats_);
     std::cout<< "DEBUG SignalFit b" <<std::endl;
-    packager.packageOutput();
+    bool split =0;
+    if (split_.size() > 0) 
+    packager.packageOutput(/*split*/split);
     std::cout<< "DEBUG SignalFit c" <<std::endl;
     sw.Stop();
     std::cout<< "DEBUG SignalFit d" <<std::endl;

@@ -151,7 +151,7 @@ int main(int argc, char* argv[]){
   if (vm.count("help")) { cout << desc << endl; exit(1); }
   if (vm.count("skipPlots")) skipPlots=true;
   if (expectSignalMass!=110 && expectSignalMass!=115 && expectSignalMass!=120 && expectSignalMass!=125 && expectSignalMass!=130 && expectSignalMass!=135 && expectSignalMass!=140 && expectSignalMass!=145 && expectSignalMass!=150){
-    cerr << "ERROR - expectSignalMass has to be integer in range (110,150,5)" << endl;
+    cerr << "ERROR - expectSignalMass has to be integer in range (115,135,5)" << endl;
     exit(1);
   }
 

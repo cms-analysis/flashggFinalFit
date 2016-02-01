@@ -945,7 +945,7 @@ void FinalModelConstruction::getNormalization(){
 	std::string procLowerCase_ = proc_;
   std::transform(procLowerCase_.begin(), procLowerCase_.end(), procLowerCase_.begin(), ::tolower); 
   TGraph *temp = new TGraph();
-  TF1 *pol2 = new TF1("pol","pol2",110,150);
+  TF1 *pol2 = new TF1("pol","pol2",115,135);
   for (unsigned int i=0; i<allMH_.size(); i++){
     double mh = double(allMH_[i]);
     RooDataSet *data = stdDatasets[mh];

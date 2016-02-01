@@ -5,20 +5,15 @@
 #include "RooRealVar.h"
 #include <string>
 #include <list>
-#ifndef WSTFILEWRAPPER 
-#define WSTFILEWRAPPER 
-
 
 class WSTFileWrapper  {
   public:
     WSTFileWrapper(std::string, std::string);
-    WSTFileWrapper( TFile*, RooWorkspace *);
   //    TObject * Get(std::string);
     RooRealVar* var(std::string);
     RooAbsPdf* pdf(std::string);
     RooCategory* cat(std::string);
     RooAbsData* data(std::string);
-    RooAbsReal* function(std::string);
     std::list<RooAbsData*> allData();
     void Close();
   private:
@@ -26,5 +21,3 @@ class WSTFileWrapper  {
     std::vector<TFile*> fileList;
     std::vector<RooWorkspace*> wsList;
 };
-
-#endif

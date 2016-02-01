@@ -18,8 +18,11 @@ parser.add_option("-f","--flashggCats",default="UntaggedTag_0,UntaggedTag_1,Unta
 
 if not (options.fromroot ==""):
 	print "execute"
-	os.system("./Background/bin/workspaceTool -i %s --print 1 | grep RooData | grep it > %s"%(options.fromroot,options.input))
-	os.system("./Background/bin/workspaceTool -i %s --print 1 | grep intLumi >> %s"%(options.fromroot,options.input))
+	if (len(options.fromroot.split(","))>1) :
+		os.system("./Signal/bin/SignalFit -i %s --checkYield 1 | grep RooData | grep it > %s"%(options.fromroot,options.input))
+	else:
+		os.system("./Background/bin/workspaceTool -i %s --print 1 | grep RooData | grep it > %s"%(options.fromroot,options.input))
+		os.system("./Background/bin/workspaceTool -i %s --print 1 | grep intLumi >> %s"%(options.fromroot,options.input))
 
 procs=[]
 tags=[]
@@ -30,7 +33,7 @@ entries=[]
 
 
 with open(options.input) as i:
-	lines  = i.readlines()
+	lines	= i.readlines()
 	for line in lines:
 		if "intLumi" in line: lumi=float(line[line.find("value")+6:])
 		#if not "entr" in line : continue 
@@ -39,7 +42,7 @@ with open(options.input) as i:
 			#procs.append(line[line.find("::")+2:line.find(str(sqrts)+"TeV")-1])
 			#print "tag ", tag
 			if not tag in line : continue
-			if "sigma" in line : continue  #don't want systematic variations
+			if "sigma" in line : continue	#don't want systematic variations
 			procs.append(line[line.find("::")+2:line.find(str(tag))-1])
 			#tags.append(line[line.find(str(sqrts)+"TeV")+4+len(str(sqrts)):line.find("[")])
 			tags.append(tag)

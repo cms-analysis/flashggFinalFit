@@ -376,6 +376,7 @@ void Plot(RooRealVar *mass, RooDataSet *data, RooAbsPdf *pdf, pair<double,double
 	fwhmText->SetLineColor(kWhite);
 	fwhmText->SetTextSize(0.03);
 	fwhmText->AddText(Form("FWHM = %1.2f GeV",(fwmax-fwmin)));
+  std::cout << " [FOR TABLE] Tag " << data->GetName() << "=, Mass " << mass->getVal() << " sigmaEff=" << 0.5*(semax-semin) << "= , FWMH=" << (fwmax-fwmin)/2.35 << "=" << std::endl;
 
 	TLatex lat1(0.65,0.85,"#splitline{CMS Preliminary}{Simulation}");
 	lat1.SetNDC(1);
