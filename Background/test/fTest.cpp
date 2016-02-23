@@ -43,6 +43,9 @@
 #include "boost/algorithm/string/classification.hpp"
 #include "boost/algorithm/string/predicate.hpp"
 
+#include "../../tdrStyle/tdrstyle.C"
+#include "../../tdrStyle/CMS_lumi.C"
+
 using namespace std;
 using namespace RooFit;
 using namespace boost;
@@ -82,7 +85,7 @@ void runFit(RooAbsPdf *pdf, RooDataSet *data, double *NLL, int *stat_t, int MaxT
 	  //params_test->Print("v");
 	  //std::cout << "-----------------------------------------------------------------------" << std::endl;
 	  RooFitResult *fitTest = pdf->fitTo(*data,RooFit::Save(1)
-		,RooFit::Minimizer("Minuit2","minimize"),RooFit::SumW2Error(kTRUE)); //FIXME
+    ,RooFit::Minimizer("Minuit2","minimize"),RooFit::SumW2Error(kTRUE)); //FIXME
           stat = fitTest->status();
 	  minnll = fitTest->minNll();
 	  if (stat!=0) params_test->assignValueOnly(fitTest->randomizePars());
@@ -197,7 +200,7 @@ double getProbabilityFtest(double chi2, int ndof,RooAbsPdf *pdfNull, RooAbsPdf *
   TCanvas *stas =new TCanvas();
   toyhistStatN.SetLineColor(2);
   toyhistStatT.SetLineColor(1); 
-  TLegend *leg = new TLegend(0.2,0.6,0.4,0.89); leg->SetFillColor(0);
+  TLegend *leg = new TLegend(0.2,0.6,0.4,0.87); leg->SetFillColor(0);
   leg->SetTextFont(42);
   leg->AddEntry(&toyhistStatN,"Null Hyp","L");
   leg->AddEntry(&toyhistStatT,"Test Hyp","L");
@@ -313,8 +316,8 @@ void plot(RooRealVar *mass, RooAbsPdf *pdf, RooDataSet *data, string name,vector
  
   *prob = getGoodnessOfFit(mass,pdf,data,name);
   RooPlot *plot = mass->frame();
-  mass->setRange("unblindReg_1",100,110);
-  mass->setRange("unblindReg_2",150,180);
+  mass->setRange("unblindReg_1",100,115);
+  mass->setRange("unblindReg_2",135,180);
   if (BLIND) {
     data->plotOn(plot,Binning(80),CutRange("unblindReg_1"));
     data->plotOn(plot,Binning(80),CutRange("unblindReg_2"));
@@ -346,13 +349,13 @@ void plot(RooRealVar *mass, RooMultiPdf *pdfs, RooCategory *catIndex, RooDataSet
   
   int color[7] = {kBlue,kRed,kMagenta,kGreen+1,kOrange+7,kAzure+10,kBlack};
   TCanvas *canv = new TCanvas();
-  TLegend *leg = new TLegend(0.5,0.55,0.92,0.92);
+  TLegend *leg = new TLegend(0.5,0.55,0.92,0.88);
   leg->SetFillColor(0);
   leg->SetLineColor(1);
   RooPlot *plot = mass->frame();
 
-  mass->setRange("unblindReg_1",100,110);
-  mass->setRange("unblindReg_2",150,180);
+  mass->setRange("unblindReg_1",100,115);
+  mass->setRange("unblindReg_2",135,180);
   if (BLIND) {
     data->plotOn(plot,Binning(80),CutRange("unblindReg_1"));
     data->plotOn(plot,Binning(80),CutRange("unblindReg_2"));
@@ -380,6 +383,7 @@ void plot(RooRealVar *mass, RooMultiPdf *pdfs, RooCategory *catIndex, RooDataSet
   if (BLIND) plot->SetMinimum(0.0001);
   plot->Draw();
   leg->Draw("same");
+  CMS_lumi( canv, 0, 0);
   canv->SaveAs(Form("%s.pdf",name.c_str()));
   canv->SaveAs(Form("%s.png",name.c_str()));
   catIndex->setIndex(currentIndex);
@@ -390,13 +394,13 @@ void plot(RooRealVar *mass, map<string,RooAbsPdf*> pdfs, RooDataSet *data, strin
   
   int color[7] = {kBlue,kRed,kMagenta,kGreen+1,kOrange+7,kAzure+10,kBlack};
   TCanvas *canv = new TCanvas();
-  TLegend *leg = new TLegend(0.6,0.65,0.89,0.89);
+  TLegend *leg = new TLegend(0.6,0.65,0.88,0.88);
   leg->SetFillColor(0);
   leg->SetLineColor(0);
   RooPlot *plot = mass->frame();
 
-  mass->setRange("unblindReg_1",100,110);
-  mass->setRange("unblindReg_2",150,180);
+  mass->setRange("unblindReg_1",100,115);
+  mass->setRange("unblindReg_2",135,180);
   if (BLIND) {
     data->plotOn(plot,Binning(80),CutRange("unblindReg_1"));
     data->plotOn(plot,Binning(80),CutRange("unblindReg_2"));
@@ -427,6 +431,7 @@ void plot(RooRealVar *mass, map<string,RooAbsPdf*> pdfs, RooDataSet *data, strin
   if (BLIND) plot->SetMinimum(0.0001);
   plot->Draw();
   leg->Draw("same");
+  CMS_lumi( canv, 0, 0);
   canv->SaveAs(Form("%s.pdf",name.c_str()));
   canv->SaveAs(Form("%s.png",name.c_str()));
   delete canv;
@@ -525,6 +530,13 @@ int getBestFitFunction(RooMultiPdf *bkg, RooDataSet *data, RooCategory *cat, boo
 
 int main(int argc, char* argv[]){
  
+  setTDRStyle();
+  writeExtraText = true;       // if extra text
+  extraText  = "Preliminary";  // default extra text is "Preliminary"
+  lumi_8TeV  = "19.1 fb^{-1}"; // default is "19.7 fb^{-1}"
+  lumi_7TeV  = "4.9 fb^{-1}";  // default is "5.1 fb^{-1}"
+  lumi_sqrtS = "13 TeV";       // used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
+
   string fileName;
   int ncats;
   int singleCategory;

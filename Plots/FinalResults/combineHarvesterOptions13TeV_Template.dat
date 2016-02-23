@@ -1,13 +1,13 @@
 #datacard=CMS-HGG_mva_13TeV_datacard!EXT!.txt
 datacard=CMS-HGG_mva_13TeV_datacard.txt
-files=CMS-HGG_mva_13TeV_sigfit.root,CMS-HGG_mva_13TeV_multipdf.root
+files=CMS-HGG_sigfit_!EXT!_ggh_TTHHadronicTag.root,CMS-HGG_sigfit_!EXT!_ggh_TTHLeptonicTag.root,CMS-HGG_sigfit_!EXT!_ggh_UntaggedTag_0.root,CMS-HGG_sigfit_!EXT!_ggh_UntaggedTag_1.root,CMS-HGG_sigfit_!EXT!_ggh_UntaggedTag_2.root,CMS-HGG_sigfit_!EXT!_ggh_UntaggedTag_3.root,CMS-HGG_sigfit_!EXT!_ggh_VBFTag_0.root,CMS-HGG_sigfit_!EXT!_ggh_VBFTag_1.root,CMS-HGG_sigfit_!EXT!_noTTH.root,CMS-HGG_sigfit_!EXT!_noWZHsplit.root,CMS-HGG_sigfit_!EXT!_tth_TTHHadronicTag.root,CMS-HGG_sigfit_!EXT!_tth_TTHLeptonicTag.root,CMS-HGG_sigfit_!EXT!_tth_UntaggedTag_0.root,CMS-HGG_sigfit_!EXT!_tth_UntaggedTag_1.root,CMS-HGG_sigfit_!EXT!_tth_UntaggedTag_2.root,CMS-HGG_sigfit_!EXT!_tth_UntaggedTag_3.root,CMS-HGG_sigfit_!EXT!_tth_VBFTag_0.root,CMS-HGG_sigfit_!EXT!_tth_VBFTag_1.root,CMS-HGG_sigfit_!EXT!_vbf_TTHHadronicTag.root,CMS-HGG_sigfit_!EXT!_vbf_TTHLeptonicTag.root,CMS-HGG_sigfit_!EXT!_vbf_UntaggedTag_0.root,CMS-HGG_sigfit_!EXT!_vbf_UntaggedTag_1.root,CMS-HGG_sigfit_!EXT!_vbf_UntaggedTag_2.root,CMS-HGG_sigfit_!EXT!_vbf_UntaggedTag_3.root,CMS-HGG_sigfit_!EXT!_vbf_VBFTag_0.root,CMS-HGG_sigfit_!EXT!_vbf_VBFTag_1.root,CMS-HGG_sigfit_!EXT!_wh_TTHHadronicTag.root,CMS-HGG_sigfit_!EXT!_wh_TTHLeptonicTag.root,CMS-HGG_sigfit_!EXT!_wh_UntaggedTag_0.root,CMS-HGG_sigfit_!EXT!_wh_UntaggedTag_1.root,CMS-HGG_sigfit_!EXT!_wh_UntaggedTag_2.root,CMS-HGG_sigfit_!EXT!_wh_UntaggedTag_3.root,CMS-HGG_sigfit_!EXT!_wh_VBFTag_0.root,CMS-HGG_sigfit_!EXT!_wh_VBFTag_1.root,CMS-HGG_sigfit_!EXT!_zh_TTHHadronicTag.root,CMS-HGG_sigfit_!EXT!_zh_TTHLeptonicTag.root,CMS-HGG_sigfit_!EXT!_zh_UntaggedTag_0.root,CMS-HGG_sigfit_!EXT!_zh_UntaggedTag_1.root,CMS-HGG_sigfit_!EXT!_zh_UntaggedTag_2.root,CMS-HGG_sigfit_!EXT!_zh_UntaggedTag_3.root,CMS-HGG_sigfit_!EXT!_zh_VBFTag_0.root,CMS-HGG_sigfit_!EXT!_zh_VBFTag_1.root,CMS-HGG_mva_13TeV_multipdf.root
 
 # limit
 ##outDir=combineJobs13TeV_!EXT!/Asymptotic											method=Asymptotic expected=0 mhLow=110. mhHigh=150. mhStep=1. jobs=31
 
 # exp pval
 outDir=combineJobs13TeV_!EXT!/ExpProfileLikelihood 					method=ProfileLikelihood expected=1 expectSignal=1 mhLow=120. mhHigh=130. mhStep=1. jobs=11 
-outDir=combineJobs13TeV_!EXT!/ExpProfileLikelihood_S0 					method=ProfileLikelihood expected=1 expectSignal=1 mhLow=120. mhHigh=130. mhStep=1. jobs=11 S0
+#outDir=combineJobs13TeV_!EXT!/ExpProfileLikelihood_S0 					method=ProfileLikelihood expected=1 expectSignal=1 mhLow=120. mhHigh=130. mhStep=1. jobs=11 S0
 
 #outDir=combineJobs13TeV_!EXT!/ExpProfileLikelihood/inc 			method=ProfileLikelihood expected=1 expectSignal=1 mhLow=120. mhHigh=130. mhStep=1. jobs=21 splitChannels=ch1_cat0_7TeV,ch1_cat1_7TeV,ch1_cat2_7TeV,ch1_cat3_7TeV,ch2_cat0_8TeV,ch2_cat1_8TeV,ch2_cat2_8TeV,ch2_cat3_8TeV
 #outDir=combineJobs13TeV_!EXT!/ExpProfileLikelihood/inc 			method=ProfileLikelihood expected=1 expectSignal=1 mhLow=120. mhHigh=130. mhStep=1. jobs=11 splitChannels=ch2_cat0_8TeV,ch2_cat1_8TeV,ch2_cat2_8TeV,ch2_cat3_8TeV
@@ -17,7 +17,7 @@ outDir=combineJobs13TeV_!EXT!/ExpProfileLikelihood_S0 					method=ProfileLikelih
 
 # exp pval @ 125
 outDir=combineJobs13TeV_!EXT!/ExpProfileLikelihood_m125 			method=ProfileLikelihood expected=1 expectSignal=1 expectSignalMass=125 mhLow=120. mhHigh=130. mhStep=1. jobs=11 
-outDir=combineJobs13TeV_!EXT!/ExpProfileLikelihood_m125_S0 			method=ProfileLikelihood expected=1 expectSignal=1 expectSignalMass=125 mhLow=120. mhHigh=130. mhStep=1. jobs=11 S0
+#outDir=combineJobs13TeV_!EXT!/ExpProfileLikelihood_m125_S0 			method=ProfileLikelihood expected=1 expectSignal=1 expectSignalMass=125 mhLow=120. mhHigh=130. mhStep=1. jobs=11 S0
 
 # obs pval
 #outDir=combineJobs13TeV_!EXT!/ProfileLikelihood 							method=ProfileLikelihood expected=0 mhLow=120. mhHigh=130. mhStep=1. jobs=11 
@@ -30,8 +30,8 @@ outDir=combineJobs13TeV_!EXT!/ExpProfileLikelihood_m125_S0 			method=ProfileLike
 
 # nll scans
 ##outDir=combineJobs13TeV_!EXT!/MuScan													method=MuScan	expected=0 mh=125 muLow=0. muHigh=2. jobs=5 pointsperjob=10 opts=--squareDistPoi
-outDir=combineJobs13TeV_!EXT!/MHScan_S0													method=MHScan	expected=1 expectSignal=1 mh=130 postFit mhLow=120. mhHigh=130. jobs=5 pointsperjob=10 opts=--squareDistPoi S0
-outDir=combineJobs13TeV_!EXT!/MHScan    												method=MHScan	expected=1 expectSignal=1 mh=130 postFit mhLow=120. mhHigh=130. jobs=5 pointsperjob=10 opts=--squareDistPoi
+##outDir=combineJobs13TeV_!EXT!/MHScan_S0													method=MHScan	expected=1 expectSignal=1 mh=130 postFit mhLow=120. mhHigh=130. jobs=5 pointsperjob=10 opts=--squareDistPoi S0
+##outDir=combineJobs13TeV_!EXT!/MHScan    												method=MHScan	expected=1 expectSignal=1 mh=130 postFit mhLow=120. mhHigh=130. jobs=5 pointsperjob=10 opts=--squareDistPoi
 ##outDir=combineJobs13TeV_!EXT!/MHScan													method=MHScan	expected=1 expectSignal=1 mh=130 postFit mhLow=120. mhHigh=130. jobs=5 pointsperjob=10 opts=--squareDistPoi freezeNuisances=JetVeto_migration0,JetVeto_migration1,pdfindex_UntaggedTag_0_13TeV,pdfindex_UntaggedTag_1_13TeV,pdfindex_UntaggedTag_2_13TeV,pdfindex_UntaggedTag_3_13TeV,pdfindex_VBFTag_0_13TeV,pdfindex_VBFTag_1_13TeV ## attempt to freeze pdfIndices
 #outDir=combineJobs13TeV_!EXT!/RVScan													method=RVScan expected=0 mh=125 rvLow=-2. rvHigh=3. jobs=5 pointsperjob=10 opts=--squareDistPoi
 #outDir=combineJobs13TeV_!EXT!/RVRFScan												method=RVRFScan expected=0 mh=125 rvLow=-1. rvHigh=4.5 rfLow=-1. rfHigh=2.5 jobs=100 pointsperjob=50

@@ -25,7 +25,7 @@ class FinalModelConstruction {
 
   public:
     
-    FinalModelConstruction(RooRealVar *massVar, RooRealVar *MHvar, RooRealVar *intL, int mhLow, int mhHigh, std::string proc, int cat, bool doSecMods, std::string systematicsFileName, std::vector<int> skipMasses, int verbosity, std::vector<std::string> procsList, std::vector<std::string> flashggCats ,bool isCB=false, int sqrts=13, bool quadraticSigmaSum=false);
+    FinalModelConstruction(RooRealVar *massVar, RooRealVar *MHvar, RooRealVar *intL, int mhLow, int mhHigh, std::string proc, std::string cat, bool doSecMods, std::string systematicsFileName, std::vector<int> skipMasses, int verbosity, std::vector<std::string> procsList, std::vector<std::string> flashggCats , string outDir, bool isProblemCategory,bool isCB=false, int sqrts=13, bool quadraticSigmaSum=false);
     ~FinalModelConstruction();
 
 		void loadSignalSystematics(std::string filename);
@@ -50,8 +50,12 @@ class FinalModelConstruction {
 
     void setRVdatasets(std::map<int,RooDataSet*> data);
     void setWVdatasets(std::map<int,RooDataSet*> data);
+    void setFITRVdatasets(std::map<int,RooDataSet*> data);
+    void setFITWVdatasets(std::map<int,RooDataSet*> data);
     void setSTDdatasets(std::map<int,RooDataSet*> data);
+    void setFITdatasets(std::map<int,RooDataSet*> data);
 		void makeSTDdatasets();
+		void makeFITdatasets();
 
 		void setHighR9cats(std::string catString);
 		void setLowR9cats(std::string catString);
@@ -68,11 +72,13 @@ class FinalModelConstruction {
     int mhLow_;
     int mhHigh_;
     std::string proc_;
-    int cat_;
+    std::string cat_;
+    std::string outDir_;
     int nIncCats_;
     bool doSecondaryModels;
     bool secondaryModelVarsSet;
     bool isCutBased_;
+    bool isProblemCategory_;
 		bool is2011_;
 		bool is2012_;
 		bool isFlashgg_;
@@ -92,6 +98,9 @@ class FinalModelConstruction {
     std::map<int,RooDataSet*> rvDatasets;
     std::map<int,RooDataSet*> wvDatasets;
     std::map<int,RooDataSet*> stdDatasets;
+    std::map<int,RooDataSet*> rvFITDatasets;
+    std::map<int,RooDataSet*> wvFITDatasets;
+    std::map<int,RooDataSet*> fitDatasets;
    
 	 	// vertex and r9 nuisances
     RooRealVar *vertexNuisance;

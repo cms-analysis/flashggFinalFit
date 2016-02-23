@@ -14,7 +14,7 @@ def Setup(gr,col,style,width,leg,name,MG):
 	gr.SetMarkerSize(0.8)
 	gr.SetMarkerStyle(20)
 	fitstring = "[0] + [1]*x*x + [2]*x*x*x +[3]*x*x*x*x + [4]*x"
-	grSmooth = ROOT.TF1("grSmooth",fitstring,109.,150.)
+	grSmooth = ROOT.TF1("grSmooth",fitstring,109.,135.)
 	#gr.Fit(grSmooth,"R,M,EXO","Q")
 	#grSmooth.SetLineWidth(2)
 	#grSmooth.SetLineColor(col)
@@ -145,10 +145,10 @@ names_med=["1xSM Higgs Median Expected","Observed"]
 Lines = [1.,2.,3.,4.]
 ## Lines = [1.,2.,3.,4.,5.]##,6.]
 Vals=[ROOT.RooStats.SignificanceToPValue(L) for L in Lines]
-TLines=[ROOT.TLine(110,V,150,V) for V in Vals]
+TLines=[ROOT.TLine(115,V,135,V) for V in Vals]
 
 fitLines = [1.]
-fitTLines=[ROOT.TLine(110,fl,150,fl) for fl in fitLines]
+fitTLines=[ROOT.TLine(115,fl,135,fl) for fl in fitLines]
 
 legend=ROOT.TLegend(0.53,0.36,0.86,0.66)
 legend.SetFillColor(0)
@@ -200,9 +200,9 @@ c = ROOT.TCanvas("pvalue","pvalue",800,600)
 ########### c.cd(1)
 ########### fitMG.Draw("AL")#E4")
 ########### #fitMGLINE = ROOT.TGraph()
-########### #for m in range(110,151): fitMGLINE.SetPoint(m-110,float(m),fitMG.Eval(float(m)))
+########### #for m in range(115,151): fitMGLINE.SetPoint(m-115,float(m),fitMG.Eval(float(m)))
 ########### fitMG.Draw("CP")
-########### fitMG.GetXaxis().SetRangeUser(110,150)
+########### fitMG.GetXaxis().SetRangeUser(115,135)
 ########### fitMG.GetYaxis().SetRangeUser(0,3)
 ########### fitMG.GetXaxis().SetTitle("")
 ########### fitMG.GetYaxis().SetTitle("#mu")
@@ -228,7 +228,7 @@ c = ROOT.TCanvas("pvalue","pvalue",800,600)
 ########### """
 
 MG.Draw("AL")#LP")
-MG.GetXaxis().SetRangeUser(110,150)
+MG.GetXaxis().SetRangeUser(115,135)
 ## MG.GetYaxis().SetRangeUser(1.e-5,2.5)
 MG.GetYaxis().SetRangeUser(1.e-6,2.5)
 for i, grSmo in enumerate(GRsmooth):
@@ -251,7 +251,7 @@ for j,TL in enumerate(TLines):
 	TL.SetLineColor(kBlack)
 	TL.SetLineWidth(1)
 	TL.Draw("same")
-	text.DrawLatex(150.5,Vals[j]*0.88,"%d #sigma"%Lines[j])
+	text.DrawLatex(135.5,Vals[j]*0.88,"%d #sigma"%Lines[j])
 #mytext.SetFillColor(8)	
 mytext.SetNDC()
 #mytext.SetFillColor(0)

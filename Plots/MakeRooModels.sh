@@ -17,7 +17,7 @@ else
 	MAXTHREADS=$3
 fi
 
-for MASS in `seq 110 0.5 150`; do
+for MASS in `seq 115 0.5 135`; do
 	THREADS=`ps | grep python | wc | awk '{print $1}'`
 	while [ ! $THREADS -lt $MAXTHREADS ]; do
 		sleep 5

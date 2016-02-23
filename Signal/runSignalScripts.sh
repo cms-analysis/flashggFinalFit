@@ -72,6 +72,7 @@ esac
 shift
 done
 
+echo "INTLUMI $INTLUMI"
 
 OUTDIR="outdir_$EXT"
 echo "[INFO] outdir is $OUTDIR" 
@@ -88,11 +89,12 @@ SIGFITONLY=1
 SIGPLOTSONLY=1
 fi
 
-if [ $BATCH=="IC" ]; then
+if [ $BATCH == "IC" ]; then
 DEFAULTQUEUE=hepshort.q
+#DEFAULTQUEUE=hepmedium.q
 BATCHQUERY="qstat -u $USER -q hepshort.q"
 fi
-if [ $BATCH=="LSF" ]; then
+if [ $BATCH == "LSF" ]; then
 DEFAULTQUEUE=1nh
 BATCHQUERY="bjobs"
 fi
@@ -100,50 +102,54 @@ fi
 ####################################################
 ################## SIGNAL F-TEST ###################
 ####################################################
-if [ $FTESTONLY == 1 ]; then
-mkdir -p $OUTDIR/fTest
-
-echo "=============================="
-echo "Running Signal F-Test"
-echo "-->Determine Number of gaussians"
-echo "=============================="
-
-
-if [ $BATCH=="" ]; then
-echo "./bin/signalFTest -i $FILE -d dat/newConfig_$EXT.dat -p $PROCS -f $CATS -o $OUTDIR"
-./bin/signalFTest -i $FILE -d dat/newConfig_$EXT.dat -p $PROCS -f $CATS -o $OUTDIR
+if [ -e dat/newConfig_${EXT}.dat ]; then
+  echo "[INFO] sigFTest dat file $OUTDIR/dat/copy_newConfig_${EXT}.dat already exists, so SKIPPING SIGNAL FTEST"
 else
-echo "./python/submitSignaFTest.py --procs $PROCS --flashggCats $CATS --outDir $OUTDIR --i $FILE --batch $BATCH -q $DEFAULTQUEUE"
-./python/submitSignaFTest.py --procs $PROCS --flashggCats $CATS --outDir $OUTDIR --i $FILE --batch $BATCH -q $DEFAULTQUEUE
+  if [ $FTESTONLY == 1 ]; then
+    mkdir -p $OUTDIR/fTest
+    echo "=============================="
+    echo "Running Signal F-Test"
+    echo "-->Determine Number of gaussians"
+    echo "=============================="
+    if [ -z $BATCH ]; then
+      echo "./bin/signalFTest -i $FILE -d dat/newConfig_$EXT.dat -p $PROCS -f $CATS -o $OUTDIR"
+  #    ./bin/signalFTest -i $FILE -d dat/newConfig_$EXT.dat -p $PROCS -f $CATS -o $OUTDIR
+    else
+      echo "./python/submitSignaFTest.py --procs $PROCS --flashggCats $CATS --outDir $OUTDIR --i $FILE --batch $BATCH -q $DEFAULTQUEUE"
+       ./python/submitSignaFTest.py --procs $PROCS --flashggCats $CATS --outDir $OUTDIR --i $FILE --batch $BATCH -q $DEFAULTQUEUE
 
-PEND=`ls -l $OUTDIR/fTestJobs/sub*| grep -v "\.run" | grep -v "\.done" | grep -v "\.fail" | grep -v "\.err" |grep -v "\.log"  |wc -l`
-echo "PEND $PEND"
-while (( $PEND > 0 )) ;
-do
-PEND=`ls -l $OUTDIR/fTestJobs/sub* | grep -v "\.run" | grep -v "\.done" | grep -v "\.fail" | grep -v "\.err" | grep -v "\.log" |wc -l`
-RUN=`ls -l $OUTDIR/fTestJobs/sub* | grep "\.run" |wc -l`
-FAIL=`ls -l $OUTDIR/fTestJobs/sub* | grep "\.fail" |wc -l`
-DONE=`ls -l $OUTDIR/fTestJobs/sub* | grep "\.done" |wc -l`
-(( PEND=$PEND-$RUN-$FAIL-$DONE ))
-echo " PEND $PEND - RUN $RUN - DONE $DONE - FAIL $FAIL"
-if (( $RUN > 0 )) ; then PEND=1 ; fi
-if (( $FAIL > 0 )) ; then 
-echo "ERROR at least one job failed :"
-ls -l $OUTDIR/fTestJobs/sub* | grep "\.fail"
-exit 1
-fi
-sleep 10
-
-done
-fi
-mkdir -p $OUTDIR/dat
-cat $OUTDIR/fTestJobs/outputs/* > dat/newConfig_$EXT.dat
-sort -u dat/newConfig_$EXT.dat  > dat/tmp_newConfig_$EXT.dat 
-mv dat/tmp_newConfig_$EXT.dat dat/newConfig_$EXT.dat
-cp dat/newConfig_$EXT.dat $OUTDIR/dat/copy_newConfig_$EXT.dat
-rm -rf $OUTDIR/sigfTest
-mv $OUTDIR/fTest $OUTDIR/sigfTest
-
+      PEND=`ls -l $OUTDIR/fTestJobs/sub*| grep -v "\.run" | grep -v "\.done" | grep -v "\.fail" | grep -v "\.err" |grep -v "\.log"  |wc -l`
+      echo "PEND $PEND"
+      while (( $PEND > 0 )) ; do
+        PEND=`ls -l $OUTDIR/fTestJobs/sub* | grep -v "\.run" | grep -v "\.done" | grep -v "\.fail" | grep -v "\.err" | grep -v "\.log" |wc -l`
+        RUN=`ls -l $OUTDIR/fTestJobs/sub* | grep "\.run" |wc -l`
+        FAIL=`ls -l $OUTDIR/fTestJobs/sub* | grep "\.fail" |wc -l`
+        DONE=`ls -l $OUTDIR/fTestJobs/sub* | grep "\.done" |wc -l`
+        (( PEND=$PEND-$RUN-$FAIL-$DONE ))
+        echo " PEND $PEND - RUN $RUN - DONE $DONE - FAIL $FAIL"
+        if (( $RUN > 0 )) ; then PEND=1 ; fi
+        if (( $FAIL > 0 )) ; then 
+          echo "ERROR at least one job failed :"
+          ls -l $OUTDIR/fTestJobs/sub* | grep "\.fail"
+          exit 1
+        fi
+        sleep 10
+      done
+    fi
+    mkdir -p $OUTDIR/dat
+    cat $OUTDIR/fTestJobs/outputs/* > dat/newConfig_${EXT}_temp.dat
+    sort -u dat/newConfig_${EXT}_temp.dat  > dat/tmp_newConfig_${EXT}_temp.dat 
+    mv dat/tmp_newConfig_${EXT}_temp.dat dat/newConfig_${EXT}_temp.dat
+    cp dat/newConfig_${EXT}_temp.dat $OUTDIR/dat/copy_newConfig_${EXT}_temp.dat
+    rm -rf $OUTDIR/sigfTest
+    mv $OUTDIR/fTest $OUTDIR/sigfTest
+  fi
+  echo "[INFO] sigFTest jobs completed, check output and do:"
+  echo "cp $PWD/dat/newConfig_${EXT}_temp.dat $PWD/dat/newConfig_${EXT}.dat"
+  echo "and manually amend chosen number of gaussians using the output pdfs."
+  echo "then re-run the same command to continue !"
+  CALCPHOSYSTONLY=0
+  SIGFITONLY=0
 fi
 ####################################################
 ################## CALCPHOSYSTCONSTS ###################
@@ -151,15 +157,15 @@ fi
 
 if [ $CALCPHOSYSTONLY == 1 ]; then
 
-echo "=============================="
-echo "Running calcPho"
-echo "-->Determine effect of photon systematics"
-echo "=============================="
+  echo "=============================="
+  echo "Running calcPho"
+  echo "-->Determine effect of photon systematics"
+  echo "=============================="
 
-echo "./bin/calcPhotonSystConsts -i $FILE -o dat/photonCatSyst_$EXT.dat -p $PROCS -s $SCALES -r $SMEARS -D $OUTDIR -f $CATS"
-./bin/calcPhotonSystConsts -i $FILE -o dat/photonCatSyst_$EXT.dat -p $PROCS -s $SCALES -r $SMEARS -D $OUTDIR -f $CATS 
-
-cp dat/photonCatSyst_$EXT.dat $OUTDIR/dat/copy_photonCatSyst_$EXT.dat
+  echo "./bin/calcPhotonSystConsts -i $FILE -o dat/photonCatSyst_$EXT.dat -p $PROCS -s $SCALES -r $SMEARS -D $OUTDIR -f $CATS"
+ # ./bin/calcPhotonSystConsts -i $FILE -o dat/photonCatSyst_$EXT.dat -p $PROCS -s $SCALES -r $SMEARS -D $OUTDIR -f $CATS 
+  
+  cp dat/photonCatSyst_$EXT.dat $OUTDIR/dat/copy_photonCatSyst_$EXT.dat
 
 fi
 ####################################################
@@ -167,20 +173,60 @@ fi
 ####################################################
 if [ $SIGFITONLY == 1 ]; then
 
-echo "=============================="
-echo "Running SignalFit"
-echo "-->Create actual signal model"
-echo "=============================="
+  echo "=============================="
+  echo "Running SignalFit"
+  echo "-->Create actual signal model"
+  echo "=============================="
 
-echo "./bin/SignalFit -i $FILE -d dat/newConfig_$EXT.dat  --mhLow=120 --mhHigh=130 -s dat/photonCatSyst_$EXT.dat --procs $PROCS -o $OUTDIR/CMS-HGG_sigfit_$EXT.root -p $OUTDIR/sigfit -f $CATS --changeIntLumi $INTLUMI "
 
-./bin/SignalFit -i $FILE -d dat/newConfig_$EXT.dat  --mhLow=120 --mhHigh=130 -s dat/photonCatSyst_$EXT.dat --procs $PROCS -o $OUTDIR/CMS-HGG_sigfit_$EXT.root -p $OUTDIR/sigfit -f $CATS --changeIntLumi $INTLUMI #--pdfWeights 26
+  if [ "$BATCH" == "" ]; then
+    echo "./bin/SignalFit -i $FILE -d dat/newConfig_$EXT.dat  --mhLow=120 --mhHigh=130 -s dat/photonCatSyst_$EXT.dat --procs $PROCS -o $OUTDIR/CMS-HGG_mva_13TeV_sigfit.root -p $OUTDIR/sigfit -f $CATS --changeIntLumi $INTLUMI "
+    ./bin/SignalFit -i $FILE -d dat/newConfig_$EXT.dat  --mhLow=120 --mhHigh=130 -s dat/photonCatSyst_$EXT.dat --procs $PROCS -o $OUTDIR/CMS-HGG_mva_13TeV_sigfit.root -p $OUTDIR/sigfit -f $CATS --changeIntLumi $INTLUMI #--pdfWeights 26
+  else
+    echo " ./python/submitSignalFit.py -i $FILE -d dat/newConfig_$EXT.dat  --mhLow=120 --mhHigh=130 -s dat/photonCatSyst_$EXT.dat --procs $PROCS -o $OUTDIR/CMS-HGG_sigfit_$EXT.root -p $OUTDIR/sigfit -f $CATS --changeIntLumi $INTLUMI --batch $BATCH -q $DEFAULTQUEUE "
+    ./python/submitSignalFit.py -i $FILE -d dat/newConfig_$EXT.dat  --mhLow=120 --mhHigh=130 -s dat/photonCatSyst_$EXT.dat --procs $PROCS -o $OUTDIR/CMS-HGG_sigfit_$EXT.root -p $OUTDIR/sigfit -f $CATS --changeIntLumi $INTLUMI --batch $BATCH -q $DEFAULTQUEUE 
+
+    PEND=`ls -l $OUTDIR/sigfit/SignalFitJobs/sub*| grep -v "\.run" | grep -v "\.done" | grep -v "\.fail" | grep -v "\.err" |grep -v "\.log"  |wc -l`
+    echo "PEND $PEND"
+    while (( $PEND > 0 )) ;do
+      PEND=`ls -l $OUTDIR/sigfit/SignalFitJobs/sub* | grep -v "\.run" | grep -v "\.done" | grep -v "\.fail" | grep -v "\.err" | grep -v "\.log" |wc -l`
+      RUN=`ls -l $OUTDIR/sigfit/SignalFitJobs/sub* | grep "\.run" |wc -l`
+      FAIL=`ls -l $OUTDIR/sigfit/SignalFitJobs/sub* | grep "\.fail" |wc -l`
+      DONE=`ls -l $OUTDIR/sigfit/SignalFitJobs/sub* | grep "\.done" |wc -l`
+      (( PEND=$PEND-$RUN-$FAIL-$DONE ))
+      echo " PEND $PEND - RUN $RUN - DONE $DONE - FAIL $FAIL"
+      if (( $RUN > 0 )) ; then PEND=1 ; fi
+      if (( $FAIL > 0 )) ; then 
+        echo "ERROR at least one job failed :"
+        ls -l $OUTDIR/sigfit/SignalFitJobs/sub* | grep "\.fail"
+        exit 1
+      fi
+      sleep 10
+  
+    done
+
+    ls $PWD/$OUTDIR/CMS-HGG_sigfit_${EXT}_*.root > out.txt
+    echo "ls ../Signal/$OUTDIR/CMS-HGG_sigfit_${EXT}_*.root > out.txt"
+    counter=0
+    while read p ; do
+      if (($counter==0)); then
+        SIGFILES="$p"
+      else
+        SIGFILES="$SIGFILES,$p"
+      fi
+      ((counter=$counter+1))
+    done < out.txt
+    echo "SIGFILES $SIGFILES"
+    echo "./bin/PackageOutput -i $SIGFILES --procs $PROCS -l $INTLUMI -p $OUTDIR/sigfit -W wsig_13TeV -f $CATS -L 120 -H 130 -o $OUTDIR/CMS-HGG_sigfit_$EXT.root"
+    ./bin/PackageOutput -i $SIGFILES --procs $PROCS -l $INTLUMI -p $OUTDIR/sigfit -W wsig_13TeV -f $CATS -L 120 -H 130 -o $OUTDIR/CMS-HGG_sigfit_$EXT.root > package.out
+  fi
 
 fi
 
-####################################################
-################### SIGNAL PLOTS ###################
-####################################################
+
+#####################################################
+#################### SIGNAL PLOTS ###################
+#####################################################
 
 if [ $SIGPLOTSONLY == 1 ]; then
 
@@ -190,8 +236,8 @@ echo "-->Create Validation plots"
 echo "=============================="
 
 echo " ./bin/makeParametricSignalModelPlots -i $OUTDIR/CMS-HGG_sigfit_$EXT.root  -o $OUTDIR -p $PROCS -f $CATS"
-./bin/makeParametricSignalModelPlots -i $OUTDIR/CMS-HGG_sigfit_$EXT.root  -o $OUTDIR/sigplots -p $PROCS -f $CATS
-mv $OUTDIR/sigplots/initialFits $OUTDIR/initialFits
+#./bin/makeParametricSignalModelPlots -i $OUTDIR/CMS-HGG_sigfit_$EXT.root  -o $OUTDIR/sigplots -p $PROCS -f $CATS
+mv $OUTDIR/sigfit/initialFits $OUTDIR/initialFits
 
 fi
 
@@ -201,6 +247,7 @@ cp ~lcorpe/public/index.php ~/www/$OUTDIR/sigplots/.
 cp ~lcorpe/public/index.php ~/www/$OUTDIR/systematics/.
 cp ~lcorpe/public/index.php ~/www/$OUTDIR/sigfit/.
 cp ~lcorpe/public/index.php ~/www/$OUTDIR/sigfTest/.
+cp ~lcorpe/public/index.php ~/www/$OUTDIR/initialFits/.
 
 echo "plots available at: "
 echo "https://lcorpe.web.cern.ch/lcorpe/$OUTDIR"
@@ -213,6 +260,7 @@ cp ~lc1113/index.php ~lc1113/public_html/$OUTDIR/sigplots/.
 cp ~lc1113/index.php ~lc1113/public_html/$OUTDIR/systematics/.
 cp ~lc1113/index.php ~lc1113/public_html/$OUTDIR/sigfit/.
 cp ~lc1113/index.php ~lc1113/public_html/$OUTDIR/sigfTest/.
+cp ~lc1113/index.php ~lc1113/public_html/$OUTDIR/initialFits/.
 echo "plots available at: "
 echo "http://www.hep.ph.imperial.ac.uk/~lc1113/$OUTDIR"
 fi
