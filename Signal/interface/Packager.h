@@ -24,7 +24,7 @@ class Packager {
 	   //  RooWorkspace *mergeWs=0, const std::vector<int>& cats=std::vector<int>() ,const std::vector<string>& flashggCats=std::vector<string>());
     ~Packager();
 
-    void packageOutput( bool split); //split indicates whwether to consider all tags  and procs or just one proc/tag 
+    void packageOutput( bool split, string process="", string tag=""); //split indicates whwether to consider all tags  and procs or just one proc/tag 
 		void makePlots();
 		void makePlot(RooRealVar *mass, RooRealVar *MH, RooAddPdf *pdf, std::map<int,RooDataSet*> data, std::string name);
 

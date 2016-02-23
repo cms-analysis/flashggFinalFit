@@ -4,6 +4,7 @@
 #include "RooPlot.h"
 #include "RooFormulaVar.h"
 #include "RooMsgService.h"
+#include "TPaveText.h"
 
 #include "boost/lexical_cast.hpp"
 
@@ -12,13 +13,15 @@
 using namespace std;
 using namespace RooFit;
 
-InitialFit::InitialFit(RooRealVar *massVar, RooRealVar *MHvar, int mhLow, int mhHigh, vector<int> skipMasses):
+InitialFit::InitialFit(RooRealVar *massVar, RooRealVar *MHvar, int mhLow, int mhHigh, vector<int> skipMasses, bool binnedFit, int bins):
   mass(massVar),
   MH(MHvar),
   mhLow_(mhLow),
   mhHigh_(mhHigh),
 	skipMasses_(skipMasses),
-  verbosity_(0)
+  verbosity_(0),
+  binnedFit_(binnedFit),
+  bins_(bins)
 {
   allMH_ = getAllMH();
 }
@@ -51,7 +54,11 @@ void InitialFit::setVerbosity(int v){
 }
 
 void InitialFit::setDatasets(map<int,RooDataSet*> data){
-  datasets = data;
+  datasets = data; // original dataset or a replacement one if needed.
+}
+
+void InitialFit::setDatasetsSTD(map<int,RooDataSet*> data){
+  datasetsSTD = data; //original dataset, not the replacement one!!
 }
 
 void InitialFit::addDataset(int mh, RooDataSet *data){
@@ -74,9 +81,10 @@ void InitialFit::buildSumOfGaussians(string name, int nGaussians, bool recursive
     
     for (int g=0; g<nGaussians; g++){
       //RooRealVar *dm = new RooRealVar(Form("dm_mh%d_g%d",mh,g),Form("dm_mh%d_g%d",mh,g),0.1,-2.5*(1.+g),2.5*(1.+g));
-      RooRealVar *dm = new RooRealVar(Form("dm_mh%d_g%d",mh,g),Form("dm_mh%d_g%d",mh,g),0.1,-10.,10.);
+      //RooRealVar *dm = new RooRealVar(Form("dm_mh%d_g%d",mh,g),Form("dm_mh%d_g%d",mh,g),0.1,-10.,10.);
+      RooRealVar *dm = new RooRealVar(Form("dm_mh%d_g%d",mh,g),Form("dm_mh%d_g%d",mh,g),0.1,-3.,3.);
       RooAbsReal *mean = new RooFormulaVar(Form("mean_mh%d_g%d",mh,g),Form("mean_mh%d_g%d",mh,g),"@0+@1",RooArgList(*MH,*dm));
-      RooRealVar *sigma = new RooRealVar(Form("sigma_mh%d_g%d",mh,g),Form("sigma_mh%d_g%d",mh,g),2.,0.4,20.);
+      RooRealVar *sigma = new RooRealVar(Form("sigma_mh%d_g%d",mh,g),Form("sigma_mh%d_g%d",mh,g),2.,0.4,10.);
       RooGaussian *gaus = new RooGaussian(Form("gaus_mh%d_g%d",mh,g),Form("gaus_mh%d_g%d",mh,g),*mass,*mean,*sigma);
       tempFitParams.insert(pair<string,RooRealVar*>(string(dm->GetName()),dm));
       tempFitParams.insert(pair<string,RooRealVar*>(string(sigma->GetName()),sigma));
@@ -176,22 +184,29 @@ void InitialFit::runFits(int ncpu){
     assert(sumOfGaussians.find(mh)!=sumOfGaussians.end());
     assert(datasets.find(mh)!=datasets.end());
     RooAddPdf *fitModel = sumOfGaussians[mh];
-    RooDataSet *data = datasets[mh];
+    //RooDataSet *data = datasets[mh];
+    RooAbsData *data;
+    if (binnedFit_){
+    data = datasets[mh]->binnedClone();
+    } else {
+    data = datasets[mh];
+    }
 		// help when dataset has no entries
 		if (data->sumEntries()<1.e-5) {
 			mass->setVal(mh);
 			data->add(RooArgSet(*mass),1.e-5);
 		}
-    fitModel->Print();
-    data->Print();
+    //fitModel->Print();
+    //data->Print();
     RooFitResult *fitRes;
+    mass->setBins(bins_);
     verbosity_ >=3 ?
       fitRes = fitModel->fitTo(*data,NumCPU(ncpu),RooFit::Minimizer("Minuit","minimize"),SumW2Error(true),Save(true)) :
       verbosity_ >=2 ?
         fitRes = fitModel->fitTo(*data,NumCPU(ncpu),RooFit::Minimizer("Minuit","minimize"),SumW2Error(true),Save(true),PrintLevel(-1)) :
-        fitRes = fitModel->fitTo(*data,NumCPU(ncpu),RooFit::Minimizer("Minuit","minimize"),SumW2Error(true),Save(true),PrintLevel(-1),PrintEvalErrors(-1))
-    ;
+        fitRes = fitModel->fitTo(*data,NumCPU(ncpu),RooFit::Minimizer("Minuit","minimize"),SumW2Error(true),Save(true),PrintLevel(-1),PrintEvalErrors(-1));
     fitResults.insert(pair<int,RooFitResult*>(mh,fitRes));
+    mass->setBins(160); //return to default 
   }
 }
 
@@ -211,10 +226,11 @@ void InitialFit::setFitParams(std::map<int,std::map<std::string,RooRealVar*> >& 
 }
 
 
-void InitialFit::plotFits(string name){
+void InitialFit::plotFits(string name, string rvwv){
   
   TCanvas *canv = new TCanvas();
   RooPlot *plot = mass->frame(Range(mhLow_-10,mhHigh_+10));
+  TPaveText *pt = new TPaveText(.65,.6,.97,.95,"NDC");
   for (unsigned int i=0; i<allMH_.size(); i++){
     int mh = allMH_[i];
     MH->setConstant(false);
@@ -223,12 +239,26 @@ void InitialFit::plotFits(string name){
     assert(sumOfGaussians.find(mh)!=sumOfGaussians.end());
     assert(datasets.find(mh)!=datasets.end());
     RooAddPdf *fitModel = sumOfGaussians[mh];
-    RooDataSet *data = datasets[mh];
-    data->plotOn(plot,Binning(160));
-    fitModel->plotOn(plot);
+    //RooDataSet *data = datasets[mh];
+    mass->setBins(bins_);
+    RooDataHist *data = new RooDataHist(datasets[mh]->GetName(),datasets[mh]->GetName(), RooArgSet(*mass),*datasets[mh]);
+    //RooDataHist *data = datasets[mh]->binnedClone();
+    //data->plotOn(plot,Binning(160),MarkerColor(kBlue+10*i));
+    data->plotOn(plot,MarkerColor(kBlue+10*i));
+    fitModel->plotOn(plot,LineColor(kBlue-1+10*i));
+    if( (TString(datasets[mh]->GetName()))!=(TString(datasetsSTD[mh]->GetName()))){
+    pt->SetTextColor(kRed);
+    pt->AddText(Form(" %d replacement :",mh));
+    pt->AddText(Form(" %s",data->GetName())); 
+    } else {
+    pt->AddText(Form(" %d: %s",mh,data->GetName())); 
+    }
   }
+  plot->SetTitle(Form("%s %s Fits",(datasetsSTD[125]->GetName()),rvwv.c_str()));
   plot->Draw();
+  pt->Draw();
   canv->Print(Form("%s.pdf",name.c_str()));
   canv->Print(Form("%s.png",name.c_str()));
+  mass->setBins(160); //return to default 
   delete canv;
 }

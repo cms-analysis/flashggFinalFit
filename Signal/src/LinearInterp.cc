@@ -59,8 +59,10 @@ void LinearInterp::interpolate(int nGaussians){
     }
     assert(xValues.size()==dmValues.size());
     assert(xValues.size()==sigmaValues.size());
-    RooSpline1D *dmSpline = new RooSpline1D(Form("dm_g%d",g),Form("dm_g%d",g),*MH,xValues.size(),&(xValues[0]),&(dmValues[0]),"LINEAR");
-    RooSpline1D *sigmaSpline = new RooSpline1D(Form("sigma_g%d",g),Form("sigma_g%d",g),*MH,xValues.size(),&(xValues[0]),&(sigmaValues[0]),"LINEAR");
+    //RooSpline1D *dmSpline = new RooSpline1D(Form("dm_g%d",g),Form("dm_g%d",g),*MH,xValues.size(),&(xValues[0]),&(dmValues[0]),"LINEAR");
+    RooSpline1D *dmSpline = new RooSpline1D(Form("dm_g%d",g),Form("dm_g%d",g),*MH,xValues.size(),&(xValues[0]),&(dmValues[0]));
+   // RooSpline1D *sigmaSpline = new RooSpline1D(Form("sigma_g%d",g),Form("sigma_g%d",g),*MH,xValues.size(),&(xValues[0]),&(sigmaValues[0]),"LINEAR");
+    RooSpline1D *sigmaSpline = new RooSpline1D(Form("sigma_g%d",g),Form("sigma_g%d",g),*MH,xValues.size(),&(xValues[0]),&(sigmaValues[0]));
     splines.insert(pair<string,RooSpline1D*>(dmSpline->GetName(),dmSpline));
     splines.insert(pair<string,RooSpline1D*>(sigmaSpline->GetName(),sigmaSpline));
     // add secondary models as well
@@ -84,7 +86,8 @@ void LinearInterp::interpolate(int nGaussians){
         fracValues.push_back(fitParams[mh][Form("frac_mh%d_g%d",mh,g)]->getVal());
       }
       assert(xValues.size()==fracValues.size());
-      RooSpline1D *fracSpline = new RooSpline1D(Form("frac_g%d",g),Form("frac_g%d",g),*MH,xValues.size(),&(xValues[0]),&(fracValues[0]),"LINEAR");
+      //RooSpline1D *fracSpline = new RooSpline1D(Form("frac_g%d",g),Form("frac_g%d",g),*MH,xValues.size(),&(xValues[0]),&(fracValues[0]),"LINEAR");
+      RooSpline1D *fracSpline = new RooSpline1D(Form("frac_g%d",g),Form("frac_g%d",g),*MH,xValues.size(),&(xValues[0]),&(fracValues[0]));
       splines.insert(pair<string,RooSpline1D*>(fracSpline->GetName(),fracSpline));
       // add secondary models as well
       if (doSecondaryModels){

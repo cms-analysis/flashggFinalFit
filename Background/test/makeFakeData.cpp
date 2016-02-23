@@ -5,6 +5,7 @@
 // and most robust is guessNew() but it is very slow!!!
 // If you would like to write something smarter that would be great!!
 
+
 #include "TF1.h"
 #include "TMatrixD.h"
 #include "TFile.h"
@@ -632,50 +633,6 @@ void profileExtendTerm(RooRealVar *mgg, RooAbsData *data, RooMultiPdf *mpdf, Roo
 	}
 }
 
-void plotAllPdfs(RooRealVar *mgg, RooAbsData *data, RooMultiPdf *mpdf, RooCategory *mcat, string name, int cat, bool unblind, int isFlashgg, std::vector<string> flashggCats){
-	string catname;
-	if (isFlashgg){
-		catname = Form("%s",flashggCats[cat].c_str());
-	} else {
-		catname = Form("cat%d",cat);
-	}
-	RooPlot *plot = mgg->frame();
-	plot->SetTitle(Form("Background functions profiled for category %s",catname.c_str()));
-	plot->GetXaxis()->SetTitle("m_{#gamma#gamma} (GeV)");
-	if (!unblind) {
-		mgg->setRange("unblind_up",135,180);
-		mgg->setRange("unblind_down",100,115);
-		data->plotOn(plot,Binning(80),CutRange("unblind_down,unblind_up"));
-	}
-	else {
-		data->plotOn(plot,Binning(80));
-	}
-
-	TLegend *leg = new TLegend(0.6,0.5,0.89,0.89);
-	leg->SetFillColor(0);
-	leg->SetLineColor(0);
-
-	int color[10] = {kBlue,kOrange,kGreen,kRed,kMagenta,kPink,kViolet,kCyan,kYellow,kBlack};
-	for (int pInd=0; pInd<mpdf->getNumPdfs(); pInd++){
-		mcat->setIndex(pInd);
-		// Always refit since we cannot be sure the best fit pdf is being fitted
-		mpdf->getCurrentPdf()->fitTo(*data);
-		mpdf->getCurrentPdf()->plotOn(plot,LineColor(color[pInd]),LineWidth(2));
-		TObject *legObj = plot->getObject(plot->numItems()-1);
-		leg->AddEntry(legObj,mpdf->getCurrentPdf()->GetName(),"L");
-	}
-
-	TCanvas *canv = new TCanvas();
-	plot->Draw();
-	if (!unblind) plot->SetMinimum(0.0001);
-	leg->Draw();
-	canv->Modified();
-	canv->Update();
-	canv->Print(Form("%s.pdf",name.c_str()));
-	canv->Print(Form("%s.png",name.c_str()));
-	canv->Print(Form("%s.C",name.c_str()));
-	delete canv;
-}
 
 int main(int argc, char* argv[]){
   
@@ -687,11 +644,14 @@ int main(int argc, char* argv[]){
   lumi_sqrtS = "13 TeV";       // used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
 
 
-	string bkgFileName;
+	string dataFileName;
+	//string bkgFileName;
+	string bkgFileName100;
+	string bkgFileName105;
+	string bkgFileName110;
 	string sigFileName;
 	string outFileName;
 	string outDir;
-	int cat;
 	string catLabel;
 	double massStep;
 	double nllTolerance;
@@ -702,6 +662,7 @@ int main(int argc, char* argv[]){
 	bool unblind=false;
 	bool makeCrossCheckProfPlots=false;
 	int mhLow;
+	int mhTarget_;
 	int mhHigh;
 	int sqrts;
 	float intLumi;
@@ -714,11 +675,14 @@ int main(int argc, char* argv[]){
 	po::options_description desc("Allowed options");
 	desc.add_options()
 		("help,h", 																																		 			"Show help")
-		("bkgFileName,b", po::value<string>(&bkgFileName), 																	"Input file name")
-		("sigFileName,s", po::value<string>(&sigFileName), 																	"Input file name")
+		("dataFileName,d", po::value<string>(&dataFileName), 																	"Input file name (for data)")
+		//("bkgFileName,b", po::value<string>(&bkgFileName), 																	"Input file name (for multipdf)")
+		("bkgFileName100", po::value<string>(&bkgFileName100), 																	"Input file name (for multipdf)")
+		("bkgFileName105", po::value<string>(&bkgFileName105), 																	"Input file name (for multipdf)")
+		("bkgFileName110", po::value<string>(&bkgFileName110), 																	"Input file name (for multipdf)")
+		("sigFileName,s", po::value<string>(&sigFileName), 																	"Input file name (for signal model)")
 		("outFileName,o", po::value<string>(&outFileName)->default_value("BkgPlots.root"),	"Output file name")
-		("outDir,d", po::value<string>(&outDir)->default_value("BkgPlots"),						 			"Output directory")
-		("cat,c", po::value<int>(&cat),																								 			"Category")
+		("outDir,D", po::value<string>(&outDir)->default_value("BkgPlots"),						 			"Output directory")
 		("catLabel,l", po::value<string>(&catLabel),																	 			"Label category")
 		("doBands",																																		 			"Do error bands")
 		("isMultiPdf",																																			"Is this a multipdf ws?")
@@ -730,6 +694,7 @@ int main(int argc, char* argv[]){
 		("mhLow,L", po::value<int>(&mhLow)->default_value(100),															"Starting point for scan")
 		("mhHigh,H", po::value<int>(&mhHigh)->default_value(180),														"End point for scan")
 		("mhVal", po::value<double>(&mhvalue_)->default_value(125.),														"Choose the MH for the plots")
+		("mhTarget,m", po::value<int>(&mhTarget_)->default_value(125),														"Choose the MH for the plots")
 		("higgsResolution", po::value<double>(&higgsResolution_)->default_value(1.),															"Starting point for scan")
 		("intLumi", po::value<float>(&intLumi)->default_value(0.),																"What intLumi in fb^{-1}")
 		("sqrts,S", po::value<int>(&sqrts)->default_value(8),																"Which centre of mass is this data from?")
@@ -756,318 +721,339 @@ int main(int argc, char* argv[]){
 	system(Form("mkdir -p %s",outDir.c_str()));
 	if (makeCrossCheckProfPlots) system(Form("mkdir -p %s/normProfs",outDir.c_str()));
 
-	TFile *inFile = TFile::Open(bkgFileName.c_str());
+	//TFile *inFile = TFile::Open(bkgFileName.c_str());
 	//RooWorkspace *inWS = (RooWorkspace*)inFile->Get("multipdf");
-	WSTFileWrapper * inWS = new WSTFileWrapper(bkgFileName,"multipdf");
+	//WSTFileWrapper * inWS = new WSTFileWrapper(bkgFileName,"multipdf");
+	WSTFileWrapper * inWS100 = new WSTFileWrapper(bkgFileName100,"multipdf");
+	WSTFileWrapper * inWS105 = new WSTFileWrapper(bkgFileName105,"multipdf");
+	WSTFileWrapper * inWS110 = new WSTFileWrapper(bkgFileName110,"multipdf");
+  string name="";
+  if (mhTarget_==100)  name=bkgFileName100;
+  if (mhTarget_==105)  name=bkgFileName105;
+  if (mhTarget_==110)  name=bkgFileName110;
+	WSTFileWrapper * inWSTarget = new WSTFileWrapper(name,"multipdf");
+
 	//if (!inWS) inWS = (RooWorkspace*)inFile->Get("cms_hgg_workspace");
-	if (!inWS) {
+	if (!inWS100 || !inWS105 || !inWS110 || !inWSTarget) {
 		cout << "[ERROR] "<< "Cant find the workspace" << endl;
 		exit(0);
 	}
-	RooRealVar *mgg = (RooRealVar*)inWS->var("CMS_hgg_mass");
+	TFile *inFileData = TFile::Open(dataFileName.c_str());
+	//RooWorkspace *inWS = (RooWorkspace*)inFile->Get("multipdf");
+	WSTFileWrapper * inWSData = new WSTFileWrapper(dataFileName,"tagsDumper/cms_hgg_13TeV");
+	//if (!inWS) inWS = (RooWorkspace*)inFile->Get("cms_hgg_workspace");
   string catname;
-	if (isFlashgg_){
-		catname = Form("%s",flashggCats_[cat].c_str());
-	} else {
-		catname = Form("cat%d",cat);
-	}
 
 	TFile *outFile = TFile::Open(outFileName.c_str(),"RECREATE");
-	RooWorkspace *outWS = new RooWorkspace("bkgplotws","bkgplotws");
+  TDirectory *cdtof = outFile->mkdir("tagsDumper");
+  cdtof->cd();    // make the "tof" directory the current director
+	//RooWorkspace *outWS = new RooWorkspace("cms_hgg_13TeV");
+	RooWorkspace *outWS = new RooWorkspace("multipdf");
+//	RooWorkspace *outWS = new RooWorkspace("cms_hgg_13TeV");
 
-	RooAbsData *data = (RooDataSet*)inWS->data(Form("data_mass_%s",catname.c_str()));
-	if (useBinnedData) data = (RooDataHist*)inWS->data(Form("roohist_data_mass_%s",catname.c_str()));
+  for (int icat =0 ; icat < flashggCats_.size() ; icat ++){
 
+  catname=flashggCats_[icat];
+
+  RooRealVar *mass =0;
+ // if (mhTarget_==100) {
+  std::cout << "get mass from 100"<<std::endl;
+  mass =(RooRealVar*)inWS100->var("CMS_hgg_mass");
+  mass->setMin(mhTarget_);
+ // }
+ /* if (mhTarget_==105) {
+  std::cout << "get mass from 105"<<std::endl;
+  mass =(RooRealVar*)inWS105->var("CMS_hgg_mass");
+  }
+  if (mhTarget_==110) {
+  std::cout << "get mass from 110"<<std::endl;
+  mass =(RooRealVar*)inWS110->var("CMS_hgg_mass");
+  }*/
+
+	RooAbsData *data100 = inWS100->data(Form("roohist_data_mass_%s",catname.c_str())); // get background events from 100 always.
+	RooAbsData *data105 = inWS105->data(Form("roohist_data_mass_%s",catname.c_str())); // get background events from 100 always.
+	RooAbsData *data110 = inWS110->data(Form("roohist_data_mass_%s",catname.c_str())); // get background events from 100 always.
+	RooAbsData *data = inWSTarget->data(Form("roohist_data_mass_%s",catname.c_str())); // get background events from 100 always.
+
+	RooAbsPdf *bpdfTarget = 0;
 	RooAbsPdf *bpdf = 0;
+	RooMultiPdf *mpdfTarget = 0; 
 	RooMultiPdf *mpdf = 0; 
+	RooCategory *mcatTarget = 0;
 	RooCategory *mcat = 0;
 	if (isMultiPdf) {
-		mpdf = (RooMultiPdf*)inWS->pdf(Form("CMS_hgg_%s_%dTeV_bkgshape",catname.c_str(),sqrts));
-		mcat = (RooCategory*)inWS->cat(Form("pdfindex_%s_%dTeV",catname.c_str(),sqrts));
-		if (!mpdf || !mcat){
+		mpdfTarget = (RooMultiPdf*)inWSTarget->pdf(Form("CMS_hgg_%s_%dTeV_bkgshape",catname.c_str(),sqrts));
+		mpdf = (RooMultiPdf*)inWS110->pdf(Form("CMS_hgg_%s_%dTeV_bkgshape",catname.c_str(),sqrts));
+		mcatTarget = (RooCategory*)inWSTarget->cat(Form("pdfindex_%s_%dTeV",catname.c_str(),sqrts));
+		mcat = (RooCategory*)inWS110->cat(Form("pdfindex_%s_%dTeV",catname.c_str(),sqrts));
+		if (!mpdf || !mcat || !mcatTarget || !mpdfTarget){
 			cout << "[ERROR] "<< "Can't find multipdfs (" << Form("CMS_hgg_%s_%dTeV_bkgshape",catname.c_str(),sqrts) << ") or multicat ("<< Form("pdfindex_%s_%dTeV",catname.c_str(),sqrts) <<")" << endl;
-			exit(0);
+			exit(1);
 		}
-	}
-	else {
-		bpdf = (RooAbsPdf*)inWS->pdf(Form("pdf_data_pol_model_%dTeV_%s",sqrts,catname.c_str()));
-		if (!bpdf){
-			cout << "[ERROR] "<< "Cant't find background pdf " << Form("pdf_data_pol_model_%dTeV_%s",sqrts,catname.c_str()) << endl;
-			exit(0);
-		}
-		mcat = new RooCategory(Form("pdfindex_%s_%dTeV",catname.c_str(),sqrts),"c");
-		RooArgList temp;
-		temp.add(*bpdf);
-		mpdf = new RooMultiPdf(Form("tempmpdf_%s",catname.c_str()),"",*mcat,temp);
-	}
+	} else {
+
+  std::cout << "ERROR must provide mutlipdf . exit" << std::endl;
+  exit(1);
+
+  }
 
 	cout << "[INFO] "<< "Current PDF and data:" << endl;
 	cout<< "[INFO] " << "\t"; mpdf->getCurrentPdf()->Print();
 	cout << "[INFO] "<< "\t"; data->Print();
+  std::cout << "DEBUG A0" <<std::endl;
+  outWS->import(*mcatTarget);
+  std::cout << "DEBUG A1" <<std::endl;
+  outWS->import(*mpdfTarget);
+  std::cout << "DEBUG A2" <<std::endl;
+  outWS->import(inWSTarget->allVars());
+  std::cout << "DEBUG A3" <<std::endl;
 
-	// plot all the pdfs for reference
-	if (isMultiPdf || verbose_) plotAllPdfs(mgg,data,mpdf,mcat,Form("%s/allPdfs_%s",outDir.c_str(),catname.c_str()),cat,unblind, isFlashgg_, flashggCats_);
-
-	// include normalization hack RooBernsteinFast;
-	/*
-		 for (int pInd=0; pInd<mpdf->getNumPdfs(); pInd++){
-		 mcat->setIndex(pInd);
-		 if (mpdf->getCurrentPdf()->IsA()->InheritsFrom(RooBernsteinFast<1>::Class())) mpdf->getCurrentPdf()->forceNumInt();	
-		 if (mpdf->getCurrentPdf()->IsA()->InheritsFrom(RooBernsteinFast<2>::Class())) mpdf->getCurrentPdf()->forceNumInt();	
-		 if (mpdf->getCurrentPdf()->IsA()->InheritsFrom(RooBernsteinFast<3>::Class())) mpdf->getCurrentPdf()->forceNumInt();	
-		 if (mpdf->getCurrentPdf()->IsA()->InheritsFrom(RooBernsteinFast<4>::Class())) mpdf->getCurrentPdf()->forceNumInt();	
-		 if (mpdf->getCurrentPdf()->IsA()->InheritsFrom(RooBernsteinFast<5>::Class())) mpdf->getCurrentPdf()->forceNumInt();	
-		 if (mpdf->getCurrentPdf()->IsA()->InheritsFrom(RooBernsteinFast<6>::Class())) mpdf->getCurrentPdf()->forceNumInt();	
-		 if (mpdf->getCurrentPdf()->IsA()->InheritsFrom(RooBernsteinFast<7>::Class())) mpdf->getCurrentPdf()->forceNumInt();	
-		 }
-		 */
-
-	// reset to best fit
-	int bf = getBestFitFunction(mpdf,data,mcat,!verbose_);
+	int bf = getBestFitFunction(mpdf,data110,mcat,!verbose_);
+  std::cout << "DEBUG A4" <<std::endl;
 	mcat->setIndex(bf);
+  std::cout << "DEBUG A5" <<std::endl;
 	cout<< "[INFO] " << "Best fit PDF and data:" << endl;
 	cout<< "[INFO] " << "\t"; mpdf->getCurrentPdf()->Print();
 	cout<< "[INFO] " << "\t"; data->Print();
-
+  
+  RooDataHist* fakedata = (RooDataHist*) data->emptyClone();
+  RooDataHist* fakedataExtra = (RooDataHist*) data->emptyClone();
+  RooDataHist* fakedataExtraBkgOnly = (RooDataHist*) data->emptyClone();
+  std::cout << "DEBUG A" <<std::endl;
+  int  nEntriesInBlindRegion =0;
+  int  nEntriesInIgnoredRegion =0;
+  int  nEntriesInIgnoredRegion0 =0;
+  float  nEntriesFromSig = 0; 
+  float  nEntriesFromBkg = 0;
+  int nBins=0;
+  std::cout << "DEBUG B" <<std::endl;
+  RooDataSet* dataGenerated = (RooDataSet*) data->emptyClone();
+  std::cout << "DEBUG C" <<std::endl;
+  float min=999;
+  float max=-999;
+  std::cout << "DEBUG D" <<std::endl;
+  for (int iEntry =0 ; iEntry < data100->numEntries() ; iEntry ++){
+    mass->setVal(data100->get(iEntry)->getRealValue("CMS_hgg_mass"));
+     if (mass->getVal()< mhTarget_) { nEntriesInIgnoredRegion+=data100->weight();continue;}
+     if (mass->getVal()== mhTarget_) {nEntriesInIgnoredRegion0+=data100->weight() ;continue;}
+     if (mass->getVal() < min) min=mass->getVal();
+     if (mass->getVal() > max) max=mass->getVal();
+     if (mass->getVal() > 135 || mass->getVal() < 115){
+     //std::cout << "DEBUG mass->setVal  " << mass->getVal() <<" data100->weight() " <<  data100->weight()<< std::endl;
+     fakedata->add( RooArgList(*mass),data100->weight() );
+     } else {
+     nEntriesInBlindRegion+=data100->weight();
+     }
+  }
+  std::cout << "DEBUG E" <<std::endl;
+  std::cout << "LC DEBUG max " << max  << " min "<< min << " nBins " << nBins << " and nEventInblindRegion " << nEntriesInBlindRegion <<  std::endl;
+  min=floor(min+0.5);
+  max=floor(max+0.5);
+  nBins= max-min;
+  //nBins= 80;
+  std::cout << "LC DEBUG max " << max  << " min "<< min << " nBins " << nBins << " and nEventInblindRegion " << nEntriesInBlindRegion <<  std::endl;
 	// plot the data
 	TLegend *leg = new TLegend(0.6,0.6,0.89,0.89);
 	leg->SetFillColor(0);
 	leg->SetLineColor(0);
+  std::cout << "DEBUG F" <<std::endl;
 
 	cout<< "[INFO] " << "Plotting data and nominal curve" << endl;
-	RooPlot *plot = mgg->frame();
-	RooPlot *plotLC = mgg->frame();
+  mass->setRange("fitRange",110,180);
+  mass->setRange("fullRange",100,180);
+  mass->setBins(70);
+	RooPlot *dummyplot = mass->frame();
+
+  /*RooPlot *plot = mass->frame();
+  mass->setRange("fitRange",130,180);
+  //mass->setRange("fitRange",110,180);
+//	RooPlot *dummyplot = mass->frame(110,180,70);
 	plot->GetXaxis()->SetTitle("m_{#gamma#gamma} (GeV)");
 	plot->SetTitle("");
-	data->plotOn(plot,Binning(80),Invisible());
-	TObject *dataLeg = (TObject*)plot->getObject(plot->numItems()-1);
-	mpdf->getCurrentPdf()->plotOn(plot,LineColor(kRed),LineWidth(2));
-	RooCurve *nomBkgCurve = (RooCurve*)plot->getObject(plot->numItems()-1);
+	//fakedata->plotOn(plot,Binning(nBins),Invisible());
+	//data->plotOn(plot,Binning(nBins),Invisible());
+  //mass->setRange(110,180);
+  */
+	data100->plotOn(dummyplot,CutRange("fullRange"),Invisible());
+	//fakedata->plotOn(plot,Invisible());
+	TObject *dataLeg = (TObject*)dummyplot->getObject(dummyplot->numItems()-1);
+	//mpdf->getCurrentPdf()->fitTo(*data110,Range("fitRange"));
+  std::cout << " DEBUG data100->sumEntries()- nEntriesbelowMHmin - nEntries atmhmin, "<<  data100->sumEntries() << " - "<< nEntriesInIgnoredRegion << " - "<< nEntriesInIgnoredRegion0 << " = " << data100->sumEntries()- nEntriesInIgnoredRegion - nEntriesInIgnoredRegion0<< std::endl;
+  std::cout << " DEBUG data110->sumEntries() " <<  data110->sumEntries() << std::endl;
+  std::cout << " DEBUG data100->numEntries() " <<  data100->numEntries() << std::endl;
+  std::cout << " DEBUG data110->numEntries() " <<  data110->numEntries() << std::endl;
+  std::cout << " DEBUG nEntries in blind region" <<  nEntriesInBlindRegion << std::endl;
+	//mpdf->getCurrentPdf()->plotOn(plot,LineColor(kRed),Normalization((int) data100->sumEntries()- nEntriesInIgnoredRegion,RooAbsReal::NumEvent),LineWidth(2));
+	//mpdf->getCurrentPdf()->plotOn(plot,LineColor(kRed),Normalization((int) data110->sumEntries(),RooAbsReal::NumEvent),LineWidth(2));
+  //mpdf->getCurrentPdf()->plotOn(plot,LineColor(kRed),Normalization((int) 1,RooAbsReal::NumEvent),LineWidth(2));
+	mpdf->getCurrentPdf()->plotOn(dummyplot,LineColor(kRed),LineWidth(2),NormRange("fitRange"));
+//	mpdf->getCurrentPdf()->plotOn(plot,LineColor(kBlue),LineWidth(2));
+//	mpdf->getCurrentPdf()->plotOn(plot,LineColor(kOrange),LineWidth(2),Normalization(data100->sumEntries(),RooAbsReal::NumEvent));
+//	mpdf->getCurrentPdf()->plotOn(plot,LineColor(kBlack),LineWidth(2),Normalization(data110->sumEntries(),RooAbsReal::NumEvent));
+	RooCurve *nomBkgCurve = (RooCurve*)dummyplot->getObject(dummyplot->numItems()-1);
+		
 
+  
+  std::cout << "DEBUG G" <<std::endl;
 	leg->AddEntry(dataLeg,"Data","LEP");
 	leg->AddEntry(nomBkgCurve,"Bkg Fit","L");
 
-	// Bands
-	TGraphAsymmErrors *oneSigmaBand = new TGraphAsymmErrors();
-	oneSigmaBand->SetName(Form("onesigma_%s",catname.c_str()));
-	TGraphAsymmErrors *twoSigmaBand = new TGraphAsymmErrors();
-	twoSigmaBand->SetName(Form("twosigma_%s",catname.c_str()));
-
-	cout<< "[INFO] " << "Plot has " << plot->GetXaxis()->GetNbins() << " bins" << endl;
-	if (doBands) {
-		int p=0;
-		for (double mass=double(mhLow); mass<double(mhHigh)+massStep; mass+=massStep) {
-			//for (int i=1; i<(plot->GetXaxis()->GetNbins()+1); i++){
-			double lowedge = mass-0.5;
-			double upedge = mass+0.5;
-			double center = mass;
-			/*
-				 double lowedge = plot->GetXaxis()->GetBinLowEdge(i);
-				 double upedge = plot->GetXaxis()->GetBinUpEdge(i);
-				 double center = plot->GetXaxis()->GetBinCenter(i);
-				 */
-			double nomBkg = nomBkgCurve->interpolate(center);
-			//double nomBkg_perGeV = (nomBkgCurve->Integral(center-higgsResolution_,center+higgsResolution_))/2*higgsResolution_;
-			double nomBkg_perGeV = (nomBkgCurve->average(center-higgsResolution_,center+higgsResolution_));
-      double nllBest = getNormTermNll(mgg,data,mpdf,mcat,nomBkg,lowedge,upedge);
-
-			// sensible range
-			double lowRange = TMath::Max(0.,nomBkg - 3*TMath::Sqrt(nomBkg));
-			double highRange = nomBkg + 3*TMath::Sqrt(nomBkg);
-       std::cout << "[FOR TABLE] ,"<<flashggCats_[cat]<<","<< mass << ","<<nomBkg_perGeV<<", assuming resolution of " << higgsResolution_ << std::endl;
-			if (verbose_) cout<< "[INFO] " << "mgg: " << center << " nomBkg: " << nomBkg << " lR: " << lowRange << " hR: " << highRange << endl;
-
-			double errLow1Value,errHigh1Value,errLow2Value,errHigh2Value;
-			// cant handle having 0 events
-			if (nomBkg<1.e-5) {
-				errLow1Value = 0.;
-				errLow2Value = 0.;
-				if (verbose_) cout << "[INFO] "<< "errHigh1" << endl;
-				errHigh1Value = guessNew(mgg,mpdf,mcat,data,nomBkg,nllBest,highRange,lowedge,upedge,1.,nllTolerance);
-				if (verbose_) cout << "[INFO] "<< "errHigh2" << endl;
-				errHigh2Value = guessNew(mgg,mpdf,mcat,data,nomBkg,nllBest,highRange,lowedge,upedge,4.,nllTolerance);
-			}
-			else {
-				// error calc algo
-				if (verbose_) cout<< "[INFO] " << "errLow1" << endl;
-				errLow1Value = guessNew(mgg,mpdf,mcat,data,nomBkg,nllBest,lowRange,lowedge,upedge,1.,nllTolerance);
-				if (verbose_) cout<< "[INFO] " << "errLow2" << endl;
-				errLow2Value = guessNew(mgg,mpdf,mcat,data,nomBkg,nllBest,lowRange,lowedge,upedge,4.,nllTolerance);
-				if (verbose_) cout<< "[INFO] " << "errHigh1" << endl;
-				errHigh1Value = guessNew(mgg,mpdf,mcat,data,nomBkg,nllBest,highRange,lowedge,upedge,1.,nllTolerance);
-				if (verbose_) cout<< "[INFO] " << "errHigh2" << endl;
-				errHigh2Value = guessNew(mgg,mpdf,mcat,data,nomBkg,nllBest,highRange,lowedge,upedge,4.,nllTolerance);
-			}
-
-			double errLow1 = nomBkg - errLow1Value;
-			double errHigh1 = errHigh1Value - nomBkg;
-			double errLow2 = nomBkg - errLow2Value;
-			double errHigh2 = errHigh2Value - nomBkg;
-
-			oneSigmaBand->SetPoint(p,center,nomBkg);
-			twoSigmaBand->SetPoint(p,center,nomBkg);
-			oneSigmaBand->SetPointError(p,0.,0.,errLow1,errHigh1);
-			twoSigmaBand->SetPointError(p,0.,0.,errLow2,errHigh2);
-
-			cout<< "[INFO] " << "mgg: " << center << " nomBkg: " << nomBkg << " +/- 1 (2) sig -- +" << errHigh1 << "(" << errHigh2 << ")" << " - " << errLow1 << "(" << errLow2 << ")" << endl;
-
-			if (makeCrossCheckProfPlots) {
-				// literal profile
-				TCanvas *temp = new TCanvas();
-				TGraph *profCurve = new TGraph();
-				int p2=0;
-				for (double scanVal=0.9*errLow2Value; scanVal<1.1*errHigh2Value; scanVal+=1){
-					double nll = getNormTermNll(mgg,data,mpdf,mcat,scanVal,lowedge,upedge)-nllBest;
-					profCurve->SetPoint(p2,scanVal,nll);
-					p2++;
-				}
-				profCurve->GetXaxis()->SetRangeUser(0.9*errLow2Value,1.1*errHigh2Value);
-				profCurve->GetYaxis()->SetRangeUser(0.,5.);
-				profCurve->Draw("ALP");
-				TLine line;
-				line.SetLineWidth(2);
-				line.SetLineStyle(kDashed);
-				line.SetLineColor(kRed);
-				line.DrawLine(nomBkg-errLow1,0.,nomBkg-errLow1,1.);
-				line.DrawLine(nomBkg+errHigh1,0.,nomBkg+errHigh1,1.);
-				line.DrawLine(0.9*errLow2Value,1.,1.1*errHigh2Value,1.);
-				line.SetLineColor(kBlue);
-				line.DrawLine(nomBkg-errLow2,0.,nomBkg-errLow2,4.);
-				line.DrawLine(nomBkg+errHigh2,0.,nomBkg+errHigh2,4.);
-				line.DrawLine(0.9*errLow2Value,4.,1.1*errHigh2Value,4.);
-				temp->Print(Form("%s/normProfs/%s_mass%6.2f.pdf",outDir.c_str(),catname.c_str(),center));
-				delete profCurve;
-				delete temp;
-			}
-			p++;
-		}
-		cout << endl;
-		}
-
+    std::cout << " DEBUG nomBkgCurve at 120 " << nomBkgCurve->interpolate(120) << std::endl;
+    std::cout << " DEBUG nomBkgCurve at 130 " << nomBkgCurve->interpolate(130) << std::endl;
+    std::cout << " DEBUG nomBkgCurve at 140 " << nomBkgCurve->interpolate(140) << std::endl;
+    std::cout << " DEBUG nomBkgCurve at 150 " << nomBkgCurve->interpolate(150) << std::endl;
+    std::cout << " DEBUG nomBkgCurve at 160 " << nomBkgCurve->interpolate(160) << std::endl;
+    std::cout << " DEBUG nomBkgCurve at 170 " << nomBkgCurve->interpolate(170) << std::endl;
+    std::cout << " DEBUG nomBkgCurve at 180 " << nomBkgCurve->interpolate(180) << std::endl;
+   	cout<< "[INFO] " << "Plot has " << dummyplot->GetXaxis()->GetNbins() << " bins" << endl;
 		outFile->cd();
-		oneSigmaBand->Write();
-		twoSigmaBand->Write();
-		nomBkgCurve->Write();
-		outWS->import(*mcat);
-		outWS->import(*mpdf);
-		outWS->import(*data);
 
 		TCanvas *canv = new TCanvas("c","",800,800);
-		RooRealVar *lumi = (RooRealVar*)inWS->var("IntLumi");
-		plot->Draw();
+		RooRealVar *lumi = (RooRealVar*)inWSTarget->var("IntLumi");
+    mass->setRange(100,180);
+    //dummyplot->SetAxisRange(100,180);
+		dummyplot->Draw();
 
-		if (!unblind) {
-			mgg->setRange("unblind_up",135,180);
-			mgg->setRange("unblind_down",100,115);
-			data->plotOn(plot,Binning(80),CutRange("unblind_down,unblind_up"));
-		}
-		else {
-			data->plotOn(plot,Binning(80));
-		}
-
-		if (doBands) {
-			twoSigmaBand->SetLineColor(kGreen);
-			twoSigmaBand->SetFillColor(kGreen);
-			twoSigmaBand->SetMarkerColor(kGreen);
-			twoSigmaBand->Draw("L3 SAME");
-			oneSigmaBand->SetLineColor(kYellow);
-			oneSigmaBand->SetFillColor(kYellow);
-			oneSigmaBand->SetMarkerColor(kYellow);
-			oneSigmaBand->Draw("L3 SAME");
-			leg->AddEntry(oneSigmaBand,"#pm1#sigma","F");
-			leg->AddEntry(twoSigmaBand,"#pm2#sigma","F");
-		}
-
-		if (doSignal){
-      int SignalType=0;
-			TFile *sigFile = TFile::Open(sigFileName.c_str());
-		//	RooWorkspace *w_sig = (RooWorkspace*)sigFile->Get("wsig_7TeV");
-	    WSTFileWrapper *w_sig = new WSTFileWrapper(sigFileName,"wsig_13TeV");
-	//		if (!w_sig) w_sig = (RooWorkspace*)sigFile->Get("wsig_8TeV");
-	//		if (!w_sig) w_sig = (RooWorkspace*)sigFile->Get("wsig_13TeV");
-			if (!w_sig) {
-	    WSTFileWrapper *w_sig = new WSTFileWrapper(sigFileName,"cms_hgg_workspace");
-      //w_sig = (RooWorkspace*)sigFile->Get("cms_hgg_workspace");
-      if (w_sig) SignalType=1;
+			mass->setRange("unblind_up",135,180);
+			mass->setRange("unblind_down",mhTarget_,115);
+      fakedata->plotOn(dummyplot,CutRange("unblind_down,unblind_up"),Binning(nBins));
+      if (!unblind) {
+      //  data->plotOn(plot,Binning(nBins),CutRange("unblind_down,unblind_up"),MarkerColor(kBlack));
       }
-			if (!w_sig) {
-				cout << "[INFO] " << "Signal workspace not found" << endl;
-				exit(0);
-			}
-			if (SignalType==1) {
-				TH1F::SetDefaultSumw2();
-				TH1F *gghHist = (TH1F*)sigFile->Get(Form("th1f_sig_ggh_mass_m125_%s",catname.c_str()));
-				TH1F *vbfHist = (TH1F*)sigFile->Get(Form("th1f_sig_vbf_mass_m125_%s",catname.c_str()));
-				TH1F *wzhHist = (TH1F*)sigFile->Get(Form("th1f_sig_wzh_mass_m125_%s",catname.c_str()));
-				TH1F *tthHist = (TH1F*)sigFile->Get(Form("th1f_sig_tth_mass_m125_%s",catname.c_str()));
-				TH1F *whHist = (TH1F*)sigFile->Get(Form("th1f_sig_wh_mass_m125_%s",catname.c_str()));
-				TH1F *zhHist = (TH1F*)sigFile->Get(Form("th1f_sig_zh_mass_m125_%s",catname.c_str()));
-				TH1F *sigHist = (TH1F*)gghHist->Clone(Form("th1f_sig_mass_m125_%s",catname.c_str()));
-				sigHist->Add(gghHist);
-				sigHist->Add(vbfHist);
-				if (wzhHist) sigHist->Add(wzhHist);
-				if (whHist) sigHist->Add(whHist);
-				if (zhHist) sigHist->Add(zhHist);
-				sigHist->Add(tthHist);
-				sigHist->SetLineColor(kBlue);
-				sigHist->SetLineWidth(3);
-				sigHist->SetFillColor(38);
-				sigHist->SetFillStyle(3001);
-				sigHist->Draw("HISTsame");
-				leg->AddEntry(sigHist,"Sig model m_{H}=125GeV","LF");
-				outFile->cd();
-				sigHist->Write();
-				if (verbose_) cout<< "[INFO] "  << "Plotted binned signal with " << sigHist->Integral() << " entries" << endl;
-				return (0); //FIXME
-			}
-			else {
-				RooRealVar *MH = (RooRealVar*)w_sig->var("MH");
-				if (!MH) MH = (RooRealVar*)w_sig->var("CMS_hgg_mass");
-				RooAbsPdf *sigPDF = (RooAbsPdf*)w_sig->pdf(Form("sigpdfrel%s_allProcs",catname.c_str()));
-				MH->setVal(mhvalue_);
-				sigPDF->plotOn(plot,Normalization(1.0,RooAbsReal::RelativeExpected),LineColor(kBlue),LineWidth(3));
-				sigPDF->plotOn(plot,Normalization(1.0,RooAbsReal::RelativeExpected),LineColor(kBlue),LineWidth(3),FillColor(38),FillStyle(3001),DrawOption("F"));
-				std::cout << "[INFO] expected number of events in signal PDF " << sigPDF->expectedEvents(*MH) << std::endl;	
-				//sigPDF->plotOn(plot,Normalization(0.001*lumi->getVal()/*get intlumi (/fb) from ws, and divide by 100 for /pb */,RooAbsReal::RelativeExpected),LineColor(kBlue),LineWidth(3));
-				//sigPDF->plotOn(plot,Normalization(0.001*lumi->getVal(),RooAbsReal::RelativeExpected),LineColor(kBlue),LineWidth(3),FillColor(38),FillStyle(3001),DrawOption("F"));
-				sigPDF->plotOn(plotLC,Normalization(1.0,RooAbsReal::RelativeExpected),LineColor(kBlue),LineWidth(3));
-				TObject *sigLeg = (TObject*)plot->getObject(plot->numItems()-1);
-				leg->AddEntry(sigLeg,Form("Sig model m_{H}=%.1fGeV",MH->getVal()),"L");
-				outWS->import(*sigPDF);
-			}
-		}
+      else {
+        data->plotOn(dummyplot,Binning(nBins),MarkerColor(kBlack));
+      }
+      //fakedata->plotOn(plot);
 
-		plot->Draw("same");
-		leg->Draw("same");
+  std::cout << "DEBUG H" <<std::endl;
+      if (doSignal){
+        int SignalType=0;
+        TFile *sigFile = TFile::Open(sigFileName.c_str());
+        WSTFileWrapper *w_sig = new WSTFileWrapper(sigFileName,"wsig_13TeV");
+        if (!w_sig) {
+          WSTFileWrapper *w_sig = new WSTFileWrapper(sigFileName,"cms_hgg_workspace");
+          if (w_sig) SignalType=1;
+        }
+        if (!w_sig) {
+          cout << "[INFO] " << "Signal workspace not found" << endl;
+          exit(0);
+        }
+        RooRealVar *MH = (RooRealVar*)w_sig->var("MH");
+        if (!MH) MH = (RooRealVar*)w_sig->var("CMS_hgg_mass");
+        MH->setMin(mhvalue_);
+        RooAbsPdf *sigPDF = (RooAbsPdf*)w_sig->pdf(Form("sigpdfrel%s_allProcs",catname.c_str()));
+        MH->setVal(mhvalue_);
+        sigPDF->plotOn(dummyplot,Normalization(1.0,RooAbsReal::RelativeExpected),LineColor(kBlue),LineWidth(3));
+        sigPDF->plotOn(dummyplot,Normalization(1.0,RooAbsReal::RelativeExpected),LineColor(kBlue),LineWidth(3),FillColor(38),FillStyle(3001),DrawOption("F"));
+        std::cout << "[INFO] expected number of events in signal PDF " << sigPDF->expectedEvents(*MH) << std::endl;	
+        nEntriesFromSig =sigPDF->expectedEvents(*MH);
+        cout << "[INFO] " << " Genrate sig events"  <<  nEntriesFromSig << " ( "<< (int) nEntriesFromSig << ")"<< endl;
+        mass->setRange(100,180);
+        RooDataSet *tmpDatasetSig = sigPDF->generate(*mass,1+(int)nEntriesFromSig*100);
+        cout << "[INFO] " << " tmpDataset " << tmpDatasetSig << " - " << *tmpDatasetSig << endl;
+        int filledEntries =0;
+        for (int iEntry =0 ; iEntry < tmpDatasetSig->numEntries() ; iEntry ++){
+          mass->setVal(tmpDatasetSig->get(iEntry)->getRealValue("CMS_hgg_mass")); 
+          if (iEntry%100==0) std::cout << "[DEBUG] mass value sig " << mass->getVal() << std::endl;
+          if (mass->getVal() < 135 && mass->getVal() > 115){
 
-		TLatex *latex = new TLatex();	
-		latex->SetTextSize(0.03);
-		latex->SetNDC();
-		TLatex *cmslatex = new TLatex();
-		cmslatex->SetTextSize(0.03);
-		cmslatex->SetNDC();
-		std::cout << "[INFO] intLumi " << intLumi << std::endl;
-		//cmslatex->drawlatex(0.2,0.85,form("#splitline{cms preliminary}{#sqrt{s} = %dtev l = %2.3ffb^{-1}}",sqrts,intlumi));
-		cmslatex->DrawLatex(0.25,0.85,Form("#splitline{}{#sqrt{s} = %dTeV L = %2.3ffb^{-1}}",sqrts,intLumi));
-		latex->DrawLatex(0.25,0.78,catLabel.c_str());
-		outWS->import(*lumi,RecycleConflictNodes());
+            fakedataExtra->add( RooArgList(*mass),tmpDatasetSig->weight() );
+            filledEntries++;
+            if (filledEntries > (int)nEntriesFromSig ) {
+              std::cout << "DEBUG reached required nEvents Sig = " << filledEntries << std::endl;
+              break;
+            }
+          }
+        }
+        dataGenerated->append(*tmpDatasetSig);
+        TObject *sigLeg = (TObject*)dummyplot->getObject(dummyplot->numItems()-1);
+        leg->AddEntry(sigLeg,Form("Sig model m_{H}=%.1fGeV",MH->getVal()),"L");
+        //outWS->import(*sigPDF);
+      }
+  std::cout << "DEBUG I" <<std::endl;
 
-		if (unblind) plot->SetMinimum(0.0001);
-		plot->GetYaxis()->SetTitleOffset(1.3);
-		canv->Modified();
-		canv->Update();
-    CMS_lumi( canv, 0, 0);
-		canv->Print(Form("%s/bkgplot_%s.pdf",outDir.c_str(),catname.c_str()));
-		canv->Print(Form("%s/bkgplot_%s.png",outDir.c_str(),catname.c_str()));
-		canv->Print(Form("%s/bkgplot_%s.C",outDir.c_str(),catname.c_str()));
-		canv->SetName(Form("bkgplot_%s",catname.c_str()));
-		outFile->cd();
-		canv->Write();
-		outWS->Write();
-		outFile->Close();
+      nEntriesFromBkg=(nEntriesInBlindRegion-nEntriesFromSig);
+      std::cout << "DEBUG nEntriesFromBkg " << nEntriesFromBkg << " nEntriesInBlindRegion " << nEntriesInBlindRegion << " nEntriesFromSig " << nEntriesFromSig << std::endl;
+      cout << "[INFO] " << " Genrate bkg events " << nEntriesFromBkg << "(" << (int) nEntriesFromBkg << ")" <<endl;
+      int generateNevnt = (int)(nEntriesFromBkg*100);
 
-		inFile->Close();
+      RooRealVar nevents("nevents","number of  events",2*generateNevnt,0.,1000000) ;
+      RooExtendPdf * epdf = new RooExtendPdf("dummy","dummy extended pdf" ,*(mpdf->getCurrentPdf()) ,nevents, "fullRange");
+      //RooDataSet *tmpDataset = mpdf->getCurrentPdf()->generate(*mass,generateNevnt);
+      mass->setRange(110,180);
+      RooDataSet *tmpDataset = epdf->generate(*mass,generateNevnt);
+      cout << "DEbug bkg dataset " << *tmpDataset << std::endl;
+      int filledEntries =0;
+      for (int iEntry =0 ; iEntry < tmpDataset->numEntries() ; iEntry ++){
+        mass->setVal(tmpDataset->get(iEntry)->getRealValue("CMS_hgg_mass")); 
+         if (mass->getVal()<110) std::cout << "[DEBUG] mass value nkg LESS THAN  110 " << mass->getVal() << std::endl;
+         if (iEntry%100==0) std::cout << "[DEBUG] mass value nkg " << mass->getVal() << std::endl;
+        if (mass->getVal() < min) min=mass->getVal();
+        if (mass->getVal() > max) max=mass->getVal();
+        if (mass->getVal() < 135 && mass->getVal() > 115){
 
-		return 0;
-	}
+         // std::cout << "[DEBUG] mass value " << mass->getVal() << std::endl;
+          fakedataExtra->add( RooArgList(*mass),tmpDataset->weight() );
+          fakedataExtraBkgOnly->add( RooArgList(*mass),tmpDataset->weight() );
+          filledEntries++;
+          if (filledEntries > (int)nEntriesFromBkg ) {
+            std::cout << "DEBUG reached required nEvents Bkg = " << filledEntries << std::endl;
+            break;
+          }
+        }
+      }
+      //epdf->fitTo(*data110,Extended(kTRUE),Range("fitRange"));
+      //epdf->fitTo(*data110,Extended(kTRUE));
+      //epdf->fitTo(*data110);
+      epdf->plotOn(dummyplot,LineColor(kMagenta));
+      fakedataExtra->plotOn(dummyplot,Binning(nBins),MarkerColor(kOrange));
+      fakedataExtraBkgOnly->plotOn(dummyplot,Binning(nBins),MarkerColor(kBlue));
+      for (int iEntry =0 ; iEntry < fakedataExtra->numEntries() ; iEntry ++){
+        mass->setVal(fakedataExtra->get(iEntry)->getRealValue("CMS_hgg_mass")); 
+        fakedata->add( RooArgList(*mass),fakedataExtra->weight() );
+      }
+
+
+
+      //nomBkgCurve->Write();
+      outWS->import(*fakedata);
+
+      //dummyplot->SetAxisRange(100,180);
+      dummyplot->Draw("same");
+      leg->Draw("same");
+
+      TLatex *latex = new TLatex();	
+      latex->SetTextSize(0.03);
+      latex->SetNDC();
+      TLatex *cmslatex = new TLatex();
+      cmslatex->SetTextSize(0.03);
+      cmslatex->SetNDC();
+      std::cout << "[INFO] intLumi " << intLumi << std::endl;
+      //cmslatex->drawlatex(0.2,0.85,form("#splitline{cms preliminary}{#sqrt{s} = %dtev l = %2.3ffb^{-1}}",sqrts,intlumi));
+      cmslatex->DrawLatex(0.25,0.85,Form("#splitline{}{#sqrt{s} = %dTeV L = %2.3ffb^{-1}}",sqrts,intLumi));
+      latex->DrawLatex(0.25,0.78,catLabel.c_str());
+      outWS->import(*lumi,RecycleConflictNodes());
+
+      if (unblind) dummyplot->SetMinimum(0.0001);
+      dummyplot->GetYaxis()->SetTitleOffset(1.3);
+      canv->Modified();
+      canv->Update();
+      CMS_lumi( canv, 0, 0);
+      canv->Print(Form("%s/fake_data_plot_%s.pdf",outDir.c_str(),catname.c_str()));
+      canv->Print(Form("%s/fake_data_plot_%s.png",outDir.c_str(),catname.c_str()));
+      canv->Print(Form("%s/fake_data_plot_%s.C",outDir.c_str(),catname.c_str()));
+      canv->SetName(Form("fake_data_lot_%s",catname.c_str()));
+      outFile->cd();
+      canv->Write();
+
+  }
+  outFile->cd();
+ // cdtof->cd();    // make the "tof" directory the current director
+  outWS->Write();
+  outFile->Close();
+
+  //inFile->Close();
+
+  return 0;
+}
 

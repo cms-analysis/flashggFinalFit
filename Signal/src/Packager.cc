@@ -47,39 +47,30 @@ bool Packager::skipMass(int mh){
 	return false;
 }
 
-void Packager::packageOutput(bool split){
+void Packager::packageOutput(bool split, string process , string tag){
 
   vector<string> expectedObjectsNotFound;
-   std::cout << "DEBUG A" << std::endl;
    bool split_=split;
 	// sum datasets first
-   std::cout << "DEBUG B" << std::endl;
 	for (int mh=mhLow_; mh<=mhHigh_; mh+=5){
 		if (skipMass(mh)) continue;
 		RooDataSet *allDataThisMass = 0;
 		for (int cat=0; cat<nCats_; cat++) {
-   std::cout << "DEBUG C" << std::endl;
 			string catname;
 			if (sqrts_==8 || sqrts_==7) catname=Form("cat%d",cat);
 			if (sqrts_ ==13) catname = Form("%s",flashggCats_[cat].c_str());
 			RooDataSet *allDataThisCat = NULL;
 			bool merge = mergeWS != 0 && ( find(cats_.begin(),cats_.end(),cat) == cats_.end() );
-   std::cout << "DEBUG D" << std::endl;
 			for (vector<string>::iterator proc=procs_.begin(); proc!=procs_.end(); proc++){
 				RooDataSet *tempData = 0;
-   std::cout << "DEBUG D.1" << std::endl;
 				if( merge ) { 
-   std::cout << "debug e" << std::endl;
 					tempData = (RooDataSet*)mergeWS->data(Form("sig_%s_mass_m%d_%s",proc->c_str(),mh,catname.c_str()));
-   std::cout << "DEBUG e.2" << std::endl;
 					 //WS->import(*tempData); //FIXME
 				} else {
-   std::cout << "DEBUG D.2" << std::endl;
 					tempData = (RooDataSet*)WS->data(Form("sig_%s_mass_m%d_%s",proc->c_str(),mh,catname.c_str()));
-   std::cout << "DEBUG F" << std::endl;
 				}
 				if (!tempData) {
-					cerr << "[WARNING] -- dataset: " << Form("sig_%s_mass_m%d_%s",proc->c_str(),mh,catname.c_str()) << " not found. It will be skipped" << endl;
+				if (!split_)	cerr << "[WARNING] -- dataset: " << Form("sig_%s_mass_m%d_%s",proc->c_str(),mh,catname.c_str()) << " not found. It will be skipped" << endl;
 					expectedObjectsNotFound.push_back(Form("sig_%s_mass_m%d_%s",proc->c_str(),mh,catname.c_str()));
 					continue;
 				}
@@ -92,30 +83,32 @@ void Packager::packageOutput(bool split){
 				else allDataThisCat->append(*tempData);
 			}
 			if (!allDataThisCat) {
-				cerr << "[WARNING] -- allData for cat " << catname.c_str() << " is NULL. Probably because the relevant datasets couldn't be found. Skipping.. " << endl;
+			if (!split_)	cerr << "[WARNING] -- allData for cat " << catname.c_str() << " is NULL. Probably because the relevant datasets couldn't be found. Skipping.. " << endl;
 				continue;
 			}
 			saveWS->import(*allDataThisCat);
 		}
 		if (!allDataThisMass) {
-			cerr << "[WARNING] -- allData for mass " << mh << " is NULL. Probably because the relevant datasets couldn't be found. Skipping.. " << endl;
+		if (!split_)	cerr << "[WARNING] -- allData for mass " << mh << " is NULL. Probably because the relevant datasets couldn't be found. Skipping.. " << endl;
 			continue;
 		}
 		saveWS->import(*allDataThisMass);
 	}
 
+  RooRealVar *MH = (RooRealVar*)WS->var("MH");
 	// now create pdf sums (these don't the relative amounts as just used for plotting so can use ThisLum versions)
 	RooArgList *sumPdfs = new RooArgList();
 	RooArgList *runningNormSum = new RooArgList();
   double runningNormSumVal=0;
 	for (int cat=0; cat<nCats_; cat++){
+    RooRealVar *intLumi = (RooRealVar*)WS->var("IntLumi");
 		string catname;
 		if (sqrts_ == 13) catname=Form("%s",flashggCats_[cat].c_str());
 		else if (sqrts_==7 || sqrts_==8) catname=Form("cat%d",cat);
 		bool merge = mergeWS != 0 && ( find(cats_.begin(),cats_.end(),cat) == cats_.end() );
 		//RooWorkspace * inWS = ( merge ? mergeWS : WS );
    if (merge){
-    std::cout << "[ERROR] -  sorry, 'merge' functionailty is disabled in this release because of incompatibility between RooWorkspace and WSTFileWrapper. Exititing"<< std::cout ;
+    std::cout << "[ERROR] -  sorry, 'merge' functionailty is disabled in this release because of incompatibility between RooWorkspace and WSTFileWrapper. Exiting"<< std::cout ;
     exit(1);
     }
 		RooArgList *sumPdfsThisCat = new RooArgList();
@@ -124,20 +117,24 @@ void Packager::packageOutput(bool split){
 			// sum eA
       //WS->Print();
 			RooSpline1D *norm = (RooSpline1D*)/*in*/WS->function(Form("hggpdfsmrel_%dTeV_%s_%s_norm",sqrts_,proc->c_str(),catname.c_str()));
+
 			if (!norm) {
-				cerr << "[WARNING] -- ea: " << Form("hggpdfsmrel_%dTeV_%s_%s_norm",sqrts_,proc->c_str(),catname.c_str()) << " not found. It will be skipped" << endl;
+			if (!split_)	cerr << "[WARNING] -- ea: " << Form("hggpdfsmrel_%dTeV_%s_%s_norm",sqrts_,proc->c_str(),catname.c_str()) << " not found. It will be skipped" << endl;
 			}
 			else {
+        for (int m =120; m<131; m=m+5){
+				MH->setVal(m);norm->getVal(); 
+        }
 				runningNormSum->add(*norm);
         runningNormSumVal+= norm->getVal();
-        std::cout << "[INFO] runningNormSum: adding "<< norm->getVal() << ", total " << runningNormSumVal << std::endl;
+       // std::cout << "[INFO] runningNormSum: adding "<< norm->getVal() << ", total " << runningNormSumVal << std::endl;
         //runningNormSum->Print();
 			}
 
 			// sum pdf
 			RooExtendPdf *tempPdf = (RooExtendPdf*)/*in*/WS->pdf(Form("extendhggpdfsmrel_%dTeV_%s_%sThisLumi",sqrts_,proc->c_str(),catname.c_str()));
 			if (!tempPdf) {
-				cerr << "[WARNING] -- pdf: " << Form("extendhggpdfsmrel_%dTeV_%s_%s",sqrts_,proc->c_str(),catname.c_str()) << " not found. It will be skipped" << endl;
+			if (!split_)	cerr << "[WARNING] -- pdf: " << Form("extendhggpdfsmrel_%dTeV_%s_%s",sqrts_,proc->c_str(),catname.c_str()) << " not found. It will be skipped" << endl;
 				expectedObjectsNotFound.push_back(Form("extendhggpdfsmrel_%dTeV_%s_%s",sqrts_,proc->c_str(),catname.c_str()));
 				continue;
 			}
@@ -149,7 +146,7 @@ void Packager::packageOutput(bool split){
 			sumPdfs->add(*tempPdf);
 		}
 		if (sumPdfsThisCat->getSize()==0){
-			cerr << "[WARNING] -- sumPdfs for cat " << catname.c_str() << " is EMPTY. Probably because the relevant pdfs couldn't be found. Skipping.. " << endl;
+		if (!split_)	cerr << "[WARNING] -- sumPdfs for cat " << catname.c_str() << " is EMPTY. Probably because the relevant pdfs couldn't be found. Skipping.. " << endl;
 			continue;
 		}
 		// Dont put sqrts here as combine never uses this (but our plotting scripts do)
@@ -157,7 +154,7 @@ void Packager::packageOutput(bool split){
 		saveWS->import(*sumPdfsPerCat,RecycleConflictNodes());
 	}
 	if (sumPdfs->getSize()==0){
-		cerr << "[WARNING] -- sumAllPdfs is EMPTY. Probably because the relevant pdfs couldn't be found. Skipping.. " << endl;
+		if (!split_) cerr << "[WARNING] -- sumAllPdfs is EMPTY. Probably because the relevant pdfs couldn't be found. Skipping.. " << endl;
 	}
 	else {
 		// Dont put sqrts here as combine never uses this (but our plotting scripts do)
@@ -167,11 +164,9 @@ void Packager::packageOutput(bool split){
 
 	if (runningNormSum->getSize()==0){
 		cerr << "[WARNING] -- runningNormSum is EMPTY. Probably because the relevant normalizations couldn't be found. Skipping.. " << endl;
-	}
-	else {
+	}	else {
 		RooAddition *normSum = new RooAddition("normSumTotal","normSumTotal",*runningNormSum);
 		saveWS->import(*normSum); //FIXME
-    std::cout <<" DEBUG normSum value = " << normSum->getVal() << std::endl;
 
 		if (!skipPlots_) {
 			RooRealVar *MH = (RooRealVar*)WS->var("MH");
@@ -195,21 +190,39 @@ void Packager::packageOutput(bool split){
 					return ;
 				}
 				MH->setVal(mh);
+        float XS_value = 0;
+        if (split_){
+        XS_value=normalization->GetXsection(mh,process); // in this case get proc-specific eff*acc
+        } else {
+        XS_value=normalization->GetXsection(mh); // or else, get the one for all processes!
+        }
 				expEventsGraph->SetPoint(p,mh,intLumiVal*normSum->getVal());
-				effAccGraph->SetPoint(p,mh,normSum->getVal()/(normalization->GetXsection(mh)*normalization->GetBR(mh)));
-				std::cout << " [INFO] eff*acc " << normSum->getVal()/(normalization->GetXsection(mh)*normalization->GetBR(mh)) << std::endl;
+				effAccGraph->SetPoint(p,mh,normSum->getVal()/(XS_value*normalization->GetBR(mh)));
+				std::cout << " [INFO] (Packager) expected events  " << intLumiVal*normSum->getVal() << std::endl;
+				std::cout << " [INFO] (Packager) eff*acc " << normSum->getVal()/(XS_value*normalization->GetBR(mh)) << std::endl;
+				std::cout << " [INFO] (Packager) eff*acc for " << mh << " (where normSum  " << normSum->getVal() << " (XS_value " << XS_value << " normalization->GetBR(mh)) " << normalization->GetBR(mh) << std::endl;
+        if (normSum->getVal()/(XS_value*normalization->GetBR(mh)) <0){
+         std::cout << "ERROR eff*acc < 0 !!! exit!" << std::endl;
+         exit(1);
+        }
 				//expEventsGraph->SetPoint(p,mh,intLumiVal*norm->getVal());
-				//effAccGraph->SetPoint(p,mh,norm->getVal()/(normalization->GetXsection(mh)*normalization->GetBR(mh)));
-			 //std::cout << " [INFO] eff*acc " << norm->getVal()/(normalization->GetXsection(mh)*normalization->GetBR(mh)) << std::endl;
+				//effAccGraph->SetPoint(p,mh,norm->getVal()/(XS_value*normalization->GetBR(mh)));
+			 //std::cout << " [INFO] eff*acc " << norm->getVal()/(XS_value*normalization->GetBR(mh)) << std::endl;
 				p++;
-			}
+			} 
+        string extension="";
+        if (split_){
+        extension=Form("_%s_%s",process.c_str(),tag.c_str());
+        } else {
+        extension=Form("_all");
+        }
 			TCanvas *canv = new TCanvas();
 			effAccGraph->SetLineWidth(3);
 			effAccGraph->GetXaxis()->SetTitle("m_{H} (GeV)");
 			effAccGraph->GetYaxis()->SetTitle("efficiency #times acceptance");
 			effAccGraph->Draw("AL");
-			canv->Print(Form("%s/effAccCheck.pdf",outDir_.c_str()));
-			canv->Print(Form("%s/effAccCheck.png",outDir_.c_str()));
+			canv->Print(Form("%s/effAccCheck%s.pdf",outDir_.c_str(),extension.c_str()));
+			canv->Print(Form("%s/effAccCheck%s.png",outDir_.c_str(),extension.c_str()));
 			expEventsGraph->SetLineWidth(3);
 			expEventsGraph->GetXaxis()->SetTitle("m_{H} (GeV)");
 			double intLumiVal = 1000;
@@ -222,12 +235,13 @@ void Packager::packageOutput(bool split){
 			}
 			expEventsGraph->GetYaxis()->SetTitle(Form("Expected Events for %4.1ffb^{-1}",intLumiVal/1000.));
 			expEventsGraph->Draw("AL");
-			canv->Print(Form("%s/expEventsCheck.pdf",outDir_.c_str()));
-			canv->Print(Form("%s/expEventsCheck.png",outDir_.c_str()));
+			canv->Print(Form("%s/expEventsCheck%s.pdf",outDir_.c_str(),extension.c_str()));
+			canv->Print(Form("%s/expEventsCheck%s.png",outDir_.c_str(),extension.c_str()));
 			makePlots();
 		}
 	}
 }
+
 
 void Packager::makePlots(){
 	RooRealVar *mass = (RooRealVar*)saveWS->var("CMS_hgg_mass");
@@ -267,7 +281,7 @@ void Packager::makePlots(){
   if (sumPdfsCat){
 		makePlot(mass,MH,sumPdfsCat,dataSetsCat,Form("%s",catname.c_str()));
     } else {
-  std::cout << "[WARNING] sumPdfsCat missing or not generated, skipping it " <<std::endl;
+   std::cout << "[WARNING] sumPdfsCat missing or not generated, skipping it " <<std::endl;
     }
 	}
 }

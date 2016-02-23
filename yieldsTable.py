@@ -101,6 +101,7 @@ for x in effSigma.keys():
     for line in lines:
       if not "TABLE" in line: continue
       line=line.replace("Tag_","Tag ")
+      print "LCDEBUG ", line
       words=line.split(',')
       bkgYield[words[1]]=float(words[3])
 bkgAllYield=0
@@ -257,7 +258,11 @@ for t in Arr :
     line = line+" &  "+str('%.2f'%Arr[t][p])
   Allline=" "+str('%.2f'%Arr[t]["All"])
   #dataLines.append( lineCat + Allline+ " "+line+ " & & &" )#+"& %s & %s & %.2f\\\\"%(effSigma[t],hmSigma[t],float(bkgYield[t]) ))
-  dataLines.append( lineCat + Allline+ " "+line+ "& %s & %s & %.2f\\\\"%(effSigma[t],hmSigma[t],float(bkgYield[t]) ))
+  esig =effSigma[t]
+  hmsig =hmSigma[t]
+  bkgy=0
+  #bkgy=bkgYield[t]
+  dataLines.append( lineCat + Allline+ " "+line+ "& %s & %s & %.2f\\\\"%(effSigma[t],hmSigma[t],bkgy ))
 
 dataLines.sort()
 for l in dataLines :
@@ -297,7 +302,9 @@ for t in Arr :
     if p=="All": continue
     line = line+" &  "+str('%.2f \%%'%(100*Arr[t][p]/Arr[t]["All"]))
   Allline=" "+str('%.2f'%Arr[t]["All"])
-  dataLines.append( lineCat + Allline+ " "+line+"& %.2f & %.2f & %.2f \\\\"%(float(effSigma[t]),float(hmSigma[t]),float(bkgYield[t])))
+  bkgy=0
+  #bkgy=bkgYield[y]
+  dataLines.append( lineCat + Allline+ " "+line+"& %.2f & %.2f & %.2f \\\\"%(float(effSigma[t]),float(hmSigma[t]),bkgy))
   #dataLines.append( lineCat + Allline+ " "+line+ "& & &")#"& %.2f & %.2f & %.2f \\\\"%(float(effSigma[t]),float(hmSigma[t]),float(bkgYield[t])))
 
 dataLines.sort()
@@ -309,3 +316,6 @@ print "\\hline"
 print "\end{tabular}"
 
 print "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
+
+
+

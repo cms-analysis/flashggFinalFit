@@ -37,6 +37,12 @@
 #include "TPaveText.h"
 #include "TArrow.h"
 
+#ifndef TDRSTYLE_C
+#define TDRSTYLE_C
+#include "../../tdrStyle/tdrstyle.C"
+#include "../../tdrStyle/CMS_lumi.C"
+#endif
+
 using namespace std;
 using namespace RooFit;
 using namespace boost;
@@ -57,6 +63,7 @@ int sqrts_;
 bool doTable_;
 bool verbose_;
 bool doCrossCheck_;
+bool markNegativeBins_;
 
 void OptionParser(int argc, char *argv[]){
 	po::options_description desc1("Allowed options");
@@ -73,6 +80,7 @@ void OptionParser(int argc, char *argv[]){
 		("doTable",	po::value<bool>(&doTable_)->default_value(false),													"doTable analysis")
 		("doCrossCheck",	po::value<bool>(&doCrossCheck_)->default_value(false),													"output additional details")
 		("verbose",	po::value<bool>(&verbose_)->default_value(false),													"output additional details")
+		("markNegativeBins",	po::value<bool>(&markNegativeBins_)->default_value(false),													" show with red arrow if a bin has a negative total value")
 		("flashggCats,f", po::value<string>(&flashggCatsStr_)->default_value("DiPhotonUntaggedCategory_0,DiPhotonUntaggedCategory_1,DiPhotonUntaggedCategory_2,DiPhotonUntaggedCategory_3,DiPhotonUntaggedCategory_4,VBFTag_0,VBFTag_1,VBFTag_2"),       "Flashgg category names to consider")
 		;
 
@@ -349,8 +357,23 @@ void Plot(RooRealVar *mass, RooDataSet *data, RooAbsPdf *pdf, pair<double,double
 	double fwmax=fwhmRange[1];
 	double halfmax=fwhmRange[2];
 	double binwidth=fwhmRange[3];
+  vector<double> negWeightBins;
+  vector<double> negWeightBinsValues;
 
 	RooPlot *plot = mass->frame(Bins(binning_),Range("higgsRange"));
+  plot->SetMinimum(0.0);
+  if (markNegativeBins_){
+  TH1F *rdh = (TH1F*) data->createHistogram("CMS_hgg_mass",*mass,Binning(binning_,105,140));
+  for(unsigned int iBin =0 ; iBin < rdh->GetNbinsX() ; iBin++){
+  float content = rdh->GetBinContent(iBin);
+  float center = rdh->GetBinCenter(iBin);
+  if(content <0) {
+  std::cout <<" BIN "<< iBin << " has negative weight : " << content << " at " << center << std::endl;
+   negWeightBins.push_back(center);
+   negWeightBinsValues.push_back(content);
+  }
+  }
+  }
 	if (data) data->plotOn(plot,Invisible());
 	pdf->plotOn(plot,NormRange("higgsRange"),Range(semin,semax),FillColor(19),DrawOption("F"),LineWidth(2),FillStyle(1001),VLines(),LineColor(15));
 	TObject *seffLeg = plot->getObject(int(plot->numItems()-1));
@@ -359,7 +382,8 @@ void Plot(RooRealVar *mass, RooDataSet *data, RooAbsPdf *pdf, pair<double,double
 	TObject *pdfLeg = plot->getObject(int(plot->numItems()-1));
 	if (data) data->plotOn(plot,MarkerStyle(kOpenSquare));
 	TObject *dataLeg = plot->getObject(int(plot->numItems()-1));
-	TLegend *leg = new TLegend(0.15,0.89,0.5,0.55);
+	//TLegend *leg = new TLegend(0.15,0.89,0.5,0.55);
+	TLegend *leg = new TLegend(0.15,0.55,0.5,0.89);
 	leg->SetFillStyle(0);
 	leg->SetLineColor(0);
 	leg->SetTextSize(0.03);
@@ -371,7 +395,7 @@ void Plot(RooRealVar *mass, RooDataSet *data, RooAbsPdf *pdf, pair<double,double
 	halfmax*=(plot->getFitRangeBinW()/binwidth);
 	TArrow *fwhmArrow = new TArrow(fwmin,halfmax,fwmax,halfmax,0.02,"<>");
 	fwhmArrow->SetLineWidth(2.);
-	TPaveText *fwhmText = new TPaveText(0.15,0.45,0.45,0.58,"brNDC");
+	TPaveText *fwhmText = new TPaveText(0.15,0.35,0.45,0.48,"brNDC");
 	fwhmText->SetFillColor(0);
 	fwhmText->SetLineColor(kWhite);
 	fwhmText->SetTextSize(0.03);
@@ -388,16 +412,28 @@ void Plot(RooRealVar *mass, RooDataSet *data, RooAbsPdf *pdf, pair<double,double
 	TCanvas *canv = new TCanvas("c","c",600,600);
 	plot->SetTitle("");
 	plot->GetXaxis()->SetTitle("m_{#gamma#gamma} (GeV)");
+  plot->SetMinimum(0.0);
 	plot->Draw();
 	leg->Draw("same");
 	fwhmArrow->Draw("same <>");
 	fwhmText->Draw("same");
-	lat1.Draw("same");
+ 	//lat1.Draw("same");
 	lat2.Draw("same");
+  for (unsigned int i =0 ; i < negWeightBins.size() ; i++){
+	
+  TArrow *negBinsArrow = new TArrow(negWeightBins[i],0.0,negWeightBins[i],halfmax/2,0.02,"<>");
+	negBinsArrow->SetLineWidth(2.);
+	negBinsArrow->SetLineColor(kRed);
+  
+  negBinsArrow->Draw("same <>");
+
+  }
+  CMS_lumi( canv, 0,0);
 	canv->Print(Form("%s.pdf",savename.c_str()));
 	canv->Print(Form("%s.png",savename.c_str()));
 	string path = savename.substr(0,savename.find('/'));
 	canv->Print(Form("%s/animation.gif+100",path.c_str()));
+
 	delete canv;
 
 }
@@ -413,6 +449,13 @@ int main(int argc, char *argv[]){
 	RooMsgService::instance().setSilentMode(true);
 
 	system("mkdir -p plots/SignalPlots/");
+  
+  setTDRStyle();
+  writeExtraText = true;       // if extra text
+  extraText  = "Preliminary Simulation";  // default extra text is "Preliminary"
+  lumi_8TeV  = "19.1 fb^{-1}"; // default is "19.7 fb^{-1}"
+  lumi_7TeV  = "4.9 fb^{-1}";  // default is "5.1 fb^{-1}"
+  lumi_sqrtS = "13 TeV";       // used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
 
 	vector<string> procs;
 	split(procs,procString_,boost::is_any_of(","));

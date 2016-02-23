@@ -9,7 +9,7 @@ targetSqrts=13
 lumi=0.
 
 initialSqrts=8
-procs=["ggH","vbfH","WH","ZH","ttH"]
+procs=["ggH","vbf","WH","ZH","ttH"]
 targetValues=[43.92,3.748,1.380,0.8696,0.5085] #at 125.
 #initialValues=[]
 transportFactors=[]

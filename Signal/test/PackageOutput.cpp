@@ -134,12 +134,48 @@ int main (int argc, char *argv[]){
   	
 	  WSTFileWrapper * inWS = new WSTFileWrapper(infilename_,"wsig_13TeV");
 	  RooWorkspace *saveWS = new RooWorkspace();
+	  RooWorkspace *tmpWS = new RooWorkspace();
+    //saveWS->import((inWS->allVars()),RecycleConflictNodes());
+    //saveWS->import((inWS->allFunctions()),RecycleConflictNodes());
+    for (int i=0 ; i < inWS->getWsList().size() ; i++){
+    std::cout << "DEBUG print workspace " << i << std::endl;
+    inWS->getWsList()[i]->Print();
+    std::cout << "DEBUG test a" << i << std::endl;
+    if (i==0) tmpWS = (RooWorkspace*) inWS->getWsList()[i]->Clone();
+    if (!tmpWS){ std::cout << "EXIT" << std::endl;  exit(1);}
+    std::cout << "DEBUG test b" << i << std::endl;
+    if (i !=0) {
+    //tmpWS->merge(*(inWS->getWsList()[i]));
+    tmpWS->import(inWS->getWsList()[i]->allVars(),RecycleConflictNodes());
+    tmpWS->import(inWS->getWsList()[i]->allFunctions(),RecycleConflictNodes());
+    std::cout <<"DEBUG want to import these functions" << std::endl;
+    inWS->getWsList()[i]->allFunctions().Print();
+    tmpWS->import(inWS->getWsList()[i]->allPdfs(),RecycleConflictNodes());
+    std::cout <<"DEBUG want to import these pdfs" << std::endl;
+    inWS->getWsList()[i]->allPdfs().Print();
+    std::list<RooAbsData*> data =  (inWS->getWsList()[i]->allData()) ;
+    for (std::list<RooAbsData*>::const_iterator iterator = data.begin(), end = data.end(); iterator != end; ++iterator )  {
+     tmpWS->import(**iterator);
+    } 
+    std::list<TObject*> stuff =  (inWS->getWsList()[i]->allGenericObjects()) ;
+    for (std::list<TObject*>::const_iterator iterator = stuff.begin(), end = stuff.end(); iterator != end; ++iterator )  {
+     tmpWS->import(**iterator);
+    } 
+
+    };
+    std::cout << "DEBUG test c" << i << std::endl;
+
+    }
+    std::cout << "DEBUG print tmpWS" << std::endl;
+    tmpWS->Print("V");
+    WSTFileWrapper *mergedWS = new WSTFileWrapper(tmpWS); 
+
     saveWS->SetName("wsig_13TeV");
     ncats_= flashggCats_.size();
     cout << "[INFO] Starting to combine fits..." << endl;
     // this guy packages everything up
 	  RooWorkspace *mergeWS = 0;
-    Packager packager(inWS, saveWS ,procs_,ncats_,mhLow_,mhHigh_,skipMasses_,/*sqrts*/13,/*skipPlots_*/false,plotDir_,mergeWS,cats_,flashggCats_);
+    Packager packager(mergedWS, saveWS ,procs_,ncats_,mhLow_,mhHigh_,skipMasses_,/*sqrts*/13,/*skipPlots_*/false,plotDir_,mergeWS,cats_,flashggCats_);
     cout << "[INFO] Finished initalising packager." << endl;
     packager.packageOutput(/*split*/ false);
     cout << "[INFO] Combination complete." << endl;

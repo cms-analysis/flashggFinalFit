@@ -39,6 +39,17 @@ std::list<RooAbsData*> WSTFileWrapper::allData() {
   return result;
 }
 
+RooArgSet WSTFileWrapper::allVars() {
+  RooArgSet result;
+  for (unsigned int i = 0 ; i < fileList.size() ; i++) {
+    fileList[0]->cd(); //only need 0th entry since they should all be same
+    RooArgSet ras = wsList[0]->allVars();
+    return ras;
+    break;
+  }
+  return result;
+}
+
 RooRealVar* WSTFileWrapper::var(std::string varName) {
   fileList[0]->cd();
   return wsList[0]->var(varName.c_str());

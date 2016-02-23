@@ -321,8 +321,15 @@ def getFlashggLineTheoryWeights(proc,cat,name,i,asymmetric):
   #weight_down = r.RooRealVar("weight_down","weight_down",0)
   weight_down = inWS.var("%s_%d"%(name,m))
   weight_central = inWS.var("centralObjectWeight") 
-  data_nominal = inWS.data("%s_125_13TeV_%s"%(proc,cat))
+  weight_sumW = inWS.var("sumW") 
+  #data_nominal = inWS.data("%s_125_13TeV_%s"%(proc,cat))
+  data_nominal= inWS.data("%s_125_13TeV_%s_pdfWeights"%(proc,cat))
   if (data_nominal) : data_nominal.reduce(r.RooArgSet(mass,weight_up, weight_down,weight_central),"1")
+  if (data_nominal==None):
+    print "USING NEW STYLE PDFWEIGHTS"
+    data_nominal = inWS.data("%s_125_13TeV_%s"%(proc,cat)) #FIXME
+    #data_nominal = inWS.data("%s_13TeV_%s"%(proc,cat))
+  #if (data_nominal) : data_nominal.reduce(r.RooArgSet(mass,weight_up, weight_down,weight_central),"1")
   #data_nominal = inWS.data("test_13TeV_%s"%(cat))
   #print "%s_13TeV_%s"%(proc,cat), " ", data_nominal
   #data_nominal_sum = data_nominal.sumEntries()
@@ -336,6 +343,8 @@ def getFlashggLineTheoryWeights(proc,cat,name,i,asymmetric):
     w_down = data_nominal.get(i).getRealValue("%s_%d"%(name,n))
     w_up = data_nominal.get(i).getRealValue("%s_%d"%(name,m))
     w_central = data_nominal.get(i).getRealValue(weight_central.GetName())
+    sumW = data_nominal.get(i).getRealValue("sumW")
+    print "--> mass ", mass.getVal() , " w_nom ", w_nominal , " w_down" ,w_down, " w_up ", w_up, " w_central" , w_central , " sumW ", sumW
     if (w_central==0.) :
         zeroWeightEvents=zeroWeightEvents+1.0
         if (zeroWeightEvents%1000==0):
@@ -379,7 +388,8 @@ def getFlashggLineTheoryEnvelope(proc,cat,name,details):
   #if (inWS) : print "got inWS!"
   for iReplica in indices:
     #print "iReplica ", iReplica
-    data_nominal = inWS.data("%s_125_13TeV_%s"%(proc,cat))
+    data_nominal = inWS.data("%s_125_13TeV_%s"%(proc,cat)) #FIXME
+    #data_nominal = inWS.data("%s_125_13TeV_%s"%(proc,cat))
     #data_nominal = inWS.data("%s_13TeV_%s"%(proc,cat))
     #print "%s_13TeV_%s"%(proc,cat), " ", data_nominal
     #data_nominal_sum = data_nominal.sumEntries()

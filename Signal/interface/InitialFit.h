@@ -10,6 +10,7 @@
 #include "RooGaussian.h"
 #include "RooAddPdf.h"
 #include "RooDataSet.h"
+#include "RooDataHist.h"
 #include "RooRealVar.h"
 #include "RooFitResult.h"
 
@@ -17,7 +18,7 @@ class InitialFit {
 
   public:
 
-    InitialFit(RooRealVar *massVar, RooRealVar *MHvar, int mhLow, int mhHigh, std::vector<int> skipMasses);
+    InitialFit(RooRealVar *massVar, RooRealVar *MHvar, int mhLow, int mhHigh, std::vector<int> skipMasses, bool binnedFit, int bins);
     ~InitialFit();
 
     void buildSumOfGaussians(std::string name, int nGaussians, bool recursive=false, bool forceFracUnity=false);
@@ -27,9 +28,10 @@ class InitialFit {
     std::map<int,std::map<std::string,RooRealVar*> > getFitParams();
 		void printFitParams();
     void setDatasets(std::map<int,RooDataSet*> data);
+    void setDatasetsSTD(std::map<int,RooDataSet*> data);
     void addDataset(int mh, RooDataSet *data);
     void runFits(int ncpu);
-    void plotFits(std::string name);
+    void plotFits(std::string name, std::string rvwn="");
     void setVerbosity(int v);
 
     void setFitParams(std::map<int,std::map<std::string,RooRealVar*> >& pars );
@@ -39,6 +41,7 @@ class InitialFit {
     RooRealVar *MH;
     std::map<int,RooAddPdf*> sumOfGaussians;
     std::map<int,RooDataSet*> datasets; 
+    std::map<int,RooDataSet*> datasetsSTD; 
     std::map<int,std::map<std::string,RooRealVar*> > fitParams;
     std::map<int,std::map<std::string,RooAbsReal*> > fitUtils;
     std::map<int,std::map<std::string,RooGaussian*> > initialGaussians;
@@ -50,6 +53,8 @@ class InitialFit {
     std::vector<int> getAllMH();
 		bool skipMass(int mh);
     int verbosity_;
+    int bins_;
+    bool binnedFit_;
 
 };
 

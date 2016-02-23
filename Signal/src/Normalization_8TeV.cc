@@ -24,13 +24,14 @@ int Normalization_8TeV::Init(int sqrtS){
     }
     TPython::Eval(Form("buildSMHiggsSignalXSBR.Init%dTeV()", sqrtS));
     
-    for (double mH=90.0;mH<=250.0;mH+=0.1){ // Do we need this up to 250 ?
+    for (double mH=120;mH<=135.0;mH+=0.1){ // Do we need this up to 250 ?
 	double valBR    =  (double)TPython::Eval(Form("buildSMHiggsSignalXSBR.getBR(%f)",mH));
 	double valXSggH =  (double)TPython::Eval(Form("buildSMHiggsSignalXSBR.getXS(%f,'%s')",mH,"ggH"));
 	double valXSqqH =  (double)TPython::Eval(Form("buildSMHiggsSignalXSBR.getXS(%f,'%s')",mH,"qqH"));
 	double valXSttH =  (double)TPython::Eval(Form("buildSMHiggsSignalXSBR.getXS(%f,'%s')",mH,"ttH"));
 	double valXSWH  =  (double)TPython::Eval(Form("buildSMHiggsSignalXSBR.getXS(%f,'%s')",mH,"WH"));
 	double valXSZH  =  (double)TPython::Eval(Form("buildSMHiggsSignalXSBR.getXS(%f,'%s')",mH,"ZH"));
+  //std::cout << "DEBUG NORMALIZATION8TEV (for 13TEV) -- mh " << mH << " BR " << valBR  << " valXSggH " << valXSggH << " valXSqqH " << valXSqqH << " valXSttH " << valXSttH << " valXSWH " << valXSWH << " valXSZH " << valXSZH <<std::endl;
 	BranchingRatioMap[mH]	= valBR;
         XSectionMap_ggh[mH]	= valXSggH; 	
         XSectionMap_vbf[mH]	= valXSqqH; 	

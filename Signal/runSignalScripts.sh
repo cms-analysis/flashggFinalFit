@@ -90,8 +90,8 @@ SIGPLOTSONLY=1
 fi
 
 if [ $BATCH == "IC" ]; then
-#DEFAULTQUEUE=hepshort.q
-DEFAULTQUEUE=hepmedium.q
+DEFAULTQUEUE=hepshort.q
+#DEFAULTQUEUE=hepmedium.q
 BATCHQUERY="qstat -u $USER -q hepshort.q"
 fi
 if [ $BATCH == "LSF" ]; then
@@ -113,7 +113,7 @@ else
     echo "=============================="
     if [ -z $BATCH ]; then
       echo "./bin/signalFTest -i $FILE -d dat/newConfig_$EXT.dat -p $PROCS -f $CATS -o $OUTDIR"
-      ./bin/signalFTest -i $FILE -d dat/newConfig_$EXT.dat -p $PROCS -f $CATS -o $OUTDIR
+  #    ./bin/signalFTest -i $FILE -d dat/newConfig_$EXT.dat -p $PROCS -f $CATS -o $OUTDIR
     else
       echo "./python/submitSignaFTest.py --procs $PROCS --flashggCats $CATS --outDir $OUTDIR --i $FILE --batch $BATCH -q $DEFAULTQUEUE"
        ./python/submitSignaFTest.py --procs $PROCS --flashggCats $CATS --outDir $OUTDIR --i $FILE --batch $BATCH -q $DEFAULTQUEUE
@@ -145,7 +145,7 @@ else
     mv $OUTDIR/fTest $OUTDIR/sigfTest
   fi
   echo "[INFO] sigFTest jobs completed, check output and do:"
-  echo "cp dat/newConfig_${EXT}_temp.dat dat/newConfig_${EXT}.dat"
+  echo "cp $PWD/dat/newConfig_${EXT}_temp.dat $PWD/dat/newConfig_${EXT}.dat"
   echo "and manually amend chosen number of gaussians using the output pdfs."
   echo "then re-run the same command to continue !"
   CALCPHOSYSTONLY=0
@@ -163,7 +163,7 @@ if [ $CALCPHOSYSTONLY == 1 ]; then
   echo "=============================="
 
   echo "./bin/calcPhotonSystConsts -i $FILE -o dat/photonCatSyst_$EXT.dat -p $PROCS -s $SCALES -r $SMEARS -D $OUTDIR -f $CATS"
-  #./bin/calcPhotonSystConsts -i $FILE -o dat/photonCatSyst_$EXT.dat -p $PROCS -s $SCALES -r $SMEARS -D $OUTDIR -f $CATS 
+ # ./bin/calcPhotonSystConsts -i $FILE -o dat/photonCatSyst_$EXT.dat -p $PROCS -s $SCALES -r $SMEARS -D $OUTDIR -f $CATS 
   
   cp dat/photonCatSyst_$EXT.dat $OUTDIR/dat/copy_photonCatSyst_$EXT.dat
 
@@ -218,7 +218,7 @@ if [ $SIGFITONLY == 1 ]; then
     done < out.txt
     echo "SIGFILES $SIGFILES"
     echo "./bin/PackageOutput -i $SIGFILES --procs $PROCS -l $INTLUMI -p $OUTDIR/sigfit -W wsig_13TeV -f $CATS -L 120 -H 130 -o $OUTDIR/CMS-HGG_sigfit_$EXT.root"
-    ./bin/PackageOutput -i $SIGFILES --procs $PROCS -l $INTLUMI -p $OUTDIR/sigfit -W wsig_13TeV -f $CATS -L 120 -H 130 -o $OUTDIR/CMS-HGG_sigfit_$EXT.root
+    ./bin/PackageOutput -i $SIGFILES --procs $PROCS -l $INTLUMI -p $OUTDIR/sigfit -W wsig_13TeV -f $CATS -L 120 -H 130 -o $OUTDIR/CMS-HGG_sigfit_$EXT.root > package.out
   fi
 
 fi
@@ -236,8 +236,8 @@ echo "-->Create Validation plots"
 echo "=============================="
 
 echo " ./bin/makeParametricSignalModelPlots -i $OUTDIR/CMS-HGG_sigfit_$EXT.root  -o $OUTDIR -p $PROCS -f $CATS"
-./bin/makeParametricSignalModelPlots -i $OUTDIR/CMS-HGG_sigfit_$EXT.root  -o $OUTDIR/sigplots -p $PROCS -f $CATS
-mv $OUTDIR/sigplots/initialFits $OUTDIR/initialFits
+#./bin/makeParametricSignalModelPlots -i $OUTDIR/CMS-HGG_sigfit_$EXT.root  -o $OUTDIR/sigplots -p $PROCS -f $CATS
+mv $OUTDIR/sigfit/initialFits $OUTDIR/initialFits
 
 fi
 
@@ -247,6 +247,7 @@ cp ~lcorpe/public/index.php ~/www/$OUTDIR/sigplots/.
 cp ~lcorpe/public/index.php ~/www/$OUTDIR/systematics/.
 cp ~lcorpe/public/index.php ~/www/$OUTDIR/sigfit/.
 cp ~lcorpe/public/index.php ~/www/$OUTDIR/sigfTest/.
+cp ~lcorpe/public/index.php ~/www/$OUTDIR/initialFits/.
 
 echo "plots available at: "
 echo "https://lcorpe.web.cern.ch/lcorpe/$OUTDIR"
@@ -259,6 +260,7 @@ cp ~lc1113/index.php ~lc1113/public_html/$OUTDIR/sigplots/.
 cp ~lc1113/index.php ~lc1113/public_html/$OUTDIR/systematics/.
 cp ~lc1113/index.php ~lc1113/public_html/$OUTDIR/sigfit/.
 cp ~lc1113/index.php ~lc1113/public_html/$OUTDIR/sigfTest/.
+cp ~lc1113/index.php ~lc1113/public_html/$OUTDIR/initialFits/.
 echo "plots available at: "
 echo "http://www.hep.ph.imperial.ac.uk/~lc1113/$OUTDIR"
 fi

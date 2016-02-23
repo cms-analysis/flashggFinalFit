@@ -45,6 +45,14 @@ std::list<RooAbsData*> WSTFileWrapper::allData() {
   return result;
 }
 
+WSTFileWrapper::WSTFileWrapper( RooWorkspace *inWS ) {
+TFile *outF = new TFile("WSTFileWrapper.root","RECREATE");
+wsList.push_back(inWS);
+fileList.push_back(outF);
+fnList.push_back("current file");
+}
+
+
 RooRealVar* WSTFileWrapper::var(std::string varName) {
   fileList[0]->cd();
   return wsList[0]->var(varName.c_str());
@@ -160,6 +168,38 @@ void WSTFileWrapper::Close() {
     fileList[i]->Close();
   }
 }
+
+RooArgSet WSTFileWrapper::allVars(){
+
+  RooArgSet result;
+  bool complained_yet = 0;
+  for (unsigned int i = 0 ; i < wsList.size() ; i++) {
+    if (fileList.size()>i) fileList[i]->cd();
+    RooArgSet this_result = wsList[i]->allVars();
+    result.add(this_result);
+  }
+ // if (!result) {
+ //   std::cout << "[WSTFileWrapper] Uh oh, never got a good RooAbsReal with name " << functionName << std::endl;
+//  }
+  return result;
+}
+
+RooArgSet WSTFileWrapper::allFunctions(){
+
+  RooArgSet result;
+  bool complained_yet = 0;
+  for (unsigned int i = 0 ; i < wsList.size() ; i++) {
+    if (fileList.size()>i) fileList[i]->cd();
+    RooArgSet this_result = wsList[i]->allFunctions();
+    result.add(this_result);
+  }
+//  if (!result) {
+  //  std::cout << "[WSTFileWrapper] Uh oh, never got a good RooAbsReal with name " << functionName << std::endl;
+ // }
+  return result;
+}
+
+
 
 /*
 #include "TFile.h"

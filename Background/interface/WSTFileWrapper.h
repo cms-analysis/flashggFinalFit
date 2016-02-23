@@ -3,6 +3,7 @@
 #include "RooWorkspace.h"
 #include "RooAbsData.h"
 #include "RooRealVar.h"
+#include "RooArgSet.h"
 #include <string>
 #include <list>
 
@@ -15,6 +16,7 @@ class WSTFileWrapper  {
     RooCategory* cat(std::string);
     RooAbsData* data(std::string);
     std::list<RooAbsData*> allData();
+    RooArgSet allVars();
     void Close();
   private:
     std::vector<std::string> fnList;

@@ -67,16 +67,19 @@ def getFilesFromDatacard(datacard):
 
 parser = OptionParser()
 parser.add_option("-i","--infile",help="Signal Workspace")
-parser.add_option("-q","--queue",help="Which batch queue")
-parser.add_option("-d","--datfile",help="datfile")
+parser.add_option("-d","--datfile",help="dat file")
 parser.add_option("-s","--systdatfile",help="systematics dat file")
+parser.add_option("--mhLow",default="120",help="mh Low")
+parser.add_option("--mhHigh",default="130",help="mh High")
+parser.add_option("-q","--queue",help="Which batch queue")
 parser.add_option("--runLocal",default=False,action="store_true",help="Run locally")
 parser.add_option("--batch",default="LSF",help="Which batch system to use (LSF,IC)")
-parser.add_option("--outDir",default=None)
+parser.add_option("--changeIntLumi",default="1.")
+parser.add_option("-o","--outfilename",default=None)
+parser.add_option("-p","--outDir",default="./")
 parser.add_option("--procs",default=None)
-parser.add_option("--flashggCats",default=None)
+parser.add_option("-f","--flashggCats",default=None)
 parser.add_option("--expected",type="int",default=None)
-parser.add_option("--changeIntLumi",type="float",default=None)
 (opts,args) = parser.parse_args()
 
 defaults = copy(opts)
@@ -107,7 +110,6 @@ def writePreamble(sub_file):
   sub_file.write('touch %s.run\n'%os.path.abspath(sub_file.name))
   sub_file.write('cd %s\n'%os.getcwd())
   sub_file.write('eval `scramv1 runtime -sh`\n')
-  sub_file.write('cd -\n')
   sub_file.write('number=$RANDOM\n')
   sub_file.write('mkdir -p scratch_$number\n')
   sub_file.write('cd scratch_$number\n')
@@ -121,8 +123,7 @@ def writePostamble(sub_file, exec_line):
   sub_file.write('else\n')
   sub_file.write('\t touch %s.fail\n'%os.path.abspath(sub_file.name))
   sub_file.write('fi\n')
-  sub_file.write('cp *root %s/%s/fTestJobs/. \n'%(os.getcwd(),opts.outDir))
-  sub_file.write('cp *{png,pdf} %s/%s/. \n'%(os.getcwd(),opts.outDir))
+  sub_file.write('cd -\n')
   sub_file.write('rm -f %s.run\n'%os.path.abspath(sub_file.name))
   sub_file.write('rm -rf scratch_$number\n')
   sub_file.close()
@@ -141,16 +142,18 @@ def writePostamble(sub_file, exec_line):
 #######################################
 
   
-system('mkdir -p %s/fTestJobs/outputs'%opts.outDir)
+system('mkdir -p %s/SignalFitJobs/outputs'%opts.outDir)
+print ('mkdir -p %s/SignalFitJobs/outputs'%opts.outDir)
 counter=0
 for proc in  opts.procs.split(","):
   for cat in opts.flashggCats.split(","):
     print "job ", counter , " - ", proc, " - ", cat
-    file = open('%s/fTestJobs/sub%d.sh'%(opts.outDir,counter),'w')
+    file = open('%s/SignalFitJobs/sub%d.sh'%(opts.outDir,counter),'w')
     writePreamble(file)
     counter =  counter+1
-    exec_line = "%s/bin/SignalFit -i %s --procs %s -f %s --split %s,%s -p %s/%s -d %s/%s -s %s/%s --mhLow=120 --mhHigh=130 -o CMS_sigfit_%s_%s.root --changeIntLumi %d "%(os.getcwd(), opts.infile,opts.procs,opts.flashggCats, proc,cat,os.getcwd(),opts.outDir,os.getcwd(), opts.datfile,os.getcwd(), opts.systdatfile , proc,cat , opts.changeIntLumi)
-    print exec_line
+    exec_line = "%s/bin/SignalFit --verbose 1 -i %s -d %s/%s  --mhLow=%s --mhHigh=%s -s %s/%s --procs %s -o  %s/%s -p %s/%s -f %s --changeIntLumi %s --binnedFit 1 --nBins 160 --split %s,%s" %(os.getcwd(), opts.infile,os.getcwd(),opts.datfile,opts.mhLow, opts.mhHigh, os.getcwd(),opts.systdatfile, opts.procs,os.getcwd(),opts.outfilename.replace(".root","_%s_%s.root"%(proc,cat)), os.getcwd(),opts.outDir, opts.flashggCats ,opts.changeIntLumi, proc,cat)
+    #exec_line = "%s/bin/SignalFit -i %s  -p %s -f %s --considerOnly %s -o %s/%s --datfilename %s/%s/SignalFitJobs/outputs/config_%d.dat" %(os.getcwd(), opts.infile,proc,opts.flashggCats,cat,os.getcwd(),opts.outDir,os.getcwd(),opts.outDir, counter)
+    #print exec_line
     writePostamble(file,exec_line)
 
 
