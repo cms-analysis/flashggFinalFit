@@ -78,10 +78,10 @@ void OptionParser(int argc, char *argv[]){
 		("infilenames,i", po::value<string>(&infilenamesStr_),                                           		"Input file names (comma sep)")
 		("outfilename,o", po::value<string>(&outfilename_)->default_value("dat/photonCatSyst.dat"), 				"Output file name")
 		("mh,m", po::value<int>(&mh_)->default_value(125),                                  								"Mass point")
-		("sqrtS", po::value<string>(&sqrtS_)->default_value("8"),																								"CoM energy")
+		("sqrtS", po::value<string>(&sqrtS_)->default_value("13"),																								"CoM energy")
 		("procs,p",po::value<string>(&procStr_)->default_value("ggh,vbf,wh,zh,tth"),												"Processes (comma sep)")
 		("plotDir,D", po::value<string>(&plotDir_)->default_value("plots"),																	"Out directory for plots")
-		("doPlots,P", po::value<bool>(&doPlots_)->default_value(true),																	"Plot variations")
+		("doPlots,P", po::value<bool>(&doPlots_)->default_value(false),																	"Plot variations")
 		("quadInterpolate",	po::value<int>(&quadInterpolate_)->default_value(0),														"Do a quadratic interpolation from this amount of sigma")
 		("isFlashgg",	po::value<bool>(&isFlashgg_)->default_value(true),														"Use flashgg format")
 		("flashggCats,f", po::value<string>(&flashggCatsStr_)->default_value("UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,UntaggedTag_4,VBFTag_0,VBFTag_1,VBFTag_2,TTHHadronicTag,TTHLeptonicTag,VHHadronicTag,VHTightTag,VHLooseTag,VHEtTag"),       "Flashgg category names") 
@@ -96,10 +96,10 @@ void OptionParser(int argc, char *argv[]){
 	po::options_description syst_opts("Systematics options");
 	syst_opts.add_options()
 		("photonCatScales,s", 		po::value<string>(&photonCatScalesStr_)->default_value("EBlowR9,EBhighR9,EElowR9,EEhighR9"),												"Photon category scales (comma sep) which get correlated across diphoton categories but NOT different years.")
-		("photonCatScalesCorr,S", po::value<string>(&photonCatScalesCorrStr_)->default_value("MaterialEBCentral,MaterialEBOuterEE"),									"Photon category scales (comma sep) which get correlated across diphoton categories AND across years.")
+		("photonCatScalesCorr,S", po::value<string>(&photonCatScalesCorrStr_)->default_value("MaterialCentral,MaterialForward"),									"Photon category scales (comma sep) which get correlated across diphoton categories AND across years.")
 		("photonCatSmears,r", 		po::value<string>(&photonCatSmearsStr_)->default_value("EBlowR9,EBhighR9,EBlowR9Phi,EBhighR9Phi,EElowR9,EEhighR9"),	"Photon category smears (comma sep) which get correlated across diphoton categories but NOT different years.")
 		("photonCatSmearsCorr,R", po::value<string>(&photonCatSmearsCorrStr_)->default_value(""),																											"Photon category smears (comma sep) which get correlated across diphoton categories AND years.")
-		("globalScales,g", 				po::value<string>(&globalScalesStr_)->default_value("NonLinearity"),																						"Global scales (comma sep) which get correlated across diphoton categories but NOT different years. Can add additional options with a \':\' to insist that a particular category get a bigger or smaller effect. E.g. passing \'NonLinearity:0:2\' will create a systematics called \'NonLinearity\' and make its effect in category 0 twice as large")
+		("globalScales,g", 				po::value<string>(&globalScalesStr_)->default_value("NonLinearity,Geant4,LightYield,Absolute"),																						"Global scales (comma sep) which get correlated across diphoton categories but NOT different years. Can add additional options with a \':\' to insist that a particular category get a bigger or smaller effect. E.g. passing \'NonLinearity:0:2\' will create a systematics called \'NonLinearity\' and make its effect in category 0 twice as large")
 		("globalScalesCorr,G", 		po::value<string>(&globalScalesCorrStr_)->default_value(""),																												"As above but scales ARE correlated across diphoton categories AND years.")
 		;
 
@@ -228,7 +228,7 @@ Double_t effSigma(TH1 * hist)
 	if(ierr != 0) cout << "effsigma: Error of type " << ierr << endl;
 
 	if(verbosity_)	std::cout<< "[INFO] " << (hist->GetName()) << " has effSigma " << widmin << std::endl;
-
+  
 	return widmin;
 
 }
@@ -510,7 +510,15 @@ int main(int argc, char *argv[]){
 								plotVariation(nominal,scaleUp,scaleDown,*phoCat,Form("%s_cat%d_scale",proc->c_str(),cat)); 
 							}
 						}
+            if (isinf(getMeanVar(nominal,scaleUp,scaleDown)) || isinf(getRateVar(nominal,scaleUp,scaleDown)) || isinf(getSigmaVar(nominal,scaleUp,scaleDown))) {
+            std::cout << "ERROR infinite " << nominal->Integral()<< std::endl;
+            std::cout << "ERROR infinite " << scaleUp->Integral() << std::endl;
+            std::cout << "ERROR infinite " << scaleDown->Integral() << std::endl;
+            std::cout << "ERROR infinite value!" << Form("%s_cat%s_scale",proc->c_str(),flashggCats_[cat].c_str()) << std::endl;
+						outfile << Form("%1.4g     %1.4g     %1.4g    ",0.,0.,0.) << endl;
+            } else {
 						outfile << Form("%1.4g     %1.4g     %1.4g    ",getMeanVar(nominal,scaleUp,scaleDown),getSigmaVar(nominal,scaleUp,scaleDown),getRateVar(nominal,scaleUp,scaleDown)) << endl;
+            }
 					} else {
 						outfile << Form("%1.4g     %1.4g     %1.4g    ",0.,0.,0.) << endl;
 					}
@@ -544,34 +552,59 @@ int main(int argc, char *argv[]){
 								plotVariation(nominal,smearUp,smearDown,*phoCat,Form("%s_cat%d_smear",proc->c_str(),cat));
 							}
 						}
+            if (isinf(getMeanVar(nominal,smearUp,smearDown)) || isinf(getRateVar(nominal,smearUp,smearDown)) || isinf(getSigmaVar(nominal,smearUp,smearDown))) {
+            std::cout << "ERROR infinite " << nominal->Integral()<< std::endl;
+            std::cout << "ERROR infinite " << smearUp->Integral() << std::endl;
+            std::cout << "ERROR infinite " << smearDown->Integral() << std::endl;
+            std::cout << "ERROR infinite value!" << Form("%s_cat%s_smear",proc->c_str(),flashggCats_[cat].c_str()) <<  std::endl;
+						outfile << Form("%1.4g     %1.4g     %1.4g    ",0.,0.,0.) << endl;
+            } else {
 						outfile << Form("%1.4g     %1.4g     %1.4g    ",getMeanVar(nominal,smearUp,smearDown),getSigmaVar(nominal,smearUp,smearDown),getRateVar(nominal,smearUp,smearDown)) << endl;
+            }
 					} else {
 						outfile << Form("%1.4g     %1.4g     %1.4g    ",0.,0.,0.) << endl;
 					}
 				}	
 			}
 
-			if (!isFlashgg_){
+			if (isFlashgg_){
 				// photon scales correlated
 				if (photonCatScalesCorrStr_.size()!=0){
 					for (vector<string>::iterator phoCat=photonCatScalesCorr_.begin(); phoCat!=photonCatScalesCorr_.end(); phoCat++){
+						string flashggCat = flashggCats_[cat]; 
+						vector<TH1F*> hists= getHistograms(inFiles,Form("%s_%d_13TeV_%s",proc->c_str(),mh_,flashggCat.c_str()),Form("%s",phoCat->c_str()));
 
 						// this is to ensure nominal comes from the right file
-						vector<TH1F*> hists = getHistograms(inFiles,Form("th1f_sig_%s_mass_m%d_cat%d",proc->c_str(),mh_,cat),Form("E_scale_%s",phoCat->c_str()));
 						TH1F *nominal = hists[0];
 						TH1F *scaleUp = hists[1];
 						TH1F *scaleDown = hists[2];
 
-						outfile << Form("%-30s",(*phoCat+"_scale").c_str());
-						if( scaleUp != 0 && scaleDown != 0 && nominal != 0) {
-							if( doPlots_ ) { plotVariation(nominal,scaleUp,scaleDown,*phoCat,Form("%s_cat%d_scale",proc->c_str(),cat)); }
-							outfile << Form("%1.4g     %1.4g     %1.4g    ",getMeanVar(nominal,scaleUp,scaleDown),getSigmaVar(nominal,scaleUp,scaleDown),getRateVar(nominal,scaleUp,scaleDown)) << endl;
-						} else {
-							outfile << Form("%1.4g     %1.4g     %1.4g    ",0.,0.,0.) << endl;
-						}
-					}
-				}
 
+					outfile << Form("%-30s",(*phoCat+"_"+"scale").c_str());
+					if( scaleUp != 0 && scaleDown != 0 && nominal != 0) {
+						if( doPlots_ ) { 
+							if (isFlashgg_){
+								plotVariation(nominal,scaleUp,scaleDown,*phoCat,Form("%s_cat%s_scale",proc->c_str(),flashggCats_[cat].c_str())); 
+							} else {
+								plotVariation(nominal,scaleUp,scaleDown,*phoCat,Form("%s_cat%d_scale",proc->c_str(),cat)); 
+							}
+						}
+            if (isinf(getMeanVar(nominal,scaleUp,scaleDown)) || isinf(getRateVar(nominal,scaleUp,scaleDown)) || isinf(getSigmaVar(nominal,scaleUp,scaleDown))) {
+            std::cout << "ERROR infinite " << nominal->Integral()<< std::endl;
+            std::cout << "ERROR infinite " << scaleUp->Integral() << std::endl;
+            std::cout << "ERROR infinite " << scaleDown->Integral() << std::endl;
+            std::cout << "ERROR infinite value!" << Form("%s_cat%s_scale",proc->c_str(),flashggCats_[cat].c_str()) << std::endl;
+						outfile << Form("%1.4g     %1.4g     %1.4g    ",0.,0.,0.) << endl;
+            } else {
+						outfile << Form("%1.4g     %1.4g     %1.4g    ",getMeanVar(nominal,scaleUp,scaleDown),getSigmaVar(nominal,scaleUp,scaleDown),getRateVar(nominal,scaleUp,scaleDown)) << endl;
+            }
+					} else {
+						outfile << Form("%1.4g     %1.4g     %1.4g    ",0.,0.,0.) << endl;
+					}
+						
+				}
+			}
+  }
 				// photon smears correlated
 				if (photonCatSmearsCorrStr_.size()!=0){
 					for (vector<string>::iterator phoCat=photonCatSmearsCorr_.begin(); phoCat!=photonCatSmearsCorr_.end(); phoCat++){
@@ -585,6 +618,10 @@ int main(int argc, char *argv[]){
 						outfile << Form("%-30s",(*phoCat+"_smear").c_str());
 						if( smearUp != 0 && smearDown != 0 && nominal != 0) {
 							if( doPlots_ ) { plotVariation(nominal,smearUp,smearDown,*phoCat,Form("%s_cat%d_smear",proc->c_str(),cat)); }
+            if (isinf(getMeanVar(nominal,smearUp,smearDown)) || isinf(getRateVar(nominal,smearUp,smearDown)) || isinf(getSigmaVar(nominal,smearUp,smearDown))) {
+            std::cout << "ERROR infinite value! " << std::endl;
+            exit (1);
+            }
 							outfile << Form("%1.4g     %1.4g     %1.4g    ",getMeanVar(nominal,smearUp,smearDown),getSigmaVar(nominal,smearUp,smearDown),getRateVar(nominal,smearUp,smearDown)) << endl;
 						} else {
 							outfile << Form("%1.4g     %1.4g     %1.4g    ",0.,0.,0.) << endl;
@@ -592,7 +629,7 @@ int main(int argc, char *argv[]){
 					}
 				}
 
-			}
+			
 			outfile << endl;	
 		} // end process loop
 		outfile << endl;

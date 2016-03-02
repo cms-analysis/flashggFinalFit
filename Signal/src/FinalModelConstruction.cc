@@ -1,5 +1,6 @@
 #include <fstream>
 #include <sstream>
+#include <iostream>
 
 #include "TVectorT.h"
 #include "TMatrixTSym.h"
@@ -47,6 +48,7 @@ FinalModelConstruction::FinalModelConstruction(RooRealVar *massVar, RooRealVar *
   mhHigh_(mhHigh),
   proc_(proc),
   cat_(cat),
+  outDir_(outDir),
   isProblemCategory_(isProblemCategory),
   doSecondaryModels(doSecMods),
   isCutBased_(isCB),
@@ -58,8 +60,7 @@ FinalModelConstruction::FinalModelConstruction(RooRealVar *massVar, RooRealVar *
   verbosity_(verbosity),
   systematicsSet_(false),
   rvFractionSet_(false),
-	procs_(procList),
-  outDir_(outDir)
+	procs_(procList)
 {
   setTDRStyle();
   writeExtraText = true;       // if extra text
@@ -86,7 +87,8 @@ FinalModelConstruction::FinalModelConstruction(RooRealVar *massVar, RooRealVar *
     RooSpline1D *xsSpline = graphToSpline(Form("fxs_%s_%dTeV",procs_[i].c_str(),sqrts_),xsGraph);
     xsSplines.insert(pair<string,RooSpline1D*>(procs_[i],xsSpline));
   }
-
+  
+  paramDump_.open (Form("%s/paramDump_%s_%stxt",outDir.c_str(),proc_.c_str(),cat_.c_str()));
   vector<string> files;
   split( files, systematicsFileName, boost::is_any_of(",") );
   for(vector<string>::iterator fi=files.begin(); fi!=files.end(); ++fi ) {
@@ -572,7 +574,7 @@ void FinalModelConstruction::getRvFractionFunc(string name){
   //temp->SetMinimum(0.5);
   //temp->SetMaximum(1.2);
   //temp->Draw();
-  //temp->Fit(pol);
+  temp->Fit(pol);
   //pol->Draw();
   //c->Print(Form("%s/%s_%s_rvF_fit_to_pol2.png",outDir_.c_str(),proc_.c_str(),cat_.c_str()));
   //c->Print(Form("%s/%s_%s_rvF_fit_to_pol2.pdf",outDir_.c_str(),proc_.c_str(),cat_.c_str()));
@@ -819,7 +821,7 @@ void FinalModelConstruction::buildRvWvPdf(string name, int nGrv, int nGwv, bool 
   }
 }
 
-vector<RooAddPdf*> FinalModelConstruction::buildPdf(string name, int nGaussians, bool recursive, map<string,RooSpline1D*> splines, string add){
+vector<RooAddPdf*> FinalModelConstruction::buildPdf(string name, int nGaussians, bool recursive, map<string,RooSpline1D*> splines, string rvwv){
   
   vector<RooAddPdf*> result;
 	string catname;
@@ -828,7 +830,7 @@ vector<RooAddPdf*> FinalModelConstruction::buildPdf(string name, int nGaussians,
 
   RooArgList *gaussians = new RooArgList();
   RooArgList *coeffs = new RooArgList();
-  string ext = Form("%s_%s%s",proc_.c_str(),catname.c_str(),add.c_str());
+  string ext = Form("%s_%s%s",proc_.c_str(),catname.c_str(),rvwv.c_str());
   
   // for SM Higgs as Background
   RooArgList *gaussians_SM = new RooArgList();
@@ -949,7 +951,9 @@ vector<RooAddPdf*> FinalModelConstruction::buildPdf(string name, int nGaussians,
   assert(dm_vect.size() == sigma_vect.size()); //otherwise we are in trouble!
   assert(dm_vect.size() == mean_vect.size()); //otherwise we are in trouble!
   assert(coeffs_vect.size() == mean_vect.size()-1); //otherwise we are in trouble!
-  for (int g =0 ; g< dm_vect.size() ; g++){
+  paramDump_ <<proc_ <<"_"<< cat_ << "_" << rvwv <<" --> & mh 120 & mh 125 & mh 130 \\ " << std::endl;
+  for (unsigned int g =0 ; g< dm_vect.size() ; g++){
+    
     int point=0;
     if (g>0){
       coeffsGraphs[g-1]->SetMarkerStyle(21);
@@ -965,27 +969,54 @@ vector<RooAddPdf*> FinalModelConstruction::buildPdf(string name, int nGaussians,
     legdm->AddEntry(dmGraphs[g],dmGraphs[g]->GetName(),"lep");
     legmean->AddEntry(meanGraphs[g],meanGraphs[g]->GetName(),"lep");
     legsigma->AddEntry(sigmaGraphs[g],sigmaGraphs[g]->GetName(),"lep");
+    
+    paramDump_  <<proc_ <<"_"<< cat_ << "_" << rvwv<< " dm" << g ;
     for (int m =120; m<131; m++){
+    bool print = (m==120 || m==125 || m==130);
       MH->setVal(m);
       if(verbosity_) std::cout << "[INFO] interpolation of gaussian  " << g << " at mH = " << m << " , dm " << dm_vect[g]->getVal() << std::endl;
-      if(verbosity_) std::cout << "[INFO] interpolation of gaussian  " << g << " at mH = " << m << " , sigma " << sigma_vect[g]->getVal() << std::endl;
       dmGraphs[g]->SetPoint(point,m,dm_vect[g]->getVal());
+        point++;
+      if (print) paramDump_ << " & " << dm_vect[g]->getVal() ;  
+     }
+     paramDump_ << " \\ " <<std::endl;
+
+    point=0;
+    paramDump_  <<proc_ <<"_"<< cat_ << "_" << rvwv<< " sigma" << g ;
+    for (int m =120; m<131; m++){
+    bool print = (m==120 || m==125 || m==130);
+      MH->setVal(m);
+      if(verbosity_) std::cout << "[INFO] interpolation of gaussian  " << g << " at mH = " << m << " , sigma " << sigma_vect[g]->getVal() << std::endl;
       meanGraphs[g]->SetPoint(point,m,mean_vect[g]->getVal());
       sigmaGraphs[g]->SetPoint(point,m,sigma_vect[g]->getVal());
+        point++;
+      if (print) paramDump_ << " & " << sigma_vect[g]->getVal() ;  
+      }
+     paramDump_ << " \\ " <<std::endl;
+
+    point=0;
+    if (g>0) paramDump_  <<proc_ <<"_"<< cat_ << "_" << rvwv<< "coeff" << (g-1) ;
+    for (int m =120; m<131; m++){
+    bool print = (m==120 || m==125 || m==130);
+      MH->setVal(m);
       if (g>0){
         coeffsGraphs[g-1]->SetPoint(point-1,m,coeffs_vect[g-1]->getVal());
+       if(verbosity_) std::cout << "[INFO] interpolation of gaussian  " << g << " at mH = " << m << " , coeff " << sigma_vect[g-1]->getVal() << std::endl;
+      if (print) paramDump_ << " & " << coeffs_vect[g-1]->getVal() ;  
       }
-      point++;
+    point++;
     }
+   if (g>0) paramDump_ << " \\ " <<std::endl;
+    point++;
     MG_dm->Add(dmGraphs[g]);
     MG_mean->Add(meanGraphs[g]);
     MG_sigma->Add(sigmaGraphs[g]);
     if (g>0)  MG_coeffs->Add(coeffsGraphs[g-1]);
   }
-  c->SetName(Form("%s %s %s ",proc_.c_str(),cat_.c_str(),add.c_str()));
-  c->SetTitle(Form("%s %s %s ",proc_.c_str(),cat_.c_str(),add.c_str()));
+  c->SetName(Form("%s %s %s ",proc_.c_str(),cat_.c_str(),rvwv.c_str()));
+  c->SetTitle(Form("%s %s %s ",proc_.c_str(),cat_.c_str(),rvwv.c_str()));
   TPaveText *pt = new TPaveText(.1,.4,.9,.8,"NDC");
-  pt->AddText(Form("%s %s %s",proc_.c_str(),catname.c_str(),add.c_str()));
+  pt->AddText(Form("%s %s %s",proc_.c_str(),catname.c_str(),rvwv.c_str()));
   pt->AddText("delta m -  top right");
   pt->AddText("sigma -  bottom left");
   pt->AddText("recursive coeffs -  bottom right");
@@ -993,7 +1024,7 @@ vector<RooAddPdf*> FinalModelConstruction::buildPdf(string name, int nGaussians,
   c->cd(1);
   pt->Draw();
   c->cd(2);
-  MG_dm->SetTitle(Form("%s %s %s",proc_.c_str(),catname.c_str(),add.c_str()));
+  MG_dm->SetTitle(Form("%s %s %s",proc_.c_str(),catname.c_str(),rvwv.c_str()));
   MG_dm->Draw("ALP");
   legdm->Draw();
   c->cd(3);
@@ -1002,7 +1033,7 @@ vector<RooAddPdf*> FinalModelConstruction::buildPdf(string name, int nGaussians,
   c->cd(4);
   MG_coeffs->Draw("ALP");
   legcoeffs->Draw();
-  c->SaveAs(Form("%s/%s_%s_%s_interpolation_debug.pdf",outDir_.c_str(),proc_.c_str(),cat_.c_str(),add.c_str()));
+  c->SaveAs(Form("%s/%s_%s_%s_interpolation_debug.pdf",outDir_.c_str(),proc_.c_str(),cat_.c_str(),rvwv.c_str()));
   assert(gaussians->getSize()==nGaussians && coeffs->getSize()==nGaussians-1);
   RooAddPdf *pdf = new RooAddPdf(Form("%s_%s",name.c_str(),ext.c_str()),Form("%s_%s",name.c_str(),ext.c_str()),*gaussians,*coeffs,recursive);
   result.push_back(pdf);
@@ -1091,7 +1122,7 @@ void FinalModelConstruction::plotPdf(string outDir){
   system(Form("mkdir -p %s",outDir.c_str()));
   
   TCanvas *canv = new TCanvas();
-  RooPlot *dataPlot = mass->frame(Title(Form("%s_%s",proc_.c_str(),catname.c_str())),Range(100,160));
+  RooPlot *dataPlot = mass->frame(Title(Form("%s_%s",proc_.c_str(),catname.c_str())),Range(110,140));
   TPaveText *pt = new TPaveText(.7,.5,.95,.8,"NDC");
   //TH1F * dummy = new TH1F("d","d",1,0,1);
   //dummy->SetMarkerColor(kWhite);

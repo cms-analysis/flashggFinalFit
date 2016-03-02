@@ -53,8 +53,8 @@ class InitialFit {
     std::vector<int> getAllMH();
 		bool skipMass(int mh);
     int verbosity_;
-    int bins_;
     bool binnedFit_;
+    int bins_;
 
 };
 

@@ -215,7 +215,9 @@ int main(int argc, char *argv[]){
   // open input files using WS wrapper.
 	WSTFileWrapper *inWS 
     = new WSTFileWrapper(filename_,"tagsDumper/cms_hgg_13TeV");
+  if(verbose_) std::cout << "[INFO] Opened files OK!" << std::endl;
 	RooRealVar *mass = (RooRealVar*)inWS->var("CMS_hgg_mass");
+  if(verbose_) std::cout << "[INFO] Got mass variable " << mass << std::endl;
 	//mass->setBins(80);
 	mass->setBins(nBins);
 	mass->setRange(rangeLow,rangeHigh);
@@ -236,10 +238,12 @@ int main(int argc, char *argv[]){
 	map<string,vector<RooPlot*> > plotsWV;
   
   // declare temporary Plots/Frames, one for each proc and cat to consider.
+  if(verbose_) std::cout << "[INFO] start looping through nProcs " << procs.size() << " to book rooPlots " <<  std::endl;
 	for (unsigned int p=0; p<procs.size(); p++){
 		vector<RooPlot*> temp;
 		vector<RooPlot*> tempRV;
 		vector<RooPlot*> tempWV;
+     if(verbose_) std::cout << "[INFO] on proc " << procs[p] <<  " start looping through nCats " << ncats_ << " to book RooPlots " <<  std::endl;
 		for (int cat=0; cat<ncats_; cat++){
 			//RooPlot *plotRV = mass->frame(Range(mass_-10,mass_+10));
 			RooPlot *plotRV = mass->frame(Range(rangeLow,rangeHigh));
@@ -273,6 +277,7 @@ int main(int argc, char *argv[]){
   // continue flag is used to tell the script to ignore some
   // cases if we are using a considerOnly option.
 	bool continueFlag =0;
+  if(verbose_) std::cout << "[INFO] start looping through nCats " << ncats_ << " to get datasets " <<std::endl;
 	for (int cat=0; cat<ncats_; cat++){
 
 		if ( (considerOnly_[0]).compare("All") != 0 ){
@@ -286,6 +291,7 @@ int main(int argc, char *argv[]){
 
 		if (continueFlag){ continueFlag=0; continue;}
     
+  if(verbose_) std::cout << "[INFO] on cat " << flashggCats_[cat] <<  " start looping through procs  " << procs.size() << " to get datasets " <<std::endl;
     // now main loop through processes...
 		for (unsigned int p=0; p<procs.size(); p++){
       
@@ -299,17 +305,29 @@ int main(int argc, char *argv[]){
       
       // We want to reduce our datasets, so just get the most important vars.
 	    RooRealVar *mass = (RooRealVar*)inWS->var("CMS_hgg_mass");
-	    RooRealVar *dZ = (RooRealVar*)inWS->var("dZ");
+	    //RooRealVar *dZ = (RooRealVar*)inWS->var("dZ");
 	    RooRealVar *weight0 = new RooRealVar("weight","weight",-100000,1000000);
+	    RooRealVar *dZ = new RooRealVar("dZ","dZ",-100000,1000000);
+      if (verbose_) std::cout << "[INFO] got roorealvars from ws ? mass " << mass << " dz " << dZ << std::endl;
       
       // access dataset and immediately reduce it!
 			if (isFlashgg_){
 				RooDataSet *data0   = (RooDataSet*)inWS->data(
           Form("%s_%d_13TeV_%s",proc.c_str(),mass_,flashggCats_[cat].c_str()));
+        if(verbose_) {
+          std::cout << "[INFO] got dataset data0 ? " << data0 << "now make empty clones " << std::endl;
+          if (data0) {
+            std::cout << "[INFO] and it looks like this : " << *data0 << std::endl;
+          } else {
+            std::cout << "[INFO] but it is a null pointer! extit " << std::endl;
+            exit (1);
+          }
+        }
         
         data = (RooDataSet*) data0->emptyClone()->reduce(RooArgSet(*mass, *dZ));
         dataRV = (RooDataSet*) data0->emptyClone()->reduce(RooArgSet(*mass, *dZ));
         dataWV = (RooDataSet*) data0->emptyClone()->reduce(RooArgSet(*mass, *dZ));
+
 
         for (unsigned int i=0 ; i < data0->numEntries() ; i++){
             mass->setVal(data0->get(i)->getRealValue("CMS_hgg_mass"));

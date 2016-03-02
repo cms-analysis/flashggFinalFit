@@ -61,6 +61,7 @@ RooRealVar* WSTFileWrapper::var(std::string varName) {
 RooAbsData* WSTFileWrapper::data(std::string dataName) {
   RooAbsData* result = 0;
   bool complained_yet = 0;
+  assert(wsList.size() == fileList.size());
   for (unsigned int i = 0 ; i < wsList.size() ; i++) {
     fileList[i]->cd();
     RooAbsData* this_result = (RooAbsData*)wsList[i]->data(dataName.c_str());
@@ -172,7 +173,7 @@ void WSTFileWrapper::Close() {
 RooArgSet WSTFileWrapper::allVars(){
 
   RooArgSet result;
-  bool complained_yet = 0;
+  //bool complained_yet = 0;
   for (unsigned int i = 0 ; i < wsList.size() ; i++) {
     if (fileList.size()>i) fileList[i]->cd();
     RooArgSet this_result = wsList[i]->allVars();
@@ -187,7 +188,7 @@ RooArgSet WSTFileWrapper::allVars(){
 RooArgSet WSTFileWrapper::allFunctions(){
 
   RooArgSet result;
-  bool complained_yet = 0;
+  //bool complained_yet = 0;
   for (unsigned int i = 0 ; i < wsList.size() ; i++) {
     if (fileList.size()>i) fileList[i]->cd();
     RooArgSet this_result = wsList[i]->allFunctions();

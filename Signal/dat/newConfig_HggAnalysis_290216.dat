@@ -1,0 +1,42 @@
+#proc cat nGausRV nGausWV #optional repalcement proc # optional repalcement tag
+# optional replacemetns are basically for RV only, since for WV the shape is always the same so we just pick the reference to be GGH untaggedTag3
+ggh TTHHadronicTag -1 -1 tth TTHHadronicTag
+ggh TTHLeptonicTag -1 -1 tth TTHLeptonicTag
+ggh UntaggedTag_0 2 2
+ggh UntaggedTag_1 3 3
+ggh UntaggedTag_2 3 4
+ggh UntaggedTag_3 4 3
+ggh VBFTag_0 2 -1
+ggh VBFTag_1 4 3
+tth TTHHadronicTag 5 -1
+tth TTHLeptonicTag 5 -1
+tth UntaggedTag_0 3 -1
+tth UntaggedTag_1 4 -1
+tth UntaggedTag_2 4 -1
+tth UntaggedTag_3 5 -1
+tth VBFTag_0 -1 -1 vbf VBFTag_0
+tth VBFTag_1 -1 -1 vbf VBFTag_1
+vbf TTHHadronicTag -1 -1 tth TTHHadronicTag
+vbf TTHLeptonicTag -1 -1 tth TTHLeptonicTag
+vbf UntaggedTag_0 2 1
+vbf UntaggedTag_1 4 5
+vbf UntaggedTag_2 4 4
+vbf UntaggedTag_3 4 3
+vbf VBFTag_0 3 3
+vbf VBFTag_1 5 3
+wh TTHHadronicTag -1 -1 tth TTHHadronicTag
+wh TTHLeptonicTag -1 -1 tth TTHLeptonicTag
+wh UntaggedTag_0 3 -1
+wh UntaggedTag_1 4 4
+wh UntaggedTag_2 5 3
+wh UntaggedTag_3 3 2
+wh VBFTag_0 -1 -1 vbf VBFTag_0
+wh VBFTag_1 -1 -1 vbf VBFTag_1
+zh TTHHadronicTag -1 -1 tth TTHHadronicTag
+zh TTHLeptonicTag -1 -1 tth TTHLeptonicTag
+zh UntaggedTag_0 3 -1
+zh UntaggedTag_1 4 2
+zh UntaggedTag_2 4 3
+zh UntaggedTag_3 5 3
+zh VBFTag_0 -1 -1 vbf VBFTag_0
+zh VBFTag_1 2 -1

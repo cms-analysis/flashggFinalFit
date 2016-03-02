@@ -65,9 +65,10 @@ void Packager::packageOutput(bool split, string process , string tag){
 				RooDataSet *tempData = 0;
 				if( merge ) { 
 					tempData = (RooDataSet*)mergeWS->data(Form("sig_%s_mass_m%d_%s",proc->c_str(),mh,catname.c_str()));
-					 //WS->import(*tempData); //FIXME
+					if(tempData && !saveWS->data(Form("sig_%s_mass_m%d_%s",proc->c_str(),mh,catname.c_str())))  saveWS->import(*tempData); //FIXME
 				} else {
 					tempData = (RooDataSet*)WS->data(Form("sig_%s_mass_m%d_%s",proc->c_str(),mh,catname.c_str()));
+					if(tempData && !saveWS->data(Form("sig_%s_mass_m%d_%s",proc->c_str(),mh,catname.c_str())))  saveWS->import(*tempData); //FIXME
 				}
 				if (!tempData) {
 				if (!split_)	cerr << "[WARNING] -- dataset: " << Form("sig_%s_mass_m%d_%s",proc->c_str(),mh,catname.c_str()) << " not found. It will be skipped" << endl;
@@ -101,7 +102,7 @@ void Packager::packageOutput(bool split, string process , string tag){
 	RooArgList *runningNormSum = new RooArgList();
   double runningNormSumVal=0;
 	for (int cat=0; cat<nCats_; cat++){
-    RooRealVar *intLumi = (RooRealVar*)WS->var("IntLumi");
+    //RooRealVar *intLumi = (RooRealVar*)WS->var("IntLumi");
 		string catname;
 		if (sqrts_ == 13) catname=Form("%s",flashggCats_[cat].c_str());
 		else if (sqrts_==7 || sqrts_==8) catname=Form("cat%d",cat);
@@ -218,11 +219,13 @@ void Packager::packageOutput(bool split, string process , string tag){
         }
 			TCanvas *canv = new TCanvas();
 			effAccGraph->SetLineWidth(3);
+			effAccGraph->SetName("effAccGraph");
 			effAccGraph->GetXaxis()->SetTitle("m_{H} (GeV)");
 			effAccGraph->GetYaxis()->SetTitle("efficiency #times acceptance");
 			effAccGraph->Draw("AL");
 			canv->Print(Form("%s/effAccCheck%s.pdf",outDir_.c_str(),extension.c_str()));
 			canv->Print(Form("%s/effAccCheck%s.png",outDir_.c_str(),extension.c_str()));
+			effAccGraph->SaveAs(Form("%s/effAccCheck%s.root",outDir_.c_str(),extension.c_str()));
 			expEventsGraph->SetLineWidth(3);
 			expEventsGraph->GetXaxis()->SetTitle("m_{H} (GeV)");
 			double intLumiVal = 1000;
@@ -289,11 +292,11 @@ void Packager::makePlots(){
 void Packager::makePlot(RooRealVar *mass, RooRealVar *MH, RooAddPdf *pdf, map<int,RooDataSet*> data, string name){
 
 	TCanvas *canv = new TCanvas();
-	RooPlot *dataPlot = mass->frame(Title(name.c_str()),Range(100,160));
+	RooPlot *dataPlot = mass->frame(Title(name.c_str()),Range(110,140));
 	for (map<int,RooDataSet*>::iterator it=data.begin(); it!=data.end(); it++){
 		int mh = it->first;
 		RooDataSet *dset = it->second;
-		dset->plotOn(dataPlot,Binning(160));
+		dset->plotOn(dataPlot,Binning(320));
 		MH->setVal(mh);
 		pdf->plotOn(dataPlot);
 	}

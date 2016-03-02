@@ -43,7 +43,7 @@ usage(){
 
 
 # options may be followed by one colon to indicate they have a required argument
-if ! options=$(getopt -u -o hi:p:f: -l help,inputFile:,procs:,flashggCats:,ext:,fTestOnly,calcPhoSystOnly,sigFitOnly,sigPlotsOnly,intLumi:,batch: -- "$@")
+if ! options=$(getopt -u -o hi:p:f: -l help,inputFile:,procs:,smears:,scales:,flashggCats:,ext:,fTestOnly,calcPhoSystOnly,sigFitOnly,sigPlotsOnly,intLumi:,batch: -- "$@")
 then
 # something went wrong, getopt will put out an error message for us
 exit 1
@@ -56,6 +56,8 @@ case $1 in
 -h|--help) usage; exit 0;;
 -i|--inputFile) FILE=$2; shift ;;
 -p|--procs) PROCS=$2; shift ;;
+--smears) SMEARS=$2; shift ;;
+--scales) SCALES=$2; shift ;;
 -f|--flashggCats) CATS=$2; shift ;;
 --ext) EXT=$2; echo "test" ; shift ;;
 --fTestOnly) FTESTONLY=1; echo "ftest" ;;
@@ -102,7 +104,7 @@ fi
 ####################################################
 ################## SIGNAL F-TEST ###################
 ####################################################
-if [ -e dat/newConfig_${EXT}.dat ]; then
+if [ -e dat/newConfig_${EXT}XXXX.dat ]; then
   echo "[INFO] sigFTest dat file $OUTDIR/dat/copy_newConfig_${EXT}.dat already exists, so SKIPPING SIGNAL FTEST"
 else
   if [ $FTESTONLY == 1 ]; then
@@ -113,7 +115,7 @@ else
     echo "=============================="
     if [ -z $BATCH ]; then
       echo "./bin/signalFTest -i $FILE -d dat/newConfig_$EXT.dat -p $PROCS -f $CATS -o $OUTDIR"
-  #    ./bin/signalFTest -i $FILE -d dat/newConfig_$EXT.dat -p $PROCS -f $CATS -o $OUTDIR
+      ./bin/signalFTest -i $FILE -d dat/newConfig_$EXT.dat -p $PROCS -f $CATS -o $OUTDIR
     else
       echo "./python/submitSignaFTest.py --procs $PROCS --flashggCats $CATS --outDir $OUTDIR --i $FILE --batch $BATCH -q $DEFAULTQUEUE"
        ./python/submitSignaFTest.py --procs $PROCS --flashggCats $CATS --outDir $OUTDIR --i $FILE --batch $BATCH -q $DEFAULTQUEUE
@@ -150,6 +152,7 @@ else
   echo "then re-run the same command to continue !"
   CALCPHOSYSTONLY=0
   SIGFITONLY=0
+  SIGPLOTSONLY=0
 fi
 ####################################################
 ################## CALCPHOSYSTCONSTS ###################
@@ -163,10 +166,8 @@ if [ $CALCPHOSYSTONLY == 1 ]; then
   echo "=============================="
 
   echo "./bin/calcPhotonSystConsts -i $FILE -o dat/photonCatSyst_$EXT.dat -p $PROCS -s $SCALES -r $SMEARS -D $OUTDIR -f $CATS"
- # ./bin/calcPhotonSystConsts -i $FILE -o dat/photonCatSyst_$EXT.dat -p $PROCS -s $SCALES -r $SMEARS -D $OUTDIR -f $CATS 
-  
+  ./bin/calcPhotonSystConsts -i $FILE -o dat/photonCatSyst_$EXT.dat -p $PROCS -s $SCALES -r $SMEARS -D $OUTDIR -f $CATS 
   cp dat/photonCatSyst_$EXT.dat $OUTDIR/dat/copy_photonCatSyst_$EXT.dat
-
 fi
 ####################################################
 ####################### SIGFIT #####################
@@ -236,8 +237,8 @@ echo "-->Create Validation plots"
 echo "=============================="
 
 echo " ./bin/makeParametricSignalModelPlots -i $OUTDIR/CMS-HGG_sigfit_$EXT.root  -o $OUTDIR -p $PROCS -f $CATS"
-#./bin/makeParametricSignalModelPlots -i $OUTDIR/CMS-HGG_sigfit_$EXT.root  -o $OUTDIR/sigplots -p $PROCS -f $CATS
-mv $OUTDIR/sigfit/initialFits $OUTDIR/initialFits
+./bin/makeParametricSignalModelPlots -i $OUTDIR/CMS-HGG_sigfit_$EXT.root  -o $OUTDIR/sigplots -p $PROCS -f $CATS > signumbers.txt
+#mv $OUTDIR/sigfit/initialFits $OUTDIR/initialFits
 
 fi
 

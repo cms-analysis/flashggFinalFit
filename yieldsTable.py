@@ -11,6 +11,7 @@ lumi=0.
 from optparse import OptionParser
 parser = OptionParser()
 parser.add_option("-d","--dir")
+parser.add_option("--factor",default=1.)
 parser.add_option("-i","--input",default="numbers.txt")
 parser.add_option("-s","--siginput",default="signumbers.txt")
 parser.add_option("-w","--workspaces",default="")
@@ -48,12 +49,13 @@ Arr={}
 effSigma={}
 hmSigma={}
 bkgYield={}
-
+options.factor=float(options.factor)
 with open(options.input) as i:
   lines  = i.readlines()
   for line in lines:
+    #print line
     if "intLumi" in line: lumi=float(line[line.find("value")+6:])
-    #if not "entr" in line : continue 
+    if "pdfWeight" in line : continue 
     line=line.replace("Tag_","Tag ")
     line=line.replace(",","_ ")
     line=line.replace("\n","")
@@ -63,7 +65,7 @@ with open(options.input) as i:
     tags.append(words[3])
     weights.append(float(words[4]))
     entries.append(float(words[4]))
-    list=[words[0],words[3],float(words[4])]
+    list=[words[0],words[3],options.factor*float(words[4])]
     yields.append(list)
     continue
 
@@ -103,10 +105,15 @@ for x in effSigma.keys():
       line=line.replace("Tag_","Tag ")
       print "LCDEBUG ", line
       words=line.split(',')
+      print "LCDEBUG ", words[1], ", ", words[3]  
       bkgYield[words[1]]=float(words[3])
+      print "LCDEBUG ", bkgYield
 bkgAllYield=0
 for x in bkgYield.values(): bkgAllYield=bkgAllYield+x
 bkgYield["All"]=bkgAllYield
+
+print "DEBUG bkg YIELD"
+bkgYield
 
 '''      
 print "INTLUMI ", lumi, "/pb"
@@ -302,8 +309,8 @@ for t in Arr :
     if p=="All": continue
     line = line+" &  "+str('%.2f \%%'%(100*Arr[t][p]/Arr[t]["All"]))
   Allline=" "+str('%.2f'%Arr[t]["All"])
-  bkgy=0
-  #bkgy=bkgYield[y]
+  #bkgy=0
+  bkgy=bkgYield[t]
   dataLines.append( lineCat + Allline+ " "+line+"& %.2f & %.2f & %.2f \\\\"%(float(effSigma[t]),float(hmSigma[t]),bkgy))
   #dataLines.append( lineCat + Allline+ " "+line+ "& & &")#"& %.2f & %.2f & %.2f \\\\"%(float(effSigma[t]),float(hmSigma[t]),float(bkgYield[t])))
 

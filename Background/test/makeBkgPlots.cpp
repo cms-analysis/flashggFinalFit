@@ -1048,7 +1048,7 @@ int main(int argc, char* argv[]){
 		cmslatex->SetNDC();
 		std::cout << "[INFO] intLumi " << intLumi << std::endl;
 		//cmslatex->drawlatex(0.2,0.85,form("#splitline{cms preliminary}{#sqrt{s} = %dtev l = %2.3ffb^{-1}}",sqrts,intlumi));
-		cmslatex->DrawLatex(0.25,0.85,Form("#splitline{}{#sqrt{s} = %dTeV L = %2.3ffb^{-1}}",sqrts,intLumi));
+		cmslatex->DrawLatex(0.25,0.85,Form("#splitline{}{#sqrt{s} = %dTeV L = %2.1ffb^{-1}}",sqrts,intLumi));
 		latex->DrawLatex(0.25,0.78,catLabel.c_str());
 		outWS->import(*lumi,RecycleConflictNodes());
 

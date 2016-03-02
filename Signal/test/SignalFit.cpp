@@ -91,7 +91,7 @@ float originalIntLumi_;
 string referenceProc_="ggh";
 string referenceProcWV_="ggh";
 string referenceProcTTH_="tth";
-string referenceTagWV_="UntaggedTag_3";
+string referenceTagWV_="UntaggedTag_2";
 string referenceTagRV_="UntaggedTag_2";
 vector<string> map_proc_;
 vector<string> map_cat_;
@@ -347,7 +347,7 @@ int main(int argc, char *argv[]){
   // need to make this configurable ?! -LC
   referenceProc_="ggh";
   referenceProcTTH_="tth";
-  referenceTagWV_="UntaggedTag_3"; // histest stats WV is ggh Untagged 3. 
+  referenceTagWV_="UntaggedTag_2"; // histest stats WV is ggh Untagged 3. 
   referenceTagRV_="UntaggedTag_2"; // fairly low resolution tag even for ggh, more approprioate as te default than re-using the original tag.
   // are WV which needs to borrow should be taken from here
   
@@ -698,6 +698,7 @@ int main(int argc, char *argv[]){
         check = name.ReplaceAll(TString(Form("%d",it->first)),TString(""));
        } else {
        TString name=it->second->GetName();
+       std::cout << "DEBUG check " << check << " compare to  name " << name << " name.ReplaceAll(TString(Form(,it->first)),TString("")) " << name.ReplaceAll(TString(Form("%d",it->first)),TString("")) << std::endl; 
        assert (check ==name.ReplaceAll(TString(Form("%d",it->first)),TString("")) );
        }
     }

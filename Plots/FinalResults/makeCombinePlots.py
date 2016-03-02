@@ -65,6 +65,11 @@ parser.add_option("--it",dest="it",type="string",help="if using superloop, index
 parser.add_option("--itLedger",dest="itLedger",type="string",help="ledger to keep track of values of each iteration if using superloop")
 (options,args)=parser.parse_args()
 
+print "[INFO] Processing Files :"
+print " --> raw input :", options.files
+if (len(options.files)==1) : options.files=options.files[0].split(",")
+print " --> output  :", options.files
+
 # Required for back compatbility and current compatibility it seems
 if options.limit: options.method='limit'
 if options.pval: options.method='pval'
@@ -180,6 +185,9 @@ dummyHist.GetXaxis().SetTitle('m_{H} (GeV)')
 
 # make a helful TLatex box
 lat = r.TLatex()
+lat.SetTextFont(42)
+lat.SetTextSize(0.045)
+lat.SetLineWidth(2)
 lat.SetNDC()
 ##########################
 
@@ -190,13 +198,16 @@ def drawGlobals(canv,shifted=False):
   
   if shifted: 
    #lat.DrawLatex(0.129+0.03,0.93,"CMS Unpublished H#rightarrow#gamma#gamma")
-   lat.DrawLatex(0.129+0.03,0.93,"CMS H#rightarrow#gamma#gamma")
+   #lat.DrawLatex(0.129+0.03,0.93,"CMS H#rightarrow#gamma#gamma")
+   lat.DrawLatex(0.129+0.03,0.93,"#bf{CMS} #it{Preliminary}")
    lat.DrawLatex(0.438+0.03,0.93,options.text)
 
   else:
    #lat.DrawLatex(0.129,0.93,"CMS Unpublished H#rightarrow#gamma#gamma")
-   lat.DrawLatex(0.129,0.93,"CMS H#rightarrow#gamma#gamma")
-   lat.DrawLatex(0.438,0.93,options.text)
+   #lat.DrawLatex(0.129,0.93,"CMS H#rightarrow#gamma#gamma")
+   lat.DrawLatex(0.129,0.93,"#bf{CMS} #it{Preliminary}")
+   #
+   lat.DrawLatex(0.54,0.933,options.text)
 
   for mi,MH in enumerate(MHtexts):
     lat.DrawLatex(mhTextX[mi],mhTextY[mi],MH)
@@ -259,8 +270,13 @@ def pvalPlot(allVals):
   if options.verbose: print 'Plotting pvalue...'
   canv.SetLogy(True)
   mg = r.TMultiGraph()
-  if not options.legend: leg = r.TLegend(0.6,0.12,0.89,0.4)
-  else: leg = r.TLegend(float(options.legend.split(',')[0]),float(options.legend.split(',')[1]),float(options.legend.split(',')[2]),float(options.legend.split(',')[3]))
+  if not options.legend: leg = r.TLegend(0.6,0.17,0.89,0.4)
+  #if not options.legend: leg = r.TLegend(0.6,0.35,0.89,0.45)
+  else:
+    print "LEGEND DEBUG options.legend ", options.legend
+    options.legend[-1]=options.legend[-1].replace("\n","")
+    print "LEGEND DEBUG options.legend ", options.legend
+    leg = r.TLegend(float(options.legend[0]),float(options.legend[1]),float(options.legend[2]),float(options.legend[3]))
   #leg.SetFillColor(0)
   # make graphs from values
   for k, values in enumerate(allVals):
@@ -276,7 +292,7 @@ def pvalPlot(allVals):
       if options.verbose or values[j][0]==125: 
         print '\t', j, values[j][0], values[j][1], r.RooStats.PValueToSignificance(values[j][1])
         pvalat125=values[j][1]
-      print "debug minpval", minpvalue
+      print "debug minpval", minpvalue, "   " , r.RooStats.PValueToSignificance(minpvalue), "values[j][0] " , values[j][0]
     
   #  with open(options.itLedger, "a") as myfile:
   #      myfile.write("%s %f %f\n" % ( (options.names[k].replace(" ","_"))+" "+options.it, minpvalue,minpvalueX ))
@@ -556,6 +572,7 @@ def runStandard():
   config = []
   for k, f in enumerate(options.files):
     tf = r.TFile(f)
+    print f
     tree = tf.Get('limit')
     values=[]
     for i in range(tree.GetEntries()):
@@ -680,6 +697,7 @@ def plot1DNLL(returnErrors=False,xvar="", ext=""):
     sys.exit('Method not recognised for 1D scan %s'%options.method)
 
   if not options.legend: leg  = r.TLegend(0.35,0.65,0.65,0.79)
+  #if not options.legend: leg  = r.TLegend(0.05,0.05,0.4,0.4)
   else: leg = r.TLegend(float(options.legend.split(',')[0]),float(options.legend.split(',')[1]),float(options.legend.split(',')[2]),float(options.legend.split(',')[3]))
   #leg.SetFillColor(0)
   clean_graphs=[]
@@ -838,6 +856,7 @@ def plot2DNLL(xvar="RF",yvar="RV",xtitle="#mu_{ggH+ttH}",ytitle="#mu_{qqH+VH}"):
   COLgrs	= []
   
   if not options.legend: leg = r.TLegend(0.7,0.7,0.88,0.88)
+  #if not options.legend: leg = r.TLegend(0.05,0.05,0.4,0.4)
   else: leg = r.TLegend(float(options.legend.split(',')[0]),float(options.legend.split(',')[1]),float(options.legend.split(',')[2]),float(options.legend.split(',')[3]))
   #leg.SetFillColor(10)
 
@@ -1087,6 +1106,7 @@ def plotMPdfChComp():
   
   points = []
   loffiles = options.files
+  print options.files
   k=0
 
   ppergraph = len(loffiles)/options.groups

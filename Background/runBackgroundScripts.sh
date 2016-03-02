@@ -163,6 +163,17 @@ OPT=" --unblind"
 fi
 echo "./scripts/subBkgPlots.py -b CMS-HGG_multipdf_$EXT.root -d $OUTDIR/bkgPlots$DATAEXT -S 13 --isMultiPdf --useBinnedData  --doBands --massStep 2 $SIG -L 100 -H 180 -f $CATS -l $CATS --intLumi $INTLUMI $OPT --batch IC -q hepmedium.q #for now"
 ./scripts/subBkgPlots.py -b CMS-HGG_multipdf_$EXT.root -d $OUTDIR/bkgPlots$DATAEXT -S 13 --isMultiPdf --useBinnedData  --doBands  --massStep 2 $SIG -L 100 -H 180 -f $CATS -l $CATS --intLumi $INTLUMI $OPT --batch IC -q hepmedium.q #for now
+continueLoop=0
+while (($continueLoop==0))
+do
+ sleep 10
+ qstat
+ qstat >qstat_out.txt
+ ((number= `cat qstat_out.txt | wc -l `))
+  if (( $number==0)) ; then
+     ((continueLoop=0))
+  fi
+done 
 
 OPT=""
 fi

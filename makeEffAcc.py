@@ -4,7 +4,10 @@
 import ROOT as r
 import sys
 import re
-
+import string
+import random
+def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
+   return ''.join(random.choice(chars) for _ in range(size))
 ###############################################################################
 ##  Get Systematics ########################################################
 ###############################################################################
@@ -21,19 +24,34 @@ def getStatError(dataVector,inWS):
       th1f.Fill(mass.getVal(),w_nominal)
       #print "CHECK data " , "suEntries", data.sumEntries(), " numEntries" ,data.numEntries()
       #print "CHECK Th1F " , "suEntries", th1f.Integral(), " numEntries", th1f.GetEntries()
-  for j in range(0,th1f.GetNbinsX()):
-    print "CHECK Th1F " , "statError in bin  ", j, " == " , th1f.GetBinError(j)
+  #for j in range(0,th1f.GetNbinsX()):
+    #print "CHECK Th1F " , "statError in bin  ", j, " == " , th1f.GetBinError(j)
 
   return th1f.GetBinError(0) 
 
 def getSystHisto(proc,cat,syst,mass,inWS):
+  printDetails=(proc=="tth")
   asymmetric=False 
-  eventweight=False 
-  #print "===========> SYST", syst ," PROC ", proc , ", TAG ", cat
-  dataSYMMETRIC =  inWS.data("%s_%d_13TeV_%s_%s"%(proc,mass,cat,syst)) #Will exist if the systematic is a symmetric uncertainty not stored as event weights
-  dataDOWN =  inWS.data("%s_%d_13TeV_%s_%sDown01sigma"%(proc,mass,cat,syst)) # will exist if teh systematic is an asymetric uncertainty not strore as event weights
-  dataUP =  inWS.data("%s_%d_13TeV_%s_%sUp01sigma"%(proc,mass,cat,syst))# will exist if teh systematic is an asymetric uncertainty not strore as event weights
+  eventweight=False
+  dataSYMMETRIC=None
+  dataDOWN=None
+  dataUP=None
+  dataNOMINAL=None
+  isWeight = None
+  isWeight = inWS.var("%sUp01sigma"%syst)
   dataNOMINAL =  inWS.data("%s_%d_13TeV_%s"%(proc,mass,cat)) #Nominal RooDataSet,. May contain required weights if UP/DOWN/SYMMETRIC roodatahists do not exist (ie systematic stored as event weigths)
+  print "DEBUG 1 dataNOMINAL"
+  dataNOMINAL.Print()
+  if (isWeight ==None):
+    print "===========> SYST notWeight ", syst ," PROC ", proc , ", TAG ", cat
+    dataDOWN =  inWS.data("%s_%d_13TeV_%s_%sDown01sigma"%(proc,mass,cat,syst)) # will exist if teh systematic is an asymetric uncertainty not strore as event weights
+    print "DEBUG 1 dataDOWN"
+    dataDOWN.Print()
+
+    dataUP =  inWS.data("%s_%d_13TeV_%s_%sUp01sigma"%(proc,mass,cat,syst))# will exist if teh systematic is an asymetric uncertainty not strore as event weights
+    print "DEBUG 1 dataUP"
+    dataUP.Print()
+    if (dataDOWN==None): dataSYMMETRIC =  inWS.data("%s_%d_13TeV_%s_%s"%(proc,mass,cat,syst)) #Will exist if the systematic is a symmetric uncertainty not stored as event weights
   #print " ", ("%s_125_13TeV_%s_%s"%(proc,cat,syst))," ", dataSYMMETRIC, "data==None" , (dataSYMMETRIC==None), " data is None ", (dataSYMMETRIC is None)
   #print " ", ("%s_125_13TeV_%s"%(proc,cat)) ," ",  dataNOMINAL, "data==None" , (dataNOMINAL==None), " data is None ", (dataNOMINAL is None)
   #print "  ", ("%s_125_13TeV_%s_%sDown01sigma"%(proc,cat,syst)), " ", dataDOWN, "data==None" , (dataDOWN==None), " data is None ", (dataDOWN is None)
@@ -53,14 +71,16 @@ def getSystHisto(proc,cat,syst,mass,inWS):
       eventweight=False
   
   if (asymmetric and eventweight) : 
-    data_up = dataNOMINAL.emptyClone();
-    data_down = dataNOMINAL.emptyClone();
+    data_up = dataNOMINAL.emptyClone()
+    data_down = dataNOMINAL.emptyClone()
+    data_nom_new = dataNOMINAL.emptyClone()
     mass = inWS.var("CMS_hgg_mass")
     weight = r.RooRealVar("weight","weight",0)
     weight_up = inWS.var("%sUp01sigma"%syst)
     #weight_down = inWS.var("%sDown01sigma"%sys)
     weight_down = r.RooRealVar("%sDown01sigma"%syst,"%sDown01sigma"%syst,-1.)
     weight_central = inWS.var("centralObjectWeight")
+    #print "mass ", mass," weight_up ", weight_up , " weight_down ", weight_down , " data_up ", data_up, " data_down ", data_down
     zeroWeightEvents=0.
     for i in range(0,int(dataNOMINAL.numEntries())):
       mass.setVal(dataNOMINAL.get(i).getRealValue("CMS_hgg_mass"))
@@ -80,15 +100,23 @@ def getSystHisto(proc,cat,syst,mass,inWS):
         continue
       weight_down.setVal(w_nominal*(w_down/w_central))
       weight_up.setVal(w_nominal*(w_up/w_central))
+    #  print "mass ", mass," weight_up ", weight_up , " weight_down ", weight_down , " data_up ", data_up, " data_down ", data_down
       data_up.add(r.RooArgSet(mass,weight_up),weight_up.getVal())
       data_down.add(r.RooArgSet(mass,weight_down),weight_down.getVal())
+      data_nom_new.add(r.RooArgSet(mass,weight),w_nominal)
     #print "dataNOMINAL " , dataNOMINAL.sumEntries()
     #print "data_up ", data_up.sumEntries()
     #print "data_down ", data_down.sumEntries()
     dataUP =  data_up  #repalce UP/DOwn histograms defined outside scope of this "if"
     dataDOWN =  data_down  #repalce UP/DOwn histograms defined outside scope of this "if"
+    dataNOMINAL =  data_nom_new  #repalce UP/DOwn histograms defined outside scope of this "if"
+    #if (printDetails) :
+    print "LC DEBUG DATASET DETAILS"
+    dataUP.Print()
+    dataNOMINAL.Print()
+    dataDOWN.Print()
 
-  return [dataUP, dataDOWN]
+  return [dataUP, dataNOMINAL, dataDOWN]
 ###############################################################################
 ## WSTFileWrapper  ############################################################
 ###############################################################################
@@ -127,14 +155,15 @@ class WSTFileWrapper:
           #print this_ws 
           #this_result_obj = this_ws.data(dataName);
           if ( result and this_result_obj and (not complained_yet) ):
-          #  print "[WSTFileWrapper] Uh oh, multiple RooAbsDatas from the file list with the same name: ",  dataName 
+            print "[WSTFileWrapper] Uh oh, multiple RooAbsDatas from the file list with the same name: ",  dataName 
             complained_yet = true;
+            exit(1)
           if this_result_obj: # [3]
              result = this_result_obj
             # print "[WSTFileWrapper]  YES Successfully found the RooAbsData with name ",  dataName 
                       #   [ ... straightforward checks for multiple results etc ... ]
-        if (not result) :
-              print "[WSTFileWrapper] Uh oh, never got a good RooAbsData with name " ,dataName 
+        #if (not result) :
+              #print "[WSTFileWrapper] Uh oh, never got a good RooAbsData with name " ,dataName 
         return result 
    
    def var(self,varName):
@@ -148,8 +177,8 @@ class WSTFileWrapper:
           if this_result_obj: # [3]
              result = this_result_obj
                       #   [ ... straightforward checks for multiple results etc ... ]
-          if (not result) :
-              print "[WSTFileWrapper] Uh oh, never got a good RooRealData with name " ,varName 
+          #if (not result) :
+              #print "[WSTFileWrapper] Uh oh, never got a good RooRealData with name " ,varName 
                 
         return result 
 
@@ -204,6 +233,9 @@ def getSigHistos(ws, procs, suffix): #ok so they are not histos anymore but rood
     #  slurpDic[name]=step1.binnedClone(name+suffix,name+suffix)
 
     #slurpDic = { name : ws.data(name+suffix).binnedClone(name+suffix,name+suffix) for name in procs}
+    for name in procs:
+      print "DEBUG getSigHistosws.data(name+suffix) ", ws.data(name+suffix)
+      ws.data(name+suffix).Print()
     slurpDic = { name : ws.data(name+suffix) for name in procs}
     # filter out histos that are null pointers
     return { k : v for k, v in slurpDic.iteritems() if v }
@@ -240,8 +272,11 @@ r.gROOT.SetBatch(1)
 #lumi=3770
 #systematics = ["vtxEff","idEff","E_scale","E_res","triggerEff","regSig","phoIdMva"] # These are the main contributions to eff*Acc
 #systematics = ["vtxEff","idEff","E_scale","E_res","triggerEff"] # These are the main contributions to eff*Acc
-#systematics = ["TriggerWeight","MvaShift","TriggerWeight","MCScaleLowR9EB","MCScaleHighR9EB","MCScaleLowR9EE","MCScaleHighR9EE","MCSmearLowR9EB","MCSmearHighR9EB","MCSmearLowR9EE","MCSmearHighR9EE"] # These are the main contributions to eff*Acc
-systematics = ["TriggerWeight"] # These are the main contributions to eff*Acc
+systematics = ["TriggerWeight","MvaShift","MCScaleLowR9EB","MCScaleHighR9EB","MCScaleLowR9EE","MCScaleHighR9EE","MCSmearLowR9EB","MCSmearHighR9EB","MCSmearLowR9EE","MCSmearHighR9EE","FracRVWeight"] # These are the main contributions to eff*Acc
+#systematics = ["TriggerWeight","MvaShift","MCScaleLowR9EB","MCScaleHighR9EB"] # These are the main contributions to eff*Acc
+#systematics = ["MCScaleHighR9EB"] # These are the main contributions to eff*Acc
+#systematics = ["MCScaleLowR9EE","MCScaleHighR9EE","MCSmearLowR9EB","MCSmearHighR9EB","MCSmearLowR9EE","MCSmearHighR9EE","FracRVWeight"] # These are the main contributions to eff*Acc
+#systematics = [] # These are the main contributions to eff*Acc
 ## Masses = range(110,152,2) 
 Masses = range(120,135,5) 
 # -------------------------------------------------------------
@@ -250,12 +285,17 @@ Masses = range(120,135,5)
 
 #(procs, masses, cats) = preFlight(f)
 procs=["ggh","vbf","wh","zh","tth"]
+#procs=["ggh","vbf","wh","zh"] #tth is bugged for now
+#procs=["tth"]
 masses=[120.,125.,130.]
 cats=["UntaggedTag_0","UntaggedTag_1","UntaggedTag_2","UntaggedTag_3","VBFTag_0","VBFTag_1","TTHLeptonicTag","TTHHadronicTag"]
+#cats=["UntaggedTag_0"]
 # Get The lumi from the workspace!
 #ws = f.Get("tagsDumper/cms_hgg_13TeV")
 sqrts = 13
 ws = WSTFileWrapper(sys.argv[1],"tagsDumper/cms_hgg_%sTeV"%sqrts)
+extraFile=sys.argv[2]
+#if "root" in extraFile:
 #print ws
 #lRRV = ws.var("IntLumi")
 lRRV = ws.var("IntLumi")
@@ -308,22 +348,27 @@ for point,M in enumerate(Masses):
 
       #integrals = { proc : h.Integral() for (proc, h) in histos.iteritems()}
       integrals = { proc : h.sumEntries() for (proc, h) in histos.iteritems()}
-      #print integrals
+      print "integralsf for M ",M ," ", integrals
 
       procLine = 'cat %s, mH=%3.1f:'%(i, M)
       for proc in procs:
         integral = integrals[proc]
         #procLine += '   %s %.5f'% (proc, 100*integral/(GetBR(M)*( GetProcXsection(M,proc)*adHocFactors[proc] )*lumi) )
         procLine += '   %s %.5f'% (proc, integral )
-      print procLine
+      #print procLine
 
       hs = [ h for (proc, h) in histos.iteritems() ]
       for (proc,h) in histos.iteritems():
         dataVector.append(h)
-      h=hs[0]
+      h=hs[0].emptyClone("dummy dataset"+str(id_generator()))
       
-      for j in hs[1:]:
+      #for j in hs[1:]:
+      for j in hs:
+        print "DEBUG LC this would be stupid before " 
+        h.Print()
         h.append(j)
+        print "DEBUG LC this would be stupid after" 
+        h.Print()
       #test = getStatError(hs,ws) 
     #else:
     #
@@ -337,51 +382,67 @@ for point,M in enumerate(Masses):
   
   xsecs = [ GetProcXsection(M,proc)*adHocFactors[proc] for proc in procs ]
   sm = GetBR(M) * sum(xsecs)
-  print xsecs
+  #print xsecs
   
   effAcc = 100*Sum/(sm*lumi) # calculate Efficiency at mH
-  print "[INFO] effAcc setting point ", M, " with value ", effAcc , " = 100* ",Sum ,"/( ",GetBR(M), " * ", sum(xsecs)  ," * ",lumi ,")"
+  #print "[INFO] effAcc setting point ", M, " with value ", effAcc , " = 100* ",Sum ,"/( ",GetBR(M), " * ", sum(xsecs)  ," * ",lumi ,")"
   centralsmooth.SetPoint(point,M,effAcc)
   central.SetPoint(point,M,effAcc)
   efficiency.SetPoint(point,M,effAcc)
   efficiencyE0.SetPoint(point,M,effAcc)
   #efficiencyTH1.Fill(M,effAcc)
-  delUp = 0
-  delDown = 0
-  #for s in systematics:
- #   syssumup=0
- #   syssumdn=0
- #   for cat in cats:
- #     for proc in procs:
- #        if int(M)==M:
-          #suffix = '_mass_m%d_cat%d_%sUp01_sigma'%(int(M),cat,s)
-          #histosup = getSigHistos(f, procs, suffix)
-          #[hup,hdn]=getSystHisto(proc,cat,s,M,ws)
+  sigmaUp = 0
+  sigmaDown = 0
+  sigmaNom = 0
+  for s in systematics:
+    syssumup=0
+    syssumnom=0
+    syssumdn=0
+    for cat in cats:
+      for proc in procs:
+         if int(M)==M:
+          print "DEBUG pre-getSystHisto proc " , proc, " cat ", cat ,", s " ,s , " M ", M, " ws " , ws
+          [hup,hnom,hdn]=getSystHisto(proc,cat,s,M,ws)
           #hdn=getSystHisto(proc,cat,s,ws)[1]
-          #print "syst " , s , " cat ", cat ,", proc ", proc, "hup.sumEntries() ", hup.sumEntries() 
-          #print "syst " , s , " cat ", cat ,", proc ", proc, "hdn.sumEntries() ", hdn.sumEntries() 
-          #syssumup+=hup.sumEntries()
-          #syssumdn+=hdn.sumEntries()
+          print
+          print "syst " , s , " cat ", cat ,", proc ", proc, "hup.sumEntries() ", hup.sumEntries()
+          hup.Print()
+          print "syst " , s , " cat ", cat ,", proc ", proc, "hnom.sumEntries() ", hnom.sumEntries() 
+          hnom.Print()
+          print "syst " , s , " cat ", cat ,", proc ", proc, "hdn.sumEntries() ", hdn.sumEntries()      
+          hdn.Print()
+          print
+          syssumup+=hup.sumEntries()
+          syssumnom+=hnom.sumEntries()
+          syssumdn+=hdn.sumEntries()
+          print "partial event yield for systematic ", s ," UP at mh=",M," is " ,syssumup, ", ", syssumnom,", ",syssumdn
 
 
     # We make 3-sigma templates so need to scale back by 1/3
-  #  print "total event yield for systematic ", s ," UP at mh=",M," is " ,syssumup
-  #  print "total event yield for systematic ", s ," DN at mh=",M," is " ,syssumdn
-  #  delUp+=abs(syssumup-Sum)
-  #  delDown+=abs(syssumdn-Sum)
+    print "total event yield for systematic ", s ," UP at mh=",M," is " ,syssumup
+    print "total event yield for systematic ", s ," NOM at mh=",M," is " ,syssumnom
+    print "total event yield for systematic ", s ," DN at mh=",M," is " ,syssumdn
+    #delUp+=abs(syssumup-Sum)
+    #delDown+=abs(syssumdn-Sum)
+    xplus= max(syssumup,syssumdn,syssumnom) -syssumnom
+    xminus= min(syssumup,syssumdn,syssumnom) -syssumnom
+    sigmaUp += xplus*xplus
+    sigmaDown += xminus*xminus
+    print "total event yield for systematic ", s ," xUp ", xplus, "xDown", xminus, " sigmaUp ", sigmaUp**0.5 , " sigmaDown ", sigmaDown**0.5
   
 
 
-  delUp=100*(delUp**0.5)/(sm*lumi)
-  delDown=100*(delDown**0.5)/(sm*lumi)
-  efficiencyup.SetPoint(point,M,delUp)
-  efficiencydn.SetPoint(point,M,delDown)
+  sigmaUp=100*(sigmaUp**0.5)/(sm*lumi)
+  sigmaDown=100*(sigmaDown**0.5)/(sm*lumi)
+  efficiencyup.SetPoint(point,M,sigmaUp)
+  efficiencydn.SetPoint(point,M,sigmaDown)
   centralsmooth.SetPointError(point,0,0,0,0)
   #sigma_N = 1/ (Sum)**0.5
-  sigma_N = getStatError(dataVector,ws) 
-  sigma_ea = 100 * sigma_N /(sm*lumi)
-  #efficiency.SetPointError(point,0,0,delDown,delUp)
-  efficiency.SetPointError(point,0,0,sigma_ea,sigma_ea)
+  #sigma_N = getStatError(dataVector,ws) 
+  #sigma_ea = 100 * sigma_N /(sm*lumi)
+  print "Setting error of pt ", point , " to [",sigmaDown,",",sigmaUp,"]"
+  efficiency.SetPointError(point,0,0,sigmaDown,sigmaUp)
+  #efficiency.SetPointError(point,0,0,sigma_ea,sigma_ea)
 
   print printLine
 
@@ -393,12 +454,12 @@ for point,M in enumerate(Masses):
 #  central.SetPoint(point,M,cenfunc.Eval(M))
 #  efficiency.SetPoint(point,M,cenfunc.Eval(M))
 
-leg=r.TLegend(0.60,0.16,0.79,0.39)
+leg=r.TLegend(0.70,0.16,0.89,0.39)
 leg.SetFillColor(0)
 leg.SetBorderSize(0)
 leg.AddEntry(central,"Higgs Signal #varepsilon #times Acc","L")
 #leg.AddEntry(efficiency,"#pm 1 #sigma syst. error","F")
-leg.AddEntry(efficiency,"#pm 1 #sigma stat. error","F")
+leg.AddEntry(efficiency,"#pm 1 #sigma syst. error","F")
 
 mytext = r.TLatex()
 mytext.SetTextSize(0.04)
@@ -407,7 +468,20 @@ mytext.SetNDC()
 listy = []
 
 MG=r.TMultiGraph()
+can =None
 can = r.TCanvas()
+
+if ("root" in extraFile):
+  print "got graph!"
+  _file0 = r.TFile(extraFile)
+  graph=r.TGraph(_file0.Get("effAccGraph"))
+  graph.SetLineColor(r.kRed)
+if (graph!=None): 
+  print "drawign graph"
+  for i in range (0,graph.GetN()): graph.GetY()[i] *= 100
+  #graph.Draw("same")
+else :
+  print "not drawign graph"
 efficiency.SetFillColor(r.kOrange)
 efficiency.SetLineWidth(2)
 central.SetLineWidth(2)
@@ -416,6 +490,8 @@ central.SetMarkerColor(r.kBlack)
 central.SetMarkerStyle(22)
 MG.Add(efficiency)
 MG.Add(central)
+MG.Add(graph)
+leg.AddEntry(graph,"Overal Signal Model","l")
 MG.Draw("APL3")
 MG.GetXaxis().SetTitle("m_{H} GeV")
 MG.GetYaxis().SetTitle("Efficiency #times Acceptance - %")
@@ -423,7 +499,7 @@ mytext.DrawLatex(0.15,0.8,"CMS Simulation")
 can.Update()
 leg.Draw("same")
 print "Int Lumi from workspace ", lumi
-raw_input("Looks OK?")
+#raw_input("Looks OK?")
 
 can.Update()
 print "Saving plot as effAcc_vs_mass.pdf"

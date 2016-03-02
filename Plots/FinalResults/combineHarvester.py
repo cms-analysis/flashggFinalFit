@@ -78,6 +78,7 @@ parser.add_option("--poix",default="r")
 parser.add_option("--S0",default=False,action="store_true",help="Stats only")
 parser.add_option("--catsMap",default="")
 parser.add_option("--nBins",default=7)
+parser.add_option("--mhRange",default=-1)
 parser.add_option("--batch",default="LSF",help="Which batch system to use (LSF,IC)")
 parser.add_option("--catRanges",default="")
 parser.add_option("--prefix",default="./")
@@ -184,12 +185,17 @@ def getSortedCats():
   f = open(opts.datacard)
   for l in f.readlines():
     if l.startswith('bin'):
+      print l
       els = l.split()[1:]
+      print els
       for el in els: 
         cats.add(el)
       break
   
-  myarr = sorted(cats, key=lambda x: (x[:3],int(x.split('cat')[1].split('_')[0])), reverse=True)
+  print " cats[0] ",  cats , "  cats[:]"
+  #myarr = sorted(cats, key=lambda x: (x[:3],int(x.split('cat')[1].split('_')[0])), reverse=True)
+  #myarr = sorted(cats, key=lambda x: (x[:3],x.split('_')[0]), reverse=True)
+  myarr=sorted(cats)
   print "[INFO] -->categories", myarr
   if opts.verbose: print myarr
   return myarr
@@ -201,7 +207,8 @@ def removeRelevantDiscreteNuisances():
   for line in card.readlines():
     if 'discrete' in line:
       for cat in opts.splitChannels:
-        catString = '_'+cat.split('cat')[1]
+        #catString = '_'+cat.split('cat')[1]
+        catString = '_'+cat
         if catString in line: newCard.write(line)
     else: newCard.write(line)
   card.close()
@@ -230,6 +237,19 @@ def splitCard():
   system('combineCards.py --xc="%s" %s > %s'%(veto,opts.datacard,splitCardName))
   opts.datacard = splitCardName
   removeRelevantDiscreteNuisances()
+
+
+def makeFloatMHCard():
+     print "LC DEBUG remake datacard  opts.mhRange " , opts.mhRange
+     olddatacard=opts.datacard
+     opts.datacard=olddatacard.replace(".txt",".mhRange.txt")
+     f1 = open(olddatacard, "r")
+     f2 = open(opts.datacard, "w")
+     for line in f1:
+        f2.write(line)
+     f2.write("MH param %.2f %.2f"%(opts.mh, opts.mhRange))
+     f1.close()
+     f2.close()
 
 def makeStatOnlyCard():
   print "[INFO] making stats-only card"
@@ -382,7 +402,8 @@ def writeProfileLikelhood():
   tempcardstore = opts.datacard
   if opts.splitChannels: splitCard()
   toysfilestore = opts.toysFile
-
+  
+  if ("Stat" in opts.outDir) : makeStatOnlyCard()
   # write
   for j, mass_set in enumerate(opts.masses_per_job):
     file = open('%s/sub_job%d.sh'%(opts.outDir,j),'w')
@@ -458,19 +479,26 @@ def writeMultiPdfChannelCompatibility():
   backupcard = opts.datacard
   backupdir = opts.outDir
   cats = getSortedCats()
+  print "[DEBUG] MultiPdfChannelCompatibility  cats ", cats 
   rmindefault = opts.muLow
   rmaxdefault = opts.muHigh
+  print "[DEBUG] MultiPdfChannelCompatibility   -- mulow, mu high ", rmindefault ," , ",rmaxdefault 
   catRanges = strtodict(opts.catRanges)
+  print "[DEBUG] MultiPdfChannelCompatibility   -- catRanges ", catRanges 
   for cat in cats:
+    print "[DEBUG] MultiPdfChannelCompatibility   -- loop trhoguh cats, now process : ", cat  
     if cat in catRanges.keys():
       if opts.verbose: print " set ranges for cat %s to"%cat, catRanges[cat]
       opts.muLow  = catRanges[cat][0]
       opts.muHigh = catRanges[cat][1]
+      print "[DEBUG] MultiPdfChannelCompatibility   -- mu ranges for cat  ", cat  , " -- ", opts.muLow, " --> ", opts.muHigh
     if opts.verbose: print cat
     opts.splitChannels = [cat]
+    print "[DEBUG] MultiPdfChannelCompatibility   -- about to slit card for cat ", cat
     splitCard()
     opts.outDir += '/'+cat
     system('mkdir -p %s'%opts.outDir)
+    print "[DEBUG] MultiPdfChannelCompatibility   -- about to write multidimfit for cat ",cat 
     opts.method = 'MuScan'
     writeMultiDimFit()
     opts.datacard = backupcard
@@ -603,6 +631,11 @@ def writeMultiDimFit(method=None,wsOnly=False):
           makeStatOnlyCard()
         if method=='MHScanNoGlob':
           makeNoGlobCard()
+        print "DEBUG DEBUG is mh Range >1 ??? opts.mhRange" ,opts.mhRange
+        if (opts.mhRange>-1):
+         print "DEBUG DEBUG great, make the correct card from ", opts.datacard
+         makeFloatMHCard()
+         print "DEBUG DEBUG great, made the correct card ", opts.datacard
         if not opts.skipWorkspace:
           datacardname = os.path.basename(opts.datacard).replace('.txt','')
           print 'Creating workspace for %s...'%method
@@ -665,7 +698,8 @@ def writeMultiDimFit(method=None,wsOnly=False):
         for i in range(opts.jobs):
           file = open('%s/sub_m%1.5g_job%d.sh'%(opts.outDir,getattr(opts,"mh",0.),i),'w')
           writePreamble(file)
-          exec_line = 'combine %s -M MultiDimFit --cminDefaultMinimizerType Minuit2 --cminDefaultMinimizerAlgo migrad --algo=grid  %s --points=%d --firstPoint=%d --lastPoint=%d -n %sJob%d'%(opts.datacard,combine_args[method],opts.pointsperjob*opts.jobs,i*opts.pointsperjob,(i+1)*opts.pointsperjob-1,method,i)
+          exec_line = 'combine %s  -M MultiDimFit --cminDefaultMinimizerType Minuit2 --cminDefaultMinimizerAlgo migrad --algo=grid  %s --points=%d --firstPoint=%d --lastPoint=%d -n %sJob%d'%(opts.datacard,combine_args[method],opts.pointsperjob*opts.jobs,i*opts.pointsperjob,(i+1)*opts.pointsperjob-1,method,i)
+          if ("FloatMH" in opts.outDir) : exec_line += " --saveSpecifiedNuis MH" 
           if method in par_ranges.keys(): exec_line+=" --setPhysicsModelParameterRanges %s "%(par_ranges[method])
           if getattr(opts,"mh",None): exec_line += ' -m %6.2f'%opts.mh
           #if opts.expected: exec_line += ' -t -1 --freezeNuisances=JetVeto_migration0,JetVeto_migration1,pdfindex_UntaggedTag_0_13TeV,pdfindex_UntaggedTag_1_13TeV,pdfindex_UntaggedTag_2_13TeV,pdfindex_UntaggedTag_3_13TeV,pdfindex_VBFTag_0_13TeV,pdfindex_VBFTag_1_13TeV'
@@ -742,7 +776,18 @@ def configure(config_line):
     if option.startswith('pointsperjob='): opts.pointsperjob = int(option.split('=')[1])
     if option.startswith('splitChannels='): opts.splitChannels = option.split('=')[1].split(',')
     if option.startswith('toysFile='): opts.toysFile = option.split('=')[1]
-    if option.startswith('mh='): opts.mh = float(option.split('=')[1])
+    if option.startswith('mh='): 
+      #opts.mh = float(option.split('=')[1])
+      mhStr = (option.split('=')[1])
+      print "DEBUG LC mhStr ", mhStr
+      if (len(mhStr.split(":"))>1):
+        print "DEBUG LC mhStr.split(:)[0] " , mhStr.split(":")[0]
+        print "DEBUG LC mhStr.split(:)[1] " , mhStr.split(":")[1]
+        opts.mh  = float(mhStr.split(":")[0])
+        opts.mhRange = float(mhStr.split(":")[1])
+      else :
+       opts.mh = float(option.split('=')[1])
+        
     if option.startswith('poix='): 
       poiopt = option.split('=')[1]
       if ',' in poiopt:
