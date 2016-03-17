@@ -64,7 +64,7 @@ FinalModelConstruction::FinalModelConstruction(RooRealVar *massVar, RooRealVar *
 {
   setTDRStyle();
   writeExtraText = true;       // if extra text
-  extraText  = "Preliminary";  // default extra text is "Preliminary"
+  extraText  = "";  // default extra text is "Preliminary"
   lumi_8TeV  = "19.1 fb^{-1}"; // default is "19.7 fb^{-1}"
   lumi_7TeV  = "4.9 fb^{-1}";  // default is "5.1 fb^{-1}"
   lumi_sqrtS = "13 TeV";       // used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
@@ -1149,7 +1149,7 @@ void FinalModelConstruction::plotPdf(string outDir){
 		// to get correct normlization need to manipulate with bins and range
     extendPdf->plotOn(pdfPlot,Normalization(mass->getBins()/160.*(mass->getMax()-mass->getMin())/60.,RooAbsReal::RelativeExpected));
   }
-  string sim="Simulation";
+  string sim="Simulation Preliminary";
   pdfPlot->Draw();
   CMS_lumi( canv, 0,0, sim );
   TLatex *latex = new TLatex();	

@@ -102,7 +102,8 @@ echo "SMEARS $SMEARS"
 echo "SCALES $SCALES"
 
 if [ $BATCH == "IC" ]; then
-DEFAULTQUEUE=hepshort.q
+#DEFAULTQUEUE=hepshort.q
+DEFAULTQUEUE=hepmedium.q
 BATCHQUERY="qstat -u $USER -q hepshort.q"
 BATCHOPTION=" --batch $BATCH"
 echo " BATCH BATCH $BATCH ==> $BATCHOPTION"
@@ -200,8 +201,8 @@ echo "------------> Create DATACARD"
 echo "------------------------------------------------"
 
 cd Datacard
-echo " ./makeParametricModelDatacardFLASHgg.py -i $FILE  -o Datacard_13TeV_$EXT.txt -p $PROCS -c $CATS --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --submitSelf #--intLumi $INTLUMI"
-./makeParametricModelDatacardFLASHgg.py -i $FILE  -o Datacard_13TeV_${EXT}_noTTHLeptonicTag.txt -p $PROCS -c UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,VBFTag_0,VBFTag_1,TTHHadronicTag --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 #--submitSelf #--intLumi $INTLUMI
+echo "./makeParametricModelDatacardFLASHgg.py -i $FILE  -o Datacard_13TeV_${EXT}.txt -p $PROCS -c UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,VBFTag_0,VBFTag_1,TTHHadronicTag,TTHLeptonicTag --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --theoryNormFactors norm_factors.py #--submitSelf #--intLumi $INTLUMI"
+./makeParametricModelDatacardFLASHgg.py -i $FILE  -o Datacard_13TeV_${EXT}.txt -p $PROCS -c UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,VBFTag_0,VBFTag_1,TTHHadronicTag,TTHLeptonicTag --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --theoryNormFactors norm_factors.py #--submitSelf #--intLumi $INTLUMI
 
 echo "cat jobs/Datacard_13TeV_${EXT}_noTTHLeptonicTag.txt* >> Datacard_13TeV_${EXT}_noTTHLeptonicTag.txt"
 exit 1
@@ -276,14 +277,16 @@ ls ../../Signal/$OUTDIR/CMS-HGG_*sigfit*oot  > tmp.txt
 while read p;
 do
 q=$(basename $p)
-#cp $p ${q/$EXT/mva} 
+cp $p ${q/$EXT/mva} 
+echo " cp $p ${q/$EXT/mva} "
 done < tmp.txt
-#cp ../../Signal/$OUTDIR/CMS-HGG_sigfit_${EXT}.root CMS-HGG_mva_13TeV_sigfit.root
-#cp ../../Background/CMS-HGG_multipdf_${EXT}${FAKE}.root CMS-HGG_mva_13TeV_multipdf${FAKE}.root
-#cp ../../Datacard/Datacard_13TeV_$EXT.txt CMS-HGG_mva_13TeV_datacard.txt
+cp ../../Signal/$OUTDIR/CMS-HGG_sigfit_${EXT}.root CMS-HGG_mva_13TeV_sigfit.root
+cp ../../Background/CMS-HGG_multipdf_${EXT}${FAKE}.root CMS-HGG_mva_13TeV_multipdf${FAKE}.root
+cp ../../Datacard/Datacard_13TeV_$EXT.txt CMS-HGG_mva_13TeV_datacard.txt
 
+exit 1
 
-#cp combineHarvesterOptions13TeV_Template${FAKE}.dat combineHarvesterOptions13TeV_${EXT}${FAKE}.dat
+cp combineHarvesterOptions13TeV_Template${FAKE}.dat combineHarvesterOptions13TeV_${EXT}${FAKE}.dat
 sed -i -e "s/\!EXT\!/$EXT/g" combineHarvesterOptions13TeV_${EXT}${FAKE}.dat 
 sed -i -e "s/\!FAKE\!/$FAKE/g" combineHarvesterOptions13TeV_${EXT}${FAKE}.dat
 echo "Adding _FAKE  ($FAKE) t multipdf if ISDATA == $ISDATA"
@@ -291,9 +294,10 @@ sed -i -e "s/multipdf.root/multipdf${FAKE}.root/g" CMS-HGG_mva_13TeV_datacard.tx
 INTLUMI="2.7"
 sed -i -e "s/\!INTLUMI\!/$INTLUMI/g" combineHarvesterOptions13TeV_${EXT}${FAKE}.dat 
 
-#cp combinePlotsOptions_Template${FAKE}.dat combinePlotsOptions_${EXT}${FAKE}.dat
+cp combinePlotsOptions_Template${FAKE}.dat combinePlotsOptions_${EXT}${FAKE}.dat
 sed -i -e "s/\!EXT\!/$EXT/g" combinePlotsOptions_${EXT}${FAKE}.dat
 sed -i -e "s/\!INTLUMI\!/$INTLUMI/g" combinePlotsOptions_${EXT}${FAKE}.dat
+
 
 if [ $COMBINEPLOTSONLY == 0 ]; then
 echo "./combineHarvester.py -d combineHarvesterOptions13TeV_$EXT.dat -q $DEFAULTQUEUE --batch $BATCH --verbose"
@@ -339,7 +343,7 @@ echo "./makeCombinePlots.py -d combinePlotsOptions_${EXT}${FAKE}.dat -b $LEDGER 
 #./makeCombinePlots.py -f combineJobs13TeV_$EXT/MuScan/MuScan.root --mu -t "#sqrt{s}\=13TeV L\=$INTLUMI fb^{-1}" -o mu -b $LEDGER #for some reason doesn't work in datfile
 ./makeCombinePlots.py -f combineJobs13TeV_$EXT/MuScanFloatMH_smallrange/MuScanFloatMH_smallrange.root --mu -t "#sqrt{s}\=13TeV L\=$INTLUMI fb^{-1}" -o MuScanFloatMH_smallrange -b $LEDGER #for some reason doesn't work in datfile
 ./makeCombinePlots.py -f combineJobs13TeV_$EXT/MuScanFloatMH_v2/MuScanFloatMH_v2.root --mu -t "#sqrt{s}\=13TeV L\=$INTLUMI fb^{-1}" -o MuScanFloatMH_v2 -b $LEDGER #for some reason doesn't work in datfile
-./makeCombinePlots.py -f combineJobs13TeV_$EXT/MuScanFloatMH_v3/MuScanFloatMH_v3.root --mu -t "#sqrt{s}\=13TeV L\=$INTLUMI fb^{-1}" -o MuScanFloatMH_v3 -b $LEDGER #for some reason doesn't work in datfile
+#./makeCombinePlots.py -f combineJobs13TeV_$EXT/MuScanFloatMH_v3/MuScanFloatMH_v3.root --mu -t "#sqrt{s}\=13TeV L\=$INTLUMI fb^{-1}" -o MuScanFloatMH_v3 -b $LEDGER #for some reason doesn't work in datfile
 ./makeCombinePlots.py -f combineJobs13TeV_$EXT/MuScanFloatMH/MuScanFloatMH.root --mu -t "#sqrt{s}\=13TeV L\=$INTLUMI fb^{-1}" -o muFloatMH -b $LEDGER #for some reason doesn't work in datfile
 ./makeCombinePlots.py -f combineJobs13TeV_$EXT/MuScanFixMH/MuScanFixMH.root --mu -t "#sqrt{s}\=13TeV L\=$INTLUMI fb^{-1}" -o muFixMH -b $LEDGER #for some reason doesn't work in datfile
 ./makeCombinePlots.py -f combineJobs13TeV_$EXT/RVRFScan/RVRFScan.root --rvrf -t "#sqrt{s}\=13TeV L\=$INTLUMI fb^{-1}" -o RVRF --xbinning 30,-1.5,2.5 --ybinning 30,-3,8 -b $LEDGER #
@@ -367,7 +371,7 @@ echo "https://lcorpe.web.cern.ch/lcorpe/$OUTDIR"
 echo "or https://lcorpe.web.cern.ch/lcorpe/${OUTDIR}_${COUNTER}"
 fi
 #if [ $USER == "lc1113" ]; then
-if [ $USER == "lc1113xxx" ]; then
+if [ $USER == "lc1113" ]; then
 cp -r $OUTDIR ~lc1113/public_html/
 cp -r $OUTDIR ~lc1113/public_html/${OUTDIR}_${COUNTER}
 cp ~lc1113/index.php ~lc1113/public_html/$OUTDIR/combinePlots/.

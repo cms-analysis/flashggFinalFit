@@ -33,18 +33,18 @@ class WSTFileWrapper:
     self.fnList = files.split(",") # [1]       
     self.fileList = []
     self.wsList = [] #now list of ws names...
-    print files
+    #print files
     for fn in self.fnList: # [2]
-        print fn
+        #print fn
         f = r.TFile.Open(fn) 
         self.fileList.append(f)
         #print " debug r.TFile.Open(fn) ", r.TFile.Open(fn)
         thing = f.Get(wsname)
-        print "r.RooWorkspace(self.fileList[-1].Get(wsname) " , thing
+        #print "r.RooWorkspace(self.fileList[-1].Get(wsname) " , thing
         #self.wsList.append(r.RooWorkspace(thing))
         self.wsList.append(self.fileList[-1].Get(wsname))
         #self.wsList.append(wsname)
-        print self.wsList
+        #print self.wsList
         f.Close()
 
    def data(self,dataName):
@@ -53,19 +53,19 @@ class WSTFileWrapper:
         for i in range(len(self.fnList)):
           #f = r.TFile.Open(self.fnList[i])  
           this_result_obj = self.wsList[i].data(dataName);
-          print "this_result_obj = f.Get(%s).data(%s) "%(self.wsList[i],dataName);
+          #print "this_result_obj = f.Get(%s).data(%s) "%(self.wsList[i],dataName);
           #this_ws=f.Get(self.wsList[i])
           #print this_ws 
           #this_result_obj = this_ws.data(dataName);
           if ( result and this_result_obj and (not complained_yet) ):
-            print "[WSTFileWrapper] Uh oh, multiple RooAbsDatas from the file list with the same name: ",  dataName 
+            #print "[WSTFileWrapper] Uh oh, multiple RooAbsDatas from the file list with the same name: ",  dataName 
             complained_yet = true;
           if this_result_obj: # [3]
              result = this_result_obj
-             print "[WSTFileWrapper]  YES Successfully found the RooAbsData with name ",  dataName 
+             #print "[WSTFileWrapper]  YES Successfully found the RooAbsData with name ",  dataName 
                       #   [ ... straightforward checks for multiple results etc ... ]
-        if (not result) :
-              print "[WSTFileWrapper] Uh oh, never got a good RooAbsData with name " ,dataName 
+        #if (not result) :
+        #      print "[WSTFileWrapper] Uh oh, never got a good RooAbsData with name " ,dataName 
         return result 
    
    def var(self,varName):
@@ -79,8 +79,8 @@ class WSTFileWrapper:
           if this_result_obj: # [3]
              result = this_result_obj
                       #   [ ... straightforward checks for multiple results etc ... ]
-          if (not result) :
-              print "[WSTFileWrapper] Uh oh, never got a good RooRealData with name " ,varName 
+          #if (not result) :
+          #    print "[WSTFileWrapper] Uh oh, never got a good RooRealData with name " ,varName 
                 
         return result 
 
@@ -106,6 +106,7 @@ parser.add_option("--photonCatSmearsCorr",default="",help="String list of photon
 parser.add_option("--globalScales",default="NonLinearity:0.001,Geant4:0.0005,LightColl:0.0005,Absolute:0.0001",help="String list of global scale nuisances names with value separated by a \':\' - WILL NOT correlate across years (default: %default)")
 parser.add_option("--globalScalesCorr",default="",help="String list of global scale nuisances names with value separated by a \':\' - WILL correlate across years (default: %default)")
 parser.add_option("--toSkip",default="",help="proc:cat which are to skipped e.g ggH:11,qqH:12 etc. (default: %default)")
+parser.add_option("--theoryNormFactors",default="", help="if provided, will apply normalisation weights per process and per PDF, QCD Scale and alphaS weight.")
 #parser.add_option("--isCutBased",default=False,action="store_true") # hangover from globe, not needd
 #parser.add_option("--isSpinModel",default=False,action="store_true")
 parser.add_option("--isMultiPdf",default=False,action="store_true")
@@ -122,6 +123,10 @@ parser.add_option("--mass",type="int",default=125,help="Mass at which to calcula
 allSystList=[]
 if options.submitSelf :
   options.justThisSyst="batch_split"
+if (options.theoryNormFactors != ""):
+   #import options.theoryNormFactors as th_norm
+   print "IMPORTING theory norm factors %s",
+   exec("import %s as th_norm"%options.theoryNormFactors.replace(".py","")) 
 ###############################################################################
 
 
@@ -239,7 +244,7 @@ dataWS = 'multipdf'
 bkgWS = 'multipdf'
 #sigFile = 'CMS-HGG_%s_%dTeV_sigfit.root'%(file_ext,sqrts)
 sigFile = 'CMS-HGG_sigfit_%s_$PROC_$CAT.root'%(file_ext)
-print "making sigfile " ,sigFile
+#print "making sigfile " ,sigFile
 sigWS = 'wsig_%dTeV'%(sqrts)
 # file detaisl: for FLashgg always use unbinned signal and multipdf
 fileDetails = {}
@@ -265,9 +270,20 @@ theorySyst = {}
 theorySyst['scaleWeight'] = [1,2,3,4,6,8,"replicas"] #5,7 unphysical
 theorySyst['alphaSWeight'] = [0,1,"asym"]
 theorySyst['pdfWeight'] = [0,60,"sym"]
-#theorySyst['pdfWeight'] = [0,60,"sym"]
 
-#printing function
+theorySystAbsScale={}
+theorySystAbsScale['names'] = ["QCDscale_qqbar_up","QCDscale_gg_up","QCDscale_qqbar_down","QCDscale_gg_down","pdf_alphaS_qqbar","pdf_alphaS_gg","pdf_qqbar","pdf_gg","alphaS_qqbar","alphaS_gg"] #QCD scale up, QCD scale down, PDF+alpha S, PDF, alpha S 
+theorySystAbsScale['names_to_consider'] = ["QCDscale_qqbar_up","QCDscale_gg_up","QCDscale_qqbar_down","QCDscale_gg_down","pdf_alphaS_qqbar","pdf_alphaS_gg"] #QCD scale up, QCD scale down, PDF+alpha S, PDF, alpha S 
+theorySystAbsScale['ggH'] = [0.0,0.076,0.0,-0.081,0.0,0.031,0,0,0.018,0,0,0.025] # GGH is a _gg process
+theorySystAbsScale['qqH'] = [0.004,0.0,-0.003,0.0,0.021,0.0,0.021,0.0,0.005,0.0] # VBF is a _qqbar process 
+theorySystAbsScale['WH'] = [0.005,0.0,-0.007,0.0,0.019,0.0,0.017,0.0,0.009,0.0] # WZH is a _qqbar process, cporrelated with VBF
+theorySystAbsScale['ZH'] = [0.038,0.0,-0.031,0.0,0.016,0.0,0.013,0.0,0.009,0.0] # WZH is a _11bar process correlated with VBF 
+theorySystAbsScale['ttH'] = [0.0,-0.058,0.0,0.092,0.0,-0.036,0.0,-0.032,0.0,-0.020]  # TTH should be a _gg process anticorrelated with GGH
+
+
+
+
+#yprinting function
 def printTheorySysts():
   # as these are antisymmetric lnN systematics - implement as [1/(1.+err_down)] for the lower and [1.+err_up] for the upper
   print '[INFO] Theory...'
@@ -307,17 +323,62 @@ def printTheorySysts():
         if '%s:%s'%(p,c) in options.toSkip: continue
         outFile.write('\n')
       outFile.write('\n')
-
+  
+  #absolute scales for theory uncertainties.
+  for syst in theorySystAbsScale['names_to_consider'] :
+    if (not "Theory" in allSystList ) :allSystList.append("Theory")
+    if (not options.justThisSyst=="") :
+      if (not options.justThisSyst=="Theory"): continue
+    #print  "DEBUG consider name ", syst
+    asymmetric= False
+    if "_up" in syst : asymmetric= True
+    if "_down" in syst : continue #already considered as part of "_up"
+    outFile.write('%-35s  lnN   '%(syst.replace("_up",""))) # if it doesn;t contain "_up", the replace has no effect anyway 
+    for c in options.cats:
+      for p in options.procs:
+            if "bkg" in flashggProc[p] : 
+              outFile.write('- ')
+              continue
+            else:
+              value = 1+theorySystAbsScale[p][theorySystAbsScale['names'].index(syst)] 
+              if asymmetric :
+                valueDown = 1+theorySystAbsScale[p][theorySystAbsScale['names'].index(syst.replace("_up","_down"))]
+                if value==1.0 and valueDown==1.0 :
+                  outFile.write("- ")
+                else:
+                  outFile.write("%1.3f/%1.3f "%(value,valueDown))
+              else :
+                if value==1.0 :
+                  outFile.write("- ")
+                else:
+                  outFile.write("%1.3f "%(value))
+    outFile.write('\n')
+    
 ## pdf weights printing tool 
 def getFlashggLineTheoryWeights(proc,cat,name,i,asymmetric):
   n = i
   m = i
   ad_hoc_factor =1.
+  theoryNormFactor_n=1. #up
+  theoryNormFactor_m=1. #down
   if ( asymmetric ) : 
     ad_hoc_factor=1.5
     m = n+1
+  if (options.theoryNormFactors != ""):
+     values = eval("th_norm.%s_%s"%(proc,name.replace("Weight","")))
+     #print ("th_norm.%s_%s"%(proc,name.replace("Weight","")))
+     theoryNormFactor_n= 1/values[n] #up
+     theoryNormFactor_m= 1/values[m] #down
+     #with open(options.theoryNormFactors, "r") as f:
+     #   for line in f :
+     #       if (line.split(" ") != "%s_%s"%(proc,name.Replace("Weight",""))) : continue
+     #       values = (line.split("[")[1]).split("]")[0]
+     #       print values
+
+
+
   #if (inWS) : print "got inWS!"
-  print proc,",",cat
+  #print proc,",",cat
   mass = inWS.var("CMS_hgg_mass")
   weight = r.RooRealVar("weight","weight",0)
   #weight_up = r.RooRealVar("weight_up","weight_up",0)
@@ -349,33 +410,43 @@ def getFlashggLineTheoryWeights(proc,cat,name,i,asymmetric):
   for i in range(0,int(data_nominal.numEntries())):
     mass.setVal(data_nominal.get(i).getRealValue("CMS_hgg_mass"))
     w_nominal =data_nominal.weight()
-    w_down = data_nominal.get(i).getRealValue("%s_%d"%(name,n))
-    w_up = data_nominal.get(i).getRealValue("%s_%d"%(name,m))
-    w_central = data_nominal.get(i).getRealValue(weight_central.GetName())
+    w_up = theoryNormFactor_m*data_nominal.get(i).getRealValue("%s_%d"%(name,n))
+    w_down = theoryNormFactor_n*data_nominal.get(i).getRealValue("%s_%d"%(name,m))
+    #w_central = data_nominal.get(i).getRealValue(weight_central.GetName())
+    w_central = data_nominal.get(i).getRealValue("scaleWeight_0") #sneaky fix as it doesn't look like central weight is beign propagated correctly in these cases.
     sumW = data_nominal.get(i).getRealValue("sumW")
-    print "--> mass ", mass.getVal() , " w_nom ", w_nominal , " w_down" ,w_down, " w_up ", w_up, " w_central" , w_central , " sumW ", sumW
-    if (w_central==0. or w_nominal==0. or math.isnan(w_down) or math.isnan(w_up) ) :
+    if (w_central==0. or w_nominal==0. or math.isnan(w_down) or math.isnan(w_up) or w_down==0. or w_up==0.): 
         zeroWeightEvents=zeroWeightEvents+1.0
-        if (zeroWeightEvents%1==0):
+        if (zeroWeightEvents%1000==0):
+          #print "--> mass ", mass.getVal() , " w_nom ", w_nominal , " w_down" ,w_down, " w_up ", w_up, " w_central" , w_central , " sumW ", sumW
           print "[WARNING] skipping one event where weight is identically 0 or nan, causing  a seg fault, occured in ",(zeroWeightEvents/data_nominal.numEntries())*100 , " percent of events"
-          print " WARNING] procs/cat  " , proc,",",cat , " entry " , i, " w_nom ", w_nominal , "  w_up " , w_up , " w_down ", w_down ,"w_central ", w_central
-        continue;
+          print " WARNING] syst ", name,n, " ","procs/cat  " , proc,",",cat , " entry " , i, " w_nom ", w_nominal , "  w_up " , w_up , " w_down ", w_down ,"w_central ", w_central
+          #exit(1)
+        continue
+    elif ( abs(w_central/w_down) <0.01 or abs(w_central/w_down) >100 ) :
+        zeroWeightEvents=zeroWeightEvents+1.0
+        if (zeroWeightEvents%1000==0):
+          #print "--> mass ", mass.getVal() , " w_nom ", w_nominal , " w_down" ,w_down, " w_up ", w_up, " w_central" , w_central , " sumW ", sumW
+          print "[WARNING] skipping one event where weight is identically 0 or nan, causing  a seg fault, occured in ",(zeroWeightEvents/data_nominal.numEntries())*100 , " percent of events"
+          print " WARNING] syst ", name,n, " ","procs/cat  " , proc,",",cat , " entry " , i, " w_nom ", w_nominal , "  w_up " , w_up , " w_down ", w_down ,"w_central ", w_central
+          #exit(1)
+        continue
     weight_down.setVal(w_nominal*(w_down/w_central))
     weight_up.setVal(w_nominal*(w_up/w_central))
     data_up.add(r.RooArgSet(mass,weight_up),weight_up.getVal())
     data_down.add(r.RooArgSet(mass,weight_down),weight_down.getVal())
     data_nominal_new.add(r.RooArgSet(mass,weight),w_nominal)
-    #print "DEBUG - dataset entry ", i, " central weight ", centralweight, " factor up " , factor_up, " factor down ", factor_down
+    #print "DEBUG - dataset entry ", i, " w_nom ",w_nominal , " w_nominal*(w_down/w_central)" ,w_nominal*(w_down/w_central)," w_nominal*(w_up/w_central) ",w_nominal*(w_up/w_central)
   if (data_up.sumEntries() <= 0. or data_down.sumEntries() <= 0. ):
       print "[WARNING] This dataset has 0 or negative sum of weight. Systematic calulcxation meaningless, so list as '- '"
-      print "data down "
-      data_down.Print()
-      print "data up "
-      data_up.Print()
+      #print "data down "
+      #data_down.Print()
+      #print "data up "
+      #data_up.Print()
       line = '- '
       return line
   systVals = interp1SigmaDataset(data_nominal_new,data_down,data_up,ad_hoc_factor)
-  print "DEBUG A ", systVals[0], " systVals[0] >10 ? ", (systVals[0] >10 )
+  #print "DEBUG A ", systVals[0], " systVals[0] >10 ? ", (systVals[0] >10 )
     #flashggSystDump.write('%s nominal: %5.3f up: %5.3f down: %5.3f vals: [%5.3f,%5.3f] \n'%("syst",data_nominal.sumEntries(),data_up.sumEntries(),data_down.sumEntries(),systVals[0],systVals[1]))
   #if (math.isnan(systVals[0]) or math.isnan(systVals[1]) or systVals[0]==0. or systVals[1]==0. ): 
   if (math.isnan(systVals[0]) or math.isnan(systVals[1]) or systVals[0]<0.2 or systVals[1]<0.2 ): 
@@ -389,19 +460,46 @@ def getFlashggLineTheoryWeights(proc,cat,name,i,asymmetric):
     exit (1)
   if (systVals[0] >10) : 
     print "ERROR look at the value of these uncertainties!! systVals[0] ", systVals[0], " systVals[1] ", systVals[1]
+    print "data_nominal_new"
+    data_nominal_new.Print()
+    print "data_down"
+    data_down.Print()
+    print "data_up"
+    data_up.Print()
+    print "ad_hoc_factor"
+    ad_hoc_factor
     exit (1)
   print "DEBUG B ", systVals[0], " systVals[0] >10 ? ", (systVals[0] >10 )
   if ((systVals[1] >10)) : 
+    print "data_nominal_new"
+    data_nominal_new.Print()
+    print "data_down"
+    data_down.Print()
+    print "data_up"
+    data_up.Print()
+    print "ad_hoc_factor"
+    ad_hoc_factor
     print "ERROR look at the value of these uncertainties!! systVals[0] ", systVals[0], " systVals[1] ", systVals[1]
     exit (1)
   print "DEBUG  C ", systVals[0], " systVals[0] >10 ? ", (systVals[0] >10 )
   if systVals[0]==1 and systVals[1]==1:
       line = '- '
   elif (asymmetric):
+      if systVals[0] < 1 and systVals[1] <1 :
+        print "alpha S --- both systVals[0] ", systVals[0] , " and systVals[1] ", systVals[1] , " are less than !"
+        print "data_nominal_new"
+        data_nominal_new.Print()
+        print "data_down"
+        data_down.Print()
+        print "data_up"
+        data_up.Print()
+        print "ad_hoc_factor"
+        ad_hoc_factor
+        exit(1)
       line = '%5.3f/%5.3f '%(systVals[0],systVals[1])
   else : #symmetric
       line = '%5.3f '%(systVals[0])
-      print " [DEBUG] -- line ", line, " systVals[0] ", systVals[0], " systVals[0] >10 ? ", (systVals[0] >10 )
+      #print " [DEBUG] -- line ", line, " systVals[0] ", systVals[0], " systVals[0] >10 ? ", (systVals[0] >10 )
   return line
 
 
@@ -412,6 +510,7 @@ def getFlashggLineTheoryEnvelope(proc,cat,name,details):
   histograms=[]
   h_nominal =None
   nBins=80
+  
   #print indices
   #if (inWS) : print "got inWS!"
   for iReplica in indices:
@@ -429,20 +528,35 @@ def getFlashggLineTheoryEnvelope(proc,cat,name,details):
     weight = r.RooRealVar("weight","weight",0)
     #weight_up = r.RooRealVar("weight_up","weight_up",0)
     weight_new = inWS.var("%s_%d"%(name,iReplica))
+    theoryNormFactor=1.0
+    if (options.theoryNormFactors != ""):
+       values = eval("th_norm.%s_%s"%(proc,name.replace("Weight","")))
+       #print ("th_norm.%s_%s"%(proc,name.replace("Weight","")))
+       theoryNormFactor= 1/values[iReplica]
+
     weight_central = inWS.var("centralObjectWeight")
     zeroWeightEvents=0.;
     for i in range(0,int(data_nominal.numEntries())):
       mass.setVal(data_nominal.get(i).getRealValue("CMS_hgg_mass"))
       mass.setBins(100)
       w_nominal =data_nominal.weight()
-      w_new = data_nominal.get(i).getRealValue("%s_%d"%(name,iReplica))
-      w_central = data_nominal.get(i).getRealValue(weight_central.GetName())
-      if (w_central==0. or w_nominal==0. or math.isnan(w_new) ) :
+      w_new = theoryNormFactor*data_nominal.get(i).getRealValue("%s_%d"%(name,iReplica))
+      #w_central = data_nominal.get(i).getRealValue(weight_central.GetName())
+      w_central = data_nominal.get(i).getRealValue("scaleWeight_0")
+      if (w_central==0. or w_nominal==0. or math.isnan(w_new) or w_new==0.):
         zeroWeightEvents=zeroWeightEvents+1.0
         if (zeroWeightEvents%1000==0):
           print "[WARNING] skipping one event where weight is identically 0, causing  a seg fault, occured in ",(zeroWeightEvents/data_nominal.numEntries())*100 , " percent of events"
-          print " WARNING] procs/cat  " , proc,",",cat , " entry " , i, " w_nom ", w_nominal , "  w_new " , w_new , "w_central ", w_central
-        continue;
+          print " [WARNING] procs/cat  " , proc,",",cat , " entry " , i, " w_nom ", w_nominal , "  w_new " , w_new , "w_central ", w_central
+        #exit(1)
+        continue
+      elif( abs(w_central/w_new) >100 or  abs(w_central/w_new) <0.01) :
+        zeroWeightEvents=zeroWeightEvents+1.0
+        if (zeroWeightEvents%1000==0):
+          print "[WARNING] skipping one event where weight is identically 0, causing  a seg fault, occured in ",(zeroWeightEvents/data_nominal.numEntries())*100 , " percent of events"
+          print " [WARNING] procs/cat  " , proc,",",cat , " entry " , i, " w_nom ", w_nominal , "  w_new " , w_new , "w_central ", w_central
+        #exit(1)
+        continue
       weight_new.setVal(w_nominal*(w_new/w_central))
       data_new_h.Fill(mass.getVal(),weight_new.getVal())
       data_nom_h.Fill(mass.getVal(),w_nominal)
@@ -832,7 +946,7 @@ def getFlashggLine(proc,cat,syst):
   dataUP =  inWS.data("%s_%d_13TeV_%s_%sUp01sigma"%(flashggProc[proc],options.mass,cat,syst))# will exist if teh systematic is an asymetric uncertainty not strore as event weights
   dataNOMINAL =  inWS.data("%s_%d_13TeV_%s"%(flashggProc[proc],options.mass,cat)) #Nominal RooDataSet,. May contain required weights if UP/DOWN/SYMMETRIC roodatahists do not exist (ie systematic stored as event weigths)
   #print " ", ("%s_%d_13TeV_%s_%s"%(flashggProc[proc],options.mass,cat,syst))," ", dataSYMMETRIC, "data==None" , (dataSYMMETRIC==None), " data is None ", (dataSYMMETRIC is None)
-  print " ", ("%s_%d_13TeV_%s"%(flashggProc[proc],options.mass,cat)) ," ",  dataNOMINAL, "data==None" , (dataNOMINAL==None), " data is None ", (dataNOMINAL is None)
+  #print " ", ("%s_%d_13TeV_%s"%(flashggProc[proc],options.mass,cat)) ," ",  dataNOMINAL, "data==None" , (dataNOMINAL==None), " data is None ", (dataNOMINAL is None)
   #print "  ", ("%s_%d_13TeV_%s_%sDown01sigma"%(flashggProc[proc],options.mass,cat,syst)), " ", dataDOWN, "data==None" , (dataDOWN==None), " data is None ", (dataDOWN is None)
   #print " ", ("%s_%d_13TeV_%s_%sUp01sigma"%(flashggProc[proc],options.mass,cat,syst)), " ", dataUP, "data==None" , (dataUP==None), " data is None ", (dataUP is None)
   if (dataSYMMETRIC==None):
@@ -872,11 +986,12 @@ def getFlashggLine(proc,cat,syst):
       w_central = dataNOMINAL.get(i).getRealValue(weight_central.GetName())
       if (w_central==0.) :
         zeroWeightEvents=zeroWeightEvents+1.0
-        if (zeroWeightEvents%1000==0):
+        if (zeroWeightEvents%1==0):
           print "[WARNING] skipping one event where weight is identically 0, causing  a seg fault, occured in ",(zeroWeightEvents/dataNOMINAL.numEntries())*100 , " percent of events"
-          print "[WARNING]  syst " , syst , " w_nom ", w_nominal , "  w_up " , w_up , " w_ down " , w_down, "w_central ", w_central 
+          print "[WARNING]  syst " , syst , " w_nom ", w_nominal , "  w_up " , w_up , " w_ down " , w_down, "w_central ", w_central
+          #exit(1)
         continue
-      print "[WARNING]  syst " , syst , " w_nom ", w_nominal , "  w_up " , w_up , " w_ down " , w_down, "w_central ", w_central 
+      #print "[WARNING]  syst " , syst , " w_nom ", w_nominal , "  w_up " , w_up , " w_ down " , w_down, "w_central ", w_central 
       if (w_up==w_down):
         weight_down.setVal(w_nominal)
         weight_up.setVal(w_nominal)
@@ -893,21 +1008,21 @@ def getFlashggLine(proc,cat,syst):
     dataUP =  data_up  #repalce UP/DOwn histograms defined outside scope of this "if"
     dataDOWN =  data_down  #repalce UP/DOwn histograms defined outside scope of this "if"
     dataNOMINAL =  data_nominal  #repalce UP/DOwn histograms defined outside scope of this "if"
-  print "DEBUG datasets UP"
-  dataUP.Print()
-  print "DEBUG datasets DOWN"
-  dataDOWN.Print()
-  print "DEBUG datasets NOM"
-  dataNOMINAL.Print()
+  #print "DEBUG datasets UP"
+  #dataUP.Print()
+  #print "DEBUG datasets DOWN"
+  #dataDOWN.Print()
+  #print "DEBUG datasets NOM"
+  #dataNOMINAL.Print()
 
   systVals = interp1SigmaDataset(dataNOMINAL,dataDOWN,dataUP)
   flashggSystDump.write('%s nominal: %5.3f up: %5.3f down: %5.3f vals: [%5.3f,%5.3f] \n'%(syst,dataNOMINAL.sumEntries(),dataUP.sumEntries(),dataDOWN.sumEntries(),systVals[0],systVals[1]))
-  print "systvals ", systVals 
+  #print "systvals ", systVals 
   if systVals[0]==1 and systVals[1]==1:
       line = '- '
   else:
       line = '%5.3f/%5.3f '%(systVals[0],systVals[1])
-  print " [DEBUG] proc ", proc, " tag " , cat,  "  syst ", syst ," --> ", line
+  #print " [DEBUG] proc ", proc, " tag " , cat,  "  syst ", syst ," --> ", line
   return line
 
 # printing whole lines 
@@ -935,6 +1050,7 @@ def printFlashggSysts():
 #     print " [DEBUG] pdfWeight and QCDScale NOT in flashggSyst"
 #     print " [DEBUG] pdfWeight and QCDScale NOT  in flashggSyst --- UNbinned Signal"
       name='CMS_hgg_%s'%paramSyst
+      print "[INFO] processing " ,name
       allSystList.append(name)
       if (not options.justThisSyst=="") :
           if (not options.justThisSyst==name): continue
@@ -966,7 +1082,7 @@ def printVbfSysts():
     adhoc=False
     affectsTTH=None
     if (len(vbfSystValArray)>(len(dijetCats))) : affectsTTH=True
-    print "vbfSystName, vbfSystValArray ", vbfSystName,", ", vbfSystValArray, " affects tth ? ", affectsTTH
+    #print "vbfSystName, vbfSystValArray ", vbfSystName,", ", vbfSystValArray, " affects tth ? ", affectsTTH
     
     # work out which cats we are migrating to and from
     syst=vbfSystName
@@ -1002,8 +1118,8 @@ def printVbfSysts():
     vbfMigrateToCats.reverse()
     vbfMigrateFromCats.reverse()
     #summary
-    print "--> cats To " , vbfMigrateToCats 
-    print "--> cats From " , vbfMigrateFromCats 
+    #print "--> cats To " , vbfMigrateToCats 
+    #print "--> cats From " , vbfMigrateFromCats 
       
     # now get relevant event counts
     for p in options.procs:
@@ -1018,25 +1134,25 @@ def printVbfSysts():
         sumNOMINAL=0
         sumDOWN=0
         for c in cats:
-          print "looking at c ", c , " proc ", p , " syst ", syst
+          #print "looking at c ", c , " proc ", p , " syst ", syst
           data =  inWS.data("%s_%d_13TeV_%s_%s"%(flashggProc[p],options.mass,c,syst))
           dataDOWN =  inWS.data("%s_%d_13TeV_%s_%sDown01sigma"%(flashggProc[p],options.mass,c,syst))
           dataNOMINAL =  inWS.data("%s_%d_13TeV_%s"%(flashggProc[p],options.mass,c))
-          print "DEBUG got dataNOMINAL " , ("%s_%d_13TeV_%s"%(flashggProc[p],options.mass,c)), " --> dataNOMINAL" , dataNOMINAL
+          #print "DEBUG got dataNOMINAL " , ("%s_%d_13TeV_%s"%(flashggProc[p],options.mass,c)), " --> dataNOMINAL" , dataNOMINAL
           mass = inWS.var("CMS_hgg_mass")
           dataUP =  inWS.data("%s_%d_13TeV_%s_%sUp01sigma"%(flashggProc[p],options.mass,c,syst))
           
           if (data==None):
             if( (dataUP==None) or  (dataDOWN==None)) :
-              print "[INFO] VBF Systematic ", syst," could not be found either as symmetric (",syst,") or asymmetric (",syst,"Down01sigma,",syst,"Up01sigma). Consider as adhoc variation..."
+              #print "[INFO] VBF Systematic ", syst," could not be found either as symmetric (",syst,") or asymmetric (",syst,"Down01sigma,",syst,"Up01sigma). Consider as adhoc variation..."
               adhoc=True
               asymmetric=False
             else:
               asymmetric=True
-              print "[INFO] VBF Systematic ", syst," will be treated as asymmetric"
+              #print "[INFO] VBF Systematic ", syst," will be treated as asymmetric"
           else:
               asymmetric=False
-              print "[INFO] VBF Systematic ", syst," wil be treated as symmetric"
+              #print "[INFO] VBF Systematic ", syst," wil be treated as symmetric"
 
 
           if (asymmetric) :
@@ -1101,7 +1217,7 @@ def printVbfSysts():
           if thisUncert==0:
             outFile.write('- ')
           else:
-            print "DEBUG ------> for migration of " ,vbfMigrateFromCats[migIt] ," to ",  vbfMigrateToCats[migIt] , " cat ", c ,", proc ", p
+            #print "DEBUG ------> for migration of " ,vbfMigrateFromCats[migIt] ," to ",  vbfMigrateToCats[migIt] , " cat ", c ,", proc ", p
             if c in vbfMigrateToCats[migIt]:
               if (asymmetric) : 
                 #print "DEBUG --------> (To) NOMINAL: ",vbfMigrateToEvCountNOMINAL[p][migIt] , ", UP: ", vbfMigrateToEvCountUP[p][migIt] , " difference (", vbfMigrateToEvCountUP[p][migIt] -  vbfMigrateToEvCountNOMINAL[p][migIt]
@@ -1114,7 +1230,7 @@ def printVbfSysts():
                 outFile.write('%1.4g/%1.4g '%(DOWN,UP))
               elif (adhoc) : 
                 VAR=((vbfMigrateToEvCountNOMINAL[p][migIt]-thisUncert*vbfMigrateFromEvCountNOMINAL[p][migIt])/vbfMigrateToEvCountNOMINAL[p][migIt]) 
-                print " TO categories : " , VAR
+                #print " TO categories : " , VAR
                 outFile.write('%1.4g '%VAR)
               else : outFile.write('%1.4g '%(vbfMigrateToEvCount[p][migIt]/vbfMigrateToEvCountNOMINAL[p][migIt]))
             elif c in vbfMigrateFromCats[migIt]:
@@ -1128,7 +1244,7 @@ def printVbfSysts():
                 #print "DEBUG --------> FROM DOWN ", DOWN, " UP ",UP 
               elif (adhoc) :
                 VAR=(1.+thisUncert)
-                print " FROM categories : " , VAR
+                #print " FROM categories : " , VAR
                 outFile.write('%1.4g '%VAR)
               else:
                 VAR=vbfMigrateFromEvCount[p][migIt]/vbfMigrateFromEvCountNOMINAL[p][migIt]

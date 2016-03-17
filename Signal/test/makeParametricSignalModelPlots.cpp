@@ -353,6 +353,7 @@ void performClosure(RooRealVar *mass, RooAbsPdf *pdf, RooDataSet *data, string c
 
 	RooPlot *plot;
 	TCanvas *c = new TCanvas();
+  c->SetTickx(); c->SetTicky();
 	if (data){
 		plot = (mass->frame(Bins(binning_),Range("higgsRange")));
 		plot->addTH1(h,"hist"); 
@@ -405,6 +406,7 @@ void Plot(RooRealVar *mass, RooDataSet *data, RooAbsPdf *pdf, pair<double,double
   }
   }
   }
+  double offset =0.05;
   std::cout << "DEBUG 3 Plot" << std::endl;
 	if (data) data->plotOn(plot,Invisible());
   std::cout << "DEBUG 4 Plot" << std::endl;
@@ -417,25 +419,25 @@ void Plot(RooRealVar *mass, RooDataSet *data, RooAbsPdf *pdf, pair<double,double
 	if (data) data->plotOn(plot,MarkerStyle(kOpenSquare));
 	TObject *dataLeg = plot->getObject(int(plot->numItems()-1));
 	//TLegend *leg = new TLegend(0.15,0.89,0.5,0.55);
-	TLegend *leg = new TLegend(0.15,0.55,0.5,0.89);
+	TLegend *leg = new TLegend(0.15+offset,0.40,0.5+offset,0.82);
 	leg->SetFillStyle(0);
 	leg->SetLineColor(0);
-	leg->SetTextSize(0.03);
-	if (data) leg->AddEntry(dataLeg,"Simulation","lep");
-	leg->AddEntry(pdfLeg,"Parametric model","l");
-	leg->AddEntry(seffLeg,Form("#sigma_{eff} = %1.2f GeV",0.5*(semax-semin)),"fl");
-
+	leg->SetTextSize(0.037);
+	if (data) leg->AddEntry(dataLeg,"#bf{Simulation}","lep");
+	leg->AddEntry(pdfLeg,"#splitline{#bf{Parametric}}{#bf{model}}","l");
+	leg->AddEntry(seffLeg,Form("#bf{#sigma_{eff} = %1.2f GeV}",0.5*(semax-semin)),"fl");
+  
   std::cout << "DEBUG 6 Plot" << std::endl;
 	plot->GetXaxis()->SetNdivisions(509);
 	halfmax*=(plot->getFitRangeBinW()/binwidth);
 	TArrow *fwhmArrow = new TArrow(fwmin,halfmax,fwmax,halfmax,0.02,"<>");
 	fwhmArrow->SetLineWidth(2.);
-	TPaveText *fwhmText = new TPaveText(0.15,0.35,0.45,0.48,"brNDC");
+	TPaveText *fwhmText = new TPaveText(0.17+offset,0.3,0.45+offset,0.40,"brNDC");
 	fwhmText->SetFillColor(0);
   std::cout << "DEBUG 7.1 Plot" << std::endl;
 	fwhmText->SetLineColor(kWhite);
   std::cout << "DEBUG 7.2 Plot" << std::endl;
-	fwhmText->SetTextSize(0.03);
+	fwhmText->SetTextSize(0.037);
   std::cout << "DEBUG 7.3 Plot" << std::endl;
 	fwhmText->AddText(Form("FWHM = %1.2f GeV",(fwmax-fwmin)));
   std::cout << "DEBUG 7.4 Plot" << std::endl;
@@ -450,24 +452,41 @@ void Plot(RooRealVar *mass, RooDataSet *data, RooAbsPdf *pdf, pair<double,double
   std::cout << "DEBUG 7.6 Plot" << std::endl;
   std::cout << "DEBUG 8 Plot" << std::endl;
 
-	TLatex lat1(0.65,0.85,"#splitline{CMS Preliminary}{Simulation}");
+	//TLatex lat1(0.65,0.85,"#splitline{CMS Simulation}{}");
+  TLatex  lat1(.129+0.03+offset,0.85,"H#rightarrow#gamma#gamma");
 	lat1.SetNDC(1);
-	lat1.SetTextSize(0.03);
-	TLatex lat2(0.65,0.75,title.c_str());
+	lat1.SetTextSize(0.047);
+
+  TString catLabel_humanReadable  = title;
+  catLabel_humanReadable.ReplaceAll("_"," ");
+  catLabel_humanReadable.ReplaceAll("UntaggedTag","Untagged");
+  catLabel_humanReadable.ReplaceAll("VBFTag","VBF Tag");
+  catLabel_humanReadable.ReplaceAll("TTHLeptonicTag","TTH Leptonic Tag");
+  catLabel_humanReadable.ReplaceAll("TTHHadronicTag","TTH Hadronic Tag");
+  catLabel_humanReadable.ReplaceAll("all","All Categories");
+
+	TLatex lat2(0.93,0.88,catLabel_humanReadable);
+  lat2.SetTextAlign(33);
 	lat2.SetNDC(1);
-	lat2.SetTextSize(0.025);
+	lat2.SetTextSize(0.045);
 
   std::cout << "DEBUG 9 Plot" << std::endl;
-	TCanvas *canv = new TCanvas("c","c",600,600);
+	TCanvas *canv = new TCanvas("c","c",650,600);
+  canv->SetLeftMargin(0.16);
+  canv->SetTickx(); canv->SetTicky();
 	plot->SetTitle("");
 	plot->GetXaxis()->SetTitle("m_{#gamma#gamma} (GeV)");
+	plot->GetXaxis()->SetTitleSize(0.05);
+	plot->GetYaxis()->SetTitleSize(0.05);
+	plot->GetYaxis()->SetTitleOffset(1.5);
   plot->SetMinimum(0.0);
 	plot->Draw();
-	leg->Draw("same");
 	fwhmArrow->Draw("same <>");
 	fwhmText->Draw("same");
  	//lat1.Draw("same");
 	lat2.Draw("same");
+  lat1.Draw("same");
+	leg->Draw("same");
   for (unsigned int i =0 ; i < negWeightBins.size() ; i++){
 	
   TArrow *negBinsArrow = new TArrow(negWeightBins[i],0.0,negWeightBins[i],halfmax/2,0.02,"<>");
@@ -503,7 +522,8 @@ int main(int argc, char *argv[]){
   
   setTDRStyle();
   writeExtraText = true;       // if extra text
-  extraText  = "Preliminary Simulation";  // default extra text is "Preliminary"
+  extraText  = "Simulation Preliminary";  // default extra text is "Preliminary"
+  //lumi_13TeV  = "2.7 fb^{-1}"; // default is "19.7 fb^{-1}"
   lumi_8TeV  = "19.1 fb^{-1}"; // default is "19.7 fb^{-1}"
   lumi_7TeV  = "4.9 fb^{-1}";  // default is "5.1 fb^{-1}"
   lumi_sqrtS = "13 TeV";       // used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)

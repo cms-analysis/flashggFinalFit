@@ -104,7 +104,8 @@ fi
 ####################################################
 ################## SIGNAL F-TEST ###################
 ####################################################
-if [ -e dat/newConfig_${EXT}XXXX.dat ]; then
+ls dat/newConfig_${EXT}.dat
+if [ -e dat/newConfig_${EXT}.dat ]; then
   echo "[INFO] sigFTest dat file $OUTDIR/dat/copy_newConfig_${EXT}.dat already exists, so SKIPPING SIGNAL FTEST"
 else
   if [ $FTESTONLY == 1 ]; then

@@ -89,7 +89,7 @@ if not options.outname: options.outname=options.method
 
 allowed_methods=['pval','limit','maxlh','mh','mu','mumh','rv','rf','rvrf','cvcf','kglukgam','xdm','mpdfchcomp','mpdfmaxlh']
 if not options.datfile and options.method not in allowed_methods:
-  print 'Invalid method. Must set one of: ', allowed_methods
+  print 'Invalid method : ' , options.method , '. Must set one of: ', allowed_methods
   sys.exit()
 
 import ROOT as r
@@ -178,9 +178,14 @@ for MH in options.MHtext:
 # make canvas and dummy hist
 #canv = r.TCanvas("c","c",int(options.canv.split(',')[0]),int(options.canv.split(',')[1]))
 canv = r.TCanvas("c","c") # use the default canvas style
+canv.SetTicks(1,1)
 
+if (options.xaxis):
+  if ("," in options.xaxis): options.xaxis = options.xaxis.split(',')
 if not options.xaxis: dummyHist = r.TH1D("dummy","",1,115,135)
-else: dummyHist =  r.TH1D("dummy","",1,float(options.xaxis.split(',')[0]),float(options.xaxis.split(',')[1]))
+else: 
+  print "DEBUG 0 dumym hist  float(options.xaxis[0]),float(options.xaxis[1]) ", float(options.xaxis[0]), " ",float(options.xaxis[1]) 
+  dummyHist =  r.TH1D("dummy","",1,float(options.xaxis[0]),float(options.xaxis[1]))
 dummyHist.GetXaxis().SetTitle('m_{H} (GeV)')
 
 # make a helful TLatex box
@@ -188,6 +193,7 @@ lat = r.TLatex()
 lat.SetTextFont(42)
 lat.SetTextSize(0.045)
 lat.SetLineWidth(2)
+lat.SetTextAlign(11)
 lat.SetNDC()
 ##########################
 
@@ -199,15 +205,25 @@ def drawGlobals(canv,shifted=False):
   if shifted: 
    #lat.DrawLatex(0.129+0.03,0.93,"CMS Unpublished H#rightarrow#gamma#gamma")
    #lat.DrawLatex(0.129+0.03,0.93,"CMS H#rightarrow#gamma#gamma")
-   lat.DrawLatex(0.129+0.03,0.93,"#bf{CMS} #it{Preliminary}")
-   lat.DrawLatex(0.438+0.03,0.93,options.text)
+   #lat.SetTextSize(0.07)
+   #lat.DrawLatex(0.173+0.05,0.85,"#splitline{#bf{CMS}}{#it{Preliminary}}")
+   lat.DrawLatex(0.129+0.085,0.93,"#bf{CMS} #scale[0.75]{#it{Preliminary}}")
+   lat.DrawLatex(0.129+0.085+0.04,0.85,"H#rightarrow#gamma#gamma")
+   print "DEBUG1"
+   lat.SetTextSize(0.045)
+   lat.DrawLatex(0.67-0.005,0.93,options.text)
+   #lat.DrawLatex(0.7,0.93,options.text)
 
   else:
    #lat.DrawLatex(0.129,0.93,"CMS Unpublished H#rightarrow#gamma#gamma")
    #lat.DrawLatex(0.129,0.93,"CMS H#rightarrow#gamma#gamma")
-   lat.DrawLatex(0.129,0.93,"#bf{CMS} #it{Preliminary}")
-   #
-   lat.DrawLatex(0.54,0.933,options.text)
+   #lat.DrawLatex(0.173,0.85,"#splitline{#bf{CMS}}{#it{Preliminary}}")
+   lat.DrawLatex(0.129,0.93,"#bf{CMS} #scale[0.75]{#it{Preliminary}}")
+   lat.DrawLatex(0.129+0.04,0.85,"H#rightarrow#gamma#gamma")
+   print "DEBUG2"
+   #lat.SetTextSize(0.07)
+   lat.SetTextSize(0.045)
+   lat.DrawLatex(0.62,0.933,options.text)
 
   for mi,MH in enumerate(MHtexts):
     lat.DrawLatex(mhTextX[mi],mhTextY[mi],MH)
@@ -216,7 +232,7 @@ def cleanSpikes1D(rfix):
 
  # cindex is where deltaNLL = 0 (pre anything)
  MAXDER = 1.0
- for i,r in enumerate(rfix):
+ for i,r,m in enumerate(rfix):
    if abs(r[1]) <0.001: cindex = i
 
  lhs = rfix[0:cindex]; lhs.reverse()
@@ -224,7 +240,7 @@ def cleanSpikes1D(rfix):
  keeplhs = []
  keeprhs = []
 
- for i,lr in enumerate(lhs): 
+ for i,lr,m in enumerate(lhs): 
    if i==0: 
    	prev = lr[1]
 	idiff = 1
@@ -236,7 +252,7 @@ def cleanSpikes1D(rfix):
    idiff=1
  keeplhs.reverse()
 
- for i,rr in enumerate(rhs):
+ for i,rr,m in enumerate(rhs):
    if i==0: 
    	prev = rr[1]
 	idiff = 1
@@ -251,7 +267,7 @@ def cleanSpikes1D(rfix):
  
  rkeep = []
  #now try to remove small jagged spikes
- for i,r in enumerate(rfix):
+ for i,r,m in enumerate(rfix):
    if i==0 or i==len(rfix)-1: 
    	rkeep.append(r)
    	continue
@@ -270,6 +286,7 @@ def pvalPlot(allVals):
   if options.verbose: print 'Plotting pvalue...'
   canv.SetLogy(True)
   mg = r.TMultiGraph()
+  print "DEUG XAXIS IN PVAL " , options.xaxis
   if not options.legend: leg = r.TLegend(0.6,0.17,0.89,0.4)
   #if not options.legend: leg = r.TLegend(0.6,0.35,0.89,0.45)
   else:
@@ -289,10 +306,10 @@ def pvalPlot(allVals):
       if (minpvalue > values[j][1]): 
         minpvalue = values[j][1]
         minpvalueX =values[j][0]
-      if options.verbose or values[j][0]==125: 
+      if options.verbose or values[j][0]==125.09: 
         print '\t', j, values[j][0], values[j][1], r.RooStats.PValueToSignificance(values[j][1])
         pvalat125=values[j][1]
-      print "debug minpval", minpvalue, "   " , r.RooStats.PValueToSignificance(minpvalue), "values[j][0] " , values[j][0]
+      print "debug minpval  for ",options.names[k], " at ", values[j][0], " ", minpvalue, "   " , r.RooStats.PValueToSignificance(minpvalue), "values[j][1] " , values[j][1], " ", r.RooStats.PValueToSignificance(values[j][1])
     
   #  with open(options.itLedger, "a") as myfile:
   #      myfile.write("%s %f %f\n" % ( (options.names[k].replace(" ","_"))+" "+options.it, minpvalue,minpvalueX ))
@@ -308,6 +325,12 @@ def pvalPlot(allVals):
   # draw dummy hist and multigraph
   dummyHist.GetYaxis().SetTitle('Local p-value')
   mg.Draw("A")
+  if (options.xaxis) :
+      print mg.GetXaxis()
+      #mg.GetXaxis().SetLimits(float(options.xaxis[0]),float(options.xaxis[1]))
+      dummyHist.SetAxisRange(float(options.xaxis[0]),float(options.xaxis[1]))
+      #canv.Modified()
+      print mg.GetXaxis().GetXmin() 
   if not options.yaxis:
     dummyHist.SetMinimum(mg.GetYaxis().GetXmin())
     dummyHist.SetMaximum(mg.GetYaxis().GetXmax())
@@ -331,14 +354,15 @@ def pvalPlot(allVals):
     if options.verbose: print sig, y
     if not options.xaxis:  lines.append(r.TLine(115,y,135,y))
     else : 
-        axmin = float(options.xaxis.split(',')[0])
-        axmax = float(options.xaxis.split(',')[1])
-    	lines.append(r.TLine(axmin,y,axmax,y))
+        axmin = float(options.xaxis[0])
+        axmax = float(options.xaxis[1])
+        print "set line at  " ,axmin, " " , axmax
+        lines.append(r.TLine(axmin,y,axmax,y))
 
     lines[i].SetLineWidth(2)
     lines[i].SetLineStyle(2)
     lines[i].SetLineColor(13) # greay Lines 
-    labels.append(r.TLatex(135+1, y * 0.8, "%d #sigma" % (i+1)))
+    labels.append(r.TLatex(132+1, y * 0.8, "%d #sigma" % (i+1)))
     labels[i].SetTextColor(13)
     labels[i].SetTextAlign(11);
     if not options.yaxis:
@@ -352,7 +376,7 @@ def pvalPlot(allVals):
  
   # draw legend
   leg.Draw()
-  canv.RedrawAxis()
+  #canv.RedrawAxis()
   drawGlobals(canv)
   # print canvas
   canv.Update()
@@ -365,6 +389,7 @@ def pvalPlot(allVals):
   canv.Write()
 
 # Maximum Likelihood vs the Mass-Hypothesis Plot 
+'''
 def maxlhPlot(allVals):
 
   canv.Clear()
@@ -398,8 +423,10 @@ def maxlhPlot(allVals):
     mg.Add(graph)
   
   # draw dummy hist and multigraph
-  dummyHist.GetYaxis().SetTitle('Best fit #sigma/#sigma_{SM}')
+  #dummyHist.GetYaxis().SetTitle('Best fit #sigma/#sigma_{SM}')
+  dummyHist.GetYaxis().SetTitle('Best fit #mu')
   mg.Draw("A")
+  
   if not options.yaxis:
     dummyHist.SetMinimum(mg.GetYaxis().GetXmin())
     dummyHist.SetMaximum(mg.GetYaxis().GetXmax())
@@ -415,8 +442,8 @@ def maxlhPlot(allVals):
   
   # draw line at y=1 
   if options.xaxis:
-        axmin = float(options.xaxis.split(',')[0])
-        axmax = float(options.xaxis.split(',')[1])
+        axmin = float(options.xaxis[0])
+        axmax = float(options.xaxis[1])
   else: 
   	axmin = 115
 	axmax = 135
@@ -543,8 +570,8 @@ def limitPlot(allVals):
  
   # draw line at y=1
   if options.xaxis:
-        axmin = float(options.xaxis.split(',')[0])
-        axmax = float(options.xaxis.split(',')[1])
+        axmin = float(options.xaxis[0])
+        axmax = float(options.xaxis[1])
   else: 
   	axmin = 115
 	axmax = 135
@@ -567,7 +594,7 @@ def limitPlot(allVals):
   canv.SetName(options.outname)
   outf.cd()
   canv.Write()
-
+'''
 def runStandard():
   config = []
   for k, f in enumerate(options.files):
@@ -609,49 +636,79 @@ def read1D(file,x,i,xtitle):
 
 def findQuantile(pts,cl):
 
-	#gr is a list of r,nll
-	# start by walking along the variable and check if crosses a CL point
+  #gr is a list of r,nll
+  # start by walking along the variable and check if crosses a CL point
   
-	if cl<=0:  
-	 min=pts[0][0]
-	 mincl=pts[0][1]
-	 for pt in pts: 
-		if pt[1]<mincl: 
-			mincl=pt[1]
-			min = pt[0]
+  if cl<=0:  
+   min=pts[0][0]
+   mincl=pts[0][1]
+   for pt in pts: 
+    if pt[1]<mincl: 
+      mincl=pt[1]
+      min = pt[0]
      
-	 return min,min
+   return min,min
+  print "DEBUG cl " ,cl 
+  min=pts[0][0]
+  mincl=pts[0][1]
+  bestfit_ci =0
+  ci=0
+  for pt in pts: 
+    if pt[1]<mincl: 
+      mincl=pt[1]
+      min = pt[0]
+      bestfit_ci=ci
+  
+    ci=ci+1
 
-	crossbound = [ pt[1]<=cl for pt in pts ]
-	rcrossbound = crossbound[:]
-	rcrossbound.reverse()
+  print min ," ", bestfit_ci   
 
-	minci = 0
-	maxci = len(crossbound)-1
-	min = pts[0][0]
-	max = pts[maxci][0]
+  #crossbound = [ pt[1]<=cl for pt in pts ]
+  #crossbound = [ abs(pt[1]-cl)<0.5 for pt in pts ]
+  crossbound = [ (abs(pt[1]-cl)<0.5) for pt in pts ]
+  #print crossbound
+  #exit
+  rcrossbound = crossbound[:]
+  rcrossbound.reverse()
 
-	for c_i,c in enumerate(crossbound): 
-		if c : 
-			minci=c_i
-			break
-	
-	for c_i,c in enumerate(rcrossbound): 
-		if c : 
-			maxci=len(rcrossbound)-c_i-1
-			break
+  minci = 0
+  maxci = len(crossbound)-1
+  min = pts[0][0]
+  max = pts[maxci][0]
+  print crossbound
+  for c_i,c in enumerate(crossbound): 
+    print c_i, c,  pts[c_i][0]
+    if c : 
+      minci=c_i
+   #   break
+    if  c_i > bestfit_ci:
+      break
+  
+  for c_i,c in enumerate(rcrossbound): 
+    print c_i, c, pts[c_i][0]
+    if c : 
+      maxci=len(rcrossbound)-c_i-1
+    print "nearest fit starting from abov ", pts[minci][0], " bestfit_ci ", bestfit_ci
+    if len(rcrossbound)-c_i-1 < bestfit_ci:
+      break
 
-	if minci>0: 
-		y0,x0 = pts[minci-1][0],pts[minci-1][1]
-		y1,x1 = pts[minci][0],pts[minci][1]
-		min = y0+((cl-x0)*y1 - (cl-x0)*y0)/(x1-x0)
-		
-	if maxci<len(crossbound)-1: 
-		y0,x0 = pts[maxci][0],pts[maxci][1]
-		y1,x1 = pts[maxci+1][0],pts[maxci+1][1]
-		max = y0+((cl-x0)*y1 - (cl-x0)*y0)/(x1-x0)
-
-	return min,max
+  if minci>0: 
+    y0,x0 = pts[minci-1][0],pts[minci-1][1]
+    y1,x1 = pts[minci][0],pts[minci][1]
+    min = y0+((cl-x0)*y1 - (cl-x0)*y0)/(x1-x0)
+    
+  if maxci<len(crossbound)-1: 
+    y0,x0 = pts[maxci][0],pts[maxci][1]
+    y1,x1 = pts[maxci+1][0],pts[maxci+1][1]
+    max = y0+((cl-x0)*y1 - (cl-x0)*y0)/(x1-x0)
+  
+  print min, max
+  if min > max :
+    tmp = min
+    min = max
+    max =tmp
+    
+  return min,max
 
 def smoothNLL(gr,res):
 
@@ -682,7 +739,9 @@ def plot1DNLL(returnErrors=False,xvar="", ext=""):
   elif options.method=='mu':
     x = 'r'
     print 'debug x ', x
-    xtitle = '#sigma / #sigma_{SM}'
+    print 'debug xvar ', xvar
+    #xtitle = '#sigma / #sigma_{SM}'
+    xtitle = '#mu'
     if options.xlab: 
       xtitle = options.xlab
     if xvar:
@@ -718,11 +777,15 @@ def plot1DNLL(returnErrors=False,xvar="", ext=""):
     for i in range(tree.GetEntries()):
       tree.GetEntry(i)
       xv = getattr(tree,x)
+      if (hasattr(tree,"MH")):
+        lcMH = getattr(tree,"MH")
+      else:
+        lcMH =-999
       # tree.quantileExpected==1: continue
       if tree.deltaNLL<0 and options.verbose: print "Warning, found -ve deltaNLL = ",  tree.deltaNLL, " at ", xv 
       if xv in [re[0] for re in res]: continue
       if 2*tree.deltaNLL < 100:
-        res.append([xv,2*tree.deltaNLL])
+        res.append([xv,2*tree.deltaNLL,lcMH])
     res.sort()
 
     # remove weird points again
@@ -742,9 +805,16 @@ def plot1DNLL(returnErrors=False,xvar="", ext=""):
       re[1]-=minNLL
   
     p=0
-    for re, nll in res: 
+    lcMH_bestfit =0;
+    lcmu_bestfit =0;
+    lcMinNLL =9999;
+    for re, nll,m in res: 
       if nll>=0.:
         gr.SetPoint(p,re,nll)
+        if (nll < lcMinNLL ) :
+          lcMinNLL = nll
+          lcmu_bestfit = re
+          lcMH_bestfit = m
         if options.verbose: print '\t', p, re, nll
         p+=1
 
@@ -768,7 +838,10 @@ def plot1DNLL(returnErrors=False,xvar="", ext=""):
     else:
       clean_graphs.append(gr)
 
+    
+    print "LC DEBUG best fit at ", lcmu_bestfit , " and mH " , lcMH_bestfit 
     xmin = m
+    xmun_m = m
     eplus = h-m
     eminus = m-l
     eplus2 = h2-m
@@ -792,16 +865,18 @@ def plot1DNLL(returnErrors=False,xvar="", ext=""):
       eminus0 = eminus
 
       axmin,axmax = findQuantile(res,6)
+      #axmin,axmax = 120,130
       if options.xaxis:
-        axmin = float(options.xaxis.split(',')[0])
-        axmax = float(options.xaxis.split(',')[1])
+        print "opts xaxis ", options.xaxis
+        axmin = float(options.xaxis[0])
+        axmax = float(options.xaxis[1])
       lines = [r.TLine(axmin, 1, axmax, 1), r.TLine(xmin-eminus,  0, xmin-eminus,  1), r.TLine(xmin+eplus,  0, xmin+eplus,  1), 
               r.TLine(axmin, 4, axmax, 4), r.TLine(xmin-eminus2, 0, xmin-eminus2, 4), r.TLine(xmin+eplus2, 0, xmin+eplus2, 4) ]
     
   dH = r.TH1D("dH","",1,axmin,axmax)
   dH.GetXaxis().SetTitle(xtitle)
   if options.method=='mh': dH.GetXaxis().SetNdivisions(505)
-  dH.GetYaxis().SetTitle('-2 #Delta Ln L')
+  dH.GetYaxis().SetTitle('-2 #Delta ln L')
   if not options.yaxis: dH.GetYaxis().SetRangeUser(0.,6)
   else: dH.GetYaxis().SetRangeUser(float(options.yaxis.split(',')[0]),float(options.yaxis.split(',')[1]))
   dH.SetLineColor(0)
@@ -829,7 +904,10 @@ def plot1DNLL(returnErrors=False,xvar="", ext=""):
   lat2.SetNDC()
   lat2.SetTextAlign(22)
   if options.method=='mh': lat2.DrawLatex(0.5,0.85,"#hat{m}_{H} = %6.2f ^{#font[122]{+}%4.2f}_{#font[122]{-}%4.2f}"%(fit,eplus0,eminus0))
-  elif options.method=='mu': lat2.DrawLatex(0.5,0.85,"#hat{#mu}_{SM} = %4.2f ^{#font[122]{+}%4.2f}_{#font[122]{-}%4.2f}"%(fit,eplus0,eminus0))
+  elif options.method=='mu': 
+    lat2.SetTextSize(0.045)
+    lat2.SetTextAlign(11)
+    lat2.DrawLatex(0.17,0.78,"#hat{#mu} = %4.2f ^{#font[122]{+}%4.2f}_{#font[122]{-}%4.2f}"%(fit,eplus0,eminus0))
   elif options.method=='rv': lat2.DrawLatex(0.5,0.85,"#hat{#mu}_{qqH+VH} = %4.2f ^{#font[122]{+}%4.2f}_{#font[122]{-}%4.2f}"%(fit,eplus0,eminus0))
   elif options.method=='rf': lat2.DrawLatex(0.5,0.85,"#hat{#mu}_{ggH+ttH} = %4.2f ^{#font[122]{+}%4.2f}_{#font[122]{-}%4.2f}"%(fit,eplus0,eminus0))
 
@@ -850,10 +928,11 @@ def plot2DNLL(xvar="RF",yvar="RV",xtitle="#mu_{ggH+ttH}",ytitle="#mu_{qqH+VH}"):
   
   #if len(options.files)>1:  sys.exit('Just one file for 2D scans please')
   canv = r.TCanvas("%s_%s"%(xvar,yvar),"%s_%s"%(xvar,yvar),750,750)
-  BFgrs		= []
-  CONT1grs	= []
-  CONT2grs 	= []
-  COLgrs	= []
+  canv.SetTicks(1,1)
+  BFgrs  = []
+  CONT1grs = []
+  CONT2grs  = []
+  COLgrs = []
   
   if not options.legend: leg = r.TLegend(0.7,0.7,0.88,0.88)
   #if not options.legend: leg = r.TLegend(0.05,0.05,0.4,0.4)
@@ -876,7 +955,7 @@ def plot2DNLL(xvar="RF",yvar="RV",xtitle="#mu_{ggH+ttH}",ytitle="#mu_{qqH+VH}"):
   th2s = []
   th2nameinfile='h2d'
   if ':' in options.get2dhist : 
-  	options.get2dhist,th2nameinfile=((options.get2dhist).split(':'))
+    options.get2dhist,th2nameinfile=((options.get2dhist).split(':'))
   for fi,file in enumerate(options.files):
 
     tf = r.TFile(file)
@@ -889,6 +968,7 @@ def plot2DNLL(xvar="RF",yvar="RV",xtitle="#mu_{ggH+ttH}",ytitle="#mu_{qqH+VH}"):
       ymax = tree.GetMaximum(yvar)
 
     if options.get2dhist:
+      print "DEBUG 2d  get2dhist"
       extfile = r.TFile(options.get2dhist)
       mems.append(extfile)
       th2f = extfile.Get('%s'%th2nameinfile).Clone();
@@ -896,10 +976,11 @@ def plot2DNLL(xvar="RF",yvar="RV",xtitle="#mu_{ggH+ttH}",ytitle="#mu_{qqH+VH}"):
       th2 = r.TH2F("h","hclean",th2f.GetNbinsX(),th2f.GetXaxis().GetXmin(),th2f.GetXaxis().GetXmax(),th2f.GetNbinsY(),th2f.GetYaxis().GetXmin(),th2f.GetYaxis().GetXmax())
       for bi in range(1,th2f.GetNbinsX()+1):
         for bj in range(1,th2f.GetNbinsY()+1):
-	  th2.SetBinContent(bi,bj,th2f.GetBinContent(bi,bj))
+           th2.SetBinContent(bi,bj,th2f.GetBinContent(bi,bj))
       tf.cd()
     else:
-
+        print "DEBUG 2d not get2dhist"
+        print "tree.Draw(\"%s>>h%d%s(10000,%1.4f,%1.4f\")"%(xvar,fi,xvar,xmin,xmax),",\"deltaNLL>0.\",\"goff\")"
         tree.Draw("%s>>h%d%s(10000,%1.4f,%1.4f)"%(xvar,fi,xvar,xmin,xmax),"deltaNLL>0.","goff")
         tempX = r.gROOT.FindObject('h%d%s'%(fi,xvar))
         tree.Draw("%s>>h%d%s(10000,%1.4f,%1.4f)"%(yvar,fi,yvar,ymin,ymax),"deltaNLL>0.","goff")
@@ -907,73 +988,155 @@ def plot2DNLL(xvar="RF",yvar="RV",xtitle="#mu_{ggH+ttH}",ytitle="#mu_{qqH+VH}"):
     
        # x binning
         if options.xbinning: 
-	 xbins = int(options.xbinning.split(',')[0])
-	 xmin = float(options.xbinning.split(',')[1])
-	 xmax = float(options.xbinning.split(',')[2])
+           xbins = int(options.xbinning.split(',')[0])
+           xmin = float(options.xbinning.split(',')[1])
+           xmax = float(options.xbinning.split(',')[2])
         else:
-	 xbins=0
-	 xmin = tree.GetMinimum(xvar)
-	 xmax = tree.GetMaximum(xvar)
-	 if options.xaxis:
-	  xmin = float(options.xaxis.split(',')[0])
-	  xmax = float(options.xaxis.split(',')[1])
-	 tree.Draw("%s>>h%d%s(10000,%1.4f,%1.4f)"%(xvar,fi,xvar,xmin,xmax),"deltaNLL>0.","goff")
-	 tempX = r.gROOT.FindObject('h%d%s'%(fi,xvar))
-	 for bin in range(1,tempX.GetNbinsX()+1):
-	  if tempX.GetBinContent(bin)!=0: xbins+=1
+           xbins=0
+           xmin = tree.GetMinimum(xvar)
+           xmax = tree.GetMaximum(xvar)
+           if options.xaxis:
+             xmin = float(options.xaxis[0])
+             xmax = float(options.xaxis[1])
+           tree.Draw("%s>>h%d%s(10000,%1.4f,%1.4f)"%(xvar,fi,xvar,xmin,xmax),"deltaNLL>0.","goff")
+           tempX = r.gROOT.FindObject('h%d%s'%(fi,xvar))
+           for bin in range(1,tempX.GetNbinsX()+1):
+                if tempX.GetBinContent(bin)!=0: 
+                  xbins+=1
     
       # y binning
         if options.ybinning: 
-	 ybins = int(options.ybinning.split(',')[0])
-	 ymin = float(options.ybinning.split(',')[1])
-	 ymax = float(options.ybinning.split(',')[2])
+           ybins = int(options.ybinning.split(',')[0])
+           ymin = float(options.ybinning.split(',')[1])
+           ymax = float(options.ybinning.split(',')[2])
         else:
-	 ybins=0
-	 ymin = tree.GetMinimum(yvar)
-	 ymax = tree.GetMaximum(yvar)
-	 if options.yaxis:
-	  ymin = float(options.yaxis.split(',')[0])
-	  ymax = float(options.yaxis.split(',')[1])
-	 tree.Draw("%s>>h%d%s(10000,%1.4f,%1.4f)"%(yvar,fi,yvar,ymin,ymax),"deltaNLL>0.","goff")
-	 tempY = r.gROOT.FindObject('h%d%s'%(fi,yvar))
-	 for bin in range(1,tempY.GetNbinsX()+1):
-	  if tempY.GetBinContent(bin)!=0: ybins+=1
+           ybins=0
+           ymin = tree.GetMinimum(yvar)
+           ymax = tree.GetMaximum(yvar)
+           if options.yaxis:
+               ymin = float(options.yaxis.split(',')[0])
+               ymax = float(options.yaxis.split(',')[1])
+           tree.Draw("%s>>h%d%s(10000,%1.4f,%1.4f)"%(yvar,fi,yvar,ymin,ymax),"deltaNLL>0.","goff")
+           tempY = r.gROOT.FindObject('h%d%s'%(fi,yvar))
+           for bin in range(1,tempY.GetNbinsX()+1):
+              if tempY.GetBinContent(bin)!=0: ybins+=1
 
         tree.Draw("2.*deltaNLL:%s:%s>>h%d%s%s(%d,%1.4f,%1.4f,%d,%1.4f,%1.4f)"%(yvar,xvar,fi,yvar,xvar,xbins,xmin,xmax,ybins,ymin,ymax),"deltaNLL>0.","prof")
         th2 = r.gROOT.FindObject('h%d%s%s'%(fi,yvar,xvar))
 
     if options.xaxis :
-	xmin = float(options.xaxis.split(',')[0])
-	xmax = float(options.xaxis.split(',')[1])
-      	th2.GetXaxis().SetRangeUser(xmin,xmax)
+        xmin = float(options.xaxis[0])
+        xmax = float(options.xaxis[1])
+        th2.GetXaxis().SetRangeUser(xmin,xmax)
     if options.yaxis :
-	ymin = float(options.yaxis.split(',')[0])
-	ymax = float(options.yaxis.split(',')[1])
-      	th2.GetYaxis().SetRangeUser(ymin,ymax)
+        ymin = float(options.yaxis.split(',')[0])
+        ymax = float(options.yaxis.split(',')[1])
+        th2.GetYaxis().SetRangeUser(ymin,ymax)
+    
+    ############## Simple spike killer ##########
+    print " DEBUG spike killer"
+    prevBin=-999
+    for j in range (0,th2.GetNbinsY()):
+      for i in range (0,th2.GetNbinsX()):
+        if (prevBin < 0) : prevBin = th2.GetBinContent(i,j) 
+        if (prevBin==0) : prevBin=1
+        thisBin = th2.GetBinContent(i,j)
+        fracChange= abs(prevBin - thisBin)/prevBin
+        if  fracChange > 10 and i!=0 and j!=0:
+          print " **DEBUG bin x=", i , " y=",j," have ", th2.GetBinContent(i,j)
+          newContent = 0.5 * (th2.GetBinContent(i-1,j)+ th2.GetBinContent(i+1,j))
+          th2.SetBinContent(i,j,newContent)
+          factor=newContent/th2.GetBinContent(i,j) 
+          th2.SetBinContent(i,j,newContent*factor)
+          print " ** --> set to  th2.GetBinContent(i,j),", th2.GetBinContent(i,j)  
+        else:
+          print " DEBUG bin x=", i , " y=",j," have ", th2.GetBinContent(i,j)
+        prevBin= th2.GetBinContent(i,j)
+    ############## Simple spike killer ##########
 
     gBF = r.TGraph()
+    gSM = r.TGraph()
+    xBF =-99999;
+    yBF =-99999;
+    contourPointsX= []
+    contourPointsY= []
+    contourPointsZ= []
+    if (options.method=="rvrf") :gSM.SetPoint(0,1,1)
+    if (options.method=="mumh") :gSM.SetPoint(0,1,125.09)
     printedOK = False
     if options.bf2d:
       if float(options.bf2d.split(',')[0]) > th2.GetXaxis().GetXmin() and \
-      	 float(options.bf2d.split(',')[0]) < th2.GetXaxis().GetXmax() and \
-	 float(options.bf2d.split(',')[1]) > th2.GetYaxis().GetXmin() and \
-	 float(options.bf2d.split(',')[1]) < th2.GetYaxis().GetXmax() : addBFtoLeg = True
+        float(options.bf2d.split(',')[0]) < th2.GetXaxis().GetXmax() and \
+        float(options.bf2d.split(',')[1]) > th2.GetYaxis().GetXmin() and \
+        float(options.bf2d.split(',')[1]) < th2.GetYaxis().GetXmax() : addBFtoLeg = True
 
       gBF.SetPoint(0,float(options.bf2d.split(',')[0]),float(options.bf2d.split(',')[1]))
     else: 
      for ev in range(tree.GetEntries()):
       tree.GetEntry(ev)
+      if tree.deltaNLL<0: continue
+      if abs(tree.deltaNLL -2.3*0.5) <0.1 : 
+        contourPointsX.append(getattr(tree,xvar))
+        contourPointsY.append(getattr(tree,yvar))
+        contourPointsZ.append((tree.deltaNLL))
       if tree.deltaNLL==0:
         if not printedOK : 
           print "Best Fit (%s) : "%(options.names[fi]),xvar,"=%.4f"%getattr(tree,xvar),", ",yvar,"=%.4f"%getattr(tree,yvar)
           printedOK=True
         if float(getattr(tree,xvar)) > th2.GetXaxis().GetXmin() and \
-      	   float(getattr(tree,xvar)) < th2.GetXaxis().GetXmax() and \
-	   float(getattr(tree,yvar)) > th2.GetYaxis().GetXmin() and \
-	   float(getattr(tree,yvar)) < th2.GetYaxis().GetXmax() : addBFtoLeg = True
+          float(getattr(tree,xvar)) < th2.GetXaxis().GetXmax() and \
+    float(getattr(tree,yvar)) > th2.GetYaxis().GetXmin() and \
+    float(getattr(tree,yvar)) < th2.GetYaxis().GetXmax() : addBFtoLeg = True
         gBF.SetPoint(0,getattr(tree,xvar),getattr(tree,yvar))
-      if tree.deltaNLL<0: continue
+        xBF=getattr(tree,xvar)
+        yBF=getattr(tree,yvar)
 
+    ############## Get BF with uncertainties ##########
+    xPlus =[-999.,-999.,-999.]
+    xMinus =[-999.,-999.,-999.]
+    yPlus =[-999.,-999.,-999.]
+    yMinus = [-999.,999.,-999.]
+    minDeltaXplus = 999.
+    minDeltaXminus = 999.
+    minDeltaYplus = 999.
+    minDeltaYminus =999.
+    for i in range(0,len(contourPointsX)):
+       deltaX = contourPointsX[i] - xBF
+       deltaY = contourPointsY[i] - yBF
+       #gBF.SetPoint(1+i,contourPointsX[i],contourPointsY[i])
+       if abs(deltaX) < minDeltaXplus and deltaY >0 :
+          minDeltaXplus = abs(deltaX)
+          yPlus= [contourPointsX[i] , contourPointsY[i],contourPointsZ[i]]
+       if abs(deltaX) < minDeltaXminus and deltaY <0 :
+          minDeltaXminus = abs(deltaX)
+          yMinus= [contourPointsX[i] , contourPointsY[i],contourPointsZ[i]]
+       if abs(deltaY) < minDeltaYplus and deltaX >0 :
+          minDeltaYplus = abs(deltaY)
+          xPlus= [contourPointsX[i] , contourPointsY[i],contourPointsZ[i]]
+       if abs(deltaY) < minDeltaYminus and deltaX <0 :
+          minDeltaYminus = abs(deltaY)
+          xMinus= [contourPointsX[i] , contourPointsY[i],contourPointsZ[i]]
+          
+    print "BF xBF= ", xBF , " yBF=",   yBF    
+    print "xPlus at ", xPlus
+    print "xMinus at ", xMinus
+    print "yPlus at ", yPlus
+    print "yMinus at ", yMinus
+
+    xBF_up = abs(xBF - xPlus[0])
+    xBF_down = abs(xBF - xMinus[0])
+    yBF_up = abs (yBF - yPlus[1])
+    yBF_down = abs( yBF - yMinus[1])
+    print " Best fit X = %2.2f + %2.2f - %2.2f"%( xBF ,  xBF_up , xBF_down)
+    print " Best fit X = %2.2f --> %2.2f--> %2.2f"%( xBF - xBF_down ,  xBF , xBF+ xBF_up)
+    print " Best fit Y = %2.2f + %2.2f - %2.2f"%( yBF ,  yBF_up , yBF_down)
+    print " Best fit Y = %2.2f --> %2.2f--> %2.2f"%( yBF - yBF_down ,  yBF , yBF+ yBF_up)
+    #gBF.SetPoint(1,xPlus[0],xPlus[1])
+    #gBF.SetPoint(2,yPlus[0],yPlus[1])
+    #gBF.SetPoint(2,xMinus[0],xMinus[1])
+    #gBF.SetPoint(4,yMinus[0],yMinus[1])
+          #print " **DEBUG bin x=", i , " y=",j," have ", th2.GetBinContent(i,j)
+    ##############Contour  ##########
 
     th2.SetTitle("")
 
@@ -983,7 +1146,7 @@ def plot2DNLL(xvar="RF",yvar="RV",xtitle="#mu_{ggH+ttH}",ytitle="#mu_{qqH+VH}"):
     th2.GetYaxis().SetTitle(ytitle)
     th2s.append(th2.Clone())
 
-    if options.xaxis: th2.GetXaxis().SetRangeUser(float(options.xaxis.split(',')[0]),float(options.xaxis.split(',')[1]))
+    if options.xaxis: th2.GetXaxis().SetRangeUser(float(options.xaxis[0]),float(options.xaxis[1]))
     if options.yaxis: th2.GetYaxis().SetRangeUser(float(options.yaxis.split(',')[0]),float(options.yaxis.split(',')[1]))
 
     cont_1sig = th2.Clone('cont_1_sig')
@@ -1002,12 +1165,17 @@ def plot2DNLL(xvar="RF",yvar="RV",xtitle="#mu_{ggH+ttH}",ytitle="#mu_{qqH+VH}"):
       cont_2sig.SetLineStyle(1)
       cont_2sig.SetLineWidth(2)
 
-    	
+     
 
     gBF.SetMarkerStyle(34)
     gBF.SetMarkerSize(2.0)
     gBF.SetMarkerColor((options.colors[fi]))
     gBF.SetLineColor((options.colors[fi]))
+    
+    gSM.SetMarkerStyle(33)
+    gSM.SetMarkerSize(2.0)
+    gSM.SetMarkerColor((r.kRed))
+    gSM.SetLineColor((1))
 
     COLgrs.append(th2.Clone())
     BFgrs.append(gBF.Clone())
@@ -1017,34 +1185,41 @@ def plot2DNLL(xvar="RF",yvar="RV",xtitle="#mu_{ggH+ttH}",ytitle="#mu_{qqH+VH}"):
     r.gStyle.SetOptStat(0)
 
     if len(options.files)==1 :
-	#if options.expected : leg.AddEntry(0,"Expected SM Higgs","") 
-	if options.expected : leg.SetHeader("Expected SM H") 
-    	if addBFtoLeg: leg.AddEntry(gBF,"Best Fit","P")
-    	leg.AddEntry(cont_1sig,"1#sigma","L")
-    	leg.AddEntry(cont_2sig,"2#sigma","L")
+       #if options.expected : leg.AddEntry(0,"Expected SM Higgs","") 
+        if options.expected : leg.SetHeader("Expected SM H") 
+        if addBFtoLeg: leg.AddEntry(gBF,"Best Fit","P")
+        if (options.method=="rvrf") :leg.AddEntry(gSM,"SM","P")
+        if (options.method=="mumh") :leg.AddEntry(gSM,"#mu=1, m_H=125.09 GeV","P")
+        leg.AddEntry(cont_1sig,"1#sigma","L")
+        leg.AddEntry(cont_2sig,"2#sigma","L")
     else :
-    	leg.AddEntry(BFgrs[-1],options.names[fi],"P")
+      leg.AddEntry(BFgrs[-1],options.names[fi],"P")
 
   if options.addSM: 
-  	# leg.AddEntry(smgraph,"SM","P")
-  	smentry =  leg.AddEntry(smmarker_leg,"SM","P")
+      # leg.AddEntry(smgraph,"SM","P")
+      smentry =  leg.AddEntry(smmarker_leg,"SM","P")
 
   # Now Draw them 
   print COLgrs
   if len(options.files)==1:
     for fi in range(len(options.files)):
-    	#th2.SetContour(10000)
-	set_palette(ncontours=255);
-    	th2.Draw("colz9")
-    	gBF_underlay = gBF.Clone()
-   	gBF_underlay.SetMarkerColor(r.kWhite)
-    	gBF_underlay.SetMarkerSize(2.6)
-  	gBF_underlay.Draw("Psame")
-  	gBF.Draw("Psame")
-	cont_1sig.SetLineColor(1);
-	cont_2sig.SetLineColor(1);
-    	cont_1sig.Draw("cont3same9")
-    	cont_2sig.Draw("cont3same9")
+     #th2.SetContour(10000)
+     set_palette(ncontours=255);
+     th2.Draw("colz9")
+     gBF_underlay = gBF.Clone()
+     gBF_underlay.SetMarkerColor(r.kWhite)
+     gBF_underlay.SetMarkerSize(2.6)
+     gBF_underlay.Draw("Psame")
+     gBF.Draw("Psame")
+     gSM_underlay = gSM.Clone()
+     gSM_underlay.SetMarkerColor(r.kWhite)
+     gSM_underlay.SetMarkerSize(2.6)
+     gSM_underlay.Draw("Psame")
+     gSM.Draw("Psame")
+     cont_1sig.SetLineColor(1);
+     cont_2sig.SetLineColor(1);
+     cont_1sig.Draw("cont3same9")
+     cont_2sig.Draw("cont3same9")
     if options.addSM:
       smmarker.Draw()
     leg.Draw()
@@ -1072,6 +1247,7 @@ def plot2DNLL(xvar="RF",yvar="RV",xtitle="#mu_{ggH+ttH}",ytitle="#mu_{qqH+VH}"):
     r.gStyle.SetOptStat(0)
     if fi==0: th2.Draw("axis")
     gBF.Draw("Psame")
+    gSM.Draw("Psame")
     cont_1sig.Draw("cont3same9")
     cont_2sig.Draw("cont3same9")
 
@@ -1079,6 +1255,7 @@ def plot2DNLL(xvar="RF",yvar="RV",xtitle="#mu_{ggH+ttH}",ytitle="#mu_{qqH+VH}"):
 
   if options.addSM:
         smmarker.Draw()
+      
 
   drawGlobals(canv)
   canv.RedrawAxis()
@@ -1092,8 +1269,8 @@ def plot2DNLL(xvar="RF",yvar="RV",xtitle="#mu_{ggH+ttH}",ytitle="#mu_{qqH+VH}"):
   newout = r.TFile("%s_hists2D.root"%options.outname,"RECREATE")
   for k,th2tmp in enumerate(th2s):
         
-  	th2tmp.SetName("h2_%d"%k)
-	newout.WriteTObject(th2tmp)
+   th2tmp.SetName("h2_%d"%k)
+   newout.WriteTObject(th2tmp)
   print "Saved 2D hists to %s"%newout.GetName()
   newout.Close()
   mems = []
@@ -1103,9 +1280,13 @@ def plotMPdfChComp():
 
   print 'plotting mpdf ChannelComp'
   if not options.noComb: print '\t will assume first file is the global best fit'
-  
+  addDummyPoint =1
   points = []
+  catNames = []
+  skipFlags = []
   loffiles = options.files
+  #loffiles.sort()
+  #loffiles.reverse()
   print options.files
   k=0
 
@@ -1119,19 +1300,39 @@ def plotMPdfChComp():
     	ext = options.groupnames[gr]
 
     options.files = [loffiles[0]]
+    catName=loffiles[0].split("/")[-1].replace(".root","").replace("_13TeV","")
+    catName=catName.replace("Tag_","Tag ")
+    catName=catName.replace("UntaggedTag","Untagged")
+    catName=catName.replace("VBFTag ","VBF Tag ")
+    if (catName=="VBF") : catName=catName.replace("VBF","VBF Tags")
+    if (catName=="TTH"): catName=catName.replace("TTH","TTH Tags")
+
     options.method = 'mu'
     r.gROOT.SetBatch()
     print '%15s'%options.names[k],
-    ps = plot1DNLL(True,options.xvar[k],ext)
+    ps = plot1DNLL(True,options.xvar[k],ext) #return the  uncertainties
+    cache=options.outname
+    options.outname=options.outname+"_debug_"+catName.replace(" ","_")
+    print "CATNAME " , catName, " -- > ", ps
+    plot1DNLL(False,options.xvar[k],ext) #print debug plot
+    options.outname=cache
     ps.insert(0,options.names[k])
     points.append(ps)
+    catNames.append(catName)
     k+=1
     loffiles.pop(0)
+    options.outname=cache
   
   rMin=1000.
   rMax=-1000.
+  if addDummyPoint : 
+    catNames.append("Dummy")
+    points.append (["",0,0,0,0,0])
+  if not options.noComb:  catNames=catNames[1:]
+
   r.gROOT.SetBatch(options.batch)
   for point in points:
+    print point 
     if options.do1sig:
       if point[1]+point[2]>rMax: rMax=point[1]+point[2]
       if point[1]-point[3]<rMin: rMin=point[1]-point[3]
@@ -1144,8 +1345,8 @@ def plotMPdfChComp():
   rMin = rMin - 0.7*r.TMath.Abs(rMin)
   rMax = rMax + 0.5*r.TMath.Abs(rMax)
   if options.xaxis: 
-    rMin = float(options.xaxis.split(',')[0])
-    rMax = float(options.xaxis.split(',')[1])
+    rMin = float(options.xaxis[0])
+    rMax = float(options.xaxis[1])
   if options.verbose:
     print 'ChComp PlotRange: ', rMin, '-', rMax
 
@@ -1159,7 +1360,9 @@ def plotMPdfChComp():
     print catFits
 
 
-  xtitle = "#sigma/#sigma_{SM}"
+  #xtitle = "#sigma/#sigma_{sm}"
+  xtitle = "#mu"
+  #xtitle = "#mu = #sigma/#sigma_{sm}"
   if options.xlab: 
       xtitle = options.xlab
   dummyHist = r.TH2F("dummy",";%s;"%xtitle,1,rMin,rMax,ppergraph,0,ppergraph)
@@ -1188,14 +1391,23 @@ def plotMPdfChComp():
       catGraph1sig[grIndex].SetPoint(pIndex,options.chcompShift,pIndex+yshift)
       catGraph2sig[grIndex].SetPoint(pIndex,options.chcompShift,pIndex+yshift)
     else:
-      catGraph1sig[grIndex].SetPoint(pIndex,point[1],pIndex+yshift)
-      catGraph2sig[grIndex].SetPoint(pIndex,point[1],pIndex+yshift)
+      if ("Dummy" in catNames[p] ): 
+        catGraph1sig[grIndex].SetPoint(pIndex,-999,pIndex+yshift)
+        catGraph2sig[grIndex].SetPoint(pIndex,-999,pIndex+yshift)
+      else:
+        catGraph1sig[grIndex].SetPoint(pIndex,point[1],pIndex+yshift)
+        catGraph2sig[grIndex].SetPoint(pIndex,point[1],pIndex+yshift)
 
 
     catGraph1sig[grIndex].SetPointError(pIndex,point[3],point[2],0.,0.)
     catGraph2sig[grIndex].SetPointError(pIndex,point[5],point[4],0.,0.)
     
-    if point[0]=='': binlabel = 'cat%d'%p
+    #if point[0]=='': binlabel = 'cat%d'%p
+    if point[0]=='': 
+      if ( "Dummy" in catNames[p]) :
+        binlabel = ""
+      else :
+        binlabel = catNames[p]
     else: binlabel = point[0]
     dummyHist.GetYaxis().SetBinLabel(p+1,binlabel)
 
@@ -1215,27 +1427,37 @@ def plotMPdfChComp():
     # for chi2 
     pcen   = bestFit[1]
     ppoint = point[1]
+    skipFlag=0
+    if "TTHL" in catNames[p]: skipFlag=1
+    if "Dummy" in catNames[p]: 
+      skipFlag=1
+      catNames[p]=""
+    print "DEBUG cat " , catNames[p], " pcen ", pcen ,", ppoint ", ppoint , " rMin ", rMin , " r Max " , rMax
     if options.chcompShift: ppoint = options.chcompShift
     if options.noComb : pcen = 1.
     chierr = 0
     if ppoint > pcen : chierr = point[3]
     else : chierr = point[2]
     additive = 0
-    if (ppoint > rMax or ppoint < rMin):
-    	tmpline = r.TLine(rMin,pIndex+yshift,rMax,pIndex+yshift)
-	tmpline.SetLineWidth(3)
-	tmpline.SetLineColor(13)
-    	nofitlines.append(tmpline.Clone())
+    if (ppoint > rMax or ppoint < rMin or skipFlag):
+      #tmpline = r.TLine(rMin,pIndex+yshift,rMax,pIndex+yshift)
+      tmpline = r.TBox(rMin,pIndex+yshift-0.2,rMax,pIndex+yshift+0.2)
+      #tmpline.SetLineWidth(3)
+      #tmpline.SetLineColor(13)
+      tmpline.SetFillColor(13)
+      tmpline.SetFillStyle(3002)
+      #nofitlines.append(tmpline.Clone())
     if chierr != 0 and  (ppoint<rMax and ppoint>rMin): 
     	ndof+=1
     	runningChi2 += ((ppoint-pcen)/chierr)**2
 	additive = ((ppoint-pcen)/chierr)**2
+    skipFlags.append(skipFlag)
 
   if not options.noComb:
   	print "Compatibility Chi2 (ndof) = ", runningChi2, ndof-1, " p-val = ", r.TMath.Prob(runningChi2,ndof-1)
 
   dummyHist.SetLineColor(r.kBlack)
-  dummyHist.SetFillColor(r.kGreen+2)
+  dummyHist.SetFillColor(r.kGreen-3)
 
   dummyHist2 = dummyHist.Clone('%s2'%dummyHist.GetName())
   dummyHist2.SetFillColor(r.kGreen)
@@ -1245,10 +1467,11 @@ def plotMPdfChComp():
 
   else: leg = r.TLegend(float(options.legend.split(',')[0]),float(options.legend.split(',')[1]),float(options.legend.split(',')[2]),float(options.legend.split(',')[3]))
   #leg.SetFillColor(0)
-
+  leg.SetTextAlign(12)
   if not options.noComb: leg.AddEntry(dummyHist,"Combined #pm 1#sigma","LF")
   if not options.do1sig and not options.noComb: leg.AddEntry(dummyHist2,"Combined #pm 2#sigma","LF")
-  if not options.noComb: leg.AddEntry(catGraph1sig[0],"Per %s #pm 1#sigma"%options.groupentry,"LP");
+  #if not options.noComb: leg.AddEntry(catGraph1sig[0],"Per %s #pm 1#sigma"%options.groupentry,"LP");
+  if not options.noComb: leg.AddEntry(catGraph1sig[0],"Per category #pm 1#sigma","LP");
   if not options.do1sig and not options.noComb: leg.AddEntry(catGraph2sig[0],"Per category #pm 2#sigma","LP");
 
   if options.groups>1: 
@@ -1256,7 +1479,7 @@ def plotMPdfChComp():
       leg.AddEntry(catGraph1sig[gr],options.groupnames[gr],"L")
 
   bestFitBand1 = r.TBox(bestFit[1]-bestFit[3],0.,bestFit[1]+bestFit[2],len(catFits)-0.005) # ROOT is bad at colouring inside the lines!
-  bestFitBand1.SetFillColor(r.kGreen+2)
+  bestFitBand1.SetFillColor(r.kGreen-3)
   bestFitBand1.SetLineStyle(0)
 
   bestFitBand2 = r.TBox(bestFit[1]-bestFit[5],0.,bestFit[1]+bestFit[4],len(catFits))
@@ -1276,14 +1499,31 @@ def plotMPdfChComp():
   canv.SetRightMargin(cachePadRight-0.03); # was 0.05
   canv.SetGridx(False)
   canv.SetGridy(False)
+ 
 
   dummyHist.Draw()
   if not options.noComb:
     if not options.do1sig: bestFitBand2.Draw()
     bestFitBand1.Draw()
     bestFitLine.Draw()
+  
+  line = r.TLine(1.0,0.,1.0,len(catFits))
+  line.SetLineColor(r.kRed)
+  line.SetLineWidth(5)
+  line.SetLineStyle(7)
+  leg.AddEntry(line,"#mu=#mu_{SM}","L")
+  line.Draw("same")
+  
+  # draw fit value
+  lat2 = r.TLatex()
+  lat2.SetNDC()
+  lat2.SetTextAlign(12)
+  lat2.SetTextSize(0.035)
+  lat2.DrawLatex(0.57,0.59,"#hat{#mu} = %6.2f ^{#font[122]{+}%4.2f}_{#font[122]{-}%4.2f}"%(bestFit[1],bestFit[2],bestFit[3]))
+  lat2.DrawLatex(0.57,0.50,"m_{H} = 125.09 GeV")
 
   for gr in range(options.groups):
+    print gr
     if not options.do1sig: catGraph2sig[gr].Draw("EPsame")
     catGraph1sig[gr].Draw("EPsame")
 
@@ -1302,11 +1542,19 @@ def plotMPdfChComp():
     label2.SetTextAngle(90)
     label1.Draw("same")
     label2.Draw("same")
-
+  print "DEBUG notfitline ", nofitlines
   for tmp in nofitlines: tmp.Draw()
   if options.groups>1 or not options.noComb: leg.Draw("same")
+  
 
   drawGlobals(canv,True) # shift the CMS text etc at the top 
+  canv.SetFillColor(0)
+  canv.SetBorderMode(0)
+  canv.SetBorderSize(2)
+  canv.SetLeftMargin(0.2155525)
+  canv.SetRightMargin(0.07094134)
+  canv.SetTopMargin(0.08392603)
+  canv.SetBottomMargin(0.1209104)
   canv.Modified()
   canv.Update()
   canv.RedrawAxis()
@@ -1328,7 +1576,8 @@ def plotMPdfMaxLH():
 
   points = []
   loffiles = options.files
-
+  addRunIMH=0;
+  #addRunIMH=1;
   k=0
   while len(loffiles)>0:
     options.files = [loffiles[0]]
@@ -1346,11 +1595,26 @@ def plotMPdfMaxLH():
     if skippoint: continue
     options.method = 'mu'
     r.gROOT.SetBatch()
+    print "debug plot1DNLL(True,options.xvar[k]) ", 'plot1DNLL(True,%s)'%options.xvar[k]
     ps = plot1DNLL(True,options.xvar[k])
+    catName=loffiles[0].split("/")[-1].replace(".root","").replace("_13TeV","")
+    cache=options.outname
+    options.outname=options.outname+"_debug_"+catName
+    cachexaxis = options.xaxis
+    cacheyaxis = options.yaxis
+    print "DEBUG x ", options.xaxis , " y ", options.yaxis 
+    options.xaxis=None
+    options.yaxis=None
+    print "DEBUG x ", options.xaxis , " y ", options.yaxis 
+    plot1DNLL(False,"r")
+    options.xaxis=cachexaxis
+    options.yaxis=cacheyaxis
+    print "DEBUG x ", options.xaxis , " y ", options.yaxis 
     ps.insert(0,mh)
     points.append(ps)
     k+=1
     loffiles.pop(0)
+    options.outname=cache
 
   points.sort(key=lambda x: x[0])
 
@@ -1377,33 +1641,40 @@ def plotMPdfMaxLH():
   oneSigma.SetLineColor(r.kBlack)
   oneSigma.SetLineStyle(1)
   oneSigma.SetLineWidth(3)
-  oneSigma.SetFillColor(r.kGreen+2)
+  oneSigma.SetFillColor(r.kGreen-3)
 
-  if not options.legend: leg = r.TLegend(0.58,0.76,0.88,0.88)
+  if not options.legend: leg = r.TLegend(0.58,0.66,0.85,0.89)
   else: leg = r.TLegend(float(options.legend.split(',')[0]),float(options.legend.split(',')[1]),float(options.legend.split(',')[2]),float(options.legend.split(',')[3]))
   #leg.SetFillColor(0)
-
+  #leg.SetTextSize(0.045)
+  leg.SetTextAlign(12)
   leg.AddEntry(oneSigma,"#pm 1 #sigma uncert.","FL")
   if not options.do1sig : leg.AddEntry(twoSigma,"#pm 2 #sigma uncert","FL")
 
   dummyHist.SetStats(0)
   #dummyHist.GetYaxis().SetTitle("#sigma/#sigma_{SM}")
   dummyHist.GetYaxis().SetTitle("#hat{#mu}")
+  #dummyHist.GetYaxis().SetTitle("#mu = #sigma/#sigma_{SM} ")
 
   dummyHist.GetYaxis().SetRangeUser(twoSigma.GetMinimum(),twoSigma.GetMaximum())
 
-  if options.xaxis: dummyHist.GetXaxis().SetRangeUser(float(options.xaxis.split(',')[0]),float(options.xaxis.split(',')[1]))
+  print "DEBUG A x ", options.xaxis , " y ", options.yaxis 
+  if options.xaxis: 
+    print "LC DEBUG A.0 float(options.xaxis[0]) " , float(options.xaxis[0]), " float(options.xaxis[1]) ", float(options.xaxis[1])
+    dummyHist.GetXaxis().SetRangeUser(float(options.xaxis[0]),float(options.xaxis[1]))
   if options.yaxis: dummyHist.GetYaxis().SetRangeUser(float(options.yaxis.split(',')[0]),float(options.yaxis.split(',')[1]))
 
   dummyHist.Draw("AXISG")
+  canv.SaveAs("lc_debug.pdf")
   if not options.do1sig:  twoSigma.Draw("LE3same")
   oneSigma.Draw("LE3same")
   if options.xaxis:
-        axmin = float(options.xaxis.split(',')[0])
-        axmax = float(options.xaxis.split(',')[1])
+        axmin = float(options.xaxis[0])
+        axmax = float(options.xaxis[1])
+        print "DEBUG B amix ", axmin , " axmax " , axmax
   else:
-  	axmin = 115
-	axmax = 135
+    axmin = 115
+    axmax = 135
   line = r.TLine(axmin,1.,axmax,1.)
   line.SetLineColor(13)
   line.SetLineWidth(3)
@@ -1416,9 +1687,30 @@ def plotMPdfMaxLH():
   bestFit.Draw("Lsame")
 
   drawGlobals(canv)
+  
+  if (addRunIMH):
+    bestFitBand1 = r.TBox(125.09-0.24,float(options.yaxis.split(",")[0]),125.09+0.24,float(options.yaxis.split(",")[1])) # ROOT is bad at colouring inside the lines!
+    bestFitBand1.SetFillColor(38)
+    bestFitBand1.SetFillStyle(3001)
+    bestFitBand1.SetLineStyle(3)
+    bestFitBand1.SetLineColor(38)
+  
+    bestFitLine = r.TLine(125.09,float(options.yaxis.split(",")[0]),125.09,float(options.yaxis.split(",")[1]))
+    bestFitLine.SetLineWidth(2)
+    bestFitLine.SetLineColor(r.kBlack)
+
+    dummy = r.TBox(0,0,0,0);
+    dummy.SetFillColor(38)
+    dummy.SetFillStyle(3001)
+    dummy.SetLineWidth(2)
+    dummy.SetLineColor(r.kBlack)
+    bestFitBand1.Draw("LE3same ")
+    bestFitLine.Draw("same ")
+    leg.AddEntry(dummy,"m_{H} = 125.09 #pm 0.24 GeV","FL")
   # draw legend
   leg.Draw()
   canv.SetGrid()
+  canv.SetTicks(1,1)
   canv.RedrawAxis()
 
   # print canvas
@@ -1458,7 +1750,8 @@ def run():
     else:
       plot1DNLL(False,options.xvar[0])
   elif options.method=='mumh':
-    plot2DNLL("MH","r","m_{H} (GeV)","#sigma/#sigma_{SM}")
+    #plot2DNLL("MH","r","m_{H} (GeV)","#sigma/#sigma_{SM}")
+    plot2DNLL("MH","r","m_{H} (GeV)","#mu")
   elif options.method=='rvrf':
     plot2DNLL("RF","RV","#mu_{ggH,ttH}","#mu_{VBF,VH}")
   elif options.method=='cvcf':
@@ -1478,18 +1771,23 @@ if options.datfile:
     config={}
     line = line.replace('\=','EQUALS')
     for opt in line.split(':'):
-      config[opt.split('=')[0]] = opt.split('=')[1].replace('EQUALS','=').split(',')
+      print opt.split('=')[0]
+      config[opt.split('=')[0]] = opt.split('=')[1].replace('EQUALS','=').strip('\n').split(',')
+      #print line 
+      print opt.split('=')[0], " " , opt.split('=')[1].replace('EQUALS','=').strip('\n').split(',')  
     for opt in ['colors','styles','widths']:
       if opt in config.keys():
         config[opt] = [int(x) for x in config[opt]]
     
     for key, item in config.items():
-      if len(item)==1 and key in ['method','text','outname','legend','yaxis']:
+      if len(item)==1 and key in ['method','text','outname','legend','yaxis','xaxis']:
         item=item[0].strip('\n')
+      print "DEBUG key " , key, " item ", item
       setattr(options,key,item)
 
     if options.verbose: print options
     run()
+
 
 else:
   run()

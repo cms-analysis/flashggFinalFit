@@ -263,19 +263,17 @@ GetXsection = lambda x : norm.GetXsection(float(x))
 GetProcXsection = lambda x,y : norm.GetXsection(x,y)
 
 # r Setup
-r.gROOT.SetStyle("Plain")
+#r.gROOT.SetStyle("Plain")
 r.gROOT.SetBatch(1)
 
 # Global Setup, Modify with each Reload
 ##### NCAT = 5
 ##### lumi = 5089
 #lumi=3770
-#systematics = ["vtxEff","idEff","E_scale","E_res","triggerEff","regSig","phoIdMva"] # These are the main contributions to eff*Acc
-#systematics = ["vtxEff","idEff","E_scale","E_res","triggerEff"] # These are the main contributions to eff*Acc
-systematics = ["TriggerWeight","MvaShift","MCScaleLowR9EB","MCScaleHighR9EB","MCScaleLowR9EE","MCScaleHighR9EE","MCSmearLowR9EB","MCSmearHighR9EB","MCSmearLowR9EE","MCSmearHighR9EE","FracRVWeight"] # These are the main contributions to eff*Acc
-#systematics = ["TriggerWeight","MvaShift","MCScaleLowR9EB","MCScaleHighR9EB"] # These are the main contributions to eff*Acc
-#systematics = ["MCScaleHighR9EB"] # These are the main contributions to eff*Acc
-#systematics = ["MCScaleLowR9EE","MCScaleHighR9EE","MCSmearLowR9EB","MCSmearHighR9EB","MCSmearLowR9EE","MCSmearHighR9EE","FracRVWeight"] # These are the main contributions to eff*Acc
+#systematics = ["TriggerWeight","MvaShift","MCScaleLowR9EB","MCScaleHighR9EB","MCScaleLowR9EE","MCScaleHighR9EE","MCSmearLowR9EB","MCSmearHighR9EB","MCSmearLowR9EE","MCSmearHighR9EE","FracRVWeight"] # These are the main contributions to eff*Acc
+systematics = ["TriggerWeight","MvaShift","MCScaleLowR9EB","MCScaleHighR9EB","MCScaleLowR9EE","MCScaleHighR9EE","MCSmearLowR9EBRho","MCSmearHighR9EBRho","MCSmearLowR9EERho","MCSmearHighR9EERho","MCSmearLowR9EBPhi","MCSmearHighR9EBPhi","MCSmearLowR9EEPhi","MCSmearHighR9EEPhi","FracRVWeight"] # These are the main contributions to eff*Acc
+#systematics = ["TriggerWeight","MCScaleLowR9EB","MCScaleHighR9EB"] # These are the main contributions to eff*Acc
+#systematics = ["MvaShift"] # These are the main contributions to eff*Acc
 #systematics = [] # These are the main contributions to eff*Acc
 ## Masses = range(110,152,2) 
 Masses = range(120,135,5) 
@@ -286,7 +284,7 @@ Masses = range(120,135,5)
 #(procs, masses, cats) = preFlight(f)
 procs=["ggh","vbf","wh","zh","tth"]
 #procs=["ggh","vbf","wh","zh"] #tth is bugged for now
-#procs=["tth"]
+#procs=["ggh"]
 masses=[120.,125.,130.]
 cats=["UntaggedTag_0","UntaggedTag_1","UntaggedTag_2","UntaggedTag_3","VBFTag_0","VBFTag_1","TTHLeptonicTag","TTHHadronicTag"]
 #cats=["UntaggedTag_0"]
@@ -324,6 +322,7 @@ print 'Categories found: ' + str(cats)
 
 
 efficiency=r.TGraphAsymmErrors()
+efficiencyPAS=r.TGraphAsymmErrors()
 efficiencyE0=r.TGraphErrors()
 #efficiencyTH1=r.TH1F("t","t",10,120,130)
 central=r.TGraphAsymmErrors()
@@ -415,7 +414,8 @@ for point,M in enumerate(Masses):
           syssumup+=hup.sumEntries()
           syssumnom+=hnom.sumEntries()
           syssumdn+=hdn.sumEntries()
-          print "partial event yield for systematic ", s ," UP at mh=",M," is " ,syssumup, ", ", syssumnom,", ",syssumdn
+          print "partial event yield for proc " , proc, " cat ", cat, "systematic ", s ," UP at mh=",M," is up=" ,syssumup, ", nom=", syssumnom,", dn=",syssumdn
+          print "[DEBUG 080316] event yield for proc " , proc, " cat ", cat, "systematic ", s ," UP at mh=",M," is up=" ,hup.sumEntries(), ", nom=", hnom.sumEntries(),", dn=",hdn.sumEntries()
 
 
     # We make 3-sigma templates so need to scale back by 1/3
@@ -442,6 +442,7 @@ for point,M in enumerate(Masses):
   #sigma_ea = 100 * sigma_N /(sm*lumi)
   print "Setting error of pt ", point , " to [",sigmaDown,",",sigmaUp,"]"
   efficiency.SetPointError(point,0,0,sigmaDown,sigmaUp)
+  efficiencyPAS.SetPointError(point,0,0,sigmaDown,sigmaUp)
   #efficiency.SetPointError(point,0,0,sigma_ea,sigma_ea)
 
   print printLine
@@ -454,55 +455,75 @@ for point,M in enumerate(Masses):
 #  central.SetPoint(point,M,cenfunc.Eval(M))
 #  efficiency.SetPoint(point,M,cenfunc.Eval(M))
 
-leg=r.TLegend(0.70,0.16,0.89,0.39)
+leg=r.TLegend(0.40,0.16,0.89,0.42)
 leg.SetFillColor(0)
 leg.SetBorderSize(0)
-leg.AddEntry(central,"Higgs Signal #varepsilon #times Acc","L")
+#leg.AddEntry(central,"Higgs Signal #varepsilon #times Acc","L")
 #leg.AddEntry(efficiency,"#pm 1 #sigma syst. error","F")
-leg.AddEntry(efficiency,"#pm 1 #sigma syst. error","F")
+#leg.AddEntry(efficiencyPAS,"#pm 1 #sigma syst. error","F")
 
 mytext = r.TLatex()
-mytext.SetTextSize(0.04)
+mytext.SetTextSize(0.05)
 mytext.SetNDC()
 
 listy = []
 
 MG=r.TMultiGraph()
 can =None
-can = r.TCanvas()
-
+can = r.TCanvas("c","c",600,600)
+can.SetTicks(1,1)
 if ("root" in extraFile):
   print "got graph!"
   _file0 = r.TFile(extraFile)
   graph=r.TGraph(_file0.Get("effAccGraph"))
-  graph.SetLineColor(r.kRed)
+  graph.SetLineColor(r.kBlack)
 if (graph!=None): 
   print "drawign graph"
-  for i in range (0,graph.GetN()): graph.GetY()[i] *= 100
+  point =0
+  for i in range (0,graph.GetN()): 
+    graph.GetY()[i] *= 100
+    if (graph.GetX()[i] == 120) or (graph.GetX()[i] ==125) or (graph.GetX()[i]==130):
+      efficiencyPAS.SetPoint(point,graph.GetX()[i],graph.GetY()[i])
+      point =point+1
   #graph.Draw("same")
 else :
   print "not drawign graph"
 efficiency.SetFillColor(r.kOrange)
+efficiencyPAS.SetFillColor(r.kOrange)
 efficiency.SetLineWidth(2)
+efficiencyPAS.SetLineWidth(2)
 central.SetLineWidth(2)
 #central.SetMarkerSize(2)
 central.SetMarkerColor(r.kBlack)
 central.SetMarkerStyle(22)
-MG.Add(efficiency)
-MG.Add(central)
+#MG.Add(efficiency)
+MG.Add(efficiencyPAS)
+#MG.Add(central)
 MG.Add(graph)
-leg.AddEntry(graph,"Overal Signal Model","l")
+leg.AddEntry(graph,"Signal model #varepsilon #times #alpha","l")
+leg.AddEntry(efficiencyPAS,"#pm 1 #sigma syst. error","F")
 MG.Draw("APL3")
-MG.GetXaxis().SetTitle("m_{H} GeV")
-MG.GetYaxis().SetTitle("Efficiency #times Acceptance - %")
-mytext.DrawLatex(0.15,0.8,"CMS Simulation")
+MG.GetXaxis().SetTitle("m_{H} (GeV)")
+MG.GetXaxis().SetTitleSize(0.055)
+MG.GetXaxis().SetTitleOffset(0.7)
+MG.GetXaxis().SetRangeUser(120.1,129.9)
+#MG.GetXaxis().SetRangeUser(120.0,130)
+MG.GetYaxis().SetTitle("Efficiency #times Acceptance (%)")
+MG.GetYaxis().SetRangeUser(37.1,42.9)
+MG.GetYaxis().SetTitleSize(0.055)
+MG.GetYaxis().SetTitleOffset(0.7)
+mytext.DrawLatex(0.1,0.92,"#scale[1.15]{CMS} #bf{#it{Simulation Preliminary}}") #for some reason the bf is reversed??
+mytext.DrawLatex(0.75,0.92,"#bf{13#scale[1.1]{ }TeV}")
+mytext.DrawLatex(0.129+0.03,0.82,"#bf{H#rightarrow#gamma#gamma}")
 can.Update()
+can.RedrawAxis()
 leg.Draw("same")
 print "Int Lumi from workspace ", lumi
 #raw_input("Looks OK?")
 
 can.Update()
 print "Saving plot as effAcc_vs_mass.pdf"
+can.SaveAs("effAcc_vs_mass.C")
 can.SaveAs("effAcc_vs_mass.pdf")
 can.SaveAs("effAcc_vs_mass.png")
 can.SaveAs("effAcc_vs_mass.root")
