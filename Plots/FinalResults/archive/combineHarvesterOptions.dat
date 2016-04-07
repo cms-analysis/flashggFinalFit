@@ -1,0 +1,21 @@
+#datacard=cms_hgg_mva_multipdf_8TeV.dat
+#datacard=hgg_datacard_mva_comb_multipdf.txt
+datacard=hgg_datacard_mva_7TeV_multipdf.txt
+#datacard=hgg_datacard_mva_8TeV_multipdf.txt
+#files=CMS-HGG_mva_7TeV_sigfit.root,CMS-HGG_mva_8TeV_sigfit.root,CMS-HGG_mva_7TeV_multipdf.root,CMS-HGG_mva_8TeV_multipdf.root
+files=CMS-HGG_mva_7TeV_sigfit.root,CMS-HGG_mva_7TeV_multipdf.root
+#files=CMS-HGG_mva_8TeV_sigfit.root,CMS-HGG_mva_8TeV_multipdf.root
+#outDir=combineJobs/Asymptotic										method=Asymptotic expected=True mhLow=110. mhHigh=150. mhStep=1. jobs=41
+
+#outDir=combineJobs/ExpProfileLikelihood 					method=ProfileLikelihood expected=1 expectSignal=1 mhLow=110. mhHigh=150. mhStep=1. jobs=41 
+
+#outDir=combineJobs/MuScan													method=MuScan	expected=1 expectSignal=1 expectSignalMass=125 mh=125 muLow=0. muHigh=2. jobs=10 pointsperjob=5 opts=--squareDistPoi
+#outDir=combineJobs/RVScan													method=RVScan expected=1 expectSignal=1 expectSignalMass=125 mh=125 rvLow=-0.5 rvHigh=2.5 jobs=10 pointsperjob=5 opts=--squareDistPoi
+outDir=combineJobs/MHScan													method=MHScan	expected=1 expectSignal=1 expectSignalMass=125 mhLow=122. mhHigh=128. jobs=10 pointsperjob=5 opts=--squareDistPoi
+outDir=combineJobs/MHScanStat											method=MHScan	expected=1 expectSignal=1 expectSignalMass=125 mhLow=122. mhHigh=128. jobs=10 pointsperjob=5 opts=--squareDistPoi,--fastScan
+
+
+#outDir=MultiPdf/mvaComb/MHScan			method=MHScan	mh=125 mhLow=122. mhHigh=128. jobs=25 pointsperjob=8  postFit 
+# postFit here means the fit will be perfomed to data and the snapshot saved in the new workspace
+#outDir=MultiPdf/mvaComb/MHScanExpected		method=MHScan	mh=125 mhLow=122. mhHigh=128. jobs=25 pointsperjob=8  skipWorkspace postFit expected=1 expectSignal=1 opts=--setPhysicsModelParameters<RV=1.0,RF=1.0> 
+# since this is "expected" the snapshot will be loaded from the previous line and only the POIs here are set to there pre-fit expected values. 

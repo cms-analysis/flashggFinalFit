@@ -100,11 +100,22 @@ int main(int argc, char *argv[]){
                 r.Rndm();
                 double x[dataset->numEntries()];
                 r.RndmArray(dataset->numEntries(),x);
+                int desiredEntries = floor(0.5+ dataset->numEntries()*fraction_);
+                int modFraction = floor(0.5+ 1/fraction_);
+                std::cout << "DEBUG dataset entries : "<< dataset->numEntries() << " reduce by " << fraction_ << " to get desiredEntries " << desiredEntries << " so pick 1 in every "<< modFraction << " events "<<std::endl;            
+                int finalEventCount=0;
                 for (int j =0; j < dataset->numEntries() ; j++){
-                    
-                    if( x[j] < fraction_){
+                //std::cout << "DEBUG " << j << " i%modFraction= "<< j%modFraction << std::endl;
+                    if( j%modFraction==0){
+                      finalEventCount++;
+                    }
+                 }
+                float average_weight= dataset->sumEntries()/finalEventCount;
+                for (int j =0; j < dataset->numEntries() ; j++){
+                //std::cout << "DEBUG " << j << " i%modFraction= "<< j%modFraction << std::endl;
+                    if( j%modFraction==0){
                     dataset->get(j);
-                    datasetReduced->add(*(dataset->get(j)),dataset->weight());
+                    datasetReduced->add(*(dataset->get(j)),average_weight);
                     }
                     
                    
@@ -135,7 +146,7 @@ int main(int argc, char *argv[]){
                 r.Rndm();
                 for (int j =0; j < datahist->numEntries() ; j++){
                     
-                    datahistOUT->add(*(datahist->get(j)),datahist->weight()*fraction_);
+                    datahistOUT->add(*(datahist->get(j)),datahist->weight());
                 }
               float w =datahistOUT->sumEntries();
               float z =datahist->sumEntries();

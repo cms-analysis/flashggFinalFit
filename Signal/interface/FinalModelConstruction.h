@@ -2,6 +2,7 @@
 #define FinalModelConstruction_h
 
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include <string>
 #include <map>
@@ -75,10 +76,10 @@ class FinalModelConstruction {
     std::string cat_;
     std::string outDir_;
     int nIncCats_;
+    bool isProblemCategory_;
     bool doSecondaryModels;
     bool secondaryModelVarsSet;
     bool isCutBased_;
-    bool isProblemCategory_;
 		bool is2011_;
 		bool is2012_;
 		bool isFlashgg_;
@@ -91,6 +92,7 @@ class FinalModelConstruction {
 		bool skipMass(int mh);
     int verbosity_;
     Normalization_8TeV *norm;
+    ofstream paramDump_;
 
     std::map<std::string,RooSpline1D*> stdSplines;
     std::map<std::string,RooSpline1D*> rvSplines;

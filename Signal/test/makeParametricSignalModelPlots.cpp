@@ -57,6 +57,7 @@ int ncats_;
 int binning_;
 string flashggCatsStr_;
 vector<string> flashggCats_;
+vector<string> procs_;
 bool isFlashgg_;
 bool blind_;
 int sqrts_;
@@ -108,7 +109,6 @@ map<string,RooDataSet*> getGlobeData(RooWorkspace *work, int ncats, int m_hyp){
 
 	return result;
 }
-
 map<string,RooDataSet*> getFlashggData(RooWorkspace *work, int ncats, int m_hyp){
 
 	map<string,RooDataSet*> result;
@@ -121,6 +121,22 @@ map<string,RooDataSet*> getFlashggData(RooWorkspace *work, int ncats, int m_hyp)
 
 	return result;
 }
+
+map<string,RooDataSet*> getFlashggDataGranular(RooWorkspace *work, int ncats, int m_hyp){
+
+	map<string,RooDataSet*> result;
+
+	for (int cat=0; cat<ncats; cat++){
+    for (int proc=0; proc < procs_.size() ; proc++){
+	std::cout << "[DEBUG] getting dataset : " << Form("sig_%s_mass_m%3d_%s",procs_[proc].c_str(),m_hyp,flashggCats_[cat].c_str()) << std::endl; 
+		result.insert(pair<string,RooDataSet*>(Form("%s_%s",procs_[proc].c_str(),flashggCats_[cat].c_str()),(RooDataSet*)work->data(Form("sig_%s_mass_m%3d_%s",procs_[proc].c_str(),m_hyp,flashggCats_[cat].c_str()))));
+    assert(work->data(Form("sig_%s_mass_m%3d_%s",procs_[proc].c_str(),m_hyp,flashggCats_[cat].c_str())));
+	  }
+  }
+
+	return result;
+}
+
 map<string,RooAddPdf*> getGlobePdfs(RooWorkspace *work, int ncats){
 
 	map<string,RooAddPdf*> result;
@@ -141,6 +157,20 @@ map<string,RooAddPdf*> getFlashggPdfs(RooWorkspace *work, int ncats){
 	}
 	result.insert(pair<string,RooAddPdf*>("all",(RooAddPdf*)work->pdf("sigpdfrelAllCats_allProcs")));
 
+	return result;
+}
+
+map<string,RooAddPdf*> getFlashggPdfsGranular(RooWorkspace *work, int ncats){
+
+	map<string,RooAddPdf*> result;
+	for (int cat=0; cat<ncats; cat++){
+    for (int proc=0; proc< procs_.size() ; proc++){
+	std::cout << "[DEBUG] getting dataset : " << (RooAddPdf*)work->pdf(Form("extendhggpdfsmrel_13TeV_%s_%sThisLumi",procs_[proc].c_str(),flashggCats_[cat].c_str()))<< std::endl; 
+		result.insert(pair<string,RooAddPdf*>(Form("%s_%s",procs_[proc].c_str(),flashggCats_[cat].c_str()),(RooAddPdf*)work->pdf((Form("extendhggpdfsmrel_13TeV_%s_%sThisLumi",procs_[proc].c_str(),flashggCats_[cat].c_str())))));
+  assert(work->pdf((Form("extendhggpdfsmrel_13TeV_%s_%sThisLumi",procs_[proc].c_str(),flashggCats_[cat].c_str()))));
+	}
+  }
+  
 	return result;
 }
 
@@ -323,6 +353,7 @@ void performClosure(RooRealVar *mass, RooAbsPdf *pdf, RooDataSet *data, string c
 
 	RooPlot *plot;
 	TCanvas *c = new TCanvas();
+  c->SetTickx(); c->SetTicky();
 	if (data){
 		plot = (mass->frame(Bins(binning_),Range("higgsRange")));
 		plot->addTH1(h,"hist"); 
@@ -359,9 +390,10 @@ void Plot(RooRealVar *mass, RooDataSet *data, RooAbsPdf *pdf, pair<double,double
 	double binwidth=fwhmRange[3];
   vector<double> negWeightBins;
   vector<double> negWeightBinsValues;
-
+  std::cout << "DEBUG 1 Plot" << std::endl;
 	RooPlot *plot = mass->frame(Bins(binning_),Range("higgsRange"));
   plot->SetMinimum(0.0);
+  std::cout << "DEBUG 2 Plot" << std::endl;
   if (markNegativeBins_){
   TH1F *rdh = (TH1F*) data->createHistogram("CMS_hgg_mass",*mass,Binning(binning_,105,140));
   for(unsigned int iBin =0 ; iBin < rdh->GetNbinsX() ; iBin++){
@@ -374,51 +406,87 @@ void Plot(RooRealVar *mass, RooDataSet *data, RooAbsPdf *pdf, pair<double,double
   }
   }
   }
+  double offset =0.05;
+  std::cout << "DEBUG 3 Plot" << std::endl;
 	if (data) data->plotOn(plot,Invisible());
+  std::cout << "DEBUG 4 Plot" << std::endl;
 	pdf->plotOn(plot,NormRange("higgsRange"),Range(semin,semax),FillColor(19),DrawOption("F"),LineWidth(2),FillStyle(1001),VLines(),LineColor(15));
 	TObject *seffLeg = plot->getObject(int(plot->numItems()-1));
 	pdf->plotOn(plot,NormRange("higgsRange"),Range(semin,semax),LineColor(15),LineWidth(2),FillStyle(1001),VLines());
 	pdf->plotOn(plot,NormRange("higgsRange"),Range("higgsRange"),LineColor(kBlue),LineWidth(2),FillStyle(0));
+  std::cout << "DEBUG 5 Plot" << std::endl;
 	TObject *pdfLeg = plot->getObject(int(plot->numItems()-1));
 	if (data) data->plotOn(plot,MarkerStyle(kOpenSquare));
 	TObject *dataLeg = plot->getObject(int(plot->numItems()-1));
 	//TLegend *leg = new TLegend(0.15,0.89,0.5,0.55);
-	TLegend *leg = new TLegend(0.15,0.55,0.5,0.89);
+	TLegend *leg = new TLegend(0.15+offset,0.40,0.5+offset,0.82);
 	leg->SetFillStyle(0);
 	leg->SetLineColor(0);
-	leg->SetTextSize(0.03);
-	if (data) leg->AddEntry(dataLeg,"Simulation","lep");
-	leg->AddEntry(pdfLeg,"Parametric model","l");
-	leg->AddEntry(seffLeg,Form("#sigma_{eff} = %1.2f GeV",0.5*(semax-semin)),"fl");
-
+	leg->SetTextSize(0.037);
+	if (data) leg->AddEntry(dataLeg,"#bf{Simulation}","lep");
+	leg->AddEntry(pdfLeg,"#splitline{#bf{Parametric}}{#bf{model}}","l");
+	leg->AddEntry(seffLeg,Form("#bf{#sigma_{eff} = %1.2f GeV}",0.5*(semax-semin)),"fl");
+  
+  std::cout << "DEBUG 6 Plot" << std::endl;
 	plot->GetXaxis()->SetNdivisions(509);
 	halfmax*=(plot->getFitRangeBinW()/binwidth);
 	TArrow *fwhmArrow = new TArrow(fwmin,halfmax,fwmax,halfmax,0.02,"<>");
 	fwhmArrow->SetLineWidth(2.);
-	TPaveText *fwhmText = new TPaveText(0.15,0.35,0.45,0.48,"brNDC");
+	TPaveText *fwhmText = new TPaveText(0.17+offset,0.3,0.45+offset,0.40,"brNDC");
 	fwhmText->SetFillColor(0);
+  std::cout << "DEBUG 7.1 Plot" << std::endl;
 	fwhmText->SetLineColor(kWhite);
-	fwhmText->SetTextSize(0.03);
+  std::cout << "DEBUG 7.2 Plot" << std::endl;
+	fwhmText->SetTextSize(0.037);
+  std::cout << "DEBUG 7.3 Plot" << std::endl;
 	fwhmText->AddText(Form("FWHM = %1.2f GeV",(fwmax-fwmin)));
+  std::cout << "DEBUG 7.4 Plot" << std::endl;
+  std::cout << "DEBUG 7.4.0 Plot data " << data << std::endl;
+  std::cout << "DEBUG 7.4.1 Plot data->GetName() " << data->GetName() << std::endl;
+  std::cout << "DEBUG 7.4.2 Plot mass->getVal() " << mass->getVal() << std::endl;
+  std::cout << "DEBUG 7.4.3 Plot 0.5*(semax-semin) "<< 0.5*(semax-semin) << std::endl;
+  std::cout << "DEBUG 7.4.4 Plot (fwmax-fwmin)/2.35 "<< (fwmax-fwmin)/2.35 << std::endl;
   std::cout << " [FOR TABLE] Tag " << data->GetName() << "=, Mass " << mass->getVal() << " sigmaEff=" << 0.5*(semax-semin) << "= , FWMH=" << (fwmax-fwmin)/2.35 << "=" << std::endl;
+  std::cout << "DEBUG 7.5 Plot" << std::endl;
+  std::cout << " [RESOLUTION CHECK] Ta/Procg " << data->GetName() << ", Mass " << mass->getVal() << " sigmaEff=" << 0.5*(semax-semin) << " , FWMH=" << (fwmax-fwmin)/2.35 << "" << std::endl;
+  std::cout << "DEBUG 7.6 Plot" << std::endl;
+  std::cout << "DEBUG 8 Plot" << std::endl;
 
-	TLatex lat1(0.65,0.85,"#splitline{CMS Preliminary}{Simulation}");
+	//TLatex lat1(0.65,0.85,"#splitline{CMS Simulation}{}");
+  TLatex  lat1(.129+0.03+offset,0.85,"H#rightarrow#gamma#gamma");
 	lat1.SetNDC(1);
-	lat1.SetTextSize(0.03);
-	TLatex lat2(0.65,0.75,title.c_str());
-	lat2.SetNDC(1);
-	lat2.SetTextSize(0.025);
+	lat1.SetTextSize(0.047);
 
-	TCanvas *canv = new TCanvas("c","c",600,600);
+  TString catLabel_humanReadable  = title;
+  catLabel_humanReadable.ReplaceAll("_"," ");
+  catLabel_humanReadable.ReplaceAll("UntaggedTag","Untagged");
+  catLabel_humanReadable.ReplaceAll("VBFTag","VBF Tag");
+  catLabel_humanReadable.ReplaceAll("TTHLeptonicTag","TTH Leptonic Tag");
+  catLabel_humanReadable.ReplaceAll("TTHHadronicTag","TTH Hadronic Tag");
+  catLabel_humanReadable.ReplaceAll("all","All Categories");
+
+	TLatex lat2(0.93,0.88,catLabel_humanReadable);
+  lat2.SetTextAlign(33);
+	lat2.SetNDC(1);
+	lat2.SetTextSize(0.045);
+
+  std::cout << "DEBUG 9 Plot" << std::endl;
+	TCanvas *canv = new TCanvas("c","c",650,600);
+  canv->SetLeftMargin(0.16);
+  canv->SetTickx(); canv->SetTicky();
 	plot->SetTitle("");
 	plot->GetXaxis()->SetTitle("m_{#gamma#gamma} (GeV)");
+	plot->GetXaxis()->SetTitleSize(0.05);
+	plot->GetYaxis()->SetTitleSize(0.05);
+	plot->GetYaxis()->SetTitleOffset(1.5);
   plot->SetMinimum(0.0);
 	plot->Draw();
-	leg->Draw("same");
 	fwhmArrow->Draw("same <>");
 	fwhmText->Draw("same");
  	//lat1.Draw("same");
 	lat2.Draw("same");
+  lat1.Draw("same");
+	leg->Draw("same");
   for (unsigned int i =0 ; i < negWeightBins.size() ; i++){
 	
   TArrow *negBinsArrow = new TArrow(negWeightBins[i],0.0,negWeightBins[i],halfmax/2,0.02,"<>");
@@ -428,12 +496,14 @@ void Plot(RooRealVar *mass, RooDataSet *data, RooAbsPdf *pdf, pair<double,double
   negBinsArrow->Draw("same <>");
 
   }
+  std::cout << "DEBUG 10 Plot" << std::endl;
   CMS_lumi( canv, 0,0);
 	canv->Print(Form("%s.pdf",savename.c_str()));
 	canv->Print(Form("%s.png",savename.c_str()));
 	string path = savename.substr(0,savename.find('/'));
 	canv->Print(Form("%s/animation.gif+100",path.c_str()));
 
+  std::cout << "DEBUG 11 Plot" << std::endl;
 	delete canv;
 
 }
@@ -452,13 +522,13 @@ int main(int argc, char *argv[]){
   
   setTDRStyle();
   writeExtraText = true;       // if extra text
-  extraText  = "Preliminary Simulation";  // default extra text is "Preliminary"
+  extraText  = "Simulation Preliminary";  // default extra text is "Preliminary"
+  //lumi_13TeV  = "2.7 fb^{-1}"; // default is "19.7 fb^{-1}"
   lumi_8TeV  = "19.1 fb^{-1}"; // default is "19.7 fb^{-1}"
   lumi_7TeV  = "4.9 fb^{-1}";  // default is "5.1 fb^{-1}"
   lumi_sqrtS = "13 TeV";       // used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
 
-	vector<string> procs;
-	split(procs,procString_,boost::is_any_of(","));
+	split(procs_,procString_,boost::is_any_of(","));
 	split(flashggCats_,flashggCatsStr_,boost::is_any_of(","));
 
 	if (isFlashgg_){
@@ -488,11 +558,15 @@ int main(int argc, char *argv[]){
 	mass->setRange("higgsRange",m_hyp_-20.,m_hyp_+15.);
 
 	map<string,RooDataSet*> dataSets;
+	map<string,RooDataSet*> dataSetsGranular;
 	map<string,RooAddPdf*> pdfs;
+	map<string,RooAddPdf*> pdfsGranular;
 
 	if (isFlashgg_){
 		dataSets = getFlashggData(hggWS,ncats_,m_hyp_);
+		dataSetsGranular = getFlashggDataGranular(hggWS,ncats_,m_hyp_);
 		pdfs = getFlashggPdfs(hggWS,ncats_);
+		pdfsGranular = getFlashggPdfsGranular(hggWS,ncats_);
 	}
 	else {
 		dataSets = getGlobeData(hggWS,ncats_,m_hyp_);
@@ -518,6 +592,24 @@ int main(int argc, char *argv[]){
 		if (doCrossCheck_) performClosure(mass,pdfs[dataIt->first],dataIt->second,Form("%s/closure_%s.pdf",outfilename_.c_str(),dataIt->first.c_str()),m_hyp_-10.,m_hyp_+10.,thisSigRange.first,thisSigRange.second);
 		Plot(mass,dataIt->second,pdfs[dataIt->first],thisSigRange,thisFWHMRange,dataIt->first,Form("%s/%s",outfilename_.c_str(),dataIt->first.c_str()));
 	}
+	
+  std::cout << "DEBUG Main 1" << std::endl;
+  for (map<string,RooDataSet*>::iterator dataIt=dataSetsGranular.begin(); dataIt!=dataSetsGranular.end(); dataIt++){
+  std::cout << "DEBUG Main 2" << std::endl;
+		pair<double,double> thisSigRange = getEffSigma(mass,pdfsGranular[dataIt->first],m_hyp_-10.,m_hyp_+10.);
+		//pair<double,double> thisSigRange = getEffSigBinned(mass,pdf[dataIt->first],m_hyp_-10.,m_hyp_+10);
+  std::cout << "DEBUG Main 3" << std::endl;
+		vector<double> thisFWHMRange = getFWHM(mass,pdfsGranular[dataIt->first],dataIt->second,m_hyp_-10.,m_hyp_+10.);
+  std::cout << "DEBUG Main 4" << std::endl;
+		sigEffs.insert(pair<string,double>(dataIt->first,(thisSigRange.second-thisSigRange.first)/2.));
+  std::cout << "DEBUG Main 5" << std::endl;
+		fwhms.insert(pair<string,double>(dataIt->first,thisFWHMRange[1]-thisFWHMRange[0]));
+  std::cout << "DEBUG Main 6" << std::endl;
+		if (doCrossCheck_) performClosure(mass,pdfsGranular[dataIt->first],dataIt->second,Form("%s/closure_%s.pdf",outfilename_.c_str(),dataIt->first.c_str()),m_hyp_-10.,m_hyp_+10.,thisSigRange.first,thisSigRange.second);
+		Plot(mass,dataIt->second,pdfsGranular[dataIt->first],thisSigRange,thisFWHMRange,dataIt->first,Form("%s/%s",outfilename_.c_str(),dataIt->first.c_str()));
+  std::cout << "DEBUG Main 7" << std::endl;
+	}
+
 
 
 	map<string,pair<double,double> > bkgVals;

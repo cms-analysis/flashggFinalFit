@@ -651,7 +651,7 @@ void plotAllPdfs(RooRealVar *mgg, RooAbsData *data, RooMultiPdf *mpdf, RooCatego
 		data->plotOn(plot,Binning(80));
 	}
 
-	TLegend *leg = new TLegend(0.6,0.5,0.89,0.89);
+	TLegend *leg = new TLegend(0.6,0.4,0.92,0.92);
 	leg->SetFillColor(0);
 	leg->SetLineColor(0);
 
@@ -682,6 +682,7 @@ int main(int argc, char* argv[]){
   setTDRStyle();
   writeExtraText = true;       // if extra text
   extraText  = "Preliminary";  // default extra text is "Preliminary"
+  lumi_13TeV ="2.7 fb^{-1}";
   lumi_8TeV  = "19.1 fb^{-1}"; // default is "19.7 fb^{-1}"
   lumi_7TeV  = "4.9 fb^{-1}";  // default is "5.1 fb^{-1}"
   lumi_sqrtS = "13 TeV";       // used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
@@ -914,6 +915,7 @@ int main(int argc, char* argv[]){
 			if (makeCrossCheckProfPlots) {
 				// literal profile
 				TCanvas *temp = new TCanvas();
+        temp->SetTickx(); temp->SetTicky();
 				TGraph *profCurve = new TGraph();
 				int p2=0;
 				for (double scanVal=0.9*errLow2Value; scanVal<1.1*errHigh2Value; scanVal+=1){
@@ -953,6 +955,7 @@ int main(int argc, char* argv[]){
 		outWS->import(*data);
 
 		TCanvas *canv = new TCanvas("c","",800,800);
+    canv->SetTickx(); canv->SetTicky();
 		RooRealVar *lumi = (RooRealVar*)inWS->var("IntLumi");
 		plot->Draw();
 
@@ -966,13 +969,13 @@ int main(int argc, char* argv[]){
 		}
 
 		if (doBands) {
-			twoSigmaBand->SetLineColor(kGreen);
-			twoSigmaBand->SetFillColor(kGreen);
-			twoSigmaBand->SetMarkerColor(kGreen);
+			twoSigmaBand->SetLineColor(kYellow);
+			twoSigmaBand->SetFillColor(kYellow);
+			twoSigmaBand->SetMarkerColor(kYellow);
 			twoSigmaBand->Draw("L3 SAME");
-			oneSigmaBand->SetLineColor(kYellow);
-			oneSigmaBand->SetFillColor(kYellow);
-			oneSigmaBand->SetMarkerColor(kYellow);
+			oneSigmaBand->SetLineColor(kGreen);
+			oneSigmaBand->SetFillColor(kGreen);
+			oneSigmaBand->SetMarkerColor(kGreen);
 			oneSigmaBand->Draw("L3 SAME");
 			leg->AddEntry(oneSigmaBand,"#pm1#sigma","F");
 			leg->AddEntry(twoSigmaBand,"#pm2#sigma","F");
@@ -1041,22 +1044,28 @@ int main(int argc, char* argv[]){
 		leg->Draw("same");
 
 		TLatex *latex = new TLatex();	
-		latex->SetTextSize(0.03);
+		latex->SetTextSize(0.045);
 		latex->SetNDC();
 		TLatex *cmslatex = new TLatex();
 		cmslatex->SetTextSize(0.03);
 		cmslatex->SetNDC();
 		std::cout << "[INFO] intLumi " << intLumi << std::endl;
 		//cmslatex->drawlatex(0.2,0.85,form("#splitline{cms preliminary}{#sqrt{s} = %dtev l = %2.3ffb^{-1}}",sqrts,intlumi));
-		cmslatex->DrawLatex(0.25,0.85,Form("#splitline{}{#sqrt{s} = %dTeV L = %2.3ffb^{-1}}",sqrts,intLumi));
-		latex->DrawLatex(0.25,0.78,catLabel.c_str());
+		//cmslatex->DrawLatex(0.25,0.85,Form("#splitline{}{#sqrt{s} = %dTeV L = %2.1ffb^{-1}}",sqrts,intLumi));
+    TString catLabel_humanReadable = catLabel;
+    catLabel_humanReadable.ReplaceAll("_"," ");
+    catLabel_humanReadable.ReplaceAll("UntaggedTag","Untagged");
+    catLabel_humanReadable.ReplaceAll("VBFTag","VBF Tag");
+    catLabel_humanReadable.ReplaceAll("TTHLeptonicTag","TTH Leptonic Tag");
+    catLabel_humanReadable.ReplaceAll("TTHHadronicTag","TTH Hadronic Tag");
+		latex->DrawLatex(0.15,0.85,catLabel_humanReadable);
 		outWS->import(*lumi,RecycleConflictNodes());
 
 		if (unblind) plot->SetMinimum(0.0001);
 		plot->GetYaxis()->SetTitleOffset(1.3);
 		canv->Modified();
 		canv->Update();
-    CMS_lumi( canv, 0, 0);
+    CMS_lumi( canv, 4, 0);
 		canv->Print(Form("%s/bkgplot_%s.pdf",outDir.c_str(),catname.c_str()));
 		canv->Print(Form("%s/bkgplot_%s.png",outDir.c_str(),catname.c_str()));
 		canv->Print(Form("%s/bkgplot_%s.C",outDir.c_str(),catname.c_str()));

@@ -6,6 +6,7 @@ The Final Fits package is a series of scripts which are used to run the final st
 cmsrel CMSSW_7_1_5
 cd CMSSW_7_1_5/src
 cmsenv
+git cms-init
 # Install Combine as per Twiki: https://twiki.cern.ch/twiki/bin/viewauth/CMS/SWGuideHiggsAnalysisCombinedLimit#ROOT6_SLC6_release_CMSSW_7_1_X
 git clone https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit
 cd ${CMSSW_BASE}/src/HiggsAnalysis/CombinedLimit
@@ -13,14 +14,16 @@ git fetch origin
 git checkout v5.0.1
 cd ${CMSSW_BASE}/src
 # Install Flashgg Final Fit packages
-git clone git@github.com:cms-analysis/flashggFinalFit.git flashggFinalFit
 cd ${CMSSW_BASE}/src
 cmsenv
-scram b -j 9
+scram b -j9
 cd ${CMSSW_BASE}/src/flashggFinalFit/
 # create 13TeV XS from 8TeV as placeholder, also add 13TeV into allowed sqrts in HiggsAnalysis/CombinedLimit/python/PhysicsModel.py
 chmod +x convertXS.py
 ./convertXS.py 
+#now update placeholder to latest LHCHXSWG numbers (Feb 2016)
+cp -r data/XS/13TeV $CMSSW_BASE/src/HiggsAnalysis/CombinedLimit/data/lhc-hxswg/sm/xs/.
+
 ```
 
 Two packages need to be built with their own makefiles, if needed. Please note that there will be verbose warnings from BOOST etc:

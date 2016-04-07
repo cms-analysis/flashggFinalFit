@@ -78,6 +78,7 @@ parser.add_option("--poix",default="r")
 parser.add_option("--S0",default=False,action="store_true",help="Stats only")
 parser.add_option("--catsMap",default="")
 parser.add_option("--nBins",default=7)
+parser.add_option("--mhRange",default=-1)
 parser.add_option("--batch",default="LSF",help="Which batch system to use (LSF,IC)")
 parser.add_option("--catRanges",default="")
 parser.add_option("--prefix",default="./")
@@ -130,7 +131,7 @@ if not os.path.exists(os.path.expandvars('$CMSSW_BASE/bin/$SCRAM_ARCH/combineCar
   sys.exit('ERROR - CombinedLimit package must be installed')
 
 cwd = os.getcwd()
-allowedMethods = ['Asymptotic','AsymptoticGrid','ProfileLikelihood','ChannelCompatibilityCheck','MultiPdfChannelCompatibility','MHScan','MHScanStat','MHScanNoGlob','MuScan','MuScanMHProf','RVScan','RFScan','RVRFScan','MuMHScan','GenerateOnly', 'RProcScan', 'RTopoScan', 'RBinScan', 'MuVsMHScan','CVCFScan','KGluKGamScan']
+allowedMethods = ['Asymptotic','AsymptoticGrid','ProfileLikelihood','ChannelCompatibilityCheck','MultiPdfChannelCompatibility','MHScan','MHScanStat','MHScanNoGlob','MuScan','MuScanMHProf','RVScan','RFScan','RVRFScan','MuMHScan','GenerateOnly', 'RProcScan', 'RTopoScan', 'RBinScan', 'MuVsMHScan','CVCFScan','KGluKGamScan','MultiPdfMuHatvsMH']
 
 if opts.parallel:
     parallel = Parallel(cpu_count())
@@ -184,12 +185,17 @@ def getSortedCats():
   f = open(opts.datacard)
   for l in f.readlines():
     if l.startswith('bin'):
+      print l
       els = l.split()[1:]
+      print els
       for el in els: 
         cats.add(el)
       break
   
-  myarr = sorted(cats, key=lambda x: (x[:3],int(x.split('cat')[1].split('_')[0])), reverse=True)
+  print " cats[0] ",  cats , "  cats[:]"
+  #myarr = sorted(cats, key=lambda x: (x[:3],int(x.split('cat')[1].split('_')[0])), reverse=True)
+  #myarr = sorted(cats, key=lambda x: (x[:3],x.split('_')[0]), reverse=True)
+  myarr=sorted(cats)
   print "[INFO] -->categories", myarr
   if opts.verbose: print myarr
   return myarr
@@ -201,7 +207,8 @@ def removeRelevantDiscreteNuisances():
   for line in card.readlines():
     if 'discrete' in line:
       for cat in opts.splitChannels:
-        catString = '_'+cat.split('cat')[1]
+        #catString = '_'+cat.split('cat')[1]
+        catString = '_'+cat
         if catString in line: newCard.write(line)
     else: newCard.write(line)
   card.close()
@@ -227,9 +234,26 @@ def splitCard():
   splitCardName = opts.datacard.replace('.txt','')
   for cat in opts.splitChannels: splitCardName += '_'+cat
   splitCardName += '.txt'
+  print 'combineCards.py --xc="%s" %s > %s'%(veto,opts.datacard,splitCardName)
   system('combineCards.py --xc="%s" %s > %s'%(veto,opts.datacard,splitCardName))
   opts.datacard = splitCardName
   removeRelevantDiscreteNuisances()
+
+
+def makeFloatMHCard():
+     print "LC DEBUG remake datacard  opts.mhRange " , opts.mhRange
+     olddatacard=opts.datacard
+     opts.datacard=olddatacard.replace(".txt",".mhRange.txt")
+     f1 = open(olddatacard, "r")
+     f2 = open(opts.datacard, "w")
+     for line in f1:
+        if ("imax") in line : line = "imax *\n" 
+        if ("jmax") in line : line = "jmax *\n" 
+        if ("kmax") in line : line = "kmax *\n" 
+        f2.write(line)
+     f2.write("MH param %.2f %.2f"%(opts.mh, opts.mhRange))
+     f1.close()
+     f2.close()
 
 def makeStatOnlyCard():
   print "[INFO] making stats-only card"
@@ -271,6 +295,7 @@ def writePreamble(sub_file):
   sub_file.write('cd %s\n'%os.getcwd())
   sub_file.write('eval `scramv1 runtime -sh`\n')
   #sub_file.write('cd -\n')
+  if (opts.batch == "IC" ) : sub_file.write('cd $TMPDIR\n')
   sub_file.write('number=$RANDOM\n')
   sub_file.write('mkdir -p scratch_$number\n')
   sub_file.write('cd scratch_$number\n')
@@ -307,7 +332,7 @@ def writePostamble(sub_file, exec_line):
   if opts.runLocal:
     if opts.parallel:
                     tmpdir = "/tmp/%s/combineHarvester%d_%d" % ( os.getlogin(), os.getpid(), parallel.njobs )
-                    system('mkdir %s'%tmpdir)
+                    system('mkdir -p %s'%tmpdir)
                     parallel.run(system,['cd %s; bash %s' % ( tmpdir, os.path.abspath(sub_file.name))])
     else:
                     system('bash %s'%os.path.abspath(sub_file.name))
@@ -380,9 +405,10 @@ def writeProfileLikelhood():
     sys.exit('No masses have been defined')
 
   tempcardstore = opts.datacard
-  if opts.splitChannels: splitCard()
+  #if opts.splitChannels: splitCard()
   toysfilestore = opts.toysFile
-
+  
+  if ("Stat" in opts.outDir) : makeStatOnlyCard()
   # write
   for j, mass_set in enumerate(opts.masses_per_job):
     file = open('%s/sub_job%d.sh'%(opts.outDir,j),'w')
@@ -452,28 +478,97 @@ def writeGenerateOnly():
       opts.outDir = backupdir
   else:
     writeSingleGenerateOnly()
+
+def writeMultiPdfMuHatvsMH():
+  
+  print '[INFO] Writing MultiPdfMuHatvsMH'
+  rmindefault = opts.muLow
+  backupdir = opts.outDir
+  rmaxdefault = opts.muHigh
+  print "[DEBUG] MultiPdfMuHatvsMH   -- mulow, mu high ", rmindefault ," , ",rmaxdefault 
+  print "[DEBUG] MultiPdfMuHatvsMH   -- catRanges ", catRanges 
+  mLow=opts.mhLow
+  mHigh=opts.mhHigh
+  mStep=opts.mhStep
+  m=mLow
+  counter=0;
+  while (m < mHigh+0.1 ):
+    print "[DEBUG] MultiPdfMuHatvsMH   -- loop trhoguh masses, now process m: ", m
+    opts.method = 'MuScan'
+    opts.mass = m
+    backupmass =  getattr(opts,"mh",None)
+    backupskipws =  opts.skipWorkspace
+    opts.outDir += '/%.2f'%m
+    print system('mkdir -p %s'%opts.outDir)
+    system('mkdir -p %s'%opts.outDir)
+    if (counter==0) :  
+      opts.skipWorkspace=0
+      #opts.skipWorkspace=1
+      counter=counter+1
+    else :
+      opts.skipWorkspace=1
+    print  opts.datacard
+    #opts.datacard = opts.datacard 
+    opts.mh=m
+    writeMultiDimFit()
+    opts.mh=backupmass
+    #opts.datacard = backupcard
+    opts.skipWorkspace = backupskipws
+    opts.muLow  = rmindefault
+    opts.outDir = backupdir
+    m += mStep
+  
+  
 def writeMultiPdfChannelCompatibility():
   
   print '[INFO] Writing MultiPdfChannelCompatibility'
   backupcard = opts.datacard
   backupdir = opts.outDir
   cats = getSortedCats()
+  print "[DEBUG] MultiPdfChannelCompatibility  cats ", cats 
   rmindefault = opts.muLow
   rmaxdefault = opts.muHigh
+  print "[DEBUG] MultiPdfChannelCompatibility   -- mulow, mu high ", rmindefault ," , ",rmaxdefault 
   catRanges = strtodict(opts.catRanges)
+  print "[DEBUG] MultiPdfChannelCompatibility   -- catRanges ", catRanges 
   for cat in cats:
+    print "[DEBUG] MultiPdfChannelCompatibility   -- loop trhoguh cats, now process : ", cat  
     if cat in catRanges.keys():
-      if opts.verbose: print " set ranges for cat %s to"%cat, catRanges[cat]
+      #if opts.verbose: print " set ranges for cat %s to"%cat, catRanges[cat]
+      print " set ranges for cat %s to", catRanges[cat]
       opts.muLow  = catRanges[cat][0]
       opts.muHigh = catRanges[cat][1]
+      print "[DEBUG] MultiPdfChannelCompatibility   -- mu ranges for cat  ", cat  , " -- ", opts.muLow, " --> ", opts.muHigh
     if opts.verbose: print cat
     opts.splitChannels = [cat]
+    print "[DEBUG] MultiPdfChannelCompatibility   -- about to slit card for cat ", cat
     splitCard()
     opts.outDir += '/'+cat
+    print 'mkdir -p %s'%opts.outDir
     system('mkdir -p %s'%opts.outDir)
+    print "[DEBUG] MultiPdfChannelCompatibility   -- about to write multidimfit for cat ",cat 
     opts.method = 'MuScan'
     writeMultiDimFit()
     opts.datacard = backupcard
+    opts.outDir = backupdir
+    opts.muLow  = rmindefault
+    opts.muHigh = rmaxdefault
+  
+  for cat in ["All"]:
+    print "[DEBUG] MultiPdfChannelCompatibility   -- loop trhoguh cats, now process : ", cat  
+    if cat in catRanges.keys():
+      #if opts.verbose: print " set ranges for cat %s to"%cat, catRanges[cat]
+      print " set ranges for cat %s to"%cat, catRanges[cat]
+      opts.muLow  = catRanges[cat][0]
+      opts.muHigh = catRanges[cat][1]
+      print "[DEBUG] MultiPdfChannelCompatibility   -- mu ranges for cat  ", cat  , " -- ", opts.muLow, " --> ", opts.muHigh
+    if opts.verbose: print cat
+    opts.outDir += '/'+cat
+    system('mkdir -p %s'%opts.outDir)
+    print "[DEBUG] MultiPdfChannelCompatibility   -- about to write multidimfit for cat ",cat 
+    opts.method = 'MuScan'
+    opts.datacard = backupcard
+    writeMultiDimFit()
     opts.outDir = backupdir
     opts.muLow  = rmindefault
     opts.muHigh = rmaxdefault
@@ -603,6 +698,11 @@ def writeMultiDimFit(method=None,wsOnly=False):
           makeStatOnlyCard()
         if method=='MHScanNoGlob':
           makeNoGlobCard()
+        print "DEBUG DEBUG is mh Range >1 ??? opts.mhRange" ,opts.mhRange
+        if (opts.mhRange>-1):
+         print "DEBUG DEBUG great, make the correct card from ", opts.datacard
+         makeFloatMHCard()
+         print "DEBUG DEBUG great, made the correct card ", opts.datacard
         if not opts.skipWorkspace:
           datacardname = os.path.basename(opts.datacard).replace('.txt','')
           print 'Creating workspace for %s...'%method
@@ -665,11 +765,14 @@ def writeMultiDimFit(method=None,wsOnly=False):
         for i in range(opts.jobs):
           file = open('%s/sub_m%1.5g_job%d.sh'%(opts.outDir,getattr(opts,"mh",0.),i),'w')
           writePreamble(file)
-          exec_line = 'combine %s -M MultiDimFit --cminDefaultMinimizerType Minuit2 --cminDefaultMinimizerAlgo migrad --algo=grid  %s --points=%d --firstPoint=%d --lastPoint=%d -n %sJob%d'%(opts.datacard,combine_args[method],opts.pointsperjob*opts.jobs,i*opts.pointsperjob,(i+1)*opts.pointsperjob-1,method,i)
+          exec_line = 'combine %s  -M MultiDimFit --cminDefaultMinimizerType Minuit2 --cminDefaultMinimizerAlgo migrad --algo=grid  %s --points=%d --firstPoint=%d --lastPoint=%d -n %sJob%d'%(opts.datacard,combine_args[method],opts.pointsperjob*opts.jobs,i*opts.pointsperjob,(i+1)*opts.pointsperjob-1,method,i)
+          if ("FloatMH" in opts.outDir) : exec_line += " --saveSpecifiedNuis MH" 
           if method in par_ranges.keys(): exec_line+=" --setPhysicsModelParameterRanges %s "%(par_ranges[method])
           if getattr(opts,"mh",None): exec_line += ' -m %6.2f'%opts.mh
           #if opts.expected: exec_line += ' -t -1 --freezeNuisances=JetVeto_migration0,JetVeto_migration1,pdfindex_UntaggedTag_0_13TeV,pdfindex_UntaggedTag_1_13TeV,pdfindex_UntaggedTag_2_13TeV,pdfindex_UntaggedTag_3_13TeV,pdfindex_VBFTag_0_13TeV,pdfindex_VBFTag_1_13TeV'
           if opts.expected: exec_line += ' -t -1 '
+          #exec_line += ' --verbose -1 ' # make very quiet
+          exec_line += ' --verbose -1 --saveSpecifiedIndex pdfindex_UntaggedTag_0_13TeV,pdfindex_UntaggedTag_1_13TeV,pdfindex_UntaggedTag_2_13TeV,pdfindex_UntaggedTag_3_13TeV,pdfindex_VBFTag_0_13TeV,pdfindex_VBFTag_1_13TeV,pdfindex_TTHLeptonicTag_13TeV,pdfindex_TTHHadronicTag_13TeV' 
           if opts.expectSignal: exec_line += ' --expectSignal %4.2f'%opts.expectSignal
           if opts.expectSignalMass: exec_line += ' --expectSignalMass %6.2f'%opts.expectSignalMass
           if opts.additionalOptions: exec_line += ' %s'%opts.additionalOptions
@@ -682,6 +785,7 @@ def writeMultiDimFit(method=None,wsOnly=False):
 def run():
   print "[INFO] running..."
   # setup
+  print opts.prefix , " ", opts.outDir  
   opts.outDir=os.path.join(opts.prefix,opts.outDir)
   system('mkdir -p %s'%opts.outDir)
   if opts.verbose: print 'Made directory', opts.outDir
@@ -697,7 +801,8 @@ def run():
       opts.datacard = opts.datacard.replace('.txt','MuMHScan_postfit.root')
       if opts.expected:
         opts.additionalOptions += " --overrideSnapshotMass --redefineSignalPOIs r --freezeNuisances MH"
-  if opts.wspace: opts.datacard=opts.wspace  
+  if opts.wspace: opts.datacard=opts.wspace 
+  if opts.splitChannels : splitCard()
   if opts.method=='Asymptotic' or opts.method=='AsymptoticGrid' or opts.method=='ProfileLikelihood':
     configureMassFromNJobs()
   if opts.method=='Asymptotic':
@@ -710,6 +815,8 @@ def run():
     writeChannelCompatibility()
   elif opts.method=='MultiPdfChannelCompatibility':
     writeMultiPdfChannelCompatibility()
+  elif opts.method=='MultiPdfMuHatvsMH':
+    writeMultiPdfMuHatvsMH()
   elif opts.method=='GenerateOnly':
     writeGenerateOnly()
   else:
@@ -742,7 +849,18 @@ def configure(config_line):
     if option.startswith('pointsperjob='): opts.pointsperjob = int(option.split('=')[1])
     if option.startswith('splitChannels='): opts.splitChannels = option.split('=')[1].split(',')
     if option.startswith('toysFile='): opts.toysFile = option.split('=')[1]
-    if option.startswith('mh='): opts.mh = float(option.split('=')[1])
+    if option.startswith('mh='): 
+      #opts.mh = float(option.split('=')[1])
+      mhStr = (option.split('=')[1])
+      print "DEBUG LC mhStr ", mhStr
+      if (len(mhStr.split(":"))>1):
+        print "DEBUG LC mhStr.split(:)[0] " , mhStr.split(":")[0]
+        print "DEBUG LC mhStr.split(:)[1] " , mhStr.split(":")[1]
+        opts.mh  = float(mhStr.split(":")[0])
+        opts.mhRange = float(mhStr.split(":")[1])
+      else :
+       opts.mh = float(option.split('=')[1])
+        
     if option.startswith('poix='): 
       poiopt = option.split('=')[1]
       if ',' in poiopt:
