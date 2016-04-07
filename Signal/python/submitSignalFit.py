@@ -89,21 +89,6 @@ def system(exec_line):
   #if opts.verbose: print '\t', exec_line
   os.system(exec_line)
 
-
-#def strtodict(lstr):
-#  print "[INFO] string to dictionariy"
-#  retdict = {}
-#  if not len(lstr): return retdict
-#  objects = lstr.split(':')
-#  for o in objects:
-#    k,vs = o.split('[')
-#    vs = vs.rstrip(']')
-#    vs = vs.split(',')
-#    retdict[k] = [float(vs[0]),float(vs[1])]
-#  return retdict
-#
-#catRanges = strtodict(opts.catRanges)
-
 def writePreamble(sub_file):
   #print "[INFO] writing preamble"
   sub_file.write('#!/bin/bash\n')
@@ -117,13 +102,17 @@ def writePreamble(sub_file):
 def writePostamble(sub_file, exec_line):
 
   #print "[INFO] writing to postamble"
+  sub_file.write('\t echo "PREPARING TO RUN "\n')
   sub_file.write('if ( %s ) then\n'%exec_line)
   #sub_file.write('\t mv higgsCombine*.root %s\n'%os.path.abspath(opts.outDir))
+  sub_file.write('\t echo "DONE" \n')
   sub_file.write('\t touch %s.done\n'%os.path.abspath(sub_file.name))
   sub_file.write('else\n')
+  sub_file.write('\t echo "FAIL" \n')
   sub_file.write('\t touch %s.fail\n'%os.path.abspath(sub_file.name))
   sub_file.write('fi\n')
   sub_file.write('cd -\n')
+  sub_file.write('\t echo "RM RUN "\n')
   sub_file.write('rm -f %s.run\n'%os.path.abspath(sub_file.name))
   sub_file.write('rm -rf scratch_$number\n')
   sub_file.close()
@@ -134,7 +123,9 @@ def writePostamble(sub_file, exec_line):
     system('rm -f %s.log'%os.path.abspath(sub_file.name))
     system('rm -f %s.err'%os.path.abspath(sub_file.name))
     if (opts.batch == "LSF") : system('bsub -q %s -o %s.log %s'%(opts.queue,os.path.abspath(sub_file.name),os.path.abspath(sub_file.name)))
-    if (opts.batch == "IC") : system('qsub -q %s -o %s.log -e %s.err %s > out.txt'%(opts.queue,os.path.abspath(sub_file.name),os.path.abspath(sub_file.name),os.path.abspath(sub_file.name)))
+    if (opts.batch == "IC") : 
+      system('qsub -q %s -o %s.log -e %s.err %s'%(opts.queue,os.path.abspath(sub_file.name),os.path.abspath(sub_file.name),os.path.abspath(sub_file.name)))
+      #print "system(",'qsub -q %s -o %s.log -e %s.err %s '%(opts.queue,os.path.abspath(sub_file.name),os.path.abspath(sub_file.name),os.path.abspath(sub_file.name)),")"
   if opts.runLocal:
      system('bash %s'%os.path.abspath(sub_file.name))
 

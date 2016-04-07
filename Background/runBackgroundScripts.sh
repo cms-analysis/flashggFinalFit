@@ -1,15 +1,11 @@
 #!/bin/bash
 
-
 #bash variables
 FILE="";
 EXT="auto"; #extensiom for all folders and files created by this script
 PROCS="ggh"
-#CATS="UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,UntaggedTag_4,VBFTag_0,VBFTag_1,VBFTag_2,TTHHadronicTag,TTHLeptonicTag,VHHadronicTag,VHTightTag,VHLooseTag,VHEtTag"
-#CATS="UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,UntaggedTag_4,VBFTag_0,VBFTag_1,VBFTag_2,TTHLeptonicTag,VHHadronicTag,VHTightTag,VHLooseTag"
 CATS="UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,UntaggedTag_4,VBFTag_0,VBFTag_1,VBFTag_2,VHHadronicTag,VHTightTag,VHLooseTag"
 SCALES="HighR9EE,LowR9EE,HighR9EB,LowR9EB"
-#SMEARS="HighR9EE,LowR9EE,HighR9EBRho,LowR9EBRho,HighR9EBPhi,LowR9EBPhi"
 SMEARS="HighR9EE,LowR9EE,HighR9EB,LowR9EB" #DRY RUN
 FTESTONLY=0
 PSEUDODATAONLY=0
@@ -81,10 +77,6 @@ done
 
 OUTDIR="outdir_${EXT}"
 echo "[INFO] outdir is $OUTDIR, INTLUMI $INTLUMI" 
-#if [ "$FILE" == "" ];then
-#	echo "ERROR, input file (--inputFile or -i) is mandatory!"
-#	exit 0
-#fi
 
 if [ $ISDATA == 1 ]; then
 DATAEXT="-Data"
@@ -163,15 +155,15 @@ OPT=" --unblind"
 fi
 echo "./scripts/subBkgPlots.py -b CMS-HGG_multipdf_$EXT.root -d $OUTDIR/bkgPlots$DATAEXT -S 13 --isMultiPdf --useBinnedData  --doBands --massStep 1 $SIG -L 100 -H 180 -f $CATS -l $CATS --intLumi $INTLUMI $OPT --batch IC -q hepmedium.q #for now"
 ./scripts/subBkgPlots.py -b CMS-HGG_multipdf_$EXT.root -d $OUTDIR/bkgPlots$DATAEXT -S 13 --isMultiPdf --useBinnedData  --doBands  --massStep 1 $SIG -L 100 -H 180 -f $CATS -l $CATS --intLumi $INTLUMI $OPT --batch IC -q hepmedium.q #for now
-continueLoop=0
-while (($continueLoop==0))
+continueLoop=1
+while (($continueLoop==1))
 do
  sleep 10
  qstat
  qstat >qstat_out.txt
- number= `cat qstat_out.txt | wc -l `
- echo number
-  if (( $number==0)) ; then
+ ((number=`cat qstat_out.txt | wc -l `))
+ echo $number
+  if (($number==0)) ; then
      ((continueLoop=0))
   fi
 done 

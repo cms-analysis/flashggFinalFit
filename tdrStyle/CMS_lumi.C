@@ -5,7 +5,6 @@
 CMS_lumi( TPad* pad, int iPeriod, int iPosX , TString extraExtraText)
 {            
 
-
   bool outOfFrame    = false;
   if( iPosX/10==0 ) 
   {

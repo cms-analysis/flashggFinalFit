@@ -185,14 +185,14 @@ def getSortedCats():
   f = open(opts.datacard)
   for l in f.readlines():
     if l.startswith('bin'):
-      print l
+      #print l
       els = l.split()[1:]
-      print els
+      #print els
       for el in els: 
         cats.add(el)
       break
   
-  print " cats[0] ",  cats , "  cats[:]"
+  #print " cats[0] ",  cats , "  cats[:]"
   #myarr = sorted(cats, key=lambda x: (x[:3],int(x.split('cat')[1].split('_')[0])), reverse=True)
   #myarr = sorted(cats, key=lambda x: (x[:3],x.split('_')[0]), reverse=True)
   myarr=sorted(cats)
@@ -229,7 +229,8 @@ def splitCard():
   veto = ""
   for cat in allCats:
     if cat in opts.splitChannels: continue
-    else: veto += "|ch1_"+cat
+    #else: veto += "|ch1_"+cat
+    else: veto += "|"+cat
   veto=veto[1:]
   splitCardName = opts.datacard.replace('.txt','')
   for cat in opts.splitChannels: splitCardName += '_'+cat
@@ -241,7 +242,6 @@ def splitCard():
 
 
 def makeFloatMHCard():
-     print "LC DEBUG remake datacard  opts.mhRange " , opts.mhRange
      olddatacard=opts.datacard
      opts.datacard=olddatacard.replace(".txt",".mhRange.txt")
      f1 = open(olddatacard, "r")
@@ -371,8 +371,7 @@ def writeAsymptoticGrid():
   if not opts.skipWorkspace:
     print '[INFO] Creating workspace for %s...'%opts.method
     ws_exec_line = 'text2workspace.py %s -o %s'%(os.path.abspath(opts.datacard),os.path.abspath(opts.datacard).replace('.txt','.root')) 
-    print " WS EXEC LINE "
-    print ws_exec_line
+    #print ws_exec_line
     system(ws_exec_line)
   opts.datacard = opts.datacard.replace('.txt','.root')
 
@@ -507,7 +506,7 @@ def writeMultiPdfMuHatvsMH():
       counter=counter+1
     else :
       opts.skipWorkspace=1
-    print  opts.datacard
+    #print  opts.datacard
     #opts.datacard = opts.datacard 
     opts.mh=m
     writeMultiDimFit()
@@ -525,28 +524,27 @@ def writeMultiPdfChannelCompatibility():
   backupcard = opts.datacard
   backupdir = opts.outDir
   cats = getSortedCats()
-  print "[DEBUG] MultiPdfChannelCompatibility  cats ", cats 
+  print "[INFO] MultiPdfChannelCompatibility  cats ", cats 
   rmindefault = opts.muLow
   rmaxdefault = opts.muHigh
-  print "[DEBUG] MultiPdfChannelCompatibility   -- mulow, mu high ", rmindefault ," , ",rmaxdefault 
+  print "[INFO] MultiPdfChannelCompatibility   -- mulow, mu high ", rmindefault ," , ",rmaxdefault 
   catRanges = strtodict(opts.catRanges)
-  print "[DEBUG] MultiPdfChannelCompatibility   -- catRanges ", catRanges 
   for cat in cats:
-    print "[DEBUG] MultiPdfChannelCompatibility   -- loop trhoguh cats, now process : ", cat  
+    print "[INFO] MultiPdfChannelCompatibility   -- loop trhoguh cats, now process : ", cat  
     if cat in catRanges.keys():
       #if opts.verbose: print " set ranges for cat %s to"%cat, catRanges[cat]
-      print " set ranges for cat %s to", catRanges[cat]
+      print " [INFO] set ranges for cat %s to", catRanges[cat]
       opts.muLow  = catRanges[cat][0]
       opts.muHigh = catRanges[cat][1]
-      print "[DEBUG] MultiPdfChannelCompatibility   -- mu ranges for cat  ", cat  , " -- ", opts.muLow, " --> ", opts.muHigh
+      print "[INFO] MultiPdfChannelCompatibility   -- mu ranges for cat  ", cat  , " -- ", opts.muLow, " --> ", opts.muHigh
     if opts.verbose: print cat
     opts.splitChannels = [cat]
-    print "[DEBUG] MultiPdfChannelCompatibility   -- about to slit card for cat ", cat
+    print "[INFO MultiPdfChannelCompatibility   -- about to split card for cat ", cat
     splitCard()
     opts.outDir += '/'+cat
     print 'mkdir -p %s'%opts.outDir
     system('mkdir -p %s'%opts.outDir)
-    print "[DEBUG] MultiPdfChannelCompatibility   -- about to write multidimfit for cat ",cat 
+    print "[INFO] MultiPdfChannelCompatibility   -- about to write multidimfit for cat ",cat 
     opts.method = 'MuScan'
     writeMultiDimFit()
     opts.datacard = backupcard
@@ -555,17 +553,13 @@ def writeMultiPdfChannelCompatibility():
     opts.muHigh = rmaxdefault
   
   for cat in ["All"]:
-    print "[DEBUG] MultiPdfChannelCompatibility   -- loop trhoguh cats, now process : ", cat  
     if cat in catRanges.keys():
       #if opts.verbose: print " set ranges for cat %s to"%cat, catRanges[cat]
-      print " set ranges for cat %s to"%cat, catRanges[cat]
       opts.muLow  = catRanges[cat][0]
       opts.muHigh = catRanges[cat][1]
-      print "[DEBUG] MultiPdfChannelCompatibility   -- mu ranges for cat  ", cat  , " -- ", opts.muLow, " --> ", opts.muHigh
     if opts.verbose: print cat
     opts.outDir += '/'+cat
     system('mkdir -p %s'%opts.outDir)
-    print "[DEBUG] MultiPdfChannelCompatibility   -- about to write multidimfit for cat ",cat 
     opts.method = 'MuScan'
     opts.datacard = backupcard
     writeMultiDimFit()
@@ -698,11 +692,8 @@ def writeMultiDimFit(method=None,wsOnly=False):
           makeStatOnlyCard()
         if method=='MHScanNoGlob':
           makeNoGlobCard()
-        print "DEBUG DEBUG is mh Range >1 ??? opts.mhRange" ,opts.mhRange
         if (opts.mhRange>-1):
-         print "DEBUG DEBUG great, make the correct card from ", opts.datacard
          makeFloatMHCard()
-         print "DEBUG DEBUG great, made the correct card ", opts.datacard
         if not opts.skipWorkspace:
           datacardname = os.path.basename(opts.datacard).replace('.txt','')
           print 'Creating workspace for %s...'%method
@@ -772,7 +763,7 @@ def writeMultiDimFit(method=None,wsOnly=False):
           #if opts.expected: exec_line += ' -t -1 --freezeNuisances=JetVeto_migration0,JetVeto_migration1,pdfindex_UntaggedTag_0_13TeV,pdfindex_UntaggedTag_1_13TeV,pdfindex_UntaggedTag_2_13TeV,pdfindex_UntaggedTag_3_13TeV,pdfindex_VBFTag_0_13TeV,pdfindex_VBFTag_1_13TeV'
           if opts.expected: exec_line += ' -t -1 '
           #exec_line += ' --verbose -1 ' # make very quiet
-          exec_line += ' --verbose -1 --saveSpecifiedIndex pdfindex_UntaggedTag_0_13TeV,pdfindex_UntaggedTag_1_13TeV,pdfindex_UntaggedTag_2_13TeV,pdfindex_UntaggedTag_3_13TeV,pdfindex_VBFTag_0_13TeV,pdfindex_VBFTag_1_13TeV,pdfindex_TTHLeptonicTag_13TeV,pdfindex_TTHHadronicTag_13TeV' 
+          #exec_line += ' --verbose -1 --saveSpecifiedIndex pdfindex_UntaggedTag_0_13TeV,pdfindex_UntaggedTag_1_13TeV,pdfindex_UntaggedTag_2_13TeV,pdfindex_UntaggedTag_3_13TeV,pdfindex_VBFTag_0_13TeV,pdfindex_VBFTag_1_13TeV,pdfindex_TTHLeptonicTag_13TeV,pdfindex_TTHHadronicTag_13TeV' 
           if opts.expectSignal: exec_line += ' --expectSignal %4.2f'%opts.expectSignal
           if opts.expectSignalMass: exec_line += ' --expectSignalMass %6.2f'%opts.expectSignalMass
           if opts.additionalOptions: exec_line += ' %s'%opts.additionalOptions
@@ -852,9 +843,7 @@ def configure(config_line):
     if option.startswith('mh='): 
       #opts.mh = float(option.split('=')[1])
       mhStr = (option.split('=')[1])
-      print "DEBUG LC mhStr ", mhStr
       if (len(mhStr.split(":"))>1):
-        print "DEBUG LC mhStr.split(:)[0] " , mhStr.split(":")[0]
         print "DEBUG LC mhStr.split(:)[1] " , mhStr.split(":")[1]
         opts.mh  = float(mhStr.split(":")[0])
         opts.mhRange = float(mhStr.split(":")[1])
@@ -892,7 +881,6 @@ def configure(config_line):
       opts.additionalOptions = opts.additionalOptions.replace(">"," ")
       opts.additionalOptions = opts.additionalOptions.replace("<"," ")
     if option.startswith('catsMap='):
-      print option
       for mp in option.split('=')[1].split(';'):
         if not "[" in mp.split(':')[-1]:
           mp += "[1,0,20]"

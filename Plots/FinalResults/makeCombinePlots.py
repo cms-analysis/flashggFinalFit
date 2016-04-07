@@ -184,7 +184,6 @@ if (options.xaxis):
   if ("," in options.xaxis): options.xaxis = options.xaxis.split(',')
 if not options.xaxis: dummyHist = r.TH1D("dummy","",1,115,135)
 else: 
-  print "DEBUG 0 dumym hist  float(options.xaxis[0]),float(options.xaxis[1]) ", float(options.xaxis[0]), " ",float(options.xaxis[1]) 
   dummyHist =  r.TH1D("dummy","",1,float(options.xaxis[0]),float(options.xaxis[1]))
 dummyHist.GetXaxis().SetTitle('m_{H} (GeV)')
 
@@ -209,7 +208,6 @@ def drawGlobals(canv,shifted=False):
    #lat.DrawLatex(0.173+0.05,0.85,"#splitline{#bf{CMS}}{#it{Preliminary}}")
    lat.DrawLatex(0.129+0.085,0.93,"#bf{CMS} #scale[0.75]{#it{Preliminary}}")
    lat.DrawLatex(0.129+0.085+0.04,0.85,"H#rightarrow#gamma#gamma")
-   print "DEBUG1"
    lat.SetTextSize(0.045)
    lat.DrawLatex(0.67-0.005,0.93,options.text)
    #lat.DrawLatex(0.7,0.93,options.text)
@@ -220,7 +218,6 @@ def drawGlobals(canv,shifted=False):
    #lat.DrawLatex(0.173,0.85,"#splitline{#bf{CMS}}{#it{Preliminary}}")
    lat.DrawLatex(0.129,0.93,"#bf{CMS} #scale[0.75]{#it{Preliminary}}")
    lat.DrawLatex(0.129+0.04,0.85,"H#rightarrow#gamma#gamma")
-   print "DEBUG2"
    #lat.SetTextSize(0.07)
    lat.SetTextSize(0.045)
    lat.DrawLatex(0.62,0.933,options.text)
@@ -286,13 +283,10 @@ def pvalPlot(allVals):
   if options.verbose: print 'Plotting pvalue...'
   canv.SetLogy(True)
   mg = r.TMultiGraph()
-  print "DEUG XAXIS IN PVAL " , options.xaxis
   if not options.legend: leg = r.TLegend(0.6,0.17,0.89,0.4)
   #if not options.legend: leg = r.TLegend(0.6,0.35,0.89,0.45)
   else:
-    print "LEGEND DEBUG options.legend ", options.legend
     options.legend[-1]=options.legend[-1].replace("\n","")
-    print "LEGEND DEBUG options.legend ", options.legend
     leg = r.TLegend(float(options.legend[0]),float(options.legend[1]),float(options.legend[2]),float(options.legend[3]))
   #leg.SetFillColor(0)
   # make graphs from values
@@ -309,7 +303,7 @@ def pvalPlot(allVals):
       if options.verbose or values[j][0]==125.09: 
         print '\t', j, values[j][0], values[j][1], r.RooStats.PValueToSignificance(values[j][1])
         pvalat125=values[j][1]
-      print "debug minpval  for ",options.names[k], " at ", values[j][0], " ", minpvalue, "   " , r.RooStats.PValueToSignificance(minpvalue), "values[j][1] " , values[j][1], " ", r.RooStats.PValueToSignificance(values[j][1])
+      #print "debug minpval  for ",options.names[k], " at ", values[j][0], " ", minpvalue, "   " , r.RooStats.PValueToSignificance(minpvalue), "values[j][1] " , values[j][1], " ", r.RooStats.PValueToSignificance(values[j][1])
     
   #  with open(options.itLedger, "a") as myfile:
   #      myfile.write("%s %f %f\n" % ( (options.names[k].replace(" ","_"))+" "+options.it, minpvalue,minpvalueX ))
@@ -337,7 +331,7 @@ def pvalPlot(allVals):
   else:
     dummyHist.SetMinimum(float(options.yaxis.split(',')[0]))
     dummyHist.SetMaximum(float(options.yaxis.split(',')[1]))
-    print "y1,y2", options.yaxis.split(',')[0], " , ", options.yaxis.split(',')[1]
+    #print "y1,y2", options.yaxis.split(',')[0], " , ", options.yaxis.split(',')[1]
     
   dummyHist.SetLineColor(0)
   dummyHist.SetStats(0)
@@ -356,7 +350,7 @@ def pvalPlot(allVals):
     else : 
         axmin = float(options.xaxis[0])
         axmax = float(options.xaxis[1])
-        print "set line at  " ,axmin, " " , axmax
+        #print "set line at  " ,axmin, " " , axmax
         lines.append(r.TLine(axmin,y,axmax,y))
 
     lines[i].SetLineWidth(2)
@@ -648,7 +642,6 @@ def findQuantile(pts,cl):
       min = pt[0]
      
    return min,min
-  print "DEBUG cl " ,cl 
   min=pts[0][0]
   mincl=pts[0][1]
   bestfit_ci =0
@@ -662,48 +655,63 @@ def findQuantile(pts,cl):
     ci=ci+1
 
   print min ," ", bestfit_ci   
-
+  #print "determine corssbounds for cl ", cl
+  #for pt in pts:
+  #  print "--> pt[1] ", pt[1], " cl ", cl, " pt[1]-cl ", pt[1]-cl ," abs(pt[1]-cl)<0.5) " , (abs(pt[1]-cl)<0.5)
   #crossbound = [ pt[1]<=cl for pt in pts ]
   #crossbound = [ abs(pt[1]-cl)<0.5 for pt in pts ]
-  crossbound = [ (abs(pt[1]-cl)<0.5) for pt in pts ]
+  crossbound =  [(True) for pt in pts ]
   #print crossbound
   #exit
   rcrossbound = crossbound[:]
   rcrossbound.reverse()
 
-  minci = 0
-  maxci = len(crossbound)-1
+  minciUp = 0
+  minciDown = 0
+  maxciUp = len(crossbound)-1
+  maxciDown = len(crossbound)-1
   min = pts[0][0]
-  max = pts[maxci][0]
-  print crossbound
+  max = pts[maxciUp][0]
+  #print crossbound
   for c_i,c in enumerate(crossbound): 
-    print c_i, c,  pts[c_i][0]
-    if c : 
-      minci=c_i
+    #print c_i, c,  pts[c_i][0],  pts[c_i][1] ,pts[c_i+1][1]
+    if c and pts[c_i][1]>cl  and pts[c_i+1][1]<cl : 
+      minciUp=c_i
+      minciDown=c_i+1
    #   break
     if  c_i > bestfit_ci:
       break
   
-  for c_i,c in enumerate(rcrossbound): 
-    print c_i, c, pts[c_i][0]
-    if c : 
-      maxci=len(rcrossbound)-c_i-1
-    print "nearest fit starting from abov ", pts[minci][0], " bestfit_ci ", bestfit_ci
-    if len(rcrossbound)-c_i-1 < bestfit_ci:
+  for c_i,c in enumerate(rcrossbound):
+    d_i = len(crossbound) -c_i-1 
+    #print "reverse" ,c_i, c, pts[d_i][0], pts[d_i][1] ,pts[d_i-1][1]
+    if c and pts[d_i][1]>cl  and pts[d_i-1][1]<cl:
+      maxciUp=d_i
+      maxciDown=d_i-1
+      #maxci=len(rcrossbound)-c_i
+    if d_i-1 < bestfit_ci:
+    #if len(rcrossbound)-c_i < bestfit_ci:
       break
 
-  if minci>0: 
-    y0,x0 = pts[minci-1][0],pts[minci-1][1]
-    y1,x1 = pts[minci][0],pts[minci][1]
+  #if minciUp>0: 
+  if minciUp!=minciDown: 
+    y0,x0 = pts[minciUp][0],pts[minciUp][1]
+    y1,x1 = pts[minciDown][0],pts[minciDown][1]
+    #print "x0, y0", x0, " ", y0
+    #print "x1, y1", x1, " ", y1
     min = y0+((cl-x0)*y1 - (cl-x0)*y0)/(x1-x0)
     
-  if maxci<len(crossbound)-1: 
-    y0,x0 = pts[maxci][0],pts[maxci][1]
-    y1,x1 = pts[maxci+1][0],pts[maxci+1][1]
+  #if maxciDown<len(crossbound)-1: 
+  if maxciDown!=maxciUp: 
+    y0,x0 = pts[maxciUp][0],pts[maxciUp][1]
+    y1,x1 = pts[maxciDown][0],pts[maxciDown][1]
+    #print "x0, y0", x0, " ", y0
+    #print "x1, y1", x1, " ", y1
     max = y0+((cl-x0)*y1 - (cl-x0)*y0)/(x1-x0)
   
-  print min, max
+  #print min, max
   if min > max :
+    print "switch min ", min," and max ", max
     tmp = min
     min = max
     max =tmp
@@ -738,8 +746,6 @@ def plot1DNLL(returnErrors=False,xvar="", ext=""):
     xtitle = 'm_{H} (GeV)'
   elif options.method=='mu':
     x = 'r'
-    print 'debug x ', x
-    print 'debug xvar ', xvar
     #xtitle = '#sigma / #sigma_{SM}'
     xtitle = '#mu'
     if options.xlab: 
@@ -797,9 +803,7 @@ def plot1DNLL(returnErrors=False,xvar="", ext=""):
     if options.cleanNll: rfix = cleanSpikes1D(rfix)
 
     res = rfix[:] 
-
     minNLL = min([re[1] for re in res])
-
     for re in res: 
       if options.correctNLL and re[1]==0.: re[1]=-1
       re[1]-=minNLL
@@ -839,7 +843,6 @@ def plot1DNLL(returnErrors=False,xvar="", ext=""):
       clean_graphs.append(gr)
 
     
-    print "LC DEBUG best fit at ", lcmu_bestfit , " and mH " , lcMH_bestfit 
     xmin = m
     xmun_m = m
     eplus = h-m
@@ -968,7 +971,6 @@ def plot2DNLL(xvar="RF",yvar="RV",xtitle="#mu_{ggH+ttH}",ytitle="#mu_{qqH+VH}"):
       ymax = tree.GetMaximum(yvar)
 
     if options.get2dhist:
-      print "DEBUG 2d  get2dhist"
       extfile = r.TFile(options.get2dhist)
       mems.append(extfile)
       th2f = extfile.Get('%s'%th2nameinfile).Clone();
@@ -979,8 +981,7 @@ def plot2DNLL(xvar="RF",yvar="RV",xtitle="#mu_{ggH+ttH}",ytitle="#mu_{qqH+VH}"):
            th2.SetBinContent(bi,bj,th2f.GetBinContent(bi,bj))
       tf.cd()
     else:
-        print "DEBUG 2d not get2dhist"
-        print "tree.Draw(\"%s>>h%d%s(10000,%1.4f,%1.4f\")"%(xvar,fi,xvar,xmin,xmax),",\"deltaNLL>0.\",\"goff\")"
+        #print "tree.Draw(\"%s>>h%d%s(10000,%1.4f,%1.4f\")"%(xvar,fi,xvar,xmin,xmax),",\"deltaNLL>0.\",\"goff\")"
         tree.Draw("%s>>h%d%s(10000,%1.4f,%1.4f)"%(xvar,fi,xvar,xmin,xmax),"deltaNLL>0.","goff")
         tempX = r.gROOT.FindObject('h%d%s'%(fi,xvar))
         tree.Draw("%s>>h%d%s(10000,%1.4f,%1.4f)"%(yvar,fi,yvar,ymin,ymax),"deltaNLL>0.","goff")
@@ -1034,7 +1035,7 @@ def plot2DNLL(xvar="RF",yvar="RV",xtitle="#mu_{ggH+ttH}",ytitle="#mu_{qqH+VH}"):
         th2.GetYaxis().SetRangeUser(ymin,ymax)
     
     ############## Simple spike killer ##########
-    print " DEBUG spike killer"
+    print " Begin Spike killer"
     prevBin=-999
     for j in range (0,th2.GetNbinsY()):
       for i in range (0,th2.GetNbinsX()):
@@ -1043,14 +1044,11 @@ def plot2DNLL(xvar="RF",yvar="RV",xtitle="#mu_{ggH+ttH}",ytitle="#mu_{qqH+VH}"):
         thisBin = th2.GetBinContent(i,j)
         fracChange= abs(prevBin - thisBin)/prevBin
         if  fracChange > 10 and i!=0 and j!=0:
-          print " **DEBUG bin x=", i , " y=",j," have ", th2.GetBinContent(i,j)
           newContent = 0.5 * (th2.GetBinContent(i-1,j)+ th2.GetBinContent(i+1,j))
           th2.SetBinContent(i,j,newContent)
           factor=newContent/th2.GetBinContent(i,j) 
           th2.SetBinContent(i,j,newContent*factor)
-          print " ** --> set to  th2.GetBinContent(i,j),", th2.GetBinContent(i,j)  
         else:
-          print " DEBUG bin x=", i , " y=",j," have ", th2.GetBinContent(i,j)
         prevBin= th2.GetBinContent(i,j)
     ############## Simple spike killer ##########
 
@@ -1075,7 +1073,8 @@ def plot2DNLL(xvar="RF",yvar="RV",xtitle="#mu_{ggH+ttH}",ytitle="#mu_{qqH+VH}"):
      for ev in range(tree.GetEntries()):
       tree.GetEntry(ev)
       if tree.deltaNLL<0: continue
-      if abs(tree.deltaNLL -2.3*0.5) <0.1 : 
+      #if abs(tree.deltaNLL -2.3*0.5) <0.1 : 
+      if abs(tree.deltaNLL -1*0.5) <0.05 : 
         contourPointsX.append(getattr(tree,xvar))
         contourPointsY.append(getattr(tree,yvar))
         contourPointsZ.append((tree.deltaNLL))
@@ -1239,7 +1238,6 @@ def plot2DNLL(xvar="RF",yvar="RV",xtitle="#mu_{ggH+ttH}",ytitle="#mu_{qqH+VH}"):
   # Now the main one
   #canv.Clear()
   for fi in range(len(options.files)):
-    print "HMM ok "
     th2 = COLgrs[fi]
     gBF = BFgrs[fi]
     cont_1sig = CONT1grs[fi]
@@ -1313,7 +1311,7 @@ def plotMPdfChComp():
     ps = plot1DNLL(True,options.xvar[k],ext) #return the  uncertainties
     cache=options.outname
     options.outname=options.outname+"_debug_"+catName.replace(" ","_")
-    print "CATNAME " , catName, " -- > ", ps
+    #print "CATNAME " , catName, " -- > ", ps
     plot1DNLL(False,options.xvar[k],ext) #print debug plot
     options.outname=cache
     ps.insert(0,options.names[k])
@@ -1332,7 +1330,7 @@ def plotMPdfChComp():
 
   r.gROOT.SetBatch(options.batch)
   for point in points:
-    print point 
+    #print point 
     if options.do1sig:
       if point[1]+point[2]>rMax: rMax=point[1]+point[2]
       if point[1]-point[3]<rMin: rMin=point[1]-point[3]
@@ -1432,7 +1430,6 @@ def plotMPdfChComp():
     if "Dummy" in catNames[p]: 
       skipFlag=1
       catNames[p]=""
-    print "DEBUG cat " , catNames[p], " pcen ", pcen ,", ppoint ", ppoint , " rMin ", rMin , " r Max " , rMax
     if options.chcompShift: ppoint = options.chcompShift
     if options.noComb : pcen = 1.
     chierr = 0
@@ -1523,7 +1520,7 @@ def plotMPdfChComp():
   lat2.DrawLatex(0.57,0.50,"m_{H} = 125.09 GeV")
 
   for gr in range(options.groups):
-    print gr
+    #print gr
     if not options.do1sig: catGraph2sig[gr].Draw("EPsame")
     catGraph1sig[gr].Draw("EPsame")
 
@@ -1542,7 +1539,6 @@ def plotMPdfChComp():
     label2.SetTextAngle(90)
     label1.Draw("same")
     label2.Draw("same")
-  print "DEBUG notfitline ", nofitlines
   for tmp in nofitlines: tmp.Draw()
   if options.groups>1 or not options.noComb: leg.Draw("same")
   
@@ -1595,21 +1591,18 @@ def plotMPdfMaxLH():
     if skippoint: continue
     options.method = 'mu'
     r.gROOT.SetBatch()
-    print "debug plot1DNLL(True,options.xvar[k]) ", 'plot1DNLL(True,%s)'%options.xvar[k]
+    #print "debug plot1DNLL(True,options.xvar[k]) ", 'plot1DNLL(True,%s)'%options.xvar[k]
     ps = plot1DNLL(True,options.xvar[k])
     catName=loffiles[0].split("/")[-1].replace(".root","").replace("_13TeV","")
     cache=options.outname
     options.outname=options.outname+"_debug_"+catName
     cachexaxis = options.xaxis
     cacheyaxis = options.yaxis
-    print "DEBUG x ", options.xaxis , " y ", options.yaxis 
     options.xaxis=None
     options.yaxis=None
-    print "DEBUG x ", options.xaxis , " y ", options.yaxis 
     plot1DNLL(False,"r")
     options.xaxis=cachexaxis
     options.yaxis=cacheyaxis
-    print "DEBUG x ", options.xaxis , " y ", options.yaxis 
     ps.insert(0,mh)
     points.append(ps)
     k+=1
@@ -1658,9 +1651,7 @@ def plotMPdfMaxLH():
 
   dummyHist.GetYaxis().SetRangeUser(twoSigma.GetMinimum(),twoSigma.GetMaximum())
 
-  print "DEBUG A x ", options.xaxis , " y ", options.yaxis 
   if options.xaxis: 
-    print "LC DEBUG A.0 float(options.xaxis[0]) " , float(options.xaxis[0]), " float(options.xaxis[1]) ", float(options.xaxis[1])
     dummyHist.GetXaxis().SetRangeUser(float(options.xaxis[0]),float(options.xaxis[1]))
   if options.yaxis: dummyHist.GetYaxis().SetRangeUser(float(options.yaxis.split(',')[0]),float(options.yaxis.split(',')[1]))
 
@@ -1671,7 +1662,6 @@ def plotMPdfMaxLH():
   if options.xaxis:
         axmin = float(options.xaxis[0])
         axmax = float(options.xaxis[1])
-        print "DEBUG B amix ", axmin , " axmax " , axmax
   else:
     axmin = 115
     axmax = 135
@@ -1771,10 +1761,10 @@ if options.datfile:
     config={}
     line = line.replace('\=','EQUALS')
     for opt in line.split(':'):
-      print opt.split('=')[0]
+      #print opt.split('=')[0]
       config[opt.split('=')[0]] = opt.split('=')[1].replace('EQUALS','=').strip('\n').split(',')
       #print line 
-      print opt.split('=')[0], " " , opt.split('=')[1].replace('EQUALS','=').strip('\n').split(',')  
+      #print opt.split('=')[0], " " , opt.split('=')[1].replace('EQUALS','=').strip('\n').split(',')  
     for opt in ['colors','styles','widths']:
       if opt in config.keys():
         config[opt] = [int(x) for x in config[opt]]
@@ -1782,7 +1772,6 @@ if options.datfile:
     for key, item in config.items():
       if len(item)==1 and key in ['method','text','outname','legend','yaxis','xaxis']:
         item=item[0].strip('\n')
-      print "DEBUG key " , key, " item ", item
       setattr(options,key,item)
 
     if options.verbose: print options

@@ -75,15 +75,11 @@ void runFit(RooAbsPdf *pdf, RooDataSet *data, double *NLL, int *stat_t, int MaxT
 
 	int ntries=0;
   	RooArgSet *params_test = pdf->getParameters((const RooArgSet*)(0));
-	//std::cout << " BEFORE ITERATIONS-------------------------------" << std::endl;
 	//params_test->Print("v");
 	int stat=1;
 	double minnll=10e8;
 	while (stat!=0){
 	  if (ntries>=MaxTries) break;
-	  //std::cout << "----------------------------- BEFORE FIT-------------------------------" << std::endl;
-	  //params_test->Print("v");
-	  //std::cout << "-----------------------------------------------------------------------" << std::endl;
 	  RooFitResult *fitTest = pdf->fitTo(*data,RooFit::Save(1)
     ,RooFit::Minimizer("Minuit2","minimize"),RooFit::SumW2Error(kTRUE)); //FIXME
           stat = fitTest->status();
@@ -463,9 +459,7 @@ int getBestFitFunction(RooMultiPdf *bkg, RooDataSet *data, RooCategory *cat, boo
 	params->snapshot(snap);
 	params->snapshot(clean);
 	if (!silent) {
-		std::cout << "[INFO] CLEAN SET OF PARAMETERS" << std::endl;
 		//params->Print("V");
-		std::cout << "-----------------------" << std::endl;
 	}
 	
 	//bkg->setDirtyInhibit(1);
@@ -652,60 +646,6 @@ vector<string> flashggCats_;
 	namingMap.insert(pair<string,string>("Exponential","exp"));
 	namingMap.insert(pair<string,string>("PowerLaw","pow"));
 	namingMap.insert(pair<string,string>("Laurent","lau"));
-	vector<pair<string,int> > fabChoice;
-	if (is2011) {
-		fabChoice.push_back(pair<string,int>("Bernstein",4));
-		fabChoice.push_back(pair<string,int>("Bernstein",5));
-		fabChoice.push_back(pair<string,int>("Bernstein",5));
-		fabChoice.push_back(pair<string,int>("Bernstein",5));
-		fabChoice.push_back(pair<string,int>("Bernstein",3));
-		fabChoice.push_back(pair<string,int>("Bernstein",3));
-		fabChoice.push_back(pair<string,int>("Bernstein",3));
-		fabChoice.push_back(pair<string,int>("Bernstein",3));
-		fabChoice.push_back(pair<string,int>("Bernstein",3));
-		fabChoice.push_back(pair<string,int>("Bernstein",3));
-		fabChoice.push_back(pair<string,int>("Bernstein",3));
-		fabChoice.push_back(pair<string,int>("Bernstein",3));
-		fabChoice.push_back(pair<string,int>("Bernstein",3));
-		fabChoice.push_back(pair<string,int>("Bernstein",3));
-		fabChoice.push_back(pair<string,int>("Bernstein",3));
-		fabChoice.push_back(pair<string,int>("Bernstein",3));
-		fabChoice.push_back(pair<string,int>("Bernstein",3));
-		fabChoice.push_back(pair<string,int>("Bernstein",3));
-		fabChoice.push_back(pair<string,int>("Bernstein",3));
-		fabChoice.push_back(pair<string,int>("Bernstein",3));
-		fabChoice.push_back(pair<string,int>("Bernstein",3));
-		fabChoice.push_back(pair<string,int>("Bernstein",3));
-		fabChoice.push_back(pair<string,int>("Bernstein",3));
-	}
-	else {
-		fabChoice.push_back(pair<string,int>("Bernstein",5));
-		fabChoice.push_back(pair<string,int>("Bernstein",5));
-		fabChoice.push_back(pair<string,int>("Bernstein",5));
-		fabChoice.push_back(pair<string,int>("Bernstein",5));
-		fabChoice.push_back(pair<string,int>("Bernstein",4));
-		fabChoice.push_back(pair<string,int>("Bernstein",4));
-		fabChoice.push_back(pair<string,int>("Bernstein",3));
-		fabChoice.push_back(pair<string,int>("Bernstein",3));
-		fabChoice.push_back(pair<string,int>("Bernstein",3));
-		fabChoice.push_back(pair<string,int>("Bernstein",5));
-		fabChoice.push_back(pair<string,int>("Bernstein",5));
-		fabChoice.push_back(pair<string,int>("Bernstein",5));
-		fabChoice.push_back(pair<string,int>("Bernstein",5));
-		fabChoice.push_back(pair<string,int>("Bernstein",4));
-		fabChoice.push_back(pair<string,int>("Bernstein",4));
-		fabChoice.push_back(pair<string,int>("Bernstein",3));
-		fabChoice.push_back(pair<string,int>("Bernstein",3));
-		fabChoice.push_back(pair<string,int>("Bernstein",3));
-		fabChoice.push_back(pair<string,int>("Bernstein",3));
-		fabChoice.push_back(pair<string,int>("Bernstein",3));
-		fabChoice.push_back(pair<string,int>("Bernstein",3));
-		fabChoice.push_back(pair<string,int>("Bernstein",3));
-		fabChoice.push_back(pair<string,int>("Bernstein",3));
-		fabChoice.push_back(pair<string,int>("Bernstein",3));
-		fabChoice.push_back(pair<string,int>("Bernstein",3));
-		fabChoice.push_back(pair<string,int>("Bernstein",3));
-	}
 
 	// store results here
 
@@ -967,8 +907,6 @@ vector<string> flashggCats_;
 				cout << "\t" << it->first << " - " << it->second << endl;
 				fprintf(dfile,"truth=%s:%d:%s%d\n",it->first.c_str(),it->second,namingMap[it->first].c_str(),it->second);
 			}
-			fprintf(dfile,"fabian=%s:%d:%s%d\n",fabChoice[cat-startingCategory].first.c_str()
-					,fabChoice[cat-startingCategory].second,namingMap[fabChoice[cat-startingCategory].first].c_str(),fabChoice[cat-startingCategory].second);
 			for (map<string,std::vector<int> >::iterator it=choices_envelope_vec[cat-startingCategory].begin(); it!=choices_envelope_vec[cat-startingCategory].end(); it++){
 				std::vector<int> ords = it->second;
 				for (std::vector<int>::iterator ordit=ords.begin(); ordit!=ords.end(); ordit++){

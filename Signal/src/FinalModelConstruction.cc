@@ -52,7 +52,6 @@ FinalModelConstruction::FinalModelConstruction(RooRealVar *massVar, RooRealVar *
   isProblemCategory_(isProblemCategory),
   doSecondaryModels(doSecMods),
   isCutBased_(isCB),
-	//is2011_(is2011),
 	sqrts_(sqrts),
 	quadraticSigmaSum_(quadraticSigmaSum),
 	skipMasses_(skipMasses),
@@ -127,15 +126,6 @@ void FinalModelConstruction::addToSystematicsList(vector<string>::iterator begin
 
 void FinalModelConstruction::addToSystematicsList(vector<string> systs){
 	addToSystematicsList( systs.begin(), systs.end() );
-	/// for (vector<string>::iterator it=systs.begin(); it!=systs.end(); it++){
-	/// 	if (find(systematicsList.begin(),systematicsList.end(),*it)!=systematicsList.end()) {
-	/// 		cout << "ERROR - duplicate systematic names! " << *it << " already found in systematics list." << endl;
-	/// 		exit(1);
-	/// 	}
-	/// 	else {
-	/// 		systematicsList.push_back(*it);
-	/// 	}
-	/// }
 }
 
 bool FinalModelConstruction::isGlobalSyst(string name){
@@ -528,8 +518,6 @@ void FinalModelConstruction::setSecondaryModelVars(RooRealVar *mh_sm, RooRealVar
 	brSpline_2 = graphToSpline(Form("fbr_%dTeV_2",sqrts_),brGraph,MH_2);
 	brSpline_NW = graphToSpline(Form("fbr_%dTeV_NW",sqrts_),brGraph,MH);
   
-	//string procs[8] = {"ggh","vbf","wzh","wh","zh","tth","gg_grav","qq_grav"};
-	//string procs[2] = {"ggH","VBF"};//,"wzh","wh","zh","tth","gg_grav","qq_grav"};//FIXME
   for (unsigned int i=0; i<procs_.size(); i++){
     TGraph *xsGraph = norm->GetSigmaGraph(procs_[i].c_str());
     RooSpline1D *xsSpline_SM = graphToSpline(Form("fxs_%s_%dTeV_SM",procs_[i].c_str(),sqrts_),xsGraph,MH_SM);
@@ -568,22 +556,11 @@ void FinalModelConstruction::getRvFractionFunc(string name){
     if (verbosity_) std::cout << "[INFO] RV/WV fraction for datasets " << *(rvDatasets[mh]) << " and " << *(wvDatasets[mh]) << " --- " << rvF << std::endl;
   }
 
-  //draw a debug/validation plot (now use the version below instead)
-  //TCanvas *c = new TCanvas("rvF","rvF",500,500);
-  //temp->SetTitle("right vertex fraction");
-  //temp->SetMinimum(0.5);
-  //temp->SetMaximum(1.2);
-  //temp->Draw();
   temp->Fit(pol);
-  //pol->Draw();
-  //c->Print(Form("%s/%s_%s_rvF_fit_to_pol2.png",outDir_.c_str(),proc_.c_str(),cat_.c_str()));
-  //c->Print(Form("%s/%s_%s_rvF_fit_to_pol2.pdf",outDir_.c_str(),proc_.c_str(),cat_.c_str()));
- 
+  
   //turn this fit to rvFrac into a spline.
   TGraph *rvFGraph = new TGraph(pol);
   rvFracFunc = graphToSpline(name.c_str(),rvFGraph);
-
-  //rvFracFunc = new RooSpline1D(name.c_str(),name.c_str(),*MH,mhValues.size(),&(mhValues[0]),&(rvFracValues[0]));
   
   //draw a debug/validation plot
   TMultiGraph *MG_rvFrac = new TMultiGraph();
@@ -687,7 +664,6 @@ RooAbsReal* FinalModelConstruction::getSigmaWithPhotonSyst(RooAbsReal *sig_fit, 
 	if (sqrts_==8 || sqrts_==7) catname=Form("cat%s",cat_.c_str());
 	if (sqrts_ ==13) catname = Form("%s",cat_.c_str());
   
-
 	string formula="@0*";
 	RooArgList *dependents = new RooArgList();
 	dependents->add(*sig_fit); // sig_fit sits at @0

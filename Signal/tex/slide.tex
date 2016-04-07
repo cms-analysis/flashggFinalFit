@@ -1,0 +1,34 @@
+\begin{frame}{!TITLE!}
+\begin{figure}
+\begin{center}
+%RV Initial Fits (replacement if needed)
+\IfFileExists{!NAMEEXT!/sigfit/initialFits/!NAME!_rv.pdf}{\includegraphics[width=0.25\textwidth]{!NAMEEXT!/sigfit/initialFits/!NAME!_rv.pdf}}{}
+%WV Initial Fits (replacement if neeed)
+\IfFileExists{!NAMEEXT!/sigfit/initialFits/!NAME!_wv.pdf}{\includegraphics[width=0.25\textwidth]{!NAMEEXT!/sigfit/initialFits/!NAME!_wv.pdf}}{}
+%Combined Fits
+%Fit
+\IfFileExists{!NAMEEXT!/sigfit/!NAME!_fits.pdf}{\includegraphics[width=0.2\textwidth]{!NAMEEXT!/sigfit/!NAME!_fits.pdf}}{}
+%Interpolation
+%Interp
+\IfFileExists{!NAMEEXT!/sigfit/!NAME!_interp.pdf}{\includegraphics[width=0.3\textwidth]{!NAMEEXT!/sigfit/!NAME!_interp.pdf}}{}
+\end{center}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+%\IfFileExists{!NAMEEXT!/sigfit/effAccCheck_!NAME!.pdf}{\includegraphics[width=0.25\textwidth]{!NAMEEXT!/sigfit/effAccCheck_!NAME!.pdf}}{}
+%RV interpolation of dm, sigma and fractions
+\IfFileExists{!NAMEEXT!/sigfit/!NAME!__rv_13TeV_interpolation_debug.pdf}{\includegraphics[width=0.3\textwidth]{!NAMEEXT!/sigfit/!NAME!__rv_13TeV_interpolation_debug.pdf}}{}
+%WV interpolation of dm, sigma and fractions
+\IfFileExists{!NAMEEXT!/sigfit/!NAME!__wv_13TeV_interpolation_debug.pdf}{\includegraphics[width=0.3\textwidth]{!NAMEEXT!/sigfit/!NAME!__wv_13TeV_interpolation_debug.pdf}}{}
+%Fitting fractions to line
+%rvFrac
+\IfFileExists{!NAMEEXT!/sigfit/!NAME!_rvFrac_debug.pdf}{\includegraphics[width=0.2\textwidth]{!NAMEEXT!/sigfit/!NAME!_rvFrac_debug.pdf}}{}
+%fitting e*a to line
+%eff x acc
+\IfFileExists{!NAMEEXT!/sigfit/!NAME!_ea_fit_to_pol2.pdf}{\includegraphics[width=0.2\textwidth]{!NAMEEXT!/sigfit/!NAME!_ea_fit_to_pol2.pdf}}{}
+\label{fig:!NAME!}
+\end{center}
+\end{figure}
+
+\end{frame}

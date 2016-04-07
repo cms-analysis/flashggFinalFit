@@ -601,11 +601,9 @@ int main(int argc, char *argv[]){
           
           int thisProcCatIndex = getIndexOfReferenceDataset(proc,cat);
           
-           std::cout << "[DEBUG] index of this proc,cat  " << thisProcCatIndex << std::endl;
           string replancementProc = map_replacement_proc_[thisProcCatIndex];
           string replancementCat = map_replacement_cat_[thisProcCatIndex];
           int replacementIndex = getIndexOfReferenceDataset(replancementProc,replancementCat);
-           std::cout << "[DEBUG] index of this proc,cat  " << replacementIndex<< std::endl;
           nGaussiansRV= map_nG_rv_[replacementIndex]; // if ==-1, want it to stay that way!
           std::cout << "[INFO] try to use  dataset for " << replancementProc << ", " << replancementCat << " instead."<< std::endl;
           
@@ -698,7 +696,6 @@ int main(int argc, char *argv[]){
         check = name.ReplaceAll(TString(Form("%d",it->first)),TString(""));
        } else {
        TString name=it->second->GetName();
-       std::cout << "DEBUG check " << check << " compare to  name " << name << " name.ReplaceAll(TString(Form(,it->first)),TString("")) " << name.ReplaceAll(TString(Form("%d",it->first)),TString("")) << std::endl; 
        assert (check ==name.ReplaceAll(TString(Form("%d",it->first)),TString("")) );
        }
     }
@@ -839,5 +836,7 @@ int main(int argc, char *argv[]){
   cout << "[INFO] Done." << endl;
  
 
+  cout << "[INFO] Done2." << endl;
   return 0;
+  cout << "[INFO] Done3." << endl;
 }
