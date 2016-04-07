@@ -16,8 +16,7 @@ int Normalization_8TeV::Init(int sqrtS){
 	 if (globeRt !=0){
 	 globeRt = globeRt+"/src/flashggFinalFit/Signal";
 	 }
-	// std::cout <<" globeRt " << globeRt<< std::endl;
-	 std::cout << " Form " << Form("buildSMHiggsSignalXSBR = imp.load_source('*', '%s/python/buildSMHiggsSignalXSBR.py')",globeRt.c_str()) << std::endl;
+	// std::cout << " Form " << Form("buildSMHiggsSignalXSBR = imp.load_source('*', '%s/python/buildSMHiggsSignalXSBR.py')",globeRt.c_str()) << std::endl;
     if( ! TPython::Exec(Form("buildSMHiggsSignalXSBR = imp.load_source('*', '%s/python/buildSMHiggsSignalXSBR.py')",globeRt.c_str())) ) {
 	     std::cout<<  "[ERROR] Importing buildSMHiggsSignalXSBR from python failed. exit." << std::endl;
 			return 0;
@@ -31,7 +30,6 @@ int Normalization_8TeV::Init(int sqrtS){
 	double valXSttH =  (double)TPython::Eval(Form("buildSMHiggsSignalXSBR.getXS(%f,'%s')",mH,"ttH"));
 	double valXSWH  =  (double)TPython::Eval(Form("buildSMHiggsSignalXSBR.getXS(%f,'%s')",mH,"WH"));
 	double valXSZH  =  (double)TPython::Eval(Form("buildSMHiggsSignalXSBR.getXS(%f,'%s')",mH,"ZH"));
-  //std::cout << "DEBUG NORMALIZATION8TEV (for 13TEV) -- mh " << mH << " BR " << valBR  << " valXSggH " << valXSggH << " valXSqqH " << valXSqqH << " valXSttH " << valXSttH << " valXSWH " << valXSWH << " valXSZH " << valXSZH <<std::endl;
 	BranchingRatioMap[mH]	= valBR;
         XSectionMap_ggh[mH]	= valXSggH; 	
         XSectionMap_vbf[mH]	= valXSqqH; 	
@@ -286,20 +284,6 @@ double Normalization_8TeV::GetMass(int ty){
 	}	 
 	else return SignalTypeMap[ty].second;
 }
-//// double Normalization_8TeV::GetXsection(int ty){
-////   std::pair<TString,double> proc_mass = SignalTypeMap[ty];
-////   // if "grav" in name then return all processes xs*br
-////   if (proc_mass.first.Contains("grav")) {
-////     return GetXsection(proc_mass.second);
-////   }
-////   else {
-////     return GetXsection(proc_mass.second,proc_mass.first);
-////   }
-//// }
-//// double Normalization_8TeV::GetBR(int ty){
-////   std::pair<TString,double> proc_mass = SignalTypeMap[ty];
-////   return GetBR(proc_mass.second);
-//// }
 
 double Normalization_8TeV::GetXsection(double mass) {
 	return GetXsection(mass,"ggh") + GetXsection(mass,"vbf") + GetXsection(mass,"wzh") + GetXsection(mass,"tth");
@@ -320,11 +304,6 @@ double Normalization_8TeV::GetNorm(double mass1, TH1F* hist1, double mass2, TH1F
 	double effAcc2 = hist2->Integral()/(xsec2*br2);
 
 	double Normalization = (xsec*br)*(effAcc1 + alpha * (effAcc2 - effAcc1));
-
-	/// std::cout << mass1 << " " << hist1->GetName() << " " << mass2 << " " << hist2->GetName() << " " << mass 
-	/// 	    << br << " " << br1 << " " << br2 << " " << xsec << " " << xsec1 << " " << xsec2 << " " << alpha << " " 
-	/// 	    << effAcc1 << " " << effAcc2 << " " << Normalization << std::endl;
-
 
 	return Normalization;
 

@@ -17,7 +17,6 @@
 using namespace std;
 using namespace RooFit;
 
-//Packager::Packager(RooWorkspace *ws, vector<string> procs, int nCats, int mhLow, int mhHigh, vector<int> skipMasses, int sqrts, bool skipPlots, string outDir, 
 Packager::Packager(WSTFileWrapper *ws, RooWorkspace *wsSave  , vector<string> procs, int nCats, int mhLow, int mhHigh, vector<int> skipMasses, int sqrts, bool skipPlots, string outDir, 
 		   RooWorkspace *wsMerge, const vector<int>& cats, const vector<string>& flashggCats):
   WS(ws),

@@ -346,17 +346,12 @@ vector<TH1F*> getHistograms(vector<TFile*> files, string name, string syst){
 			TH1F *up =  new TH1F(Form("%s_%sUp01sigma",name.c_str(),syst.c_str()),Form("%s_%sUp01sigma",name.c_str(),syst.c_str()),80,100,180);
 			TH1F *down = new TH1F(Form("%s_%sDown01sigma",name.c_str(),syst.c_str()),Form("%s_%sDown01sigma",name.c_str(),syst.c_str()),80,100,180);
 			TH1F *nominal = new TH1F((Form("%s_%s",name.c_str(),syst.c_str())),(Form("%s%s",name.c_str(),syst.c_str())),80,100,180);
-			//RooWorkspace *inWS;
-			//	RooRealVar *mass = (RooRealVar*)inWS->var("CMS_hgg_mass");
-			//		RooRealVar *mass = new RooRealVar("CMS_hgg_mass","CMS_hgg_mass",125);
-			//inWS = (RooWorkspace*)files[i]->Get("tagsDumper/cms_hgg_13TeV");
 			RooDataSet *rds_up = (RooDataSet*) inWS_->data((Form("%s_%sUp01sigma",name.c_str(),syst.c_str())));
 			RooDataSet *rds_down = (RooDataSet*) inWS_->data((Form("%s_%sDown01sigma",name.c_str(),syst.c_str())));
 			RooDataSet *rds_nom = (RooDataSet*) inWS_->data((Form("%s",name.c_str())));
 				
 			RooDataHist *rds_up_h = (RooDataHist*) inWS_->data((Form("%s_%sUp01sigma",name.c_str(),syst.c_str())));
 			RooDataHist *rds_down_h = (RooDataHist*) inWS_->data((Form("%s_%sDown01sigma",name.c_str(),syst.c_str())));
-		//	RooDataHist *rds_nom_h = (RooDataSet*) inWS_->data((Form("%s",name.c_str())));
 
 			if(rds_up){
 				rds_up->fillHistogram(up,RooArgList(*mass_));

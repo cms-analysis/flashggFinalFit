@@ -114,7 +114,6 @@ map<string,RooDataSet*> getFlashggData(RooWorkspace *work, int ncats, int m_hyp)
 	map<string,RooDataSet*> result;
 
 	for (int cat=0; cat<ncats; cat++){
-	std::cout << "[DEBUG] getting dataset : " << Form("sig_mass_m%3d_%s",m_hyp,flashggCats_[cat].c_str()) << std::endl; 
 		result.insert(pair<string,RooDataSet*>(Form("%s",flashggCats_[cat].c_str()),(RooDataSet*)work->data(Form("sig_mass_m%3d_%s",m_hyp,flashggCats_[cat].c_str()))));
 	}
 	result.insert(pair<string,RooDataSet*>("all",(RooDataSet*)work->data(Form("sig_mass_m%3d_AllCats",m_hyp))));
@@ -128,7 +127,6 @@ map<string,RooDataSet*> getFlashggDataGranular(RooWorkspace *work, int ncats, in
 
 	for (int cat=0; cat<ncats; cat++){
     for (int proc=0; proc < procs_.size() ; proc++){
-	std::cout << "[DEBUG] getting dataset : " << Form("sig_%s_mass_m%3d_%s",procs_[proc].c_str(),m_hyp,flashggCats_[cat].c_str()) << std::endl; 
 		result.insert(pair<string,RooDataSet*>(Form("%s_%s",procs_[proc].c_str(),flashggCats_[cat].c_str()),(RooDataSet*)work->data(Form("sig_%s_mass_m%3d_%s",procs_[proc].c_str(),m_hyp,flashggCats_[cat].c_str()))));
     assert(work->data(Form("sig_%s_mass_m%3d_%s",procs_[proc].c_str(),m_hyp,flashggCats_[cat].c_str())));
 	  }
@@ -152,7 +150,6 @@ map<string,RooAddPdf*> getFlashggPdfs(RooWorkspace *work, int ncats){
 
 	map<string,RooAddPdf*> result;
 	for (int cat=0; cat<ncats; cat++){
-	std::cout << "[DEBUG] getting dataset : " << (RooAddPdf*)work->pdf(Form("sigpdfrel%s_    allProcs",flashggCats_[cat].c_str()))<< std::endl; 
 		result.insert(pair<string,RooAddPdf*>(Form("%s",flashggCats_[cat].c_str()),(RooAddPdf*)work->pdf(Form("sigpdfrel%s_allProcs",flashggCats_[cat].c_str()))));
 	}
 	result.insert(pair<string,RooAddPdf*>("all",(RooAddPdf*)work->pdf("sigpdfrelAllCats_allProcs")));
@@ -165,7 +162,6 @@ map<string,RooAddPdf*> getFlashggPdfsGranular(RooWorkspace *work, int ncats){
 	map<string,RooAddPdf*> result;
 	for (int cat=0; cat<ncats; cat++){
     for (int proc=0; proc< procs_.size() ; proc++){
-	std::cout << "[DEBUG] getting dataset : " << (RooAddPdf*)work->pdf(Form("extendhggpdfsmrel_13TeV_%s_%sThisLumi",procs_[proc].c_str(),flashggCats_[cat].c_str()))<< std::endl; 
 		result.insert(pair<string,RooAddPdf*>(Form("%s_%s",procs_[proc].c_str(),flashggCats_[cat].c_str()),(RooAddPdf*)work->pdf((Form("extendhggpdfsmrel_13TeV_%s_%sThisLumi",procs_[proc].c_str(),flashggCats_[cat].c_str())))));
   assert(work->pdf((Form("extendhggpdfsmrel_13TeV_%s_%sThisLumi",procs_[proc].c_str(),flashggCats_[cat].c_str()))));
 	}
@@ -352,8 +348,8 @@ void performClosure(RooRealVar *mass, RooAbsPdf *pdf, RooDataSet *data, string c
 	copy->SetFillColor(kGray);
 
 	RooPlot *plot;
-	TCanvas *c = new TCanvas();
-  c->SetTickx(); c->SetTicky();
+	TCanvas *ca = new TCanvas();
+  ca->SetTickx(); ca->SetTicky();
 	if (data){
 		plot = (mass->frame(Bins(binning_),Range("higgsRange")));
 		plot->addTH1(h,"hist"); 
@@ -361,7 +357,7 @@ void performClosure(RooRealVar *mass, RooAbsPdf *pdf, RooDataSet *data, string c
 		if (data) data->plotOn(plot);
 		pdf->plotOn(plot,Normalization(h->Integral(),RooAbsReal::NumEvent),NormRange("higgsRange"),Range("higgsRange"),LineWidth(1),LineColor(kRed),LineStyle(kDashed));
 		plot->Draw();
-		c->Print(closurename.c_str());
+		ca->Print(closurename.c_str());
 	}
 	else {
 		plot = mass->frame(Bins(binning_),Range("higgsRange"));
@@ -371,10 +367,10 @@ void performClosure(RooRealVar *mass, RooAbsPdf *pdf, RooDataSet *data, string c
 		plot->Draw();
 		h->Draw("hist same");
 		copy->Draw("same f");
-		c->Print(closurename.c_str());
+		ca->Print(closurename.c_str());
 	}
 	cout << "IntH: [" << h->GetBinLowEdge(binLow) << "-" << h->GetBinLowEdge(binHigh+1) << "] Area = " << areaCov << endl;
-	delete c;
+	delete ca;
 	//  delete copy;
 	// delete h;
 	delete plot;
@@ -390,10 +386,8 @@ void Plot(RooRealVar *mass, RooDataSet *data, RooAbsPdf *pdf, pair<double,double
 	double binwidth=fwhmRange[3];
   vector<double> negWeightBins;
   vector<double> negWeightBinsValues;
-  std::cout << "DEBUG 1 Plot" << std::endl;
 	RooPlot *plot = mass->frame(Bins(binning_),Range("higgsRange"));
   plot->SetMinimum(0.0);
-  std::cout << "DEBUG 2 Plot" << std::endl;
   if (markNegativeBins_){
   TH1F *rdh = (TH1F*) data->createHistogram("CMS_hgg_mass",*mass,Binning(binning_,105,140));
   for(unsigned int iBin =0 ; iBin < rdh->GetNbinsX() ; iBin++){
@@ -407,14 +401,11 @@ void Plot(RooRealVar *mass, RooDataSet *data, RooAbsPdf *pdf, pair<double,double
   }
   }
   double offset =0.05;
-  std::cout << "DEBUG 3 Plot" << std::endl;
 	if (data) data->plotOn(plot,Invisible());
-  std::cout << "DEBUG 4 Plot" << std::endl;
 	pdf->plotOn(plot,NormRange("higgsRange"),Range(semin,semax),FillColor(19),DrawOption("F"),LineWidth(2),FillStyle(1001),VLines(),LineColor(15));
 	TObject *seffLeg = plot->getObject(int(plot->numItems()-1));
 	pdf->plotOn(plot,NormRange("higgsRange"),Range(semin,semax),LineColor(15),LineWidth(2),FillStyle(1001),VLines());
 	pdf->plotOn(plot,NormRange("higgsRange"),Range("higgsRange"),LineColor(kBlue),LineWidth(2),FillStyle(0));
-  std::cout << "DEBUG 5 Plot" << std::endl;
 	TObject *pdfLeg = plot->getObject(int(plot->numItems()-1));
 	if (data) data->plotOn(plot,MarkerStyle(kOpenSquare));
 	TObject *dataLeg = plot->getObject(int(plot->numItems()-1));
@@ -427,30 +418,17 @@ void Plot(RooRealVar *mass, RooDataSet *data, RooAbsPdf *pdf, pair<double,double
 	leg->AddEntry(pdfLeg,"#splitline{#bf{Parametric}}{#bf{model}}","l");
 	leg->AddEntry(seffLeg,Form("#bf{#sigma_{eff} = %1.2f GeV}",0.5*(semax-semin)),"fl");
   
-  std::cout << "DEBUG 6 Plot" << std::endl;
 	plot->GetXaxis()->SetNdivisions(509);
 	halfmax*=(plot->getFitRangeBinW()/binwidth);
 	TArrow *fwhmArrow = new TArrow(fwmin,halfmax,fwmax,halfmax,0.02,"<>");
 	fwhmArrow->SetLineWidth(2.);
 	TPaveText *fwhmText = new TPaveText(0.17+offset,0.3,0.45+offset,0.40,"brNDC");
 	fwhmText->SetFillColor(0);
-  std::cout << "DEBUG 7.1 Plot" << std::endl;
 	fwhmText->SetLineColor(kWhite);
-  std::cout << "DEBUG 7.2 Plot" << std::endl;
 	fwhmText->SetTextSize(0.037);
-  std::cout << "DEBUG 7.3 Plot" << std::endl;
 	fwhmText->AddText(Form("FWHM = %1.2f GeV",(fwmax-fwmin)));
-  std::cout << "DEBUG 7.4 Plot" << std::endl;
-  std::cout << "DEBUG 7.4.0 Plot data " << data << std::endl;
-  std::cout << "DEBUG 7.4.1 Plot data->GetName() " << data->GetName() << std::endl;
-  std::cout << "DEBUG 7.4.2 Plot mass->getVal() " << mass->getVal() << std::endl;
-  std::cout << "DEBUG 7.4.3 Plot 0.5*(semax-semin) "<< 0.5*(semax-semin) << std::endl;
-  std::cout << "DEBUG 7.4.4 Plot (fwmax-fwmin)/2.35 "<< (fwmax-fwmin)/2.35 << std::endl;
   std::cout << " [FOR TABLE] Tag " << data->GetName() << "=, Mass " << mass->getVal() << " sigmaEff=" << 0.5*(semax-semin) << "= , FWMH=" << (fwmax-fwmin)/2.35 << "=" << std::endl;
-  std::cout << "DEBUG 7.5 Plot" << std::endl;
   std::cout << " [RESOLUTION CHECK] Ta/Procg " << data->GetName() << ", Mass " << mass->getVal() << " sigmaEff=" << 0.5*(semax-semin) << " , FWMH=" << (fwmax-fwmin)/2.35 << "" << std::endl;
-  std::cout << "DEBUG 7.6 Plot" << std::endl;
-  std::cout << "DEBUG 8 Plot" << std::endl;
 
 	//TLatex lat1(0.65,0.85,"#splitline{CMS Simulation}{}");
   TLatex  lat1(.129+0.03+offset,0.85,"H#rightarrow#gamma#gamma");
@@ -470,8 +448,7 @@ void Plot(RooRealVar *mass, RooDataSet *data, RooAbsPdf *pdf, pair<double,double
 	lat2.SetNDC(1);
 	lat2.SetTextSize(0.045);
 
-  std::cout << "DEBUG 9 Plot" << std::endl;
-	TCanvas *canv = new TCanvas("c","c",650,600);
+	TCanvas *canv = new TCanvas("canv","canv",650,600);
   canv->SetLeftMargin(0.16);
   canv->SetTickx(); canv->SetTicky();
 	plot->SetTitle("");
@@ -496,14 +473,13 @@ void Plot(RooRealVar *mass, RooDataSet *data, RooAbsPdf *pdf, pair<double,double
   negBinsArrow->Draw("same <>");
 
   }
-  std::cout << "DEBUG 10 Plot" << std::endl;
-  CMS_lumi( canv, 0,0);
+  string sim="Simulation Preliminary";
+  CMS_lumi( canv, 0,0,sim);
 	canv->Print(Form("%s.pdf",savename.c_str()));
 	canv->Print(Form("%s.png",savename.c_str()));
-	string path = savename.substr(0,savename.find('/'));
-	canv->Print(Form("%s/animation.gif+100",path.c_str()));
+	//string path = savename.substr(0,savename.find('/'));
+	//canv->Print(Form("%s/animation.gif+100",path.c_str()));
 
-  std::cout << "DEBUG 11 Plot" << std::endl;
 	delete canv;
 
 }
@@ -522,8 +498,8 @@ int main(int argc, char *argv[]){
   
   setTDRStyle();
   writeExtraText = true;       // if extra text
-  extraText  = "Simulation Preliminary";  // default extra text is "Preliminary"
-  //lumi_13TeV  = "2.7 fb^{-1}"; // default is "19.7 fb^{-1}"
+  extraText  = "";  // default extra text is "Preliminary"
+  lumi_13TeV  = "2.7 fb^{-1}"; // default is "19.7 fb^{-1}"
   lumi_8TeV  = "19.1 fb^{-1}"; // default is "19.7 fb^{-1}"
   lumi_7TeV  = "4.9 fb^{-1}";  // default is "5.1 fb^{-1}"
   lumi_sqrtS = "13 TeV";       // used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
@@ -593,39 +569,22 @@ int main(int argc, char *argv[]){
 		Plot(mass,dataIt->second,pdfs[dataIt->first],thisSigRange,thisFWHMRange,dataIt->first,Form("%s/%s",outfilename_.c_str(),dataIt->first.c_str()));
 	}
 	
-  std::cout << "DEBUG Main 1" << std::endl;
   for (map<string,RooDataSet*>::iterator dataIt=dataSetsGranular.begin(); dataIt!=dataSetsGranular.end(); dataIt++){
-  std::cout << "DEBUG Main 2" << std::endl;
 		pair<double,double> thisSigRange = getEffSigma(mass,pdfsGranular[dataIt->first],m_hyp_-10.,m_hyp_+10.);
 		//pair<double,double> thisSigRange = getEffSigBinned(mass,pdf[dataIt->first],m_hyp_-10.,m_hyp_+10);
-  std::cout << "DEBUG Main 3" << std::endl;
 		vector<double> thisFWHMRange = getFWHM(mass,pdfsGranular[dataIt->first],dataIt->second,m_hyp_-10.,m_hyp_+10.);
-  std::cout << "DEBUG Main 4" << std::endl;
 		sigEffs.insert(pair<string,double>(dataIt->first,(thisSigRange.second-thisSigRange.first)/2.));
-  std::cout << "DEBUG Main 5" << std::endl;
 		fwhms.insert(pair<string,double>(dataIt->first,thisFWHMRange[1]-thisFWHMRange[0]));
-  std::cout << "DEBUG Main 6" << std::endl;
 		if (doCrossCheck_) performClosure(mass,pdfsGranular[dataIt->first],dataIt->second,Form("%s/closure_%s.pdf",outfilename_.c_str(),dataIt->first.c_str()),m_hyp_-10.,m_hyp_+10.,thisSigRange.first,thisSigRange.second);
 		Plot(mass,dataIt->second,pdfsGranular[dataIt->first],thisSigRange,thisFWHMRange,dataIt->first,Form("%s/%s",outfilename_.c_str(),dataIt->first.c_str()));
-  std::cout << "DEBUG Main 7" << std::endl;
 	}
-
-
 
 	map<string,pair<double,double> > bkgVals;
 	map<string,vector<double> > sigVals;
 	map<string,pair<double,double> > datVals;
 	map<string,double> sobVals;
 
-
 	hggFile->Close();
+
 }
-
-
-
-
-
-
-
-
 

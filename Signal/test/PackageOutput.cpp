@@ -138,20 +138,15 @@ int main (int argc, char *argv[]){
     //saveWS->import((inWS->allVars()),RecycleConflictNodes());
     //saveWS->import((inWS->allFunctions()),RecycleConflictNodes());
     for (int i=0 ; i < inWS->getWsList().size() ; i++){
-    std::cout << "DEBUG print workspace " << i << std::endl;
     inWS->getWsList()[i]->Print();
-    std::cout << "DEBUG test a" << i << std::endl;
     if (i==0) tmpWS = (RooWorkspace*) inWS->getWsList()[i]->Clone();
     if (!tmpWS){ std::cout << "EXIT" << std::endl;  exit(1);}
-    std::cout << "DEBUG test b" << i << std::endl;
     if (i !=0) {
     //tmpWS->merge(*(inWS->getWsList()[i]));
     tmpWS->import(inWS->getWsList()[i]->allVars(),RecycleConflictNodes());
     tmpWS->import(inWS->getWsList()[i]->allFunctions(),RecycleConflictNodes());
-    std::cout <<"DEBUG want to import these functions" << std::endl;
     inWS->getWsList()[i]->allFunctions().Print();
     tmpWS->import(inWS->getWsList()[i]->allPdfs(),RecycleConflictNodes());
-    std::cout <<"DEBUG want to import these pdfs" << std::endl;
     inWS->getWsList()[i]->allPdfs().Print();
     std::list<RooAbsData*> data =  (inWS->getWsList()[i]->allData()) ;
     for (std::list<RooAbsData*>::const_iterator iterator = data.begin(), end = data.end(); iterator != end; ++iterator )  {
@@ -163,11 +158,8 @@ int main (int argc, char *argv[]){
     } 
 
     };
-    std::cout << "DEBUG test c" << i << std::endl;
 
     }
-    std::cout << "DEBUG print tmpWS" << std::endl;
-    tmpWS->Print("V");
     WSTFileWrapper *mergedWS = new WSTFileWrapper(tmpWS); 
 
     saveWS->SetName("wsig_13TeV");

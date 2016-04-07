@@ -1,8 +1,6 @@
-#datacard=CMS-HGG_mva_13TeV_datacardHggAnalysis_110316.txt
+#complete set of jobs to submit, as used for Moriond 2016.
 datacard=CMS-HGG_mva_13TeV_datacard.txt
 files=CMS-HGG_sigfit_mva_ggh_TTHHadronicTag.root,CMS-HGG_sigfit_mva_ggh_TTHLeptonicTag.root,CMS-HGG_sigfit_mva_ggh_UntaggedTag_0.root,CMS-HGG_sigfit_mva_ggh_UntaggedTag_1.root,CMS-HGG_sigfit_mva_ggh_UntaggedTag_2.root,CMS-HGG_sigfit_mva_ggh_UntaggedTag_3.root,CMS-HGG_sigfit_mva_ggh_VBFTag_0.root,CMS-HGG_sigfit_mva_ggh_VBFTag_1.root,root,CMS-HGG_sigfit_mva_tth_TTHHadronicTag.root,CMS-HGG_sigfit_mva_tth_TTHLeptonicTag.root,CMS-HGG_sigfit_mva_tth_UntaggedTag_0.root,CMS-HGG_sigfit_mva_tth_UntaggedTag_1.root,CMS-HGG_sigfit_mva_tth_UntaggedTag_2.root,CMS-HGG_sigfit_mva_tth_UntaggedTag_3.root,CMS-HGG_sigfit_mva_tth_VBFTag_0.root,CMS-HGG_sigfit_mva_tth_VBFTag_1.root,CMS-HGG_sigfit_mva_vbf_TTHHadronicTag.root,CMS-HGG_sigfit_mva_vbf_TTHLeptonicTag.root,CMS-HGG_sigfit_mva_vbf_UntaggedTag_0.root,CMS-HGG_sigfit_mva_vbf_UntaggedTag_1.root,CMS-HGG_sigfit_mva_vbf_UntaggedTag_2.root,CMS-HGG_sigfit_mva_vbf_UntaggedTag_3.root,CMS-HGG_sigfit_mva_vbf_VBFTag_0.root,CMS-HGG_sigfit_mva_vbf_VBFTag_1.root,CMS-HGG_sigfit_mva_wh_TTHHadronicTag.root,CMS-HGG_sigfit_mva_wh_TTHLeptonicTag.root,CMS-HGG_sigfit_mva_wh_UntaggedTag_0.root,CMS-HGG_sigfit_mva_wh_UntaggedTag_1.root,CMS-HGG_sigfit_mva_wh_UntaggedTag_2.root,CMS-HGG_sigfit_mva_wh_UntaggedTag_3.root,CMS-HGG_sigfit_mva_wh_VBFTag_0.root,CMS-HGG_sigfit_mva_wh_VBFTag_1.root,CMS-HGG_sigfit_mva_zh_TTHHadronicTag.root,CMS-HGG_sigfit_mva_zh_TTHLeptonicTag.root,CMS-HGG_sigfit_mva_zh_UntaggedTag_0.root,CMS-HGG_sigfit_mva_zh_UntaggedTag_1.root,CMS-HGG_sigfit_mva_zh_UntaggedTag_2.root,CMS-HGG_sigfit_mva_zh_UntaggedTag_3.root,CMS-HGG_sigfit_mva_zh_VBFTag_0.root,CMS-HGG_sigfit_mva_zh_VBFTag_1.root,CMS-HGG_mva_13TeV_multipdf.root
-#files=CMS-HGG_sigfit_HggAnalysis_110316.root,CMS-HGG_mva_13TeV_multipdf.root
-#files=CMS-HGG_mva_13TeV_sigfit.root,CMS-HGG_mva_13TeV_multipdf.root
 # mu scans
 outDir=combineJobs13TeV_HggAnalysis_110316/MuScanFixMH													method=MuScan	expected=0 mh=125.09 muLow=0. muHigh=2. jobs=5 pointsperjob=20 opts=--squareDistPoi
 outDir=combineJobs13TeV_HggAnalysis_110316/MuScanFloatMH									 method=MuScan	expected=0 mh=125.09:0.24 muLow=0. muHigh=2. jobs=5 pointsperjob=20 opts=--squareDistPoi
@@ -17,7 +15,6 @@ outDir=combineJobs13TeV_HggAnalysis_110316/MultiPdfChannelCompatibility/Untagged
 outDir=combineJobs13TeV_HggAnalysis_110316/MultiPdfChannelCompatibility/TTH													method=MuScan	expected=0 mh=125.09 muLow=-10. muHigh=10. jobs=1 pointsperjob=100 splitChannels=TTHLeptonicTag_13TeV,TTHHadronicTag_13TeV
 # Mu hat vs MH
 outDir=combineJobs13TeV_HggAnalysis_110316/MultiPdfMuHatvsMH											method=MultiPdfMuHatvsMH expected=0  mhLow=120. mhHigh=130.  muLow=-5. muHigh=5. pointsperjob=50 jobs=10  mhStep=0.5
-#outDir=combineJobs13TeV_HggAnalysis_110316/MultiPdfMuHatvsMH											method=MultiPdfMuHatvsMH expected=0  mhLow=120. mhHigh=130.  muLow=-5. muHigh=5. pointsperjob=20 jobs=2  mhStep=0.5
 
 # rv vs rf scnas
 outDir=combineJobs13TeV_HggAnalysis_110316/RVRFScanFixMH											method=RVRFScan expected=0 mh=125.09 rvLow=-3. rvHigh=10 rfLow=-2. rfHigh=3.5 jobs=100 pointsperjob=40 

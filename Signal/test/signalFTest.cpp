@@ -166,7 +166,7 @@ int main(int argc, char *argv[]){
   //make nice plots in ~correct style.
   setTDRStyle();
   writeExtraText = true;       // if extra text
-  extraText  = "Simulation Preliminary";  // default extra text is "Preliminary"
+  extraText  = "";  // default extra text is "Preliminary"
   lumi_8TeV  = "19.1 fb^{-1}"; // default is "19.7 fb^{-1}"
   lumi_7TeV  = "4.9 fb^{-1}";  // default is "5.1 fb^{-1}"
   lumi_sqrtS = "13 TeV";       // used with iPeriod = 0
@@ -341,8 +341,6 @@ int main(int argc, char *argv[]){
             }
         }
 
-        //std::cout<< "DEBUG ws before" << *data0 << std::endl;
-        //std::cout<< "DEBUG ws after" << *data << std::endl;
         //print out contents, if you want... 
 				if (verbose_) {
 					std::cout << "[INFO] Workspace contains : " << std::endl;
@@ -588,7 +586,7 @@ int main(int argc, char *argv[]){
 			plot->Draw();
 
       //make it a nice CMS style plot!
-      string sim="Simulation";
+      string sim="Simulation Preliminary";
       CMS_lumi( canv, 0, 0, sim ); // CMS prefer option 11 i
                                    //but out of frame (0) looks nicer!!!
 

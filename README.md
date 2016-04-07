@@ -1,5 +1,6 @@
 # FLASHgg Final Fits
-The Final Fits package is a series of scripts which are used to run the final stages of the CMS Hgg analysis. 
+The Final Fits package is a series of scripts which are used to run the final stages of the CMS Hgg analysis: signal modelling, background modelling, datacard creatipn and final statistical interpratation and final result plots.
+
 ## Download and setup instructions
 
 ```
@@ -26,7 +27,7 @@ cp -r data/XS/13TeV $CMSSW_BASE/src/HiggsAnalysis/CombinedLimit/data/lhc-hxswg/s
 
 ```
 
-Two packages need to be built with their own makefiles, if needed. Please note that there will be verbose warnings from BOOST etc:
+Two packages need to be built with their own makefiles, if needed. Please note that there will be verbose warnings from BOOST etc, which can be ignored. So long as the `make` commands finish without error, then the compilation happened fine.:
 
 ```
 cd ${CMSSW_BASE}/src/flashggFinalFit/Background
@@ -43,6 +44,7 @@ The FLASHgg Finals Fits package contains several subfolders which are used for t
 * Generate a Datacard (see `Datacard` dir)
 * Run `combine` and generate statistical interpretation plots. (see `Plots/FinalResults` dir)
 
+Each of the relevant folders are documented with specific `README.md` files.
 
 ## Quickstart
 
@@ -67,12 +69,12 @@ This script will run all parts of the analysis, and produce the output plots as 
 
 where type can be `sig` or `bkg`.
 
-Tou can run `./runFinalFitsScripts.sh -h` to check the available options.
+You can run `./runFinalFitsScripts.sh -h` to check the available options.
 
 ## Some interesting options
 
-	Most fo the options are fairly self-explanatory, but some of them could use a little extra explanations:
-	* inputFile : The default file to `file` mentioned above,
+	Most fo the options are fairly self-explanatory, but some of them could use a little extra explanation:
+	* inputFile : The default file to `file` mentioned above.
 	* procs: The comma-separated list of processes to run over. eg `ggh,vbf,tth,wzh`. Convention is to use lower case.
 	* flashggCats: The comma-separated list of FLASHgg categories you wish to consider. Obviously the more you include the longer everything will take. These again must obviously match the ones in your workspace input `file`.
 	* ext: An extension to keep track of all files associated with your exercise. Will be apepnded to output dirs, plots and root files as needed.
