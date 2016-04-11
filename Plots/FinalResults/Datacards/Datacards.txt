@@ -1,0 +1,10 @@
+#This file is used to keep track of the datacards and software versions used for public results.
+#Please update for each new public result.
+#------------------------------------------------------------------------------
+#Reference (eg Name of conf/public result) - cadi svn repo : <revision number> - flashggFinalFitsGitTag <git tag>
+#------------------------------------------------------------------------------
+
+Moriond2016 - cadi/HIG-15-005/ : rev 6836 - flashggFinalFits Tag : Moriond2016_tag_v1_messy
+# datacards also available in moriond2016/couplings/hgg : rev 6795
+# sig, bkg, datcards and plots made with internal file extension : HggAnalysis_110316 
+# git Tag mentioned above is 'messy' - a clean version is available at a0e95b0996625ce132e6689a30bfc266fee75a42
