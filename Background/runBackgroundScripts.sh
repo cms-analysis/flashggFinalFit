@@ -35,6 +35,7 @@ echo "--seed) for pseudodata random number gen seed (default $SEED)"
 echo "--intLumi) specified in fb^-{1} (default $INTLUMI)) "
 echo "--isData) specified in fb^-{1} (default $DATA)) "
 echo "--unblind) specified in fb^-{1} (default $UNBLIND)) "
+		echo "--batch) which batch system to use (None (''),LSF,IC) (default '$BATCH')) "
 }
 
 
@@ -42,7 +43,7 @@ echo "--unblind) specified in fb^-{1} (default $UNBLIND)) "
 
 
 # options may be followed by one colon to indicate they have a required argument
-if ! options=$(getopt -u -o hi:p:f: -l help,inputFile:,procs:,flashggCats:,ext:,fTestOnly,pseudoDataOnly,bkgPlotsOnly,pseudoDataDat:,sigFile:,seed:,intLumi:,unblind,isData -- "$@")
+if ! options=$(getopt -u -o hi:p:f: -l help,inputFile:,procs:,flashggCats:,ext:,fTestOnly,pseudoDataOnly,bkgPlotsOnly,pseudoDataDat:,sigFile:,seed:,intLumi:,unblind,isData,batch: -- "$@")
 then
 # something went wrong, getopt will put out an error message for us
 exit 1
@@ -66,6 +67,7 @@ case $1 in
 --intLumi) INTLUMI=$2; shift;;
 --isData) ISDATA=1;;
 --unblind) UNBLIND=1;;
+--batch) BATCH=$2; shift;;
 
 (--) shift; break;;
 (-*) usage; echo "$0: error - unrecognized option $1" 1>&2; usage >> /dev/stderr; exit 1;;
@@ -91,6 +93,15 @@ if [ $FTESTONLY == 0 -a $PSEUDODATAONLY == 0 -a $BKGPLOTSONLY == 0 ]; then
 FTESTONLY=1
 PSEUDODATAONLY=1
 BKGPLOTSONLY=1
+fi
+
+if [[ $BATCH == "IC" ]]; then
+DEFAULTQUEUE=hepshort.q
+BATCHQUERY=qstat
+fi
+if [[ $BATCH == "LSF" ]]; then
+DEFAULTQUEUE=1nh
+BATCHQUERY=bjobs
 fi
 
 ####################################################
@@ -153,14 +164,14 @@ fi
 if [ $UNBLIND == 1 ]; then
 OPT=" --unblind"
 fi
-echo "./scripts/subBkgPlots.py -b CMS-HGG_multipdf_$EXT.root -d $OUTDIR/bkgPlots$DATAEXT -S 13 --isMultiPdf --useBinnedData  --doBands --massStep 1 $SIG -L 100 -H 180 -f $CATS -l $CATS --intLumi $INTLUMI $OPT --batch IC -q hepmedium.q #for now"
-./scripts/subBkgPlots.py -b CMS-HGG_multipdf_$EXT.root -d $OUTDIR/bkgPlots$DATAEXT -S 13 --isMultiPdf --useBinnedData  --doBands  --massStep 1 $SIG -L 100 -H 180 -f $CATS -l $CATS --intLumi $INTLUMI $OPT --batch IC -q hepmedium.q #for now
+echo "./scripts/subBkgPlots.py -b CMS-HGG_multipdf_$EXT.root -d $OUTDIR/bkgPlots$DATAEXT -S 13 --isMultiPdf --useBinnedData  --doBands --massStep 1 $SIG -L 100 -H 180 -f $CATS -l $CATS --intLumi $INTLUMI $OPT --batch $BATCH -q $DEFAULTQUEUE "
+./scripts/subBkgPlots.py -b CMS-HGG_multipdf_$EXT.root -d $OUTDIR/bkgPlots$DATAEXT -S 13 --isMultiPdf --useBinnedData  --doBands  --massStep 1 $SIG -L 100 -H 180 -f $CATS -l $CATS --intLumi $INTLUMI $OPT --batch $BATCH -q $DEFAULTQUEUE
 continueLoop=1
 while (($continueLoop==1))
 do
  sleep 10
- qstat
- qstat >qstat_out.txt
+ $BATCHQUERY
+ $BATCHQUERY >qstat_out.txt
  ((number=`cat qstat_out.txt | wc -l `))
  echo $number
   if (($number==0)) ; then

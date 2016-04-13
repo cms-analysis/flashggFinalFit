@@ -1,12 +1,12 @@
 # Background Scripts
-This is where the background model determined. Either true data can be used or pseudodata can be generated using the simulation samples avaible.
+This is where the background model is determined. Either true data can be used or pseudodata can be generated using the simulation samples available.
 
 ## Background workflow
 
 The workflow looks like this:
-* Start eitehr from data (default) or from flashgg signal and background sample root files
+* Start either from data (default) or from flashgg signal and background sample root files
 * (if using pseudodata) Manually create a dat file listing available samples and whether they are signal or background, which will be used to assemble the pseudodata. See example samples=/afs/cern.ch/user/l/lcorpe/public/HggDryRunDec15/flashgg_source_files/samples.txt
-* (if using pseudodata) Generate pseudodata by fitting the signal and background to either gaussians or bernsetins and throwing the number of toys equal to sum of the weight of events in a given category.
+* (if using pseudodata) Generate pseudodata by fitting the signal and background to either gaussians or bernsteins and throwing the number of toys equal to sum of the weight of events in a given category.
 * Generate the background model from the data or pseudodata using `./bin/fTest`
 * Make validation plots using `./bin/makeParametricSignalModelPlots`
 
@@ -19,12 +19,15 @@ All plots using data and pseudodata are blinded by default.
 
 ```
 cmsenv
-sig=$PWD/../Signal/outdir_hgg_dry_run_2015/CMS-HGG_sigfit_hgg_dry_run_2015.root #previously generated using Signal scripts, used for validation plots
-samples=/afs/cern.ch/user/l/lcorpe/public/HggDryRunDec15/flashgg_source_files/samples.txt # used for pseudodata generation if needed
-data=/afs/cern.ch/user/l/lcorpe/public/HggDryRunDec15/flashgg_source_files/alldata.root # the true data
 # if using data :
-./runBackgroundScripts.sh -p ggh,vbf,wzh,tth -f UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,VBFTag_0,VBFTag_1 --ext hgg_dry_run_2015 --sigFile $sig --seed 0 --intLumi 2.46  --isData  -i $data
-# or if you wish to generate  pseudodata :
+./runBackgroundScripts.sh -p <comma separated processes> -f <comma separated tag names> --ext <extension to keep track of this processign run> --sigFile <the sigfit output fiel (to plot sig and bkg together in final validation plots>  --intLumi <in fb^{-1}> (--unblind) --isData -i <data file> --batch <LSF (CERN or IC> 
+```
+eg
+```
+runBackgroundScripts.sh -p ggh,vbf,tth,wh,zh -f UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,VBFTag_0,VBFTag_1,TTHHadronicTag,TTHLeptonicTag --ext HggAnalysis_Moriond2016_example --sigFile $CMSSW_BASE/src/flashggFinalFit/Signal/outdir_HggAnalysis_Moriond2016_example/CMS-HGG_sigfit_HggAnalysis_Moriond2016_example.root --seed 0 --intLumi 2.69 --unblind --isData -i root://eoscms.cern.ch//eos/cms/store/group/phys_higgs/cmshgg/analyzed/moriond2016/flashgg-workspaces//DoubleEG.root --batch LSF --bkgPlotsOnly
+```
+ or if you wish to generate  pseudodata :
+ ```
 ./runBackgroundScripts.sh -p ggh,vbf,wzh,tth -f UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,VBFTag_0,VBFTag_1 --ext hgg_dry_run_2015 --sigFile $sig --seed 0 --intLumi 2.46 --pseudoDataDat $samples
 ```
 The available options can be seen by doing `runSignalScripts.sh -h`. They are all self-explanatory, aside from 
@@ -33,7 +36,7 @@ The available options can be seen by doing `runSignalScripts.sh -h`. They are al
 * `--pseudoDataDat`: Specify the list of available samples using the format: <type>,<filepath> where type can be `sig` or `bkg`.
 
 ## Script-by-script guide
-### Generating the pseudodata
+### Generating the pseudodata (not needed if using data!)
 
 One can use the `/bin/pseudodataMaker` script to regenerate this. Example output is provided here.
 
@@ -42,7 +45,7 @@ The pseudodata maker works by looping through the list of samples provided in th
 <type>,<sample path>
 ```
 There should be one line per sample file.
-For each sample file, the script loops through the datasets asscoiated with each tag or category. It fits the signal samples to 3 gaussians, and the background samples to a bernstein of order 3. The resulting pdf is then used to generate random events, where the total number of events generated per sample is equal to the sum of weights in the original sample. The datasets per sample are then summed into a single dataset per tag/category. 
+For each sample file, the script loops through the datasets associated with each tag or category. It fits the signal samples to 3 gaussians, and the background samples to a bernstein of order 3. The resulting pdf is then used to generate random events, where the total number of events generated per sample is equal to the sum of weights in the original sample. The datasets per sample are then summed into a single dataset per tag/category. 
 
 The options are self explanatory, aside from the two listed below which probably deserve extra explanation:
 * `--seed`: The seed is given to the random number generator inside RooFit. This allows you to force a particular seed, ie if you want to generate two separate and different pseudo-datasets. To do this, simply provide different seeds each time.
@@ -61,15 +64,14 @@ https://twiki.cern.ch/twiki/bin/view/CMS/FLASHggFramework#Background #(Under Pse
 ```
 ### Generating the background model
 
-The script `./bin/fTest` generates the background model using the envelope method. The idea is to fit the background to various possible background pdfs.
-More explanation is probably needed of the envelope method, but this will be added in at a later date. The input to this script is either real data or the pseudodata from the previous step.
+The script `./bin/fTest` generates the background model to be used for the envelope method. The idea is here to pick a sensible subset of all possible functions which could describe the data, and then treat the choice of function as a discrete nuisance parameter in the final stat analysis step. The input to this script is either real data or the pseudodata from the previous step.
 
 FLASHgg working example:
 
 ```
 # using data:
-data=/afs/cern.ch/user/l/lcorpe/public/HggDryRunDec15/flashgg_source_files/alldata.root 
-./bin/fTest -i $data --saveMultiPdf CMS-HGG_multipdf_hgg_dry_run_2015/.root  -D hgg_dry_run_2015//bkgfTest-Data -f UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,VBFTag_0,VBFTag_1  --isData 1
+ ./bin/fTest -i root://eoscms.cern.ch//eos/cms/store/group/phys_higgs/cmshgg/analyzed/moriond2016/flashgg-workspaces//DoubleEG.root --saveMultiPdf CMS-HGG_multipdf_HggAnalysis_Moriond2016_example.root  -D outdir_HggAnalysis_Moriond2016_example/bkgfTest-Data -f UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,VBFTag_0,VBFTag_1,TTHHadronicTag,TTHLeptonicTag  --isData 1
+
 # OR using pseudodata:
 pseudodata=outdir_hgg_dry_run_2015/pseudoData/pseudoWS.root # created by pseudodataMaker
 ./bin/fTest -i $pseudodata --saveMultiPdf CMS-HGG_multipdf_hgg_dry_run_2015.root  -D outdir_hgg_dry_run_2015/bkgfTest -f UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,VBFTag_0,VBFTag_1
@@ -95,12 +97,10 @@ The `-s` option, which provides a signal file to add to the plots, is not compul
 FLASHgg working example:
 
 ```
-bkg=CMS-HGG_multipdf_hgg_dry_run_2015.root #created in previous step 
-sig=$PWD/../Signal/outdir_hgg_dry_run_2015/CMS-HGG_sigfit_hgg_dry_run_2015.root
-# for true data:
-./scripts/subBkgPlots.py -b $bkg -d outdir_hgg_dry_run_2015/bkgPlots-Data -S 13 --isMultiPdf --useBinnedData  --doBands --runLocal  --massStep 2 -s /afs/cern.ch/work/l/lcorpe/private/FinalFits_Jan16/CMSSW_7_1_5/src/flashggFinalFit/Background/../Signal/outdir_hgg_dry_run_2015/CMS-HGG_sigfit_hgg_dry_run_2015.root -L 100 -H 180 -f UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,VBFTag_0,VBFTag_1 -l UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,VBFTag_0,VBFTag_1 --intLumi 2.46
-# for pseudodata (basically exaclt the same)
-./scripts/subBkgPlots.py -b $bkg -d outdir_hgg_dry_run_2015/bkgPlots -S 13 --isMultiPdf --useBinnedData  --doBands --runLocal --massStep 2 -s $sig -L 100 -H 180 -f UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,VBFTag_0,VBFTag_1 -l UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,VBFTag_0,VBFTag_1 --intLumi 2.46
+./scripts/subBkgPlots.py -b <background file from previous step> -d <output dir for plots> -S <sqrts>  --isMultiPdf --useBinnedData  --doBands --massStep <in GeV>  -s <signal file to include sig model on validation plots> -L <low side of mgg> -H <high side of mgg> -f i<comma separated list fo tags> -l <list of labels for tags, human readable> --intLumi < in fb^{-1}>  (--unblind) --batch <IC or LSF (Cern)> -q <your favourite queue eg 8nm>
+```
+```
+./scripts/subBkgPlots.py -b CMS-HGG_multipdf_HggAnalysis_Moriond2016_example.root -d outdir_HggAnalysis_Moriond2016_example/bkgPlots-Data -S 13 --isMultiPdf --useBinnedData  --doBands --massStep 1 -s $CMSSW_BASE/src/flashggFinalFit/Signal/outdir_HggAnalysis_Moriond2016_example/CMS-HGG_sigfit_HggAnalysis_Moriond2016_example.root -L 100 -H 180 -f UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,VBFTag_0,VBFTag_1,TTHHadronicTag,TTHLeptonicTag -l UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,VBFTag_0,VBFTag_1,TTHHadronicTag,TTHLeptonicTag --intLumi 2.69  --unblind --batch LSF -q 8nm #for now
 ```
 
 Example output can be found here:
@@ -114,16 +114,9 @@ https://twiki.cern.ch/twiki/bin/view/CMS/FLASHggFramework#Background #(Under Bkg
 
 Notes:
 
-* Technically this step can be submitted to the batch, but I generally do not use this feature.
-
-## To Do
-
-* Try to undertsand why there are differences between the nEvents using data and nEvents using pseudodata.
-
 ## Notes
 
-Some notes whcih might be helpful:
+Some notes which might be helpful:
 
-* At present there is a discrepancy between the total number of events provided by the data and the pseudodata when summing up all the samples. As such the results provided using pseudodata should be taken with a pinch of salt until the differences are understood.
-* Keep an eye out for situatiosn where you are using too many orders in your candidate background functions. As for the signal workflow, sometimes the extra PDFs added for high order are geative or 0, and this causes headaches with roofit. For example, during the dry run I had to force nBernsteins < 7 otherwise I got segfaults and nonsense later int he workflow.
+* Keep an eye out for situations where you are using too many orders in your candidate background functions. As for the signal workflow, sometimes the extra PDFs added for high order are negative or 0, and this causes headaches with roofit. For example, during the dry run I had to force nBernsteins < 7 otherwise I got segfaults and nonsense later in the workflow.
 

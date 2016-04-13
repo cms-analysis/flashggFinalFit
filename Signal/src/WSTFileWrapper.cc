@@ -75,7 +75,7 @@ RooAbsData* WSTFileWrapper::data(std::string dataName) {
     }
   }
   if (!result) {
-    std::cout << "[WSTFileWrapper] Uh oh, never got a good RooAbsData with name " << dataName << std::endl;
+    //std::cout << "[WSTFileWrapper] Uh oh, never got a good RooAbsData with name " << dataName << std::endl;
   }
   return result;
 }
