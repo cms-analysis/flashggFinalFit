@@ -112,7 +112,6 @@ https://twiki.cern.ch/twiki/bin/view/CMS/FLASHggFramework#Background #(Under Bkg
 https://twiki.cern.ch/twiki/bin/view/CMS/FLASHggFramework#Background #(Under Bkg Validation Plots, Pseudodata)
 ```
 
-Notes:
 
 ## Notes
 

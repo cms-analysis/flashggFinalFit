@@ -12,7 +12,7 @@ git cms-init
 git clone https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit
 cd ${CMSSW_BASE}/src/HiggsAnalysis/CombinedLimit
 git fetch origin
-git checkout v5.0.1
+#git checkout v5.0.1 #at present only master branch has up to date XS files
 cd ${CMSSW_BASE}/src
 # Install Flashgg Final Fit packages
 git clone git@github.com:cms-analysis/flashggFinalFit.git
@@ -62,7 +62,6 @@ A few key examples:
 ```
 
 This script will run all parts of the analysis, and produce the output plots as needed. Since it considers all the Tags and processes, it will be very long to run. To practice, you may consider running only ggh and vbf processes, for example.
-```
 
 You can run `./runFinalFitsScripts.sh -h` to check the available options.
 
@@ -74,7 +73,7 @@ You can run `./runFinalFitsScripts.sh -h` to check the available options.
 	* flashggCats: The comma-separated list of FLASHgg categories you wish to consider. Obviously the more you include the longer everything will take. These again must obviously match the ones in your workspace input `file`.
 	* ext: An extension to keep track of all files associated with your exercise. Will be apepnded to output dirs, plots and root files as needed.
 	* pseudoDataDat: `samples` file telling which samples to include in the pseudodata as described above.
-  * combine: Tell the script to also run the combine jobs (will submit them to the batch)
+	* combine: Tell the script to also run the combine jobs (will submit them to the batch)
 	* combineOnly: Skip Signal and Background and Datacard, only do combine job submission and plots.
 	* combinePlotsOnly: Skip combine job submission, just make combine plots from combine output.
 	* signalOnly: Skip Background and Datacard. 
