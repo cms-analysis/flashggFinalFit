@@ -693,12 +693,13 @@ int main(int argc, char *argv[]){
       latex->DrawLatex(0.16,0.88,Form("RV+WV"));
 
       // save it !
-			canv->Print(Form("%s/fTest/%s_%s.pdf",
-        outdir_.c_str(),proc.c_str(),
-        flashggCats_[cat].c_str()));
-			canv->Print(Form("%s/fTest/%s_%s.png",
-        outdir_.c_str(),proc.c_str(),
-        flashggCats_[cat].c_str()));
+			//canv->Print(Form("%s/fTest/%s_%s.pdf",
+      //  outdir_.c_str(),proc.c_str(),
+      //  flashggCats_[cat].c_str()));
+			//canv->Print(Form("%s/fTest/%s_%s.png",
+      //  outdir_.c_str(),proc.c_str(),
+      //  flashggCats_[cat].c_str()));
+			//  ^ NB at the moment the combiend plot is not terribly useful, so ignore it for now.
 		}
 	}
 

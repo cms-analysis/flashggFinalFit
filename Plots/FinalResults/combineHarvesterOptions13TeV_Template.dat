@@ -1,21 +1,21 @@
 #complete set of jobs to submit, as used for Moriond 2016.
 datacard=CMS-HGG_mva_13TeV_datacard.txt
 files=CMS-HGG_sigfit_mva_ggh_TTHHadronicTag.root,CMS-HGG_sigfit_mva_ggh_TTHLeptonicTag.root,CMS-HGG_sigfit_mva_ggh_UntaggedTag_0.root,CMS-HGG_sigfit_mva_ggh_UntaggedTag_1.root,CMS-HGG_sigfit_mva_ggh_UntaggedTag_2.root,CMS-HGG_sigfit_mva_ggh_UntaggedTag_3.root,CMS-HGG_sigfit_mva_ggh_VBFTag_0.root,CMS-HGG_sigfit_mva_ggh_VBFTag_1.root,root,CMS-HGG_sigfit_mva_tth_TTHHadronicTag.root,CMS-HGG_sigfit_mva_tth_TTHLeptonicTag.root,CMS-HGG_sigfit_mva_tth_UntaggedTag_0.root,CMS-HGG_sigfit_mva_tth_UntaggedTag_1.root,CMS-HGG_sigfit_mva_tth_UntaggedTag_2.root,CMS-HGG_sigfit_mva_tth_UntaggedTag_3.root,CMS-HGG_sigfit_mva_tth_VBFTag_0.root,CMS-HGG_sigfit_mva_tth_VBFTag_1.root,CMS-HGG_sigfit_mva_vbf_TTHHadronicTag.root,CMS-HGG_sigfit_mva_vbf_TTHLeptonicTag.root,CMS-HGG_sigfit_mva_vbf_UntaggedTag_0.root,CMS-HGG_sigfit_mva_vbf_UntaggedTag_1.root,CMS-HGG_sigfit_mva_vbf_UntaggedTag_2.root,CMS-HGG_sigfit_mva_vbf_UntaggedTag_3.root,CMS-HGG_sigfit_mva_vbf_VBFTag_0.root,CMS-HGG_sigfit_mva_vbf_VBFTag_1.root,CMS-HGG_sigfit_mva_wh_TTHHadronicTag.root,CMS-HGG_sigfit_mva_wh_TTHLeptonicTag.root,CMS-HGG_sigfit_mva_wh_UntaggedTag_0.root,CMS-HGG_sigfit_mva_wh_UntaggedTag_1.root,CMS-HGG_sigfit_mva_wh_UntaggedTag_2.root,CMS-HGG_sigfit_mva_wh_UntaggedTag_3.root,CMS-HGG_sigfit_mva_wh_VBFTag_0.root,CMS-HGG_sigfit_mva_wh_VBFTag_1.root,CMS-HGG_sigfit_mva_zh_TTHHadronicTag.root,CMS-HGG_sigfit_mva_zh_TTHLeptonicTag.root,CMS-HGG_sigfit_mva_zh_UntaggedTag_0.root,CMS-HGG_sigfit_mva_zh_UntaggedTag_1.root,CMS-HGG_sigfit_mva_zh_UntaggedTag_2.root,CMS-HGG_sigfit_mva_zh_UntaggedTag_3.root,CMS-HGG_sigfit_mva_zh_VBFTag_0.root,CMS-HGG_sigfit_mva_zh_VBFTag_1.root,CMS-HGG_mva_13TeV_multipdf.root
-# mu scans
+## mu scans #DO NOT RUN UNLESS YOU INTEND TO UNBLIND
 outDir=combineJobs13TeV_!EXT!/MuScanFixMH													method=MuScan	expected=0 mh=125.09 muLow=0. muHigh=2. jobs=5 pointsperjob=20 opts=--squareDistPoi
 outDir=combineJobs13TeV_!EXT!/MuScanFloatMH									 method=MuScan	expected=0 mh=125.09:0.24 muLow=0. muHigh=2. jobs=5 pointsperjob=20 opts=--squareDistPoi
-#outDir=combineJobs13TeV_!EXT!/MuScanFixMHStat													method=MuScan	expected=0 mh=125.09 muLow=0. muHigh=2. jobs=5 pointsperjob=20 opts=--squareDistPoi
-#outDir=combineJobs13TeV_!EXT!/MuScanFloatMHStat									 method=MuScan	expected=0 mh=125.09:0.24 muLow=0. muHigh=2. jobs=5 pointsperjob=20 opts=--squareDistPoi
-##MultiPdfChannelCompatibility
+
+##MultiPdfChannelCompatibility #DO NOT RUN UNLESS YOU INTEND TO UNBLIND
 outDir=combineJobs13TeV_!EXT!/MultiPdfChannelCompatibility/All												method=MultiPdfChannelCompatibility expected=0  mh=125.09 muLow=-10. muHigh=20. jobs=1 pointsperjob=20
-##above is just shorthand for a muscan split by each cat in the datacard
+#above is just shorthand for a muscan split by each cat in the datacard
 outDir=combineJobs13TeV_!EXT!/MultiPdfChannelCompatibility/VBF													method=MuScan	expected=0 mh=125.09 muLow=-10. muHigh=10. jobs=1 pointsperjob=100 splitChannels=VBFTag_0_13TeV,VBFTag_1_13TeV
 outDir=combineJobs13TeV_!EXT!/MultiPdfChannelCompatibility/Untagged													method=MuScan	expected=0 mh=125.09 muLow=-10. muHigh=10. jobs=1 pointsperjob=100 splitChannels=UntaggedTag_0_13TeV,UntaggedTag_1_13TeV,UntaggedTag_2_13TeV,UntaggedTag_3_13TeV
 outDir=combineJobs13TeV_!EXT!/MultiPdfChannelCompatibility/TTH													method=MuScan	expected=0 mh=125.09 muLow=-10. muHigh=10. jobs=1 pointsperjob=100 splitChannels=TTHLeptonicTag_13TeV,TTHHadronicTag_13TeV
-# Mu hat vs MH
+
+# Mu hat vs MH #DO NOT RUN UNLESS YOU INTEND TO UNBLIND
 outDir=combineJobs13TeV_!EXT!/MultiPdfMuHatvsMH											method=MultiPdfMuHatvsMH expected=0  mhLow=120. mhHigh=130.  muLow=-5. muHigh=5. pointsperjob=50 jobs=10  mhStep=0.5
 
-# rv vs rf scnas
+# rv vs rf scans #DO NOT RUN UNLESS YOU INTEND TO UNBLIND
 outDir=combineJobs13TeV_!EXT!/RVRFScanFixMH											method=RVRFScan expected=0 mh=125.09 rvLow=-3. rvHigh=10 rfLow=-2. rfHigh=3.5 jobs=100 pointsperjob=40 
 outDir=combineJobs13TeV_!EXT!/RVRFScanFloatMH											method=RVRFScan expected=0 mh=125.09:0.24 rvLow=-3. rvHigh=10 rfLow=-2. rfHigh=3.5 jobs=100 pointsperjob=40 
 
@@ -37,26 +37,26 @@ outDir=combineJobs13TeV_!EXT!/ExpProfileLikelihood/TTHHadronicTag_13TeV 		method
 outDir=combineJobs13TeV_!EXT!/ExpProfileLikelihood/TTHLeptonicTag_13TeV 		method=ProfileLikelihood expected=1 expectSignal=1 mhLow=120. mhHigh=130. mhStep=0.5 jobs=21 splitChannels=TTHLeptonicTag_13TeV
 
 # exp pval @ 125
-outDir=combineJobs13TeV_!EXT!/ExpProfileLikelihood_m125.09 			method=ProfileLikelihood expected=1 expectSignal=1 expectSignalMass=125.09 mhLow=120. mhHigh=130. mhStep=0.1 jobs=101
+outDir=combineJobs13TeV_!EXT!/ExpProfileLikelihood_m125.09 			method=ProfileLikelihood expected=1 expectSignal=1 expectSignalMass=125.09 mhLow=120. mhHigh=130. mhStep=0.1 jobs=21
 
 
-# obs pval
+# obs pval #DO NOT RUN UNLESS YOU INTEND TO UNBLIND
 
-outDir=combineJobs13TeV_!EXT!/ProfileLikelihood/Untagged 		method=ProfileLikelihood expected=0 mhLow=120. mhHigh=130. mhStep=0.1 jobs=101 splitChannels=UntaggedTag_0_13TeV,UntaggedTag_1_13TeV,UntaggedTag_2_13TeV,UntaggedTag_3_13TeV
-outDir=combineJobs13TeV_!EXT!/ProfileLikelihood/VBF 		method=ProfileLikelihood expected=0 mhLow=120. mhHigh=130. mhStep=0.1 jobs=101 splitChannels=VBFTag_0_13TeV,VBFTag_1_13TeV
-outDir=combineJobs13TeV_!EXT!/ProfileLikelihood/TTH 		method=ProfileLikelihood expected=0 mhLow=120. mhHigh=130. mhStep=0.1 jobs=101 splitChannels=TTHLeptonicTag_13TeV,TTHHadronicTag_13TeV
+outDir=combineJobs13TeV_!EXT!/ProfileLikelihood/Untagged 		method=ProfileLikelihood expected=0 mhLow=120. mhHigh=130. mhStep=0.1 jobs=21 splitChannels=UntaggedTag_0_13TeV,UntaggedTag_1_13TeV,UntaggedTag_2_13TeV,UntaggedTag_3_13TeV
+outDir=combineJobs13TeV_!EXT!/ProfileLikelihood/VBF 		method=ProfileLikelihood expected=0 mhLow=120. mhHigh=130. mhStep=0.1 jobs=21 splitChannels=VBFTag_0_13TeV,VBFTag_1_13TeV
+outDir=combineJobs13TeV_!EXT!/ProfileLikelihood/TTH 		method=ProfileLikelihood expected=0 mhLow=120. mhHigh=130. mhStep=0.1 jobs=21 splitChannels=TTHLeptonicTag_13TeV,TTHHadronicTag_13TeV
 
-outDir=combineJobs13TeV_!EXT!/ProfileLikelihood/All 		method=ProfileLikelihood expected=0 mhLow=120. mhHigh=130. mhStep=0.1 jobs=101 
-outDir=combineJobs13TeV_!EXT!/ProfileLikelihood/UntaggedTag_0_13TeV 		method=ProfileLikelihood expected=0 mhLow=120. mhHigh=130. mhStep=0.1 jobs=101 splitChannels=UntaggedTag_0_13TeV
-outDir=combineJobs13TeV_!EXT!/ProfileLikelihood/UntaggedTag_1_13TeV 		method=ProfileLikelihood expected=0 mhLow=120. mhHigh=130. mhStep=0.1 jobs=101 splitChannels=UntaggedTag_1_13TeV
-outDir=combineJobs13TeV_!EXT!/ProfileLikelihood/UntaggedTag_2_13TeV 		method=ProfileLikelihood expected=0 mhLow=120. mhHigh=130. mhStep=0.1 jobs=101 splitChannels=UntaggedTag_2_13TeV
-outDir=combineJobs13TeV_!EXT!/ProfileLikelihood/UntaggedTag_3_13TeV 		method=ProfileLikelihood expected=0 mhLow=120. mhHigh=130. mhStep=0.1 jobs=101 splitChannels=UntaggedTag_3_13TeV
-outDir=combineJobs13TeV_!EXT!/ProfileLikelihood/VBF 		method=ProfileLikelihood expected=0 mhLow=120. mhHigh=130. mhStep=0.1 jobs=101 splitChannels=VBFTag_0_13TeV,VBFTag_1_13TeV
-outDir=combineJobs13TeV_!EXT!/ProfileLikelihood/VBFTag_0_13TeV 		method=ProfileLikelihood expected=0 mhLow=120. mhHigh=130. mhStep=0.1 jobs=101 splitChannels=VBFTag_0_13TeV
-outDir=combineJobs13TeV_!EXT!/ProfileLikelihood/VBFTag_1_13TeV 		method=ProfileLikelihood expected=0 mhLow=120. mhHigh=130. mhStep=0.1 jobs=101 splitChannels=VBFTag_1_13TeV
-outDir=combineJobs13TeV_!EXT!/ProfileLikelihood/TTH 		method=ProfileLikelihood expected=0 mhLow=120. mhHigh=130. mhStep=0.1 jobs=101 splitChannels=TTHLeptonicTag_13TeV,TTHHadronicTag_13TeV
-outDir=combineJobs13TeV_!EXT!/ProfileLikelihood/TTHHadronicTag_13TeV 		method=ProfileLikelihood expected=0 mhLow=120. mhHigh=130. mhStep=0.1 jobs=101 splitChannels=TTHHadronicTag_13TeV
-outDir=combineJobs13TeV_!EXT!/ProfileLikelihood/TTHLeptonicTag_13TeV 		method=ProfileLikelihood expected=0 mhLow=120. mhHigh=130. mhStep=0.1 jobs=101 splitChannels=TTHLeptonicTag_13TeV
+outDir=combineJobs13TeV_!EXT!/ProfileLikelihood/All 		method=ProfileLikelihood expected=0 mhLow=120. mhHigh=130. mhStep=0.1 jobs=21 
+outDir=combineJobs13TeV_!EXT!/ProfileLikelihood/UntaggedTag_0_13TeV 		method=ProfileLikelihood expected=0 mhLow=120. mhHigh=130. mhStep=0.1 jobs=21 splitChannels=UntaggedTag_0_13TeV
+outDir=combineJobs13TeV_!EXT!/ProfileLikelihood/UntaggedTag_1_13TeV 		method=ProfileLikelihood expected=0 mhLow=120. mhHigh=130. mhStep=0.1 jobs=21 splitChannels=UntaggedTag_1_13TeV
+outDir=combineJobs13TeV_!EXT!/ProfileLikelihood/UntaggedTag_2_13TeV 		method=ProfileLikelihood expected=0 mhLow=120. mhHigh=130. mhStep=0.1 jobs=21 splitChannels=UntaggedTag_2_13TeV
+outDir=combineJobs13TeV_!EXT!/ProfileLikelihood/UntaggedTag_3_13TeV 		method=ProfileLikelihood expected=0 mhLow=120. mhHigh=130. mhStep=0.1 jobs=21 splitChannels=UntaggedTag_3_13TeV
+outDir=combineJobs13TeV_!EXT!/ProfileLikelihood/VBF 		method=ProfileLikelihood expected=0 mhLow=120. mhHigh=130. mhStep=0.1 jobs=21 splitChannels=VBFTag_0_13TeV,VBFTag_1_13TeV
+outDir=combineJobs13TeV_!EXT!/ProfileLikelihood/VBFTag_0_13TeV 		method=ProfileLikelihood expected=0 mhLow=120. mhHigh=130. mhStep=0.1 jobs=21 splitChannels=VBFTag_0_13TeV
+outDir=combineJobs13TeV_!EXT!/ProfileLikelihood/VBFTag_1_13TeV 		method=ProfileLikelihood expected=0 mhLow=120. mhHigh=130. mhStep=0.1 jobs=21 splitChannels=VBFTag_1_13TeV
+outDir=combineJobs13TeV_!EXT!/ProfileLikelihood/TTH 		method=ProfileLikelihood expected=0 mhLow=120. mhHigh=130. mhStep=0.1 jobs=21 splitChannels=TTHLeptonicTag_13TeV,TTHHadronicTag_13TeV
+outDir=combineJobs13TeV_!EXT!/ProfileLikelihood/TTHHadronicTag_13TeV 		method=ProfileLikelihood expected=0 mhLow=120. mhHigh=130. mhStep=0.1 jobs=21 splitChannels=TTHHadronicTag_13TeV
+outDir=combineJobs13TeV_!EXT!/ProfileLikelihood/TTHLeptonicTag_13TeV 		method=ProfileLikelihood expected=0 mhLow=120. mhHigh=130. mhStep=0.1 jobs=21 splitChannels=TTHLeptonicTag_13TeV
 #
 #
 ## 2d mu vs MH scan
@@ -66,7 +66,7 @@ outDir=combineJobs13TeV_!EXT!/ProfileLikelihood/TTHLeptonicTag_13TeV 		method=Pr
 #outDir=combineJobs13TeV_!EXT!/MuScan_PostFit_126.2													method=MuScan	expected=0 mh=126.2 postFit muLow=-3. muHigh=3. jobs=5 pointsperjob=10 opts=--squareDistPoi
 #
 
-#Quick MH scan
+#Quick MH scan #DO NOT RUN UNLESS YOU INTEND TO UNBLIND
 outDir=combineJobs13TeV_!EXT!/MHScan    												method=MHScan	expected=0 mh=130 mhLow=120. mhHigh=130. jobs=5 pointsperjob=10 opts=--squareDistPoi
 
 #

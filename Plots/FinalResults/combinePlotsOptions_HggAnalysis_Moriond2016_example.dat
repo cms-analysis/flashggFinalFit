@@ -1,0 +1,19 @@
+# NOTICE THAT TO PASS AN = SIGN IN A STRING USE \= e.g #sqrt{s}\=13TeV
+#method=pval:files=exp1.root,exp2.root,obs1.root,obs2.root:colors=2,4,2,4:styles=2,2,1,1:widths=2,2,2,2:names=Expected 1,Expected 2,Observed 1,Observed 2:text=#sqrt{s}\=13TeV L\=2.69fb^{-1}
+
+
+method=pval:files=combineJobs13TeV_HggAnalysis_Moriond2016_example/ExpProfileLikelihood/All/All.root,combineJobs13TeV_HggAnalysis_Moriond2016_example/ExpProfileLikelihood_m125.09/ExpProfileLikelihood_m125.09.root,combineJobs13TeV_HggAnalysis_Moriond2016_example/ProfileLikelihood/All/All.root:colors=2,4,1:styles=1,1,1:widths=2,2,2:names=Expected,Expected m_{H} \= 125.09 GeV,Observed:text=#sqrt{s}\=13TeV L\=2.69fb^{-1}:outname=pval13TeV-observed
+method=pval:files=combineJobs13TeV_HggAnalysis_Moriond2016_example/ExpProfileLikelihood/All/All.root,combineJobs13TeV_HggAnalysis_Moriond2016_example/ExpProfileLikelihood_m125.09/ExpProfileLikelihood_m125.09.root:colors=2,4:styles=1,1:widths=2,2:names=Expected ,Expected m_{H} \= 125.09 GeV,:text=#sqrt{s}\=13TeV L\=2.69fb^{-1}:outname=pval13TeV
+method=pval:files=combineJobs13TeV_HggAnalysis_Moriond2016_example/ExpProfileLikelihood_m125.09/ExpProfileLikelihood_m125.09.root:colors=2:styles=1:widths=2:names=Expected m_{H} \= 125.09 GeV:text=#sqrt{s}\=13TeV L\=2.69b^{-1}:outname=pval13TeV-mh125.09
+method=pval:files=combineJobs13TeV_HggAnalysis_Moriond2016_example/ProfileLikelihood/All/All.root:colors=1:styles=1:widths=2:names=Observed:text=#sqrt{s}\=13TeV L\=2.69fb^{-1}:outname=pval13TeV-observed-only
+#method=pval:files=combineJobs13TeV_HggAnalysis_Moriond2016_example/ExpProfileLikelihood_m125/ExpProfileLikelihood_m125.root,combineJobs13TeV_HggAnalysis_Moriond2016_example/ExpProfileLikelihood_m125_Stat/ExpProfileLikelihood_m125_Stat.root:colors=2,3:styles=2,2:widths=,22:names=Expected mh125 13TeV, expected no Syst:text=#sqrt{s}\=13TeV L\=2.69b^{-1}:outname=pval13TeV-mh125-S0
+#method=pval:files=combineJobs13TeV_HggAnalysis_Moriond2016_example/ExpProfileLikelihood/ExpProfileLikelihood.root,combineJobs13TeV_HggAnalysis_Moriond2016_example/ExpProfileLikelihood_m125/ExpProfileLikelihood_m125.root,combineJobs13TeV_HggAnalysis_Moriond2016_example/ExpProfileLikelihood_S0/ExpProfileLikelihood_S0.root,combineJobs13TeV_HggAnalysis_Moriond2016_example/ExpProfileLikelihood_m125_S0/ExpProfileLikelihood_m125_S0.root:colors=2,3,2,3:styles=1,1,2,2:widths=1,1,2,2:names=Expected 13TeV,Expected mh125 13TeV,Expected 13TeV S0,Expected mh125 13TeV S0,:text=#sqrt{s}\=13TeV L\=2.69fb^{-1}:outname=pval13TeV
+
+##method=limit:files=combineJobs13TeV_HggAnalysis_Moriond2016_example/Asymptotic/Asymptotic.root:text=#sqrt{s}\=13TeV L\=2.69fb^{-1}:outname=limit
+
+#method=mu:files=combineJobs13TeV_HggAnalysis_Moriond2016_example/MuScan/MuScan.root:text=#sqrt{s}\=13TeV L\=2.69fb^{-1}:outname=mu
+#method=mh:files=combineJobs13TeV_HggAnalysis_Moriond2016_example/MHScan/MHScan.root:text=#sqrt{s}\=13TeV L\=2.69fb^{-1}:outname=mh:xvar=MH
+#method=mh:files=combineJobs13TeV_HggAnalysis_Moriond2016_example/MHScan/MHScan.root:text=#sqrt{s}\=13TeV L\=2.69fb^{-1}:outname=mh:xvar=MH
+#method=mh:files=combineJobs13TeV_HggAnalysis_Moriond2016_example/MHScan/MHScan.root,combineJobs13TeV_HggAnalysis_Moriond2016_example/MHScan_S0/MHScan_S0.root:text=#sqrt{s}\=13TeV L\=2.69fb^{-1}:colors=2,2:styles=1,2:widths=1,2:names=Expected 13TeV,Expected 13TeV S0:outname=mh:xvar=MH
+
+
