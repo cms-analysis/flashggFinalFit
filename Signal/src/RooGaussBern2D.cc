@@ -24,8 +24,8 @@ RooGaussBern2D::RooGaussBern2D(const char *name, const char *title, RooAbsReal& 
   RooAbsArg* mean;
   while ((mean = (RooAbsArg*)meanIter->Next())) {
     if (!dynamic_cast<RooAbsReal*>(mean)) {
-      cout << "RooGaussBern2D::ctor(" << GetName() << ") ERROR: coefficient " << mean->GetName() 
-	   << " is not of type RooAbsReal" << endl ;
+      std::cout << "RooGaussBern2D::ctor(" << GetName() << ") ERROR: coefficient " << mean->GetName() 
+	   << " is not of type RooAbsReal" << std::endl ;
       assert(0) ;
     }
     polParamsMean.add(*mean) ;
@@ -34,8 +34,8 @@ RooGaussBern2D::RooGaussBern2D(const char *name, const char *title, RooAbsReal& 
   RooAbsArg* sigma;
   while ((sigma = (RooAbsArg*)sigmaIter->Next())) {
     if (!dynamic_cast<RooAbsReal*>(sigma)) {
-      cout << "RooGaussBern2D::ctor(" << GetName() << ") ERROR: coefficient " << sigma->GetName() 
-	   << " is not of type RooAbsReal" << endl ;
+      std::cout << "RooGaussBern2D::ctor(" << GetName() << ") ERROR: coefficient " << sigma->GetName() 
+	   << " is not of type RooAbsReal" << std::endl ;
       assert(0) ;
     }
     polParamsSigma.add(*sigma) ;
@@ -63,7 +63,7 @@ Double_t RooGaussBern2D::evalBernstein(const char* type) const {
     coefList = polParamsSigma;
   }
   else {
-    cout << "ERROR -- eval type must be mean or sigma not " << type << endl;
+    std::cout << "ERROR -- eval type must be mean or sigma not " << type << std::endl;
     assert(0);
   }
   // run in y direction
@@ -128,7 +128,7 @@ Double_t RooGaussBern2D::analyticalIntegralBernstein(const char* type, const cha
     coefList = polParamsSigma;
   }
   else {
-    cout << "ERROR -- eval type must be mean or sigma not " << type << endl;
+    std::cout << "ERROR -- eval type must be mean or sigma not " << type << std::endl;
     assert(0);
   }
 
@@ -172,9 +172,9 @@ Double_t RooGaussBern2D::analyticalIntegral(Int_t code, const char* rangeName=0)
   Double_t ret = 0;
   if(code==1){  
     ret = rootPiBy2*sigma*(RooMath::erf((x.max(rangeName)-mean)/xscale)-RooMath::erf((x.min(rangeName)-mean)/xscale));
-//     cout << "Int_gauss_dx(mean=" << mean << ",sigma=" << sigma << ", xmin=" << x.min(rangeName) << ", xmax=" << x.max(rangeName) << ")=" << ret << endl ;
+//     std::cout << "Int_gauss_dx(mean=" << mean << ",sigma=" << sigma << ", xmin=" << x.min(rangeName) << ", xmax=" << x.max(rangeName) << ")=" << ret << std::endl ;
   } else{
-    cout << "Error in RooGaussian::analyticalIntegral" << endl;
+    std::cout << "Error in RooGaussian::analyticalIntegral" << std::endl;
   }
   return ret ;
 
