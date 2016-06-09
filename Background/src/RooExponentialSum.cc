@@ -58,8 +58,8 @@ RooExponentialSum::RooExponentialSum(const char *name, const char *title,
   RooAbsArg* coef;
   while ((coef = (RooAbsArg*)_coefIter->Next())) {
     if (!dynamic_cast<RooAbsReal*>(coef)){
-      cout << "RooExponentialSum::ctor(" << GetName() << ") ERROR: coefficient " << coef->GetName() 
-	   << " is not of type RooAbsReal" << endl ;
+      std::cout << "RooExponentialSum::ctor(" << GetName() << ") ERROR: coefficient " << coef->GetName() 
+	   << " is not of type RooAbsReal" << std::endl ;
       assert(0) ;
     }
     coefList.add(*coef);
@@ -108,7 +108,7 @@ Double_t RooExponentialSum::evaluate() const{
     order++;
   }
   double ret = (1./p1)*dfdx*exp(fx);
-  //cout << x << " " << fx << " " << dfdx << " " << ret << endl;
+  //std::cout << x << " " << fx << " " << dfdx << " " << ret << std::endl;
   return ret;
 }
 

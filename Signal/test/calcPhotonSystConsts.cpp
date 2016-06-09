@@ -505,7 +505,8 @@ int main(int argc, char *argv[]){
 								plotVariation(nominal,scaleUp,scaleDown,*phoCat,Form("%s_cat%d_scale",proc->c_str(),cat)); 
 							}
 						}
-            if (isinf(getMeanVar(nominal,scaleUp,scaleDown)) || isinf(getRateVar(nominal,scaleUp,scaleDown)) || isinf(getSigmaVar(nominal,scaleUp,scaleDown))) {
+            //if (isinf(getMeanVar(nominal,scaleUp,scaleDown)) || isinf(getRateVar(nominal,scaleUp,scaleDown)) || isinf(getSigmaVar(nominal,scaleUp,scaleDown))) {
+            if ((getMeanVar(nominal,scaleUp,scaleDown))>99999 || (getRateVar(nominal,scaleUp,scaleDown))>99999 || (getSigmaVar(nominal,scaleUp,scaleDown))>99999 ) {
             std::cout << "ERROR infinite " << nominal->Integral()<< std::endl;
             std::cout << "ERROR infinite " << scaleUp->Integral() << std::endl;
             std::cout << "ERROR infinite " << scaleDown->Integral() << std::endl;
@@ -547,7 +548,8 @@ int main(int argc, char *argv[]){
 								plotVariation(nominal,smearUp,smearDown,*phoCat,Form("%s_cat%d_smear",proc->c_str(),cat));
 							}
 						}
-            if (isinf(getMeanVar(nominal,smearUp,smearDown)) || isinf(getRateVar(nominal,smearUp,smearDown)) || isinf(getSigmaVar(nominal,smearUp,smearDown))) {
+            //if (isinf(getMeanVar(nominal,smearUp,smearDown)) || isinf(getRateVar(nominal,smearUp,smearDown)) || isinf(getSigmaVar(nominal,smearUp,smearDown))) {
+            if ((getMeanVar(nominal,smearUp,smearDown))>9999 || (getRateVar(nominal,smearUp,smearDown))>9999 || (getSigmaVar(nominal,smearUp,smearDown))>9999 ) {
             std::cout << "ERROR infinite " << nominal->Integral()<< std::endl;
             std::cout << "ERROR infinite " << smearUp->Integral() << std::endl;
             std::cout << "ERROR infinite " << smearDown->Integral() << std::endl;
@@ -584,7 +586,8 @@ int main(int argc, char *argv[]){
 								plotVariation(nominal,scaleUp,scaleDown,*phoCat,Form("%s_cat%d_scale",proc->c_str(),cat)); 
 							}
 						}
-            if (isinf(getMeanVar(nominal,scaleUp,scaleDown)) || isinf(getRateVar(nominal,scaleUp,scaleDown)) || isinf(getSigmaVar(nominal,scaleUp,scaleDown))) {
+            //if (isinf(getMeanVar(nominal,scaleUp,scaleDown)) || isinf(getRateVar(nominal,scaleUp,scaleDown)) || isinf(getSigmaVar(nominal,scaleUp,scaleDown))) {
+            if ((getMeanVar(nominal,scaleUp,scaleDown))>9999 || (getRateVar(nominal,scaleUp,scaleDown)) >9999 || (getSigmaVar(nominal,scaleUp,scaleDown))>9999 ) {
             std::cout << "ERROR infinite " << nominal->Integral()<< std::endl;
             std::cout << "ERROR infinite " << scaleUp->Integral() << std::endl;
             std::cout << "ERROR infinite " << scaleDown->Integral() << std::endl;
@@ -613,7 +616,8 @@ int main(int argc, char *argv[]){
 						outfile << Form("%-30s",(*phoCat+"_smear").c_str());
 						if( smearUp != 0 && smearDown != 0 && nominal != 0) {
 							if( doPlots_ ) { plotVariation(nominal,smearUp,smearDown,*phoCat,Form("%s_cat%d_smear",proc->c_str(),cat)); }
-            if (isinf(getMeanVar(nominal,smearUp,smearDown)) || isinf(getRateVar(nominal,smearUp,smearDown)) || isinf(getSigmaVar(nominal,smearUp,smearDown))) {
+            //if (isinf(getMeanVar(nominal,smearUp,smearDown)) || isinf(getRateVar(nominal,smearUp,smearDown)) || isinf(getSigmaVar(nominal,smearUp,smearDown))) {
+            if ((getMeanVar(nominal,smearUp,smearDown))>9999 || (getRateVar(nominal,smearUp,smearDown))>9999 || (getSigmaVar(nominal,smearUp,smearDown))>9999) {
             std::cout << "ERROR infinite value! " << std::endl;
             exit (1);
             }

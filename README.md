@@ -4,15 +4,15 @@ The Final Fits package is a series of scripts which are used to run the final st
 ## Download and setup instructions
 
 ```
-cmsrel CMSSW_7_1_5
-cd CMSSW_7_1_5/src
+cmsrel CMSSW_7_4_7
+cd CMSSW_7_4_7/src
 cmsenv
 git cms-init
-# Install Combine as per Twiki: https://twiki.cern.ch/twiki/bin/viewauth/CMS/SWGuideHiggsAnalysisCombinedLimit#ROOT6_SLC6_release_CMSSW_7_1_X
+# Install Combine as per Twiki: https://twiki.cern.ch/twiki/bin/viewauth/CMS/SWGuideHiggsAnalysisCombinedLimit#ROOT6_SLC6_release_CMSSW_7_4_X
 git clone https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit
 cd ${CMSSW_BASE}/src/HiggsAnalysis/CombinedLimit
 git fetch origin
-#git checkout v5.0.1 #at present only master branch has up to date XS files
+git checkout v6.2.1 
 cd ${CMSSW_BASE}/src
 # Install Flashgg Final Fit packages
 git clone git@github.com:cms-analysis/flashggFinalFit.git
