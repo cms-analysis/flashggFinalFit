@@ -115,7 +115,10 @@ void InitialFit::loadPriorConstraints(string filename, float constraintValue){
 
   ifstream datfile;
   datfile.open(filename.c_str());
-  if (datfile.fail()) return;
+  if (datfile.fail()){
+    std::cout<<"loadPriorCostraints FAILED: no such file as "<<filename<<std::endl;
+    return;
+  }
   while (datfile.good()) {
     string line;
     getline(datfile,line);
@@ -173,38 +176,119 @@ void InitialFit::printFitParams(){
 }
 
 void InitialFit::runFits(int ncpu){
+  int ngausmax = 10; //we assume that we never use more than 10 (very safe) gaussians for a single dataset
+  float n_sigma_constraint = 1.; //constrain sigmas of gaussians at mh!=125 to the values fitted at mh=125, within n_sigma_constraint times the fit uncertainty
+  //middle point is assumed to be 125 GeV
+  int mh = allMH_[(allMH_.size()+1)/2 - 1];
+  //  int mh = 125;
+  std::cout<<"RUNNING FITS for mh = "<<mh<<std::endl;
+  MH->setConstant(false);
+  MH->setVal(mh);
+  MH->setConstant(true);
+  assert(sumOfGaussians.find(mh)!=sumOfGaussians.end());
+  assert(datasets.find(mh)!=datasets.end());
+  RooAddPdf *fitModel125 = sumOfGaussians[mh];
+  //RooDataSet *data125 = datasets[mh];
+  RooAbsData *data125;
+  if (binnedFit_){
+    data125 = datasets[mh]->binnedClone();
+  } else {
+    data125 = datasets[mh];
+  }
+  // help when dataset has no entries
+  if (data125->sumEntries()<1.e-5) {
+    mass->setVal(mh);
+    data125->add(RooArgSet(*mass),1.e-5);
+  }
+  //fitModel125->Print();
+  //data125->Print();
+  RooFitResult *fitRes125;
+  mass->setBins(bins_);
+  verbosity_ >=3 ?
+    fitRes125 = fitModel125->fitTo(*data125,NumCPU(ncpu),RooFit::Minimizer("Minuit","minimize"),SumW2Error(true),Save(true)) :
+    verbosity_ >=2 ?
+    fitRes125 = fitModel125->fitTo(*data125,NumCPU(ncpu),RooFit::Minimizer("Minuit","minimize"),SumW2Error(true),Save(true),PrintLevel(-1)) :
+        fitRes125 = fitModel125->fitTo(*data125,NumCPU(ncpu),RooFit::Minimizer("Minuit","minimize"),SumW2Error(true),Save(true),PrintLevel(-1),PrintEvalErrors(-1));
+  fitResults.insert(pair<int,RooFitResult*>(mh,fitRes125));
+  mass->setBins(160); //return to default 
+  
+  std::cout<<"PRINT 125 MODEL FIT RESULT"<<std::endl;
+  fitRes125->floatParsFinal().Print();
   
   for (unsigned int i=0; i<allMH_.size(); i++){
-    int mh = allMH_[i];
+    if( i == (allMH_.size()+1)/2 -1 ) continue;
+    // if( allMH_[i] == 125 ) continue;
+    mh = allMH_[i];
+    std::cout<<"RUNNING FITS for mh = "<<mh<<std::endl;
     MH->setConstant(false);
     MH->setVal(mh);
     MH->setConstant(true);
     assert(sumOfGaussians.find(mh)!=sumOfGaussians.end());
     assert(datasets.find(mh)!=datasets.end());
     RooAddPdf *fitModel = sumOfGaussians[mh];
+    fitModel->Print();
+    RooArgSet* comps = fitModel->getComponents();
+    TIterator* iter = comps->createIterator();
+    RooGaussian* nextg = (RooGaussian*)iter->Next();
+    //    while(nextg){
+      std::cout<<"Print:"<<std::endl;
+      nextg->Print();
+      RooArgSet* formulaMean = nextg->getParameters(*mass);
+      std::cout<<"Print formulamean:"<<std::endl;
+      formulaMean->Print();
+      for(int ng=0; ng<ngausmax; ng++){
+
+// 	RooAbsArg* dm = formulaMean->find(Form("dm_mh%d_g%d",mh,ng ));
+//	if(dm!=NULL){
+//	  dm->Print();
+//	}
+	RooRealVar* sigma = (RooRealVar*)formulaMean->find(Form("sigma_mh%d_g%d",mh,ng ));
+	if(sigma!=NULL){
+	  sigma->Print();
+	  sigma->setVal( ((RooRealVar*)fitRes125->floatParsFinal().find(  Form("sigma_mh125_g%d",ng )  ))->getVal()   );
+	  sigma->setRange( ((RooRealVar*)fitRes125->floatParsFinal().find(  Form("sigma_mh125_g%d",ng )  ))->getVal() - n_sigma_constraint*(((RooRealVar*)fitRes125->floatParsFinal().find(  Form("sigma_mh125_g%d",ng )  ))->getAsymErrorLo()), ((RooRealVar*)fitRes125->floatParsFinal().find(  Form("sigma_mh125_g%d",ng )  ))->getVal() + n_sigma_constraint*(((RooRealVar*)fitRes125->floatParsFinal().find(  Form("sigma_mh125_g%d",ng )  ))->getAsymErrorHi())   );
+	  sigma->Print();
+	}
+	else{
+	  std::cout<<"Constraints set on sigmas of "<<ng-1<<" gaussians of this model"<<std::endl;
+	  break;
+	}
+      }
+
+      
+//      RooArgSet* actualvars = formulaMean->getComponents();
+//      TIterator* iterFormula = actualvars->createIterator();
+//      RooAbsReal* nextVar = (RooAbsReal*)iterFormula->Next();
+//      while(nextVar){
+//	nextVar->Print();
+//	nextVar = (RooAbsReal*)iterFormula->Next();
+//	
+//      }
+//      nextg = (RooGaussian*)iter->Next();
+//    }
     //RooDataSet *data = datasets[mh];
     RooAbsData *data;
     if (binnedFit_){
-    data = datasets[mh]->binnedClone();
+      data = datasets[mh]->binnedClone();
     } else {
     data = datasets[mh];
     }
-		// help when dataset has no entries
-		if (data->sumEntries()<1.e-5) {
-			mass->setVal(mh);
-			data->add(RooArgSet(*mass),1.e-5);
-		}
+    // help when dataset has no entries
+    if (data->sumEntries()<1.e-5) {
+      mass->setVal(mh);
+      data->add(RooArgSet(*mass),1.e-5);
+    }
     //fitModel->Print();
-    //data->Print();
+  //data->Print();
     RooFitResult *fitRes;
     mass->setBins(bins_);
     verbosity_ >=3 ?
       fitRes = fitModel->fitTo(*data,NumCPU(ncpu),RooFit::Minimizer("Minuit","minimize"),SumW2Error(true),Save(true)) :
       verbosity_ >=2 ?
-        fitRes = fitModel->fitTo(*data,NumCPU(ncpu),RooFit::Minimizer("Minuit","minimize"),SumW2Error(true),Save(true),PrintLevel(-1)) :
-        fitRes = fitModel->fitTo(*data,NumCPU(ncpu),RooFit::Minimizer("Minuit","minimize"),SumW2Error(true),Save(true),PrintLevel(-1),PrintEvalErrors(-1));
-    fitResults.insert(pair<int,RooFitResult*>(mh,fitRes));
-    mass->setBins(160); //return to default 
+      fitRes = fitModel->fitTo(*data,NumCPU(ncpu),RooFit::Minimizer("Minuit","minimize"),SumW2Error(true),Save(true),PrintLevel(-1)) :
+      fitRes = fitModel->fitTo(*data,NumCPU(ncpu),RooFit::Minimizer("Minuit","minimize"),SumW2Error(true),Save(true),PrintLevel(-1),PrintEvalErrors(-1));
+  fitResults.insert(pair<int,RooFitResult*>(mh,fitRes));
+  mass->setBins(160); //return to default 
   }
 }
 
@@ -225,7 +309,7 @@ void InitialFit::setFitParams(std::map<int,std::map<std::string,RooRealVar*> >& 
 
 
 void InitialFit::plotFits(string name, string rvwv){
-  
+  std::cout<<"Plotting InitalFit"<<std::endl;
   TCanvas *canv = new TCanvas();
   RooPlot *plot = mass->frame(Range(mhLow_-10,mhHigh_+10));
   TPaveText *pt = new TPaveText(.65,.6,.97,.95,"NDC");
@@ -259,4 +343,5 @@ void InitialFit::plotFits(string name, string rvwv){
   canv->Print(Form("%s.png",name.c_str()));
   mass->setBins(160); //return to default 
   delete canv;
+  std::cout<<"Plotted InitalFit"<<std::endl;
 }
