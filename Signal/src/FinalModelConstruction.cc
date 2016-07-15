@@ -8,6 +8,7 @@
 #include "TF1.h"
 #include "RooPlot.h"
 #include "TLatex.h"
+#include "TColor.h"
 #include "TPaveText.h"
 #include "TMultiGraph.h"
 #include "RooVoigtian.h"
@@ -40,7 +41,7 @@ template<class ResultT, class SourceT, class PredicateT> typename ResultT::itera
 	return dst.begin()+orig_size;
 }
 
-FinalModelConstruction::FinalModelConstruction(RooRealVar *massVar, RooRealVar *MHvar, RooRealVar *intL, int mhLow, int mhHigh, string proc, string cat, bool doSecMods, string systematicsFileName, vector<int> skipMasses, int verbosity,std::vector<std::string> procList, std::vector<std::string> flashggCats , string outDir, bool isProblemCategory ,bool isCB, int sqrts, bool quadraticSigmaSum)	:
+FinalModelConstruction::FinalModelConstruction( std::vector<int> massList, RooRealVar *massVar, RooRealVar *MHvar, RooRealVar *intL,int mhLow, int mhHigh, string proc, string cat, bool doSecMods, string systematicsFileName, vector<int> skipMasses, int verbosity,std::vector<std::string> procList, std::vector<std::string> flashggCats , string outDir, bool isProblemCategory ,bool isCB, int sqrts, bool quadraticSigmaSum)	:
   mass(massVar),
   MH(MHvar),
   intLumi(intL),
@@ -67,7 +68,12 @@ FinalModelConstruction::FinalModelConstruction(RooRealVar *massVar, RooRealVar *
   lumi_8TeV  = "19.1 fb^{-1}"; // default is "19.7 fb^{-1}"
   lumi_7TeV  = "4.9 fb^{-1}";  // default is "5.1 fb^{-1}"
   lumi_sqrtS = "13 TeV";       // used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
-  allMH_ = getAllMH();
+  if (massList.size()==0){
+    allMH_ = getAllMH();
+  }else{
+    allMH_ = massList;
+  }
+
 	if (sqrts_ ==7) is2011_=1;
 	if (sqrts_ ==8) is2012_=1;
 	if (sqrts_ ==13) isFlashgg_=1;
@@ -531,7 +537,7 @@ void FinalModelConstruction::setSecondaryModelVars(RooRealVar *mh_sm, RooRealVar
 }
 
 void FinalModelConstruction::getRvFractionFunc(string name){
-  
+   std::cout << " LC DEBUG allMH size " << allMH_.size() << " rvDatasets size " << rvDatasets.size() << " wvDatasets size " << rvDatasets.size() << std::endl;
   assert(allMH_.size()==rvDatasets.size());
   assert(allMH_.size()==wvDatasets.size());
   vector<double> mhValues, rvFracValues;
@@ -1103,11 +1109,12 @@ void FinalModelConstruction::plotPdf(string outDir){
   //TH1F * dummy = new TH1F("d","d",1,0,1);
   //dummy->SetMarkerColor(kWhite);
   //pt->AddText(Form("Fit using PDF from :"); 
+  std::vector<int> colorList ={7,9,4,2,8,5,1,14};//kCyan,kMagenta,kBlue, kRed,kGreen,kYellow,kBlack, kGray};
   for (unsigned int i=0; i<allMH_.size(); i++){
     int mh=allMH_[i];
-    stdDatasets[mh]->plotOn(dataPlot,Binning(160),MarkerColor(kBlue+10*i));
+    stdDatasets[mh]->plotOn(dataPlot,Binning(160),MarkerColor(colorList[i]));
     MH->setVal(mh);
-    extendPdf->plotOn(dataPlot,LineColor(kBlue-1+10*i));
+    extendPdf->plotOn(dataPlot,LineColor(colorList[i]));
     pt->AddText(Form("RV %d: %s",mh,rvFITDatasets[mh]->GetName())); 
     pt->AddText(Form("WV %d: %s",mh,wvFITDatasets[mh]->GetName())); 
    // extendPdf->Print("V");
@@ -1243,7 +1250,7 @@ void FinalModelConstruction::getNormalization(){
   TGraph *  xsGraph = new TGraph();
   TGraph *  brGraph = new TGraph();
   int point=0;
-  for (int m =120; m<131; m++){
+  for (float m =120; m<131; m=m+0.5){
     MH->setVal(m);
     xsGraph->SetPoint(point,m,xs->getVal());
     brGraph->SetPoint(point,m,brSpline->getVal());

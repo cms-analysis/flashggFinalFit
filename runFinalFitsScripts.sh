@@ -9,6 +9,7 @@ CATS="UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,UntaggedTag_4,VBFT
 SCALES="HighR9EE,LowR9EE,HighR9EB,LowR9EB"
 #SMEARS="HighR9EE,LowR9EE,HighR9EBRho,LowR9EBRho,HighR9EBPhi,LowR9EBPhi"
 SMEARS="HighR9EE,LowR9EE,HighR9EB,LowR9EB" #DRY RUN
+MASSLIST="120,125,130" #DRY RUN
 PSEUDODATADAT=""
 SIGFILE=""
 SIGONLY=1
@@ -23,6 +24,7 @@ INTLUMI=1
 DATAFILE=""
 UNBLIND=0
 ISDATA=0
+BS=0
 VERBOSE=0
 BATCH="LSF"
 DEFAULTQUEUE="1nh"
@@ -56,7 +58,7 @@ echo "--batch) which batch system to use (LSF,IC) (default $BATCH)) "
 
 
 # options may be followed by one colon to indicate they have a required argument
-if ! options=$(getopt -u -o hi:p:f: -l help,inputFile:,procs:,flashggCats:,ext:,smears:,scales:,pseudoDataDat:,sigFile:,combine,combineOnly,combinePlotsOnly,signalOnly,backgroundOnly,datacardOnly,superloop:,continueLoop:,intLumi:,unblind,isData,isFakeData,dataFile:,batch:,verbose -- "$@")
+if ! options=$(getopt -u -o hi:p:f: -l help,inputFile:,procs:,bs:,flashggCats:,ext:,smears:,massList:,scales:,pseudoDataDat:,sigFile:,combine,combineOnly,combinePlotsOnly,signalOnly,backgroundOnly,datacardOnly,superloop:,continueLoop:,intLumi:,unblind,isData,isFakeData,dataFile:,batch:,verbose -- "$@")
 then
 # something went wrong, getopt will put out an error message for us
 exit 1
@@ -71,8 +73,9 @@ case $1 in
 -p|--procs) PROCS=$2; shift ;;
 --scales) SCALES=$2; shift ;;
 --smears) SMEARS=$2; shift ;;
+--massList) MASSLIST=$2; shift ;;
 -f|--flashggCats) CATS=$2; shift ;;
---ext) EXT=$2; echo "test" ; shift ;;
+--ext) EXT=$2; echo "test ext $EXT " ; shift ;;
 --pseudoDataDat) PSEUDODATADAT=$2; shift;;
 --dataFile) DATAFILE=$2; shift;;
 --batch) BATCH=$2; echo " BATCH $BATCH " ; shift;;
@@ -85,6 +88,7 @@ case $1 in
 --superloop) SUPERLOOP=$2 ; shift;;
 --continueLoop) COUNTER=$2; CONTINUELOOP=1 ; shift;;
 --intLumi) INTLUMI=$2; echo " test $INTLUMI" ;shift ;;
+--bs) BS=$2; echo " test BS $BS" ;shift ;;
 --isData) ISDATA=1;; 
 --verbose) VERBOSE=1;; 
 --isFakeData) ISDATA=0;; 
@@ -96,7 +100,7 @@ case $1 in
 esac
 shift
 done
-
+echo "[INFO] MASSLIST is $MASSLIST"
 if (($VERBOSE==1)) ; then echo "[INFO] SMEARS $SMEARS" ;fi
 if (($VERBOSE==1)) ; then echo "[INFO] SCALES $SCALES" ;fi
 
@@ -127,10 +131,9 @@ if [ $SIGONLY == 1 ]; then
 echo "------------------------------------------------"
 echo "------------>> Running SIGNAL"
 echo "------------------------------------------------"
-
 cd Signal
 echo "./runSignalScripts.sh -i $FILE -p $PROCS -f $CATS --ext $EXT --intLumi $INTLUMI $BATCHOPTION"
-./runSignalScripts.sh -i $FILE -p $PROCS -f $CATS --ext $EXT --intLumi $INTLUMI $BATCHOPTION --smears $SMEARS --scales $SCALES
+./runSignalScripts.sh -i $FILE -p $PROCS -f $CATS --ext $EXT --intLumi $INTLUMI $BATCHOPTION --smears $SMEARS --scales $SCALES --bs $BS --massList $MASSLIST
 cd -
 if [ $USER == lcorpe ]; then
 echo " Processing of the Signal model for final fit exercice $EXT is done, see output here: https://lcorpe.web.cern.ch/lcorpe/$OUTDIR/ " |  mail -s "FINAL FITS: $EXT " lc1113@imperial.ac.uk
@@ -185,8 +188,9 @@ echo "------------> Create DATACARD"
 echo "------------------------------------------------"
 
 cd Datacard
-echo "./makeParametricModelDatacardFLASHgg.py -i $FILE  -o Datacard_13TeV_${EXT}.txt -p $PROCS -c UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,VBFTag_0,VBFTag_1,TTHHadronicTag,TTHLeptonicTag --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --theoryNormFactors norm_factors.py #--submitSelf #--intLumi $INTLUMI"
-./makeParametricModelDatacardFLASHgg.py -i $FILE  -o Datacard_13TeV_${EXT}.txt -p $PROCS -c UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,VBFTag_0,VBFTag_1,TTHHadronicTag,TTHLeptonicTag --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --theoryNormFactors norm_factors.py #--submitSelf #--intLumi $INTLUMI
+echo "./makeParametricModelDatacardFLASHgg.py -i $FILE  -o Datacard_13TeV_${EXT}.txt -p $PROCS -c UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,VBFTag_0,VBFTag_1,TTHHadronicTag,TTHLeptonicTag --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --theoryNormFactors norm_factors.py --submitSelf #--intLumi $INTLUMI"
+./makeParametricModelDatacardFLASHgg.py -i $FILE  -o Datacard_13TeV_${EXT}.txt -p $PROCS -c UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,VBFTag_0,VBFTag_1,TTHHadronicTag,TTHLeptonicTag --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --theoryNormFactors norm_factors.py --submitSelf --intLumi $INTLUMI
+#./makeParametricModelDatacardFLASHgg.py -i $FILE  -o Datacard_13TeV_${EXT}.txt -p $PROCS -c UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,VBFTag_0,VBFTag_1,TTHHadronicTag,TTHLeptonicTag --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --theoryNormFactors norm_factors.py #--submitSelf #--intLumi $INTLUMI
 cd -
 fi
 
@@ -224,7 +228,7 @@ sed -i -e "s/\!EXT\!/$EXT/g" allPlots_${EXT}${FAKE}.sh
 sed -i -e "s/\!FAKE\!/$FAKE/g" combineHarvesterOptions13TeV_${EXT}${FAKE}.dat
 echo "Adding _FAKE  ($FAKE) t multipdf if ISDATA == $ISDATA"
 sed -i -e "s/multipdf.root/multipdf${FAKE}.root/g" CMS-HGG_mva_13TeV_datacard.txt 
-#INTLUMI="2.7"
+#INTLUMI="2.60"
 sed -i -e "s/\!INTLUMI\!/$INTLUMI/g" combineHarvesterOptions13TeV_${EXT}${FAKE}.dat 
 
 cp combinePlotsOptions_Template${FAKE}.dat combinePlotsOptions_${EXT}${FAKE}.dat
@@ -268,7 +272,7 @@ LEDGER=" --it $COUNTER --itLedger itLedger_$EXT.txt"
 echo INTLUMI = "$INTLUMI"
 echo "./makeCombinePlots.py -d combinePlotsOptions_${EXT}${FAKE}.dat -b $LEDGER "
 ./makeCombinePlots.py -d combinePlotsOptions_$EXT${FAKE}.dat -b $LEDGER
-./allPlots_${EXT}${FAKE}.sh
+#./allPlots_${EXT}${FAKE}.sh
 #./makeCombinePlots.py -f combineJobs13TeV_$EXT/MuScanFloatMH/MuScanFloatMH.root --mu -t "#sqrt{s}\=13TeV L\=$INTLUMI fb^{-1}" -o muFloatMH -b $LEDGER #for some reason doesn't work in datfile
 #./makeCombinePlots.py -f combineJobs13TeV_$EXT/MuScanFixMH/MuScanFixMH.root --mu -t "#sqrt{s}\=13TeV L\=$INTLUMI fb^{-1}" -o muFixMH -b $LEDGER #for some reason doesn't work in datfile
 #./makeCombinePlots.py -f combineJobs13TeV_$EXT/RVRFScan/RVRFScan.root --rvrf -t "#sqrt{s}\=13TeV L\=$INTLUMI fb^{-1}" -o RVRF --xbinning 30,-1.5,2.5 --ybinning 30,-3,8 -b $LEDGER #

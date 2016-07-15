@@ -62,6 +62,8 @@ bool is2011_=false;
 bool is2012_=false;
 string massesToSkip_;
 vector<int> skipMasses_;
+string massListStr_;
+vector<int> massList_;
 bool splitRVWV_=true;
 bool doSecondaryModels_=true;
 bool doQuadraticSigmaSum_=false;
@@ -132,6 +134,7 @@ void OptionParser(int argc, char *argv[]){
 		("skipSecondaryModels",                                                                   			"Turn off creation of all additional models")
 		("doQuadraticSigmaSum",  										        "Add sigma systematic terms in quadrature")
 		("procs", po::value<string>(&procStr_)->default_value("ggh,vbf,wh,zh,tth"),					"Processes (comma sep)")
+		("massList", po::value<string>(&massListStr_)->default_value("120,125,130"),					"Masses to process.")
 		("skipMasses", po::value<string>(&massesToSkip_)->default_value(""),					"Skip these mass points - used eg for the 7TeV where there's no mc at 145")
 		("runInitialFitsOnly",                                                                                      "Just fit gaussians - no interpolation, no systematics - useful for testing nGaussians")
 		("cloneFits", po::value<string>(&cloneFitFile_),															"Do not redo the fits but load the fit parameters from this workspace. Pass as fileName:wsName.")
@@ -179,6 +182,21 @@ void OptionParser(int argc, char *argv[]){
 		}
 		cout << "\t";
 		for (vector<int>::iterator it=skipMasses_.begin(); it!=skipMasses_.end(); it++) cout << *it << " ";
+		cout << endl;
+	}
+	if (vm.count("massList")) {
+		cout << "[INFO] Masses to process... " << endl;
+		vector<string> els;
+
+    // if you want to skip masses for some reason...
+		split(els,massListStr_,boost::is_any_of(","));
+		if (els.size()>0 && massListStr_!="") {
+			for (vector<string>::iterator it=els.begin(); it!=els.end(); it++) {
+				massList_.push_back(boost::lexical_cast<int>(*it));
+			}
+		}
+		cout << "\t";
+		for (vector<int>::iterator it=massList_.begin(); it!=massList_.end(); it++) cout << *it << " ";
 		cout << endl;
 	}
 	
@@ -646,7 +664,8 @@ int main(int argc, char *argv[]){
 
     bool isProblemCategory =false;
 
-    for (int mh=mhLow_; mh<=mhHigh_; mh+=5){
+    for (int mhIndex=0; mhIndex< massList_.size() ; mhIndex++){
+      int mh=massList_[mhIndex];
       if (skipMass(mh)) continue;
       RooDataSet *dataRV; 
       RooDataSet *dataWV; 
@@ -812,8 +831,8 @@ int main(int argc, char *argv[]){
 
     // these guys do the fitting
     // right vertex
-    if (verbose_) std::cout << "[INFO] preapraing initialfit RV" << std::endl;
-    InitialFit initFitRV(mass_,MH,mhLow_,mhHigh_,skipMasses_,binnedFit_,nBins_);
+    if (verbose_) std::cout << "[INFO] preapraing initialfit RV, massList size "<< massList_.size() << std::endl;
+    InitialFit initFitRV(mass_,MH,mhLow_,mhHigh_,skipMasses_,binnedFit_,nBins_,massList_);
     initFitRV.setVerbosity(verbose_);
     if (!cloneFits_) {
       if (verbose_) std::cout << "[INFO] RV building sum of gaussians with nGaussiansRV " << nGaussiansRV << std::endl;
@@ -836,8 +855,8 @@ int main(int argc, char *argv[]){
     parlist_t fitParamsRV = initFitRV.getFitParams();
 
     // wrong vertex
-    if (verbose_) std::cout << "[INFO] preparing initialfi tWV" << std::endl;
-    InitialFit initFitWV(mass_,MH,mhLow_,mhHigh_,skipMasses_,binnedFit_,nBins_);
+    if (verbose_) std::cout << "[INFO] preparing initialfit WV, masList size "<< massList_.size() << std::endl;
+    InitialFit initFitWV(mass_,MH,mhLow_,mhHigh_,skipMasses_,binnedFit_,nBins_,massList_);
     initFitWV.setVerbosity(verbose_);
     if (!cloneFits_) {
       if (verbose_) std::cout << "[INFO] WV building sum of gaussians wth nGaussiansWV "<< nGaussiansWV << std::endl;
@@ -891,7 +910,7 @@ int main(int argc, char *argv[]){
       if (isFlashgg_){
         
         outWS->import(*intLumi_);
-        FinalModelConstruction finalModel(mass_,MH,intLumi_,mhLow_,mhHigh_,proc,cat,doSecondaryModels_,systfilename_,skipMasses_,verbose_,procs_, flashggCats_,plotDir_, isProblemCategory,isCutBased_,sqrts_,doQuadraticSigmaSum_);
+        FinalModelConstruction finalModel(massList_, mass_,MH,intLumi_,mhLow_,mhHigh_,proc,cat,doSecondaryModels_,systfilename_,skipMasses_,verbose_,procs_, flashggCats_,plotDir_, isProblemCategory,isCutBased_,sqrts_,doQuadraticSigmaSum_);
         
         finalModel.setSecondaryModelVars(MH_SM,DeltaM,MH_2,higgsDecayWidth);
         finalModel.setRVsplines(splinesRV);

@@ -340,18 +340,29 @@ vector<TH1F*> getHistograms(vector<TFile*> files, string name, string syst){
 
 	vector<TH1F*> ret_hists;
 	for (unsigned int i=0; i<files.size(); i++){
-
+    std::cout << " DEBUG getHist a " << std::endl;
 		files[i]->cd();
+    std::cout << " DEBUG getHist b " << std::endl;
 		if (isFlashgg_){
+    std::cout << " DEBUG getHist c " << std::endl;
 			TH1F *up =  new TH1F(Form("%s_%sUp01sigma",name.c_str(),syst.c_str()),Form("%s_%sUp01sigma",name.c_str(),syst.c_str()),80,100,180);
+    std::cout << " DEBUG getHist d " << std::endl;
 			TH1F *down = new TH1F(Form("%s_%sDown01sigma",name.c_str(),syst.c_str()),Form("%s_%sDown01sigma",name.c_str(),syst.c_str()),80,100,180);
+    std::cout << " DEBUG getHist e " << std::endl;
 			TH1F *nominal = new TH1F((Form("%s_%s",name.c_str(),syst.c_str())),(Form("%s%s",name.c_str(),syst.c_str())),80,100,180);
+    std::cout << " DEBUG getHist f " << std::endl;
 			RooDataSet *rds_up = (RooDataSet*) inWS_->data((Form("%s_%sUp01sigma",name.c_str(),syst.c_str())));
+    std::cout << " DEBUG getHist g " << std::endl;
 			RooDataSet *rds_down = (RooDataSet*) inWS_->data((Form("%s_%sDown01sigma",name.c_str(),syst.c_str())));
+    std::cout << " DEBUG getHist h (Form(,name.c_str())) "<< (Form("%s",name.c_str())) << std::endl;
 			RooDataSet *rds_nom = (RooDataSet*) inWS_->data((Form("%s",name.c_str())));
+    std::cout << " DEBUG getHist i rds_nom " << rds_nom << std::endl;
 				
+    std::cout << " DEBUG getHist j " << std::endl;
 			RooDataHist *rds_up_h = (RooDataHist*) inWS_->data((Form("%s_%sUp01sigma",name.c_str(),syst.c_str())));
+    std::cout << " DEBUG getHist k " << std::endl;
 			RooDataHist *rds_down_h = (RooDataHist*) inWS_->data((Form("%s_%sDown01sigma",name.c_str(),syst.c_str())));
+    std::cout << " DEBUG getHist l " << std::endl;
 
 			if(rds_up){
 				rds_up->fillHistogram(up,RooArgList(*mass_));
@@ -476,6 +487,8 @@ int main(int argc, char *argv[]){
 			//	if (isFlashgg_){
 			//	outfile << Form("diphotonCat=%s",(flashggCats_[cat]).c_str()) << endl;
 			//	} else {
+      cout << "[DEBUG a " << endl;
+
 			outfile << Form("diphotonCat=%d",cat) << endl;
 			//	}
 			outfile << Form("proc=%s",proc->c_str()) << endl;
@@ -484,14 +497,22 @@ int main(int argc, char *argv[]){
 			if (photonCatScalesStr_.size()!=0){
 				for (vector<string>::iterator phoCat=photonCatScales_.begin(); phoCat!=photonCatScales_.end(); phoCat++){
 
+      cout << "[DEBUG b " << endl;
 					// this is to ensure nominal comes from the right file
 					vector<TH1F*> hists;
+      cout << "[DEBUG b1 " << endl;
 					if (isFlashgg_){
+      cout << "[DEBUG b2 " << endl;
 						string flashggCat = flashggCats_[cat]; 
+      cout << "[DEBUG b3 " <<Form("%s_%d_13TeV_%s",proc->c_str(),mh_,flashggCat.c_str()) << "  " <<Form("MCScale%s",phoCat->c_str()) <<  endl;
 						hists= getHistograms(inFiles,Form("%s_%d_13TeV_%s",proc->c_str(),mh_,flashggCat.c_str()),Form("MCScale%s",phoCat->c_str()));
+      cout << "[DEBUG b4 " << endl;
 					}else{
+      cout << "[DEBUG b5 " << endl;
 						hists= getHistograms(inFiles,Form("th1f_sig_%s_mass_m%d_cat%d",proc->c_str(),mh_,cat),Form("E_scale_%s",phoCat->c_str()));
+      cout << "[DEBUG b6 " << endl;
 					}
+      cout << "[DEBUG c " << endl;
 					TH1F *nominal = hists[0];
 					TH1F *scaleUp = hists[1];
 					TH1F *scaleDown = hists[2];
@@ -505,6 +526,7 @@ int main(int argc, char *argv[]){
 								plotVariation(nominal,scaleUp,scaleDown,*phoCat,Form("%s_cat%d_scale",proc->c_str(),cat)); 
 							}
 						}
+      cout << "[DEBUG d " << endl;
             //if (isinf(getMeanVar(nominal,scaleUp,scaleDown)) || isinf(getRateVar(nominal,scaleUp,scaleDown)) || isinf(getSigmaVar(nominal,scaleUp,scaleDown))) {
             if ((getMeanVar(nominal,scaleUp,scaleDown))>99999 || (getRateVar(nominal,scaleUp,scaleDown))>99999 || (getSigmaVar(nominal,scaleUp,scaleDown))>99999 ) {
             std::cout << "ERROR infinite " << nominal->Integral()<< std::endl;
@@ -521,16 +543,19 @@ int main(int argc, char *argv[]){
 				}
 			}
 
+      cout << "[DEBUG e " << endl;
 			// photon smears not correlated
 			if (photonCatSmearsStr_.size()!=0){
 				for (vector<string>::iterator phoCat=photonCatSmears_.begin(); phoCat!=photonCatSmears_.end(); phoCat++){
 
+      cout << "[DEBUG f " << endl;
 					vector<TH1F*> hists;
 					if (isFlashgg_){ // Smearing not yet supported for Flashgg
 						string flashggCat = flashggCats_[cat]; 
 						hists= getHistograms(inFiles,Form("%s_%d_13TeV_%s",proc->c_str(),mh_,flashggCat.c_str()),Form("MCSmear%s",phoCat->c_str()));
 					}	 else {
 
+      cout << "[DEBUG g " << endl;
 						// this is to ensure nominal comes from the right file
 						hists = getHistograms(inFiles,Form("th1f_sig_%s_mass_m%d_cat%d",proc->c_str(),mh_,cat),Form("E_res_%s",phoCat->c_str()));
 					}
@@ -538,6 +563,7 @@ int main(int argc, char *argv[]){
 					TH1F *smearUp = hists[1];
 					TH1F *smearDown = hists[2];
 
+      cout << "[DEBUG h " << endl;
 					outfile << Form("%-30s",(*phoCat+"_"+sqrtS_+"TeVsmear").c_str());
 					if( smearUp != 0 && smearDown != 0 && nominal != 0) {
 						if( doPlots_ ) { 
@@ -548,6 +574,7 @@ int main(int argc, char *argv[]){
 								plotVariation(nominal,smearUp,smearDown,*phoCat,Form("%s_cat%d_smear",proc->c_str(),cat));
 							}
 						}
+      cout << "[DEBUG i " << endl;
             //if (isinf(getMeanVar(nominal,smearUp,smearDown)) || isinf(getRateVar(nominal,smearUp,smearDown)) || isinf(getSigmaVar(nominal,smearUp,smearDown))) {
             if ((getMeanVar(nominal,smearUp,smearDown))>9999 || (getRateVar(nominal,smearUp,smearDown))>9999 || (getSigmaVar(nominal,smearUp,smearDown))>9999 ) {
             std::cout << "ERROR infinite " << nominal->Integral()<< std::endl;
@@ -564,6 +591,7 @@ int main(int argc, char *argv[]){
 				}	
 			}
 
+      cout << "[DEBUG j " << endl;
 			if (isFlashgg_){
 				// photon scales correlated
 				if (photonCatScalesCorrStr_.size()!=0){
@@ -576,6 +604,7 @@ int main(int argc, char *argv[]){
 						TH1F *scaleUp = hists[1];
 						TH1F *scaleDown = hists[2];
 
+      cout << "[DEBUG k " << endl;
 
 					outfile << Form("%-30s",(*phoCat+"_"+"scale").c_str());
 					if( scaleUp != 0 && scaleDown != 0 && nominal != 0) {
@@ -586,6 +615,7 @@ int main(int argc, char *argv[]){
 								plotVariation(nominal,scaleUp,scaleDown,*phoCat,Form("%s_cat%d_scale",proc->c_str(),cat)); 
 							}
 						}
+      cout << "[DEBUG l " << endl;
             //if (isinf(getMeanVar(nominal,scaleUp,scaleDown)) || isinf(getRateVar(nominal,scaleUp,scaleDown)) || isinf(getSigmaVar(nominal,scaleUp,scaleDown))) {
             if ((getMeanVar(nominal,scaleUp,scaleDown))>9999 || (getRateVar(nominal,scaleUp,scaleDown)) >9999 || (getSigmaVar(nominal,scaleUp,scaleDown))>9999 ) {
             std::cout << "ERROR infinite " << nominal->Integral()<< std::endl;
@@ -603,6 +633,7 @@ int main(int argc, char *argv[]){
 				}
 			}
   }
+      cout << "[DEBUG n " << endl;
 				// photon smears correlated
 				if (photonCatSmearsCorrStr_.size()!=0){
 					for (vector<string>::iterator phoCat=photonCatSmearsCorr_.begin(); phoCat!=photonCatSmearsCorr_.end(); phoCat++){
@@ -613,6 +644,7 @@ int main(int argc, char *argv[]){
 						TH1F *smearUp = hists[1];
 						TH1F *smearDown = hists[2];
 
+      cout << "[DEBUG m " << endl;
 						outfile << Form("%-30s",(*phoCat+"_smear").c_str());
 						if( smearUp != 0 && smearDown != 0 && nominal != 0) {
 							if( doPlots_ ) { plotVariation(nominal,smearUp,smearDown,*phoCat,Form("%s_cat%d_smear",proc->c_str(),cat)); }
@@ -629,11 +661,13 @@ int main(int argc, char *argv[]){
 				}
 
 			
+      cout << "[DEBUG o " << endl;
 			outfile << endl;	
 		} // end process loop
 		outfile << endl;
 	} // end category loop
 
+      cout << "[DEBUG p " << endl;
 	for (unsigned int i=0; i<inFiles.size(); i++){
 		if(verbosity_)	cout << "[INFO] Closed file " << inFiles[i]->GetName() << endl;
 		inFiles[i]->cd();

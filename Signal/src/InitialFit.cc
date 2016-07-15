@@ -3,6 +3,7 @@
 #include "TCanvas.h"
 #include "TMath.h"
 #include "RooPlot.h"
+#include "TColor.h"
 #include "RooFormulaVar.h"
 #include "RooMsgService.h"
 #include "TPaveText.h"
@@ -14,7 +15,7 @@
 using namespace std;
 using namespace RooFit;
 
-InitialFit::InitialFit(RooRealVar *massVar, RooRealVar *MHvar, int mhLow, int mhHigh, vector<int> skipMasses, bool binnedFit, int bins):
+InitialFit::InitialFit(RooRealVar *massVar, RooRealVar *MHvar, int mhLow, int mhHigh, vector<int> skipMasses, bool binnedFit, int bins, std::vector<int> massList):
   mass(massVar),
   MH(MHvar),
   mhLow_(mhLow),
@@ -23,8 +24,13 @@ InitialFit::InitialFit(RooRealVar *massVar, RooRealVar *MHvar, int mhLow, int mh
   verbosity_(0),
   binnedFit_(binnedFit),
   bins_(bins)
-{
-  allMH_ = getAllMH();
+{ 
+  std::cout << "LC  DEBUG imitialFit filling all MH with massList of size " << massList.size() <<std::endl;
+  if (massList.size()==0){
+    allMH_ = getAllMH();
+  }else{
+    allMH_ = massList;
+  }
 }
 
 InitialFit::~InitialFit(){}
@@ -82,8 +88,8 @@ void InitialFit::buildSumOfGaussians(string name, int nGaussians, bool recursive
     
     for (int g=0; g<nGaussians; g++){
       //RooRealVar *dm = new RooRealVar(Form("dm_mh%d_g%d",mh,g),Form("dm_mh%d_g%d",mh,g),0.1,-8.,8.);
-      float dmRange =5.;
-      if (g>3) dmRange=2.;
+      float dmRange =3.;
+      if (g>3) dmRange=3.;
       RooRealVar *dm = new RooRealVar(Form("dm_mh%d_g%d",mh,g),Form("dm_mh%d_g%d",mh,g),0.1,-dmRange,dmRange);
       RooAbsReal *mean = new RooFormulaVar(Form("mean_mh%d_g%d",mh,g),Form("mean_mh%d_g%d",mh,g),"@0+@1",RooArgList(*MH,*dm));
       RooRealVar *sigma = new RooRealVar(Form("sigma_mh%d_g%d",mh,g),Form("sigma_mh%d_g%d",mh,g),2.,0.4,20.);
@@ -372,6 +378,7 @@ void InitialFit::plotFits(string name, string rvwv){
   TCanvas *canv = new TCanvas();
   RooPlot *plot = mass->frame(Range(mhLow_-10,mhHigh_+10));
   TPaveText *pt = new TPaveText(.65,.6,.97,.95,"NDC");
+  std::vector<int> colorList ={7,9,4,2,8,5,1,14};//kCyan,kMagenta,kBlue, kRed,kGreen,kYellow,kBlack, kGray};
   for (unsigned int i=0; i<allMH_.size(); i++){
     int mh = allMH_[i];
     MH->setConstant(false);
@@ -385,8 +392,12 @@ void InitialFit::plotFits(string name, string rvwv){
     RooDataHist *data = new RooDataHist(datasets[mh]->GetName(),datasets[mh]->GetName(), RooArgSet(*mass),*datasets[mh]);
     //RooDataHist *data = datasets[mh]->binnedClone();
     //data->plotOn(plot,Binning(160),MarkerColor(kBlue+10*i));
-    data->plotOn(plot,MarkerColor(kBlue+10*i));
-    fitModel->plotOn(plot,LineColor(kBlue-1+10*i));
+    if (i>  colorList.size() ){
+    std::cout << "ERROR you need to add more colors in InitialFit::plotFits because you have a lot of mH points!" << std::endl;
+    exit(1);
+    }
+    data->plotOn(plot,MarkerColor(colorList[i]));
+    fitModel->plotOn(plot,LineColor(colorList[i]));
     if( (TString(datasets[mh]->GetName()))!=(TString(datasetsSTD[mh]->GetName()))){
       pt->SetTextColor(kRed);
       pt->AddText(Form(" %d replacement :",mh));
