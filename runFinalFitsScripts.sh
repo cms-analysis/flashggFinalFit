@@ -7,7 +7,10 @@ CATS="UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,UntaggedTag_4,VBFT
 #CATS="UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,UntaggedTag_4,VBFTag_0,VBFTag_1,VBFTag_2,TTHLeptonicTag,VHHadronicTag,VHTightTag,VHLooseTag"
 #CATS="UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,UntaggedTag_4,VBFTag_0,VBFTag_1,VBFTag_2,VHHadronicTag,VHTightTag,VHLooseTag"
 SCALES="HighR9EE,LowR9EE,HighR9EB,LowR9EB"
-#SMEARS="HighR9EE,LowR9EE,HighR9EBRho,LowR9EBRho,HighR9EBPhi,LowR9EBPhi"
+#SCALESCORR="MaterialCentral,MaterialForward,FNUFEE,FNUFEB,ShowerShapeHighR9EE,ShowerShapeHighR9EB,ShowerShapeLowR9EE,ShowerShapeLowR9EB"
+SCALESCORR="MaterialCentral,MaterialForward"
+#SCALESGLOBAL="NonLinearity:0:2.6"
+SCALESGLOBAL="NonLinearity,Geant4,LightYield,Absolute"
 SMEARS="HighR9EE,LowR9EE,HighR9EB,LowR9EB" #DRY RUN
 MASSLIST="120,125,130" #DRY RUN
 PSEUDODATADAT=""
@@ -58,7 +61,7 @@ echo "--batch) which batch system to use (LSF,IC) (default $BATCH)) "
 
 
 # options may be followed by one colon to indicate they have a required argument
-if ! options=$(getopt -u -o hi:p:f: -l help,inputFile:,procs:,bs:,flashggCats:,ext:,smears:,massList:,scales:,pseudoDataDat:,sigFile:,combine,combineOnly,combinePlotsOnly,signalOnly,backgroundOnly,datacardOnly,superloop:,continueLoop:,intLumi:,unblind,isData,isFakeData,dataFile:,batch:,verbose -- "$@")
+if ! options=$(getopt -u -o hi:p:f: -l help,inputFile:,procs:,bs:,flashggCats:,ext:,smears:,massList:,scales:,scalesCorr:,scalesGlobal:,,pseudoDataDat:,sigFile:,combine,combineOnly,combinePlotsOnly,signalOnly,backgroundOnly,datacardOnly,superloop:,continueLoop:,intLumi:,unblind,isData,isFakeData,dataFile:,batch:,verbose -- "$@")
 then
 # something went wrong, getopt will put out an error message for us
 exit 1
@@ -72,6 +75,8 @@ case $1 in
 -i|--inputFile) FILE=$2; shift ;;
 -p|--procs) PROCS=$2; shift ;;
 --scales) SCALES=$2; shift ;;
+--scalesCorr) SCALESCORR=$2; shift ;;
+--scalesGlobal) SCALESGLOBAL=$2; shift ;;
 --smears) SMEARS=$2; shift ;;
 --massList) MASSLIST=$2; shift ;;
 -f|--flashggCats) CATS=$2; shift ;;
@@ -103,6 +108,8 @@ done
 echo "[INFO] MASSLIST is $MASSLIST"
 if (($VERBOSE==1)) ; then echo "[INFO] SMEARS $SMEARS" ;fi
 if (($VERBOSE==1)) ; then echo "[INFO] SCALES $SCALES" ;fi
+if (($VERBOSE==1)) ; then echo "[INFO] SCALESORR $SCALESCORR" ;fi
+if (($VERBOSE==1)) ; then echo "[INFO] SCALESGLOBAL $SCALESGLOBAL" ;fi
 
 if [[ $BATCH == "IC" ]]; then
 DEFAULTQUEUE=hepshort.q
@@ -132,8 +139,8 @@ echo "------------------------------------------------"
 echo "------------>> Running SIGNAL"
 echo "------------------------------------------------"
 cd Signal
-echo "./runSignalScripts.sh -i $FILE -p $PROCS -f $CATS --ext $EXT --intLumi $INTLUMI $BATCHOPTION"
-./runSignalScripts.sh -i $FILE -p $PROCS -f $CATS --ext $EXT --intLumi $INTLUMI $BATCHOPTION --smears $SMEARS --scales $SCALES --bs $BS --massList $MASSLIST
+echo "./runSignalScripts.sh -i $FILE -p $PROCS -f $CATS --ext $EXT --intLumi $INTLUMI $BATCHOPTION --smears $SMEARS --scales $SCALES --scalesCorr $SCALESCORR --scalesGlobal $SCALESGLOBAL --bs $BS --massList $MASSLIST"
+./runSignalScripts.sh -i $FILE -p $PROCS -f $CATS --ext $EXT --intLumi $INTLUMI $BATCHOPTION --smears $SMEARS --scales $SCALES --scalesCorr $SCALESCORR --scalesGlobal $SCALESGLOBAL --bs $BS --massList $MASSLIST
 cd -
 if [ $USER == lcorpe ]; then
 echo " Processing of the Signal model for final fit exercice $EXT is done, see output here: https://lcorpe.web.cern.ch/lcorpe/$OUTDIR/ " |  mail -s "FINAL FITS: $EXT " lc1113@imperial.ac.uk

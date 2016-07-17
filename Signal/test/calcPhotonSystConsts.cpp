@@ -97,6 +97,7 @@ void OptionParser(int argc, char *argv[]){
 	syst_opts.add_options()
 		("photonCatScales,s", 		po::value<string>(&photonCatScalesStr_)->default_value("EBlowR9,EBhighR9,EElowR9,EEhighR9"),												"Photon category scales (comma sep) which get correlated across diphoton categories but NOT different years.")
 		("photonCatScalesCorr,S", po::value<string>(&photonCatScalesCorrStr_)->default_value("MaterialCentral,MaterialForward"),									"Photon category scales (comma sep) which get correlated across diphoton categories AND across years.")
+		//("photonCatScalesCorr,S", po::value<string>(&photonCatScalesCorrStr_)->default_value("MaterialCentral,MaterialForward,FNUFEE,FNUFEB,ShowerShapeHighR9EE,ShowerShapeHighR9EB,ShowerShapeLowR9EE,ShowerShapeLowR9EB"),									"Photon category scales (comma sep) which get correlated across diphoton categories AND across years.")
 		("photonCatSmears,r", 		po::value<string>(&photonCatSmearsStr_)->default_value("EBlowR9,EBhighR9,EBlowR9Phi,EBhighR9Phi,EElowR9,EEhighR9"),	"Photon category smears (comma sep) which get correlated across diphoton categories but NOT different years.")
 		("photonCatSmearsCorr,R", po::value<string>(&photonCatSmearsCorrStr_)->default_value(""),																											"Photon category smears (comma sep) which get correlated across diphoton categories AND years.")
 		("globalScales,g", 				po::value<string>(&globalScalesStr_)->default_value("NonLinearity,Geant4,LightYield,Absolute"),																						"Global scales (comma sep) which get correlated across diphoton categories but NOT different years. Can add additional options with a \':\' to insist that a particular category get a bigger or smaller effect. E.g. passing \'NonLinearity:0:2\' will create a systematics called \'NonLinearity\' and make its effect in category 0 twice as large")
@@ -362,7 +363,8 @@ vector<TH1F*> getHistograms(vector<TFile*> files, string name, string syst){
 			RooDataHist *rds_up_h = (RooDataHist*) inWS_->data((Form("%s_%sUp01sigma",name.c_str(),syst.c_str())));
     std::cout << " DEBUG getHist k " << std::endl;
 			RooDataHist *rds_down_h = (RooDataHist*) inWS_->data((Form("%s_%sDown01sigma",name.c_str(),syst.c_str())));
-    std::cout << " DEBUG getHist l " << std::endl;
+    std::cout << " DEBUG getHist " << syst.c_str() << " l rds_up "<< rds_up << " rds_up_h " << rds_up_h << std::endl;
+    std::cout << " DEBUG getHist  " << syst.c_str() <<" l rds_down "<< rds_down << " rds_down_h " << rds_down_h << std::endl;
 
 			if(rds_up){
 				rds_up->fillHistogram(up,RooArgList(*mass_));
@@ -615,7 +617,7 @@ int main(int argc, char *argv[]){
 								plotVariation(nominal,scaleUp,scaleDown,*phoCat,Form("%s_cat%d_scale",proc->c_str(),cat)); 
 							}
 						}
-      cout << "[DEBUG l " << endl;
+      cout << "[DEBUG l nominal,scaleUp,scaleDown "<< nominal<< " " <<scaleUp<< " " << scaleDown << endl;
             //if (isinf(getMeanVar(nominal,scaleUp,scaleDown)) || isinf(getRateVar(nominal,scaleUp,scaleDown)) || isinf(getSigmaVar(nominal,scaleUp,scaleDown))) {
             if ((getMeanVar(nominal,scaleUp,scaleDown))>9999 || (getRateVar(nominal,scaleUp,scaleDown)) >9999 || (getSigmaVar(nominal,scaleUp,scaleDown))>9999 ) {
             std::cout << "ERROR infinite " << nominal->Integral()<< std::endl;
