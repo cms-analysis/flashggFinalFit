@@ -164,14 +164,16 @@ float FinalModelConstruction::getRequiredAddtionalGlobalScaleFactor(string name)
 	float retVal=-999;
 	// check non correlated
 	if (globalScalesOpts.find(name)!=globalScalesOpts.end()) {
-		for (vector<pair<int,float> >::iterator it=globalScalesOpts[name].begin(); it!=globalScalesOpts[name].end(); it++){
-			if (cat_.compare(flashggCats_[it->first])==0) return it->second;
+		for (vector<pair<string,float> >::iterator it=globalScalesOpts[name].begin(); it!=globalScalesOpts[name].end(); it++){
+			//if (cat_.compare(flashggCats_[it->first])==0) return it->second;
+			if (cat_.compare(it->first)==0) return it->second;
 		}
 	}
 	// check correlated
 	if (globalScalesCorrOpts.find(name)!=globalScalesCorrOpts.end()) {
-		for (vector<pair<int,float> >::iterator it=globalScalesCorrOpts[name].begin(); it!=globalScalesCorrOpts[name].end(); it++){
-			if (cat_.compare(flashggCats_[it->first])==0) return it->second;
+		for (vector<pair<string,float> >::iterator it=globalScalesCorrOpts[name].begin(); it!=globalScalesCorrOpts[name].end(); it++){
+			//if (cat_.compare(flashggCats_[it->first])==0) return it->second;
+			if (cat_.compare(it->first)==0) return it->second;
 		}
 	}
 	return retVal;
@@ -296,13 +298,14 @@ void FinalModelConstruction::loadSignalSystematics(string filename){
 			if (verbosity_) cout << " [INFO] GlobalScales: ";
 			for (vector<string>::iterator strIt=temp.begin(); strIt!=temp.end(); strIt++){
 				vector<string> opts;
-				vector<pair<int,float> > optDetails;
+				vector<pair<string,float> > optDetails;
 				split(opts,*strIt,boost::is_any_of(":"));
 				globalScales.push_back(opts[0]);
 				assert((opts.size()-1)%2==0);
 				if (verbosity_) cout << "[" << opts[0] << ":";
 				for (unsigned int i=1; i<opts.size(); i+=2) {
-					optDetails.push_back(make_pair(boost::lexical_cast<int>(opts[i]),boost::lexical_cast<float>(opts[i+1])));
+					//optDetails.push_back(make_pair(boost::lexical_cast<int>(opts[i]),boost::lexical_cast<float>(opts[i+1])));
+					optDetails.push_back(make_pair((opts[i]),boost::lexical_cast<float>(opts[i+1])));
 					if (verbosity_) cout << "(" << opts[i] << "," << opts[i+1] << ")";
 				}
 				globalScalesOpts.insert(make_pair(opts[0],optDetails));
@@ -319,13 +322,14 @@ void FinalModelConstruction::loadSignalSystematics(string filename){
 			if (verbosity_) cout << "[INFO] GlobalScalesCorr: ";
 			for (vector<string>::iterator strIt=temp.begin(); strIt!=temp.end(); strIt++){
 				vector<string> opts;
-				vector<pair<int,float> > optDetails;
+				vector<pair<string,float> > optDetails;
 				split(opts,*strIt,boost::is_any_of(":"));
 				globalScalesCorr.push_back(opts[0]);
 				assert((opts.size()-1)%2==0);
 				if (verbosity_) cout << "[" << opts[0] << ": ";
 				for (unsigned int i=1; i<opts.size(); i+=2) {
-					optDetails.push_back(make_pair(boost::lexical_cast<int>(opts[i]),boost::lexical_cast<float>(opts[i+1])));
+					//optDetails.push_back(make_pair(boost::lexical_cast<int>(opts[i]),boost::lexical_cast<float>(opts[i+1])));
+					optDetails.push_back(make_pair((opts[i]),boost::lexical_cast<float>(opts[i+1])));
 					if (verbosity_) cout << "(" << opts[i] << "," << opts[i+1] << ")";
 				}
 				globalScalesCorrOpts.insert(make_pair(opts[0],optDetails));

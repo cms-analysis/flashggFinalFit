@@ -112,7 +112,7 @@ if (($VERBOSE==1)) ; then echo "[INFO] SCALESORR $SCALESCORR" ;fi
 if (($VERBOSE==1)) ; then echo "[INFO] SCALESGLOBAL $SCALESGLOBAL" ;fi
 
 if [[ $BATCH == "IC" ]]; then
-DEFAULTQUEUE=hepshort.q
+DEFAULTQUEUE="hep.q"
 #DEFAULTQUEUE=hepmedium.q
 BATCHOPTION=" --batch $BATCH"
 fi

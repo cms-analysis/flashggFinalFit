@@ -26,7 +26,7 @@ class FinalModelConstruction {
 
   public:
     
-    FinalModelConstruction(RooRealVar *massVar, RooRealVar *MHvar, RooRealVar *intL, int mhLow, int mhHigh, std::string proc, std::string cat, bool doSecMods, std::string systematicsFileName, std::vector<int> skipMasses, int verbosity, std::vector<std::string> procsList, std::vector<std::string> flashggCats , string outDir, bool isProblemCategory,bool isCB=false, int sqrts=13, bool quadraticSigmaSum=false);
+    FinalModelConstruction( std::vector<int> massList, RooRealVar *massVar, RooRealVar *MHvar, RooRealVar *intL, int mhLow, int mhHigh, std::string proc, std::string cat, bool doSecMods, std::string systematicsFileName, std::vector<int> skipMasses, int verbosity, std::vector<std::string> procsList, std::vector<std::string> flashggCats , string outDir,bool isProblemCategory,bool isCB=false, int sqrts=13, bool quadraticSigmaSum=false);
     ~FinalModelConstruction();
 
 		void loadSignalSystematics(std::string filename);
@@ -158,8 +158,8 @@ class FinalModelConstruction {
 		std::vector<std::string> globalScales;
 		std::vector<std::string> globalScalesCorr;
 		// these are required to know specific options about further scaling 
-		std::map<std::string,std::vector<std::pair<int,float> > > globalScalesOpts;
-		std::map<std::string,std::vector<std::pair<int,float> > > globalScalesCorrOpts;
+		std::map<std::string,std::vector<std::pair<string,float> > > globalScalesOpts;
+		std::map<std::string,std::vector<std::pair<string,float> > > globalScalesCorrOpts;
 		std::vector<std::string> systematicsList;
 		std::vector<float> systematicsCorr;
 		std::vector<int> systematicsIdx;

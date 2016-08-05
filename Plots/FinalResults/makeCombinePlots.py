@@ -26,6 +26,7 @@ parser.add_option("","--xvar",dest="xvar",type="string",default=[],action="appen
 parser.add_option("-e","--expected",dest="expected",default=False,action="store_true",help="Expected only")
 parser.add_option("-m","--method",dest="method",type="string",help="Method to run")
 parser.add_option("-l","--legend",dest="legend",type="string",help="Legend position - x1,y1,x2,y2")
+parser.add_option("--box",dest="box",type="string",help="Legend position - x1,y1,x2,y2,TColor")
 parser.add_option("-x","--xaxis",dest="xaxis",type="string",help="x-axis range - x1,x2")
 parser.add_option("-y","--yaxis",dest="yaxis",type="string",help="y-axis range - y1,y2")
 parser.add_option("","--xbinning",dest="xbinning",type="string",help="force x binning (b,l,h)")
@@ -36,6 +37,7 @@ parser.add_option("","--chcompLine",dest="chcompLine",type="int",help="For Chann
 parser.add_option("","--chcompShift",dest="chcompShift",type="float",help="For ChannelComp Asimov - shift to this value")
 parser.add_option("","--do1sig",dest="do1sig",default=False,action="store_true",help="For ChannelComp plot only 1 sigma errors")
 parser.add_option("","--noComb",dest="noComb",default=False,action="store_true",help="Don't assume the first line is the combined one")
+parser.add_option("","--mhval",dest="mhval",default="125.09",help="Don't assume the first line is the combined one")
 parser.add_option("","--smoothNLL",dest="smoothNLL",default=False,action="store_true",help="Smooth 1D likelihood scans")
 parser.add_option("","--shiftNLL",dest="shiftNLL",type="float",help="Correct NLL to this value")
 parser.add_option("","--correctNLL",dest="correctNLL",default=False,action="store_true",help="Correct NLL (occasionally required for failed jobs)")
@@ -46,6 +48,7 @@ parser.add_option("","--pval",dest="pval",default=False,action="store_true",help
 parser.add_option("","--maxlh",dest="maxlh",default=False,action="store_true",help="Do best fit mu plot")
 parser.add_option("","--mh",dest="mh",default=False,action="store_true",help="Do NLL mass scan plot")
 parser.add_option("","--mu",dest="mu",default=False,action="store_true",help="Do NLL mu scan plot")
+parser.add_option("","--pdf",dest="pdf",default=False,action="store_true",help="Do NLL pdf scan plot")
 parser.add_option("","--rv",dest="rv",default=False,action="store_true",help="Do NLL rv scan plot")
 parser.add_option("","--rf",dest="rf",default=False,action="store_true",help="Do NLL rf scan plot")
 parser.add_option("","--draw2dhist",dest="draw2dhist",default=False,action="store_true",help="Ue 2D hist drawing for the 2D NLL")
@@ -58,6 +61,7 @@ parser.add_option("","--kglukgam",dest="kglukgam",default=False,action="store_tr
 parser.add_option("","--xdm",dest="xdm",default=False,action="store_true",help="Do NLL x vs delta(m) degenerate")
 parser.add_option("","--zmax",dest="zmax",default=10.,type='float',help="Maximum on 2D plots for the Z axis")
 parser.add_option("","--mpdfchcomp",dest="mpdfchcomp",default=False,action="store_true",help="Do MultiPdf channel compatbility plot")
+parser.add_option("","--perprocchcomp",dest="perprocchcomp",default=False,action="store_true",help="Do PerProc channel compatbility plot")
 parser.add_option("","--mpdfmaxlh",dest="mpdfmaxlh",default=False,action="store_true",help="Do MultiPdf best fit mu as a function of MH plot")
 parser.add_option("-v","--verbose",dest="verbose",default=False,action="store_true")
 parser.add_option("-b","--batch",dest="batch",default=False,action="store_true")
@@ -76,6 +80,7 @@ if options.pval: options.method='pval'
 if options.maxlh: options.method='maxlh'
 if options.mh: options.method='mh'
 if options.mu: options.method='mu'
+if options.pdf: options.method='pdf'
 if options.rv: options.method='rv'
 if options.rf: options.method='rf'
 if options.mumh: options.method='mumh'
@@ -84,10 +89,11 @@ if options.cvcf: options.method='cvcf'
 if options.kglukgam: options.method='kglukgam'
 if options.xdm: options.method='xdm'
 if options.mpdfchcomp: options.method='mpdfchcomp'
+if options.perprocchcomp: options.method='perprocchcomp'
 if options.mpdfmaxlh: options.method='mpdfmaxlh'
 if not options.outname: options.outname=options.method
 
-allowed_methods=['pval','limit','maxlh','mh','mu','mumh','rv','rf','rvrf','cvcf','kglukgam','xdm','mpdfchcomp','mpdfmaxlh']
+allowed_methods=['pval','limit','maxlh','mh','mu','pdf','mumh','rv','rf','rvrf','cvcf','kglukgam','xdm','mpdfchcomp','perprocchcomp','mpdfmaxlh']
 if not options.datfile and options.method not in allowed_methods:
   print 'Invalid method : ' , options.method , '. Must set one of: ', allowed_methods
   sys.exit()
@@ -101,10 +107,15 @@ r.gROOT.ProcessLine(".x hggPaperStyle.C")
 if options.batch: r.gROOT.SetBatch()
 r.gStyle.SetOptStat(0)
 
-
+def is_float_try(str):
+    try:
+      float(str)
+      return True
+    except ValueError:
+      return False
 # very fine-grained colour palettee
 def set_palette(ncontours=999):
-    style=1
+    style=2
     if (style==1):
      # default palette, looks cool
      stops = [0.00, 0.34, 0.61, 0.84, 1.00]
@@ -129,10 +140,14 @@ def set_palette(ncontours=999):
 
     elif (style==2):
      # blue palette, looks cool
-     stops = [0.00, 0.14, 0.34, 0.61, 0.84, 1.00]
-     red   = [0.00, 0.00, 0.00, 0.05, 0.30, 1.00]
-     green = [0.00, 0.00, 0.00, 0.00, 0.00, 0.00]
-     blue  = [1.00, 0.80, 0.6, 0.4, 0.2, 0.0]
+     #stops = [0.00, 0.14, 0.34, 0.61, 0.84, 1.00]
+     #red   = [1.00, 1.00, 1.00, 1.00, 1.00, 1.00]
+     #green = [1.00, 1.00, 1.00, 1.00, 1.00, 1.00]
+     #blue  = [1.00, 0.80, 0.6, 0.4, 0.2, 1.0]
+     stops = [0.00,1.00 ]
+     red   = [1.00,0.220 ]
+     green = [1.00,0.27 ]
+     blue  = [1.00,0.57 ]
 
      st = array.array('d', stops)
      re = array.array('d', red)
@@ -168,15 +183,21 @@ while len(options.files)>len(options.groupnames): options.groupnames.append("")
 # mh text options, this is just an excuse to dump some text somewhere
 mhTextX = []
 mhTextY = []
+mhTextSize = []
 MHtexts = []
 for MH in options.MHtext:
   mhtextoptions = MH.split(":")
   MHtexts.append(mhtextoptions[2])
   mhTextX.append(float(mhtextoptions[0]))
   mhTextY.append(float(mhtextoptions[1]))
+  if len(mhtextoptions)>3:
+    mhTextSize.append(float(mhtextoptions[3]))
+  else:
+    mhTextSize.append(-1)
 
 # make canvas and dummy hist
 #canv = r.TCanvas("c","c",int(options.canv.split(',')[0]),int(options.canv.split(',')[1]))
+#canv = r.TCanvas("c","c",900,750) # use the default canvas style
 canv = r.TCanvas("c","c") # use the default canvas style
 canv.SetTicks(1,1)
 
@@ -186,6 +207,8 @@ if not options.xaxis: dummyHist = r.TH1D("dummy","",1,115,135)
 else: 
   dummyHist =  r.TH1D("dummy","",1,float(options.xaxis[0]),float(options.xaxis[1]))
 dummyHist.GetXaxis().SetTitle('m_{H} (GeV)')
+dummyHist.GetXaxis().SetTitleSize(0.05)
+dummyHist.GetXaxis().SetTitleOffset(0.9)
 
 # make a helful TLatex box
 lat = r.TLatex()
@@ -197,32 +220,48 @@ lat.SetNDC()
 ##########################
 
 # Draw the usual propaganda 
-def drawGlobals(canv,shifted=False):
+def drawGlobals(canv,shifted="False"):
 
   # draw text 
   
-  if shifted: 
+  if (shifted=="True"):
+   print "AM I SHIFTED ? YES"
    #lat.DrawLatex(0.129+0.03,0.93,"CMS Unpublished H#rightarrow#gamma#gamma")
    #lat.DrawLatex(0.129+0.03,0.93,"CMS H#rightarrow#gamma#gamma")
    #lat.SetTextSize(0.07)
-   #lat.DrawLatex(0.173+0.05,0.85,"#splitline{#bf{CMS}}{#it{Preliminary}}")
    lat.DrawLatex(0.129+0.085,0.93,"#bf{CMS} #scale[0.75]{#it{Preliminary}}")
-   lat.DrawLatex(0.129+0.085+0.04,0.85,"H#rightarrow#gamma#gamma")
    lat.SetTextSize(0.045)
-   lat.DrawLatex(0.67-0.005,0.93,options.text)
-   #lat.DrawLatex(0.7,0.93,options.text)
+   lat.DrawLatex(0.129+0.085+0.04,0.85,"H#rightarrow#gamma#gamma")
+   #lat.DrawLatex(0.71,0.92,options.text)
+   lat.DrawLatex(0.7,0.93,options.text)
+
+  elif shifted=="2D":
+   print "AM I SHIFTED ? 2D"
+   lat.SetTextSize(0.05)
+   lat.DrawLatex(0.1,0.92,"#bf{CMS} #scale[0.75]{#it{Preliminary}}")
+   #lat.DrawLatex(0.129+0.04,0.85,"H#rightarrow#gamma#gamma")
+   #lat.DrawLatex(0.13,0.85,"H#rightarrow#gamma#gamma")
+   #lat.SetTextSize(0.07)
+   lat.SetTextSize(0.045)
+   lat.DrawLatex(0.61,0.92,options.text)
 
   else:
+   print "AM I SHIFTED ? NO"
    #lat.DrawLatex(0.129,0.93,"CMS Unpublished H#rightarrow#gamma#gamma")
    #lat.DrawLatex(0.129,0.93,"CMS H#rightarrow#gamma#gamma")
    #lat.DrawLatex(0.173,0.85,"#splitline{#bf{CMS}}{#it{Preliminary}}")
-   lat.DrawLatex(0.129,0.93,"#bf{CMS} #scale[0.75]{#it{Preliminary}}")
-   lat.DrawLatex(0.129+0.04,0.85,"H#rightarrow#gamma#gamma")
+   #lat.DrawLatex(0.129,0.93,"#bf{CMS} #scale[0.75]{#it{Preliminary}}")
+   lat.SetTextSize(0.05)
+   lat.DrawLatex(0.1,0.92,"#bf{CMS} #scale[0.75]{#it{Preliminary}}")
+   #lat.DrawLatex(0.129+0.04,0.85,"H#rightarrow#gamma#gamma")
+   lat.DrawLatex(0.13,0.83,"H#rightarrow#gamma#gamma")
    #lat.SetTextSize(0.07)
    lat.SetTextSize(0.045)
-   lat.DrawLatex(0.62,0.933,options.text)
+   lat.DrawLatex(0.69,0.92,options.text)
 
   for mi,MH in enumerate(MHtexts):
+    if mhTextSize[mi]>0:
+      lat.SetTextSize(mhTextSize[mi])
     lat.DrawLatex(mhTextX[mi],mhTextY[mi],MH)
 
 def cleanSpikes1D(rfix):
@@ -283,12 +322,13 @@ def pvalPlot(allVals):
   if options.verbose: print 'Plotting pvalue...'
   canv.SetLogy(True)
   mg = r.TMultiGraph()
-  if not options.legend: leg = r.TLegend(0.6,0.17,0.89,0.4)
+  if not options.legend: leg = r.TLegend(0.14,0.30,0.4,0.7)
   #if not options.legend: leg = r.TLegend(0.6,0.35,0.89,0.45)
   else:
     options.legend[-1]=options.legend[-1].replace("\n","")
     leg = r.TLegend(float(options.legend[0]),float(options.legend[1]),float(options.legend[2]),float(options.legend[3]))
   #leg.SetFillColor(0)
+  leg.SetBorderSize(0)
   # make graphs from values
   for k, values in enumerate(allVals):
     minpvalue=99999.
@@ -300,8 +340,8 @@ def pvalPlot(allVals):
       if (minpvalue > values[j][1]): 
         minpvalue = values[j][1]
         minpvalueX =values[j][0]
-      if options.verbose or values[j][0]==125.09: 
-        print '\t', j, values[j][0], values[j][1], r.RooStats.PValueToSignificance(values[j][1])
+      if options.verbose or values[j][0]==125.09 or  values[j][0]==125.0 : 
+        print options.names[k] ,' at ', values[j][0], " signif ",  r.RooStats.PValueToSignificance(values[j][1])
         pvalat125=values[j][1]
       #print "debug minpval  for ",options.names[k], " at ", values[j][0], " ", minpvalue, "   " , r.RooStats.PValueToSignificance(minpvalue), "values[j][1] " , values[j][1], " ", r.RooStats.PValueToSignificance(values[j][1])
     
@@ -318,6 +358,7 @@ def pvalPlot(allVals):
  
   # draw dummy hist and multigraph
   dummyHist.GetYaxis().SetTitle('Local p-value')
+  dummyHist.GetYaxis().SetTitleSize(0.05)
   mg.Draw("A")
   if (options.xaxis) :
       print mg.GetXaxis()
@@ -356,7 +397,7 @@ def pvalPlot(allVals):
     lines[i].SetLineWidth(2)
     lines[i].SetLineStyle(2)
     lines[i].SetLineColor(13) # greay Lines 
-    labels.append(r.TLatex(132+1, y * 0.8, "%d #sigma" % (i+1)))
+    labels.append(r.TLatex(132+1, y * 1.1, "%d #sigma" % (i+1)))
     labels[i].SetTextColor(13)
     labels[i].SetTextAlign(11);
     if not options.yaxis:
@@ -367,7 +408,6 @@ def pvalPlot(allVals):
       if y<=float(options.yaxis.split(',')[1]) and y>=float(options.yaxis.split(',')[0]):
         lines[i].Draw('SAME')
         labels[i].Draw('SAME')
- 
   # draw legend
   leg.Draw()
   #canv.RedrawAxis()
@@ -376,6 +416,7 @@ def pvalPlot(allVals):
   canv.Update()
   if not options.batch: raw_input("Looks ok?")
   canv.Print('%s.pdf'%options.outname)
+  canv.Print('%s.root'%options.outname)
   canv.Print('%s.png'%options.outname)
   canv.Print('%s.C'%options.outname)
   canv.SetName(options.outname)
@@ -654,7 +695,7 @@ def findQuantile(pts,cl):
   
     ci=ci+1
 
-  print min ," ", bestfit_ci   
+  #print min ," ", bestfit_ci   
   #print "determine corssbounds for cl ", cl
   #for pt in pts:
   #  print "--> pt[1] ", pt[1], " cl ", cl, " pt[1]-cl ", pt[1]-cl ," abs(pt[1]-cl)<0.5) " , (abs(pt[1]-cl)<0.5)
@@ -745,9 +786,17 @@ def plot1DNLL(returnErrors=False,xvar="", ext=""):
     #x = 'mh'
     xtitle = 'm_{H} (GeV)'
   elif options.method=='mu':
-    x = 'r'
+    x = "r"
     #xtitle = '#sigma / #sigma_{SM}'
     xtitle = '#mu'
+  elif options.method=='muProc':
+    x = xvar
+    #xtitle = '#sigma / #sigma_{SM}'
+    xtitle = '#mu'
+  elif options.method=='pdf':
+    x = 'pdfindex_UntaggedTag3_13TeV'
+    #xtitle = '#sigma / #sigma_{SM}'
+    xtitle = 'chosen pdf index'
     if options.xlab: 
       xtitle = options.xlab
     if xvar:
@@ -766,9 +815,9 @@ def plot1DNLL(returnErrors=False,xvar="", ext=""):
   else: leg = r.TLegend(float(options.legend.split(',')[0]),float(options.legend.split(',')[1]),float(options.legend.split(',')[2]),float(options.legend.split(',')[3]))
   #leg.SetFillColor(0)
   clean_graphs=[]
+  leg.SetBorderSize(0)
 
   for k, f in enumerate(options.files):
-    print k,f
     ntitle = options.names[k]
     tf = r.TFile(f)
     tree = tf.Get('limit')
@@ -850,7 +899,9 @@ def plot1DNLL(returnErrors=False,xvar="", ext=""):
     eplus2 = h2-m
     eminus2 = m-l2
 
-    print "%15s : %4.4f +%4.4g -%4.4g" % ( ntitle+" "+ext, xmin, eplus , eminus )
+    print "%15s : %4.6f +%4.6g -%4.6g" % ( ntitle+" "+ext, xmin, eplus , eminus )
+    if (options.method=="mu"):
+      print "MU = %4.6f +%4.6g -%4.6g" % (  xmin, eplus , eminus )
     #Write in the ledger
     #with open(options.itLedger, "a") as myfile:
 		#    myfile.write("%s %f %f %f\n" % ( options.method+" "+options.it, xmin, eplus , eminus ))
@@ -878,6 +929,8 @@ def plot1DNLL(returnErrors=False,xvar="", ext=""):
     
   dH = r.TH1D("dH","",1,axmin,axmax)
   dH.GetXaxis().SetTitle(xtitle)
+  dH.GetXaxis().SetTitleSize(0.05)
+  dH.GetYaxis().SetTitleSize(0.05)
   if options.method=='mh': dH.GetXaxis().SetNdivisions(505)
   dH.GetYaxis().SetTitle('-2 #Delta ln L')
   if not options.yaxis: dH.GetYaxis().SetRangeUser(0.,6)
@@ -907,7 +960,7 @@ def plot1DNLL(returnErrors=False,xvar="", ext=""):
   lat2.SetNDC()
   lat2.SetTextAlign(22)
   if options.method=='mh': lat2.DrawLatex(0.5,0.85,"#hat{m}_{H} = %6.2f ^{#font[122]{+}%4.2f}_{#font[122]{-}%4.2f}"%(fit,eplus0,eminus0))
-  elif options.method=='mu': 
+  elif ( options.method=='mu' or options.method=='muProc'): 
     lat2.SetTextSize(0.045)
     lat2.SetTextAlign(11)
     lat2.DrawLatex(0.17,0.78,"#hat{#mu} = %4.2f ^{#font[122]{+}%4.2f}_{#font[122]{-}%4.2f}"%(fit,eplus0,eminus0))
@@ -1049,7 +1102,7 @@ def plot2DNLL(xvar="RF",yvar="RV",xtitle="#mu_{ggH+ttH}",ytitle="#mu_{qqH+VH}"):
           factor=newContent/th2.GetBinContent(i,j) 
           th2.SetBinContent(i,j,newContent*factor)
         else:
-        prevBin= th2.GetBinContent(i,j)
+          prevBin= th2.GetBinContent(i,j)
     ############## Simple spike killer ##########
 
     gBF = r.TGraph()
@@ -1126,10 +1179,10 @@ def plot2DNLL(xvar="RF",yvar="RV",xtitle="#mu_{ggH+ttH}",ytitle="#mu_{qqH+VH}"):
     xBF_down = abs(xBF - xMinus[0])
     yBF_up = abs (yBF - yPlus[1])
     yBF_down = abs( yBF - yMinus[1])
-    print " Best fit X = %2.2f + %2.2f - %2.2f"%( xBF ,  xBF_up , xBF_down)
-    print " Best fit X = %2.2f --> %2.2f--> %2.2f"%( xBF - xBF_down ,  xBF , xBF+ xBF_up)
-    print " Best fit Y = %2.2f + %2.2f - %2.2f"%( yBF ,  yBF_up , yBF_down)
-    print " Best fit Y = %2.2f --> %2.2f--> %2.2f"%( yBF - yBF_down ,  yBF , yBF+ yBF_up)
+    print " Best fit rF = %2.2f + %2.2f - %2.2f"%( xBF ,  xBF_up , xBF_down)
+    #print " Best fit X = %2.2f --> %2.2f--> %2.2f"%( xBF - xBF_down ,  xBF , xBF+ xBF_up)
+    print " Best fit rV = %2.2f + %2.2f - %2.2f"%( yBF ,  yBF_up , yBF_down)
+    #print " Best fit Y = %2.2f --> %2.2f--> %2.2f"%( yBF - yBF_down ,  yBF , yBF+ yBF_up)
     #gBF.SetPoint(1,xPlus[0],xPlus[1])
     #gBF.SetPoint(2,yPlus[0],yPlus[1])
     #gBF.SetPoint(2,xMinus[0],xMinus[1])
@@ -1143,6 +1196,15 @@ def plot2DNLL(xvar="RF",yvar="RV",xtitle="#mu_{ggH+ttH}",ytitle="#mu_{qqH+VH}"):
     th2.SetMaximum(options.zmax)
     th2.GetXaxis().SetTitle(xtitle)
     th2.GetYaxis().SetTitle(ytitle)
+    canv.SetRightMargin(0.15)
+    canv.SetBottomMargin(0.15)
+    th2.GetZaxis().SetTitle(("q(%s,%s)"%(xtitle,ytitle)))
+    th2.GetZaxis().SetTitleOffset(0.85)
+    th2.GetYaxis().SetTitleOffset(0.85)
+    th2.GetXaxis().SetTitleOffset(0.9)
+    th2.GetZaxis().SetTitleSize(0.05)
+    th2.GetYaxis().SetTitleSize(0.05)
+    th2.GetXaxis().SetTitleSize(0.05)
     th2s.append(th2.Clone())
 
     if options.xaxis: th2.GetXaxis().SetRangeUser(float(options.xaxis[0]),float(options.xaxis[1]))
@@ -1193,7 +1255,7 @@ def plot2DNLL(xvar="RF",yvar="RV",xtitle="#mu_{ggH+ttH}",ytitle="#mu_{qqH+VH}"):
         leg.AddEntry(cont_2sig,"2#sigma","L")
     else :
       leg.AddEntry(BFgrs[-1],options.names[fi],"P")
-
+  leg.SetBorderSize(0)
   if options.addSM: 
       # leg.AddEntry(smgraph,"SM","P")
       smentry =  leg.AddEntry(smmarker_leg,"SM","P")
@@ -1204,6 +1266,7 @@ def plot2DNLL(xvar="RF",yvar="RV",xtitle="#mu_{ggH+ttH}",ytitle="#mu_{qqH+VH}"):
     for fi in range(len(options.files)):
      #th2.SetContour(10000)
      set_palette(ncontours=255);
+     #r.gStyle.SetPalette(100,86);
      th2.Draw("colz9")
      gBF_underlay = gBF.Clone()
      gBF_underlay.SetMarkerColor(r.kWhite)
@@ -1221,9 +1284,19 @@ def plot2DNLL(xvar="RF",yvar="RV",xtitle="#mu_{ggH+ttH}",ytitle="#mu_{qqH+VH}"):
      cont_2sig.Draw("cont3same9")
     if options.addSM:
       smmarker.Draw()
+    #if (len(options.box.split(",")>1)):
+    if (options.box):
+      print "DRAWING BOX with option.bix", options.box
+      boxp= options.box.split(",")
+      box = r.TPave(float(boxp[0]),float(boxp[1]),float(boxp[2]),float(boxp[3]),0,"NDC")
+      #box.SetFillColor(int(boxp[4]))
+      box.SetFillColor(r.kWhite)
+      #box.DrawPave(float(boxp[0]),float(boxp[1]),float(boxp[2]),float(boxp[3]),0,"NBNDC")
+      box.Draw()
+
+    leg.SetFillColor(r.kWhite)
     leg.Draw()
-    
-    drawGlobals(canv)
+    drawGlobals(canv,"2D")
     canv.RedrawAxis()
     canv.Modified()
     canv.Update()
@@ -1234,6 +1307,8 @@ def plot2DNLL(xvar="RF",yvar="RV",xtitle="#mu_{ggH+ttH}",ytitle="#mu_{qqH+VH}"):
     canv.Print('%s_col.png'%options.outname)
     canv.Print('%s_col.C'%options.outname)
     canv.SetName('%s_col'%options.outname)
+    canv.SetRightMargin(0.1)
+    canv.SetBottomMargin(0.1)
 
   # Now the main one
   #canv.Clear()
@@ -1255,7 +1330,7 @@ def plot2DNLL(xvar="RF",yvar="RV",xtitle="#mu_{ggH+ttH}",ytitle="#mu_{qqH+VH}"):
         smmarker.Draw()
       
 
-  drawGlobals(canv)
+  drawGlobals(canv,"2D")
   canv.RedrawAxis()
   if not options.batch: raw_input("Looks ok?")
   canv.Print('%s.pdf'%options.outname) 
@@ -1274,7 +1349,7 @@ def plot2DNLL(xvar="RF",yvar="RV",xtitle="#mu_{ggH+ttH}",ytitle="#mu_{qqH+VH}"):
   mems = []
 
 # Channe; compatibility for Envelope (correct errors)
-def plotMPdfChComp():
+def plotMPdfChComp(plottype="perTag"):
 
   print 'plotting mpdf ChannelComp'
   if not options.noComb: print '\t will assume first file is the global best fit'
@@ -1287,10 +1362,11 @@ def plotMPdfChComp():
   #loffiles.reverse()
   print options.files
   k=0
-
+  print " LC DEBUG A"
   ppergraph = len(loffiles)/options.groups
   if not options.noComb:  ppergraph = (len(loffiles)-1)/options.groups
-
+  nFile = len(loffiles)
+  print " LC DEBUG B"
   while len(loffiles)>0:
     ext=''
     if options.groups>1: 
@@ -1298,19 +1374,52 @@ def plotMPdfChComp():
     	ext = options.groupnames[gr]
 
     options.files = [loffiles[0]]
-    catName=loffiles[0].split("/")[-1].replace(".root","").replace("_13TeV","")
-    catName=catName.replace("Tag_","Tag ")
-    catName=catName.replace("UntaggedTag","Untagged")
-    catName=catName.replace("VBFTag ","VBF Tag ")
-    if (catName=="VBF") : catName=catName.replace("VBF","VBF Tags")
-    if (catName=="TTH"): catName=catName.replace("TTH","TTH Tags")
+    if plottype=="perTag":
+      print " LC DEBUG C perTag"
 
-    options.method = 'mu'
+      catName=loffiles[0].split("/")[-1].replace(".root","")
+      catName=catName.replace("TTHLeptonicTag","TTH Leptonic Tag")
+      catName=catName.replace("TTHHadronicTag","TTH Hadronic Tag")
+      catName=catName.replace("_13TeV","")
+      catName=catName.replace("Tag_","Tag ")
+      catName=catName.replace("UntaggedTag","Untagged")
+      catName=catName.replace("VBFTag ","VBF Tag")
+      if (catName=="VBF") : catName=catName.replace("VBF","VBF Tags")
+      if (catName=="TTH"): catName=catName.replace("TTH","TTH Tags")
+
+      options.method = 'mu'
+    if plottype=="perProc":
+      catName=loffiles[0].split("/")[-1].replace(".root","") 
+      print " LC DEBUG C perProc -- catname ",catName
+      if ("_" in catName):
+         catName=catName.split("_",1)[-1] #eg r_ggH --> ggH
+         options.method = 'muProc'
+         options.xvar[k] = 'r_%s'%catName
+         debugCatName=catName
+         if "ggH" in catName: catName ="#scale[1.5]{#mu_{ggH}}"
+         if "qqH" in catName: catName ="#scale[1.5]{#mu_{VBF}}"
+         if "ttH" in catName: catName ="#scale[1.5]{#mu_{ttH}}"
+         if "VH"  in catName: catName ="#scale[1.5]{#mu_{VH}}"
+         print "DEBUG LC b CATBAME ", catName
+      else:
+         options.method = 'mu'
+         debugCatName=catName
+         #options.xvar[k] = 'r_%s'%catName
+      catName=catName.replace("TTHLeptonicTag","TTH Leptonic Tag")
+      catName=catName.replace("TTHHadronicTag","TTH Hadronic Tag")
+      catName=catName.replace("_13TeV","")
+      catName=catName.replace("Tag_","Tag ")
+      catName=catName.replace("UntaggedTag","Untagged")
+      catName=catName.replace("VBFTag","VBF Tag")
+      if (catName=="VBF") : catName=catName.replace("VBF","VBF Tags")
+      if (catName=="TTH"): catName=catName.replace("TTH","TTH Tags")
     r.gROOT.SetBatch()
-    print '%15s'%options.names[k],
+    print 'name %15s'%options.names[k],
+    print 'method %15s'%options.method,
+    print 'method %15s'%options.method,
     ps = plot1DNLL(True,options.xvar[k],ext) #return the  uncertainties
     cache=options.outname
-    options.outname=options.outname+"_debug_"+catName.replace(" ","_")
+    options.outname=options.outname+"_debug_"+debugCatName.replace(" ","_")
     #print "CATNAME " , catName, " -- > ", ps
     plot1DNLL(False,options.xvar[k],ext) #print debug plot
     options.outname=cache
@@ -1333,6 +1442,7 @@ def plotMPdfChComp():
     #print point 
     if options.do1sig:
       if point[1]+point[2]>rMax: rMax=point[1]+point[2]
+      print " point[1] ", point[1] , " point[2] ", point[2] , " point[1]+point[2] ", point[1]+point[2] , " rMax ", rMax
       if point[1]-point[3]<rMin: rMin=point[1]-point[3]
     else:
       if point[1]+point[4]>rMax: rMax=point[1]+point[4]
@@ -1359,12 +1469,13 @@ def plotMPdfChComp():
 
 
   #xtitle = "#sigma/#sigma_{sm}"
-  xtitle = "#mu"
+  #xtitle = "#mu"
+  xtitle = "#hat{#mu}"
   #xtitle = "#mu = #sigma/#sigma_{sm}"
   if options.xlab: 
       xtitle = options.xlab
   dummyHist = r.TH2F("dummy",";%s;"%xtitle,1,rMin,rMax,ppergraph,0,ppergraph)
-
+  dummyHist.GetXaxis().SetTitleSize(0.05)
   catGraph1sig = [r.TGraphAsymmErrors() for gr in range(options.groups)]
   catGraph2sig = [r.TGraphAsymmErrors() for gr in range(options.groups)]
 
@@ -1404,10 +1515,16 @@ def plotMPdfChComp():
     if point[0]=='': 
       if ( "Dummy" in catNames[p]) :
         binlabel = ""
-      else :
-        binlabel = catNames[p]
+      else:
+        if (point[2]<0.340 or point[3]<0.340):
+          binlabel = "%s      %.2f ^{+%.2f}_{-%.2f}"%(catNames[p],point[1],point[2],point[3])
+        else:
+          binlabel = "%s      %.2f ^{+%.1f}_{-%.1f}"%(catNames[p],point[1],point[2],point[3])
+
     else: binlabel = point[0]
     dummyHist.GetYaxis().SetBinLabel(p+1,binlabel)
+    dummyHist.GetYaxis().SetLabelOffset(-0.045)
+    dummyHist.GetYaxis().SetLabelSize(0.05)
 
     catGraph1sig[grIndex].SetLineColor(int(options.colors[grIndex]))
     catGraph1sig[grIndex].SetLineWidth(2)
@@ -1465,11 +1582,17 @@ def plotMPdfChComp():
   else: leg = r.TLegend(float(options.legend.split(',')[0]),float(options.legend.split(',')[1]),float(options.legend.split(',')[2]),float(options.legend.split(',')[3]))
   #leg.SetFillColor(0)
   leg.SetTextAlign(12)
+  leg.SetBorderSize(0)
+  leg.SetTextAlign(12)
   if not options.noComb: leg.AddEntry(dummyHist,"Combined #pm 1#sigma","LF")
   if not options.do1sig and not options.noComb: leg.AddEntry(dummyHist2,"Combined #pm 2#sigma","LF")
   #if not options.noComb: leg.AddEntry(catGraph1sig[0],"Per %s #pm 1#sigma"%options.groupentry,"LP");
   if not options.noComb: leg.AddEntry(catGraph1sig[0],"Per category #pm 1#sigma","LP");
-  if not options.do1sig and not options.noComb: leg.AddEntry(catGraph2sig[0],"Per category #pm 2#sigma","LP");
+  if not options.do1sig and not options.noComb: 
+    if plottype =="perTag":
+      leg.AddEntry(catGraph2sig[0],"Per category #pm 2#sigma","LP");
+    if plottype =="perProc":
+      leg.AddEntry(catGraph2sig[0],"Per process #pm 2#sigma","LP");
 
   if options.groups>1: 
     for gr in range(options.groups):
@@ -1515,9 +1638,16 @@ def plotMPdfChComp():
   lat2 = r.TLatex()
   lat2.SetNDC()
   lat2.SetTextAlign(12)
-  lat2.SetTextSize(0.035)
-  lat2.DrawLatex(0.57,0.59,"#hat{#mu} = %6.2f ^{#font[122]{+}%4.2f}_{#font[122]{-}%4.2f}"%(bestFit[1],bestFit[2],bestFit[3]))
-  lat2.DrawLatex(0.57,0.50,"m_{H} = 125.09 GeV")
+  #lat2.SetTextSize(0.035)
+  lat2.SetTextSize(0.04)
+  lat2.DrawLatex(0.57,0.59,"#hat{#mu}_{combined} = %6.2f ^{#font[122]{+}%4.2f}_{#font[122]{-}%4.2f}"%(bestFit[1],bestFit[2],bestFit[3]))
+  if (options.mhval==None):
+    lat2.DrawLatex(0.57,0.50,"m_{H} = 125.09 GeV")
+  else:
+    if (is_float_try(options.mhval)): 
+      lat2.DrawLatex(0.57,0.50,"m_{H} = %s GeV"%options.mhval)
+    else:
+      lat2.DrawLatex(0.57,0.50,"m_{H} %s"%options.mhval)
 
   for gr in range(options.groups):
     #print gr
@@ -1543,7 +1673,7 @@ def plotMPdfChComp():
   if options.groups>1 or not options.noComb: leg.Draw("same")
   
 
-  drawGlobals(canv,True) # shift the CMS text etc at the top 
+  drawGlobals(canv,"True") # shift the CMS text etc at the top 
   canv.SetFillColor(0)
   canv.SetBorderMode(0)
   canv.SetBorderSize(2)
@@ -1641,12 +1771,15 @@ def plotMPdfMaxLH():
   #leg.SetFillColor(0)
   #leg.SetTextSize(0.045)
   leg.SetTextAlign(12)
-  leg.AddEntry(oneSigma,"#pm 1 #sigma uncert.","FL")
+  leg.SetBorderSize(0)
+  leg.AddEntry(oneSigma,"#pm 1 #sigma uncertainty","FL")
   if not options.do1sig : leg.AddEntry(twoSigma,"#pm 2 #sigma uncert","FL")
 
   dummyHist.SetStats(0)
   #dummyHist.GetYaxis().SetTitle("#sigma/#sigma_{SM}")
   dummyHist.GetYaxis().SetTitle("#hat{#mu}")
+  dummyHist.GetYaxis().SetTitleSize(0.05)
+  dummyHist.GetYaxis().SetTitleOffset(0.7)
   #dummyHist.GetYaxis().SetTitle("#mu = #sigma/#sigma_{SM} ")
 
   dummyHist.GetYaxis().SetRangeUser(twoSigma.GetMinimum(),twoSigma.GetMaximum())
@@ -1724,7 +1857,7 @@ def run():
 
   if options.method=='pval' or options.method=='limit' or options.method=='maxlh':
     runStandard()
-  elif options.method=='mh' or options.method=='mu' or options.method=='rv' or options.method=='rf' or options.method=='mpdfchcomp' or options.method=='mpdfmaxlh':
+  elif options.method=='mh' or options.method=='mu' or options.method=='rv' or options.method=='rf' or options.method=='mpdfchcomp'  or options.method=='perprocchcomp' or options.method=='mpdfmaxlh':
     path = os.path.expandvars('$CMSSW_BASE/src/flashggFinalFit/Plots/FinalResults/rootPalette.C')
     if not os.path.exists(path):
       sys.exit('ERROR - Can\'t find path: '+path) 
@@ -1734,11 +1867,16 @@ def run():
       sys.exit('ERROR - Can\'t find path: '+path) 
     r.gROOT.LoadMacro(path)
     if options.method=='mpdfchcomp':
-      plotMPdfChComp()
+      plotMPdfChComp("perTag")
+    if options.method=='perprocchcomp':
+      plotMPdfChComp("perProc")
     elif options.method=='mpdfmaxlh':
       plotMPdfMaxLH()
     else:
-      plot1DNLL(False,options.xvar[0])
+      if len(options.xvar)>0:
+        plot1DNLL(False,options.xvar[0])
+      else:
+        plot1DNLL(False)
   elif options.method=='mumh':
     #plot2DNLL("MH","r","m_{H} (GeV)","#sigma/#sigma_{SM}")
     plot2DNLL("MH","r","m_{H} (GeV)","#mu")

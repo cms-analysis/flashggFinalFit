@@ -96,7 +96,7 @@ BKGPLOTSONLY=1
 fi
 
 if [[ $BATCH == "IC" ]]; then
-DEFAULTQUEUE=hepshort.q
+DEFAULTQUEUE="hep.q -l h_rt=0:20:0"
 BATCHQUERY=qstat
 fi
 if [[ $BATCH == "LSF" ]]; then
