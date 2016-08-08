@@ -241,6 +241,7 @@ sed -i -e "s/\!INTLUMI\!/$INTLUMI/g" combineHarvesterOptions13TeV_${EXT}${FAKE}.
 cp combinePlotsOptions_Template${FAKE}.dat combinePlotsOptions_${EXT}${FAKE}.dat
 sed -i -e "s/\!EXT\!/$EXT/g" combinePlotsOptions_${EXT}${FAKE}.dat
 sed -i -e "s/\!INTLUMI\!/$INTLUMI/g" combinePlotsOptions_${EXT}${FAKE}.dat
+sed -i -e "s/\!INTLUMI\!/$INTLUMI/g"  allPlots_${EXT}${FAKE}.sh
 
 
 if [ $COMBINEPLOTSONLY == 0 ]; then

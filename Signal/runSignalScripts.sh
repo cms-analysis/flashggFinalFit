@@ -98,7 +98,7 @@ SIGPLOTSONLY=1
 fi
 
 if [[ $BATCH == "IC" ]]; then
-DEFAULTQUEUE=hepshort.q
+DEFAULTQUEUE=hep.q
 fi
 if [[ $BATCH == "LSF" ]]; then
 DEFAULTQUEUE=1nh

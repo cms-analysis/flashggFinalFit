@@ -6,18 +6,18 @@ files=CMS-HGG_sigfit_mva_ggh_TTHHadronicTag.root,CMS-HGG_sigfit_mva_ggh_TTHLepto
 #############################################
 ##DO NOT RUN UNLESS YOU INTEND TO UNBLIND
 ###Fixed MH at 125.09
-outDir=combineJobs13TeV_!EXT!/MuScanFixMH													method=MuScan	expected=0 mh=125.09 muLow=0. muHigh=2. jobs=5 pointsperjob=20 opts=--squareDistPoi,--saveWorkspace label=MS_fMH 
+#outDir=combineJobs13TeV_!EXT!/MuScanFixMH													method=MuScan	expected=0 mh=125.09 muLow=0. muHigh=2. jobs=5 pointsperjob=20 opts=--squareDistPoi,--saveWorkspace label=MS_fMH 
 ##To get stat + theory + syst breakdown
-outDir=combineJobs13TeV_!EXT!/MuScanFixMHBreakdown/MuScanNoTheory    												method=MuScan	expected=0  postFit mh=125.09 muLow=0. muHigh=2. jobs=10 pointsperjob=10 opts=--squareDistPoi+--freezeNuisances<CMS_hgg_pdfWeight_0,CMS_hgg_pdfWeight_1,CMS_hgg_pdfWeight_2,CMS_hgg_pdfWeight_3,CMS_hgg_pdfWeight_4,CMS_hgg_pdfWeight_5,CMS_hgg_pdfWeight_6,CMS_hgg_pdfWeight_7,CMS_hgg_pdfWeight_8,CMS_hgg_pdfWeight_9,CMS_hgg_pdfWeight_10,CMS_hgg_pdfWeight_11,CMS_hgg_pdfWeight_12,CMS_hgg_pdfWeight_13,CMS_hgg_pdfWeight_14,CMS_hgg_pdfWeight_15,CMS_hgg_pdfWeight_16,CMS_hgg_pdfWeight_17,CMS_hgg_pdfWeight_18,CMS_hgg_pdfWeight_19,CMS_hgg_pdfWeight_20,CMS_hgg_pdfWeight_21,CMS_hgg_pdfWeight_22,CMS_hgg_pdfWeight_23,CMS_hgg_pdfWeight_24,CMS_hgg_pdfWeight_25,CMS_hgg_pdfWeight_26,CMS_hgg_pdfWeight_27,CMS_hgg_pdfWeight_28,CMS_hgg_pdfWeight_29,CMS_hgg_pdfWeight_30,CMS_hgg_pdfWeight_31,CMS_hgg_pdfWeight_32,CMS_hgg_pdfWeight_33,CMS_hgg_pdfWeight_34,CMS_hgg_pdfWeight_35,CMS_hgg_pdfWeight_36,CMS_hgg_pdfWeight_37,CMS_hgg_pdfWeight_38,CMS_hgg_pdfWeight_39,CMS_hgg_pdfWeight_40,CMS_hgg_pdfWeight_41,CMS_hgg_pdfWeight_42,CMS_hgg_pdfWeight_43,CMS_hgg_pdfWeight_44,CMS_hgg_pdfWeight_45,CMS_hgg_pdfWeight_46,CMS_hgg_pdfWeight_47,CMS_hgg_pdfWeight_48,CMS_hgg_pdfWeight_49,CMS_hgg_pdfWeight_50,CMS_hgg_pdfWeight_51,CMS_hgg_pdfWeight_52,CMS_hgg_pdfWeight_53,CMS_hgg_pdfWeight_54,CMS_hgg_pdfWeight_55,CMS_hgg_pdfWeight_56,CMS_hgg_pdfWeight_57,CMS_hgg_pdfWeight_58,CMS_hgg_pdfWeight_59,pdf_alphaS_qqbar,pdf_alphaS_gg,CMS_hgg_alphaSWeight_0,CMS_hgg_scaleWeight_2,CMS_hgg_scaleWeight_1,CMS_hgg_scaleWeight_0,pdf_alphaS_qqbar,pdf_alphaS_gg,QCDscale_qqbar,QCDscale_gg,BR_hgg>
-outDir=combineJobs13TeV_!EXT!/MuScanFixMHBreakdown/MuScanNoSyst 												method=MuScan	expected=0  postFit mh=125.09 muLow=0.0 muHigh=2.0 jobs=10 pointsperjob=10 opts=--squareDistPoi+-S0
-outDir=combineJobs13TeV_!EXT!/MuScanFixMHBreakdown/MuScanAllSyst 												method=MuScan	expected=0  postFit mh=125.09 muLow=0.0 muHigh=2.0 jobs=10 pointsperjob=10 opts=--squareDistPoi
+#outDir=combineJobs13TeV_!EXT!/MuScanFixMHBreakdown/MuScanNoTheory    												method=MuScan	expected=0  postFit mh=125.09 muLow=0. muHigh=2. jobs=10 pointsperjob=10 opts=--squareDistPoi+--freezeNuisances<CMS_hgg_pdfWeight_0,CMS_hgg_pdfWeight_1,CMS_hgg_pdfWeight_2,CMS_hgg_pdfWeight_3,CMS_hgg_pdfWeight_4,CMS_hgg_pdfWeight_5,CMS_hgg_pdfWeight_6,CMS_hgg_pdfWeight_7,CMS_hgg_pdfWeight_8,CMS_hgg_pdfWeight_9,CMS_hgg_pdfWeight_10,CMS_hgg_pdfWeight_11,CMS_hgg_pdfWeight_12,CMS_hgg_pdfWeight_13,CMS_hgg_pdfWeight_14,CMS_hgg_pdfWeight_15,CMS_hgg_pdfWeight_16,CMS_hgg_pdfWeight_17,CMS_hgg_pdfWeight_18,CMS_hgg_pdfWeight_19,CMS_hgg_pdfWeight_20,CMS_hgg_pdfWeight_21,CMS_hgg_pdfWeight_22,CMS_hgg_pdfWeight_23,CMS_hgg_pdfWeight_24,CMS_hgg_pdfWeight_25,CMS_hgg_pdfWeight_26,CMS_hgg_pdfWeight_27,CMS_hgg_pdfWeight_28,CMS_hgg_pdfWeight_29,CMS_hgg_pdfWeight_30,CMS_hgg_pdfWeight_31,CMS_hgg_pdfWeight_32,CMS_hgg_pdfWeight_33,CMS_hgg_pdfWeight_34,CMS_hgg_pdfWeight_35,CMS_hgg_pdfWeight_36,CMS_hgg_pdfWeight_37,CMS_hgg_pdfWeight_38,CMS_hgg_pdfWeight_39,CMS_hgg_pdfWeight_40,CMS_hgg_pdfWeight_41,CMS_hgg_pdfWeight_42,CMS_hgg_pdfWeight_43,CMS_hgg_pdfWeight_44,CMS_hgg_pdfWeight_45,CMS_hgg_pdfWeight_46,CMS_hgg_pdfWeight_47,CMS_hgg_pdfWeight_48,CMS_hgg_pdfWeight_49,CMS_hgg_pdfWeight_50,CMS_hgg_pdfWeight_51,CMS_hgg_pdfWeight_52,CMS_hgg_pdfWeight_53,CMS_hgg_pdfWeight_54,CMS_hgg_pdfWeight_55,CMS_hgg_pdfWeight_56,CMS_hgg_pdfWeight_57,CMS_hgg_pdfWeight_58,CMS_hgg_pdfWeight_59,pdf_alphaS_qqbar,pdf_alphaS_gg,CMS_hgg_alphaSWeight_0,CMS_hgg_scaleWeight_2,CMS_hgg_scaleWeight_1,CMS_hgg_scaleWeight_0,pdf_alphaS_qqbar,pdf_alphaS_gg,QCDscale_qqbar,QCDscale_gg,BR_hgg>
+#outDir=combineJobs13TeV_!EXT!/MuScanFixMHBreakdown/MuScanNoSyst 												method=MuScan	expected=0  postFit mh=125.09 muLow=0.0 muHigh=2.0 jobs=10 pointsperjob=10 opts=--squareDistPoi+-S0
+#outDir=combineJobs13TeV_!EXT!/MuScanFixMHBreakdown/MuScanAllSyst 												method=MuScan	expected=0  postFit mh=125.09 muLow=0.0 muHigh=2.0 jobs=10 pointsperjob=10 opts=--squareDistPoi
 #
 ###Profiled MH
 outDir=combineJobs13TeV_!EXT!/MuScanProfileMH									 method=MuScanMHProf	expected=0  muLow=0. muHigh=2. jobs=5 pointsperjob=20 opts=--squareDistPoi,--saveWorkspace label=MS_pMH
 ##To get stat + theory + syst breakdown
-outDir=combineJobs13TeV_!EXT!/MuScanProfMHBreakdown/MuScanNoTheory    												method=MuScanMHProf	expected=0  postFit mh=125.09 muLow=0. muHigh=2. jobs=10 pointsperjob=10 opts=--squareDistPoi+--freezeNuisances<CMS_hgg_pdfWeight_0,CMS_hgg_pdfWeight_1,CMS_hgg_pdfWeight_2,CMS_hgg_pdfWeight_3,CMS_hgg_pdfWeight_4,CMS_hgg_pdfWeight_5,CMS_hgg_pdfWeight_6,CMS_hgg_pdfWeight_7,CMS_hgg_pdfWeight_8,CMS_hgg_pdfWeight_9,CMS_hgg_pdfWeight_10,CMS_hgg_pdfWeight_11,CMS_hgg_pdfWeight_12,CMS_hgg_pdfWeight_13,CMS_hgg_pdfWeight_14,CMS_hgg_pdfWeight_15,CMS_hgg_pdfWeight_16,CMS_hgg_pdfWeight_17,CMS_hgg_pdfWeight_18,CMS_hgg_pdfWeight_19,CMS_hgg_pdfWeight_20,CMS_hgg_pdfWeight_21,CMS_hgg_pdfWeight_22,CMS_hgg_pdfWeight_23,CMS_hgg_pdfWeight_24,CMS_hgg_pdfWeight_25,CMS_hgg_pdfWeight_26,CMS_hgg_pdfWeight_27,CMS_hgg_pdfWeight_28,CMS_hgg_pdfWeight_29,CMS_hgg_pdfWeight_30,CMS_hgg_pdfWeight_31,CMS_hgg_pdfWeight_32,CMS_hgg_pdfWeight_33,CMS_hgg_pdfWeight_34,CMS_hgg_pdfWeight_35,CMS_hgg_pdfWeight_36,CMS_hgg_pdfWeight_37,CMS_hgg_pdfWeight_38,CMS_hgg_pdfWeight_39,CMS_hgg_pdfWeight_40,CMS_hgg_pdfWeight_41,CMS_hgg_pdfWeight_42,CMS_hgg_pdfWeight_43,CMS_hgg_pdfWeight_44,CMS_hgg_pdfWeight_45,CMS_hgg_pdfWeight_46,CMS_hgg_pdfWeight_47,CMS_hgg_pdfWeight_48,CMS_hgg_pdfWeight_49,CMS_hgg_pdfWeight_50,CMS_hgg_pdfWeight_51,CMS_hgg_pdfWeight_52,CMS_hgg_pdfWeight_53,CMS_hgg_pdfWeight_54,CMS_hgg_pdfWeight_55,CMS_hgg_pdfWeight_56,CMS_hgg_pdfWeight_57,CMS_hgg_pdfWeight_58,CMS_hgg_pdfWeight_59,pdf_alphaS_qqbar,pdf_alphaS_gg,CMS_hgg_alphaSWeight_0,CMS_hgg_scaleWeight_2,CMS_hgg_scaleWeight_1,CMS_hgg_scaleWeight_0,pdf_alphaS_qqbar,pdf_alphaS_gg,QCDscale_qqbar,QCDscale_gg,BR_hgg>
-outDir=combineJobs13TeV_!EXT!/MuScanProfMHBreakdown/MuScanNoSyst 												method=MuScanMHProf	expected=0  postFit mh=125.09 muLow=0.0 muHigh=2.0 jobs=10 pointsperjob=10 opts=--squareDistPoi+-S0
-outDir=combineJobs13TeV_!EXT!/MuScanProfMHBreakdown/MuScanAllSyst 												method=MuScanMHProf	expected=0  postFit mh=125.09 muLow=0.0 muHigh=2.0 jobs=10 pointsperjob=10 opts=--squareDistPoi
+#outDir=combineJobs13TeV_!EXT!/MuScanProfMHBreakdown/MuScanNoTheory    												method=MuScanMHProf	expected=0  postFit mh=125.09 muLow=0. muHigh=2. jobs=10 pointsperjob=10 opts=--squareDistPoi+--freezeNuisances<CMS_hgg_pdfWeight_0,CMS_hgg_pdfWeight_1,CMS_hgg_pdfWeight_2,CMS_hgg_pdfWeight_3,CMS_hgg_pdfWeight_4,CMS_hgg_pdfWeight_5,CMS_hgg_pdfWeight_6,CMS_hgg_pdfWeight_7,CMS_hgg_pdfWeight_8,CMS_hgg_pdfWeight_9,CMS_hgg_pdfWeight_10,CMS_hgg_pdfWeight_11,CMS_hgg_pdfWeight_12,CMS_hgg_pdfWeight_13,CMS_hgg_pdfWeight_14,CMS_hgg_pdfWeight_15,CMS_hgg_pdfWeight_16,CMS_hgg_pdfWeight_17,CMS_hgg_pdfWeight_18,CMS_hgg_pdfWeight_19,CMS_hgg_pdfWeight_20,CMS_hgg_pdfWeight_21,CMS_hgg_pdfWeight_22,CMS_hgg_pdfWeight_23,CMS_hgg_pdfWeight_24,CMS_hgg_pdfWeight_25,CMS_hgg_pdfWeight_26,CMS_hgg_pdfWeight_27,CMS_hgg_pdfWeight_28,CMS_hgg_pdfWeight_29,CMS_hgg_pdfWeight_30,CMS_hgg_pdfWeight_31,CMS_hgg_pdfWeight_32,CMS_hgg_pdfWeight_33,CMS_hgg_pdfWeight_34,CMS_hgg_pdfWeight_35,CMS_hgg_pdfWeight_36,CMS_hgg_pdfWeight_37,CMS_hgg_pdfWeight_38,CMS_hgg_pdfWeight_39,CMS_hgg_pdfWeight_40,CMS_hgg_pdfWeight_41,CMS_hgg_pdfWeight_42,CMS_hgg_pdfWeight_43,CMS_hgg_pdfWeight_44,CMS_hgg_pdfWeight_45,CMS_hgg_pdfWeight_46,CMS_hgg_pdfWeight_47,CMS_hgg_pdfWeight_48,CMS_hgg_pdfWeight_49,CMS_hgg_pdfWeight_50,CMS_hgg_pdfWeight_51,CMS_hgg_pdfWeight_52,CMS_hgg_pdfWeight_53,CMS_hgg_pdfWeight_54,CMS_hgg_pdfWeight_55,CMS_hgg_pdfWeight_56,CMS_hgg_pdfWeight_57,CMS_hgg_pdfWeight_58,CMS_hgg_pdfWeight_59,pdf_alphaS_qqbar,pdf_alphaS_gg,CMS_hgg_alphaSWeight_0,CMS_hgg_scaleWeight_2,CMS_hgg_scaleWeight_1,CMS_hgg_scaleWeight_0,pdf_alphaS_qqbar,pdf_alphaS_gg,QCDscale_qqbar,QCDscale_gg,BR_hgg>
+#outDir=combineJobs13TeV_!EXT!/MuScanProfMHBreakdown/MuScanNoSyst 												method=MuScanMHProf	expected=0  postFit mh=125.09 muLow=0.0 muHigh=2.0 jobs=10 pointsperjob=10 opts=--squareDistPoi+-S0
+#outDir=combineJobs13TeV_!EXT!/MuScanProfMHBreakdown/MuScanAllSyst 												method=MuScanMHProf	expected=0  postFit mh=125.09 muLow=0.0 muHigh=2.0 jobs=10 pointsperjob=10 opts=--squareDistPoi
 ###Other options for MH treatment
 #outDir=combineJobs13TeV_!EXT!/MuScanFixMH125.97													method=MuScan	expected=0 mh=125.97 muLow=0. muHigh=2. jobs=5 pointsperjob=20 opts=--squareDistPoi label=MuScanFixMH125.97
 
@@ -34,30 +34,30 @@ outDir=combineJobs13TeV_!EXT!/MuScanProfMHBreakdown/MuScanAllSyst 												me
 #############################################
 
 # Mu hat vs MH #DO NOT RUN UNLESS YOU INTEND TO UNBLIND
-outDir=combineJobs13TeV_!EXT!/MultiPdfMuHatvsMH											method=MultiPdfMuHatvsMH expected=0  mhLow=120. mhHigh=130.  muLow=-5. muHigh=5. pointsperjob=50 jobs=10  mhStep=0.5
+#outDir=combineJobs13TeV_!EXT!/MultiPdfMuHatvsMH											method=MultiPdfMuHatvsMH expected=0  mhLow=120. mhHigh=130.  muLow=-5. muHigh=5. pointsperjob=50 jobs=10  mhStep=0.5
 
 #############################################
 ######## RV vs RF 2D SCANS ##################
 #############################################
 # rv vs rf scans #DO NOT RUN UNLESS YOU INTEND TO UNBLIND
 #outDir=combineJobs13TeV_!EXT!/RVRFScanFixMH											method=RVRFScan expected=0 mh=125.09 rvLow=-3. rvHigh=10 rfLow=-2. rfHigh=3.5 jobs=100 pointsperjob=40 
-outDir=combineJobs13TeV_!EXT!/RVRFScanProfileMH											method=RVRFScan expected=0 rvLow=-3. rvHigh=10 rfLow=-2. rfHigh=3.5 jobs=100 pointsperjob=40 profileMH label=rvrf_pMH
+#outDir=combineJobs13TeV_!EXT!/RVRFScanProfileMH											method=RVRFScan expected=0 rvLow=-3. rvHigh=10 rfLow=-2. rfHigh=3.5 jobs=100 pointsperjob=40 profileMH label=rvrf_pMH
 #outDir=combineJobs13TeV_!EXT!/RVRFScanFixMH125.97											method=RVRFScan expected=0 mh=125.97 rvLow=-3. rvHigh=10 rfLow=-2. rfHigh=3.5 jobs=100 pointsperjob=40 
 #outDir=combineJobs13TeV_!EXT!/RVRFScanFloatMH											method=RVRFScan expected=0 mh=125.09:0.24 rvLow=-3. rvHigh=10 rfLow=-2. rfHigh=3.5 jobs=100 pointsperjob=40 
 
 # to get the unertainties
 #outDir=combineJobs13TeV_!EXT!/RVScan													method=RVScan	expected=0 mh=125.09 postFit muLow=-3. muHigh=3. jobs=1 pointsperjob=10 opts=--squareDistPoi
 #outDir=combineJobs13TeV_!EXT!/RFScan													method=RFScan	expected=0 mh=125.09 postFit muLow=-3. muHigh=3. jobs=1 pointsperjob=10 opts=--squareDistPoi
-outDir=combineJobs13TeV_!EXT!/RVScanProfileMH													method=RVScan	expected=0 profileMH muLow=-3. muHigh=3. jobs=1 pointsperjob=10 opts=--squareDistPoi profileMH
-outDir=combineJobs13TeV_!EXT!/RFScanProfileMH													method=RFScan	expected=0 profileMH muLow=-3. muHigh=3. jobs=1 pointsperjob=10 opts=--squareDistPoi profileMH
+#outDir=combineJobs13TeV_!EXT!/RVScanProfileMH													method=RVScan	expected=0 profileMH muLow=-3. muHigh=3. jobs=1 pointsperjob=10 opts=--squareDistPoi profileMH
+#outDir=combineJobs13TeV_!EXT!/RFScanProfileMH													method=RFScan	expected=0 profileMH muLow=-3. muHigh=3. jobs=1 pointsperjob=10 opts=--squareDistPoi profileMH
 
 #############################################
 ######## KvKF and KgluKpho 2D SCANS #########
 #############################################
 #outDir=combineJobs13TeV_!EXT!/CVCFScanFixMH											method=CVCFScan expected=0 mh=125.09 cvLow=-1. cvHigh=3 cfLow=-1. cfHigh=4 jobs=100 pointsperjob=40 
 #outDir=combineJobs13TeV_!EXT!/KGluKGamScanFixMH											method=KGluKGamScan expected=0 mh=125.09 kgamLow=-0.5 kgamHigh=2.5 kgluLow=-0.5 kgluHigh=2.5 jobs=100 pointsperjob=40 
-outDir=combineJobs13TeV_!EXT!/CVCFScanFixMH											method=CVCFScan expected=0 mh=125.09 cvLow=-1. cvHigh=3 cfLow=-1. cfHigh=4 jobs=100 pointsperjob=40  profileMH 
-outDir=combineJobs13TeV_!EXT!/KGluKGamScanFixMH											method=KGluKGamScan expected=0 mh=125.09 kgamLow=-0.5 kgamHigh=2.5 kgluLow=-0.5 kgluHigh=2.5 jobs=100 pointsperjob=40  profileMH
+#outDir=combineJobs13TeV_!EXT!/CVCFScanFixMH											method=CVCFScan expected=0 mh=125.09 cvLow=-1. cvHigh=3 cfLow=-1. cfHigh=4 jobs=100 pointsperjob=40  profileMH 
+#outDir=combineJobs13TeV_!EXT!/KGluKGamScanFixMH											method=KGluKGamScan expected=0 mh=125.09 kgamLow=-0.5 kgamHigh=2.5 kgluLow=-0.5 kgluHigh=2.5 jobs=100 pointsperjob=40  profileMH
 
 #############################################
 ############### PVAL SCANS ##################
@@ -118,7 +118,7 @@ outDir=combineJobs13TeV_!EXT!/ProfileLikelihood/All 		method=ProfileLikelihood e
 #outDir=combineJobs13TeV_!EXT!/MuScan_PostFit_125.09													method=MuScan	expected=0 mh=125.09 postFit muLow=-3. muHigh=3. jobs=5 pointsperjob=10 opts=--squareDistPoi
 #outDir=combineJobs13TeV_!EXT!/MuScan_PostFit_125.97													method=MuScan	expected=0 mh=125.97 postFit muLow=-3. muHigh=3. jobs=1 pointsperjob=1 opts=--squareDistPoi
 #outDir=combineJobs13TeV_!EXT!/MuScan_PostFit_125.09pm0.24													method=MuScan	expected=0 mh=125.09:0.24 postFit muLow=-3. muHigh=3. jobs=1 pointsperjob=1 opts=--squareDistPoi
-outDir=combineJobs13TeV_!EXT!/MuScan_PostFit_ProfileMH	method=MuScanMHProf	expected=0 mh=120.01 postFit muLow=-3. muHigh=3. jobs=1 pointsperjob=1 opts=--squareDistPoi
+#outDir=combineJobs13TeV_!EXT!/MuScan_PostFit_ProfileMH	method=MuScanMHProf	expected=0 mh=120.01 postFit muLow=-3. muHigh=3. jobs=1 pointsperjob=1 opts=--squareDistPoi
 #
 
 #############################################
@@ -163,9 +163,9 @@ outDir=combineJobs13TeV_!EXT!/PerProcessChannelCompatibilityProfileMH/r_ttH					
 #
 #
 ### Fix MH 125.09
-outDir=combineJobs13TeV_!EXT!/PerProcessChannelCompatibilityFixMH/r_ggH												method=PerProcessChannelCompatibility mh=125.09 jobs=20 pointsperjob=10  perProcessChannelCompatibilityPOI=r_ggH label=PerProcFixMH125.09 label=PPCC_fMH_ggH opts=--saveWorkspace
-outDir=combineJobs13TeV_!EXT!/PerProcessChannelCompatibilityFixMH/r_qqH												method=PerProcessChannelCompatibility mh=125.09  jobs=20 pointsperjob=10  perProcessChannelCompatibilityPOI=r_qqH  label=PerProcFixMH125.09 label=PPCC_fMH_qqH opts=--saveWorkspace
-outDir=combineJobs13TeV_!EXT!/PerProcessChannelCompatibilityFixMH/r_ttH												method=PerProcessChannelCompatibility mh=125.09   jobs=20 pointsperjob=10  perProcessChannelCompatibilityPOI=r_ttH label=PerProcFixMH125.09 label=PPCC_fMH_ttH opts=--saveWorkspace
+#outDir=combineJobs13TeV_!EXT!/PerProcessChannelCompatibilityFixMH/r_ggH												method=PerProcessChannelCompatibility mh=125.09 jobs=20 pointsperjob=10  perProcessChannelCompatibilityPOI=r_ggH label=PerProcFixMH125.09 label=PPCC_fMH_ggH opts=--saveWorkspace
+#outDir=combineJobs13TeV_!EXT!/PerProcessChannelCompatibilityFixMH/r_qqH												method=PerProcessChannelCompatibility mh=125.09  jobs=20 pointsperjob=10  perProcessChannelCompatibilityPOI=r_qqH  label=PerProcFixMH125.09 label=PPCC_fMH_qqH opts=--saveWorkspace
+#outDir=combineJobs13TeV_!EXT!/PerProcessChannelCompatibilityFixMH/r_ttH												method=PerProcessChannelCompatibility mh=125.09   jobs=20 pointsperjob=10  perProcessChannelCompatibilityPOI=r_ttH label=PerProcFixMH125.09 label=PPCC_fMH_ttH opts=--saveWorkspace
 ### Fix MH 125.97
 #outDir=combineJobs13TeV_!EXT!/PerProcessChannelCompatibilityFixMH125.97/v3_ggH												method=PerProcessChannelCompatibility mh=125.97 jobs=20 pointsperjob=10  perProcessChannelCompatibilityPOI=r_ggH label=PerProcFixMH125.97
 #outDir=combineJobs13TeV_!EXT!/PerProcessChannelCompatibilityFixMH125.97/v3_qqH												method=PerProcessChannelCompatibility mh=125.97  jobs=20 pointsperjob=10  perProcessChannelCompatibilityPOI=r_qqH label=PerProcFixMH125.97
@@ -176,14 +176,14 @@ outDir=combineJobs13TeV_!EXT!/PerProcessChannelCompatibilityFixMH/r_ttH									
 ##############################################
 #PER TAG MULTIPDF CH COMPATIBLITY
 ######## Fix MH 125.09
-outDir=combineJobs13TeV_!EXT!/PerTagChannelCompatibilityFixMH/r_UntaggedTag_0_13TeV										method=PerTagChannelCompatibility mh=125.09 jobs=20 pointsperjob=10  perTagChannelCompatibilityPOI=r_UntaggedTag_0_13TeV label=PTCC_fMH_U0 opts=--saveWorkspace
-outDir=combineJobs13TeV_!EXT!/PerTagChannelCompatibilityFixMH/r_UntaggedTag_1_13TeV										method=PerTagChannelCompatibility mh=125.09 jobs=20 pointsperjob=10  perTagChannelCompatibilityPOI=r_UntaggedTag_1_13TeV label=PTCC_fMH_U1 opts=--saveWorkspace
-outDir=combineJobs13TeV_!EXT!/PerTagChannelCompatibilityFixMH/r_UntaggedTag_2_13TeV										method=PerTagChannelCompatibility mh=125.09 jobs=20 pointsperjob=10  perTagChannelCompatibilityPOI=r_UntaggedTag_2_13TeV label=PTCC_fMH_U2 opts=--saveWorkspace
-outDir=combineJobs13TeV_!EXT!/PerTagChannelCompatibilityFixMH/r_UntaggedTag_3_13TeV										method=PerTagChannelCompatibility mh=125.09 jobs=20 pointsperjob=10  perTagChannelCompatibilityPOI=r_UntaggedTag_3_13TeV label=PTCC_fMH_U3 opts=--saveWorkspace
-outDir=combineJobs13TeV_!EXT!/PerTagChannelCompatibilityFixMH/r_VBFTag_0_13TeV												method=PerTagChannelCompatibility mh=125.09 jobs=20 pointsperjob=10  perTagChannelCompatibilityPOI=r_VBFTag_0_13TeV label=PTCC_fMH_V0 opts=--saveWorkspace
-outDir=combineJobs13TeV_!EXT!/PerTagChannelCompatibilityFixMH/r_VBFTag_1_13TeV												method=PerTagChannelCompatibility mh=125.09 jobs=20 pointsperjob=10  perTagChannelCompatibilityPOI=r_VBFTag_1_13TeV label=PTCC_fMH_V1 opts=--saveWorkspace
-outDir=combineJobs13TeV_!EXT!/PerTagChannelCompatibilityFixMH/r_TTHLeptonicTag_13TeV									method=PerTagChannelCompatibility mh=125.09 jobs=20 pointsperjob=10  perTagChannelCompatibilityPOI=r_TTHLeptonicTag_13TeV label=PTCC_fMH_TL opts=--saveWorkspace
-outDir=combineJobs13TeV_!EXT!/PerTagChannelCompatibilityFixMH/r_TTHHadronicTag_13TeV									method=PerTagChannelCompatibility mh=125.09 jobs=20 pointsperjob=10  perTagChannelCompatibilityPOI=r_TTHHadronicTag_13TeV label=PTCC_fMH_TH opts=--saveWorkspace
+#outDir=combineJobs13TeV_!EXT!/PerTagChannelCompatibilityFixMH/r_UntaggedTag_0_13TeV										method=PerTagChannelCompatibility mh=125.09 jobs=20 pointsperjob=10  perTagChannelCompatibilityPOI=r_UntaggedTag_0_13TeV label=PTCC_fMH_U0 opts=--saveWorkspace
+#outDir=combineJobs13TeV_!EXT!/PerTagChannelCompatibilityFixMH/r_UntaggedTag_1_13TeV										method=PerTagChannelCompatibility mh=125.09 jobs=20 pointsperjob=10  perTagChannelCompatibilityPOI=r_UntaggedTag_1_13TeV label=PTCC_fMH_U1 opts=--saveWorkspace
+#outDir=combineJobs13TeV_!EXT!/PerTagChannelCompatibilityFixMH/r_UntaggedTag_2_13TeV										method=PerTagChannelCompatibility mh=125.09 jobs=20 pointsperjob=10  perTagChannelCompatibilityPOI=r_UntaggedTag_2_13TeV label=PTCC_fMH_U2 opts=--saveWorkspace
+#outDir=combineJobs13TeV_!EXT!/PerTagChannelCompatibilityFixMH/r_UntaggedTag_3_13TeV										method=PerTagChannelCompatibility mh=125.09 jobs=20 pointsperjob=10  perTagChannelCompatibilityPOI=r_UntaggedTag_3_13TeV label=PTCC_fMH_U3 opts=--saveWorkspace
+#outDir=combineJobs13TeV_!EXT!/PerTagChannelCompatibilityFixMH/r_VBFTag_0_13TeV												method=PerTagChannelCompatibility mh=125.09 jobs=20 pointsperjob=10  perTagChannelCompatibilityPOI=r_VBFTag_0_13TeV label=PTCC_fMH_V0 opts=--saveWorkspace
+#outDir=combineJobs13TeV_!EXT!/PerTagChannelCompatibilityFixMH/r_VBFTag_1_13TeV												method=PerTagChannelCompatibility mh=125.09 jobs=20 pointsperjob=10  perTagChannelCompatibilityPOI=r_VBFTag_1_13TeV label=PTCC_fMH_V1 opts=--saveWorkspace
+#outDir=combineJobs13TeV_!EXT!/PerTagChannelCompatibilityFixMH/r_TTHLeptonicTag_13TeV									method=PerTagChannelCompatibility mh=125.09 jobs=20 pointsperjob=10  perTagChannelCompatibilityPOI=r_TTHLeptonicTag_13TeV label=PTCC_fMH_TL opts=--saveWorkspace
+#outDir=combineJobs13TeV_!EXT!/PerTagChannelCompatibilityFixMH/r_TTHHadronicTag_13TeV									method=PerTagChannelCompatibility mh=125.09 jobs=20 pointsperjob=10  perTagChannelCompatibilityPOI=r_TTHHadronicTag_13TeV label=PTCC_fMH_TH opts=--saveWorkspace
 #PER TAG MULTIPDF CH COMPATIBLITY
 ######## Profile MH
 outDir=combineJobs13TeV_!EXT!/PerTagChannelCompatibilityProfileMH/r_UntaggedTag_0_13TeV									method=PerTagChannelCompatibility profileMH jobs=20 pointsperjob=10  perTagChannelCompatibilityPOI=r_UntaggedTag_0_13TeV label=PTCC_pMH_U0 opts=--saveWorkspace
