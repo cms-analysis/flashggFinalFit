@@ -532,6 +532,7 @@ int main(int argc, char* argv[]){
   lumi_sqrtS = "13 TeV";       // used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
 
   string fileName;
+  string WSDirectory;
   int ncats;
   int singleCategory;
   string datfile;
@@ -549,6 +550,7 @@ vector<string> flashggCats_;
   desc.add_options()
     ("help,h",                                                                                  "Show help")
     ("infilename,i", po::value<string>(&fileName),                                              "In file name")
+    ("workSpaceDirectory,w", po::value<string>(&WSDirectory),                                   "workspace TDirectory name")
     ("ncats,c", po::value<int>(&ncats)->default_value(5),                                       "Number of categories")
     ("singleCat", po::value<int>(&singleCategory)->default_value(-1),                           "Run A single Category")
     ("datfile,d", po::value<string>(&datfile)->default_value("dat/fTest.dat"),                  "Right results to datfile for BiasStudy")
@@ -606,7 +608,7 @@ vector<string> flashggCats_;
   RooWorkspace *inWS;
 	if(isFlashgg_){
 		if (isData_){
-			inWS = (RooWorkspace*)inFile->Get("tagsDumper/cms_hgg_13TeV");
+			inWS = (RooWorkspace*)inFile->Get(Form("%s/cms_hgg_13TeV",WSDirectory.c_str()));
 		} else {
 			inWS = (RooWorkspace*)inFile->Get("cms_hgg_workspace");
 		}
