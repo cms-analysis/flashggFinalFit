@@ -25,7 +25,6 @@ InitialFit::InitialFit(RooRealVar *massVar, RooRealVar *MHvar, int mhLow, int mh
   binnedFit_(binnedFit),
   bins_(bins)
 { 
-  std::cout << "LC  DEBUG imitialFit filling all MH with massList of size " << massList.size() <<std::endl;
   if (massList.size()==0){
     allMH_ = getAllMH();
   }else{
@@ -220,8 +219,7 @@ void InitialFit::runFits(int ncpu){
     fitResults.insert(pair<int,RooFitResult*>(mh,fitRes125));
     mass->setBins(160); //return to default 
 
-    std::cout<<"PRINT 125 MODEL FIT RESULT"<<std::endl;
-    fitRes125->floatParsFinal().Print("V");
+    //fitRes125->floatParsFinal().Print("V");
 
     for (unsigned int i=0; i<allMH_.size(); i++){
       //int mh = allMH_[i];
@@ -239,16 +237,16 @@ void InitialFit::runFits(int ncpu){
 
 
 
-         fitModel->Print();
+         //fitModel->Print();
          RooArgSet* comps = fitModel->getComponents();
          TIterator* iter = comps->createIterator();
          RooGaussian* nextg = (RooGaussian*)iter->Next();
          //    while(nextg){
-            std::cout<<"Print:"<<std::endl;
-           nextg->Print();
+            //std::cout<<"Print:"<<std::endl;
+           //nextg->Print();
            RooArgSet* formulaMean = nextg->getParameters(*mass);
-           std::cout<<"Print formulamean:"<<std::endl;
-           formulaMean->Print();
+          // std::cout<<"Print formulamean:"<<std::endl;
+          // formulaMean->Print();
            for(int ng=0; ng<ngausmax; ng++){
       
         //  RooAbsArg* dm = formulaMean->find(Form("dm_mh%d_g%d",mh,ng ));
@@ -257,20 +255,16 @@ void InitialFit::runFits(int ncpu){
       // }
        RooRealVar* sigma = (RooRealVar*)formulaMean->find(Form("sigma_mh%d_g%d",mh,ng ));
       if(sigma!=NULL){
-          sigma->Print();
+          //sigma->Print();
          float mh125_sigma_val = ((RooRealVar*)fitRes125->floatParsFinal().find(  Form("sigma_mh125_g%d",ng )  ))->getVal();
-         //float mh125_sigmaerr_Lo =((RooRealVar*)fitRes125->floatParsFinal().find(  Form("sigma_mh125_g%d",ng ))) ->getAsymErrorLo();
-         //float mh125_sigmaerr_Hi =((RooRealVar*)fitRes125->floatParsFinal().find(  Form("sigma_mh125_g%d",ng ))) ->getAsymErrorHi() ;
-         //float mh125_sigmaerr_Lo2 =((RooRealVar*)fitRes125->floatParsFinal().find(  Form("sigma_mh125_g%d",ng ))) ->getErrorLo();
-         //float mh125_sigmaerr_Hi2 =((RooRealVar*)fitRes125->floatParsFinal().find(  Form("sigma_mh125_g%d",ng ))) ->getErrorHi() ;
          float mh125_sigmaerr =((RooRealVar*)fitRes125->floatParsFinal().find(  Form("sigma_mh125_g%d",ng ))) ->getError() ;
          sigma->setVal( mh125_sigma_val );
          float allowedRange = n_sigma_constraint*mh125_sigmaerr;
          if (n_sigma_constraint*mh125_sigmaerr > 0.05* mh125_sigma_val) {allowedRange= 0.05* mh125_sigma_val;}
 
          sigma->setRange( TMath::Max(mh125_sigma_val - allowedRange,sigma->getMin()) ,TMath::Min(mh125_sigma_val + allowedRange,sigma->getMax()));
-          std::cout <<" LC DEBUG MH " << mh << ": fit params sigma for gaussian_"<< ng << " set to be 125 value " << mh125_sigma_val << " + "<< mh125_sigmaerr << " - "<< mh125_sigmaerr  << std::endl;   
-         sigma->Print();
+         // std::cout <<"[INFO] MH " << mh << ": fit params sigma for gaussian_"<< ng << " set to be 125 value " << mh125_sigma_val << " + "<< mh125_sigmaerr << " - "<< mh125_sigmaerr  << std::endl;   
+         //sigma->Print();
         }
       else{
           std::cout<<"Constraints set on sigmas of "<<ng-1<<" gaussians of this model"<<std::endl;
@@ -279,7 +273,7 @@ void InitialFit::runFits(int ncpu){
        
        RooRealVar* dm = (RooRealVar*)formulaMean->find(Form("dm_mh%d_g%d",mh,ng ));
       if(dm!=NULL){
-          dm->Print();
+         //dm->Print();
          float mh125_dm_val = ((RooRealVar*)fitRes125->floatParsFinal().find(  Form("dm_mh125_g%d",ng )  ))->getVal();
          float mh125_dmerr =((RooRealVar*)fitRes125->floatParsFinal().find(  Form("dm_mh125_g%d",ng ))) ->getError() ;
          //if (mh125_dmerr >3.0) { mh125_dmerr=3.0 ;}
@@ -289,8 +283,8 @@ void InitialFit::runFits(int ncpu){
          if (n_sigma_constraint*mh125_dmerr > 0.05* mh125_dm_val) {allowedRange= 0.05* mh125_dm_val;}
 
          dm->setRange( TMath::Max(mh125_dm_val - allowedRange,dm->getMin()) ,TMath::Min(mh125_dm_val + allowedRange,dm->getMax()));
-          std::cout <<" LC DEBUG MH " << mh << ": fit params dm for gaussian_"<< ng << " set to be 125 value " << mh125_dm_val << " + "<< mh125_dmerr << " - "<< mh125_dmerr  << std::endl;   
-         dm->Print();
+         // std::cout <<" [INFO] MH " << mh << ": fit params dm for gaussian_"<< ng << " set to be 125 value " << mh125_dm_val << " + "<< mh125_dmerr << " - "<< mh125_dmerr  << std::endl;   
+         //dm->Print();
         }
       else{
           std::cout<<"Constraints set on dms of "<<ng-1<<" gaussians of this model"<<std::endl;
@@ -300,7 +294,7 @@ void InitialFit::runFits(int ncpu){
        
        RooRealVar* frac = (RooRealVar*)formulaMean->find(Form("frac_mh%d_g%d",mh,ng ));
       if(frac!=NULL){
-          frac->Print();
+          //frac->Print();
          float mh125_frac_val = ((RooRealVar*)fitRes125->floatParsFinal().find(  Form("frac_mh125_g%d",ng )  ))->getVal();
          float mh125_fracerr =((RooRealVar*)fitRes125->floatParsFinal().find(  Form("frac_mh125_g%d",ng ))) ->getError() ;
          if (mh125_fracerr >0.5) { mh125_fracerr=.5 ;}
@@ -309,8 +303,8 @@ void InitialFit::runFits(int ncpu){
          float allowedRange = n_sigma_constraint*mh125_fracerr;
          if (n_sigma_constraint*mh125_fracerr > 0.05* mh125_frac_val) {allowedRange= 0.05* mh125_frac_val;}
          frac->setRange( TMath::Max(mh125_frac_val - allowedRange,frac->getMin()) ,TMath::Min(mh125_frac_val + allowedRange,frac->getMax()));
-          std::cout <<" LC DEBUG MH " << mh << ": fit params frac for gaussian_"<< ng << " set to be 125 value " << mh125_frac_val << " + "<< mh125_fracerr << " - "<< mh125_fracerr  << std::endl;   
-         frac->Print();
+          //std::cout <<"[INFO] MH " << mh << ": fit params frac for gaussian_"<< ng << " set to be 125 value " << mh125_frac_val << " + "<< mh125_fracerr << " - "<< mh125_fracerr  << std::endl;   
+         //frac->Print();
         }
       else{
           std::cout<<"Constraints set on fracs of "<<ng-1<<" gaussians of this model"<<std::endl;

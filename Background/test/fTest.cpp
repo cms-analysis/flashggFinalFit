@@ -225,7 +225,6 @@ double getGoodnessOfFit(RooRealVar *mass, RooAbsPdf *mpdf, RooDataSet *data, std
 
   double prob;
   int ntoys = 500;
-  std::cout << "DE BUG getGOF A" << std::endl;
   // Routine to calculate the goodness of fit. 
   name+="_gofTest.pdf";
   RooRealVar norm("norm","norm",data->sumEntries(),0,10E6);
@@ -237,7 +236,6 @@ double getGoodnessOfFit(RooRealVar *mass, RooAbsPdf *mpdf, RooDataSet *data, std
   RooPlot *plot_chi2 = mass->frame();
   data->plotOn(plot_chi2,Binning(nBinsForMass),Name("data"));
 
-  std::cout << "DE BUG getGOF b" << std::endl;
   pdf->plotOn(plot_chi2,Name("pdf"));
   int np = pdf->getParameters(*data)->getSize();
 
@@ -247,7 +245,6 @@ double getGoodnessOfFit(RooRealVar *mass, RooAbsPdf *mpdf, RooDataSet *data, std
   // The first thing is to check if the number of entries in any bin is < 5 
   // if so, we don't rely on asymptotic approximations
  
-  std::cout << "DE BUG getGOF c" << std::endl;
   if ((double)data->sumEntries()/nBinsForMass < 5 ){
 
     std::cout << "[INFO] Running toys for GOF test " << std::endl;
@@ -288,14 +285,11 @@ double getGoodnessOfFit(RooRealVar *mass, RooAbsPdf *mpdf, RooDataSet *data, std
     }
     toyhist.Draw();
 
-  std::cout << "DE BUG getGOF d" << std::endl;
     TArrow lData(chi2*(nBinsForMass-np),toyhist.GetMaximum(),chi2*(nBinsForMass-np),0);
     lData.SetLineWidth(2);
     lData.Draw();
-  std::cout << "DE BUG getGOF e" << std::endl;
     can->SaveAs(name.c_str());
 
-  std::cout << "DE BUG getGOF f" << std::endl;
     // back to best fit 	
     params->assignValueOnly(preParams);
   } else {
@@ -309,7 +303,6 @@ double getGoodnessOfFit(RooRealVar *mass, RooAbsPdf *mpdf, RooDataSet *data, std
 }
 
 void plot(RooRealVar *mass, RooAbsPdf *pdf, RooDataSet *data, string name,vector<string> flashggCats_, int status, double *prob){
-  std::cout << " DEBUG PLOT 1A " << std::endl;
   
   // Chi2 taken from full range fit
   RooPlot *plot_chi2 = mass->frame();
@@ -319,26 +312,17 @@ void plot(RooRealVar *mass, RooAbsPdf *pdf, RooDataSet *data, string name,vector
   int np = pdf->getParameters(*data)->getSize()+1; //Because this pdf has no extend
   double chi2 = plot_chi2->chiSquare(np);
  
-  std::cout << " DEBUG PLOT 1b "<< std::endl; 
   *prob = getGoodnessOfFit(mass,pdf,data,name);
-  std::cout << " DEBUG PLOT 1ba "<< std::endl; 
   RooPlot *plot = mass->frame();
-  std::cout << " DEBUG PLOT 1bb "<< std::endl; 
   mass->setRange("unblindReg_1",mgg_low,115);
-  std::cout << " DEBUG PLOT 1bc "<< std::endl; 
   mass->setRange("unblindReg_2",135,mgg_high);
-  std::cout << " DEBUG PLOT 1bd "<< std::endl; 
   if (BLIND) {
     data->plotOn(plot,Binning(mgg_high-mgg_low),CutRange("unblindReg_1"));
-  std::cout << " DEBUG PLOT 1be "<< std::endl; 
     data->plotOn(plot,Binning(mgg_high-mgg_low),CutRange("unblindReg_2"));
-  std::cout << " DEBUG PLOT 1bf "<< std::endl; 
     data->plotOn(plot,Binning(mgg_high-mgg_low),Invisible());
-  std::cout << " DEBUG PLOT 1bg "<< std::endl; 
   }
   else data->plotOn(plot,Binning(mgg_high-mgg_low));
 
-  std::cout << " DEBUG PLOT 1c "<< std::endl; 
  // data->plotOn(plot,Binning(mgg_high-mgg_low));
   TCanvas *canv = new TCanvas();
   pdf->plotOn(plot);//,RooFit::NormRange("fitdata_1,fitdata_2"));
@@ -346,12 +330,10 @@ void plot(RooRealVar *mass, RooAbsPdf *pdf, RooDataSet *data, string name,vector
   if (BLIND) plot->SetMinimum(0.0001);
   plot->SetTitle("");
   plot->Draw();
-  std::cout << " DEBUG PLOT 1d " <<std::endl; 
   TLatex *lat = new TLatex();
   lat->SetNDC();
   lat->SetTextFont(42);
   lat->DrawLatex(0.1,0.92,Form("#chi^{2} = %.3f, Prob = %.2f, Fit Status = %d ",chi2*(nBinsForMass-np),*prob,status));
-  std::cout << " DEBUG PLOT 1e save as "<< name <<  std::endl; 
   canv->SaveAs(name.c_str());
  	
 	//plot_chi2->Draw();
@@ -363,7 +345,6 @@ void plot(RooRealVar *mass, RooAbsPdf *pdf, RooDataSet *data, string name,vector
 void plot(RooRealVar *mass, RooMultiPdf *pdfs, RooCategory *catIndex, RooDataSet *data, string name, vector<string> flashggCats_, int cat, int bestFitPdf=-1){
   
   int color[7] = {kBlue,kRed,kMagenta,kGreen+1,kOrange+7,kAzure+10,kBlack};
-  std::cout << " DEBUG PLOT 2a " <<std::endl; 
   TLegend *leg = new TLegend(0.5,0.55,0.92,0.88);
   leg->SetFillColor(0);
   leg->SetLineColor(1);
@@ -391,7 +372,6 @@ void plot(RooRealVar *mass, RooMultiPdf *pdfs, RooCategory *catIndex, RooDataSet
   pad1->cd();
   // enf extra bit for ratio plot///
 
-  std::cout << " DEBUG PLOT 2b " <<std::endl; 
   int currentIndex = catIndex->getIndex();
   TObject *datLeg = plot->getObject(int(plot->numItems()-1));
   leg->AddEntry(datLeg,Form("Data - %s",flashggCats_[cat].c_str()),"LEP");
@@ -416,13 +396,11 @@ void plot(RooRealVar *mass, RooMultiPdf *pdfs, RooCategory *catIndex, RooDataSet
     }
     leg->AddEntry(pdfLeg,Form("%s%s",pdfs->getCurrentPdf()->GetName(),ext.c_str()),"L");
   }
-  std::cout << " DEBUG PLOT 2c " <<std::endl; 
   plot->SetTitle(Form("Category %s",flashggCats_[cat].c_str()));
   if (BLIND) plot->SetMinimum(0.0001);
   plot->Draw();
   leg->Draw("same");
   CMS_lumi( canv, 0, 0);
-  std::cout << " DEBUG PLOT 2c save as "<< name << " using pdf " << pdf->GetName() <<  std::endl; 
   ///start extra bit for ratio plot///
   TH1D *hbplottmp = (TH1D*) pdf->createHistogram("hbplottmp",*mass,Binning(mgg_high-mgg_low,mgg_low,mgg_high));
   hbplottmp->Scale(plotdata->Integral());
@@ -477,7 +455,6 @@ void plot(RooRealVar *mass, RooMultiPdf *pdfs, RooCategory *catIndex, RooDataSet
 
 void plot(RooRealVar *mass, map<string,RooAbsPdf*> pdfs, RooDataSet *data, string name, vector<string> flashggCats_, int cat, int bestFitPdf=-1){
   
-  std::cout << " DEBUG PLOT 3a save as "<< name <<  std::endl; 
   int color[7] = {kBlue,kRed,kMagenta,kGreen+1,kOrange+7,kAzure+10,kBlack};
   TCanvas *canv = new TCanvas();
   TLegend *leg = new TLegend(0.6,0.65,0.88,0.88);
@@ -493,7 +470,6 @@ void plot(RooRealVar *mass, map<string,RooAbsPdf*> pdfs, RooDataSet *data, strin
     data->plotOn(plot,Binning(mgg_high-mgg_low),Invisible());
   }
   else data->plotOn(plot,Binning(mgg_high-mgg_low));
-  std::cout << " DEBUG PLOT 3b save as "<< name <<  std::endl; 
 
   TObject *datLeg = plot->getObject(int(plot->numItems()-1));
 	if(flashggCats_.size() >0){
@@ -514,13 +490,11 @@ void plot(RooRealVar *mass, map<string,RooAbsPdf*> pdfs, RooDataSet *data, strin
     leg->AddEntry(pdfLeg,Form("%s%s",it->first.c_str(),ext.c_str()),"L");
     i++;
   }
-  std::cout << " DEBUG PLOT 3c save as "<< name <<  std::endl; 
   plot->SetTitle(Form(" %s",flashggCats_[cat].c_str()));
   if (BLIND) plot->SetMinimum(0.0001);
   plot->Draw();
   leg->Draw("same");
   CMS_lumi( canv, 0, 0);
-  std::cout << " DEBUG PLOT 3d save as "<< name <<  std::endl; 
   canv->SaveAs(Form("%s.pdf",name.c_str()));
   canv->SaveAs(Form("%s.png",name.c_str()));
   delete canv;
@@ -837,60 +811,44 @@ vector<string> flashggCats_;
 			int counter =0;
 			//	while (prob<0.05){
 			while (prob<0.05 && order < 7){ //FIXME
-        std::cout << " DEBUG a flashggcat " << flashggCats_[cat] <<std::endl;
 				RooAbsPdf *bkgPdf = getPdf(pdfsModel,*funcType,order,Form("ftest_pdf_%d_%s",cat,ext.c_str()));
-        std::cout << " DEBUG b flashggcat " << flashggCats_[cat] <<std::endl;
 				if (!bkgPdf){
 					// assume this order is not allowed
 					order++;
-        std::cout << " DEBUG c flashggcat " << flashggCats_[cat] <<std::endl;
 				}
 				else {
-        std::cout << " DEBUG d flashggcat " << flashggCats_[cat] <<std::endl;
 
 					//RooFitResult *fitRes = bkgPdf->fitTo(*data,Save(true),RooFit::Minimizer("Minuit2","minimize"));
 					int fitStatus = 0;
 					//thisNll = fitRes->minNll();
-        std::cout << " DEBUG e flashggcat " << flashggCats_[cat] <<std::endl;
-        std::cout << " DEBUG fit this pdf: " <<std::endl;
         bkgPdf->Print();
 					runFit(bkgPdf,data,&thisNll,&fitStatus,/*max iterations*/3);//bkgPdf->fitTo(*data,Save(true),RooFit::Minimizer("Minuit2","minimize"));
-        std::cout << " DEBUG f flashggcat " << flashggCats_[cat] <<std::endl;
 					if (fitStatus!=0) std::cout << "[WARNING] Warning -- Fit status for " << bkgPdf->GetName() << " at " << fitStatus <<std::endl;
        
-        std::cout << " DEBUG g flashggcat " << flashggCats_[cat] <<std::endl;
 					chi2 = 2.*(prevNll-thisNll);
 					if (chi2<0. && order>1) chi2=0.;
-        std::cout << " DEBUG h flashggcat " << flashggCats_[cat] <<std::endl;
 					if (prev_pdf!=NULL){
-        std::cout << " DEBUG i flashggcat " << flashggCats_[cat] <<std::endl;
 						prob = getProbabilityFtest(chi2,order-prev_order,prev_pdf,bkgPdf,mass,data
 								,Form("%s/Ftest_from_%s%d_cat%d.pdf",outDir.c_str(),funcType->c_str(),order,cat));
 						std::cout << "[INFO]  F-test Prob(chi2>chi2(data)) == " << prob << std::endl;
-        std::cout << " DEBUG j flashggcat " << flashggCats_[cat] <<std::endl;
 					} else {
-        std::cout << " DEBUG k flashggcat " << flashggCats_[cat] <<std::endl;
 						prob = 0;
 					}
 					double gofProb=0;
 					// otherwise we get it later ...
 					if (!saveMultiPdf) plot(mass,bkgPdf,data,Form("%s/%s%d_cat%d.pdf",outDir.c_str(),funcType->c_str(),order,cat),flashggCats_,fitStatus,&gofProb);
-        std::cout << " DEBUG l flashggcat " << flashggCats_[cat] <<std::endl;
 					cout << "[INFO]\t " << *funcType << " " << order << " " << prevNll << " " << thisNll << " " << chi2 << " " << prob << endl;
 					//fprintf(resFile,"%15s && %d && %10.2f && %10.2f && %10.2f \\\\\n",funcType->c_str(),order,thisNll,chi2,prob);
 					prevNll=thisNll;
-        std::cout << " DEBUG m flashggcat " << flashggCats_[cat] <<std::endl;
 					cache_order=prev_order;
 					cache_pdf=prev_pdf;
 					prev_order=order;
 					prev_pdf=bkgPdf;
 					order++;
 				}
-        std::cout << " DEBUG n flashggcat " << flashggCats_[cat] <<std::endl;
 				counter++;
 			}
 
-        std::cout << " DEBUG o flashggcat " << flashggCats_[cat] <<std::endl;
 			fprintf(resFile,"%15s & %d & %5.2f & %5.2f \\\\\n",funcType->c_str(),cache_order+1,chi2,prob);
 			choices.insert(pair<string,int>(*funcType,cache_order));
 			pdfs.insert(pair<string,RooAbsPdf*>(Form("%s%d",funcType->c_str(),cache_order),cache_pdf));
@@ -910,65 +868,46 @@ vector<string> flashggCats_;
 				std::cout << "[INFO] Upper end Threshold for highest order function " << upperEnvThreshold <<std::endl;
 
 				while (prob<upperEnvThreshold){
-        std::cout << " DEBUG p flashggcat " << flashggCats_[cat] <<std::endl;
 					RooAbsPdf *bkgPdf = getPdf(pdfsModel,*funcType,order,Form("env_pdf_%d_%s",cat,ext.c_str()));
-        std::cout << " DEBUG q flashggcat " << flashggCats_[cat] <<std::endl;
 					if (!bkgPdf ){
 						// assume this order is not allowed
 						if (order >6) { std::cout << " [WARNING] could not add ] " << std::endl; break ;}
 						order++;
 					}
 					else {
-        std::cout << " DEBUG r flashggcat " << flashggCats_[cat] <<std::endl;
 						//RooFitResult *fitRes;
 						int fitStatus=0;
 						runFit(bkgPdf,data,&thisNll,&fitStatus,/*max iterations*/3);//bkgPdf->fitTo(*data,Save(true),RooFit::Minimizer("Minuit2","minimize"));
 						//thisNll = fitRes->minNll();
 						if (fitStatus!=0) std::cout << "[WARNING] Warning -- Fit status for " << bkgPdf->GetName() << " at " << fitStatus <<std::endl;
-        std::cout << " DEBUG s flashggcat " << flashggCats_[cat] <<std::endl;
 						double myNll = 2.*thisNll;
-        std::cout << " DEBUG t flashggcat " << flashggCats_[cat] <<std::endl;
 						chi2 = 2.*(prevNll-thisNll);
-        std::cout << " DEBUG u flashggcat " << flashggCats_[cat] <<std::endl;
 						if (chi2<0. && order>1) chi2=0.;
-        std::cout << " DEBUG v flashggcat " << flashggCats_[cat] <<std::endl;
 						prob = TMath::Prob(chi2,order-prev_order);
-        std::cout << " DEBUG w flashggcat " << flashggCats_[cat] <<std::endl;
 
-        std::cout << " DEBUG x flashggcat " << flashggCats_[cat] <<std::endl;
 						cout << "[INFO] \t " << *funcType << " " << order << " " << prevNll << " " << thisNll << " " << chi2 << " " << prob << endl;
-        std::cout << " DEBUG y flashggcat " << flashggCats_[cat] <<std::endl;
 						prevNll=thisNll;
-        std::cout << " DEBUG z flashggcat " << flashggCats_[cat] <<std::endl;
 						cache_order=prev_order;
 						cache_pdf=prev_pdf;
-        std::cout << " DEBUG aa flashggcat " << flashggCats_[cat] <<std::endl;
 
 						// Calculate goodness of fit for the thing to be included (will use toys for lowstats)!
 						double gofProb =0; 
-        std::cout << " DEBUG ab flashggcat " << flashggCats_[cat] <<std::endl;
 						plot(mass,bkgPdf,data,Form("%s/%s%d_cat%d.pdf",outDir.c_str(),funcType->c_str(),order,cat),flashggCats_,fitStatus,&gofProb);
 
-        std::cout << " DEBUG ac flashggcat " << flashggCats_[cat] <<std::endl;
 						if ((prob < upperEnvThreshold) ) { // Looser requirements for the envelope
-        std::cout << " DEBUG a flashggcat " << flashggCats_[cat] <<std::endl;
 
 							if (gofProb > 0.01 || order == truthOrder ) {  // Good looking fit or one of our regular truth functions
-        std::cout << " DEBUG ad flashggcat " << flashggCats_[cat] <<std::endl;
 
 								std::cout << "[INFO] Adding to Envelope " << bkgPdf->GetName() << " "<< gofProb 
 									<< " 2xNLL + c is " << myNll + bkgPdf->getVariables()->getSize() <<  std::endl;
 								allPdfs.insert(pair<string,RooAbsPdf*>(Form("%s%d",funcType->c_str(),order),bkgPdf));
-        std::cout << " DEBUG ae flashggcat " << flashggCats_[cat] <<std::endl;
 								storedPdfs.add(*bkgPdf);
 								pdforders.push_back(order);
-        std::cout << " DEBUG af flashggcat " << flashggCats_[cat] <<std::endl;
 
 								// Keep track but we shall redo this later
 								if ((myNll + bkgPdf->getVariables()->getSize()) < MinimimNLLSoFar) {
 									simplebestFitPdfIndex = storedPdfs.getSize()-1;
 									MinimimNLLSoFar = myNll + bkgPdf->getVariables()->getSize();
-        std::cout << " DEBUG ag flashggcat " << flashggCats_[cat] <<std::endl;
 								}
 							}
 						}
@@ -976,14 +915,11 @@ vector<string> flashggCats_;
 						prev_order=order;
 						prev_pdf=bkgPdf;
 						order++;
-        std::cout << " DEBUG ah flashggcat " << flashggCats_[cat] <<std::endl;
 					}
 				}
 
 				fprintf(resFile,"%15s & %d & %5.2f & %5.2f \\\\\n",funcType->c_str(),cache_order+1,chi2,prob);
-        std::cout << " DEBUG ai flashggcat " << flashggCats_[cat] <<std::endl;
 				choices_envelope.insert(pair<string,std::vector<int> >(*funcType,pdforders));
-        std::cout << " DEBUG aj flashggcat " << flashggCats_[cat] <<std::endl;
 			}
 		}
 

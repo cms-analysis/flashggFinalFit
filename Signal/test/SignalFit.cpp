@@ -92,7 +92,7 @@ vector<string>  split_;
 string  splitStr_;
 float newIntLumi_;
 float originalIntLumi_;
-float mcBeamSpotWidth_=5.14; //cm
+float mcBeamSpotWidth_=5.14; //cm // the beamspot has a certain width in MC which is not necessarily the same in data. for the data/MC to agree, we reweight the MC to match the data Beamspot width, using dZ as a proxy (they have a factor of sqrt(2) because you are subtracting one gaussain distributed quantity from another)
 //float dataBeamSpotWidth_=4.24; //cm
 float dataBeamSpotWidth_=3.5; //cm
 string referenceProc_="ggh";
@@ -127,7 +127,6 @@ void OptionParser(int argc, char *argv[]){
 		("dataBeamSpotWidth", po::value<float>(&dataBeamSpotWidth_)->default_value(3.50),                                  			"Default width of data beamspot")
 		("nThreads,t", po::value<int>(&ncpu_)->default_value(ncpu_),                               			"Number of threads to be used for the fits")
 		("mhHigh,H", po::value<int>(&mhHigh_)->default_value(135),                                			"High mass point")
-		// ("nCats,n", po::value<int>(&nCats_)->default_value(9),                                    			"Number of total categories")
 		("constraintValue,C", po::value<float>(&constraintValue_)->default_value(0.1),            			"Constraint value")
 		("constraintValueMass,M", po::value<int>(&constraintValueMass_)->default_value(125),                        "Constraint value mass")
 		("pdfWeights", po::value<int>(&pdfWeights_)->default_value(0),                        "If pdf systematics should be considered, say how many (default 0 = off)")
@@ -223,25 +222,10 @@ unsigned int getIndexOfReferenceDataset(string proc, string cat){
   }
   
   if (iLine==-1 ) {
-    std::cout << "ERROR could not find the index of the category you wished to look up. Exit!" << std::endl;
+    std::cout << "[ERROR] could not find the index of the category you wished to look up. Exit!" << std::endl;
      exit(1);
   }
   return iLine;
-}
-
-// is this still used ? -LC 
-void transferMacros(TFile *inFile, TDirectory *outFile){
-
-	TIter next(inFile->GetListOfKeys());
-	TKey *key;
-	while ((key = (TKey*)next())){
-		if (string(key->ReadObj()->ClassName())=="TMacro") {
-			//cout << key->ReadObj()->ClassName() << " : " << key->GetName() << endl;
-			TMacro *macro = (TMacro*)inFile->Get(key->GetName());
-			outFile->cd();
-			macro->Write();
-		}
-	}
 }
 
 
@@ -305,6 +289,7 @@ RooDataSet * reduceDataset(RooDataSet *data0){
 return data;
 }
 
+// this is where we reweight the DZ distribution as a proxy for the beamspot.
 void plotBeamSpotDZdist(RooDataSet *data0, string suffix=""){
   gStyle->SetOptFit(1111);
 	RooRealVar *weight0 = new RooRealVar("weight","weight",-100000,1000000);
@@ -327,13 +312,11 @@ void plotBeamSpotDZdist(RooDataSet *data0, string suffix=""){
   extra="BS_reweigh";
 	}
 	histSmallDZ->Draw();
-  histSmallDZ->Fit("gaus");
-	std::cout << "LC DEBUG sum entries smallDz " << histSmallDZ->Integral() <<std::endl;
-	  c->SaveAs(Form("testLC-%s_smallDz_%s_%s.pdf",data0->GetName(),extra.c_str(),suffix.c_str()));
+  histSmallDZ->Fit("gaus","Q");
+	//c->SaveAs(Form("debug-%s_smallDz_%s_%s.pdf",data0->GetName(),extra.c_str(),suffix.c_str()));
 	histLargeDZ->Draw();
-  histLargeDZ->Fit("gaus");
-	std::cout << "LC DEBUG sum entries largeDz " << histSmallDZ->Integral() <<std::endl;
-	  c->SaveAs(Form("testLC-%s_largeDz_%s_%s.pdf",data0->GetName(),extra.c_str(),suffix.c_str()));
+  histLargeDZ->Fit("gaus","Q");
+	//c->SaveAs(Form("debug-%s_largeDz_%s_%s.pdf",data0->GetName(),extra.c_str(),suffix.c_str()));
 //	delete c;
 	delete histSmallDZ;
 	delete histLargeDZ;
@@ -347,8 +330,8 @@ RooDataSet * rvwvDataset(RooDataSet *data0, string rvwv){
 	RooRealVar *weight0 = new RooRealVar("weight","weight",-100000,1000000);
   for (unsigned int i=0 ; i < data0->numEntries() ; i++){
     mass_->setVal(data0->get(i)->getRealValue("CMS_hgg_mass"));
-    weight0->setVal(data0->weight() ); // <--- is this correct?
-    dZ_->setVal(data0->get(i)->getRealValue("dZ"));
+    weight0->setVal(data0->weight() ); 
+		dZ_->setVal(data0->get(i)->getRealValue("dZ"));
     if (fabs(dZ_->getVal() )<1.){
       dataRV->add( RooArgList(*mass_, *dZ_, *weight0), weight0->getVal() );
     } else{
@@ -365,10 +348,9 @@ RooDataSet * rvwvDataset(RooDataSet *data0, string rvwv){
   }
 }
 RooDataSet * beamSpotReweigh(RooDataSet *data0 /*original dataset*/){
-  std::cout << " LC DEBUG REWEIGHITNG BEAMSPOT !!!"<< std::endl;	
   RooDataSet *data = (RooDataSet*) data0->emptyClone();
 	RooRealVar *weight0 = new RooRealVar("weight","weight",-100000,1000000);
-	data0->Print();
+	//data0->Print();
 	plotBeamSpotDZdist(data0,"before");
   for (int i = 0; i < data0->numEntries(); i++) {
     mass_->setVal(data0->get(i)->getRealValue("CMS_hgg_mass"));
@@ -382,12 +364,11 @@ RooDataSet * beamSpotReweigh(RooDataSet *data0 /*original dataset*/){
     double dataBeamSpot=TMath::Gaus(dZ_->getVal(),0,TMath::Sqrt(2)*dataBeamSpotWidth_,true); 
 		factor = dataBeamSpot/mcBeamSpot; 
 		}
-		//std::cout << " LC DEBUG entry "<< i << " dZ " << dZ_->getVal() << " factor "<< factor  << std::endl;
     
 		weight0->setVal(factor * data0->weight() ); // <--- is this correct?
     data->add( RooArgList(*mass_, *dZ_, *weight0), weight0->getVal() );
   }
-	data->Print();
+	//data->Print();
 	plotBeamSpotDZdist(data,"after");
   
 	if (verbose_) std::cout << "[INFO] Old dataset (before beamSpot  reweight): " << *data0 << std::endl;
@@ -451,7 +432,7 @@ int main(int argc, char *argv[]){
 	if (isFlashgg_){ 
     nCats_= flashggCats_.size();
 	} else {
-    std::cout << "[ERROR] script is onyl compatible with flashgg! exit(1)." << std::endl;
+    std::cout << "[ERROR] script is only compatible with flashgg! exit(1)." << std::endl;
     exit(1);
   }
   

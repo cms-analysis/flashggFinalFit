@@ -73,6 +73,7 @@ parser.add_option("--parallel",default=False,action="store_true",help="Run local
 parser.add_option("--runLocal",default=False,action="store_true",help="Run locally")
 parser.add_option("--skipWorkspace",default=False,action="store_true",help="Dont remake MultiDim workspace")
 parser.add_option("--hadd",help="Trawl passed directory and hadd files. To be used when jobs are complete.")
+parser.add_option("--resubmitFailures",help=" Provide directory and the script will find failed jobs and resubmit them")
 parser.add_option("-v","--verbose",default=False,action="store_true")
 parser.add_option("--poix",default="r")
 parser.add_option("--S0",default=False,action="store_true",help="Stats only")
@@ -545,15 +546,12 @@ def writeMultiPdfMuHatvsMH():
   rmindefault = opts.muLow
   backupdir = opts.outDir
   rmaxdefault = opts.muHigh
-  print "[DEBUG] MultiPdfMuHatvsMH   -- mulow, mu high ", rmindefault ," , ",rmaxdefault 
-  print "[DEBUG] MultiPdfMuHatvsMH   -- catRanges ", catRanges 
   mLow=opts.mhLow
   mHigh=opts.mhHigh
   mStep=opts.mhStep
   m=mLow
   counter=0;
   while (m < mHigh+0.1 ):
-    print "[DEBUG] MultiPdfMuHatvsMH   -- loop trhoguh masses, now process m: ", m
     opts.method = 'MuScan'
     opts.mass = m
     backupmass =  getattr(opts,"mh",None)
@@ -661,14 +659,12 @@ def writeMultiDimFit(method=None,wsOnly=False):
                 binstr += ").*TeV/.*Bin.*:r_Bin%d[1,0,20]'" % ibin
                 catsMap += binstr
         perTagChCompPOIs=[] 
-        print "DEBUG LC method ", opts.method
         if opts.method=="PerTagChannelCompatibility" and catsMap=="":
            cats = getSortedCats()
            catsMap =" --PO verbose "
            for cat in cats:
             catsMap = catsMap + " --PO 'map=%s/.*hgg:r_%s[1,-5,5]'"%(cat,cat)
             perTagChCompPOIs.append("r_%s"%cat)
-           print " LC DEBUG catsMap ", catsMap
         print '[INFO] Writing MultiDim Scan'
         ws_args = { "RVRFScan"   : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:rVrFXSHiggs %s "% profMH ,
     #"PerProcessChannelCompatibility" : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:floatingXSHiggs --PO modes=ggH,qqH,VH,ttH %s " % profMH,
@@ -1039,6 +1035,33 @@ def trawlHadd():
       exec_line = 'hadd -f %s/%s.root%s'%(dir,os.path.basename(dir),list_of_files)
       if opts.verbose: print exec_line
       system(exec_line)
+
+def resubmitFailures():
+  print "[INFO] resubmit failed jobs"
+  list_of_dirs=set()
+  for root, dirs, files in os.walk(opts.resubmitFailures):
+    #print ' root ', root 
+    for x in files:
+      #print ' root ', root, ' files ', files
+      if 'fail' in x: 
+        list_of_dirs.add(root)
+
+  for dir in list_of_dirs:
+    for root, dirs, files in os.walk(dir):
+      list_of_files=''
+      for file in fnmatch.filter(files,'*.sh.fail'):
+        list_of_files += ' '+os.path.join(root,'%s'%file.replace('.fail',''))
+        filename = os.path.join(root,'%s'%file.replace('.fail','')) 
+        print 'Resubmitting ', filename
+        system('rm %s'%os.path.join(root,'%s'%file))
+        if (opts.batch == "LSF") : 
+					print 'bsub -q %s -o %s.log %s'%(opts.queue,os.path.abspath(filename), os.path.abspath(filename))
+					system('bsub -q %s -o %s.log %s'%(opts.queue,os.path.abspath(filename), os.path.abspath(filename)))
+        if (opts.batch == "IC") : system('qsub -q %s -o %s.log -e %s.err %s '%(opts.queue,os.path.abspath(filename), os.path.abspath(filename), os.path.abspath(filename)))
+  exit(1)
+
+if opts.resubmitFailures:
+  resubmitFailures()
 
 if opts.hadd:
   trawlHadd()

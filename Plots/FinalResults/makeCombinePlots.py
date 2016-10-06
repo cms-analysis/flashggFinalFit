@@ -102,7 +102,7 @@ import ROOT as r
 outf = r.TFile('%s.root'%options.outname,'RECREATE')
 
 # Load and use the Hgg Paper style
-r.gROOT.ProcessLine(".x hggPaperStyle.C")
+#r.gROOT.ProcessLine(".x hggPaperStyle.C")
 
 if options.batch: r.gROOT.SetBatch()
 r.gStyle.SetOptStat(0)
@@ -225,7 +225,7 @@ def drawGlobals(canv,shifted="False"):
   # draw text 
   
   if (shifted=="True"):
-   print "AM I SHIFTED ? YES"
+   #print "AM I SHIFTED ? YES"
    #lat.DrawLatex(0.129+0.03,0.93,"CMS Unpublished H#rightarrow#gamma#gamma")
    #lat.DrawLatex(0.129+0.03,0.93,"CMS H#rightarrow#gamma#gamma")
    #lat.SetTextSize(0.07)
@@ -236,7 +236,7 @@ def drawGlobals(canv,shifted="False"):
    lat.DrawLatex(0.7,0.93,options.text)
 
   elif shifted=="2D":
-   print "AM I SHIFTED ? 2D"
+   #print "AM I SHIFTED ? 2D"
    lat.SetTextSize(0.05)
    lat.DrawLatex(0.1,0.92,"#bf{CMS} #scale[0.75]{#it{Preliminary}}")
    #lat.DrawLatex(0.129+0.04,0.85,"H#rightarrow#gamma#gamma")
@@ -246,7 +246,7 @@ def drawGlobals(canv,shifted="False"):
    lat.DrawLatex(0.61,0.92,options.text)
 
   else:
-   print "AM I SHIFTED ? NO"
+   #print "AM I SHIFTED ? NO"
    #lat.DrawLatex(0.129,0.93,"CMS Unpublished H#rightarrow#gamma#gamma")
    #lat.DrawLatex(0.129,0.93,"CMS H#rightarrow#gamma#gamma")
    #lat.DrawLatex(0.173,0.85,"#splitline{#bf{CMS}}{#it{Preliminary}}")
@@ -340,7 +340,7 @@ def pvalPlot(allVals):
       if (minpvalue > values[j][1]): 
         minpvalue = values[j][1]
         minpvalueX =values[j][0]
-      if options.verbose or values[j][0]==125.09 or  values[j][0]==125.0 : 
+      if options.verbose or abs(values[j][0]-125.09)<0.1 or  values[j][0]==125.0 : 
         print options.names[k] ,' at ', values[j][0], " signif ",  r.RooStats.PValueToSignificance(values[j][1])
         pvalat125=values[j][1]
       #print "debug minpval  for ",options.names[k], " at ", values[j][0], " ", minpvalue, "   " , r.RooStats.PValueToSignificance(minpvalue), "values[j][1] " , values[j][1], " ", r.RooStats.PValueToSignificance(values[j][1])
@@ -1169,19 +1169,21 @@ def plot2DNLL(xvar="RF",yvar="RV",xtitle="#mu_{ggH+ttH}",ytitle="#mu_{qqH+VH}"):
           minDeltaYminus = abs(deltaY)
           xMinus= [contourPointsX[i] , contourPointsY[i],contourPointsZ[i]]
           
-    print "BF xBF= ", xBF , " yBF=",   yBF    
-    print "xPlus at ", xPlus
-    print "xMinus at ", xMinus
-    print "yPlus at ", yPlus
-    print "yMinus at ", yMinus
+    #print "BF xBF= ", xBF , " yBF=",   yBF    
+    #print "xPlus at ", xPlus
+    #print "xMinus at ", xMinus
+    #print "yPlus at ", yPlus
+    #print "yMinus at ", yMinus
 
     xBF_up = abs(xBF - xPlus[0])
     xBF_down = abs(xBF - xMinus[0])
     yBF_up = abs (yBF - yPlus[1])
     yBF_down = abs( yBF - yMinus[1])
-    print " Best fit rF = %2.2f + %2.2f - %2.2f"%( xBF ,  xBF_up , xBF_down)
+    
+		#WARNING this is not the right way to calculate teh uncertainties: you should do a 1-D scan fo each variabel profiling the other. That is the correct way to get the uncertaainties!
+		#print " Best fit rF = %2.2f + %2.2f - %2.2f"%( xBF ,  xBF_up , xBF_down)
     #print " Best fit X = %2.2f --> %2.2f--> %2.2f"%( xBF - xBF_down ,  xBF , xBF+ xBF_up)
-    print " Best fit rV = %2.2f + %2.2f - %2.2f"%( yBF ,  yBF_up , yBF_down)
+    #print " Best fit rV = %2.2f + %2.2f - %2.2f"%( yBF ,  yBF_up , yBF_down)
     #print " Best fit Y = %2.2f --> %2.2f--> %2.2f"%( yBF - yBF_down ,  yBF , yBF+ yBF_up)
     #gBF.SetPoint(1,xPlus[0],xPlus[1])
     #gBF.SetPoint(2,yPlus[0],yPlus[1])

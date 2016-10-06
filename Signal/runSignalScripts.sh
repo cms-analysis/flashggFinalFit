@@ -65,8 +65,8 @@ case $1 in
 --scalesGlobal) SCALESGLOBAL=$2; shift ;;
 --bs) BS=$2; shift ;;
 -f|--flashggCats) CATS=$2; shift ;;
---ext) EXT=$2; echo "test" ; shift ;;
---fTestOnly) FTESTONLY=1; echo "ftest" ;;
+--ext) EXT=$2 ; shift ;;
+--fTestOnly) FTESTONLY=1 ;;
 --calcPhoSystOnly) CALCPHOSYSTONLY=1;;
 --sigFitOnly) SIGFITONLY=1;;
 --sigPlotsOnly) SIGPLOTSONLY=1;;
@@ -74,18 +74,18 @@ case $1 in
 --batch) BATCH=$2; shift;;
 
 (--) shift; break;;
-(-*) usage; echo "$0: error - unrecognized option $1" 1>&2; usage >> /dev/stderr; exit 1;;
+(-*) usage; echo "$0: [ERROR] - unrecognized option $1" 1>&2; usage >> /dev/stderr; exit 1;;
 (*) break;;
 esac
 shift
 done
 
-echo "INTLUMI $INTLUMI"
+echo "[INFO] processing signal model for INTLUMI $INTLUMI"
 
 OUTDIR="outdir_$EXT"
 echo "[INFO] outdir is $OUTDIR" 
 if [[ $FILE == "" ]];then
-echo "ERROR, input file (--inputFile or -i) is mandatory!"
+echo "[ERROR], input file (--inputFile or -i) is mandatory!"
 exit 0
 fi
 
@@ -106,9 +106,9 @@ fi
 BSOPT=""
 
 if [[ $BS == "" ]]; then
-echo "NO BS SPECIFIED"
+echo "[INFO] NO BeamSpot SIZE SPECIFIED - DEFAULT FROM MC WILL BE USED"
 else
-echo "BS IS $BS"
+echo "[INFO] BeamSpot Size is to be reweighted to $BS"
 BSOPT=" --bs $BS"
 fi
 
@@ -143,7 +143,7 @@ else
         echo " PEND $PEND - RUN $RUN - DONE $DONE - FAIL $FAIL"
         if (( $RUN > 0 )) ; then PEND=1 ; fi
         if (( $FAIL > 0 )) ; then 
-          echo "ERROR at least one job failed :"
+          echo "[ERROR] at least one job failed :"
           ls -l $OUTDIR/fTestJobs/sub* | grep "\.fail"
           exit 1
         fi
@@ -158,7 +158,7 @@ else
     rm -rf $OUTDIR/sigfTest
     mv $OUTDIR/fTest $OUTDIR/sigfTest
   fi
-  echo "[INFO] sigFTest jobs completed, check output and do:"
+  echo "[INFO] SUCCESS sigFTest jobs completed, check output and do:"
   echo "cp $PWD/dat/newConfig_${EXT}_temp.dat $PWD/dat/newConfig_${EXT}.dat"
   echo "and manually amend chosen number of gaussians using the output pdfs here:"
 	echo "Signal/outdir_${EXT}/sigfTest/"

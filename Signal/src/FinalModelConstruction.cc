@@ -541,7 +541,6 @@ void FinalModelConstruction::setSecondaryModelVars(RooRealVar *mh_sm, RooRealVar
 }
 
 void FinalModelConstruction::getRvFractionFunc(string name){
-   std::cout << " LC DEBUG allMH size " << allMH_.size() << " rvDatasets size " << rvDatasets.size() << " wvDatasets size " << rvDatasets.size() << std::endl;
   assert(allMH_.size()==rvDatasets.size());
   assert(allMH_.size()==wvDatasets.size());
   vector<double> mhValues, rvFracValues;
@@ -566,7 +565,7 @@ void FinalModelConstruction::getRvFractionFunc(string name){
     if (verbosity_) std::cout << "[INFO] RV/WV fraction for datasets " << *(rvDatasets[mh]) << " and " << *(wvDatasets[mh]) << " --- " << rvF << std::endl;
   }
 
-  temp->Fit(pol);
+  temp->Fit(pol,"Q");
   
   //turn this fit to rvFrac into a spline.
   TGraph *rvFGraph = new TGraph(pol);
@@ -650,7 +649,7 @@ RooAbsReal* FinalModelConstruction::getMeanWithPhotonSyst(RooAbsReal *dm, string
 				RooAbsReal *nuisVar = photonSystematics[Form("CMS_hgg_nuisance_%s",syst.c_str())];
 				if( verbosity_ ) { 
 					std::cout << "[INFO] Systematic " << syst << std::endl;
-					nuisVar->Print("V");
+					//nuisVar->Print("V");
 				}
 				if ( fabs(constVar->getVal())>=5.e-5) { 
 					hasEffect = true;
@@ -688,8 +687,8 @@ RooAbsReal* FinalModelConstruction::getSigmaWithPhotonSyst(RooAbsReal *sig_fit, 
 			if (photonSystematicConsts.find(Form("const_%s_%s_%dTeV_sigma_%s",proc_.c_str(),catname.c_str(),sqrts_,syst.c_str())) != photonSystematicConsts.end() ) {
 				RooConstVar *constVar = photonSystematicConsts[Form("const_%s_%s_%dTeV_sigma_%s",proc_.c_str(),catname.c_str(),sqrts_,syst.c_str())];
 				RooAbsReal *nuisVar = photonSystematics[Form("CMS_hgg_nuisance_%s",syst.c_str())];
-      constVar->Print(); //std::cout
-      nuisVar->Print(); //std::cout
+      //constVar->Print(); //std::cout
+      //nuisVar->Print(); //std::cout
 				if (constVar->getVal()>=1.e-4) {
 					hasEffect = true;
 					if( quadraticSigmaSum_ ) { 
@@ -708,7 +707,7 @@ RooAbsReal* FinalModelConstruction::getSigmaWithPhotonSyst(RooAbsReal *sig_fit, 
 	}
 	formula+="))";
 	RooFormulaVar *formVar = new RooFormulaVar(name.c_str(),name.c_str(),formula.c_str(),*dependents);
-  dependents->Print() ;//std::cout
+  //dependents->Print() ;//std::cout
     
 	return formVar;
 }
@@ -1220,7 +1219,7 @@ void FinalModelConstruction::getNormalization(){
     //temp->Fit(pol2,"EMFEX0") :
     //temp->Fit(pol2,"QEMFEX0");
     //pol->SetParLimits(2,0.01,999); // want a in y=ax^2 +bx+c to not be 0!
-    temp->Fit(pol);
+    temp->Fit(pol,"Q");
     float b=pol->GetParameter(1) ;// y = [0] + [1]*x + [2]*x*x
     float a=pol->GetParameter(2) ;// y = [0] + [1]*x + [2]*x*x
     float parabola_extremum_x = -b/(2*a);
@@ -1228,18 +1227,18 @@ void FinalModelConstruction::getNormalization(){
     if ( parabola_extremum_x  > 120. && parabola_extremum_x < 130){
       TF1 *pol1= new TF1("pol","pol1",120,130); // set to constant
       pol=pol1;
-      temp->Fit(pol);
+      temp->Fit(pol,"Q");
     }
   } else {
     TF1 *pol0= new TF1("pol","pol0",120,130); //  problem dataset, set to constant fit
      pol=pol0;
-     temp->Fit(pol);
+     temp->Fit(pol,"Q");
   }
   //temp->SetMinimum(0.);
   //temp->SetMinimum(0.66*temp->GetHistogram()->GetMaximum());
   //temp->SetMaximum(1.5*temp->GetHistogram()->GetMaximum());
   temp->Draw();
-  temp->Fit(pol);
+  temp->Fit(pol,"Q");
   TPaveText *pt = new TPaveText(.25,.9,.9,1.0,"NDC");
   pt->SetTextSize(0.045);
   pt->AddText(Form("%s %s eff*acc",proc_.c_str(),cat_.c_str()));
@@ -1280,7 +1279,7 @@ void FinalModelConstruction::getNormalization(){
 	if (!(xs && brSpline && eaSpline && rateNuisTerm && intLumi)){
   	std::cout << "[ERROR] some of the following are not set properly. exit." << std::endl;
     std::cout << "[ERROR] xs " << xs << ", brSpline " << brSpline << ", eaSpline " << eaSpline << ", rateNuisTerm " << rateNuisTerm << ", intLumi " << intLumi << std::endl;
-  	if( verbosity_) std::cout << "[DEBUG] xs " << xs << ", brSpline " << brSpline << ", eaSpline " << eaSpline << ", rateNuisTerm " << rateNuisTerm << ", intLumi " << intLumi << std::endl;
+  	if( verbosity_) std::cout << "[INFO] xs " << xs << ", brSpline " << brSpline << ", eaSpline " << eaSpline << ", rateNuisTerm " << rateNuisTerm << ", intLumi " << intLumi << std::endl;
   	exit(1);
 	} else {
      if (verbosity_>1) std::cout << "[INFO] xs " << xs->getVal() << ", brSpline " << brSpline->getVal() << ", eaSpline " << eaSpline->getVal() << ", rateNuisTerm " << rateNuisTerm->getVal() << ", intLumi " << intLumi->getVal() << std::endl;

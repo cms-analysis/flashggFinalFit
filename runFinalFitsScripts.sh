@@ -196,8 +196,8 @@ echo "------------------------------------------------"
 
 cd Datacard
 echo "./makeParametricModelDatacardFLASHgg.py -i $FILE  -o Datacard_13TeV_${EXT}.txt -p $PROCS -c UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,VBFTag_0,VBFTag_1,TTHHadronicTag,TTHLeptonicTag --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --theoryNormFactors norm_factors.py --submitSelf #--intLumi $INTLUMI"
-./makeParametricModelDatacardFLASHgg.py -i $FILE  -o Datacard_13TeV_${EXT}.txt -p $PROCS -c UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,VBFTag_0,VBFTag_1,TTHHadronicTag,TTHLeptonicTag --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --theoryNormFactors norm_factors.py --submitSelf --intLumi $INTLUMI
-#./makeParametricModelDatacardFLASHgg.py -i $FILE  -o Datacard_13TeV_${EXT}.txt -p $PROCS -c UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,VBFTag_0,VBFTag_1,TTHHadronicTag,TTHLeptonicTag --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --theoryNormFactors norm_factors.py #--submitSelf #--intLumi $INTLUMI
+#./makeParametricModelDatacardFLASHgg.py -i $FILE  -o Datacard_13TeV_${EXT}.txt -p $PROCS -c UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,VBFTag_0,VBFTag_1,TTHHadronicTag,TTHLeptonicTag --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --theoryNormFactors norm_factors.py --submitSelf --intLumi $INTLUMI --batch $BATCH 
+./makeParametricModelDatacardFLASHgg.py -i $FILE  -o Datacard_13TeV_${EXT}.txt -p $PROCS -c UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,VBFTag_0,VBFTag_1,TTHHadronicTag,TTHLeptonicTag --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --theoryNormFactors norm_factors.py --intLumi $INTLUMI #--submitSelf
 cd -
 fi
 
@@ -271,6 +271,7 @@ done
 
 echo "[INFO] ------> All jobs done"
 fi
+echo "[INFO] ------> Hadding files in directory combineJobs13TeV_$EXT "
 ./combineHarvester.py --hadd combineJobs13TeV_$EXT
 
 LEDGER=" --it $COUNTER --itLedger itLedger_$EXT.txt"
