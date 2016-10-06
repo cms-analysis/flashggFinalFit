@@ -288,6 +288,6 @@ echo "http://www.hep.ph.imperial.ac.uk/~lc1113/$OUTDIR"
 echo "~lc1113/public_html/$OUTDIR/sigfTest/."
 echo " if you want the plots on lxplus, fill in your password!"
 echo " scp -r ~lc1113/public_html/$OUTDIR lcorpe@lxplus.cern.ch:~/www/. "
-#scp -r ~lc1113/public_html/$OUTDIR lcorpe@lxplus.cern.ch:~/www/. 
+scp -r ~lc1113/public_html/$OUTDIR lcorpe@lxplus.cern.ch:~/www/. 
 echo "https://lcorpe.web.cern.ch/lcorpe/$OUTDIR"
 fi
