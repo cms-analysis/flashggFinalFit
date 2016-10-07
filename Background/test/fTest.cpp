@@ -550,7 +550,7 @@ vector<string> flashggCats_;
   desc.add_options()
     ("help,h",                                                                                  "Show help")
     ("infilename,i", po::value<string>(&fileName),                                              "In file name")
-    ("workSpaceDirectory,w", po::value<string>(&WSDirectory),                                   "workspace TDirectory name")
+    ("workSpaceDirectory,w", po::value<string>(&WSDirectory)->default_value("tagsDumper"),      "workspace TDirectory name")
     ("ncats,c", po::value<int>(&ncats)->default_value(5),                                       "Number of categories")
     ("singleCat", po::value<int>(&singleCategory)->default_value(-1),                           "Run A single Category")
     ("datfile,d", po::value<string>(&datfile)->default_value("dat/fTest.dat"),                  "Right results to datfile for BiasStudy")
