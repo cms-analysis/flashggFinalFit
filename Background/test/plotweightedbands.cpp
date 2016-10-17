@@ -51,10 +51,10 @@ namespace po = boost::program_options;
 string filenameStr_;
 vector<string> filename_;
 string name_;
-string flashggCatsStr_;
-vector<string> flashggCats_;
+float intLumi_;
 bool verbose_;
 bool drawZeroBins_ ;
+bool quoteMu_;
 
 void OptionParser(int argc, char *argv[]){
 	po::options_description desc1("Allowed options");
@@ -62,8 +62,9 @@ void OptionParser(int argc, char *argv[]){
 		("help,h",                                                                                			"Show help")
 		("infilename,i", po::value<string>(&filenameStr_),                                           			"Input file name")
 		("name", po::value<string>(&name_)->default_value("CMS-HGG_hgg_"), 			"Output file name")
-		("flashggCats,f", po::value<string>(&flashggCatsStr_)->default_value("UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,UntaggedTag_4,VBFTag_0,VBFTag_1,VBFTag_2,TTHHadronicTag,TTHLeptonicTag,VHHadronicTag,VHTightTag,VHLooseTag,VHEtTag"),       "Flashgg categories if used")
+		("lumi", po::value<float>(&intLumi_)->default_value(12.9), 			"Output file name")
 		("verbose,v", po::value<bool>(&verbose_)->default_value(0),       "verbose")
+		("quoteMu", po::value<bool>(&quoteMu_)->default_value(1),       "set 0 to not quote mu eg for fiducial XS result")
 		("drawZeroBins", po::value<bool>(&drawZeroBins_)->default_value(1),       "Draw data points if zero events in that bin?")
 		;                                                                                             		
 	po::options_description desc("Allowed options");
@@ -74,7 +75,6 @@ void OptionParser(int argc, char *argv[]){
 	po::notify(vm);
 	if (vm.count("help")){ cout << desc << endl; exit(1);}
 	
-	split(flashggCats_,flashggCatsStr_,boost::is_any_of(","));
 	split(filename_,filenameStr_,boost::is_any_of(","));
 
 }
@@ -239,6 +239,7 @@ int main(int argc, char *argv[]) {
   
   RooRealVar *MH = win->var("MH");
   RooRealVar *r = win->var("r");
+  std::cout << " VALUES OF MH " << MH->getVal() << " and r " << r->getVal() <<std::endl;
 
   RooSimultaneous *sbpdf = (RooSimultaneous*)win->pdf("model_s");
   RooSimultaneous *bpdf = (RooSimultaneous*)win->pdf("model_b");
@@ -296,19 +297,20 @@ int main(int argc, char *argv[]) {
     desc.ReplaceAll("VBFTag","VBF Tag");
     desc.ReplaceAll("TTHLeptonicTag","TTH Leptonic Tag");
     desc.ReplaceAll("TTHHadronicTag","TTH Hadronic Tag");
+    desc.ReplaceAll("SigmaMpTTag","#sigma_{M}/M |_{decorr} category");
     catdesc.push_back(desc);
     std::cout << "[INFO] --> description :" << desc << std::endl;
   }
 
   printf("[INFO] Channel %d  : combcat_unweighted",chan->numTypes()+1);
-  std::cout << "[INFO] --> description :" << "#splitline{fiducial phase space}{All classes summed} "<< std::endl;
+  std::cout << "[INFO] --> description :" << "#splitline{fiducial phase space}{All classes} "<< std::endl;
   catnames.push_back("combcat_unweighted");
-  catdesc.push_back("#splitline{All categories summed}{}");
+  catdesc.push_back("#splitline{All categories}{}");
   
   printf("[INFO] Channel %d  : combcat_weighted",chan->numTypes()+2);
-  std::cout << "[INFO] --> description :" << "#splitline{fiducial phase space}{S/(S+B) weighted sum}" << std::endl;
+  std::cout << "[INFO] --> description :" << "#splitline{fiducial phase space}{S/(S+B) weighted}" << std::endl;
   catnames.push_back("combcat_weighted");
-  catdesc.push_back("#splitline{All categories summed}{S/(S+B) weighted sum}");
+  catdesc.push_back("#splitline{All categories}{S/(S+B) weighted}");
   
   if (verbose_) std::cout << "[INFO] preparing weights verctor.." << std::endl; 
   std::vector<double> catweights;
@@ -844,7 +846,7 @@ int main(int argc, char *argv[]) {
     
     TLegend *leg2 = new TLegend(0.529,0.46+offset,0.860,0.749+offset);  
     leg2->AddEntry(plotdata,"Data","PE");  
-    leg2->AddEntry(hsigbkg,"S+B fit sum","L");  
+    leg2->AddEntry(hsigbkg,"S+B fit","L");  
     leg2->AddEntry(hbkg,"B component","L");  
     leg2->AddEntry(onesigma,"#pm1 #sigma","F");  
     leg2->AddEntry(twosigma,"#pm2 #sigma","F");       
@@ -857,7 +859,11 @@ int main(int argc, char *argv[]) {
     lat2->SetNDC();
     lat2->SetTextSize(0.045);
     lat2->DrawLatex(0.535,0.800,TString::Format("#scale[1.0]{%s}",catdesc.at(i).Data()));
-    lat2->DrawLatex(0.159,0.8,"m_{H}=125.09 GeV, #hat{#mu}=0.7");
+    if (quoteMu_){
+    lat2->DrawLatex(0.159,0.8,Form("#hat{m}_{H}=%.1f GeV, #hat{#mu}=%.2f",MH->getVal(),r->getVal()));
+    } else {
+    lat2->DrawLatex(0.159,0.8,Form("#hat{m}_{H}=%.1f GeV",MH->getVal()));
+    }
     lat2->DrawLatex(0.56585,0.727+offset,"-"); // top
     
     TLatex *lat2b = new TLatex();
@@ -874,7 +880,7 @@ int main(int argc, char *argv[]) {
     TLatex *mytext = new TLatex();
     mytext->SetTextSize(0.055);
     mytext->SetNDC();
-    mytext->DrawLatex(0.64,0.93,"2.7 fb^{-1} (13#scale[0.75]{ }TeV)");        
+    mytext->DrawLatex(0.6,0.93,Form(" %.1f fb^{-1} (13#scale[0.75]{ }TeV)",intLumi_));        
     mytext->DrawLatex(0.129+0.03,0.85,"H#rightarrow#gamma#gamma");
     
     std::cout << "[INFO]  now do lower ratio plot " << std::endl; 

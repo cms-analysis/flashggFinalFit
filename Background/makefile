@@ -43,7 +43,6 @@ CXXFLAGS += $(INCLUDE)
 
 LIBS += $(USERLIBS)
 LIBS += -L$(CMSSW_BASE)/lib/$(SCRAM_ARCH)/ -lHiggsAnalysisCombinedLimit
-
 # this is where you  would normaly have the lib, bin and source directories
 LIBDIR = $(BASEDIR)/lib
 EXEDIR = $(BASEDIR)/bin

@@ -18,13 +18,15 @@ WSTFileWrapper::WSTFileWrapper( std::string files, std::string wsname ) {
     } else if (fileList.back()->IsZombie()) {
       std::cout << "[WSTFileWrapper] got that this file is a zombie: " << (*fn) << std::endl;
     } else {
-      std::cout << "[WSTFileWrapper] successfully opened this file: " << (*fn) << std::endl;
+      // this is very verbose otherwise!
+			//std::cout << "[WSTFileWrapper] successfully opened this file: " << (*fn) << std::endl;
     }
     wsList.push_back((RooWorkspace*)fileList.back()->Get(wsname.c_str()));
     if (wsList.back() == 0) {
       std::cout << "[WSTFileWrapper] on file " << (*fn) << " failed to obtain workspace named: " << wsname << std::endl;
     } else {
-      std::cout << "[WSTFileWrapper] on file " << (*fn) << " opened workspace named: " << wsname << std::endl;
+      // this is very verbose otherwise!
+      //std::cout << "[WSTFileWrapper] on file " << (*fn) << " opened workspace named: " << wsname << std::endl;
     }
   }
 }
@@ -96,7 +98,7 @@ RooAbsPdf* WSTFileWrapper::pdf(std::string pdfName) {
     }
   }
   if (!result) {
-    std::cout << "[WSTFileWrapper] Uh oh, never got a good RooAbsPdf with name " << pdfName << std::endl;
+    //std::cout << "[WSTFileWrapper] Uh oh, never got a good RooAbsPdf with name " << pdfName << std::endl;
   }
   return result;
 }
@@ -117,7 +119,7 @@ RooCategory* WSTFileWrapper::cat(std::string catName) {
     }
   }
   if (!result) {
-    std::cout << "[WSTFileWrapper] Uh oh, never got a good RooCategory with name " << catName << std::endl;
+    //std::cout << "[WSTFileWrapper] Uh oh, never got a good RooCategory with name " << catName << std::endl;
   }
   return result;
 }
@@ -138,7 +140,7 @@ RooAbsReal* WSTFileWrapper::function(std::string functionName) {
     }
   }
   if (!result) {
-    std::cout << "[WSTFileWrapper] Uh oh, never got a good RooAbsReal with name " << functionName << std::endl;
+    //std::cout << "[WSTFileWrapper] Uh oh, never got a good RooAbsReal with name " << functionName << std::endl;
   }
   return result;
 }

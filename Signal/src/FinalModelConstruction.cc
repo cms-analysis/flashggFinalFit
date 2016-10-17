@@ -8,6 +8,7 @@
 #include "TF1.h"
 #include "RooPlot.h"
 #include "TLatex.h"
+#include "TColor.h"
 #include "TPaveText.h"
 #include "TMultiGraph.h"
 #include "RooVoigtian.h"
@@ -40,7 +41,7 @@ template<class ResultT, class SourceT, class PredicateT> typename ResultT::itera
 	return dst.begin()+orig_size;
 }
 
-FinalModelConstruction::FinalModelConstruction(RooRealVar *massVar, RooRealVar *MHvar, RooRealVar *intL, int mhLow, int mhHigh, string proc, string cat, bool doSecMods, string systematicsFileName, vector<int> skipMasses, int verbosity,std::vector<std::string> procList, std::vector<std::string> flashggCats , string outDir, bool isProblemCategory ,bool isCB, int sqrts, bool quadraticSigmaSum)	:
+FinalModelConstruction::FinalModelConstruction( std::vector<int> massList, RooRealVar *massVar, RooRealVar *MHvar, RooRealVar *intL,int mhLow, int mhHigh, string proc, string cat, bool doSecMods, string systematicsFileName, vector<int> skipMasses, int verbosity,std::vector<std::string> procList, std::vector<std::string> flashggCats , string outDir, bool isProblemCategory ,bool isCB, int sqrts, bool quadraticSigmaSum)	:
   mass(massVar),
   MH(MHvar),
   intLumi(intL),
@@ -67,7 +68,12 @@ FinalModelConstruction::FinalModelConstruction(RooRealVar *massVar, RooRealVar *
   lumi_8TeV  = "19.1 fb^{-1}"; // default is "19.7 fb^{-1}"
   lumi_7TeV  = "4.9 fb^{-1}";  // default is "5.1 fb^{-1}"
   lumi_sqrtS = "13 TeV";       // used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
-  allMH_ = getAllMH();
+  if (massList.size()==0){
+    allMH_ = getAllMH();
+  }else{
+    allMH_ = massList;
+  }
+
 	if (sqrts_ ==7) is2011_=1;
 	if (sqrts_ ==8) is2012_=1;
 	if (sqrts_ ==13) isFlashgg_=1;
@@ -158,14 +164,16 @@ float FinalModelConstruction::getRequiredAddtionalGlobalScaleFactor(string name)
 	float retVal=-999;
 	// check non correlated
 	if (globalScalesOpts.find(name)!=globalScalesOpts.end()) {
-		for (vector<pair<int,float> >::iterator it=globalScalesOpts[name].begin(); it!=globalScalesOpts[name].end(); it++){
-			if (cat_.compare(flashggCats_[it->first])==0) return it->second;
+		for (vector<pair<string,float> >::iterator it=globalScalesOpts[name].begin(); it!=globalScalesOpts[name].end(); it++){
+			//if (cat_.compare(flashggCats_[it->first])==0) return it->second;
+			if (cat_.compare(it->first)==0) return it->second;
 		}
 	}
 	// check correlated
 	if (globalScalesCorrOpts.find(name)!=globalScalesCorrOpts.end()) {
-		for (vector<pair<int,float> >::iterator it=globalScalesCorrOpts[name].begin(); it!=globalScalesCorrOpts[name].end(); it++){
-			if (cat_.compare(flashggCats_[it->first])==0) return it->second;
+		for (vector<pair<string,float> >::iterator it=globalScalesCorrOpts[name].begin(); it!=globalScalesCorrOpts[name].end(); it++){
+			//if (cat_.compare(flashggCats_[it->first])==0) return it->second;
+			if (cat_.compare(it->first)==0) return it->second;
 		}
 	}
 	return retVal;
@@ -290,13 +298,14 @@ void FinalModelConstruction::loadSignalSystematics(string filename){
 			if (verbosity_) cout << " [INFO] GlobalScales: ";
 			for (vector<string>::iterator strIt=temp.begin(); strIt!=temp.end(); strIt++){
 				vector<string> opts;
-				vector<pair<int,float> > optDetails;
+				vector<pair<string,float> > optDetails;
 				split(opts,*strIt,boost::is_any_of(":"));
 				globalScales.push_back(opts[0]);
 				assert((opts.size()-1)%2==0);
 				if (verbosity_) cout << "[" << opts[0] << ":";
 				for (unsigned int i=1; i<opts.size(); i+=2) {
-					optDetails.push_back(make_pair(boost::lexical_cast<int>(opts[i]),boost::lexical_cast<float>(opts[i+1])));
+					//optDetails.push_back(make_pair(boost::lexical_cast<int>(opts[i]),boost::lexical_cast<float>(opts[i+1])));
+					optDetails.push_back(make_pair((opts[i]),boost::lexical_cast<float>(opts[i+1])));
 					if (verbosity_) cout << "(" << opts[i] << "," << opts[i+1] << ")";
 				}
 				globalScalesOpts.insert(make_pair(opts[0],optDetails));
@@ -313,13 +322,14 @@ void FinalModelConstruction::loadSignalSystematics(string filename){
 			if (verbosity_) cout << "[INFO] GlobalScalesCorr: ";
 			for (vector<string>::iterator strIt=temp.begin(); strIt!=temp.end(); strIt++){
 				vector<string> opts;
-				vector<pair<int,float> > optDetails;
+				vector<pair<string,float> > optDetails;
 				split(opts,*strIt,boost::is_any_of(":"));
 				globalScalesCorr.push_back(opts[0]);
 				assert((opts.size()-1)%2==0);
 				if (verbosity_) cout << "[" << opts[0] << ": ";
 				for (unsigned int i=1; i<opts.size(); i+=2) {
-					optDetails.push_back(make_pair(boost::lexical_cast<int>(opts[i]),boost::lexical_cast<float>(opts[i+1])));
+					//optDetails.push_back(make_pair(boost::lexical_cast<int>(opts[i]),boost::lexical_cast<float>(opts[i+1])));
+					optDetails.push_back(make_pair((opts[i]),boost::lexical_cast<float>(opts[i+1])));
 					if (verbosity_) cout << "(" << opts[i] << "," << opts[i+1] << ")";
 				}
 				globalScalesCorrOpts.insert(make_pair(opts[0],optDetails));
@@ -531,7 +541,6 @@ void FinalModelConstruction::setSecondaryModelVars(RooRealVar *mh_sm, RooRealVar
 }
 
 void FinalModelConstruction::getRvFractionFunc(string name){
-  
   assert(allMH_.size()==rvDatasets.size());
   assert(allMH_.size()==wvDatasets.size());
   vector<double> mhValues, rvFracValues;
@@ -556,7 +565,7 @@ void FinalModelConstruction::getRvFractionFunc(string name){
     if (verbosity_) std::cout << "[INFO] RV/WV fraction for datasets " << *(rvDatasets[mh]) << " and " << *(wvDatasets[mh]) << " --- " << rvF << std::endl;
   }
 
-  temp->Fit(pol);
+  temp->Fit(pol,"Q");
   
   //turn this fit to rvFrac into a spline.
   TGraph *rvFGraph = new TGraph(pol);
@@ -640,7 +649,7 @@ RooAbsReal* FinalModelConstruction::getMeanWithPhotonSyst(RooAbsReal *dm, string
 				RooAbsReal *nuisVar = photonSystematics[Form("CMS_hgg_nuisance_%s",syst.c_str())];
 				if( verbosity_ ) { 
 					std::cout << "[INFO] Systematic " << syst << std::endl;
-					nuisVar->Print("V");
+					//nuisVar->Print("V");
 				}
 				if ( fabs(constVar->getVal())>=5.e-5) { 
 					hasEffect = true;
@@ -678,8 +687,8 @@ RooAbsReal* FinalModelConstruction::getSigmaWithPhotonSyst(RooAbsReal *sig_fit, 
 			if (photonSystematicConsts.find(Form("const_%s_%s_%dTeV_sigma_%s",proc_.c_str(),catname.c_str(),sqrts_,syst.c_str())) != photonSystematicConsts.end() ) {
 				RooConstVar *constVar = photonSystematicConsts[Form("const_%s_%s_%dTeV_sigma_%s",proc_.c_str(),catname.c_str(),sqrts_,syst.c_str())];
 				RooAbsReal *nuisVar = photonSystematics[Form("CMS_hgg_nuisance_%s",syst.c_str())];
-      constVar->Print(); //std::cout
-      nuisVar->Print(); //std::cout
+      //constVar->Print(); //std::cout
+      //nuisVar->Print(); //std::cout
 				if (constVar->getVal()>=1.e-4) {
 					hasEffect = true;
 					if( quadraticSigmaSum_ ) { 
@@ -698,7 +707,7 @@ RooAbsReal* FinalModelConstruction::getSigmaWithPhotonSyst(RooAbsReal *sig_fit, 
 	}
 	formula+="))";
 	RooFormulaVar *formVar = new RooFormulaVar(name.c_str(),name.c_str(),formula.c_str(),*dependents);
-  dependents->Print() ;//std::cout
+  //dependents->Print() ;//std::cout
     
 	return formVar;
 }
@@ -1103,11 +1112,12 @@ void FinalModelConstruction::plotPdf(string outDir){
   //TH1F * dummy = new TH1F("d","d",1,0,1);
   //dummy->SetMarkerColor(kWhite);
   //pt->AddText(Form("Fit using PDF from :"); 
+  std::vector<int> colorList ={7,9,4,2,8,5,1,14};//kCyan,kMagenta,kBlue, kRed,kGreen,kYellow,kBlack, kGray};
   for (unsigned int i=0; i<allMH_.size(); i++){
     int mh=allMH_[i];
-    stdDatasets[mh]->plotOn(dataPlot,Binning(160),MarkerColor(kBlue+10*i));
+    stdDatasets[mh]->plotOn(dataPlot,Binning(160),MarkerColor(colorList[i]));
     MH->setVal(mh);
-    extendPdf->plotOn(dataPlot,LineColor(kBlue-1+10*i));
+    extendPdf->plotOn(dataPlot,LineColor(colorList[i]));
     pt->AddText(Form("RV %d: %s",mh,rvFITDatasets[mh]->GetName())); 
     pt->AddText(Form("WV %d: %s",mh,wvFITDatasets[mh]->GetName())); 
    // extendPdf->Print("V");
@@ -1209,7 +1219,7 @@ void FinalModelConstruction::getNormalization(){
     //temp->Fit(pol2,"EMFEX0") :
     //temp->Fit(pol2,"QEMFEX0");
     //pol->SetParLimits(2,0.01,999); // want a in y=ax^2 +bx+c to not be 0!
-    temp->Fit(pol);
+    temp->Fit(pol,"Q");
     float b=pol->GetParameter(1) ;// y = [0] + [1]*x + [2]*x*x
     float a=pol->GetParameter(2) ;// y = [0] + [1]*x + [2]*x*x
     float parabola_extremum_x = -b/(2*a);
@@ -1217,18 +1227,18 @@ void FinalModelConstruction::getNormalization(){
     if ( parabola_extremum_x  > 120. && parabola_extremum_x < 130){
       TF1 *pol1= new TF1("pol","pol1",120,130); // set to constant
       pol=pol1;
-      temp->Fit(pol);
+      temp->Fit(pol,"Q");
     }
   } else {
     TF1 *pol0= new TF1("pol","pol0",120,130); //  problem dataset, set to constant fit
      pol=pol0;
-     temp->Fit(pol);
+     temp->Fit(pol,"Q");
   }
   //temp->SetMinimum(0.);
   //temp->SetMinimum(0.66*temp->GetHistogram()->GetMaximum());
   //temp->SetMaximum(1.5*temp->GetHistogram()->GetMaximum());
   temp->Draw();
-  temp->Fit(pol);
+  temp->Fit(pol,"Q");
   TPaveText *pt = new TPaveText(.25,.9,.9,1.0,"NDC");
   pt->SetTextSize(0.045);
   pt->AddText(Form("%s %s eff*acc",proc_.c_str(),cat_.c_str()));
@@ -1243,7 +1253,7 @@ void FinalModelConstruction::getNormalization(){
   TGraph *  xsGraph = new TGraph();
   TGraph *  brGraph = new TGraph();
   int point=0;
-  for (int m =120; m<131; m++){
+  for (float m =120; m<131; m=m+0.5){
     MH->setVal(m);
     xsGraph->SetPoint(point,m,xs->getVal());
     brGraph->SetPoint(point,m,brSpline->getVal());
@@ -1269,7 +1279,7 @@ void FinalModelConstruction::getNormalization(){
 	if (!(xs && brSpline && eaSpline && rateNuisTerm && intLumi)){
   	std::cout << "[ERROR] some of the following are not set properly. exit." << std::endl;
     std::cout << "[ERROR] xs " << xs << ", brSpline " << brSpline << ", eaSpline " << eaSpline << ", rateNuisTerm " << rateNuisTerm << ", intLumi " << intLumi << std::endl;
-  	if( verbosity_) std::cout << "[DEBUG] xs " << xs << ", brSpline " << brSpline << ", eaSpline " << eaSpline << ", rateNuisTerm " << rateNuisTerm << ", intLumi " << intLumi << std::endl;
+  	if( verbosity_) std::cout << "[INFO] xs " << xs << ", brSpline " << brSpline << ", eaSpline " << eaSpline << ", rateNuisTerm " << rateNuisTerm << ", intLumi " << intLumi << std::endl;
   	exit(1);
 	} else {
      if (verbosity_>1) std::cout << "[INFO] xs " << xs->getVal() << ", brSpline " << brSpline->getVal() << ", eaSpline " << eaSpline->getVal() << ", rateNuisTerm " << rateNuisTerm->getVal() << ", intLumi " << intLumi->getVal() << std::endl;

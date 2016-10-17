@@ -6,7 +6,9 @@
 #include <typeinfo>
 
 #include "TROOT.h"
+#include <TStyle.h>
 #include "TFile.h"
+#include "TMath.h"
 #include "TStopwatch.h"
 #include "RooWorkspace.h"
 #include "RooDataSet.h"
@@ -60,6 +62,8 @@ bool is2011_=false;
 bool is2012_=false;
 string massesToSkip_;
 vector<int> skipMasses_;
+string massListStr_;
+vector<int> massList_;
 bool splitRVWV_=true;
 bool doSecondaryModels_=true;
 bool doQuadraticSigmaSum_=false;
@@ -88,6 +92,9 @@ vector<string>  split_;
 string  splitStr_;
 float newIntLumi_;
 float originalIntLumi_;
+float mcBeamSpotWidth_=5.14; //cm // the beamspot has a certain width in MC which is not necessarily the same in data. for the data/MC to agree, we reweight the MC to match the data Beamspot width, using dZ as a proxy (they have a factor of sqrt(2) because you are subtracting one gaussain distributed quantity from another)
+//float dataBeamSpotWidth_=4.24; //cm
+float dataBeamSpotWidth_=3.5; //cm
 string referenceProc_="ggh";
 string referenceProcWV_="ggh";
 string referenceProcTTH_="tth";
@@ -102,6 +109,7 @@ vector<int> map_nG_wv_;
 RooRealVar *mass_;
 RooRealVar *dZ_;
 RooRealVar *intLumi_;
+bool beamSpotReweigh_ = false;
 
 void OptionParser(int argc, char *argv[]){
 	po::options_description desc1("Allowed options");
@@ -115,15 +123,17 @@ void OptionParser(int argc, char *argv[]){
 		("plotDir,p", po::value<string>(&plotDir_)->default_value("plots"),						"Put plots in this directory")
 		("skipPlots", 																																									"Do not make any plots")
 		("mhLow,L", po::value<int>(&mhLow_)->default_value(115),                                  			"Low mass point")
+		("mcBeamSpotWidth", po::value<float>(&mcBeamSpotWidth_)->default_value(5.14),                                  			"Default width of MC beamspot")
+		("dataBeamSpotWidth", po::value<float>(&dataBeamSpotWidth_)->default_value(3.50),                                  			"Default width of data beamspot")
 		("nThreads,t", po::value<int>(&ncpu_)->default_value(ncpu_),                               			"Number of threads to be used for the fits")
 		("mhHigh,H", po::value<int>(&mhHigh_)->default_value(135),                                			"High mass point")
-		// ("nCats,n", po::value<int>(&nCats_)->default_value(9),                                    			"Number of total categories")
 		("constraintValue,C", po::value<float>(&constraintValue_)->default_value(0.1),            			"Constraint value")
 		("constraintValueMass,M", po::value<int>(&constraintValueMass_)->default_value(125),                        "Constraint value mass")
 		("pdfWeights", po::value<int>(&pdfWeights_)->default_value(0),                        "If pdf systematics should be considered, say how many (default 0 = off)")
 		("skipSecondaryModels",                                                                   			"Turn off creation of all additional models")
 		("doQuadraticSigmaSum",  										        "Add sigma systematic terms in quadrature")
 		("procs", po::value<string>(&procStr_)->default_value("ggh,vbf,wh,zh,tth"),					"Processes (comma sep)")
+		("massList", po::value<string>(&massListStr_)->default_value("120,125,130"),					"Masses to process.")
 		("skipMasses", po::value<string>(&massesToSkip_)->default_value(""),					"Skip these mass points - used eg for the 7TeV where there's no mc at 145")
 		("runInitialFitsOnly",                                                                                      "Just fit gaussians - no interpolation, no systematics - useful for testing nGaussians")
 		("cloneFits", po::value<string>(&cloneFitFile_),															"Do not redo the fits but load the fit parameters from this workspace. Pass as fileName:wsName.")
@@ -133,6 +143,7 @@ void OptionParser(int argc, char *argv[]){
 		("binnedFit",	po::value<bool>(&binnedFit_)->default_value(true),														"Binned Signal fit")
 		("nBins",	po::value<int>(&nBins_)->default_value(80),														"If using binned signal for fit, how many bins in 100-180?")
 		("checkYields",	po::value<bool>(&checkYields_)->default_value(false),														"Use flashgg format (default false)")
+		("beamSpotReweigh",	po::value<bool>(&beamSpotReweigh_)->default_value(false),														"Reweight events to  discrepancy in width of beamspot between data and MC")
       ("split", po::value<string>(&splitStr_)->default_value(""), "do just one tag,proc ")
 		("changeIntLumi",	po::value<float>(&newIntLumi_)->default_value(0),														"If you want to specify an intLumi other than the one in the file. The event weights and rooRealVar IntLumi are both changed accordingly. (Specify new intlumi in fb^{-1})")
 		("flashggCats,f", po::value<string>(&flashggCatsStr_)->default_value("UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,UntaggedTag_4,VBFTag_0,VBFTag_1,VBFTag_2,TTHHadronicTag,TTHLeptonicTag,VHHadronicTag,VHTightTag,VHLooseTag,VHEtTag"),       "Flashgg categories if used")
@@ -172,6 +183,21 @@ void OptionParser(int argc, char *argv[]){
 		for (vector<int>::iterator it=skipMasses_.begin(); it!=skipMasses_.end(); it++) cout << *it << " ";
 		cout << endl;
 	}
+	if (vm.count("massList")) {
+		cout << "[INFO] Masses to process... " << endl;
+		vector<string> els;
+
+    // if you want to skip masses for some reason...
+		split(els,massListStr_,boost::is_any_of(","));
+		if (els.size()>0 && massListStr_!="") {
+			for (vector<string>::iterator it=els.begin(); it!=els.end(); it++) {
+				massList_.push_back(boost::lexical_cast<int>(*it));
+			}
+		}
+		cout << "\t";
+		for (vector<int>::iterator it=massList_.begin(); it!=massList_.end(); it++) cout << *it << " ";
+		cout << endl;
+	}
 	
   // split options which are fiven as lists
   split(procs_,procStr_,boost::is_any_of(","));
@@ -196,25 +222,10 @@ unsigned int getIndexOfReferenceDataset(string proc, string cat){
   }
   
   if (iLine==-1 ) {
-    std::cout << "ERROR could not find the index of the category you wished to look up. Exit!" << std::endl;
+    std::cout << "[ERROR] could not find the index of the category you wished to look up. Exit!" << std::endl;
      exit(1);
   }
   return iLine;
-}
-
-// is this still used ? -LC 
-void transferMacros(TFile *inFile, TDirectory *outFile){
-
-	TIter next(inFile->GetListOfKeys());
-	TKey *key;
-	while ((key = (TKey*)next())){
-		if (string(key->ReadObj()->ClassName())=="TMacro") {
-			//cout << key->ReadObj()->ClassName() << " : " << key->GetName() << endl;
-			TMacro *macro = (TMacro*)inFile->Get(key->GetName());
-			outFile->cd();
-			macro->Write();
-		}
-	}
 }
 
 
@@ -278,6 +289,40 @@ RooDataSet * reduceDataset(RooDataSet *data0){
 return data;
 }
 
+// this is where we reweight the DZ distribution as a proxy for the beamspot.
+void plotBeamSpotDZdist(RooDataSet *data0, string suffix=""){
+  gStyle->SetOptFit(1111);
+	RooRealVar *weight0 = new RooRealVar("weight","weight",-100000,1000000);
+	TH1F *histSmallDZ = new TH1F ("h1sdz","h1sdz",20,-0.1,0.1);
+	TH1F *histLargeDZ = new TH1F ("h1ldz","h1ldz",20,-25,25);
+
+  for (unsigned int i=0 ; i < data0->numEntries() ; i++){
+    mass_->setVal(data0->get(i)->getRealValue("CMS_hgg_mass"));
+    weight0->setVal(data0->weight() ); // <--- is this correct?
+    dZ_->setVal(data0->get(i)->getRealValue("dZ"));
+    if (fabs(dZ_->getVal()) <0.1){
+		histSmallDZ->Fill( dZ_->getVal(),data0->weight());
+		} else {
+		histLargeDZ->Fill( dZ_->getVal(),data0->weight());
+		}
+  }
+	TCanvas *c = new TCanvas("c","c",500,500);
+	string extra="";
+	if (beamSpotReweigh_){
+  extra="BS_reweigh";
+	}
+	histSmallDZ->Draw();
+  histSmallDZ->Fit("gaus","Q");
+	//c->SaveAs(Form("debug-%s_smallDz_%s_%s.pdf",data0->GetName(),extra.c_str(),suffix.c_str()));
+	histLargeDZ->Draw();
+  histLargeDZ->Fit("gaus","Q");
+	//c->SaveAs(Form("debug-%s_largeDz_%s_%s.pdf",data0->GetName(),extra.c_str(),suffix.c_str()));
+//	delete c;
+	delete histSmallDZ;
+	delete histLargeDZ;
+  gStyle->SetOptFit();
+}
+
 RooDataSet * rvwvDataset(RooDataSet *data0, string rvwv){
 
   RooDataSet *dataRV = (RooDataSet*) data0->emptyClone()->reduce(RooArgSet(*mass_, *dZ_));
@@ -285,9 +330,9 @@ RooDataSet * rvwvDataset(RooDataSet *data0, string rvwv){
 	RooRealVar *weight0 = new RooRealVar("weight","weight",-100000,1000000);
   for (unsigned int i=0 ; i < data0->numEntries() ; i++){
     mass_->setVal(data0->get(i)->getRealValue("CMS_hgg_mass"));
-    weight0->setVal(data0->weight() ); // <--- is this correct?
-    dZ_->setVal(data0->get(i)->getRealValue("dZ"));
-    if (dZ_->getVal() <1.){
+    weight0->setVal(data0->weight() ); 
+		dZ_->setVal(data0->get(i)->getRealValue("dZ"));
+    if (fabs(dZ_->getVal() )<1.){
       dataRV->add( RooArgList(*mass_, *dZ_, *weight0), weight0->getVal() );
     } else{
       dataWV->add( RooArgList(*mass_, *dZ_, *weight0), weight0->getVal() );
@@ -302,6 +347,38 @@ RooDataSet * rvwvDataset(RooDataSet *data0, string rvwv){
     exit (1);
   }
 }
+RooDataSet * beamSpotReweigh(RooDataSet *data0 /*original dataset*/){
+  RooDataSet *data = (RooDataSet*) data0->emptyClone();
+	RooRealVar *weight0 = new RooRealVar("weight","weight",-100000,1000000);
+	//data0->Print();
+	plotBeamSpotDZdist(data0,"before");
+  for (int i = 0; i < data0->numEntries(); i++) {
+    mass_->setVal(data0->get(i)->getRealValue("CMS_hgg_mass"));
+    dZ_->setVal(data0->get(i)->getRealValue("dZ"));
+   double factor =1.0;
+    
+		if (fabs(dZ_->getVal()) < 0.1 ){
+    factor =1;
+		} else {
+    double mcBeamSpot=TMath::Gaus(dZ_->getVal(),0,TMath::Sqrt(2)*mcBeamSpotWidth_,true); 
+    double dataBeamSpot=TMath::Gaus(dZ_->getVal(),0,TMath::Sqrt(2)*dataBeamSpotWidth_,true); 
+		factor = dataBeamSpot/mcBeamSpot; 
+		}
+    
+		weight0->setVal(factor * data0->weight() ); // <--- is this correct?
+    data->add( RooArgList(*mass_, *dZ_, *weight0), weight0->getVal() );
+  }
+	//data->Print();
+	plotBeamSpotDZdist(data,"after");
+  
+	if (verbose_) std::cout << "[INFO] Old dataset (before beamSpot  reweight): " << *data0 << std::endl;
+  if (verbose_) std::cout << "[INFO] New dataset (after beamSpot reweight):  " << *data << std::endl;
+  
+  return data;
+}
+
+
+
 
 RooDataSet * intLumiReweigh(RooDataSet *data0 /*original dataset*/){
 		
@@ -355,7 +432,7 @@ int main(int argc, char *argv[]){
 	if (isFlashgg_){ 
     nCats_= flashggCats_.size();
 	} else {
-    std::cout << "[ERROR] script is onyl compatible with flashgg! exit(1)." << std::endl;
+    std::cout << "[ERROR] script is only compatible with flashgg! exit(1)." << std::endl;
     exit(1);
   }
   
@@ -406,6 +483,9 @@ int main(int argc, char *argv[]){
   mass_->SetTitle("m_{#gamma#gamma}");
 	mass_->setUnit("GeV");
 	dZ_ = (RooRealVar*)inWS->var("dZ");
+	dZ_->setMin(-25.0);
+	dZ_->setMax(25.0);
+	dZ_->setBins(100);
   intLumi_ = (RooRealVar*)inWS->var("IntLumi");
   originalIntLumi_ =(intLumi_->getVal());// specify in 1/pb
   newIntLumi_ = newIntLumi_*1000; // specify in 1/pb instead of 1/fb.
@@ -565,7 +645,8 @@ int main(int argc, char *argv[]){
 
     bool isProblemCategory =false;
 
-    for (int mh=mhLow_; mh<=mhHigh_; mh+=5){
+    for (int mhIndex=0; mhIndex< massList_.size() ; mhIndex++){
+      int mh=massList_[mhIndex];
       if (skipMass(mh)) continue;
       RooDataSet *dataRV; 
       RooDataSet *dataWV; 
@@ -578,7 +659,11 @@ int main(int argc, char *argv[]){
 
         if (verbose_)std::cout << "[INFO] Opening dataset called "<< Form("%s_%d_13TeV_%s",proc.c_str(),mh,cat.c_str()) << " in in WS " << inWS << std::endl;
         RooDataSet *data0   = reduceDataset((RooDataSet*)inWS->data(Form("%s_%d_13TeV_%s",proc.c_str(),mh,cat.c_str())));
+				if (beamSpotReweigh_){
+        data = beamSpotReweigh(intLumiReweigh(data0));
+				} else {
         data = intLumiReweigh(data0);
+				}
         if (verbose_) std::cout << "[INFO] Old dataset (before intLumi change): " << *data0 << std::endl;
 
         dataRV = rvwvDataset(data,"RV"); 
@@ -609,6 +694,18 @@ int main(int argc, char *argv[]){
           
           //pick the dataset for the replacement proc and cat, reduce it (ie remove pdfWeights etc) ,
           //reweight for lumi, and then get the RV events only.
+					if(beamSpotReweigh_){
+          data0Ref   = beamSpotReweigh(
+													rvwvDataset(
+                        		intLumiReweigh(
+                          		reduceDataset(
+                          			(RooDataSet*)inWS->data(Form("%s_%d_13TeV_%s",replancementProc.c_str(),mh,replancementCat.c_str()))
+                              )
+                            ), "RV"
+                          )
+											 );
+
+					} else {
           data0Ref   = rvwvDataset(
                         intLumiReweigh(
                           reduceDataset(
@@ -616,6 +713,7 @@ int main(int argc, char *argv[]){
                          )
                        ), "RV"
                       );
+					}
           if (data0Ref) {
            std::cout << "[INFO] Found replacement dataset for RV:" << *data0Ref<< std::endl;
           } else {
@@ -643,6 +741,17 @@ int main(int argc, char *argv[]){
         
          //pick the dataset for the replacement proc and cat, reduce it (ie remove pdfWeights etc) ,
          //reweight for lumi and then get the WV events only.
+				 if (beamSpotReweigh_){
+         data0Ref   = beamSpotReweigh( 
+				               rvwvDataset(
+                        intLumiReweigh(
+                          reduceDataset(
+                          (RooDataSet*)inWS->data(Form("%s_%d_13TeV_%s",referenceProcWV_.c_str(),mh,referenceTagWV_.c_str()))
+                         )
+                       ), "WV"
+                      )
+										);
+				 } else {
          data0Ref   = rvwvDataset(
                         intLumiReweigh(
                           reduceDataset(
@@ -650,6 +759,7 @@ int main(int argc, char *argv[]){
                          )
                        ), "WV"
                       );
+					}
           if (data0Ref) {
            std::cout << "[INFO] Found replacement dataset for WV:" << *data0Ref<< std::endl;
           } else { // if the dataset was fine to begin with, make the reference dataset the original
@@ -702,8 +812,8 @@ int main(int argc, char *argv[]){
 
     // these guys do the fitting
     // right vertex
-    if (verbose_) std::cout << "[INFO] preapraing initialfit RV" << std::endl;
-    InitialFit initFitRV(mass_,MH,mhLow_,mhHigh_,skipMasses_,binnedFit_,nBins_);
+    if (verbose_) std::cout << "[INFO] preapraing initialfit RV, massList size "<< massList_.size() << std::endl;
+    InitialFit initFitRV(mass_,MH,mhLow_,mhHigh_,skipMasses_,binnedFit_,nBins_,massList_);
     initFitRV.setVerbosity(verbose_);
     if (!cloneFits_) {
       if (verbose_) std::cout << "[INFO] RV building sum of gaussians with nGaussiansRV " << nGaussiansRV << std::endl;
@@ -726,8 +836,8 @@ int main(int argc, char *argv[]){
     parlist_t fitParamsRV = initFitRV.getFitParams();
 
     // wrong vertex
-    if (verbose_) std::cout << "[INFO] preparing initialfi tWV" << std::endl;
-    InitialFit initFitWV(mass_,MH,mhLow_,mhHigh_,skipMasses_,binnedFit_,nBins_);
+    if (verbose_) std::cout << "[INFO] preparing initialfit WV, masList size "<< massList_.size() << std::endl;
+    InitialFit initFitWV(mass_,MH,mhLow_,mhHigh_,skipMasses_,binnedFit_,nBins_,massList_);
     initFitWV.setVerbosity(verbose_);
     if (!cloneFits_) {
       if (verbose_) std::cout << "[INFO] WV building sum of gaussians wth nGaussiansWV "<< nGaussiansWV << std::endl;
@@ -781,7 +891,7 @@ int main(int argc, char *argv[]){
       if (isFlashgg_){
         
         outWS->import(*intLumi_);
-        FinalModelConstruction finalModel(mass_,MH,intLumi_,mhLow_,mhHigh_,proc,cat,doSecondaryModels_,systfilename_,skipMasses_,verbose_,procs_, flashggCats_,plotDir_, isProblemCategory,isCutBased_,sqrts_,doQuadraticSigmaSum_);
+        FinalModelConstruction finalModel(massList_, mass_,MH,intLumi_,mhLow_,mhHigh_,proc,cat,doSecondaryModels_,systfilename_,skipMasses_,verbose_,procs_, flashggCats_,plotDir_, isProblemCategory,isCutBased_,sqrts_,doQuadraticSigmaSum_);
         
         finalModel.setSecondaryModelVars(MH_SM,DeltaM,MH_2,higgsDecayWidth);
         finalModel.setRVsplines(splinesRV);

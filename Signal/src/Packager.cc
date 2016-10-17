@@ -70,7 +70,7 @@ void Packager::packageOutput(bool split, string process , string tag){
 					if(tempData && !saveWS->data(Form("sig_%s_mass_m%d_%s",proc->c_str(),mh,catname.c_str())))  saveWS->import(*tempData); //FIXME
 				}
 				if (!tempData) {
-				if (!split_)	cerr << "[WARNING] -- dataset: " << Form("sig_%s_mass_m%d_%s",proc->c_str(),mh,catname.c_str()) << " not found. It will be skipped" << endl;
+				if (!split_)	cerr << "[WARNING] -- dataset: " << Form("sig_%s_mass_m%d_%s",proc->c_str(),mh,catname.c_str()) << " not found. It will be skipped (ignore this warning if just running one tag/proc)" << endl;
 					expectedObjectsNotFound.push_back(Form("sig_%s_mass_m%d_%s",proc->c_str(),mh,catname.c_str()));
 					continue;
 				}
@@ -83,13 +83,13 @@ void Packager::packageOutput(bool split, string process , string tag){
 				else allDataThisCat->append(*tempData);
 			}
 			if (!allDataThisCat) {
-			if (!split_)	cerr << "[WARNING] -- allData for cat " << catname.c_str() << " is NULL. Probably because the relevant datasets couldn't be found. Skipping.. " << endl;
+			if (!split_)	cerr << "[WARNING] -- allData for cat " << catname.c_str() << " is NULL. Probably because the relevant datasets couldn't be found. Skipping.. (ignore this warning if just running one tag/proc)" << endl;
 				continue;
 			}
 			saveWS->import(*allDataThisCat);
 		}
 		if (!allDataThisMass) {
-		if (!split_)	cerr << "[WARNING] -- allData for mass " << mh << " is NULL. Probably because the relevant datasets couldn't be found. Skipping.. " << endl;
+		if (!split_)	cerr << "[WARNING] -- allData for mass " << mh << " is NULL. Probably because the relevant datasets couldn't be found. Skipping.. (ignore this warning if just running one tag/proc)" << endl;
 			continue;
 		}
 		saveWS->import(*allDataThisMass);
@@ -119,7 +119,7 @@ void Packager::packageOutput(bool split, string process , string tag){
 			RooSpline1D *norm = (RooSpline1D*)/*in*/WS->function(Form("hggpdfsmrel_%dTeV_%s_%s_norm",sqrts_,proc->c_str(),catname.c_str()));
 
 			if (!norm) {
-			if (!split_)	cerr << "[WARNING] -- ea: " << Form("hggpdfsmrel_%dTeV_%s_%s_norm",sqrts_,proc->c_str(),catname.c_str()) << " not found. It will be skipped" << endl;
+			if (!split_)	cerr << "[WARNING] -- ea: " << Form("hggpdfsmrel_%dTeV_%s_%s_norm",sqrts_,proc->c_str(),catname.c_str()) << " not found. It will be skipped (ignore this warning if just running one tag/proc)" << endl;
 			}
 			else {
         for (int m =120; m<131; m=m+5){
@@ -134,7 +134,7 @@ void Packager::packageOutput(bool split, string process , string tag){
 			// sum pdf
 			RooExtendPdf *tempPdf = (RooExtendPdf*)/*in*/WS->pdf(Form("extendhggpdfsmrel_%dTeV_%s_%sThisLumi",sqrts_,proc->c_str(),catname.c_str()));
 			if (!tempPdf) {
-			if (!split_)	cerr << "[WARNING] -- pdf: " << Form("extendhggpdfsmrel_%dTeV_%s_%s",sqrts_,proc->c_str(),catname.c_str()) << " not found. It will be skipped" << endl;
+			if (!split_)	cerr << "[WARNING] -- pdf: " << Form("extendhggpdfsmrel_%dTeV_%s_%s",sqrts_,proc->c_str(),catname.c_str()) << " not found. It will be skipped (ignore this warning if just running one tag/proc)" << endl;
 				expectedObjectsNotFound.push_back(Form("extendhggpdfsmrel_%dTeV_%s_%s",sqrts_,proc->c_str(),catname.c_str()));
 				continue;
 			}
@@ -146,7 +146,7 @@ void Packager::packageOutput(bool split, string process , string tag){
 			sumPdfs->add(*tempPdf);
 		}
 		if (sumPdfsThisCat->getSize()==0){
-		if (!split_)	cerr << "[WARNING] -- sumPdfs for cat " << catname.c_str() << " is EMPTY. Probably because the relevant pdfs couldn't be found. Skipping.. " << endl;
+		if (!split_)	cerr << "[WARNING] -- sumPdfs for cat " << catname.c_str() << " is EMPTY. Probably because the relevant pdfs couldn't be found. Skipping.. (ignore this warning if just running one tag/proc) " << endl;
 			continue;
 		}
 		// Dont put sqrts here as combine never uses this (but our plotting scripts do)
@@ -154,7 +154,7 @@ void Packager::packageOutput(bool split, string process , string tag){
 		saveWS->import(*sumPdfsPerCat,RecycleConflictNodes());
 	}
 	if (sumPdfs->getSize()==0){
-		if (!split_) cerr << "[WARNING] -- sumAllPdfs is EMPTY. Probably because the relevant pdfs couldn't be found. Skipping.. " << endl;
+		if (!split_) cerr << "[WARNING] -- sumAllPdfs is EMPTY. Probably because the relevant pdfs couldn't be found. Skipping.. (ignore this warning if just running one tag/proc) " << endl;
 	}
 	else {
 		// Dont put sqrts here as combine never uses this (but our plotting scripts do)
@@ -163,7 +163,7 @@ void Packager::packageOutput(bool split, string process , string tag){
 	}
 
 	if (runningNormSum->getSize()==0){
-		cerr << "[WARNING] -- runningNormSum is EMPTY. Probably because the relevant normalizations couldn't be found. Skipping.. " << endl;
+		cerr << "[WARNING] -- runningNormSum is EMPTY. Probably because the relevant normalizations couldn't be found. Skipping.. (ignore this warning if just running one tag/proc) " << endl;
 	}	else {
 		RooAddition *normSum = new RooAddition("normSumTotal","normSumTotal",*runningNormSum);
 		saveWS->import(*normSum); //FIXME
@@ -198,9 +198,9 @@ void Packager::packageOutput(bool split, string process , string tag){
         }
 				expEventsGraph->SetPoint(p,mh,intLumiVal*normSum->getVal());
 				effAccGraph->SetPoint(p,mh,normSum->getVal()/(XS_value*normalization->GetBR(mh)));
-				std::cout << " [INFO] (Packager) expected events  " << intLumiVal*normSum->getVal() << std::endl;
-				std::cout << " [INFO] (Packager) eff*acc " << normSum->getVal()/(XS_value*normalization->GetBR(mh)) << std::endl;
-				std::cout << " [INFO] (Packager) eff*acc for " << mh << " (where normSum  " << normSum->getVal() << " (XS_value " << XS_value << " normalization->GetBR(mh)) " << normalization->GetBR(mh) << std::endl;
+				//std::cout << " [INFO] (Packager) expected events  " << intLumiVal*normSum->getVal() << std::endl;
+				//std::cout << " [INFO] (Packager) eff*acc " << normSum->getVal()/(XS_value*normalization->GetBR(mh)) << std::endl;
+				//std::cout << " [INFO] (Packager) eff*acc for " << mh << " (where normSum  " << normSum->getVal() << " (XS_value " << XS_value << " normalization->GetBR(mh)) " << normalization->GetBR(mh) << std::endl;
         if (normSum->getVal()/(XS_value*normalization->GetBR(mh)) <0){
          std::cout << "ERROR eff*acc < 0 !!! exit!" << std::endl;
          exit(1);
@@ -255,9 +255,9 @@ void Packager::makePlots(){
 		RooDataSet *data = (RooDataSet*)saveWS->data(Form("sig_mass_m%d_AllCats",m));
 		if (data) {
     dataSets.insert(make_pair(m,data));
-    data->Print();
+    //data->Print();
     } else {
-    std::cout << "[WARNING] could not get dataset " << Form("sig_mass_m%d_AllCats",m) << std::endl;
+    std::cout << "[WARNING] could not get dataset " << Form("sig_mass_m%d_AllCats",m) <<" (ignore this warning if just running one tag/proc)"<<   std::endl;
     }
 	}
   if (sumPdfsAllCats){

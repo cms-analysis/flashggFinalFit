@@ -110,6 +110,7 @@ int main(int argc, char *argv[]){
 	RooRealVar *mass;
 	RooRealVar *intLumiREAD;
 	inWS = (RooWorkspace*)inFile->Get("cms_hgg_workspace");
+	if (! inWS) inWS = (RooWorkspace*)inFile->Get("w");
 	if (! inWS) inWS = (RooWorkspace*)inFile->Get("multipdf");
 	if (! inWS) inWS = (RooWorkspace*)inFile->Get("wsig_8TeV");
 	if (! inWS) inWS = (RooWorkspace*)inFile->Get("wsig_13TeV");
@@ -120,7 +121,7 @@ int main(int argc, char *argv[]){
 	mass = (RooRealVar*)inWS->var("CMS_hgg_mass");
 	intLumiREAD = (RooRealVar*)inWS->var("IntLumi");
 	std::cout << "[INFO] Got mass var from ws"<<std::endl;
-	std::cout << "[INFO] Got intLumi var from ws, value "<< intLumiREAD->getVal()<<std::endl;
+	//std::cout << "[INFO] Got intLumi var from ws, value "<< intLumiREAD->getVal()<<std::endl;
 
 	RooWorkspace *outWS = new RooWorkspace();
 	RooRealVar  newmass("CMS_hgg_mass","CMS_hgg_mass",100,180) ;
@@ -128,13 +129,13 @@ int main(int argc, char *argv[]){
 	RooRealVar  sqrts("SqrtS","SqrtS",0,14) ;
 	RooRealVar  intlumi("IntLumi","IntLumi",0,300000) ;
 	sqrts.setVal(13);
-	intlumi.setVal(intlumi_);
 	outWS->import(sqrts);
 	inWS->import(sqrts);
 	//outWS->import(intlumi);
 	//inWS->Write("cms_hgg_workspace");
 	
 	if (intlumi_){
+	intlumi.setVal(intlumi_);
 	inWS->import(intlumi);
 	RooRealVar *lumi = (RooRealVar*)inWS->var("IntLumi");
 	if (lumi){
@@ -165,7 +166,7 @@ return 0;
 
 		}
 		std::cout <<" [INFO] Reading WS roorealvar contents: "<< std::endl;
-		inWS->Print();
+		inWS->Print("V");
 
 	}
 

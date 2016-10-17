@@ -1,14 +1,14 @@
 #Full suite of plots as used for the Moriond2016 result
-EXT=!EXT!
-INTLUMI=!INTLUMI!
+EXT=HggAnalysis_310716_BS036_example
+INTLUMI=12.9
 ##########################################
 ############## MU SCANS #################
 ##########################################
 
-#./makeCombinePlots.py -d combinePlotsOptions_${EXT}.dat  -b
+#./makeCombinePlots.py -d combinePlotsOptions_${EXT}.dat --verbose  -b
 #./makeCombinePlots.py -f combineJobs13TeV_$EXT/MuScanFloatMH/MuScanFloatMH.root --mu -t "$INTLUMI fb^{-1} (13#scale[0.5]{ }TeV)" -o MuScanFloatMH --MHtext 0.17:0.7:"#splitline{m_{H}=125.09 #pm 0.24 GeV}{#hat{m}_{H}=125.33 GeV}" -b
-#./makeCombinePlots.py -f combineJobs13TeV_$EXT/MuScanFixMH/MuScanFixMH.root --mu -t "$INTLUMI fb^{-1} (13#scale[0.5]{ }TeV)" --MHtext 0.17:0.7:"m_{H}=125.09 GeV" -o MuScanFixMH  -b
-#./makeCombinePlots.py -f combineJobs13TeV_$EXT/MuScanFixMH125.97/MuScanFixMH125.97.root --mu -t "$INTLUMI fb^{-1} (13#scale[0.5]{ }TeV)" --MHtext 0.17:0.7:"m_{H}=125.97 GeV" -o MuScanFixMH125.97  -b
+#./makeCombinePlots.py -f combineJobs13TeV_$EXT/MuScanFixMH_v2/MuScanFixMH_v2.root --mu -t "$INTLUMI fb^{-1} (13#scale[0.5]{ }TeV)" --MHtext 0.17:0.7:"m_{H}=125.09 GeV" -o MuScanFixMH_v2  -b
+#./makeCombinePlots.py -f combineJobs13TeV_$EXT/MuScanFixMH125.97_v2/MuScanFixMH125.97_v2.root --mu -t "$INTLUMI fb^{-1} (13#scale[0.5]{ }TeV)" --MHtext 0.17:0.7:"m_{H}=125.97 GeV" -o MuScanFixMH125.97_v2  -b
 #./makeCombinePlots.py -f combineJobs13TeV_$EXT/MuScanProfileMH/MuScanProfileMH.root --mu -t "$INTLUMI fb^{-1} (13#scale[0.5]{ }TeV)" --MHtext 0.17:0.7:"m_{H} Profiled" -o MuScanProfileMH  -b #RooRealVar::MH = 125.973 +/- 0.292702  L(115 - 135) // [GeV]
 #./makeCombinePlots.py -f combineJobs13TeV_$EXT/MuScanAllSyst/MuScanAllSyst.root --mu -t "$INTLUMI fb^{-1} (13#scale[0.5]{ }TeV)" --MHtext 0.17:0.7:"m_{H}=125.97 GeV" -o MuScanAllSyst  -b
 #./makeCombinePlots.py -f combineJobs13TeV_$EXT/MuScanNoSyst/MuScanNoSyst.root --mu -t "$INTLUMI fb^{-1} (13#scale[0.5]{ }TeV)" --MHtext 0.17:0.7:"m_{H}=125.97 GeV" -o MuScanNoSyst  -b
@@ -25,13 +25,14 @@ INTLUMI=!INTLUMI!
 ##########################################
 
 #./makeCombinePlots.py -f combineJobs13TeV_$EXT/MuScanFixMH/MuScanFixMH.root,combineJobs13TeV_$EXT/PerTagChannelCompatibilityFixMH/r_TTHLeptonicTag_13TeV/r_TTHLeptonicTag_13TeV.root,combineJobs13TeV_$EXT/PerTagChannelCompatibilityFixMH/r_TTHHadronicTag_13TeV/r_TTHHadronicTag_13TeV.root,combineJobs13TeV_$EXT/PerTagChannelCompatibilityFixMH/r_VBFTag_1_13TeV/r_VBFTag_1_13TeV.root,combineJobs13TeV_$EXT/PerTagChannelCompatibilityFixMH/r_VBFTag_0_13TeV/r_VBFTag_0_13TeV.root,combineJobs13TeV_$EXT/PerTagChannelCompatibilityFixMH/r_UntaggedTag_3_13TeV/r_UntaggedTag_3_13TeV.root,combineJobs13TeV_$EXT/PerTagChannelCompatibilityFixMH/r_UntaggedTag_2_13TeV/r_UntaggedTag_2_13TeV.root,combineJobs13TeV_$EXT/PerTagChannelCompatibilityFixMH/r_UntaggedTag_1_13TeV/r_UntaggedTag_1_13TeV.root,combineJobs13TeV_$EXT/PerTagChannelCompatibilityFixMH/r_UntaggedTag_0_13TeV/r_UntaggedTag_0_13TeV.root --perprocchcomp -x -3,8.5 -o PerTagChannelCompatibilityFixMH --do1sig  -l 0.55,0.65,0.85,0.90 --text="    ${INTLUMI} fb^{-1} (13#scale[0.5]{ }TeV)"  --mhval "125.09"  -b
-./makeCombinePlots.py -f combineJobs13TeV_$EXT/MuScanProfileMH/MuScanProfileMH.root,combineJobs13TeV_$EXT/PerTagChannelCompatibilityProfileMH/r_TTHLeptonicTag_13TeV/r_TTHLeptonicTag_13TeV.root,combineJobs13TeV_$EXT/PerTagChannelCompatibilityProfileMH/r_TTHHadronicTag_13TeV/r_TTHHadronicTag_13TeV.root,combineJobs13TeV_$EXT/PerTagChannelCompatibilityProfileMH/r_VBFTag_1_13TeV/r_VBFTag_1_13TeV.root,combineJobs13TeV_$EXT/PerTagChannelCompatibilityProfileMH/r_VBFTag_0_13TeV/r_VBFTag_0_13TeV.root,combineJobs13TeV_$EXT/PerTagChannelCompatibilityProfileMH/r_UntaggedTag_3_13TeV/r_UntaggedTag_3_13TeV.root,combineJobs13TeV_$EXT/PerTagChannelCompatibilityProfileMH/r_UntaggedTag_2_13TeV/r_UntaggedTag_2_13TeV.root,combineJobs13TeV_$EXT/PerTagChannelCompatibilityProfileMH/r_UntaggedTag_1_13TeV/r_UntaggedTag_1_13TeV.root,combineJobs13TeV_$EXT/PerTagChannelCompatibilityProfileMH/r_UntaggedTag_0_13TeV/r_UntaggedTag_0_13TeV.root --perprocchcomp -x -3,8.5 -o PerTagChannelCompatibilityProfileMH --do1sig  -l 0.55,0.65,0.85,0.90 --text="  ${INTLUMI} fb^{-1} (13#scale[0.5]{ }TeV)"  --mhval "Profiled"  -b
+#./makeCombinePlots.py -f combineJobs13TeV_$EXT/MuScanProfileMH/MuScanProfileMH.root,combineJobs13TeV_$EXT/PerTagChannelCompatibilityProfileMH/r_TTHLeptonicTag_13TeV/r_TTHLeptonicTag_13TeV.root,combineJobs13TeV_$EXT/PerTagChannelCompatibilityProfileMH/r_TTHHadronicTag_13TeV/r_TTHHadronicTag_13TeV.root,combineJobs13TeV_$EXT/PerTagChannelCompatibilityProfileMH/r_VBFTag_1_13TeV/r_VBFTag_1_13TeV.root,combineJobs13TeV_$EXT/PerTagChannelCompatibilityProfileMH/r_VBFTag_0_13TeV/r_VBFTag_0_13TeV.root,combineJobs13TeV_$EXT/PerTagChannelCompatibilityProfileMH/r_UntaggedTag_3_13TeV/r_UntaggedTag_3_13TeV.root,combineJobs13TeV_$EXT/PerTagChannelCompatibilityProfileMH/r_UntaggedTag_2_13TeV/r_UntaggedTag_2_13TeV.root,combineJobs13TeV_$EXT/PerTagChannelCompatibilityProfileMH/r_UntaggedTag_1_13TeV/r_UntaggedTag_1_13TeV.root,combineJobs13TeV_$EXT/PerTagChannelCompatibilityProfileMH/r_UntaggedTag_0_13TeV/r_UntaggedTag_0_13TeV.root --perprocchcomp -x -3,8.5 -o PerTagChannelCompatibilityProfileMH --do1sig  -l 0.55,0.65,0.85,0.90 --text="  ${INTLUMI} fb^{-1} (13#scale[0.5]{ }TeV)"  --mhval "Profiled"  -b
 
 ##########################################
 #########  PER PROC CH COMP ##############
 ##########################################
 
-#./makeCombinePlots.py -f combineJobs13TeV_$EXT/MuScanProfileMH/MuScanProfileMH.root,combineJobs13TeV_$EXT/PerProcessChannelCompatibilityProfileMH/r_ttH/r_ttH.root,combineJobs13TeV_$EXT/PerProcessChannelCompatibilityProfileMH/r_qqH/r_qqH.root,combineJobs13TeV_$EXT/PerProcessChannelCompatibilityProfileMH/r_ggH/r_ggH.root --perprocchcomp -x -2,9 -o PerProcChannelCompatibilityProfileMH --do1sig  -l 0.55,0.65,0.85,0.9 --text="  ${INTLUMI} fb^{-1} (13#scale[0.5]{ }TeV)" --MHtext 0.57:0.41:"#bf{#mu_{VH} = 1}"  --mhval "Profiled"  -b
+./makeCombinePlots.py -f combineJobs13TeV_$EXT/MuScanProfileMH/MuScanProfileMH.root,combineJobs13TeV_$EXT/PerProcessChannelCompatibilityProfileMH/r_ttH/r_ttH.root,combineJobs13TeV_$EXT/PerProcessChannelCompatibilityProfileMH/r_qqH/r_qqH.root,combineJobs13TeV_$EXT/PerProcessChannelCompatibilityProfileMH/r_ggH/r_ggH.root --perprocchcomp -x -2,9 -o PerProcChannelCompatibilityProfileMH --do1sig  -l 0.55,0.65,0.85,0.9 --text="  ${INTLUMI} fb^{-1} (13#scale[0.5]{ }TeV)" --MHtext 0.57:0.41:"#bf{#mu_{VH} = 1}"  --mhval "Profiled"  -b
+exit 1
 #./makeCombinePlots.py -f combineJobs13TeV_$EXT/MuScanFixMH/MuScanFixMH.root,combineJobs13TeV_$EXT/PerProcessChannelCompatibilityFixMH/r_ttH/r_ttH.root,combineJobs13TeV_$EXT/PerProcessChannelCompatibilityFixMH/r_qqH/r_qqH.root,combineJobs13TeV_$EXT/PerProcessChannelCompatibilityFixMH/r_ggH/r_ggH.root --perprocchcomp -x -2,9 -o PerProcChannelCompatibilityFixMH --do1sig  -l 0.55,0.65,0.85,0.9 --text="       ${INTLUMI} fb^{-1} (13#scale[0.5]{ }TeV)" --MHtext 0.57:0.41:"#bf{#mu_{VH}=1}"   --mhval "125.09"  -b
 #
 #./makeCombinePlots.py -f combineJobs13TeV_$EXT/MuScanFixMH125.97/MuScanFixMH125.97.root,combineJobs13TeV_$EXT/PerProcessChannelCompatibilityFixMH125.97/r_ttH/r_ttH.root,combineJobs13TeV_$EXT/PerProcessChannelCompatibilityFixMH125.97/r_qqH/r_qqH.root,combineJobs13TeV_$EXT/PerProcessChannelCompatibilityFixMH/r_ggH/r_ggH.root --perprocchcomp -x -2,9 -o PerProcChannelCompatibilityFixMH125.97 --do1sig  -l 0.55,0.65,0.9,0.9 --text="${INTLUMI} fb^{-1} (13#scale[0.5]{ }TeV)"  --mhval "125.97"  -b
@@ -52,8 +53,8 @@ INTLUMI=!INTLUMI!
 ##########################################
 ##########  CV vs CF 2D SCANS   ##########
 ##########################################
-#./makeCombinePlots.py -f combineJobs13TeV_$EXT/CVCFScanFixMH/CVCFScanFixMH.root --cvcf -t "$INTLUMI fb^{-1} (13#scale[0.5]{ }TeV)" -o CVCFScanFixMH --xbinning 30,0,2 --ybinning 40,-1,3 --MHtext 0.17:0.17:"m_{H}=125.09 GeV" --legend 0.71,0.65,0.89,0.89 -b 
+#./makeCombinePlots.py -f combineJobs13TeV_$EXT/CVCFScanFixMH_v2/CVCFScanFixMH_v2.root --cvcf -t "$INTLUMI fb^{-1} (13#scale[0.5]{ }TeV)" -o CVCFScanFixMH --xbinning 30,0,2 --ybinning 40,-1,3 --MHtext 0.17:0.17:"m_{H}=125.09 GeV" --legend 0.71,0.65,0.89,0.89 -b 
 ##########################################
 ##########  K GLU vs K GAM 2D SCANS   ##########
 ##########################################
-#./makeCombinePlots.py -f combineJobs13TeV_$EXT/KGluKGamScanFixMH/KGluKGamScanFixMH.root --kglukgam -t "$INTLUMI fb^{-1} (13#scale[0.5]{ }TeV)" -o KGluKGamScanFixMH --xbinning 25,0,2 --ybinning 25,0,2 --MHtext 0.17:0.17:"m_{H}=125.09 GeV" --legend 0.71,0.65,0.89,0.89 -b 
+#./makeCombinePlots.py -f combineJobs13TeV_$EXT/KGluKGamScanFixMH_v2/KGluKGamScanFixMH_v2.root --kglukgam -t "$INTLUMI fb^{-1} (13#scale[0.5]{ }TeV)" -o KGluKGamScanFixMH --xbinning 25,0,2 --ybinning 25,0,2 --MHtext 0.17:0.17:"m_{H}=125.09 GeV" --legend 0.71,0.65,0.89,0.89 -b 

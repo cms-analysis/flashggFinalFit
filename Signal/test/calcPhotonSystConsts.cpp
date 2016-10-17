@@ -340,7 +340,6 @@ vector<TH1F*> getHistograms(vector<TFile*> files, string name, string syst){
 
 	vector<TH1F*> ret_hists;
 	for (unsigned int i=0; i<files.size(); i++){
-
 		files[i]->cd();
 		if (isFlashgg_){
 			TH1F *up =  new TH1F(Form("%s_%sUp01sigma",name.c_str(),syst.c_str()),Form("%s_%sUp01sigma",name.c_str(),syst.c_str()),80,100,180);
@@ -476,6 +475,7 @@ int main(int argc, char *argv[]){
 			//	if (isFlashgg_){
 			//	outfile << Form("diphotonCat=%s",(flashggCats_[cat]).c_str()) << endl;
 			//	} else {
+
 			outfile << Form("diphotonCat=%d",cat) << endl;
 			//	}
 			outfile << Form("proc=%s",proc->c_str()) << endl;

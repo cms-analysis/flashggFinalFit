@@ -6,7 +6,12 @@ EXT="auto"; #extensiom for all folders and files created by this script
 PROCS="ggh"
 CATS="UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,UntaggedTag_4,VBFTag_0,VBFTag_1,VBFTag_2"
 SCALES="HighR9EE,LowR9EE,HighR9EB,LowR9EB"
+#SCALESCORR="MaterialCentral,MaterialForward,FNUFEE,FNUFEB,ShowerShapeHighR9EE,ShowerShapeHighR9EB,ShowerShapeLowR9EE,ShowerShapeLowR9EB"
+SCALESCORR="MaterialCentral,MaterialForward"
+#SCALESGLOBAL="NonLinearity:0:2.6"
+SCALESGLOBAL="NonLinearity,Geant4,LightYield,Absolute"
 SMEARS="HighR9EE,LowR9EE,HighR9EB,LowR9EB" #DRY RUN
+MASSLIST="120,125,130"
 FTESTONLY=0
 CALCPHOSYSTONLY=0
 SIGFITONLY=0
@@ -14,6 +19,7 @@ SIGPLOTSONLY=0
 INTLUMI=1
 BATCH=""
 DEFAULTQUEUE=""
+BS=""
 
 usage(){
 	echo "The script runs three signal scripts in this order:"
@@ -39,7 +45,7 @@ usage(){
 
 
 # options may be followed by one colon to indicate they have a required argument
-if ! options=$(getopt -u -o hi:p:f: -l help,inputFile:,procs:,smears:,scales:,flashggCats:,ext:,fTestOnly,calcPhoSystOnly,sigFitOnly,sigPlotsOnly,intLumi:,batch: -- "$@")
+if ! options=$(getopt -u -o hi:p:f: -l help,inputFile:,procs:,bs:,smears:,massList:,scales:,scalesCorr:,scalesGlobal:,flashggCats:,ext:,fTestOnly,calcPhoSystOnly,sigFitOnly,sigPlotsOnly,intLumi:,batch: -- "$@")
 then
 # something went wrong, getopt will put out an error message for us
 exit 1
@@ -52,11 +58,15 @@ case $1 in
 -h|--help) usage; exit 0;;
 -i|--inputFile) FILE=$2; shift ;;
 -p|--procs) PROCS=$2; shift ;;
+--massList) MASSLIST=$2; shift ;;
 --smears) SMEARS=$2; shift ;;
 --scales) SCALES=$2; shift ;;
+--scalesCorr) SCALESCORR=$2; shift ;;
+--scalesGlobal) SCALESGLOBAL=$2; shift ;;
+--bs) BS=$2; shift ;;
 -f|--flashggCats) CATS=$2; shift ;;
---ext) EXT=$2; echo "test" ; shift ;;
---fTestOnly) FTESTONLY=1; echo "ftest" ;;
+--ext) EXT=$2 ; shift ;;
+--fTestOnly) FTESTONLY=1 ;;
 --calcPhoSystOnly) CALCPHOSYSTONLY=1;;
 --sigFitOnly) SIGFITONLY=1;;
 --sigPlotsOnly) SIGPLOTSONLY=1;;
@@ -64,18 +74,18 @@ case $1 in
 --batch) BATCH=$2; shift;;
 
 (--) shift; break;;
-(-*) usage; echo "$0: error - unrecognized option $1" 1>&2; usage >> /dev/stderr; exit 1;;
+(-*) usage; echo "$0: [ERROR] - unrecognized option $1" 1>&2; usage >> /dev/stderr; exit 1;;
 (*) break;;
 esac
 shift
 done
 
-echo "INTLUMI $INTLUMI"
+echo "[INFO] processing signal model for INTLUMI $INTLUMI"
 
 OUTDIR="outdir_$EXT"
 echo "[INFO] outdir is $OUTDIR" 
 if [[ $FILE == "" ]];then
-echo "ERROR, input file (--inputFile or -i) is mandatory!"
+echo "[ERROR], input file (--inputFile or -i) is mandatory!"
 exit 0
 fi
 
@@ -88,11 +98,20 @@ SIGPLOTSONLY=1
 fi
 
 if [[ $BATCH == "IC" ]]; then
-DEFAULTQUEUE=hepshort.q
+DEFAULTQUEUE=hep.q
 fi
 if [[ $BATCH == "LSF" ]]; then
 DEFAULTQUEUE=1nh
 fi
+BSOPT=""
+
+if [[ $BS == "" ]]; then
+echo "[INFO] NO BeamSpot SIZE SPECIFIED - DEFAULT FROM MC WILL BE USED"
+else
+echo "[INFO] BeamSpot Size is to be reweighted to $BS"
+BSOPT=" --bs $BS"
+fi
+
 ####################################################
 ################## SIGNAL F-TEST ###################
 ####################################################
@@ -124,7 +143,7 @@ else
         echo " PEND $PEND - RUN $RUN - DONE $DONE - FAIL $FAIL"
         if (( $RUN > 0 )) ; then PEND=1 ; fi
         if (( $FAIL > 0 )) ; then 
-          echo "ERROR at least one job failed :"
+          echo "[ERROR] at least one job failed :"
           ls -l $OUTDIR/fTestJobs/sub* | grep "\.fail"
           exit 1
         fi
@@ -139,7 +158,7 @@ else
     rm -rf $OUTDIR/sigfTest
     mv $OUTDIR/fTest $OUTDIR/sigfTest
   fi
-  echo "[INFO] sigFTest jobs completed, check output and do:"
+  echo "[INFO] SUCCESS sigFTest jobs completed, check output and do:"
   echo "cp $PWD/dat/newConfig_${EXT}_temp.dat $PWD/dat/newConfig_${EXT}.dat"
   echo "and manually amend chosen number of gaussians using the output pdfs here:"
 	echo "Signal/outdir_${EXT}/sigfTest/"
@@ -160,8 +179,8 @@ if [ $CALCPHOSYSTONLY == 1 ]; then
   echo "-->Determine effect of photon systematics"
   echo "=============================="
 
-  echo "./bin/calcPhotonSystConsts -i $FILE -o dat/photonCatSyst_$EXT.dat -p $PROCS -s $SCALES -r $SMEARS -D $OUTDIR -f $CATS"
-  ./bin/calcPhotonSystConsts -i $FILE -o dat/photonCatSyst_$EXT.dat -p $PROCS -s $SCALES -r $SMEARS -D $OUTDIR -f $CATS 
+  echo "./bin/calcPhotonSystConsts -i $FILE -o dat/photonCatSyst_$EXT.dat -p $PROCS -s $SCALES -S $SCALESCORR -g $SCALESGLOBAL -r $SMEARS -D $OUTDIR -f $CATS"
+  ./bin/calcPhotonSystConsts -i $FILE -o dat/photonCatSyst_$EXT.dat -p $PROCS -s $SCALES -S $SCALESCORR -g $SCALESGLOBAL -r $SMEARS -D $OUTDIR -f $CATS 
   cp dat/photonCatSyst_$EXT.dat $OUTDIR/dat/copy_photonCatSyst_$EXT.dat
 fi
 ####################################################
@@ -177,10 +196,10 @@ if [ $SIGFITONLY == 1 ]; then
 
   if [[ $BATCH == "" ]]; then
     echo "./bin/SignalFit -i $FILE -d dat/newConfig_$EXT.dat  --mhLow=120 --mhHigh=130 -s dat/photonCatSyst_$EXT.dat --procs $PROCS -o $OUTDIR/CMS-HGG_mva_13TeV_sigfit.root -p $OUTDIR/sigfit -f $CATS --changeIntLumi $INTLUMI "
-    ./bin/SignalFit -i $FILE -d dat/newConfig_$EXT.dat  --mhLow=120 --mhHigh=130 -s dat/photonCatSyst_$EXT.dat --procs $PROCS -o $OUTDIR/CMS-HGG_mva_13TeV_sigfit.root -p $OUTDIR/sigfit -f $CATS --changeIntLumi $INTLUMI #--pdfWeights 26
+    ./bin/SignalFit -i $FILE -d dat/newConfig_$EXT.dat  --mhLow=120 --mhHigh=130 -s dat/photonCatSyst_$EXT.dat --procs $PROCS -o $OUTDIR/CMS-HGG_mva_13TeV_sigfit.root -p $OUTDIR/sigfit -f $CATS --changeIntLumi $INTLUMI --massList $MASSLIST #--pdfWeights 26
   else
-    echo " ./python/submitSignalFit.py -i $FILE -d dat/newConfig_$EXT.dat  --mhLow=120 --mhHigh=130 -s dat/photonCatSyst_$EXT.dat --procs $PROCS -o $OUTDIR/CMS-HGG_sigfit_$EXT.root -p $OUTDIR/sigfit -f $CATS --changeIntLumi $INTLUMI --batch $BATCH -q $DEFAULTQUEUE "
-    ./python/submitSignalFit.py -i $FILE -d dat/newConfig_$EXT.dat  --mhLow=120 --mhHigh=130 -s dat/photonCatSyst_$EXT.dat --procs $PROCS -o $OUTDIR/CMS-HGG_sigfit_$EXT.root -p $OUTDIR/sigfit -f $CATS --changeIntLumi $INTLUMI --batch $BATCH -q $DEFAULTQUEUE
+    echo "./python/submitSignalFit.py -i $FILE -d dat/newConfig_$EXT.dat  --mhLow=120 --mhHigh=130 -s dat/photonCatSyst_$EXT.dat --procs $PROCS -o $OUTDIR/CMS-HGG_sigfit_$EXT.root -p $OUTDIR/sigfit -f $CATS --changeIntLumi $INTLUMI --batch $BATCH --massList $MASSLIST -q $DEFAULTQUEUE $BSOPT "
+    ./python/submitSignalFit.py -i $FILE -d dat/newConfig_$EXT.dat  --mhLow=120 --mhHigh=130 -s dat/photonCatSyst_$EXT.dat --procs $PROCS -o $OUTDIR/CMS-HGG_sigfit_$EXT.root -p $OUTDIR/sigfit -f $CATS --changeIntLumi $INTLUMI --batch $BATCH --massList $MASSLIST -q $DEFAULTQUEUE $BSOPT 
 
     PEND=`ls -l $OUTDIR/sigfit/SignalFitJobs/sub*| grep -v "\.run" | grep -v "\.done" | grep -v "\.fail" | grep -v "\.err" |grep -v "\.log"  |wc -l`
     echo "PEND $PEND"
@@ -213,6 +232,10 @@ if [ $SIGFITONLY == 1 ]; then
       ((counter=$counter+1))
     done < out.txt
     echo "SIGFILES $SIGFILES"
+
+    #./makeSlides.sh $OUTDIR
+    #scp fullslides.pdf lcorpe@lxplus.cern.ch:www/scratch/fullslides.pdf
+    #exit 1
     echo "./bin/PackageOutput -i $SIGFILES --procs $PROCS -l $INTLUMI -p $OUTDIR/sigfit -W wsig_13TeV -f $CATS -L 120 -H 130 -o $OUTDIR/CMS-HGG_sigfit_$EXT.root"
     ./bin/PackageOutput -i $SIGFILES --procs $PROCS -l $INTLUMI -p $OUTDIR/sigfit -W wsig_13TeV -f $CATS -L 120 -H 130 -o $OUTDIR/CMS-HGG_sigfit_$EXT.root > package.out
   fi
@@ -233,10 +256,14 @@ echo "=============================="
 
 echo " ./bin/makeParametricSignalModelPlots -i $OUTDIR/CMS-HGG_sigfit_$EXT.root  -o $OUTDIR -p $PROCS -f $CATS"
 #./bin/makeParametricSignalModelPlots -i $OUTDIR/CMS-HGG_sigfit_$EXT.root  -o $OUTDIR/sigplots -p $PROCS -f $CATS 
-./bin/makeParametricSignalModelPlots -i $OUTDIR/CMS-HGG_sigfit_$EXT.root  -o $OUTDIR/sigplots -p $PROCS -f $CATS > signumbers.txt
+./bin/makeParametricSignalModelPlots -i $OUTDIR/CMS-HGG_sigfit_$EXT.root  -o $OUTDIR/sigplots -p $PROCS -f $CATS > signumbers_${EXT}.txt
 #mv $OUTDIR/sigfit/initialFits $OUTDIR/initialFits
 
+./makeSlides.sh $OUTDIR
+mv fullslides.pdf $OUTDIR/fullslides_${EXT}.pdf
 fi
+
+
 
 if [ $USER == "lcorpe" ]; then
 cp -r $OUTDIR ~/www/.

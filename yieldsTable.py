@@ -17,6 +17,7 @@ parser.add_option("-s","--siginput",default="signumbers.txt")
 parser.add_option("-w","--workspaces",default="")
 parser.add_option("-v","--sigworkspaces",default="")
 parser.add_option("-u","--bkgworkspaces",default="")
+parser.add_option("-o","--order",default="",help="tell teh script what order to print tags and procs in. Usage proc1,proc2,proc3..:tag1,tag2,tag3...")
 parser.add_option("-f","--flashggCats",default="UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,UntaggedTag_4,VBFTag_0,VBFTag_1,VBFTag_2,TTHHadronicTag,TTHLeptonicTag,VHHadronicTag,VHTightTag,VHLooseTag,VHEtTag")
 (options,args) = parser.parse_args()
 
@@ -57,6 +58,8 @@ with open(options.input) as i:
     if "intLumi" in line: lumi=float(line[line.find("value")+6:])
     if "pdfWeight" in line : continue 
     line=line.replace("Tag_","Tag ")
+    line=line.replace("Tag"," Tag")
+    line=line.replace("TTH","TTH ")
     line=line.replace(",","_ ")
     line=line.replace("\n","")
     words=line.split("_")  
@@ -73,13 +76,17 @@ with open(options.siginput) as i:
   lines  = i.readlines()
   for line in lines:
     if not "TABLE" in line: continue
+    if not "sig_mass" in line: continue
     line=line.replace("m125_","=")
     line=line.replace("Tag_","Tag ")
-    line=line.replace("AllCats","All")
+    line=line.replace("AllCats","Total")
+    line=line.replace("Tag"," Tag")
+    line=line.replace("TTH","TTH ")
     words=line.split("=")  
     print words
     effSigma[words[1]]=words[3]
     hmSigma[words[1]]=words[5]
+#exit (1)
 
 print effSigma
 print hmSigma
@@ -93,7 +100,7 @@ for x in effSigma.keys():
 counter=0;
 for x in effSigma.keys():
   
-  exec_line='$CMSSW_BASE/src/flashggFinalFit/Background/bin/makeBkgPlots -b %s -o tmp.root -d tmp -c %d --sqrts 13 --intLumi 2.610000 --massStep 1.000 --nllTolerance 0.050 -L 125 -H 125 --higgsResolution %f --isMultiPdf --useBinnedData --doBands -f %s| grep TABLE > bkg.tmp'%(options.bkgworkspaces,counter,float(effSigma[x]),flashggCats.replace(" ","_"))
+  exec_line='$CMSSW_BASE/src/flashggFinalFit/Background/bin/makeBkgPlots -b %s -o tmp.root -d tmp -c %d --sqrts 13 --intLumi 2.610000 --massStep 1.000 --nllTolerance 0.050 -L 125 -H 125 --higgsResolution %f --isMultiPdf --useBinnedData --doBands -f %s| grep TABLE > bkg.tmp'%(options.bkgworkspaces,counter,float(effSigma[x]),flashggCats.replace("Tag ","Tag_").replace(" Tag","Tag").replace("TTH ","TTH"))
   print exec_line
   os.system(exec_line)
   counter=counter+1
@@ -103,6 +110,8 @@ for x in effSigma.keys():
     for line in lines:
       if not "TABLE" in line: continue
       line=line.replace("Tag_","Tag ")
+      line=line.replace("Tag"," Tag")
+      line=line.replace("TTH","TTH ")
       print "LCDEBUG ", line
       words=line.split(',')
       print "LCDEBUG ", words[1], ", ", words[3]  
@@ -110,7 +119,7 @@ for x in effSigma.keys():
       print "LCDEBUG ", bkgYield
 bkgAllYield=0
 for x in bkgYield.values(): bkgAllYield=bkgAllYield+x
-bkgYield["All"]=bkgAllYield
+bkgYield["Total"]=bkgAllYield
 
 print "DEBUG bkg YIELD"
 bkgYield
@@ -196,22 +205,23 @@ for p in Arr :
 print line
 
 
-Arr["All"]={"All":0}
+Arr["Total"]={"Total":0}
 for x in Arr.values()[1].keys():
-  Arr["All"][x]=0
+  Arr["Total"][x]=0
 
-print Arr["All"]
+print Arr["Total"]
 
 
 
 
 line=""
 for t in Arr :
-  Arr[t]["All"]=0
+  Arr[t]["Total"]=0
+  print " consider tag " ,t , " looping through", Arr[t]
   for p in Arr[t]:
-    if p=="All": continue
-    Arr[t]["All"]= Arr[t]["All"]+Arr[t][p]
-  line=line+" "+str('All'+":"+'%.2f'%Arr[t]["All"])
+    if p=="Total": continue
+    Arr[t]["Total"]= Arr[t]["Total"]+Arr[t][p]
+  line=line+" "+str('Total'+":"+'%.2f'%Arr[t]["Total"])
 
 '''
 for t in Arr :
@@ -233,7 +243,10 @@ nTags=len(Arr.keys()[0])
 
 for x in Arr.keys():
    for y in Arr.values()[0].keys() :
-      Arr["All"][y] = Arr["All"][y] +Arr[x][y]
+      if x == "Total": continue
+      Arr["Total"][y] = Arr["Total"][y] +Arr[x][y]
+
+print " Done : Arr[Total]", Arr["Total"]
 
 print "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
 line="\\begin{tabular}{ |r | c | c  | c|"
@@ -261,9 +274,9 @@ for t in Arr :
   lineCat=t+" &   " 
   line=""
   for p in Arr[t]:
-    if p=="All": continue
+    if p=="Total": continue
     line = line+" &  "+str('%.2f'%Arr[t][p])
-  Allline=" "+str('%.2f'%Arr[t]["All"])
+  Allline=" "+str('%.2f'%Arr[t]["Total"])
   #dataLines.append( lineCat + Allline+ " "+line+ " & & &" )#+"& %s & %s & %.2f\\\\"%(effSigma[t],hmSigma[t],float(bkgYield[t]) ))
   esig =effSigma[t]
   hmsig =hmSigma[t]
@@ -292,7 +305,11 @@ print "\\hline"
 print "\\hline"
 print "\\multirow{2}{*}{Event Categories} &\multicolumn{%d}{|l|}{SM 125GeV Higgs boson expected signal} & Bkg \\\\ \\cline{2-%d}"%(nProcs+2,nProcs+3)
 line="  &  "
-for p in Arr.values()[0].keys() :
+
+procList=[]
+if (options.order==""): procList=Arr.values()[0].keys() 
+else : procList = options.order.split(":")[0].split(",")
+for p in procList:
  #print p
   line=line+ p + " & "
 line =line+"  $\\sigma_{eff} $  & $\\sigma_{HM} $ & (GeV$^{-1}$) \\\\ "
@@ -301,20 +318,30 @@ print "\\hline"
 print "\\hline"
 
 dataLines=[]
-for t in Arr :
+tagList=[]
+if (options.order==""): 
+  tagList=Arr 
+else : 
+  tagList = options.order.split(":")[1].split(",")
+
+for t in tagList :
   #print p
   lineCat=t+" &   " 
   line=""
-  for p in Arr[t]:
-    if p=="All": continue
-    line = line+" &  "+str('%.2f \%%'%(100*Arr[t][p]/Arr[t]["All"]))
-  Allline=" "+str('%.2f'%Arr[t]["All"])
+  for p in procList:
+    if p=="Total": continue
+    line = line+" &  "+str('%.2f \%%'%(100*Arr[t][p]/Arr[t]["Total"]))
+  Allline=" "+str('%.2f'%Arr[t]["Total"])
   #bkgy=0
+  if not t in bkgYield.keys():
+    print "ERROR COULD NOT FIND KEY ", t , " in list of Bkg Numbers:"
+    print bkgYield
+    exit(1)
   bkgy=bkgYield[t]
   dataLines.append( lineCat + Allline+ " "+line+"& %.2f & %.2f & %.2f \\\\"%(float(effSigma[t]),float(hmSigma[t]),bkgy))
   #dataLines.append( lineCat + Allline+ " "+line+ "& & &")#"& %.2f & %.2f & %.2f \\\\"%(float(effSigma[t]),float(hmSigma[t]),float(bkgYield[t])))
 
-dataLines.sort()
+#dataLines.sort()
 for l in dataLines :
   print l
 
@@ -323,6 +350,175 @@ print "\\hline"
 print "\end{tabular}"
 
 print "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
+
+print "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
+line="\\begin{tabular}{ |r | c | c | c  | c |"
+for x in range(0,nProcs):
+ line = line + " c | "
+line = line + "}"
+print line
+print "\\hline"
+i#print "\\multicolumn{%d}{|l|}{Expected Signal} \\\\"%(nProcs+3)
+print "\\hline"
+print "\\hline"
+print "\\multirow{2}{*}{Event Categories} &\multicolumn{%d}{|l|}{SM 125GeV Higgs boson expected signal} & Bkg & S/(S+B) \\\\ \\cline{2-%d}"%(nProcs+2,nProcs+3)
+line="  &  "
+
+procList=[]
+if (options.order==""): procList=Arr.values()[0].keys() 
+else : procList = options.order.split(":")[0].split(",")
+for p in procList:
+ #print p
+  line=line+ p + " & "
+line =line+"  $\\sigma_{eff} $  & $\\sigma_{HM} $ & (GeV$^{-1}$) & \\\\ "
+print line 
+print "\\hline"
+print "\\hline"
+
+dataLines=[]
+tagList=[]
+if (options.order==""): 
+  tagList=Arr 
+else : 
+  tagList = options.order.split(":")[1].split(",")
+
+naiveExpecteds=[]
+for t in tagList :
+  #print p
+  if t=="Total" : continue
+  lineCat=t+" &   " 
+  line=""
+  for p in procList:
+    if p=="Total": continue
+    line = line+" &  "+str('%.2f \%%'%(100*Arr[t][p]/Arr[t]["Total"]))
+  Allline=" "+str('%.2f'%Arr[t]["Total"])
+  #bkgy=0
+  if not t in bkgYield.keys():
+    print "ERROR COULD NOT FIND KEY ", t , " in list of Bkg Numbers:"
+    print bkgYield
+    exit(1)
+  bkgy=bkgYield[t]
+  naiveExp=(0.68*Arr[t]["Total"])/(2*float(effSigma[t])*bkgy + 0.68*Arr[t]["Total"] )
+  dataLines.append( lineCat + Allline+ " "+line+"& %.2f & %.2f & %.2f & %.2f\\\\"%(float(effSigma[t]),float(hmSigma[t]),bkgy,naiveExp ))
+  naiveExpecteds.append(naiveExp)
+
+# now do total line
+t=="Total" 
+lineCat=t+" &   " 
+line=""
+for p in procList:
+   if p=="Total": continue
+   line = line+" &  "+str('%.2f \%%'%(100*Arr[t][p]/Arr[t]["Total"]))
+Allline=" "+str('%.2f'%Arr[t]["Total"])
+  #bkgy=0
+if not t in bkgYield.keys():
+    print "ERROR COULD NOT FIND KEY ", t , " in list of Bkg Numbers:"
+    print bkgYield
+    exit(1)
+bkgy=bkgYield[t]
+totalNaiveExp=0.
+for n in naiveExpecteds:
+  totalNaiveExp=totalNaiveExp+(n**2)
+totalNaiveExp=(totalNaiveExp)**(0.5)
+dataLines.append( lineCat + Allline+ " "+line+"& %.2f & %.2f & %.2f & %.2f\\\\"%(float(effSigma[t]),float(hmSigma[t]),bkgy,totalNaiveExp))
+  #dataLines.append( lineCat + Allline+ " "+line+ "& & &")#"& %.2f & %.2f & %.2f \\\\"%(float(effSigma[t]),float(hmSigma[t]),float(bkgYield[t])))
+
+#dataLines.sort()
+for l in dataLines :
+  print l
+
+print "\\hline"
+print "\\hline"
+print "\end{tabular}"
+
+print "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
+
+
+
+print "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
+print "\\resizebox{\\textwidth}{!}{"
+line="\\begin{tabular}{ |r | c | c | c  | c | c |"
+for x in range(0,nProcs):
+ line = line + " c | "
+line = line + "}"
+print line
+print "\\hline"
+i#print "\\multicolumn{%d}{|l|}{Expected Signal} \\\\"%(nProcs+3)
+print "\\hline"
+print "\\hline"
+print "\\multirow{2}{*}{Event Categories} &\multicolumn{%d}{|l|}{SM 125GeV Higgs boson expected signal} & Bkg & Bkg &naive expected\\\\ \\cline{2-%d}"%(nProcs+2,nProcs+3)
+line="  &  "
+
+procList=[]
+if (options.order==""): procList=Arr.values()[0].keys() 
+else : procList = options.order.split(":")[0].split(",")
+for p in procList:
+ #print p
+  line=line+ p + " & "
+line =line+"  $\\sigma_{eff} $  & $\\sigma_{HM} $ & (GeV$^{-1}$) & (GeV$^{-1}$ fb^{-1} )& \\\\ "
+print line 
+print "\\hline"
+print "\\hline"
+
+dataLines=[]
+tagList=[]
+if (options.order==""): 
+  tagList=Arr 
+else : 
+  tagList = options.order.split(":")[1].split(",")
+
+naiveExpecteds=[]
+for t in tagList :
+  #print p
+  if t=="Total" : continue
+  lineCat=t+" &   " 
+  line=""
+  for p in procList:
+    if p=="Total": continue
+    line = line+" &  "+str('%.2f \%%'%(100*Arr[t][p]/Arr[t]["Total"]))
+  Allline=" "+str('%.2f'%Arr[t]["Total"])
+  #bkgy=0
+  if not t in bkgYield.keys():
+    print "ERROR COULD NOT FIND KEY ", t , " in list of Bkg Numbers:"
+    print bkgYield
+    exit(1)
+  bkgy=bkgYield[t]
+  naiveExp=(0.68*Arr[t]["Total"])/(2*float(effSigma[t])*bkgy)**(0.5)
+  dataLines.append( lineCat + Allline+ " "+line+"& %.2f & %.2f & %.2f & %.2f & %.2f\\\\"%(float(effSigma[t]),float(hmSigma[t]),bkgy,bkgy/options.factor,naiveExp ))
+  naiveExpecteds.append(naiveExp)
+
+# now do total line
+t=="Total" 
+lineCat=t+" &   " 
+line=""
+for p in procList:
+   if p=="Total": continue
+   line = line+" &  "+str('%.2f \%%'%(100*Arr[t][p]/Arr[t]["Total"]))
+Allline=" "+str('%.2f'%Arr[t]["Total"])
+  #bkgy=0
+if not t in bkgYield.keys():
+    print "ERROR COULD NOT FIND KEY ", t , " in list of Bkg Numbers:"
+    print bkgYield
+    exit(1)
+bkgy=bkgYield[t]
+totalNaiveExp=0.
+for n in naiveExpecteds:
+  totalNaiveExp=totalNaiveExp+(n**2)
+totalNaiveExp=(totalNaiveExp)**(0.5)
+dataLines.append( lineCat + Allline+ " "+line+"& %.2f & %.2f & %.2f & %.2f & %.2f\\\\"%(float(effSigma[t]),float(hmSigma[t]),bkgy,bkgy/options.factor,totalNaiveExp))
+  #dataLines.append( lineCat + Allline+ " "+line+ "& & &")#"& %.2f & %.2f & %.2f \\\\"%(float(effSigma[t]),float(hmSigma[t]),float(bkgYield[t])))
+
+#dataLines.sort()
+for l in dataLines :
+  print l
+
+print "\\hline"
+print "\\hline"
+print "\end{tabular}}"
+
+print "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
+
+
 
 
 

@@ -18,6 +18,7 @@
 #include "RooMsgService.h"
 #include "RooMinimizer.h"
 #include "RooAbsPdf.h"
+#include "RooHist.h"
 #include "RooExtendPdf.h"
 #include "RooWorkspace.h"
 #include "RooRealVar.h"
@@ -682,7 +683,7 @@ int main(int argc, char* argv[]){
   setTDRStyle();
   writeExtraText = true;       // if extra text
   extraText  = "Preliminary";  // default extra text is "Preliminary"
-  lumi_13TeV ="2.7 fb^{-1}";
+  lumi_13TeV ="2.6 fb^{-1}";
   lumi_8TeV  = "19.1 fb^{-1}"; // default is "19.7 fb^{-1}"
   lumi_7TeV  = "4.9 fb^{-1}";  // default is "5.1 fb^{-1}"
   lumi_sqrtS = "13 TeV";       // used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
@@ -753,7 +754,7 @@ int main(int argc, char* argv[]){
 	RooMsgService::instance().setGlobalKillBelow(RooFit::ERROR);
 	RooMsgService::instance().setSilentMode(true);
 	split(flashggCats_,flashggCatsStr_,boost::is_any_of(","));
-	
+  lumi_13TeV =Form("%.1f fb^{-1}",intLumi);	
 	system(Form("mkdir -p %s",outDir.c_str()));
 	if (makeCrossCheckProfPlots) system(Form("mkdir -p %s/normProfs",outDir.c_str()));
 
@@ -841,6 +842,9 @@ int main(int argc, char* argv[]){
 	plot->GetXaxis()->SetTitle("m_{#gamma#gamma} (GeV)");
 	plot->SetTitle("");
 	data->plotOn(plot,Binning(80),Invisible());
+  ///start extra bit for ratio plot///
+  RooHist *plotdata = (RooHist*)plot->getObject(plot->numItems()-1);
+  // enf extra bit for ratio plot///
 	TObject *dataLeg = (TObject*)plot->getObject(plot->numItems()-1);
 	mpdf->getCurrentPdf()->plotOn(plot,LineColor(kRed),LineWidth(2));
 	RooCurve *nomBkgCurve = (RooCurve*)plot->getObject(plot->numItems()-1);
@@ -850,9 +854,13 @@ int main(int argc, char* argv[]){
 
 	// Bands
 	TGraphAsymmErrors *oneSigmaBand = new TGraphAsymmErrors();
+	TGraphAsymmErrors *oneSigmaBand_r = new TGraphAsymmErrors();
 	oneSigmaBand->SetName(Form("onesigma_%s",catname.c_str()));
+	oneSigmaBand_r->SetName(Form("onesigma_%s_r",catname.c_str()));
 	TGraphAsymmErrors *twoSigmaBand = new TGraphAsymmErrors();
+	TGraphAsymmErrors *twoSigmaBand_r = new TGraphAsymmErrors();
 	twoSigmaBand->SetName(Form("twosigma_%s",catname.c_str()));
+	twoSigmaBand_r->SetName(Form("twosigma_%s_r",catname.c_str()));
 
 	cout<< "[INFO] " << "Plot has " << plot->GetXaxis()->GetNbins() << " bins" << endl;
 	if (doBands) {
@@ -906,9 +914,13 @@ int main(int argc, char* argv[]){
 			double errHigh2 = errHigh2Value - nomBkg;
 
 			oneSigmaBand->SetPoint(p,center,nomBkg);
+			oneSigmaBand_r->SetPoint(p,center,0);
 			twoSigmaBand->SetPoint(p,center,nomBkg);
+			twoSigmaBand_r->SetPoint(p,center,0);
 			oneSigmaBand->SetPointError(p,0.,0.,errLow1,errHigh1);
+			oneSigmaBand_r->SetPointError(p,0.,0.,errLow1,errHigh1);
 			twoSigmaBand->SetPointError(p,0.,0.,errLow2,errHigh2);
+			twoSigmaBand_r->SetPointError(p,0.,0.,errLow2,errHigh2);
 
 			cout<< "[INFO] " << "mgg: " << center << " nomBkg: " << nomBkg << " +/- 1 (2) sig -- +" << errHigh1 << "(" << errHigh2 << ")" << " - " << errLow1 << "(" << errLow2 << ")" << endl;
 
@@ -955,6 +967,17 @@ int main(int argc, char* argv[]){
 		outWS->import(*data);
 
 		TCanvas *canv = new TCanvas("c","",800,800);
+  ///start extra bit for ratio plot///
+  bool doRatioPlot_=1;
+  TPad *pad1 = new TPad("pad1","pad1",0,0.25,1,1);
+  TPad *pad2 = new TPad("pad2","pad2",0,0,1,0.35);
+  pad1->SetBottomMargin(0.18);
+  pad2->SetTopMargin(0.00001);
+  pad2->SetBottomMargin(0.25);
+  pad1->Draw();
+  pad2->Draw();
+  pad1->cd();
+  // enf extra bit for ratio plot///
     canv->SetTickx(); canv->SetTicky();
 		RooRealVar *lumi = (RooRealVar*)inWS->var("IntLumi");
 		plot->Draw();
@@ -979,6 +1002,12 @@ int main(int argc, char* argv[]){
 			oneSigmaBand->Draw("L3 SAME");
 			leg->AddEntry(oneSigmaBand,"#pm1#sigma","F");
 			leg->AddEntry(twoSigmaBand,"#pm2#sigma","F");
+			twoSigmaBand_r->SetLineColor(kYellow);
+			twoSigmaBand_r->SetFillColor(kYellow);
+			twoSigmaBand_r->SetMarkerColor(kYellow);
+			oneSigmaBand_r->SetLineColor(kGreen);
+			oneSigmaBand_r->SetFillColor(kGreen);
+			oneSigmaBand_r->SetMarkerColor(kGreen);
 		}
 
 		if (doSignal){
@@ -1065,6 +1094,54 @@ int main(int argc, char* argv[]){
 		plot->GetYaxis()->SetTitleOffset(1.3);
 		canv->Modified();
 		canv->Update();
+  ///start extra bit for ratio plot///
+  //TH1D *hbplottmp = (TH1D*) pdf->createHistogram("hbplottmp",*mass,Binning(80,100,180));
+  //hbplottmp->Scale(plotdata->Integral());
+  //hbplottmp->Draw("same");
+  int npoints = plotdata->GetN();
+  double xtmp,ytmp;//
+  int point =0;
+  TGraphAsymmErrors *hdatasub = new TGraphAsymmErrors(npoints);
+  //hdatasub->SetMarkerSize(defmarkersize);
+  for (int ipoint=0; ipoint<npoints; ++ipoint) {
+  //double bkgval = hbplottmp->GetBinContent(ipoint+1);
+  plotdata->GetPoint(ipoint, xtmp,ytmp);
+  double bkgval = nomBkgCurve->interpolate(xtmp);
+  if (!unblind) {
+   if ((xtmp > 115 ) && ( xtmp < 135) ) continue;
+  }
+  //std::cout << "[INFO] plotdata->Integral() " <<  plotdata->Integral() << " ( bins " << npoints  << ") hbkgplots[i]->Integral() " << hbplottmp->Integral() << " (bins " << hbplottmp->GetNbinsX() << std::endl;
+ double errhi = plotdata->GetErrorYhigh(ipoint);
+ double errlow = plotdata->GetErrorYlow(ipoint);
+       
+ //std::cout << "[INFO]  Channel " << name  << " errhi " << errhi << " errlow " << errlow  << std::endl;
+ std::cout << "[INFO] Channel  " << " setting point " << point <<" : xtmp "<< xtmp << "  ytmp " << ytmp << " bkgval  " << bkgval << " ytmp-bkgval " << ytmp-bkgval << std::endl;
+ bool drawZeroBins_ =1;
+ if (!drawZeroBins_) if(fabs(ytmp)<1e-5) continue; 
+ hdatasub->SetPoint(point,xtmp,ytmp-bkgval);
+ hdatasub->SetPointError(point,0.,0.,errlow,errhi );
+ point++;
+  } 
+  pad2->cd();
+  TH1 *hdummy = new TH1D("hdummyweight","",80,100,180);
+  hdummy->SetMaximum(hdatasub->GetHistogram()->GetMaximum()+1);
+  hdummy->SetMinimum(hdatasub->GetHistogram()->GetMinimum()-1);
+  hdummy->GetYaxis()->SetTitle("data - best fit PDF");
+  hdummy->GetYaxis()->SetTitleSize(0.12);
+  hdummy->GetXaxis()->SetTitle("m_{#gamma#gamma} (GeV)");
+  hdummy->GetXaxis()->SetTitleSize(0.12);
+  hdummy->Draw("HIST");
+	if (doBands) twoSigmaBand_r->Draw("L3 SAME");
+	if (doBands) oneSigmaBand_r->Draw("L3 SAME");
+  hdummy->GetYaxis()->SetNdivisions(808);
+
+  TLine *line3 = new TLine(100,0.,180,0.);
+  line3->SetLineColor(kRed);
+  //line3->SetLineStyle(kDashed);
+  line3->SetLineWidth(4.0);
+  line3->Draw();
+  hdatasub->Draw("PESAME");
+  // enf extra bit for ratio plot///
     CMS_lumi( canv, 4, 0);
 		canv->Print(Form("%s/bkgplot_%s.pdf",outDir.c_str(),catname.c_str()));
 		canv->Print(Form("%s/bkgplot_%s.png",outDir.c_str(),catname.c_str()));
