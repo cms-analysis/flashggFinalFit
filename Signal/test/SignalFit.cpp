@@ -870,14 +870,14 @@ int main(int argc, char *argv[]){
 
       if (!cloneFits_){
         // right vertex
-        LinearInterp linInterpRV(MH,mhLow_,mhHigh_,fitParamsRV,doSecondaryModels_,skipMasses_);
+        LinearInterp linInterpRV(MH,massList_,fitParamsRV,doSecondaryModels_,skipMasses_);
         linInterpRV.setVerbosity(verbose_);
         linInterpRV.setSecondaryModelVars(MH_SM,DeltaM,MH_2,higgsDecayWidth);
         linInterpRV.interpolate(nGaussiansRV);
         splinesRV = linInterpRV.getSplines();
 
         // wrong vertex
-        LinearInterp linInterpWV(MH,mhLow_,mhHigh_,fitParamsWV,doSecondaryModels_,skipMasses_);
+        LinearInterp linInterpWV(MH,massList_,fitParamsWV,doSecondaryModels_,skipMasses_);
         linInterpWV.setVerbosity(verbose_);
         linInterpWV.setSecondaryModelVars(MH_SM,DeltaM,MH_2,higgsDecayWidth);
         linInterpWV.interpolate(nGaussiansWV);
