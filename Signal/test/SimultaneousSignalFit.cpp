@@ -65,7 +65,7 @@ vector<int> skipMasses_;
 string massListStr_;
 vector<int> massList_;
 bool splitRVWV_=true;
-bool doSecondaryModels_=true;
+bool doSecondaryModels_=false;
 bool doQuadraticSigmaSum_=false;
 bool runInitialFitsOnly_=false;
 bool cloneFits_=false;
@@ -813,7 +813,7 @@ int main(int argc, char *argv[]){
     // these guys do the fitting AND interpolation
     // right vertex
     if (verbose_) std::cout << "[INFO] preapraing initialfit RV, massList size "<< massList_.size() << std::endl;
-    SimultaneousFit simultaneousFitRV(mass_,MH,mhLow_,mhHigh_,skipMasses_,binnedFit_,nBins_,massList_);
+    SimultaneousFit simultaneousFitRV(mass_,MH,mhLow_,mhHigh_,skipMasses_,binnedFit_,nBins_,massList_,cat,proc);
     simultaneousFitRV.setVerbosity(verbose_);
     if (!cloneFits_) {
       if (verbose_) std::cout << "[INFO] RV building sum of gaussians with nGaussiansRV " << nGaussiansRV << std::endl;
@@ -837,7 +837,7 @@ int main(int argc, char *argv[]){
 
     // wrong vertex
     if (verbose_) std::cout << "[INFO] preparing initialfit WV, masList size "<< massList_.size() << std::endl;
-    SimultaneousFit simultaneousFitWV(mass_,MH,mhLow_,mhHigh_,skipMasses_,binnedFit_,nBins_,massList_);
+    SimultaneousFit simultaneousFitWV(mass_,MH,mhLow_,mhHigh_,skipMasses_,binnedFit_,nBins_,massList_,cat,proc);
     simultaneousFitWV.setVerbosity(verbose_);
     if (!cloneFits_) {
       if (verbose_) std::cout << "[INFO] WV building sum of gaussians wth nGaussiansWV "<< nGaussiansWV << std::endl;
@@ -870,18 +870,9 @@ int main(int argc, char *argv[]){
 
       if (!cloneFits_){
         // right vertex
-        LinearInterp linInterpRV(MH,massList_,fitParamsRV,doSecondaryModels_,skipMasses_);
-        linInterpRV.setVerbosity(verbose_);
-        linInterpRV.setSecondaryModelVars(MH_SM,DeltaM,MH_2,higgsDecayWidth);
-        linInterpRV.interpolate(nGaussiansRV);
-        splinesRV = linInterpRV.getSplines();
-
+        splinesRV =  simultaneousFitRV.getSplines();
         // wrong vertex
-        LinearInterp linInterpWV(MH,massList_,fitParamsWV,doSecondaryModels_,skipMasses_);
-        linInterpWV.setVerbosity(verbose_);
-        linInterpWV.setSecondaryModelVars(MH_SM,DeltaM,MH_2,higgsDecayWidth);
-        linInterpWV.interpolate(nGaussiansWV);
-        splinesWV = linInterpWV.getSplines();
+        splinesWV =  simultaneousFitWV.getSplines();
       }
       else {
         splinesRV = cloneSplinesMapRV[make_pair(proc,cat)];
