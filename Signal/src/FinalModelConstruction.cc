@@ -61,30 +61,38 @@ FinalModelConstruction::FinalModelConstruction( std::vector<int> massList, RooRe
   systematicsSet_(false),
   rvFractionSet_(false),
 	procs_(procList)
-{
+{ 
+  std::cout << " LC DEBUG FMC 0 " << std::endl;
   setTDRStyle();
   writeExtraText = true;       // if extra text
   extraText  = "";  // default extra text is "Preliminary"
   lumi_8TeV  = "19.1 fb^{-1}"; // default is "19.7 fb^{-1}"
   lumi_7TeV  = "4.9 fb^{-1}";  // default is "5.1 fb^{-1}"
   lumi_sqrtS = "13 TeV";       // used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
+  std::cout << " LC DEBUG FMC 1 " << std::endl;
   if (massList.size()==0){
     allMH_ = getAllMH();
   }else{
     allMH_ = massList;
   }
+  std::cout << " LC DEBUG FMC 2 " << std::endl;
 
 	if (sqrts_ ==7) is2011_=1;
 	if (sqrts_ ==8) is2012_=1;
 	if (sqrts_ ==13) isFlashgg_=1;
   // load xs and br info from Normalization_8TeV
+  std::cout << " LC DEBUG FMC 3 " << std::endl;
   norm = new Normalization_8TeV();
+  std::cout << " LC DEBUG FMC 4 " << std::endl;
   if(!norm->Init(sqrts_)){
 	std::cout << "[ERROR] Normalization Initiation failed, exit." << std::endl;
 	exit(1);
 	}
+  std::cout << " LC DEBUG FMC 5 " << std::endl;
   TGraph *brGraph = norm->GetBrGraph();
+  std::cout << " LC DEBUG FMC 6 " << std::endl;
 	brSpline = graphToSpline(Form("fbr_%dTeV",sqrts_),brGraph);
+  std::cout << " LC DEBUG FMC 7 " << std::endl;
 
  // string procs[8] = {"ggh","vbf","wzh","wh","zh","tth","gg_grav","qq_grav"} ;//Don't want this hard-coded.
   for (unsigned int i=0; i<procs_.size(); i++){
@@ -92,14 +100,19 @@ FinalModelConstruction::FinalModelConstruction( std::vector<int> massList, RooRe
     RooSpline1D *xsSpline = graphToSpline(Form("fxs_%s_%dTeV",procs_[i].c_str(),sqrts_),xsGraph);
     xsSplines.insert(pair<string,RooSpline1D*>(procs_[i],xsSpline));
   }
+  std::cout << " LC DEBUG FMC 8 " << std::endl;
   
   paramDump_.open (Form("%s/paramDump_%s_%stxt",outDir.c_str(),proc_.c_str(),cat_.c_str()));
+  std::cout << " LC DEBUG FMC 9 " << std::endl;
   vector<string> files;
+  std::cout << " LC DEBUG FMC 10 " << std::endl;
   split( files, systematicsFileName, boost::is_any_of(",") );
+  std::cout << " LC DEBUG FMC 11 " << std::endl;
   for(vector<string>::iterator fi=files.begin(); fi!=files.end(); ++fi ) {
 	  loadSignalSystematics(*fi);
   }
   if (verbosity_) printSignalSystematics();
+  std::cout << " LC DEBUG FMC 12 " << std::endl;
 }
 
 FinalModelConstruction::~FinalModelConstruction(){}
@@ -785,14 +798,20 @@ void FinalModelConstruction::buildStdPdf(string name, int nGaussians, bool recur
 
 void FinalModelConstruction::buildRvWvPdf(string name, int nGrv, int nGwv, bool recursive){
 	string catname;
+   std::cout << " LC DEBUG FMC buildRvWvpdf 0" << std::endl;
 	if (sqrts_==8 || sqrts_==7) catname=Form("cat%s",cat_.c_str());
 	if (sqrts_ ==13) catname = Form("%s",cat_.c_str());
 
+   std::cout << " LC DEBUG FMC buildRvWvpdf 1" << std::endl;
   if (!rvFractionSet_) getRvFractionFunc(Form("%s_%s_%s_rvFracFunc",name.c_str(),proc_.c_str(),catname.c_str()));
   if (!systematicsSet_) setupSystematics();
+   std::cout << " LC DEBUG FMC buildRvWvpdf 2" << std::endl;
   RooFormulaVar *rvFraction = new RooFormulaVar(Form("%s_%s_%s_rvFrac",name.c_str(),proc_.c_str(),catname.c_str()),Form("%s_%s_%s_rvFrac",name.c_str(),proc_.c_str(),catname.c_str()),"TMath::Min(@0+@1,1.0)",RooArgList(*vertexNuisance,*rvFracFunc));
+   std::cout << " LC DEBUG FMC buildRvWvpdf 3" << std::endl;
   vector<RooAddPdf*> rvPdfs = buildPdf(name,nGrv,recursive,rvSplines,Form("_rv_%dTeV",sqrts_)); 
+   std::cout << " LC DEBUG FMC buildRvWvpdf 4" << std::endl;
   vector<RooAddPdf*> wvPdfs = buildPdf(name,nGwv,recursive,wvSplines,Form("_wv_%dTeV",sqrts_)); 
+   std::cout << " LC DEBUG FMC buildRvWvpdf 5" << std::endl;
   finalPdf = new RooAddPdf(Form("%s_%s_%s",name.c_str(),proc_.c_str(),catname.c_str()),Form("%s_%s_%s",name.c_str(),proc_.c_str(),catname.c_str()),RooArgList(*rvPdfs[0],*wvPdfs[0]),RooArgList(*rvFraction));
   if (doSecondaryModels){
     assert(secondaryModelVarsSet);
@@ -803,6 +822,7 @@ void FinalModelConstruction::buildRvWvPdf(string name, int nGrv, int nGwv, bool 
     finalPdf_SM = new RooAddPdf(Form("%s_%s_%s_SM",name.c_str(),proc_.c_str(),catname.c_str()),Form("%s_%s_%s_SM",name.c_str(),proc_.c_str(),catname.c_str()),RooArgList(*rvPdfs[1],*wvPdfs[1]),RooArgList(*rvFraction_SM));
     finalPdf_2 = new RooAddPdf(Form("%s_%s_%s_2",name.c_str(),proc_.c_str(),catname.c_str()),Form("%s_%s_%s_2",name.c_str(),proc_.c_str(),catname.c_str()),RooArgList(*rvPdfs[2],*wvPdfs[2]),RooArgList(*rvFraction_2));
     finalPdf_NW = new RooAddPdf(Form("%s_%s_%s_NW",name.c_str(),proc_.c_str(),catname.c_str()),Form("%s_%s_%s_NW",name.c_str(),proc_.c_str(),catname.c_str()),RooArgList(*rvPdfs[3],*wvPdfs[3]),RooArgList(*rvFraction_NW));
+   std::cout << " LC DEBUG FMC buildRvWvpdf 6" << std::endl;
   }
 }
 
@@ -845,14 +865,22 @@ vector<RooAddPdf*> FinalModelConstruction::buildPdf(string name, int nGaussians,
   vector <TGraph * > sigmaGraphs;
 
   for (int g=0; g<nGaussians; g++){
+    std::cout << "DEBUG LC A.1" << std::endl;
     RooAbsReal *dm = splines[Form("dm_g%d",g)];
+    std::cout << "DEBUG LC A.1.1" << std::endl;
     dm->SetName(Form("dm_g%d_%s",g,ext.c_str()));
+    std::cout << "DEBUG LC A.1.2" << std::endl;
     RooAbsReal *mean = getMeanWithPhotonSyst(dm,Form("mean_g%d_%s",g,ext.c_str()));
+    std::cout << "DEBUG LC A.1.3" << std::endl;
     RooAbsReal *sig_fit = splines[Form("sigma_g%d",g)];
+    std::cout << "DEBUG LC A.1.4" << std::endl;
     sig_fit->SetName(Form("sigma_g%d_%s",g,ext.c_str()));
+    std::cout << "DEBUG LC A.1.5" << std::endl;
     RooAbsReal *sigma = getSigmaWithPhotonSyst(sig_fit,Form("sig_g%d_%s",g,ext.c_str()));
+    std::cout << "DEBUG LC A.1.6" << std::endl;
 		RooGaussian *gaus = new RooGaussian(Form("gaus_g%d_%s",g,ext.c_str()),Form("gaus_g%d_%s",g,ext.c_str()),*mass,*mean,*sigma);
     dm_vect.push_back(dm);
+    std::cout << "DEBUG LC A.2" << std::endl;
     mean_vect.push_back(mean);
     sigma_vect.push_back(sigma);
     TGraph* this_dmGraph = new TGraph();
@@ -862,10 +890,14 @@ vector<RooAddPdf*> FinalModelConstruction::buildPdf(string name, int nGaussians,
     this_sigmaGraph->SetName(Form("sigma_g%d",g));
     sigmaGraphs.push_back(this_sigmaGraph);
     TGraph* this_meanGraph = new TGraph();
+    std::cout << "DEBUG LC A.3" << std::endl;
     this_meanGraph->SetName(Form("mean_g%d",g));
+    std::cout << "DEBUG LC A.3.1" << std::endl;
     meanGraphs.push_back(this_meanGraph);
+    std::cout << "DEBUG LC A.3.2" << std::endl;
     
     gaussians->add(*gaus);
+    std::cout << "DEBUG LC A.3.3" << std::endl;
     // add secondary models as well
     if (doSecondaryModels){
       assert(secondaryModelVarsSet);
@@ -891,8 +923,9 @@ vector<RooAddPdf*> FinalModelConstruction::buildPdf(string name, int nGaussians,
       RooVoigtian *voigNW = new RooVoigtian(Form("voig_g%d_%s_NW",g,ext.c_str()),Form("voig_g%d_%s_NW",g,ext.c_str()),*mass,*mean,*higgsDecayWidth,*sigma);
       voigtians_NW->add(*voigNW);
     }
-    if (g<nGaussians-1) {
-      RooAbsReal *frac = splines[Form("frac_g%d",g)];
+    std::cout << "DEBUG LC A.4" << std::endl;
+    if (g<nGaussians) { //nGaussians-1
+      RooAbsReal *frac = splines[Form("frac_g%d_constrained",g)];
       frac->SetName(Form("frac_g%d_%s",g,ext.c_str()));
       coeffs->add(*frac);
       coeffs_vect.push_back(frac);
@@ -912,6 +945,7 @@ vector<RooAddPdf*> FinalModelConstruction::buildPdf(string name, int nGaussians,
         coeffs_2->add(*frac2);
         // natural width
         coeffs_NW->add(*frac);
+    std::cout << "DEBUG LC A.5" << std::endl;
       }
     }
   }
@@ -935,7 +969,7 @@ vector<RooAddPdf*> FinalModelConstruction::buildPdf(string name, int nGaussians,
 	legcoeffs->SetTextSize(0.03);
   assert(dm_vect.size() == sigma_vect.size()); //otherwise we are in trouble!
   assert(dm_vect.size() == mean_vect.size()); //otherwise we are in trouble!
-  assert(coeffs_vect.size() == mean_vect.size()-1); //otherwise we are in trouble!
+  //assert(coeffs_vect.size() == mean_vect.size()-1); //otherwise we are in trouble!
   paramDump_ <<proc_ <<"_"<< cat_ << "_" << rvwv <<" --> & mh 120 & mh 125 & mh 130 \\ " << std::endl;
   for (unsigned int g =0 ; g< dm_vect.size() ; g++){
     
@@ -1019,7 +1053,7 @@ vector<RooAddPdf*> FinalModelConstruction::buildPdf(string name, int nGaussians,
   MG_coeffs->Draw("ALP");
   legcoeffs->Draw();
   c->SaveAs(Form("%s/%s_%s_%s_interpolation_debug.pdf",outDir_.c_str(),proc_.c_str(),cat_.c_str(),rvwv.c_str()));
-  assert(gaussians->getSize()==nGaussians && coeffs->getSize()==nGaussians-1);
+  assert(gaussians->getSize()==nGaussians && coeffs->getSize()==nGaussians);//-1
   RooAddPdf *pdf = new RooAddPdf(Form("%s_%s",name.c_str(),ext.c_str()),Form("%s_%s",name.c_str(),ext.c_str()),*gaussians,*coeffs,recursive);
   result.push_back(pdf);
   

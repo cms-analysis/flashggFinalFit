@@ -167,7 +167,7 @@ void OptionParser(int argc, char *argv[]){
 	if (vm.count("nosplitRVWV"))              splitRVWV_=false;
 	if (vm.count("doQuadraticSigmaSum"))			doQuadraticSigmaSum_=true;
 	if (vm.count("skipSecondaryModels"))      doSecondaryModels_=false;
-	if (vm.count("recursive"))                recursive_=false;
+	if (vm.count("nonRecursive"))                recursive_=false;
 	if (vm.count("skipMasses")) {
 		cout << "[INFO] Masses to skip... " << endl;
 		vector<string> els;
@@ -198,7 +198,7 @@ void OptionParser(int argc, char *argv[]){
 		for (vector<int>::iterator it=massList_.begin(); it!=massList_.end(); it++) cout << *it << " ";
 		cout << endl;
 	}
-	
+  std::cout << " LC DEBUG RECURSIVE ?? recursive_ " << recursive_ << std::endl;	
   // split options which are fiven as lists
   split(procs_,procStr_,boost::is_any_of(","));
 	split(flashggCats_,flashggCatsStr_,boost::is_any_of(","));
@@ -813,20 +813,21 @@ int main(int argc, char *argv[]){
     // these guys do the fitting AND interpolation
     // right vertex
     if (verbose_) std::cout << "[INFO] preapraing initialfit RV, massList size "<< massList_.size() << std::endl;
-    SimultaneousFit simultaneousFitRV(mass_,MH,mhLow_,mhHigh_,skipMasses_,binnedFit_,nBins_,massList_,cat,proc);
+    SimultaneousFit simultaneousFitRV(mass_,MH,mhLow_,mhHigh_,skipMasses_,binnedFit_,nBins_,massList_,cat,proc,Form("%s/rv",plotDir_.c_str()));
     simultaneousFitRV.setVerbosity(verbose_);
     if (!cloneFits_) {
       if (verbose_) std::cout << "[INFO] RV building sum of gaussians with nGaussiansRV " << nGaussiansRV << std::endl;
+      std::cout << "LC DEBUG  RV building sum of gaussia with recursive_ " << recursive_<< std::endl;
       simultaneousFitRV.buildSumOfGaussians(Form("%s_%s",proc.c_str(),cat.c_str()),nGaussiansRV,recursive_);
       if (verbose_) std::cout << "[INFO] RV setting datasets in initialFIT " << std::endl;
       simultaneousFitRV.setDatasets(FITdatasetsRV);
       simultaneousFitRV.setDatasetsSTD(datasetsRV);
       if (verbose_) std::cout << "[INFO] RV running fits" << std::endl;
-      simultaneousFitRV.runFits(ncpu_);
+      simultaneousFitRV.runFits(ncpu_,Form("%s/initialFits/rv_%s_%s",plotDir_.c_str(),proc.c_str(),cat.c_str()));
       if (!runInitialFitsOnly_ && !replace_) {
         simultaneousFitRV.saveParamsToFileAtMH(Form("dat/in/%s_%s_rv.dat",proc.c_str(),cat.c_str()),constraintValueMass_);
         simultaneousFitRV.loadPriorConstraints(Form("dat/in/%s_%s_rv.dat",proc.c_str(),cat.c_str()),constraintValue_);
-        simultaneousFitRV.runFits(ncpu_);
+        simultaneousFitRV.runFits(ncpu_,Form("%s/initialFits/rv_%s_%s",plotDir_.c_str(),proc.c_str(),cat.c_str()));
       }
       if( replace_ ) {
         simultaneousFitRV.setFitParams(allParameters[replaceWith_].first); 
@@ -837,20 +838,21 @@ int main(int argc, char *argv[]){
 
     // wrong vertex
     if (verbose_) std::cout << "[INFO] preparing initialfit WV, masList size "<< massList_.size() << std::endl;
-    SimultaneousFit simultaneousFitWV(mass_,MH,mhLow_,mhHigh_,skipMasses_,binnedFit_,nBins_,massList_,cat,proc);
+    SimultaneousFit simultaneousFitWV(mass_,MH,mhLow_,mhHigh_,skipMasses_,binnedFit_,nBins_,massList_,cat,proc,Form("%s/wv",plotDir_.c_str()));
     simultaneousFitWV.setVerbosity(verbose_);
     if (!cloneFits_) {
       if (verbose_) std::cout << "[INFO] WV building sum of gaussians wth nGaussiansWV "<< nGaussiansWV << std::endl;
+      std::cout << "LC DEBUG  WV building sum of gaussia with recursive_ " << recursive_<< std::endl;
       simultaneousFitWV.buildSumOfGaussians(Form("%s_cat%s",proc.c_str(),cat.c_str()),nGaussiansWV,recursive_);
       if (verbose_) std::cout << "[INFO] WV setting datasets in initial FIT " << std::endl;
       simultaneousFitWV.setDatasets(FITdatasetsWV);
       simultaneousFitWV.setDatasetsSTD(datasetsWV);
       if (verbose_) std::cout << "[INFO] WV running fits" << std::endl;
-      simultaneousFitWV.runFits(ncpu_);
+      simultaneousFitWV.runFits(ncpu_,Form("%s/initialFits/wv_%s_%s",plotDir_.c_str(),proc.c_str(),cat.c_str()));
       if (!runInitialFitsOnly_ && !replace_) {
         simultaneousFitWV.saveParamsToFileAtMH(Form("dat/in/%s_%s_wv.dat",proc.c_str(),cat.c_str()),constraintValueMass_);
         simultaneousFitWV.loadPriorConstraints(Form("dat/in/%s_%s_wv.dat",proc.c_str(),cat.c_str()),constraintValue_);
-        simultaneousFitWV.runFits(ncpu_);
+        simultaneousFitWV.runFits(ncpu_,Form("%s/initialFits/wv_%s_%s",plotDir_.c_str(),proc.c_str(),cat.c_str()));
       }
       if( replace_ ) {
         simultaneousFitWV.setFitParams(allParameters[replaceWith_].second); 
@@ -869,10 +871,12 @@ int main(int argc, char *argv[]){
       map<string,RooSpline1D*> splinesWV;
 
       if (!cloneFits_){
+        std::cout << " DEBUG LC XX0" << std::endl;
         // right vertex
         splinesRV =  simultaneousFitRV.getSplines();
         // wrong vertex
         splinesWV =  simultaneousFitWV.getSplines();
+        std::cout << " DEBUG LC XX1" << std::endl;
       }
       else {
         splinesRV = cloneSplinesMapRV[make_pair(proc,cat)];
@@ -880,26 +884,35 @@ int main(int argc, char *argv[]){
       }
       // this guy constructs the final model with systematics, eff*acc etc.
       if (isFlashgg_){
+        std::cout << " DEBUG LC XX2" << std::endl;
         
         outWS->import(*intLumi_);
         FinalModelConstruction finalModel(massList_, mass_,MH,intLumi_,mhLow_,mhHigh_,proc,cat,doSecondaryModels_,systfilename_,skipMasses_,verbose_,procs_, flashggCats_,plotDir_, isProblemCategory,isCutBased_,sqrts_,doQuadraticSigmaSum_);
         
+        std::cout << " DEBUG LC XX3" << std::endl;
         finalModel.setSecondaryModelVars(MH_SM,DeltaM,MH_2,higgsDecayWidth);
         finalModel.setRVsplines(splinesRV);
         finalModel.setWVsplines(splinesWV);
+        std::cout << " DEBUG LC XX4" << std::endl;
         finalModel.setRVdatasets(datasetsRV);
         finalModel.setWVdatasets(datasetsWV);
+        std::cout << " DEBUG LC XX5" << std::endl;
         finalModel.setFITRVdatasets(FITdatasetsRV);
         finalModel.setFITWVdatasets(FITdatasetsWV);
+        std::cout << " DEBUG LC XX6" << std::endl;
         //finalModel.setSTDdatasets(datasets);
         finalModel.makeSTDdatasets();
         finalModel.makeFITdatasets();
+        std::cout << " DEBUG LC XX7" << std::endl;
         if( isFlashgg_){
           finalModel.buildRvWvPdf("hggpdfsmrel_13TeV",nGaussiansRV,nGaussiansWV,recursive_);
         }
+        std::cout << " DEBUG LC XX8" << std::endl;
         finalModel.getNormalization();
+        std::cout << " DEBUG LC XX9" << std::endl;
         if (!skipPlots_) finalModel.plotPdf(plotDir_);
         finalModel.save(outWS);
+        std::cout << " DEBUG LC XX10" << std::endl;
     }
   }
   }

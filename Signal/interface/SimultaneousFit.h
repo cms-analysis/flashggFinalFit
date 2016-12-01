@@ -19,10 +19,10 @@ class SimultaneousFit {
 
   public:
 
-    SimultaneousFit(RooRealVar *massVar, RooRealVar *MHvar, int mhLow, int mhHigh, std::vector<int> skipMasses, bool binnedFit, int binso, std::vector<int> massList, std::string cat, std::string proc);
+    SimultaneousFit(RooRealVar *massVar, RooRealVar *MHvar, int mhLow, int mhHigh, std::vector<int> skipMasses, bool binnedFit, int binso, std::vector<int> massList, std::string cat, std::string proc, std::string outdir);
     ~SimultaneousFit();
 
-    void buildSumOfGaussians(std::string name, int nGaussians, bool recursive=false, bool forceFracUnity=false);
+    void buildSumOfGaussians(std::string name, int nGaussians, bool recursive=false, bool forceFracUnity=false, int maxOrder=2);
     void loadPriorConstraints(std::string filename, float constraintValue);
     void saveParamsToFile(std::string filename);
     void saveParamsToFileAtMH(std::string filename, int setMH);
@@ -31,7 +31,7 @@ class SimultaneousFit {
     void setDatasets(std::map<int,RooDataSet*> data);
     void setDatasetsSTD(std::map<int,RooDataSet*> data);
     void addDataset(int mh, RooDataSet *data);
-    void runFits(int ncpu);
+    void runFits(int ncpu, std::string outdir);
     void plotFits(std::string name, std::string rvwn="");
     void setVerbosity(int v);
     RooDataSet* mergeNormalisedDatasets (std::map<int,RooDataSet*> data);
@@ -63,6 +63,7 @@ class SimultaneousFit {
     int bins_;
     std::string cat_;
     std::string proc_;
+    std::string outdir_;
 
 };
 

@@ -130,8 +130,7 @@ else
       ./bin/signalFTest -i $FILE -d dat/newConfig_$EXT.dat -p $PROCS -f $CATS -o $OUTDIR
     else
       echo "./python/submitSignaFTest.py --procs $PROCS --flashggCats $CATS --outDir $OUTDIR --i $FILE --batch $BATCH -q $DEFAULTQUEUE"
-       ./python/submitSignaFTest.py --procs $PROCS --flashggCats $CATS --outDir $OUTDIR --i $FILE --batch $BATCH -q $DEFAULTQUEUE
-
+       #./python/submitSignaFTest.py --procs $PROCS --flashggCats $CATS --outDir $OUTDIR --i $FILE --batch $BATCH -q $DEFAULTQUEUE
       PEND=`ls -l $OUTDIR/fTestJobs/sub*| grep -v "\.run" | grep -v "\.done" | grep -v "\.fail" | grep -v "\.err" |grep -v "\.log"  |wc -l`
       echo "PEND $PEND"
       while (( $PEND > 0 )) ; do
@@ -180,7 +179,8 @@ if [ $CALCPHOSYSTONLY == 1 ]; then
   echo "=============================="
 
   echo "./bin/calcPhotonSystConsts -i $FILE -o dat/photonCatSyst_$EXT.dat -p $PROCS -s $SCALES -S $SCALESCORR -g $SCALESGLOBAL -r $SMEARS -D $OUTDIR -f $CATS"
-  #./bin/calcPhotonSystConsts -i $FILE -o dat/photonCatSyst_$EXT.dat -p $PROCS -s $SCALES -S $SCALESCORR -g $SCALESGLOBAL -r $SMEARS -D $OUTDIR -f $CATS 
+  #./bin/calcPhotonSystConsts -i $FILE -o dat/photonCatSyst_$EXT.dat -p $PROCS -s $SCALES -S $SCALESCORR -g $SCALESGLOBAL -r $SMEARS -D $OUTDIR -f $CATS
+  mkdir -p $OUTDIR/dat
   cp dat/photonCatSyst_$EXT.dat $OUTDIR/dat/copy_photonCatSyst_$EXT.dat
 fi
 ####################################################
@@ -242,7 +242,6 @@ if [ $SIGFITONLY == 1 ]; then
 
 fi
 
-
 #####################################################
 #################### SIGNAL PLOTS ###################
 #####################################################
@@ -260,13 +259,15 @@ echo " ./bin/makeParametricSignalModelPlots -i $OUTDIR/CMS-HGG_sigfit_$EXT.root 
 #mv $OUTDIR/sigfit/initialFits $OUTDIR/initialFits
 
 ./makeSlides.sh $OUTDIR
+echo " debug -1"
 mv fullslides.pdf $OUTDIR/fullslides_${EXT}.pdf
+echo " debug 0"
 fi
 
 
 
 if [ $USER == "lcorpe" ]; then
-cp -r $OUTDIR ~/www/.
+#cp -r $OUTDIR ~/www/.
 cp ~lcorpe/public/index.php ~/www/$OUTDIR/sigplots/.
 cp ~lcorpe/public/index.php ~/www/$OUTDIR/systematics/.
 cp ~lcorpe/public/index.php ~/www/$OUTDIR/sigfit/.
@@ -278,16 +279,22 @@ echo "https://lcorpe.web.cern.ch/lcorpe/$OUTDIR"
 fi
 
 if [ $USER == "lc1113" ]; then
-cp -r $OUTDIR ~lc1113/public_html/.
+echo " debug 1"
+#cp -r $OUTDIR ~lc1113/public_html/.
+echo " debug 2"
 cp ~lc1113/index.php ~lc1113/public_html/$OUTDIR/sigplots/.
+echo " debug 3"
 cp ~lc1113/index.php ~lc1113/public_html/$OUTDIR/systematics/.
+echo " debug 4"
 cp ~lc1113/index.php ~lc1113/public_html/$OUTDIR/sigfit/.
+echo " debug 5"
 cp ~lc1113/index.php ~lc1113/public_html/$OUTDIR/sigfTest/.
 echo "plots available at: "
 echo "http://www.hep.ph.imperial.ac.uk/~lc1113/$OUTDIR"
 echo "~lc1113/public_html/$OUTDIR/sigfTest/."
 echo " if you want the plots on lxplus, fill in your password!"
 echo " scp -r ~lc1113/public_html/$OUTDIR lcorpe@lxplus.cern.ch:~/www/. "
-scp -r ~lc1113/public_html/$OUTDIR lcorpe@lxplus.cern.ch:~/www/. 
+#scp -r ~lc1113/public_html/$OUTDIR lcorpe@lxplus.cern.ch:~/www/. 
+#scp -r $OUTDIR lcorpe@lxplus.cern.ch:~/www/. 
 echo "https://lcorpe.web.cern.ch/lcorpe/$OUTDIR"
 fi

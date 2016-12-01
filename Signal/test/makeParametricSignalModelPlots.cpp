@@ -343,7 +343,7 @@ pair<double,double> getEffSigBinned(RooRealVar *mass, RooAbsPdf *pdf, double wmi
 }
 
 // get FWHHM
-vector<double> getFWHM(RooRealVar *mass, RooAbsPdf *pdf, RooDataSet *data, double wmin=110., double wmax=130., double step=0.0004) {
+vector<double> getFWHM(RooRealVar *mass, RooAbsPdf *pdf, RooDataSet *data, double wmin=110., double wmax=130., double step=0.025) {
 
   cout << "Computing FWHM...." << endl;
   double nbins = (wmax-wmin)/step;
@@ -359,7 +359,7 @@ vector<double> getFWHM(RooRealVar *mass, RooAbsPdf *pdf, RooDataSet *data, doubl
   double low = h->GetBinCenter(h->FindFirstBinAbove(hm));
   double high = h->GetBinCenter(h->FindLastBinAbove(hm));
 
-  cout << "FWHM: [" << low << "-" << high << "] Max = " << hm << endl;
+  cout << "FWHM: [" << low << "-" << high << " = " << high-low <<"] Max = " << hm << endl;
   vector<double> result;
   result.push_back(low);
   result.push_back(high);
