@@ -48,6 +48,14 @@ bool Packager::skipMass(int mh){
 
 void Packager::packageOutput(bool split, string process , string tag){
 
+  std::map<std::string,std::string> tpMap;
+  tpMap["GG2H"] = "ggh";
+  tpMap["VBF"] = "vbf";
+  tpMap["TTH"] = "tth";
+  tpMap["QQ2HLNU"] = "vh";
+  tpMap["VH2HQQ"] = "vh";
+  tpMap["QQ2HLL"] = "vh";
+
   vector<string> expectedObjectsNotFound;
    bool split_=split;
 	// sum datasets first

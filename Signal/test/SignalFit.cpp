@@ -108,7 +108,8 @@ vector<int> map_nG_rv_;
 vector<int> map_nG_wv_;
 RooRealVar *mass_;
 RooRealVar *dZ_;
-RooRealVar *intLumi_;
+//RooRealVar *intLumi_;
+RooRealVar *intLumi_ = new RooRealVar("IntLumi","hacked int lumi", 1000.);
 bool beamSpotReweigh_ = false;
 
 void OptionParser(int argc, char *argv[]){
@@ -486,7 +487,7 @@ int main(int argc, char *argv[]){
 	dZ_->setMin(-25.0);
 	dZ_->setMax(25.0);
 	dZ_->setBins(100);
-  intLumi_ = (RooRealVar*)inWS->var("IntLumi");
+  //intLumi_ = (RooRealVar*)inWS->var("IntLumi");
   originalIntLumi_ =(intLumi_->getVal());// specify in 1/pb
   newIntLumi_ = newIntLumi_*1000; // specify in 1/pb instead of 1/fb.
   intLumi_->setVal(newIntLumi_); 
@@ -939,6 +940,7 @@ int main(int argc, char *argv[]){
 
   cout << "[INFO] Writing to file..." << endl;
   outFile->cd();
+  outWS->Print();
   outWS->Write();
   outFile->Close();
   //	inFile->Close();

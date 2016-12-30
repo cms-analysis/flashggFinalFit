@@ -337,7 +337,18 @@ double getRateVar(TH1F* nom, TH1F *up, TH1F* down){
 }
 
 vector<TH1F*> getHistograms(vector<TFile*> files, string name, string syst){
-
+ 
+	TString theDataName = TString(name);
+        std::map<std::string,std::string> tpMap;
+	tpMap["GG2H"] = "ggh";
+	tpMap["VBF"] = "vbf";
+	tpMap["TTH"] = "tth";
+	tpMap["QQ2HLNU"] = "vh";
+	tpMap["VH2HQQ"] = "vh";
+	tpMap["QQ2HLL"] = "vh";
+	for( std::map<std::string,std::string>::iterator it = tpMap.begin(); it != tpMap.end(); it++ ) {
+	  theDataName.ReplaceAll( it->first, it->second );
+	}
 	vector<TH1F*> ret_hists;
 	for (unsigned int i=0; i<files.size(); i++){
 		files[i]->cd();

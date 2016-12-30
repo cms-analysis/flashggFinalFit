@@ -1083,6 +1083,7 @@ void FinalModelConstruction::makeSTDdatasets(){
   for (unsigned int i=0; i<allMH_.size(); i++){
     int mh=allMH_[i];
 		RooDataSet *data = (RooDataSet*)rvDatasets[mh]->Clone(Form("sig_%s_mass_m%d_%s",proc_.c_str(),mh,catname.c_str()));
+		std::cout << "just cloned " << Form("sig_%s_mass_m%d_%s",proc_.c_str(),mh,catname.c_str()) << std::endl;
 		data->append(*wvDatasets[mh]);
 		stdDatasets.insert(pair<int,RooDataSet*>(mh,data));
 	}	
@@ -1095,6 +1096,7 @@ void FinalModelConstruction::makeFITdatasets(){
   for (unsigned int i=0; i<allMH_.size(); i++){
     int mh=allMH_[i];
 		RooDataSet *data = (RooDataSet*)rvFITDatasets[mh]->Clone(Form("sig_%s_mass_m%d_%s",proc_.c_str(),mh,catname.c_str()));
+		std::cout << "just cloned " << Form("sig_%s_mass_m%d_%s",proc_.c_str(),mh,catname.c_str()) << std::endl;
 		data->append(*wvFITDatasets[mh]);
 		fitDatasets.insert(pair<int,RooDataSet*>(mh,data));
 	}	

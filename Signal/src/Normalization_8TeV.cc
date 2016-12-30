@@ -140,15 +140,16 @@ TGraph * Normalization_8TeV::GetSigmaGraph(TString process)
 {
 	TGraph * gr = new TGraph();
 	std::map<double, double> * XSectionMap = 0 ;
-	if ( process == "ggh" || process == "ggH") {
+	if ( process == "ggh" || process == "ggH" || process == "GG2H") {
 		XSectionMap = &XSectionMap_ggh;
 	} else if ( process == "vbf" || process == "VBF" ) { // FIXME
 		XSectionMap = &XSectionMap_vbf;
 	} else if ( process == "vbfold") {
 		XSectionMap = &XSectionMap_vbfold;
-	} else if ( process == "wzh") {
+	//} else if ( process == "wzh") {
+	} else if ( process == "wzh" || process == "vh" || process == "VH2HQQ" || process == "QQ2HLNU" || process == "QQ2HLL") {
 		XSectionMap = &XSectionMap_wzh;
-	} else if ( process == "tth") {
+	} else if ( process == "tth" || process == "TTH") {
 		XSectionMap = &XSectionMap_tth;
 	} else if ( process == "wh") {
 		XSectionMap = &XSectionMap_wh;
@@ -206,9 +207,9 @@ double Normalization_8TeV::GetXsection(double mass, TString HistName) {
 
 	std::map<double,double> *XSectionMap;
 
-	if (HistName.Contains("ggh")) {
+	if (HistName.Contains("ggh") || HistName.Contains("GG2H")) {
 		XSectionMap = &XSectionMap_ggh;
-	} else if (HistName.Contains("vbf") && !HistName.Contains("vbfold")) {
+	} else if ((HistName.Contains("vbf") || HistName.Contains("VBF")) && !HistName.Contains("vbfold")) {
 		XSectionMap = &XSectionMap_vbf;
 	} else if (HistName.Contains("vbfold")) {
 		XSectionMap = &XSectionMap_vbfold;
@@ -216,9 +217,9 @@ double Normalization_8TeV::GetXsection(double mass, TString HistName) {
 		XSectionMap = &XSectionMap_wh;
 	} else if (HistName.Contains("zh") && !HistName.Contains("wzh")) {
 		XSectionMap = &XSectionMap_zh;
-	} else if (HistName.Contains("wzh")) {
+	} else if (HistName.Contains("wzh") || HistName.Contains("vh") || HistName.Contains("QQ2HLL") || HistName.Contains("QQ2HLNU") || HistName.Contains("VH2HQQ")) {
 		XSectionMap = &XSectionMap_wzh;
-	} else if (HistName.Contains("tth")) {
+	} else if (HistName.Contains("tth") || HistName.Contains("TTH")) {
 		XSectionMap = &XSectionMap_tth;
 	} else if (HistName.Contains("grav")) {
 		XSectionMap = &XSectionMap_sm;

@@ -60,25 +60,61 @@ RooRealVar* WSTFileWrapper::var(std::string varName) {
   return wsList[0]->var(varName.c_str());
 }
 
+std::pair<std::string,std::string> WSTFileWrapper::convertTemplatedName(std::string dataName) {
+  TString theDataName = TString(dataName);
+  std::string theProcName = "";
+  std::map<std::string,std::string> tpMap;
+  tpMap["GG2H"] = "ggh";
+  tpMap["VBF"] = "vbf";
+  tpMap["TTH"] = "tth";
+  tpMap["QQ2HLNU"] = "vh";
+  tpMap["VH2HQQ"] = "vh";
+  tpMap["QQ2HLL"] = "vh";
+  for( std::map<std::string,std::string>::iterator it = tpMap.begin(); it != tpMap.end(); it++ ) {
+    if( theDataName.BeginsWith(it->first) ) { 
+      theProcName = it->first;
+      theDataName.Replace( 0, it->first.size(), it->second );
+    }
+    /*else if( theDataName.BeginsWith("sig_"+it->first) ) { 
+      theProcName = it->first;
+      theDataName.Replace( 0, it->first.size()+4, "sig_"+it->second );
+    }*/
+  }
+  std::pair<std::string,std::string> thePair;
+  thePair.first  = theDataName.Data();
+  thePair.second = theProcName;
+  return thePair;
+}
+
 RooAbsData* WSTFileWrapper::data(std::string dataName) {
+  std::pair<std::string,std::string> thePair = convertTemplatedName(dataName);
+  std::string newDataName = thePair.first;
+  std::string newProcName = thePair.second;
   RooAbsData* result = 0;
   bool complained_yet = 0;
   assert(wsList.size() == fileList.size());
   for (unsigned int i = 0 ; i < wsList.size() ; i++) {
+    if(fnList[i].find(newProcName)==std::string::npos && newProcName!="") continue;
     fileList[i]->cd();
-    RooAbsData* this_result = (RooAbsData*)wsList[i]->data(dataName.c_str());
+    RooAbsData* this_result = (RooAbsData*)wsList[i]->data(newDataName.c_str());
     if (result && this_result && !complained_yet) {
-      std::cout << "[WSTFileWrapper] Uh oh, multiple RooAbsDatas from the file list with the same name: " <<  dataName << std::endl;
+      std::cout << "[WSTFileWrapper] Uh oh, multiple RooAbsDatas from the file list with the same name: " <<  newDataName << std::endl;
+      //std::cerr << "[WSTFileWrapper] Uh oh, multiple RooAbsDatas from the file list with the same name: " <<  newDataName << std::endl;
       complained_yet = true;
     }
     if (this_result) {
       result = this_result;
-      std::cout << "[WSTFileWrapper] Got non-zero RooAbsData from " << fnList[i] << " with name " << dataName << std::endl;
+      std::cout << "[WSTFileWrapper] Got non-zero RooAbsData from " << fnList[i] << " with name " << newDataName << std::endl;
+      //std::cerr << "[WSTFileWrapper] Got non-zero RooAbsData from " << fnList[i] << " with name " << newDataName << std::endl;
     }
   }
   if (!result) {
-    //std::cout << "[WSTFileWrapper] Uh oh, never got a good RooAbsData with name " << dataName << std::endl;
+    //std::cout << "[WSTFileWrapper] Uh oh, never got a good RooAbsData with name " << newDataName << std::endl;
+    //std::cerr << "[WSTFileWrapper] Uh oh, never got a good RooAbsData with name " << newDataName << std::endl;
+    //std::cerr << "ED DEBUG:: newDataName = " << newDataName << std::endl;
+    //wsList[0]->Print();
   }
+  std::cout << "[WSTFileWrapper] nummer of entries is " << result->sumEntries() << std::endl;
   return result;
 }
     
