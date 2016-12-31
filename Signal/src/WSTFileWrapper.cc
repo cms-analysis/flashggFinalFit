@@ -109,12 +109,14 @@ RooAbsData* WSTFileWrapper::data(std::string dataName) {
     }
   }
   if (!result) {
-    //std::cout << "[WSTFileWrapper] Uh oh, never got a good RooAbsData with name " << newDataName << std::endl;
+    std::cout << "[WSTFileWrapper] Uh oh, never got a good RooAbsData with name " << newDataName << std::endl;
     //std::cerr << "[WSTFileWrapper] Uh oh, never got a good RooAbsData with name " << newDataName << std::endl;
     //std::cerr << "ED DEBUG:: newDataName = " << newDataName << std::endl;
     //wsList[0]->Print();
   }
-  std::cout << "[WSTFileWrapper] nummer of entries is " << result->sumEntries() << std::endl;
+  //std::cout << "ED DEBUG:: before entries" << std::endl;
+  //std::cout << "[WSTFileWrapper] nummer of entries is " << result->sumEntries() << std::endl;
+  //std::cout << "ED DEBUG:: after entries" << std::endl;
   return result;
 }
     

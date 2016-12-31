@@ -95,9 +95,12 @@ float originalIntLumi_;
 float mcBeamSpotWidth_=5.14; //cm // the beamspot has a certain width in MC which is not necessarily the same in data. for the data/MC to agree, we reweight the MC to match the data Beamspot width, using dZ as a proxy (they have a factor of sqrt(2) because you are subtracting one gaussain distributed quantity from another)
 //float dataBeamSpotWidth_=4.24; //cm
 float dataBeamSpotWidth_=3.5; //cm
-string referenceProc_="ggh";
-string referenceProcWV_="ggh";
-string referenceProcTTH_="tth";
+//string referenceProc_="ggh";
+string referenceProc_="GG2H";
+//string referenceProcWV_="ggh";
+string referenceProcWV_="GG2H";
+//string referenceProcTTH_="tth";
+string referenceProcTTH_="TTH";
 string referenceTagWV_="UntaggedTag_2";
 string referenceTagRV_="UntaggedTag_2";
 vector<string> map_proc_;
@@ -223,7 +226,7 @@ unsigned int getIndexOfReferenceDataset(string proc, string cat){
   }
   
   if (iLine==-1 ) {
-    std::cout << "[ERROR] could not find the index of the category you wished to look up. Exit!" << std::endl;
+    std::cout << "[ERROR] could not find the index of the category " << proc << ", " << cat << "you wished to look up. Exit!" << std::endl;
      exit(1);
   }
   return iLine;
@@ -423,8 +426,10 @@ int main(int argc, char *argv[]){
 
   // reference details for low stats cats
   // need to make this configurable ?! -LC
-  referenceProc_="ggh";
-  referenceProcTTH_="tth";
+  //referenceProc_="ggh";
+  referenceProc_="GG2H";
+  //referenceProcTTH_="tth";
+  referenceProcTTH_="TTH";
   referenceTagWV_="UntaggedTag_2"; // histest stats WV is ggh Untagged 3. 
   referenceTagRV_="UntaggedTag_2"; // fairly low resolution tag even for ggh, more approprioate as te default than re-using the original tag.
   // are WV which needs to borrow should be taken from here
