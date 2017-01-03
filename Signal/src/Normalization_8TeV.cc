@@ -140,16 +140,16 @@ TGraph * Normalization_8TeV::GetSigmaGraph(TString process)
 {
 	TGraph * gr = new TGraph();
 	std::map<double, double> * XSectionMap = 0 ;
-	if ( process == "ggh" || process == "ggH" || process == "GG2H") {
+	if ( process == "ggh" || process == "ggH" || process.Contains("GG2H") ) {
 		XSectionMap = &XSectionMap_ggh;
-	} else if ( process == "vbf" || process == "VBF" ) { // FIXME
+	} else if ( process == "vbf" || process.Contains("VBF") ) { // FIXME
 		XSectionMap = &XSectionMap_vbf;
 	} else if ( process == "vbfold") {
 		XSectionMap = &XSectionMap_vbfold;
 	//} else if ( process == "wzh") {
-	} else if ( process == "wzh" || process == "vh" || process == "VH2HQQ" || process == "QQ2HLNU" || process == "QQ2HLL") {
+	} else if ( process == "wzh" || process == "vh" || process.Contains("VH2HQQ") || process.Contains("QQ2HLNU") || process.Contains("QQ2HLL") ) {
 		XSectionMap = &XSectionMap_wzh;
-	} else if ( process == "tth" || process == "TTH") {
+	} else if ( process == "tth" || process.Contains("TTH") ) {
 		XSectionMap = &XSectionMap_tth;
 	} else if ( process == "wh") {
 		XSectionMap = &XSectionMap_wh;

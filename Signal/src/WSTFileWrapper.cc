@@ -75,11 +75,8 @@ std::pair<std::string,std::string> WSTFileWrapper::convertTemplatedName(std::str
       theProcName = it->first;
       theDataName.Replace( 0, it->first.size(), it->second );
     }
-    /*else if( theDataName.BeginsWith("sig_"+it->first) ) { 
-      theProcName = it->first;
-      theDataName.Replace( 0, it->first.size()+4, "sig_"+it->second );
-    }*/
   }
+  theDataName.ReplaceAll("_FWDH","");
   std::pair<std::string,std::string> thePair;
   thePair.first  = theDataName.Data();
   thePair.second = theProcName;
@@ -95,6 +92,9 @@ RooAbsData* WSTFileWrapper::data(std::string dataName) {
   assert(wsList.size() == fileList.size());
   for (unsigned int i = 0 ; i < wsList.size() ; i++) {
     if(fnList[i].find(newProcName)==std::string::npos && newProcName!="") continue;
+    bool procIsFwd = dataName.find("FWD")!=std::string::npos;
+    bool fileIsFwd = fnList[i].find("FWD")!=std::string::npos;
+    if( (procIsFwd&&!fileIsFwd) || (!procIsFwd&&fileIsFwd) ) continue;
     fileList[i]->cd();
     RooAbsData* this_result = (RooAbsData*)wsList[i]->data(newDataName.c_str());
     if (result && this_result && !complained_yet) {
