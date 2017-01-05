@@ -11,6 +11,7 @@ WSTFileWrapper::WSTFileWrapper( std::string files, std::string wsname ) {
     fnList.push_back( substr );
   }
 
+  std::cout << "inside WST contructor, about to loop over files" << std:: endl;
   for ( std::vector<std::string>::iterator fn = fnList.begin() ; fn != fnList.end() ; fn++ ) {
     fileList.push_back(TFile::Open(fn->c_str()));
     if (fileList.back() == 0) {
@@ -19,16 +20,17 @@ WSTFileWrapper::WSTFileWrapper( std::string files, std::string wsname ) {
       std::cout << "[WSTFileWrapper] got that this file is a zombie: " << (*fn) << std::endl;
     } else {
       // this is very verbose otherwise!
-			//std::cout << "[WSTFileWrapper] successfully opened this file: " << (*fn) << std::endl;
+			std::cout << "[WSTFileWrapper] successfully opened this file: " << (*fn) << std::endl;
     }
     wsList.push_back((RooWorkspace*)fileList.back()->Get(wsname.c_str()));
     if (wsList.back() == 0) {
       std::cout << "[WSTFileWrapper] on file " << (*fn) << " failed to obtain workspace named: " << wsname << std::endl;
     } else {
       // this is very verbose otherwise!
-      //std::cout << "[WSTFileWrapper] on file " << (*fn) << " opened workspace named: " << wsname << std::endl;
+      std::cout << "[WSTFileWrapper] on file " << (*fn) << " opened workspace named: " << wsname << std::endl;
     }
   }
+  std::cout << "inside WST contructor, done loop over files" << std:: endl;
 }
 
 WSTFileWrapper::WSTFileWrapper( TFile *tf ,RooWorkspace *inWS ) {
