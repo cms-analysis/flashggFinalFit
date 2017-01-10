@@ -807,6 +807,7 @@ int main(int argc, char *argv[]){
         check = name.ReplaceAll(TString(Form("%d",it->first)),TString(""));
        } else {
        TString name=it->second->GetName();
+       std::cout << "check, name replaced = " << check.Data() << ", " << name.ReplaceAll(TString(Form("%d",it->first)),TString("")) << std::endl;
        assert (check ==name.ReplaceAll(TString(Form("%d",it->first)),TString("")) );
        }
     }
@@ -817,6 +818,7 @@ int main(int argc, char *argv[]){
         check = name.ReplaceAll(TString(Form("%d",it->first)),TString(""));
        } else {
        TString name=it->second->GetName();
+       std::cout << "check, name replaced = " << check.Data() << ", " << name.ReplaceAll(TString(Form("%d",it->first)),TString("")) << std::endl;
        assert (check ==name.ReplaceAll(TString(Form("%d",it->first)),TString("")) );
        }
     }
