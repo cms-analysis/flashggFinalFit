@@ -76,9 +76,9 @@ std::pair<std::string,std::string> WSTFileWrapper::convertTemplatedName(std::str
     if( theDataName.BeginsWith(it->first) ) { 
       theProcName = it->first;
       theDataName.Replace( 0, it->first.size(), it->second );
+      theDataName.ReplaceAll("_FWDH","");
     }
   }
-  theDataName.ReplaceAll("_FWDH","");
   std::pair<std::string,std::string> thePair;
   thePair.first  = theDataName.Data();
   thePair.second = theProcName;
@@ -93,10 +93,12 @@ RooAbsData* WSTFileWrapper::data(std::string dataName) {
   bool complained_yet = 0;
   assert(wsList.size() == fileList.size());
   for (unsigned int i = 0 ; i < wsList.size() ; i++) {
-    if(fnList[i].find(newProcName)==std::string::npos && newProcName!="") continue;
-    bool procIsFwd = dataName.find("FWD")!=std::string::npos;
-    bool fileIsFwd = fnList[i].find("FWD")!=std::string::npos;
-    if( (procIsFwd&&!fileIsFwd) || (!procIsFwd&&fileIsFwd) ) continue;
+    if( fnList[i] != "current file" ) {
+      if(fnList[i].find(newProcName)==std::string::npos && newProcName!="") continue;
+      bool procIsFwd = dataName.find("FWD")!=std::string::npos;
+      bool fileIsFwd = fnList[i].find("FWD")!=std::string::npos;
+      if( (procIsFwd&&!fileIsFwd) || (!procIsFwd&&fileIsFwd) ) continue;
+    }
     fileList[i]->cd();
     RooAbsData* this_result = (RooAbsData*)wsList[i]->data(newDataName.c_str());
     if (result && this_result && !complained_yet) {
