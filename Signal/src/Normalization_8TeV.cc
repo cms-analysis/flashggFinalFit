@@ -37,6 +37,10 @@ int Normalization_8TeV::Init(int sqrtS){
         XSectionMap_wh[mH]	= valXSWH; 	
         XSectionMap_zh[mH]	= valXSZH;	
         XSectionMap_wzh[mH]	= valXSWH+valXSZH;	
+
+        XSectionMap_VH2HQQ[mH]	= valXSWH*(67.41*0.01)/*BR(W to hadrons)*/ + valXSZH*(69.91*0.01)/*BR(Z to hadrons)*/;	
+        XSectionMap_QQ2HLNU[mH]	= valXSWH*(3.*10.86*0.01)/*3xBR(W to lv)*/;	
+        XSectionMap_QQ2HLL[mH]	= valXSZH*(3*3.3658*0.01 + 20.00*0.01)/*BR(Z to ll) + BR(Z to invisible)*/;	
 	
     }
 
@@ -147,7 +151,7 @@ TGraph * Normalization_8TeV::GetSigmaGraph(TString process)
 	} else if ( process == "vbfold") {
 		XSectionMap = &XSectionMap_vbfold;
 	//} else if ( process == "wzh") {
-	} else if ( process == "wzh" || process == "vh" || process.Contains("VH2HQQ") || process.Contains("QQ2HLNU") || process.Contains("QQ2HLL") ) {
+	} else if ( process == "wzh" || process == "vh" ) {
 		XSectionMap = &XSectionMap_wzh;
 	} else if ( process == "tth" || process.Contains("TTH") ) {
 		XSectionMap = &XSectionMap_tth;
@@ -157,8 +161,14 @@ TGraph * Normalization_8TeV::GetSigmaGraph(TString process)
 		XSectionMap = &XSectionMap_zh;
 	} else if (process.Contains("grav")){
 		XSectionMap = &XSectionMap_sm;
+	} else if ( process.Contains("VH2HQQ") ) {
+		XSectionMap = &XSectionMap_VH2HQQ;
+	} else if ( process.Contains("QQ2HLNU") ) {
+		XSectionMap = &XSectionMap_QQ2HLNU;
+	} else if ( process.Contains("QQ2HLL") ) {
+		XSectionMap = &XSectionMap_QQ2HLL;
 	} else {
-		std::cout << "[WARNING] Warning ggh, vbf, wh, zh, wzh, tth or grav not found in histname!!!!" << std::endl;
+		std::cout << "[WARNING] Warning ggh, vbf, wh, zh, wzh, tth or grav or STXS proc not found in histname!!!!" << std::endl;
 		//exit(1);
 	}
 
@@ -217,14 +227,20 @@ double Normalization_8TeV::GetXsection(double mass, TString HistName) {
 		XSectionMap = &XSectionMap_wh;
 	} else if (HistName.Contains("zh") && !HistName.Contains("wzh")) {
 		XSectionMap = &XSectionMap_zh;
-	} else if (HistName.Contains("wzh") || HistName.Contains("vh") || HistName.Contains("QQ2HLL") || HistName.Contains("QQ2HLNU") || HistName.Contains("VH2HQQ")) {
+	} else if (HistName.Contains("wzh") || HistName.Contains("vh")) {
 		XSectionMap = &XSectionMap_wzh;
 	} else if (HistName.Contains("tth") || HistName.Contains("TTH")) {
 		XSectionMap = &XSectionMap_tth;
 	} else if (HistName.Contains("grav")) {
 		XSectionMap = &XSectionMap_sm;
+	} else if (HistName.Contains("VH2HQQ")) {
+		XSectionMap = &XSectionMap_VH2HQQ;
+	} else if (HistName.Contains("QQ2HLNU")) {
+		XSectionMap = &XSectionMap_QQ2HLNU;
+	} else if (HistName.Contains("QQ2HLL")) {
+		XSectionMap = &XSectionMap_QQ2HLL;
 	} else {
-		std::cout << "[WARNING] Warning ggh, vbf, wh, zh, wzh, tth or grav not found in " << HistName << std::endl;
+		std::cout << "[WARNING] Warning ggh, vbf, wh, zh, wzh, tth or grav or STXS proc not found in " << HistName << std::endl;
 		//exit(1);
 	}
 
