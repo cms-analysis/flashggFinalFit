@@ -17,10 +17,8 @@ PROCS="GG2H,GG2H_FWDH,VBF,VBF_FWDH,TTH,TTH_FWDH,QQ2HLL,QQ2HLL_FWDH,QQ2HLNU,QQ2HL
 echo "Procs are $PROCS"
 CATS="UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,VBFTag_0,VBFTag_1,TTHHadronicTag,TTHLeptonicTag"
 echo "Cats are $CATS"
-OUTDIR="edInterpolationPlots"
-echo "Outdir is $OUTDIR"
-#INTLUMI=12.9
-INTLUMI=36.5
+INTLUMI=12.9
+#INTLUMI=36.5
 echo "Intlumi is $INTLUMI"
 BATCH="IC"
 echo "Batch is $BATCH"
