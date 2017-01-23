@@ -1320,7 +1320,7 @@ void FinalModelConstruction::getNormalization(){
 	
   // this might break proc names for STXS? Check when merging with Ed's  developments
 	std::string procLowerCase_ = proc_;
-  std::transform(procLowerCase_.begin(), procLowerCase_.end(), procLowerCase_.begin(), ::tolower); 
+  //std::transform(procLowerCase_.begin(), procLowerCase_.end(), procLowerCase_.begin(), ::tolower); 
   TGraph *temp = new TGraph();
   bool fitToConstant=0; //if low-stats category, don;' try to fit to polynomial
   for (unsigned int i=0; i<allMH_.size(); i++){

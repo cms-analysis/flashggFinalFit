@@ -59,6 +59,8 @@ int mgg_low =100;
 int mgg_high =180;
 int nBinsForMass = 4*(mgg_high-mgg_low);
 
+RooRealVar *intLumi_ = new RooRealVar("IntLumi","hacked int lumi", 1000.);
+
 TRandom3 *RandomGen = new TRandom3();
 
 RooAbsPdf* getPdf(PdfModelBuilder &pdfsModel, string type, int order, const char* ext=""){
@@ -688,14 +690,16 @@ vector<string> flashggCats_;
 		RooRealVar *sqrts;
 
 		if (isFlashgg_){
-			intL  = (RooRealVar*)inWS->var("IntLumi");
+			//intL  = (RooRealVar*)inWS->var("IntLumi");
+			intL  = intLumi_;
 			sqrts = (RooRealVar*)inWS->var("SqrtS");
 			if (!sqrts){ sqrts = new RooRealVar("SqrtS","SqrtS",13); }
 		std::cout << "[INFO] got intL and sqrts " << intL << ", " << sqrts << std::endl;
 
 
 		} else {
-			intL  = (RooRealVar*)inWS->var("IntLumi");
+			//intL  = (RooRealVar*)inWS->var("IntLumi");
+			intL  = intLumi_;
 			sqrts = (RooRealVar*)inWS->var("Sqrts");
 		}
 		outputws->import(*intL);

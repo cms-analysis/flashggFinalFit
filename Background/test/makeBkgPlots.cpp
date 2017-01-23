@@ -63,6 +63,8 @@ namespace po = boost::program_options;
 
 bool verbose_=false;
 
+RooRealVar *intLumi_ = new RooRealVar("IntLumi","hacked int lumi", 1000.);
+
 int getBestFitFunction(RooMultiPdf *bkg, RooAbsData *data, RooCategory *cat, bool silent=false){
 
 	double global_minNll = 1E10;
@@ -979,7 +981,8 @@ int main(int argc, char* argv[]){
   pad1->cd();
   // enf extra bit for ratio plot///
     canv->SetTickx(); canv->SetTicky();
-		RooRealVar *lumi = (RooRealVar*)inWS->var("IntLumi");
+		//RooRealVar *lumi = (RooRealVar*)inWS->var("IntLumi");
+		RooRealVar *lumi = intLumi_;
 		plot->Draw();
 
 		if (!unblind) {

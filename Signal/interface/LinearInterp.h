@@ -26,16 +26,14 @@ class LinearInterp {
 
   private:
     RooRealVar *MH;
-    int mhLow_;
-    int mhHigh_;
     std::map<int,std::map<std::string,RooRealVar*> > fitParams;
     bool doSecondaryModels;
     bool secondaryModelVarsSet;
-		std::vector<int> skipMasses_;
+    std::vector<int> skipMasses_;
     int verbosity_;
     std::vector<int> allMH_;
     std::vector<int> getAllMH();
-		bool skipMass(int mh);
+    bool skipMass(int mh);
     std::map<std::string,RooSpline1D*> splines;
     
     RooRealVar *MH_SM;

@@ -42,6 +42,9 @@ if options.catLabels=='mk_default':
     options.catLabels.append('Category %d'%cat)
 else:
   options.catLabels = options.catLabels.split(',')
+print ""
+print options.catLabels
+print ""
 
 #for cat in range(options.cats):
 for cat in range(ncats):
@@ -50,6 +53,10 @@ for cat in range(ncats):
   f.write('#!/bin/bash\n')
   f.write('cd %s\n'%os.getcwd())
   f.write('eval `scramv1 runtime -sh`\n')
+  print "nCats = ",ncats
+  print "cat = ",cat
+  print "nCatLabels = ",len(options.catLabels)
+  print ""
   execLine = '$CMSSW_BASE/src/flashggFinalFit/Background/bin/makeBkgPlots -f %s -b %s -o %s/BkgPlots_cat%d.root -d %s -c %d -l \"%s\"'%(options.flashggCats,options.bkgfilename,options.outDir,cat,options.outDir,cat,options.catLabels[cat])
 #  execLine = '$PWD -b %s -s %s -o %s/BkgPlots_cat%d.root -d %s -c %d -l \"%s\"'%(options.bkgfilename,options.sigfilename,options.outDir,cat,options.outDir,cat,options.catLabels[cat])
   execLine += " --sqrts %d "%options.sqrts
