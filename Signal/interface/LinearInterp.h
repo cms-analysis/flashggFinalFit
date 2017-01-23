@@ -6,6 +6,7 @@
 #include <string>
 #include <map>
 
+#include "TString.h"
 #include "RooRealVar.h"
 #include "RooAbsReal.h"
 #include "RooAddition.h"
@@ -15,11 +16,11 @@ class LinearInterp {
 
   public:
     
-    LinearInterp(RooRealVar *MHvar, std::vector<int> massList , std::map<int,std::map<std::string,RooRealVar*> > fitParamVals, bool doSecMods, std::vector<int> skipMasses);
+    LinearInterp(RooRealVar *MHvar, std::vector<int> massList, std::map<int,std::map<std::string,RooRealVar*> > fitParamVals, bool doSecMods, std::vector<int> skipMasses);
     ~LinearInterp();
 
     void setSecondaryModelVars(RooRealVar *mh_sm, RooRealVar *deltam, RooAddition *mh_2, RooRealVar *width);
-    void interpolate(int nGaussians);
+    void interpolate();
     std::map<std::string,RooSpline1D*> getSplines();
     void setVerbosity(int v);
 
