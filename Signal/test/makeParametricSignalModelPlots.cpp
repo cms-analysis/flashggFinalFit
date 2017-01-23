@@ -436,7 +436,9 @@ void Plot(RooRealVar *mass, RooDataSet *data, RooAbsPdf *pdf, pair<double,double
   vector<double> negWeightBins;
   vector<double> negWeightBinsValues;
   RooPlot *plot = mass->frame(Bins(binning_),Range("higgsRange"));
+  RooPlot *plotchi2 = mass->frame(Bins(binning_),Range("higgsRange"));
   plot->SetMinimum(0.0);
+  plotchi2->SetMinimum(0.0);
   if (markNegativeBins_){
   TH1F *rdh = (TH1F*) data->createHistogram("CMS_hgg_mass",*mass,Binning(binning_,105,140));
     for(unsigned int iBin =0 ; iBin < rdh->GetNbinsX() ; iBin++){
@@ -451,6 +453,7 @@ void Plot(RooRealVar *mass, RooDataSet *data, RooAbsPdf *pdf, pair<double,double
   }
   double offset =0.05;
   if (data) data->plotOn(plot,Invisible());
+  if (data) data->plotOn(plotchi2,Invisible());
   std::cout << " LC DEBIG A : data content: " << data->sumEntries() << std::endl;
   data->Print();
 
@@ -458,6 +461,28 @@ void Plot(RooRealVar *mass, RooDataSet *data, RooAbsPdf *pdf, pair<double,double
   TObject *seffLeg = plot->getObject(int(plot->numItems()-1));
   pdf->plotOn(plot,NormRange("higgsRange"),Range(semin,semax),LineColor(15),LineWidth(2),FillStyle(1001),VLines());
   pdf->plotOn(plot,NormRange("higgsRange"),Range("higgsRange"),LineColor(kBlue),LineWidth(2),FillStyle(0));
+  pdf->plotOn(plotchi2,NormRange("higgsRange"),Range("higgsRange"),LineColor(kBlue),LineWidth(2),FillStyle(0));
+  float chi2_bis= (plotchi2->chiSquare());
+  //int ndof= (pdf->getParameters(*mass))->getSize();
+  RooArgSet *allComponents = pdf->getComponents();
+  TIterator *vIter = allComponents->createIterator();
+  RooAbsReal * datavar;
+  int ndof =0;
+  while((datavar=(RooAbsReal*)vIter->Next())) {
+    if (datavar) {
+    if (!datavar->InheritsFrom("RooSpline1D")) {
+    
+    std::cout << " This datavar was skipped " << datavar->GetName() << std::endl;
+    continue;
+    }
+    if (TString(datavar->GetName()).Contains("ea")) continue;
+    if (TString(datavar->GetName()).Contains("xs")) continue;
+    if (TString(datavar->GetName()).Contains("br")) continue;
+    std::cout << " ** This datavar was counted " << datavar->GetName() << " ( " << datavar->IsA()->GetName()<< " ) " <<  std::endl;
+    ndof++;
+    }
+  }
+  //pdf->getObservables(*mh)->Print("V");
   //pdf->plotOn(plot,NormRange("higgsRange"),Range("higgsRange"),LineColor(kBlue),LineWidth(2),FillStyle(0));
   //pdf->plotOn(plot,Range("higgsRange"),LineColor(kBlue),LineWidth(2),FillStyle(0));
 
@@ -514,15 +539,20 @@ void Plot(RooRealVar *mass, RooDataSet *data, RooAbsPdf *pdf, pair<double,double
   plot->Draw();
   fwhmArrow->Draw("same <>");
   fwhmText->Draw("same");
-   //lat1.Draw("same");
+  //lat1.Draw("same");
   lat2.Draw("same");
   lat1.Draw("same");
   leg->Draw("same");
+  TLatex *chi2ndof_latex = new TLatex();	
+  chi2ndof_latex->SetTextSize(0.035);
+  chi2ndof_latex->SetTextAlign(33);
+  chi2ndof_latex->SetNDC();
+  chi2ndof_latex->DrawLatex(0.93,0.83,Form("#chi^{2}/n_{d.o.f.}=%.3f/%d",chi2_bis,ndof));
   for (unsigned int i =0 ; i < negWeightBins.size() ; i++){
-  TArrow *negBinsArrow = new TArrow(negWeightBins[i],0.0,negWeightBins[i],halfmax/2,0.02,"<>");
-  negBinsArrow->SetLineWidth(2.);
-  negBinsArrow->SetLineColor(kRed);
-  negBinsArrow->Draw("same <>");
+    TArrow *negBinsArrow = new TArrow(negWeightBins[i],0.0,negWeightBins[i],halfmax/2,0.02,"<>");
+    negBinsArrow->SetLineWidth(2.);
+    negBinsArrow->SetLineColor(kRed);
+    negBinsArrow->Draw("same <>");
 
   }
   string sim="Simulation Preliminary";
@@ -610,12 +640,12 @@ int main(int argc, char *argv[]){
     pair<double,double> thisSigRange = getEffSigma(mass,pdfs[dataIt->first],m_hyp_-10.,m_hyp_+10.);
     //pair<double,double> thisSigRange = getEffSigBinned(mass,pdf[dataIt->first],m_hyp_-10.,m_hyp_+10);
     //RooDataHist *binned = new RooDataHist("test","test",*mass, (dataIt->second)->createHistogram("test",*mass,RooFit::Binning(1000,m_hyp_-10.,m_hyp_+10.)));
-    
+
     //pair<double,double> thisSigRange = getEffSigmaData(mass,binned,m_hyp_-10.,m_hyp_+10.);
-    
+
     vector<double> thisFWHMRange = getFWHM(mass,pdfs[dataIt->first],dataIt->second,m_hyp_-10.,m_hyp_+10.);
-   
-   sigEffs.insert(pair<string,double>(dataIt->first,(thisSigRange.second-thisSigRange.first)/2.));
+
+    sigEffs.insert(pair<string,double>(dataIt->first,(thisSigRange.second-thisSigRange.first)/2.));
     fwhms.insert(pair<string,double>(dataIt->first,thisFWHMRange[1]-thisFWHMRange[0]));
     if (doCrossCheck_) performClosure(mass,pdfs[dataIt->first],dataIt->second,Form("%s/closure_%s.pdf",outfilename_.c_str(),dataIt->first.c_str()),m_hyp_-10.,m_hyp_+10.,thisSigRange.first,thisSigRange.second);
     Plot(mass,dataIt->second,pdfs[dataIt->first],thisSigRange,thisFWHMRange,dataIt->first,Form("%s/%s",outfilename_.c_str(),dataIt->first.c_str()));
@@ -624,7 +654,7 @@ int main(int argc, char *argv[]){
   for (map<string,RooDataSet*>::iterator dataIt=dataSetsGranular.begin(); dataIt!=dataSetsGranular.end(); dataIt++){
     //RooDataHist *binned = new RooDataHist("test","test",*mass, (dataIt->second)->createHistogram("test",*mass,RooFit::Binning(1000,m_hyp_-10.,m_hyp_+10.)));
     //RooDataHist *binned = new RooDataHist("test1","test1",*mass, (dataIt->second)->createHistogram("tes1t",*mass,RooFit::Binning(1,100,140)));
-    
+
     //pair<double,double> thisSigRange = getEffSigmaData(mass,binned,m_hyp_-10.,m_hyp_+10.);
     pair<double,double> thisSigRange = getEffSigma(mass,pdfsGranular[dataIt->first],m_hyp_-10.,m_hyp_+10.);
     //pair<double,double> thisSigRange = getEffSigBinned(mass,pdf[dataIt->first],m_hyp_-10.,m_hyp_+10);

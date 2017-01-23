@@ -13,11 +13,14 @@ git clone https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsA
 cd ${CMSSW_BASE}/src/HiggsAnalysis/CombinedLimit
 git fetch origin
 cd ${CMSSW_BASE}/src
-# Install Flashgg Final Fit packages
-git clone git@github.com:cms-analysis/flashggFinalFit.git
-cd ${CMSSW_BASE}/src
+# Install the GBRLikelihood package which contains the RooDoubleCBFast implementation
+git clone git@github.com:bendavid/GBRLikelihood.git HiggsAnalysis/GBRLikelihood
+# Compile external libraries
+cd ${CMSSW_BASE}/src/HiggsAnalysis
 cmsenv
 scram b -j9
+# Install Flashgg Final Fit packages
+git clone git@github.com:cms-analysis/flashggFinalFit.git
 cd ${CMSSW_BASE}/src/flashggFinalFit/
 ```
 

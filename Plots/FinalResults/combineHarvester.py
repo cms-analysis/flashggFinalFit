@@ -409,7 +409,7 @@ def writeAsymptotic():
     writePreamble(file)
     exec_line = ''
     for mass in mass_set:
-      exec_line +=  'combine %s -M Asymptotic -m %6.2f --cminDefaultMinimizerType=Minuit2'%(opts.datacard,mass)
+      exec_line +=  'combine %s -M Asymptotic -m %6.2f --cminDefaultMinimizerType=Minuit2 -L $CMSSW_BASE/lib/$SCRAM_ARCH/libHiggsAnalysisGBRLikelihood.so '%(opts.datacard,mass)
       if opts.S0: exec_line += ' --S0 '
       if opts.additionalOptions: exec_line += ' %s'%opts.additionalOptions
       if opts.expected: exec_line += ' --run=expected'
@@ -430,7 +430,7 @@ def writeAsymptoticGrid():
   # create specialised limit grid workspace
   if not opts.skipWorkspace:
     print '[INFO] Creating workspace for %s...'%opts.method
-    ws_exec_line = 'text2workspace.py %s -o %s'%(os.path.abspath(opts.datacard),os.path.abspath(opts.datacard).replace('.txt','.root')) 
+    ws_exec_line = 'text2workspace.py %s -o %s -L $CMSSW_BASE/lib/$SCRAM_ARCH/libHiggsAnalysisGBRLikelihood.so'%(os.path.abspath(opts.datacard),os.path.abspath(opts.datacard).replace('.txt','.root')) 
     #print ws_exec_line
     system(ws_exec_line)
   opts.datacard = opts.datacard.replace('.txt','.root')
@@ -480,7 +480,7 @@ def writeProfileLikelhood():
     writePreamble(file)
     exec_line = ''
     for mass in mass_set:
-      exec_line +=  'combine %s -M ProfileLikelihood -m %6.2f --signif --pval --cminDefaultMinimizerType=Minuit2'%(opts.datacard,mass)
+      exec_line +=  'combine %s -M ProfileLikelihood -m %6.2f --signif --pval --cminDefaultMinimizerType=Minuit2 -L $CMSSW_BASE/lib/$SCRAM_ARCH/libHiggsAnalysisGBRLikelihood.so'%(opts.datacard,mass)
       if opts.additionalOptions: exec_line += ' %s'%opts.additionalOptions
       if opts.expected: exec_line += ' -t -1 '
       if opts.expectSignal: exec_line += ' --expectSignal=%3.1f'%opts.expectSignal
@@ -503,14 +503,14 @@ def writeChannelCompatibility():
 
   file = open('%s/sub_m%6.2f.sh'%(opts.outDir,opts.mh),'w')
   writePreamble(file)
-  exec_line = 'combine %s -M ChannelCompatibilityCheck -m %6.2f --rMin=-25. --saveFitResult --cminDefaultMinimizerType=Minuit2'%(opts.datacard,opts.mh)
+  exec_line = 'combine %s -M ChannelCompatibilityCheck -m %6.2f --rMin=-25. --saveFitResult --cminDefaultMinimizerType=Minuit2 -L $CMSSW_BASE/lib/$SCRAM_ARCH/libHiggsAnalysisGBRLikelihood.so'%(opts.datacard,opts.mh)
   writePostamble(file,exec_line)
 
 def writeSingleGenerateOnly():
   
   file = open('%s/sub.sh'%(opts.outDir),'w')
   writePreamble(file)
-  exec_line = 'combine %s -M GenerateOnly -m %6.2f --saveToys '%(opts.datacard,opts.mh)
+  exec_line = 'combine %s -M GenerateOnly -m %6.2f --saveToys -L $CMSSW_BASE/lib/$SCRAM_ARCH/libHiggsAnalysisGBRLikelihood.so'%(opts.datacard,opts.mh)
   if opts.expected: exec_line += ' -t -1'
   if opts.expectSignal: exec_line += ' --expectSignal=%3.1f'%opts.expectSignal
   if opts.expectSignalMass: exec_line += ' --expectSignalMass=%6.2f'%opts.expectSignalMass
@@ -769,7 +769,7 @@ def writeMultiDimFit(method=None,wsOnly=False):
           par_ranges["MuScan"]  = "r=%4.2f,%4.2f"%(opts.muLow,opts.muHigh) 
           par_ranges["MuScanStat"]  = "r=%4.2f,%4.2f"%(opts.muLow,opts.muHigh) 
           par_ranges["MuScanTheo"]  = "r=%4.2f,%4.2f"%(opts.muLow,opts.muHigh) 
-          par_ranges["MuScanMHProf"]= "r=%4.2f,%4.2f"%(opts.muLow,opts.muHigh) 
+          par_ranges["MuScanMHProf"]= "r=%4.2f,%4.2f:MH=120.0,130.0"%(opts.muLow,opts.muHigh) 
           par_ranges["RProcScan"]    = "%s=%4.2f,%4.2f"%(opts.poix,opts.muLow,opts.muHigh)
           par_ranges["RTopoScan"]    = "%s=%4.2f,%4.2f"%(opts.poix,opts.muLow,opts.muHigh)
           par_ranges["RBinScan"]    = "%s=%4.2f,%4.2f"%(opts.poix,opts.muLow,opts.muHigh)
@@ -807,10 +807,10 @@ def writeMultiDimFit(method=None,wsOnly=False):
         if not opts.skipWorkspace:
           datacardname = os.path.basename(opts.datacard).replace('.txt','')
           print 'Creating workspace for %s...'%method
-          exec_line = 'text2workspace.py %s -o %s %s'%(os.path.abspath(opts.datacard),os.path.abspath(opts.datacard).replace('.txt',method+'.root'),ws_args[method]) 
+          exec_line = 'text2workspace.py %s -o %s %s -L $CMSSW_BASE/lib/$SCRAM_ARCH/libHiggsAnalysisGBRLikelihood.so'%(os.path.abspath(opts.datacard),os.path.abspath(opts.datacard).replace('.txt',method+'.root'),ws_args[method]) 
           print exec_line
           if opts.postFit:
-                          exec_line += ' && combine -m %.2f -M MultiDimFit --saveWorkspace -n %s_postFit %s' % ( opts.mh, datacardname+method, os.path.abspath(opts.datacard).replace('.txt',method+'.root') )
+                          exec_line += ' && combine -m %.2f -M MultiDimFit --saveWorkspace -n %s_postFit %s -L $CMSSW_BASE/lib/$SCRAM_ARCH/libHiggsAnalysisGBRLikelihood.so' % ( opts.mh, datacardname+method, os.path.abspath(opts.datacard).replace('.txt',method+'.root') )
                           exec_line += ' && cp higgsCombine%s_postFit.MultiDimFit.mH%.2f.root %s' % ( datacardname+method, opts.mh, os.path.abspath(opts.datacard).replace('.txt',method+'_postFit.root') )
           if opts.parallel and opts.dryRun:
                           parallel.run(system,(exec_line,))
@@ -866,7 +866,7 @@ def writeMultiDimFit(method=None,wsOnly=False):
         for i in range(opts.jobs):
           file = open('%s/sub_m%1.5g_job%d.sh'%(opts.outDir,getattr(opts,"mh",0.),i),'w')
           writePreamble(file)
-          exec_line = 'combine %s  -M MultiDimFit --cminDefaultMinimizerType Minuit2 --cminDefaultMinimizerAlgo migrad --algo=grid  %s --points=%d --firstPoint=%d --lastPoint=%d -n %sJob%d'%(opts.datacard,combine_args[method],opts.pointsperjob*opts.jobs,i*opts.pointsperjob,(i+1)*opts.pointsperjob-1,method,i)
+          exec_line = 'combine %s  -M MultiDimFit --cminDefaultMinimizerType Minuit2 --cminDefaultMinimizerAlgo migrad --algo=grid  %s --points=%d --firstPoint=%d --lastPoint=%d -n %sJob%d -L $CMSSW_BASE/lib/$SCRAM_ARCH/libHiggsAnalysisGBRLikelihood.so'%(opts.datacard,combine_args[method],opts.pointsperjob*opts.jobs,i*opts.pointsperjob,(i+1)*opts.pointsperjob-1,method,i)
           if ("FloatMH" in opts.outDir) : exec_line += " --saveSpecifiedNuis MH" 
           if method in par_ranges.keys(): exec_line+=" --setPhysicsModelParameterRanges %s "%(par_ranges[method])
           if getattr(opts,"mh",None): exec_line += ' -m %6.2f'%opts.mh

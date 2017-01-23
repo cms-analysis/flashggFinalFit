@@ -20,6 +20,7 @@
 #include "TRandom3.h"
 #include "HiggsAnalysis/CombinedLimit/interface/RooSpline1D.h"
 
+#include "../interface/SimultaneousFit.h"
 #include "../interface/InitialFit.h"
 #include "../interface/LinearInterp.h"
 #include "../interface/FinalModelConstruction.h"
@@ -53,6 +54,7 @@ int mhLow_=115;
 int mhHigh_=135;
 int nCats_;
 float constraintValue_;
+float iterativeFitConstraint_;
 int constraintValueMass_;
 bool spin_=false;
 vector<string> procs_;
@@ -65,7 +67,8 @@ vector<int> skipMasses_;
 string massListStr_;
 vector<int> massList_;
 bool splitRVWV_=true;
-bool doSecondaryModels_=true;
+bool doSecondaryModels_=false;
+bool useSSF_=false;
 bool doQuadraticSigmaSum_=false;
 bool runInitialFitsOnly_=false;
 bool cloneFits_=false;
@@ -110,6 +113,7 @@ RooRealVar *mass_;
 RooRealVar *dZ_;
 RooRealVar *intLumi_;
 bool beamSpotReweigh_ = false;
+bool useDCBplusGaus_ = false;
 
 void OptionParser(int argc, char *argv[]){
 	po::options_description desc1("Allowed options");
@@ -127,7 +131,8 @@ void OptionParser(int argc, char *argv[]){
 		("dataBeamSpotWidth", po::value<float>(&dataBeamSpotWidth_)->default_value(3.50),                                  			"Default width of data beamspot")
 		("nThreads,t", po::value<int>(&ncpu_)->default_value(ncpu_),                               			"Number of threads to be used for the fits")
 		("mhHigh,H", po::value<int>(&mhHigh_)->default_value(135),                                			"High mass point")
-		("constraintValue,C", po::value<float>(&constraintValue_)->default_value(0.1),            			"Constraint value")
+		("iterativeFitConstraint_,C", po::value<float>(&iterativeFitConstraint_)->default_value(0.1),            			"Constraint value for iterative fit (for SSF)(0.1 is +/- 10%)")
+		("useSSF", po::value<bool>(&useSSF_)->default_value(false),"Use a simulatenous fit of all mass points where the params of the functional form are functions of MH")
 		("constraintValueMass,M", po::value<int>(&constraintValueMass_)->default_value(125),                        "Constraint value mass")
 		("pdfWeights", po::value<int>(&pdfWeights_)->default_value(0),                        "If pdf systematics should be considered, say how many (default 0 = off)")
 		("skipSecondaryModels",                                                                   			"Turn off creation of all additional models")
@@ -144,6 +149,7 @@ void OptionParser(int argc, char *argv[]){
 		("nBins",	po::value<int>(&nBins_)->default_value(80),														"If using binned signal for fit, how many bins in 100-180?")
 		("checkYields",	po::value<bool>(&checkYields_)->default_value(false),														"Use flashgg format (default false)")
 		("beamSpotReweigh",	po::value<bool>(&beamSpotReweigh_)->default_value(false),														"Reweight events to  discrepancy in width of beamspot between data and MC")
+		("useDCBplusGaus",	po::value<bool>(&useDCBplusGaus_)->default_value(false),														"Use Double Crystal Ball plus 1 Gaussian to do fits instead of a sum of Gaussians")
       ("split", po::value<string>(&splitStr_)->default_value(""), "do just one tag,proc ")
 		("changeIntLumi",	po::value<float>(&newIntLumi_)->default_value(0),														"If you want to specify an intLumi other than the one in the file. The event weights and rooRealVar IntLumi are both changed accordingly. (Specify new intlumi in fb^{-1})")
 		("flashggCats,f", po::value<string>(&flashggCatsStr_)->default_value("UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,UntaggedTag_4,VBFTag_0,VBFTag_1,VBFTag_2,TTHHadronicTag,TTHLeptonicTag,VHHadronicTag,VHTightTag,VHLooseTag,VHEtTag"),       "Flashgg categories if used")
@@ -167,7 +173,7 @@ void OptionParser(int argc, char *argv[]){
 	if (vm.count("nosplitRVWV"))              splitRVWV_=false;
 	if (vm.count("doQuadraticSigmaSum"))			doQuadraticSigmaSum_=true;
 	if (vm.count("skipSecondaryModels"))      doSecondaryModels_=false;
-	if (vm.count("recursive"))                recursive_=false;
+	if (vm.count("nonRecursive"))                recursive_=false;
 	if (vm.count("skipMasses")) {
 		cout << "[INFO] Masses to skip... " << endl;
 		vector<string> els;
@@ -236,8 +242,7 @@ void addToCloneMap(clonemap_t &cloneMap, string proc, string cat, string name, R
 		map<string,RooSpline1D*> tempMap;
 		tempMap.insert(make_pair(name,spline));
 		cloneMap.insert(make_pair(mapKey,tempMap));
-	}
-	else {
+	} else {
 		cloneMap[mapKey].insert(make_pair(name,spline));
 	}
 }
@@ -323,6 +328,7 @@ void plotBeamSpotDZdist(RooDataSet *data0, string suffix=""){
   gStyle->SetOptFit();
 }
 
+// split a dataset between right vertex (dZ <1cm ) and wrogn vertex (dZ >1cm)
 RooDataSet * rvwvDataset(RooDataSet *data0, string rvwv){
 
   RooDataSet *dataRV = (RooDataSet*) data0->emptyClone()->reduce(RooArgSet(*mass_, *dZ_));
@@ -347,6 +353,8 @@ RooDataSet * rvwvDataset(RooDataSet *data0, string rvwv){
     exit (1);
   }
 }
+
+// reweight events according to a specified beamspot distribution width
 RooDataSet * beamSpotReweigh(RooDataSet *data0 /*original dataset*/){
   RooDataSet *data = (RooDataSet*) data0->emptyClone();
 	RooRealVar *weight0 = new RooRealVar("weight","weight",-100000,1000000);
@@ -377,9 +385,7 @@ RooDataSet * beamSpotReweigh(RooDataSet *data0 /*original dataset*/){
   return data;
 }
 
-
-
-
+// reweight the events to get a particular intL.
 RooDataSet * intLumiReweigh(RooDataSet *data0 /*original dataset*/){
 		
   double factor = newIntLumi_/originalIntLumi_; // newIntLumi expressed in 1/fb
@@ -410,8 +416,8 @@ bool skipMass(int mh){
 	return false;
 }
 
+//main code
 int main(int argc, char *argv[]){
-
 
 	gROOT->SetBatch();
 
@@ -434,6 +440,18 @@ int main(int argc, char *argv[]){
 	} else {
     std::cout << "[ERROR] script is only compatible with flashgg! exit(1)." << std::endl;
     exit(1);
+  }
+	
+  if (useDCBplusGaus_){ 
+    std::cout << "[INFO] Using functional form: Double Crystal Ball + 1 Gaussian (same mean)" << std::endl;
+  } else {
+    std::cout << "[INFO] Using functional form: Sum of N Gaussians " << std::endl;
+  }
+  
+  if (useSSF_){ 
+    std::cout << "[INFO] Using fitting strategy: Simultaneous Signal Fitting (Simultaneous fit of all mass points, where functional form parameters are themselves functions of MH) " << std::endl;
+  } else {
+    std::cout << "[INFO] Using fitting strategy: Fit each mass point and perform linear interpolation of parameters " << std::endl;
   }
   
   // open sig file
@@ -548,55 +566,67 @@ int main(int argc, char *argv[]){
 		std::cerr << "[ERROR] Could not open " << datfilename_ <<std::endl;
 		exit(1);
 	}
+  
+  if (0){// not actually used since DCB still needs to know which cat/procs to use a repalcement for
+    for (int iproc =0 ; iproc < procs_.size() ; iproc++){
+      for (int itag =0 ; itag < flashggCats_.size() ; itag++){
+        map_proc_.push_back(procs_[iproc]);
+        map_cat_.push_back(flashggCats_[itag]);
+        map_nG_rv_.push_back(-1);
+        map_nG_wv_.push_back(-1); //this info is not needed for DCB+1G shape, but keep format to maintain compatibility;
+      }
+    }
+  } else {
+    if (verbose_) std::cout << "[INFO] openign dat file "<< datfile<< std::endl;
+    //loop over it 
+	  while (datfile.good()){
+		  string line;
+		  getline(datfile,line);
+		  if (line=="\n" || line.substr(0,1)=="#" || line==" " || line.empty()) continue;
+		  vector<string> els;
+		  split(els,line,boost::is_any_of(" "));
+		  if( els.size()!=4 && els.size()!=6 ) {
+			  cerr << "Malformed line " << line << " " << els.size() <<endl;
+			  assert(0);
+		  }
 
-  if (verbose_) std::cout << "[INFO] openign dat file "<< datfile<< std::endl;
-  //loop over it 
-	while (datfile.good()){
-		string line;
-		getline(datfile,line);
-		if (line=="\n" || line.substr(0,1)=="#" || line==" " || line.empty()) continue;
-		vector<string> els;
-		split(els,line,boost::is_any_of(" "));
-		if( els.size()!=4 && els.size()!=6 ) {
-			cerr << "Malformed line " << line << " " << els.size() <<endl;
-			assert(0);
-		}
+      // the defaukt info need: proc, tag, nRv, nrWV
+      string proc = els[0];
+		  string cat = els[1]; // used to be an int, string directly now...
+		  int nGaussiansRV = boost::lexical_cast<int>(els[2]);
+		  int nGaussiansWV = boost::lexical_cast<int>(els[3]);
 
-    // the defaukt info need: proc, tag, nRv, nrWV
-		string proc = els[0];
-		string cat = els[1]; // used to be an int, string directly now...
-		int nGaussiansRV = boost::lexical_cast<int>(els[2]);
-		int nGaussiansWV = boost::lexical_cast<int>(els[3]);
+	  	replace_ = false; // old method of replacing from Matt and Nick
+      // have a different appraoch now but could re-use machinery.
 
-		replace_ = false; // old method of replacing from Matt and Nick
-    // have a different appraoch now but could re-use machinery.
+		  if( els.size()==6 ) { // in this case you have specified a replacement tag!
+			  replaceWith_ = make_pair(els[4],els[5]); // proc, cat
+		   	replace_ = true;
+        map_replacement_proc_.push_back(els[4]);
+        map_replacement_cat_.push_back(els[5]);
+      } else {
+        // if no replacement is speficied, use defaults
+        if (cat.compare(0,3,"TTH") ==0){
+          // if the cat starts with TTH, use TTH reference process.
+          // howwver this is over-riden later if the WV needs to be replaced
+          // as even teh TTH tags in WV has limited stats
+          map_replacement_proc_.push_back(referenceProcTTH_);
+          map_replacement_cat_.push_back(cat);
+        } else {
+         // else use the ggh
+         map_replacement_proc_.push_back(referenceProc_);
+         map_replacement_cat_.push_back(referenceTagRV_); //deflaut is ggh UntaggedTag3
+        }
+      }
+      if (verbose_) std::cout << "[INFO] dat file listing: "<< proc << " " << cat << " " << nGaussiansRV << " " << nGaussiansWV <<  " " << std::endl;
+      if (verbose_) std::cout << "[INFO] dat file listing: ----> selected replacements if needed " <<  map_replacement_proc_[map_replacement_proc_.size() -1] << " " <<  map_replacement_cat_[map_replacement_cat_.size() -1] << std::endl;
 
-		if( els.size()==6 ) { // in this case you have specified a replacement tag!
-			replaceWith_ = make_pair(els[4],els[5]); // proc, cat
-			replace_ = true;
-      map_replacement_proc_.push_back(els[4]);
-      map_replacement_cat_.push_back(els[5]);
-    } else {
-      // if no replacement is speficied, use defaults
-      if (cat.compare(0,3,"TTH") ==0){
-       // if the cat starts with TTH, use TTH reference process.
-       // howwver this is over-riden later if the WV needs to be replaced
-       // as even teh TTH tags in WV has limited stats
-       map_replacement_proc_.push_back(referenceProcTTH_);
-       map_replacement_cat_.push_back(cat);
-     } else {
-       // else use the ggh
-       map_replacement_proc_.push_back(referenceProc_);
-       map_replacement_cat_.push_back(referenceTagRV_); //deflaut is ggh UntaggedTag3
-     }
-   }
-   if (verbose_) std::cout << "[INFO] dat file listing: "<< proc << " " << cat << " " << nGaussiansRV << " " << nGaussiansWV <<  " " << std::endl;
-   if (verbose_) std::cout << "[INFO] dat file listing: ----> selected replacements if needed " <<  map_replacement_proc_[map_replacement_proc_.size() -1] << " " <<  map_replacement_cat_[map_replacement_cat_.size() -1] << std::endl;
-
-    map_proc_.push_back(proc);
-    map_cat_.push_back(cat);
-    map_nG_rv_.push_back(nGaussiansRV);
-    map_nG_wv_.push_back(nGaussiansWV);
+      map_proc_.push_back(proc);
+      map_cat_.push_back(cat);
+      map_nG_rv_.push_back(nGaussiansRV);
+      map_nG_wv_.push_back(nGaussiansWV);
+    }
+    datfile.close();
   }
   
   // now start the proper loop, so loop over teh maps we filled above.
@@ -809,15 +839,87 @@ int main(int argc, char *argv[]){
        assert (check ==name.ReplaceAll(TString(Form("%d",it->first)),TString("")) );
        }
     }
+      
+      
+    //these guys do the interpolation
+    //declare them in advnace of the fitting
+    map<string,RooSpline1D*> splinesRV;
+    map<string,RooSpline1D*> splinesWV;
 
     // these guys do the fitting
+    if(useSSF_){
+    // right vertex
+    if (verbose_) std::cout << "[INFO] preapraing initialfit RV, massList size "<< massList_.size() << std::endl;
+    SimultaneousFit simultaneousFitRV(mass_,MH,mhLow_,mhHigh_,skipMasses_,binnedFit_,nBins_,massList_,cat,proc,Form("%s/rv",plotDir_.c_str()), /*maxOrder of MH depende of RooPolyVars*/ 2);
+    simultaneousFitRV.setVerbosity(verbose_);
+    if (!cloneFits_) {
+      if (verbose_) std::cout << "[INFO] RV building sum of gaussians with nGaussiansRV " << nGaussiansRV << std::endl;
+      if(useDCBplusGaus_) {
+        simultaneousFitRV.buildDCBplusGaussian(Form("%s_%s",proc.c_str(),cat.c_str()),recursive_);
+      } else {
+        simultaneousFitRV.buildSumOfGaussians(Form("%s_%s",proc.c_str(),cat.c_str()),nGaussiansRV,recursive_);
+      }
+      if (verbose_) std::cout << "[INFO] RV setting datasets in initialFIT " << std::endl;
+      simultaneousFitRV.setDatasets(FITdatasetsRV);
+      simultaneousFitRV.setDatasetsSTD(datasetsRV);
+      if (verbose_) std::cout << "[INFO] RV running fits" << std::endl;
+      simultaneousFitRV.runFits(ncpu_,Form("%s/initialFits/rv_%s_%s",plotDir_.c_str(),proc.c_str(),cat.c_str()),iterativeFitConstraint_);
+      if( replace_ ) {
+        simultaneousFitRV.setFitParams(allParameters[replaceWith_].first); 
+      }
+      if (!skipPlots_) simultaneousFitRV.plotFits(Form("%s/initialFits/%s_%s_rv",plotDir_.c_str(),proc.c_str(),cat.c_str()),"RV");
+    }
+    parlist_t fitParamsRV = simultaneousFitRV.getFitParams();
+
+    // wrong vertex
+    if (verbose_) std::cout << "[INFO] preparing initialfit WV, masList size "<< massList_.size() << std::endl;
+    SimultaneousFit simultaneousFitWV(mass_,MH,mhLow_,mhHigh_,skipMasses_,binnedFit_,nBins_,massList_,cat,proc,Form("%s/wv",plotDir_.c_str()), /*maxOrder of MH depende of RooPolyVars*/ 2);
+    simultaneousFitWV.setVerbosity(verbose_);
+    if (!cloneFits_) {
+      if (verbose_) std::cout << "[INFO] WV building sum of gaussians wth nGaussiansWV "<< nGaussiansWV << std::endl;
+      if(useDCBplusGaus_) {
+        simultaneousFitWV.buildDCBplusGaussian(Form("%s_cat%s",proc.c_str(),cat.c_str()),recursive_);
+      } else {
+        simultaneousFitWV.buildSumOfGaussians(Form("%s_cat%s",proc.c_str(),cat.c_str()),nGaussiansWV,recursive_);
+      }
+      if (verbose_) std::cout << "[INFO] WV setting datasets in initial FIT " << std::endl;
+      simultaneousFitWV.setDatasets(FITdatasetsWV);
+      simultaneousFitWV.setDatasetsSTD(datasetsWV);
+      if (verbose_) std::cout << "[INFO] WV running fits" << std::endl;
+      simultaneousFitWV.runFits(ncpu_,Form("%s/initialFits/wv_%s_%s",plotDir_.c_str(),proc.c_str(),cat.c_str()),iterativeFitConstraint_);
+      if( replace_ ) {
+        simultaneousFitWV.setFitParams(allParameters[replaceWith_].second); 
+      }
+      if (!skipPlots_) simultaneousFitWV.plotFits(Form("%s/initialFits/%s_%s_wv",plotDir_.c_str(),proc.c_str(),cat.c_str()),"WV");
+    }
+    parlist_t fitParamsWV = simultaneousFitWV.getFitParams();
+    allParameters[ make_pair(proc,cat) ] = make_pair(fitParamsRV,fitParamsWV);
+    
+    //Ok, now that we have made the fit parameters eitehr with the regular dataset or the replacement one.
+    // Now we should be using the ORIGINAL dataset
+    if (!runInitialFitsOnly_) {
+      if (!cloneFits_){
+        // right vertex
+        splinesRV =  simultaneousFitRV.getSplines();
+        // wrong vertex
+        splinesWV =  simultaneousFitWV.getSplines();
+      } else {
+        splinesRV = cloneSplinesMapRV[make_pair(proc,cat)];
+        splinesWV = cloneSplinesMapWV[make_pair(proc,cat)];
+      }
+     }
+    } else {
     // right vertex
     if (verbose_) std::cout << "[INFO] preapraing initialfit RV, massList size "<< massList_.size() << std::endl;
     InitialFit initFitRV(mass_,MH,mhLow_,mhHigh_,skipMasses_,binnedFit_,nBins_,massList_);
     initFitRV.setVerbosity(verbose_);
     if (!cloneFits_) {
       if (verbose_) std::cout << "[INFO] RV building sum of gaussians with nGaussiansRV " << nGaussiansRV << std::endl;
-      initFitRV.buildSumOfGaussians(Form("%s_%s",proc.c_str(),cat.c_str()),nGaussiansRV,recursive_);
+      if(useDCBplusGaus_) {
+        initFitRV.buildDCBplusGaussian(Form("%s_%s",proc.c_str(),cat.c_str()));
+      } else {
+        initFitRV.buildSumOfGaussians(Form("%s_%s",proc.c_str(),cat.c_str()),nGaussiansRV,recursive_);
+      }
       if (verbose_) std::cout << "[INFO] RV setting datasets in initialFIT " << std::endl;
       initFitRV.setDatasets(FITdatasetsRV);
       initFitRV.setDatasetsSTD(datasetsRV);
@@ -832,87 +934,88 @@ int main(int argc, char *argv[]){
         initFitRV.setFitParams(allParameters[replaceWith_].first); 
       }
       if (!skipPlots_) initFitRV.plotFits(Form("%s/initialFits/%s_%s_rv",plotDir_.c_str(),proc.c_str(),cat.c_str()),"RV");
-    }
-    parlist_t fitParamsRV = initFitRV.getFitParams();
-
-    // wrong vertex
-    if (verbose_) std::cout << "[INFO] preparing initialfit WV, masList size "<< massList_.size() << std::endl;
-    InitialFit initFitWV(mass_,MH,mhLow_,mhHigh_,skipMasses_,binnedFit_,nBins_,massList_);
-    initFitWV.setVerbosity(verbose_);
-    if (!cloneFits_) {
-      if (verbose_) std::cout << "[INFO] WV building sum of gaussians wth nGaussiansWV "<< nGaussiansWV << std::endl;
-      initFitWV.buildSumOfGaussians(Form("%s_cat%s",proc.c_str(),cat.c_str()),nGaussiansWV,recursive_);
-      if (verbose_) std::cout << "[INFO] WV setting datasets in initial FIT " << std::endl;
-      initFitWV.setDatasets(FITdatasetsWV);
-      initFitWV.setDatasetsSTD(datasetsWV);
-      if (verbose_) std::cout << "[INFO] WV running fits" << std::endl;
-      initFitWV.runFits(ncpu_);
-      if (!runInitialFitsOnly_ && !replace_) {
-        initFitWV.saveParamsToFileAtMH(Form("dat/in/%s_%s_wv.dat",proc.c_str(),cat.c_str()),constraintValueMass_);
-        initFitWV.loadPriorConstraints(Form("dat/in/%s_%s_wv.dat",proc.c_str(),cat.c_str()),constraintValue_);
-        initFitWV.runFits(ncpu_);
       }
-      if( replace_ ) {
-        initFitWV.setFitParams(allParameters[replaceWith_].second); 
-      }
-      if (!skipPlots_) initFitWV.plotFits(Form("%s/initialFits/%s_%s_wv",plotDir_.c_str(),proc.c_str(),cat.c_str()),"WV");
-    }
-    parlist_t fitParamsWV = initFitWV.getFitParams();
+      parlist_t fitParamsRV = initFitRV.getFitParams();
 
-    allParameters[ make_pair(proc,cat) ] = make_pair(fitParamsRV,fitParamsWV);
-    
-    //Ok, now that we have made the fit parameters eitehr with the regular dataset or the replacement one.
-    // Now we should be using the ORIGINAL dataset
-    if (!runInitialFitsOnly_) {
-      //these guys do the interpolation
-      map<string,RooSpline1D*> splinesRV;
-      map<string,RooSpline1D*> splinesWV;
-
-      if (!cloneFits_){
-        // right vertex
-        LinearInterp linInterpRV(MH,mhLow_,mhHigh_,fitParamsRV,doSecondaryModels_,skipMasses_);
-        linInterpRV.setVerbosity(verbose_);
-        linInterpRV.setSecondaryModelVars(MH_SM,DeltaM,MH_2,higgsDecayWidth);
-        linInterpRV.interpolate(nGaussiansRV);
-        splinesRV = linInterpRV.getSplines();
-
-        // wrong vertex
-        LinearInterp linInterpWV(MH,mhLow_,mhHigh_,fitParamsWV,doSecondaryModels_,skipMasses_);
-        linInterpWV.setVerbosity(verbose_);
-        linInterpWV.setSecondaryModelVars(MH_SM,DeltaM,MH_2,higgsDecayWidth);
-        linInterpWV.interpolate(nGaussiansWV);
-        splinesWV = linInterpWV.getSplines();
-      }
-      else {
-        splinesRV = cloneSplinesMapRV[make_pair(proc,cat)];
-        splinesWV = cloneSplinesMapWV[make_pair(proc,cat)];
-      }
-      // this guy constructs the final model with systematics, eff*acc etc.
-      if (isFlashgg_){
-        
-        outWS->import(*intLumi_);
-        FinalModelConstruction finalModel(massList_, mass_,MH,intLumi_,mhLow_,mhHigh_,proc,cat,doSecondaryModels_,systfilename_,skipMasses_,verbose_,procs_, flashggCats_,plotDir_, isProblemCategory,isCutBased_,sqrts_,doQuadraticSigmaSum_);
-        
-        finalModel.setSecondaryModelVars(MH_SM,DeltaM,MH_2,higgsDecayWidth);
-        finalModel.setRVsplines(splinesRV);
-        finalModel.setWVsplines(splinesWV);
-        finalModel.setRVdatasets(datasetsRV);
-        finalModel.setWVdatasets(datasetsWV);
-        finalModel.setFITRVdatasets(FITdatasetsRV);
-        finalModel.setFITWVdatasets(FITdatasetsWV);
-        //finalModel.setSTDdatasets(datasets);
-        finalModel.makeSTDdatasets();
-        finalModel.makeFITdatasets();
-        if( isFlashgg_){
-          finalModel.buildRvWvPdf("hggpdfsmrel_13TeV",nGaussiansRV,nGaussiansWV,recursive_);
+      // wrong vertex
+      if (verbose_) std::cout << "[INFO] preparing initialfit WV, masList size "<< massList_.size() << std::endl;
+      InitialFit initFitWV(mass_,MH,mhLow_,mhHigh_,skipMasses_,binnedFit_,nBins_,massList_);
+      initFitWV.setVerbosity(verbose_);
+      if (!cloneFits_) {
+        if (verbose_) std::cout << "[INFO] WV building sum of gaussians wth nGaussiansWV "<< nGaussiansWV << std::endl;
+        if(useDCBplusGaus_) {
+          initFitWV.buildDCBplusGaussian(Form("%s_%s",proc.c_str(),cat.c_str()));
+        } else {
+          initFitWV.buildSumOfGaussians(Form("%s_cat%s",proc.c_str(),cat.c_str()),nGaussiansWV,recursive_);
         }
-        finalModel.getNormalization();
-        if (!skipPlots_) finalModel.plotPdf(plotDir_);
-        finalModel.save(outWS);
+        if (verbose_) std::cout << "[INFO] WV setting datasets in initial FIT " << std::endl;
+        initFitWV.setDatasets(FITdatasetsWV);
+        initFitWV.setDatasetsSTD(datasetsWV);
+        if (verbose_) std::cout << "[INFO] WV running fits" << std::endl;
+        initFitWV.runFits(ncpu_);
+        if (!runInitialFitsOnly_ && !replace_) {
+          initFitWV.saveParamsToFileAtMH(Form("dat/in/%s_%s_wv.dat",proc.c_str(),cat.c_str()),constraintValueMass_);
+          initFitWV.loadPriorConstraints(Form("dat/in/%s_%s_wv.dat",proc.c_str(),cat.c_str()),constraintValue_);
+          initFitWV.runFits(ncpu_);
+        }
+        if( replace_ ) {
+          initFitWV.setFitParams(allParameters[replaceWith_].second); 
+        }
+        if (!skipPlots_) initFitWV.plotFits(Form("%s/initialFits/%s_%s_wv",plotDir_.c_str(),proc.c_str(),cat.c_str()),"WV");
+      }
+      parlist_t fitParamsWV = initFitWV.getFitParams();
+    
+      allParameters[ make_pair(proc,cat) ] = make_pair(fitParamsRV,fitParamsWV);
+    
+      //Ok, now that we have made the fit parameters eitehr with the regular dataset or the replacement one.
+      // Now we should be using the ORIGINAL dataset
+      if (!runInitialFitsOnly_) {
+        if (!cloneFits_){
+          // right vertex
+          LinearInterp linInterpRV(MH,massList_,fitParamsRV,doSecondaryModels_,skipMasses_);
+          linInterpRV.setVerbosity(verbose_);
+          linInterpRV.setSecondaryModelVars(MH_SM,DeltaM,MH_2,higgsDecayWidth);
+          linInterpRV.interpolate(); //nGaussians no longer need to be provided since re-implementation of the interpolate class to be functional-form-agnostic
+          splinesRV = linInterpRV.getSplines();
+
+          // wrong vertex
+          LinearInterp linInterpWV(MH,massList_,fitParamsWV,doSecondaryModels_,skipMasses_);
+          linInterpWV.setVerbosity(verbose_);
+          linInterpWV.setSecondaryModelVars(MH_SM,DeltaM,MH_2,higgsDecayWidth);
+          linInterpWV.interpolate();//nGaussians no longer need to be provided since re-implementation of the interpolate class to be functional-form-agnostic
+
+          splinesWV = linInterpWV.getSplines();
+        } else {
+          splinesRV = cloneSplinesMapRV[make_pair(proc,cat)];
+          splinesWV = cloneSplinesMapWV[make_pair(proc,cat)];
+        }
+      }
+    }
+    // this guy constructs the final model with systematics, eff*acc etc.
+    if (isFlashgg_){
+        
+      outWS->import(*intLumi_);
+      FinalModelConstruction finalModel(massList_, mass_,MH,intLumi_,mhLow_,mhHigh_,proc,cat,doSecondaryModels_,systfilename_,skipMasses_,verbose_,procs_, flashggCats_,plotDir_, isProblemCategory,isCutBased_,sqrts_,doQuadraticSigmaSum_);
+    
+      finalModel.setSecondaryModelVars(MH_SM,DeltaM,MH_2,higgsDecayWidth);
+      finalModel.setRVsplines(splinesRV);
+      finalModel.setWVsplines(splinesWV);
+      finalModel.setRVdatasets(datasetsRV);
+      finalModel.setWVdatasets(datasetsWV);
+      finalModel.setFITRVdatasets(FITdatasetsRV);
+      finalModel.setFITWVdatasets(FITdatasetsWV);
+      //finalModel.setSTDdatasets(datasets);
+      finalModel.makeSTDdatasets();
+      finalModel.makeFITdatasets();
+      if( isFlashgg_){
+        if (verbose_>1) std::cout << "[INFO] About to do Final Model Construction with useDCBplusGaus_=" << useDCBplusGaus_ << std::endl;
+        finalModel.buildRvWvPdf("hggpdfsmrel_13TeV",nGaussiansRV,nGaussiansWV,recursive_,useDCBplusGaus_);
+      }
+      finalModel.getNormalization();
+      if (!skipPlots_) finalModel.plotPdf(plotDir_);
+      finalModel.save(outWS);
     }
   }
-  }
-  datfile.close();
 
   sw.Stop();
   cout << "[INFO] Whole fitting process took..." << endl;
@@ -944,7 +1047,6 @@ int main(int argc, char *argv[]){
   //	inFile->Close();
   inWS->Close();
   cout << "[INFO] Done." << endl;
- 
 
   return 0;
 }

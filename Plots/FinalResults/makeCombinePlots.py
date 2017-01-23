@@ -318,9 +318,9 @@ def cleanSpikes1D(rfix):
 def pvalPlot(allVals):
   
   canv.Clear()
+  canv.SetLogy(True)
 
   if options.verbose: print 'Plotting pvalue...'
-  canv.SetLogy(True)
   mg = r.TMultiGraph()
   if not options.legend: leg = r.TLegend(0.14,0.30,0.4,0.7)
   #if not options.legend: leg = r.TLegend(0.6,0.35,0.89,0.45)
@@ -335,12 +335,15 @@ def pvalPlot(allVals):
     minpvalueX=99999.
     pvalat125=999999.
     graph = r.TGraph()
+    p=0
     for j in range(len(values)):
-      graph.SetPoint(j,values[j][0],values[j][1])
+      if (values[j][1]<10e-150): continue
+      graph.SetPoint(p,values[j][0],values[j][1])
+      p=p+1
       if (minpvalue > values[j][1]): 
         minpvalue = values[j][1]
         minpvalueX =values[j][0]
-      if options.verbose or abs(values[j][0]-125.09)<0.1 or  values[j][0]==125.0 : 
+      if options.verbose or abs(values[j][0]-125.09)<0.1 or  values[j][0]==126.0 : 
         print options.names[k] ,' at ', values[j][0], " signif ",  r.RooStats.PValueToSignificance(values[j][1])
         pvalat125=values[j][1]
       #print "debug minpval  for ",options.names[k], " at ", values[j][0], " ", minpvalue, "   " , r.RooStats.PValueToSignificance(minpvalue), "values[j][1] " , values[j][1], " ", r.RooStats.PValueToSignificance(values[j][1])
@@ -355,11 +358,14 @@ def pvalPlot(allVals):
     graph.SetLineWidth(int(options.widths[k]))
     if options.names[k]!="-1": leg.AddEntry(graph,options.names[k],'L')
     mg.Add(graph)
- 
+    mg.Draw("A")
+    canv.Print("debug%d.pdf"%j)
+    
   # draw dummy hist and multigraph
   dummyHist.GetYaxis().SetTitle('Local p-value')
   dummyHist.GetYaxis().SetTitleSize(0.05)
   mg.Draw("A")
+  canv.Print("debug.pdf")
   if (options.xaxis) :
       print mg.GetXaxis()
       #mg.GetXaxis().SetLimits(float(options.xaxis[0]),float(options.xaxis[1]))
@@ -367,19 +373,23 @@ def pvalPlot(allVals):
       #canv.Modified()
       print mg.GetXaxis().GetXmin() 
   if not options.yaxis:
+    print "LC DEBUG A mg.GetYaxis().GetXmin() ", mg.GetYaxis().GetXmin()
+    print "LC DEBUG A mg.GetYaxis().GetXmax() ", mg.GetYaxis().GetXmax()
     dummyHist.SetMinimum(mg.GetYaxis().GetXmin())
-    dummyHist.SetMaximum(mg.GetYaxis().GetXmax())
+    dummyHist.SetMaximum(1e0)
   else:
+    print "LC DEBUG B"
     dummyHist.SetMinimum(float(options.yaxis.split(',')[0]))
     dummyHist.SetMaximum(float(options.yaxis.split(',')[1]))
     #print "y1,y2", options.yaxis.split(',')[0], " , ", options.yaxis.split(',')[1]
-    
+  print "DEBUG SimultaneousFit A"  
   dummyHist.SetLineColor(0)
   dummyHist.SetStats(0)
   dummyHist.Draw("AXIS")
   mg.Draw("L")
   dummyHist.Draw("AXIGSAME")
 
+  print "DEBUG SimultaneousFit b"  
   # draw sigma lines
   sigmas=[1,2,3,4,5,6]
   lines=[]
@@ -409,11 +419,17 @@ def pvalPlot(allVals):
         lines[i].Draw('SAME')
         labels[i].Draw('SAME')
   # draw legend
+  print "DEBUG SimultaneousFit c"  
   leg.Draw()
+  print "DEBUG SimultaneousFit c1"  
   #canv.RedrawAxis()
+  print "DEBUG SimultaneousFit c2"  
   drawGlobals(canv)
+  print "DEBUG SimultaneousFit c3"  
   # print canvas
+  print "DEBUG SimultaneousFit c4"  
   canv.Update()
+  print "DEBUG SimultaneousFit d"  
   if not options.batch: raw_input("Looks ok?")
   canv.Print('%s.pdf'%options.outname)
   canv.Print('%s.root'%options.outname)
@@ -422,214 +438,8 @@ def pvalPlot(allVals):
   canv.SetName(options.outname)
   outf.cd()
   canv.Write()
+  print "DEBUG SimultaneousFit e"  
 
-# Maximum Likelihood vs the Mass-Hypothesis Plot 
-'''
-def maxlhPlot(allVals):
-
-  canv.Clear()
-  canv.SetLogy(False)
-  if options.verbose: print 'Plotting maxlh...'
-  mg = r.TMultiGraph()
-  if not options.legend: leg = r.TLegend(0.58,0.76,0.89,0.89)
-  else: leg = r.TLegend(float(options.legend.split(',')[0]),float(options.legend.split(',')[1]),float(options.legend.split(',')[2]),float(options.legend.split(',')[3]))
-  #leg.SetFillColor(0) 
-  # make graph from values
-  for k, values in enumerate(allVals):
-    graph = r.TGraphAsymmErrors()
-    point_counter=0
-    for j in range(len(values)):
-      if (j%4==0):
-        mh = values[j][0]
-        fit = values[j][1]
-        low = values[j+1][1]
-        high = values[j+2][1]
-        graph.SetPoint(point_counter,mh,fit)
-        graph.SetPointError(point_counter,0,0,abs(fit-low),abs(high-fit))
-        point_counter+=1
-        if options.verbose: print mh, fit, low, high
-    
-    graph.SetMarkerStyle(21)
-    graph.SetMarkerSize(0.5)
-    graph.SetLineColor(1)
-    graph.SetLineWidth(2)
-    graph.SetFillColor(r.kGreen)
-    leg.AddEntry(graph,'68% CL Band','F')
-    mg.Add(graph)
-  
-  # draw dummy hist and multigraph
-  #dummyHist.GetYaxis().SetTitle('Best fit #sigma/#sigma_{SM}')
-  dummyHist.GetYaxis().SetTitle('Best fit #mu')
-  mg.Draw("A")
-  
-  if not options.yaxis:
-    dummyHist.SetMinimum(mg.GetYaxis().GetXmin())
-    dummyHist.SetMaximum(mg.GetYaxis().GetXmax())
-  else:
-    dummyHist.SetMinimum(float(options.yaxis.split(',')[0]))
-    dummyHist.SetMaximum(float(options.yaxis.split(',')[1]))
-  dummyHist.SetLineColor(0)
-  dummyHist.SetStats(0)
-  dummyHist.Draw("AXIS")
-  mg.Draw("3")
-  mg.Draw("LPX")
-  dummyHist.Draw("AXIGSAME")
-  
-  # draw line at y=1 
-  if options.xaxis:
-        axmin = float(options.xaxis[0])
-        axmax = float(options.xaxis[1])
-  else: 
-  	axmin = 115
-	axmax = 135
-  l = r.TLine(axmin,1.,axmax,1.)
-  l.SetLineColor(13)
-  l.SetLineStyle(1)
-  l.SetLineWidth(2)
-  l.Draw()
-  
-  # draw line at y=0 
-  l2 = r.TLine(axmin,0.,axmax,0.)
-  l2.SetLineColor(13)
-  l2.SetLineStyle(r.kDashed)
-  l2.SetLineWidth(2)
-  l2.Draw()
-  # draw legend
-  leg.Draw()
-  canv.RedrawAxis()
-
-  # print canvas
-  drawGlobals(canv)
-  canv.Update()
-  if not options.batch: raw_input("Looks ok?")
-  canv.Print('%s.pdf'%options.outname)
-  canv.Print('%s.png'%options.outname)
-  canv.Print('%s.C'%options.outname)
-  canv.SetName(options.outname)
-  outf.cd()
-  canv.Write()
-
-# Limit plots
-def limitPlot(allVals):
-
-  # figure out many entries per mass point
-  # so we now if expected or not
-  for vals in allVals: list_of_masses = [x[0] for x in vals]
-  ents_per_mass = list_of_masses.count(list_of_masses[0])
-  
-  canv.Clear()
-  canv.SetLogy(False)
-  if options.verbose: print 'Plotting limit...'
-  mg = r.TMultiGraph()
-  if not options.legend: leg = r.TLegend(0.6,0.7,0.89,0.89)
-  else: leg = r.TLegend(float(options.legend.split(',')[0]),float(options.legend.split(',')[1]),float(options.legend.split(',')[2]),float(options.legend.split(',')[3]))
-  #leg.SetFillColor(0)
-
-  # make graph from values
-  for k, values in enumerate(allVals):
-    graph = r.TGraphAsymmErrors()
-    exp = r.TGraphAsymmErrors()
-    oneSigma = r.TGraphAsymmErrors()
-    twoSigma = r.TGraphAsymmErrors()
-    point_counter=0
-    for j in range(len(values)):
-      if (j%ents_per_mass==0):
-        mh = values[j][0]
-        down95 = values[j][1]
-        down68 = values[j+1][1]
-        median = values[j+2][1]
-        up68 = values[j+3][1]
-        up95 = values[j+4][1]
-        if not options.expected: 
-          obs = values[j+5][1]
-          graph.SetPoint(point_counter,mh,obs)
-        exp.SetPoint(point_counter,mh,median)
-        oneSigma.SetPoint(point_counter,mh,median)
-        oneSigma.SetPointError(point_counter,0,0,abs(median-down68),abs(up68-median))
-        twoSigma.SetPoint(point_counter,mh,median)
-        twoSigma.SetPointError(point_counter,0,0,abs(median-down95),abs(up95-median))
-        point_counter+=1
-        if options.verbose: 
-          print mh, median, down68, up68, down95, up95, 
-          if not options.expected: print obs
-          else: print ''
-    
-    graph.SetMarkerStyle(21)
-    graph.SetMarkerSize(0.5)
-    graph.SetLineColor(1)
-    graph.SetLineWidth(2)
-    exp.SetLineColor(1)
-    exp.SetLineStyle(2)
-    oneSigma.SetLineStyle(2)
-    twoSigma.SetLineStyle(2)
-    oneSigma.SetFillColor(r.kGreen)
-    twoSigma.SetFillColor(r.kYellow)
-    if len(allVals)>1:
-      exp.SetLineColor(int(options.colors[k]))
-      exp.SetLineStyle(2)
-      exp.SetLineWidth(int(options.widths[k]))
-      graph.SetMarkerColor(int(options.colors[k]))
-      graph.SetLineColor(int(options.colors[k]))
-      leg.AddEntry(graph,options.names[k],'L')
-    else:
-      exp.SetLineColor(1)
-      exp.SetLineStyle(2)
-      exp.SetLineWidth(2)
-      if not options.expected: leg.AddEntry(graph,'Observed','L')
-      #leg.AddEntry(exp,'Expected','L')
-      leg.AddEntry(oneSigma,'Expected #pm 1#sigma','FL') 
-      leg.AddEntry(twoSigma,'Expected #pm 2#sigma','FL') 
-    
-    if len(allVals)==1:
-      mg.Add(twoSigma)
-      mg.Add(oneSigma)
-    mg.Add(exp)
-    if not options.expected: mg.Add(graph)
-  
-  # draw dummy hist and multigraph
-  #dummyHist.GetYaxis().SetTitle("\sigma(H#rightarrow #gamma #gamma)_{95%%CL} / \sigma(H#rightarrow #gamma #gamma)_{SM}")
-  dummyHist.GetYaxis().SetTitle("\sigma(H\gamma\gamma)_{95pc \quad CL} / \sigma(H\gamma\gamma)_{SM}")
-  mg.Draw("A")
-  if not options.yaxis:
-    dummyHist.SetMinimum(mg.GetYaxis().GetXmin())
-    dummyHist.SetMaximum(mg.GetYaxis().GetXmax())
-  else:
-    dummyHist.SetMinimum(float(options.yaxis.split(',')[0]))
-    dummyHist.SetMaximum(float(options.yaxis.split(',')[1]))
-  dummyHist.SetLineColor(0)
-  dummyHist.SetStats(0)
-  dummyHist.Draw("AXIS")
-  mg.Draw("3")
-  mg.Draw("LPX")
-  dummyHist.Draw("AXIGSAME")
- 
-  # draw line at y=1
-  if options.xaxis:
-        axmin = float(options.xaxis[0])
-        axmax = float(options.xaxis[1])
-  else: 
-  	axmin = 115
-	axmax = 135
-  l = r.TLine(axmin,1.,axmax,1.)
-  l.SetLineColor(13)
-  l.SetLineWidth(2)
-  l.Draw()
-
-  # draw legend
-  leg.Draw()
-  canv.RedrawAxis()
-
-  # print canvas
-  drawGlobals(canv)
-  canv.Update()
-  if not options.batch: raw_input("Looks ok?")
-  canv.Print('%s.pdf'%options.outname)
-  canv.Print('%s.png'%options.outname)
-  canv.Print('%s.C'%options.outname)
-  canv.SetName(options.outname)
-  outf.cd()
-  canv.Write()
-'''
 def runStandard():
   config = []
   for k, f in enumerate(options.files):

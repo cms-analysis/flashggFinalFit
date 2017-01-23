@@ -7,12 +7,12 @@ using namespace RooFit;
 
 LinearInterp::LinearInterp(RooRealVar *MHvar, vector<int> massList ,  map<int,map<string,RooRealVar*> > fitParamVals, bool doSecMods, vector<int> skipMasses):
   MH(MHvar),
+  allMH_(massList),
   fitParams(fitParamVals),
   doSecondaryModels(doSecMods),
   secondaryModelVarsSet(false),
 	skipMasses_(skipMasses),
-  verbosity_(0),
-  allMH_(massList)
+  verbosity_(0)
 {
  // allMH_ = getAllMH();
 }
@@ -44,8 +44,50 @@ void LinearInterp::setSecondaryModelVars(RooRealVar *mh_sm, RooRealVar *deltam, 
   secondaryModelVarsSet=true;
 }
 
-void LinearInterp::interpolate(int nGaussians){
- 
+// new interpolation class which is simpler agnostic of the functional form used
+// it just loops through the parameters of the functional form and makes a spline for each
+// rather than beign hard coded to parameters of a Gaussian
+void LinearInterp::interpolate(){
+
+  vector<double> xValues;
+  vector<double> dmValues;
+  vector<double> sigmaValues;
+  vector<TString> paramNameTemplates; //TStrings are better than cpp strings because they have an intuitive find and repalce function
+    
+  int mh0 = allMH_[0]; //pick the first MH to get param names. It doesn't really matter which to pick here/
+    
+  typedef map<string,RooRealVar* >::iterator it_map2;
+    
+  // here we get the names of the params at mh0, and then we will loop through this list in the next loop
+  for(it_map2 iterator2 = fitParams[mh0].begin(); iterator2 != fitParams[mh0].end(); iterator2++) {
+    paramNameTemplates.push_back(TString(iterator2->first));
+   }
+    
+  // next loop through each param name template and for each MH, in order to make a spline.
+  for (int iParam =0; iParam < paramNameTemplates.size() ; iParam++){
+    //fill the x,y values of the parameter 
+    vector<double> mhValues;
+    vector<double> paramValues;
+    for (unsigned int i=0; i<allMH_.size(); i++){
+      int mh = allMH_[i];
+      mhValues.push_back(double(mh)); 
+      TString thisParamName = paramNameTemplates[iParam]; 
+      thisParamName = thisParamName.ReplaceAll(TString(Form("mh%d",mh0)),TString(Form("mh%d",mh))); //name of equivalent param for this MH value.
+      paramValues.push_back(fitParams[mh][thisParamName.Data()]->getVal()); // .Data() converts a TSTring into a regular string
+    }
+    TString splineName = paramNameTemplates[iParam]; 
+    splineName =  splineName.ReplaceAll(TString(Form("_mh%d",mh0)),TString(""));  // just remove the reference to the MH value in param name
+    //it's just that easy: plug the x,y values of the param into the Spline constructor
+    RooSpline1D *paramSpline = new RooSpline1D(splineName.Data(),splineName.Data(),*MH,mhValues.size(),&(mhValues[0]),&(paramValues[0]),"LINEAR");
+    // and save it for later use.
+    splines.insert(pair<string,RooSpline1D*>(paramSpline->GetName(),paramSpline));
+    if (verbosity_) std::cout << "[INFO] Linear Interp: preparing this spline " << paramSpline->GetName() << std::endl;
+  }
+}
+
+// this old class is depracated as it was basically hard-coded for a sum of Gaussians functional form
+// leaving it here for reference but it can probably be safely deleted 
+/*void LinearInterp::interpolate(int nGaussians){
   for (int g=0; g<nGaussians; g++) {
     vector<double> xValues;
     vector<double> dmValues;
@@ -100,7 +142,7 @@ void LinearInterp::interpolate(int nGaussians){
       }
     }
   }
-}
+}*/
 
 map<string,RooSpline1D*> LinearInterp::getSplines(){
   return splines;
