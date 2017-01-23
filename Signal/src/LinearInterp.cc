@@ -7,7 +7,6 @@ using namespace RooFit;
 
 LinearInterp::LinearInterp(RooRealVar *MHvar, vector<int> massList, map<int,map<string,RooRealVar*> > fitParamVals, bool doSecMods, vector<int> skipMasses):
   MH(MHvar),
-  allMH_(massList),
   fitParams(fitParamVals),
   doSecondaryModels(doSecMods),
   secondaryModelVarsSet(false),

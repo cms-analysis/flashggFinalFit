@@ -510,7 +510,7 @@ int main(int argc, char *argv[]){
 	dZ_->setMax(25.0);
 	dZ_->setBins(100);
   intLumi_ = (RooRealVar*)inWS->var("IntLumi");
-  if !(intLumi_) {
+  if (!intLumi_) {
      intLumi_ = new RooRealVar("IntLumi","hacked int lumi", 1000.);
      std::cout << "WARNING THIS IS A DUMMY INTLUMI MAKE SURE TO REMOVE ONCE NORMALISATION BUG IS FIXED " << std::endl;
   }
