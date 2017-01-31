@@ -547,7 +547,7 @@ void Plot(RooRealVar *mass, RooDataSet *data, RooAbsPdf *pdf, pair<double,double
   chi2ndof_latex->SetTextSize(0.035);
   chi2ndof_latex->SetTextAlign(33);
   chi2ndof_latex->SetNDC();
-  chi2ndof_latex->DrawLatex(0.93,0.83,Form("#chi^{2}/n_{d.o.f.}=%.3f/%d",chi2_bis,ndof));
+  //chi2ndof_latex->DrawLatex(0.93,0.83,Form("#chi^{2}/n_{d.o.f.}=%.3f/%d",chi2_bis,ndof));
   for (unsigned int i =0 ; i < negWeightBins.size() ; i++){
     TArrow *negBinsArrow = new TArrow(negWeightBins[i],0.0,negWeightBins[i],halfmax/2,0.02,"<>");
     negBinsArrow->SetLineWidth(2.);

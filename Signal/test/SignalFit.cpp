@@ -98,14 +98,16 @@ float originalIntLumi_;
 float mcBeamSpotWidth_=5.14; //cm // the beamspot has a certain width in MC which is not necessarily the same in data. for the data/MC to agree, we reweight the MC to match the data Beamspot width, using dZ as a proxy (they have a factor of sqrt(2) because you are subtracting one gaussain distributed quantity from another)
 //float dataBeamSpotWidth_=4.24; //cm
 float dataBeamSpotWidth_=3.5; //cm
-//string referenceProc_="ggh";
-string referenceProc_="GG2H";
-//string referenceProcWV_="ggh";
-string referenceProcWV_="GG2H";
-//string referenceProcTTH_="tth";
-string referenceProcTTH_="TTH";
-string referenceTagWV_="UntaggedTag_2";
-string referenceTagRV_="UntaggedTag_2";
+string referenceProc_="ggh";
+//string referenceProc_="GG2H";
+string referenceProcWV_="ggh";
+//string referenceProcWV_="GG2H";
+string referenceProcTTH_="tth";
+//string referenceProcTTH_="TTH";
+//string referenceTagWV_="UntaggedTag_2";
+string referenceTagWV_="TTHHadronicTag";
+//string referenceTagRV_="UntaggedTag_2";
+string referenceTagRV_="TTHHadronicTag";
 vector<string> map_proc_;
 vector<string> map_cat_;
 vector<string> map_replacement_proc_;
@@ -431,12 +433,14 @@ int main(int argc, char *argv[]){
 
   // reference details for low stats cats
   // need to make this configurable ?! -LC
-  //referenceProc_="ggh";
-  referenceProc_="GG2H";
-  //referenceProcTTH_="tth";
-  referenceProcTTH_="TTH";
-  referenceTagWV_="UntaggedTag_2"; // histest stats WV is ggh Untagged 3. 
-  referenceTagRV_="UntaggedTag_2"; // fairly low resolution tag even for ggh, more approprioate as te default than re-using the original tag.
+  referenceProc_="ggh";
+  //referenceProc_="GG2H";
+  referenceProcTTH_="tth";
+  //referenceProcTTH_="TTH";
+  //referenceTagWV_="UntaggedTag_2"; // histest stats WV is ggh Untagged 3. 
+  referenceTagWV_="TTHHadronicTag"; // histest stats WV is ggh Untagged 3. 
+  //referenceTagRV_="UntaggedTag_2"; // fairly low resolution tag even for ggh, more approprioate as te default than re-using the original tag.
+  referenceTagRV_="TTHHadronicTag"; // fairly low resolution tag even for ggh, more approprioate as te default than re-using the original tag.
   // are WV which needs to borrow should be taken from here
   
   // isFlashgg should now be the only option.
@@ -605,12 +609,12 @@ int main(int argc, char *argv[]){
 		  int nGaussiansRV = boost::lexical_cast<int>(els[2]);
 		  int nGaussiansWV = boost::lexical_cast<int>(els[3]);
 
-	  	replace_ = false; // old method of replacing from Matt and Nick
+	  	//replace_ = false; // old method of replacing from Matt and Nick
       // have a different appraoch now but could re-use machinery.
 
 		  if( els.size()==6 ) { // in this case you have specified a replacement tag!
 			  replaceWith_ = make_pair(els[4],els[5]); // proc, cat
-		   	replace_ = true;
+		   	//replace_ = true;
         map_replacement_proc_.push_back(els[4]);
         map_replacement_cat_.push_back(els[5]);
       } else {
@@ -875,9 +879,9 @@ int main(int argc, char *argv[]){
       simultaneousFitRV.setDatasetsSTD(datasetsRV);
       if (verbose_) std::cout << "[INFO] RV running fits" << std::endl;
       simultaneousFitRV.runFits(ncpu_,Form("%s/initialFits/rv_%s_%s",plotDir_.c_str(),proc.c_str(),cat.c_str()),iterativeFitConstraint_);
-      if( replace_ ) {
+      /*if( replace_ ) {
         simultaneousFitRV.setFitParams(allParameters[replaceWith_].first); 
-      }
+      }*/
       if (!skipPlots_) simultaneousFitRV.plotFits(Form("%s/initialFits/%s_%s_rv",plotDir_.c_str(),proc.c_str(),cat.c_str()),"RV");
     }
     parlist_t fitParamsRV = simultaneousFitRV.getFitParams();
@@ -898,9 +902,9 @@ int main(int argc, char *argv[]){
       simultaneousFitWV.setDatasetsSTD(datasetsWV);
       if (verbose_) std::cout << "[INFO] WV running fits" << std::endl;
       simultaneousFitWV.runFits(ncpu_,Form("%s/initialFits/wv_%s_%s",plotDir_.c_str(),proc.c_str(),cat.c_str()),iterativeFitConstraint_);
-      if( replace_ ) {
+      /*if( replace_ ) {
         simultaneousFitWV.setFitParams(allParameters[replaceWith_].second); 
-      }
+      }*/
       if (!skipPlots_) simultaneousFitWV.plotFits(Form("%s/initialFits/%s_%s_wv",plotDir_.c_str(),proc.c_str(),cat.c_str()),"WV");
     }
     parlist_t fitParamsWV = simultaneousFitWV.getFitParams();
@@ -936,14 +940,14 @@ int main(int argc, char *argv[]){
       initFitRV.setDatasetsSTD(datasetsRV);
       if (verbose_) std::cout << "[INFO] RV running fits" << std::endl;
       initFitRV.runFits(ncpu_);
-      if (!runInitialFitsOnly_ && !replace_) {
+      /*if (!runInitialFitsOnly_ && !replace_) {
         initFitRV.saveParamsToFileAtMH(Form("dat/in/%s_%s_rv.dat",proc.c_str(),cat.c_str()),constraintValueMass_);
         initFitRV.loadPriorConstraints(Form("dat/in/%s_%s_rv.dat",proc.c_str(),cat.c_str()),constraintValue_);
         initFitRV.runFits(ncpu_);
       }
       if( replace_ ) {
         initFitRV.setFitParams(allParameters[replaceWith_].first); 
-      }
+      }*/
       if (!skipPlots_) initFitRV.plotFits(Form("%s/initialFits/%s_%s_rv",plotDir_.c_str(),proc.c_str(),cat.c_str()),"RV");
       }
       parlist_t fitParamsRV = initFitRV.getFitParams();
@@ -964,14 +968,14 @@ int main(int argc, char *argv[]){
         initFitWV.setDatasetsSTD(datasetsWV);
         if (verbose_) std::cout << "[INFO] WV running fits" << std::endl;
         initFitWV.runFits(ncpu_);
-        if (!runInitialFitsOnly_ && !replace_) {
+        /*if (!runInitialFitsOnly_ && !replace_) {
           initFitWV.saveParamsToFileAtMH(Form("dat/in/%s_%s_wv.dat",proc.c_str(),cat.c_str()),constraintValueMass_);
           initFitWV.loadPriorConstraints(Form("dat/in/%s_%s_wv.dat",proc.c_str(),cat.c_str()),constraintValue_);
           initFitWV.runFits(ncpu_);
         }
         if( replace_ ) {
           initFitWV.setFitParams(allParameters[replaceWith_].second); 
-        }
+        }*/
         if (!skipPlots_) initFitWV.plotFits(Form("%s/initialFits/%s_%s_wv",plotDir_.c_str(),proc.c_str(),cat.c_str()),"WV");
       }
       parlist_t fitParamsWV = initFitWV.getFitParams();

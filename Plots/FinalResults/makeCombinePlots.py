@@ -391,7 +391,8 @@ def pvalPlot(allVals):
 
   print "DEBUG SimultaneousFit b"  
   # draw sigma lines
-  sigmas=[1,2,3,4,5,6]
+  #sigmas=[1,2,3,4,5,6]
+  sigmas=[1,2,3,4,5,6,7,8,9,10]
   lines=[]
   labels=[]
   for i,sig in enumerate(sigmas):
@@ -411,9 +412,11 @@ def pvalPlot(allVals):
     labels[i].SetTextColor(13)
     labels[i].SetTextAlign(11);
     if not options.yaxis:
-      if y<=mg.GetYaxis().GetXmax() and y>=mg.GetYaxis().GetXmin():
-        lines[i].Draw('SAME')
-        labels[i].Draw('SAME')
+      #if y<=mg.GetYaxis().GetXmax() and y>=mg.GetYaxis().GetXmin():
+      #  lines[i].Draw('SAME')
+      #  labels[i].Draw('SAME')
+      lines[i].Draw('SAME')
+      labels[i].Draw('SAME')
     else:
       if y<=float(options.yaxis.split(',')[1]) and y>=float(options.yaxis.split(',')[0]):
         lines[i].Draw('SAME')

@@ -211,7 +211,8 @@ Masses = range(120,135,5)
 
 procs=["ggh","vbf","wh","zh","tth"]
 masses=[120.,125.,130.]
-cats=["UntaggedTag_0","UntaggedTag_1","UntaggedTag_2","UntaggedTag_3","VBFTag_0","VBFTag_1","TTHLeptonicTag","TTHHadronicTag"]
+#cats=["UntaggedTag_0","UntaggedTag_1","UntaggedTag_2","UntaggedTag_3","VBFTag_0","VBFTag_1","TTHLeptonicTag","TTHHadronicTag"]
+cats=["TTHLeptonicTag","TTHHadronicTag"]
 sqrts = 13
 ws = WSTFileWrapper(sys.argv[1],"tagsDumper/cms_hgg_%sTeV"%sqrts)
 extraFile=sys.argv[2]
@@ -401,7 +402,7 @@ MG.GetXaxis().SetTitleOffset(0.7)
 MG.GetXaxis().SetRangeUser(120.1,129.9)
 #MG.GetXaxis().SetRangeUser(120.0,130)
 MG.GetYaxis().SetTitle("Efficiency #times Acceptance (%)")
-MG.GetYaxis().SetRangeUser(35.1,45.9)
+#MG.GetYaxis().SetRangeUser(35.1,45.9)
 MG.GetYaxis().SetTitleSize(0.055)
 MG.GetYaxis().SetTitleOffset(0.7)
 mytext.DrawLatex(0.1,0.92,"#scale[1.15]{CMS} #bf{#it{Simulation Preliminary}}") #for some reason the bf is reversed??

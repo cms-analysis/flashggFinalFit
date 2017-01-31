@@ -18,7 +18,9 @@ parser.add_option("-w","--workspaces",default="")
 parser.add_option("-v","--sigworkspaces",default="")
 parser.add_option("-u","--bkgworkspaces",default="")
 parser.add_option("-o","--order",default="",help="tell teh script what order to print tags and procs in. Usage proc1,proc2,proc3..:tag1,tag2,tag3...")
-parser.add_option("-f","--flashggCats",default="UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,UntaggedTag_4,VBFTag_0,VBFTag_1,VBFTag_2,TTHHadronicTag,TTHLeptonicTag,VHHadronicTag,VHTightTag,VHLooseTag,VHEtTag")
+#parser.add_option("-f","--flashggCats",default="UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,UntaggedTag_4,VBFTag_0,VBFTag_1,VBFTag_2,TTHHadronicTag,TTHLeptonicTag,VHHadronicTag,VHTightTag,VHLooseTag,VHEtTag")
+#parser.add_option("-f","--flashggCats",default="UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,VBFTag_0,VBFTag_1,TTHHadronicTag,TTHLeptonicTag,ZHLeptonicTag,WHLeptonicTag,VHLeptonicLooseTag,VHHadronicTag,VHMetTag")
+parser.add_option("-f","--flashggCats",default="TTHHadronicTag,TTHLeptonicTag")
 (options,args) = parser.parse_args()
 
 if not (options.workspaces ==""):
@@ -60,6 +62,9 @@ with open(options.input) as i:
     line=line.replace("Tag_","Tag ")
     line=line.replace("Tag"," Tag")
     line=line.replace("TTH","TTH ")
+    line=line.replace("WH","WH ")
+    line=line.replace("ZH","ZH ")
+    line=line.replace("VH","VH ")
     line=line.replace(",","_ ")
     line=line.replace("\n","")
     words=line.split("_")  
@@ -82,6 +87,9 @@ with open(options.siginput) as i:
     line=line.replace("AllCats","Total")
     line=line.replace("Tag"," Tag")
     line=line.replace("TTH","TTH ")
+    line=line.replace("WH","WH ")
+    line=line.replace("ZH","ZH ")
+    line=line.replace("VH","VH ")
     words=line.split("=")  
     print words
     effSigma[words[1]]=words[3]
@@ -100,7 +108,8 @@ for x in effSigma.keys():
 counter=0;
 for x in effSigma.keys():
   
-  exec_line='$CMSSW_BASE/src/flashggFinalFit/Background/bin/makeBkgPlots -b %s -o tmp.root -d tmp -c %d --sqrts 13 --intLumi 2.610000 --massStep 1.000 --nllTolerance 0.050 -L 125 -H 125 --higgsResolution %f --isMultiPdf --useBinnedData --doBands -f %s| grep TABLE > bkg.tmp'%(options.bkgworkspaces,counter,float(effSigma[x]),flashggCats.replace("Tag ","Tag_").replace(" Tag","Tag").replace("TTH ","TTH"))
+  #exec_line='$CMSSW_BASE/src/flashggFinalFit/Background/bin/makeBkgPlots -b %s -o tmp.root -d tmp -c %d --sqrts 13 --intLumi 2.610000 --massStep 1.000 --nllTolerance 0.050 -L 125 -H 125 --higgsResolution %f --isMultiPdf --useBinnedData --doBands -f %s| grep TABLE > bkg.tmp'%(options.bkgworkspaces,counter,float(effSigma[x]),flashggCats.replace("Tag ","Tag_").replace(" Tag","Tag").replace("TTH ","TTH"))
+  exec_line='$CMSSW_BASE/src/flashggFinalFit/Background/bin/makeBkgPlots -b %s -o tmp.root -d tmp -c %d --sqrts 13 --intLumi 2.610000 --massStep 1.000 --nllTolerance 0.050 -L 125 -H 125 --higgsResolution %f --isMultiPdf --useBinnedData --doBands -f %s| grep TABLE > bkg.tmp'%(options.bkgworkspaces,counter,float(effSigma[x]),flashggCats.replace("Tag ","Tag_").replace(" Tag","Tag").replace("TTH ","TTH").replace("WH ","WH").replace("ZH ","ZH").replace("VH ","VH"))
   print exec_line
   os.system(exec_line)
   counter=counter+1
@@ -112,6 +121,9 @@ for x in effSigma.keys():
       line=line.replace("Tag_","Tag ")
       line=line.replace("Tag"," Tag")
       line=line.replace("TTH","TTH ")
+      line=line.replace("WH","WH ")
+      line=line.replace("ZH","ZH ")
+      line=line.replace("VH","VH ")
       print "LCDEBUG ", line
       words=line.split(',')
       print "LCDEBUG ", words[1], ", ", words[3]  
@@ -206,7 +218,11 @@ print line
 
 
 Arr["Total"]={"Total":0}
-for x in Arr.values()[1].keys():
+print "ED DEBUG"
+print "Arr.values()",Arr.values()
+print "Arr.values()[1].keys()",Arr.values()[1].keys()
+#for x in Arr.values()[1].keys():
+for x in Arr.values()[0].keys():
   Arr["Total"][x]=0
 
 print Arr["Total"]
@@ -244,6 +260,8 @@ nTags=len(Arr.keys()[0])
 for x in Arr.keys():
    for y in Arr.values()[0].keys() :
       if x == "Total": continue
+      print "Arr[Total][y]",Arr["Total"][y]
+      print "Arr[x][y]",Arr[x][y]
       Arr["Total"][y] = Arr["Total"][y] +Arr[x][y]
 
 print " Done : Arr[Total]", Arr["Total"]

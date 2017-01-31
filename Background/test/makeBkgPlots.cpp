@@ -56,6 +56,8 @@
 #include "../../tdrStyle/tdrstyle.C"
 #include "../../tdrStyle/CMS_lumi.C"
 
+#include <TSystem.h>
+
 using namespace RooFit;
 using namespace std;
 using namespace boost;
@@ -681,6 +683,7 @@ void plotAllPdfs(RooRealVar *mgg, RooAbsData *data, RooMultiPdf *mpdf, RooCatego
 }
 
 int main(int argc, char* argv[]){
+  gSystem->Load("$CMSSW_BASE/lib/$SCRAM_ARCH/libHiggsAnalysisGBRLikelihood.so");
   
   setTDRStyle();
   writeExtraText = true;       // if extra text
