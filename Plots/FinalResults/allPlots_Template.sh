@@ -9,7 +9,7 @@ INTLUMI=!INTLUMI!
 #./makeCombinePlots.py -f combineJobs13TeV_$EXT/MuScanFloatMH/MuScanFloatMH.root --mu -t "$INTLUMI fb^{-1} (13#scale[0.5]{ }TeV)" -o MuScanFloatMH --MHtext 0.17:0.7:"#splitline{m_{H}=125.09 #pm 0.24 GeV}{#hat{m}_{H}=125.33 GeV}" -b
 #./makeCombinePlots.py -f combineJobs13TeV_$EXT/MuScanFixMH/MuScanFixMH.root --mu -t "$INTLUMI fb^{-1} (13#scale[0.5]{ }TeV)" --MHtext 0.17:0.7:"m_{H}=125.09 GeV" -o MuScanFixMH  -b
 #./makeCombinePlots.py -f combineJobs13TeV_$EXT/MuScanFixMH125.97/MuScanFixMH125.97.root --mu -t "$INTLUMI fb^{-1} (13#scale[0.5]{ }TeV)" --MHtext 0.17:0.7:"m_{H}=125.97 GeV" -o MuScanFixMH125.97  -b
-./makeCombinePlots.py -f combineJobs13TeV_$EXT/MuScanProfileMH/MuScanProfileMH.root --mu -t "$INTLUMI fb^{-1} (13#scale[0.5]{ }TeV)" --MHtext 0.17:0.7:"m_{H} Profiled" -o MuScanProfileMH  -b #RooRealVar::MH = 125.973 +/- 0.292702  L(115 - 135) // [GeV]
+#./makeCombinePlots.py -f combineJobs13TeV_$EXT/MuScanProfileMH/MuScanProfileMH.root --mu -t "$INTLUMI fb^{-1} (13#scale[0.5]{ }TeV)" --MHtext 0.17:0.7:"m_{H} Profiled" -o MuScanProfileMH  -b #RooRealVar::MH = 125.973 +/- 0.292702  L(115 - 135) // [GeV]
 #./makeCombinePlots.py -f combineJobs13TeV_$EXT/MuScanAllSyst/MuScanAllSyst.root --mu -t "$INTLUMI fb^{-1} (13#scale[0.5]{ }TeV)" --MHtext 0.17:0.7:"m_{H}=125.97 GeV" -o MuScanAllSyst  -b
 #./makeCombinePlots.py -f combineJobs13TeV_$EXT/MuScanNoSyst/MuScanNoSyst.root --mu -t "$INTLUMI fb^{-1} (13#scale[0.5]{ }TeV)" --MHtext 0.17:0.7:"m_{H}=125.97 GeV" -o MuScanNoSyst  -b
 #./makeCombinePlots.py -f combineJobs13TeV_$EXT/MuScanNoTheory/MuScanNoTheory.root --mu -t "$INTLUMI fb^{-1} (13#scale[0.5]{ }TeV)" --MHtext 0.17:0.7:"m_{H}=125.97 GeV" -o MuScanNoTheory  -b

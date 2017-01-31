@@ -18,9 +18,7 @@ parser.add_option("-w","--workspaces",default="")
 parser.add_option("-v","--sigworkspaces",default="")
 parser.add_option("-u","--bkgworkspaces",default="")
 parser.add_option("-o","--order",default="",help="tell teh script what order to print tags and procs in. Usage proc1,proc2,proc3..:tag1,tag2,tag3...")
-#parser.add_option("-f","--flashggCats",default="UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,UntaggedTag_4,VBFTag_0,VBFTag_1,VBFTag_2,TTHHadronicTag,TTHLeptonicTag,VHHadronicTag,VHTightTag,VHLooseTag,VHEtTag")
-#parser.add_option("-f","--flashggCats",default="UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,VBFTag_0,VBFTag_1,TTHHadronicTag,TTHLeptonicTag,ZHLeptonicTag,WHLeptonicTag,VHLeptonicLooseTag,VHHadronicTag,VHMetTag")
-parser.add_option("-f","--flashggCats",default="TTHHadronicTag,TTHLeptonicTag")
+parser.add_option("-f","--flashggCats",default="UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,VBFTag_0,VBFTag_1,VBFTag_2,TTHHadronicTag,TTHLeptonicTag,ZHLeptonicTag,WHLeptonicTag,VHLeptonicLooseTag,VHHadronicTag,VHMetTag")
 (options,args) = parser.parse_args()
 
 if not (options.workspaces ==""):
@@ -108,7 +106,6 @@ for x in effSigma.keys():
 counter=0;
 for x in effSigma.keys():
   
-  #exec_line='$CMSSW_BASE/src/flashggFinalFit/Background/bin/makeBkgPlots -b %s -o tmp.root -d tmp -c %d --sqrts 13 --intLumi 2.610000 --massStep 1.000 --nllTolerance 0.050 -L 125 -H 125 --higgsResolution %f --isMultiPdf --useBinnedData --doBands -f %s| grep TABLE > bkg.tmp'%(options.bkgworkspaces,counter,float(effSigma[x]),flashggCats.replace("Tag ","Tag_").replace(" Tag","Tag").replace("TTH ","TTH"))
   exec_line='$CMSSW_BASE/src/flashggFinalFit/Background/bin/makeBkgPlots -b %s -o tmp.root -d tmp -c %d --sqrts 13 --intLumi 2.610000 --massStep 1.000 --nllTolerance 0.050 -L 125 -H 125 --higgsResolution %f --isMultiPdf --useBinnedData --doBands -f %s| grep TABLE > bkg.tmp'%(options.bkgworkspaces,counter,float(effSigma[x]),flashggCats.replace("Tag ","Tag_").replace(" Tag","Tag").replace("TTH ","TTH").replace("WH ","WH").replace("ZH ","ZH").replace("VH ","VH"))
   print exec_line
   os.system(exec_line)
@@ -218,9 +215,6 @@ print line
 
 
 Arr["Total"]={"Total":0}
-print "ED DEBUG"
-print "Arr.values()",Arr.values()
-print "Arr.values()[1].keys()",Arr.values()[1].keys()
 #for x in Arr.values()[1].keys():
 for x in Arr.values()[0].keys():
   Arr["Total"][x]=0
@@ -260,8 +254,6 @@ nTags=len(Arr.keys()[0])
 for x in Arr.keys():
    for y in Arr.values()[0].keys() :
       if x == "Total": continue
-      print "Arr[Total][y]",Arr["Total"][y]
-      print "Arr[x][y]",Arr[x][y]
       Arr["Total"][y] = Arr["Total"][y] +Arr[x][y]
 
 print " Done : Arr[Total]", Arr["Total"]
@@ -454,7 +446,7 @@ print "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
 
 
 print "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
-print "\\resizebox{\\textwidth}{!}{"
+#print "\\resizebox{\\textwidth}{!}{"
 line="\\begin{tabular}{ |r | c | c | c  | c | c |"
 for x in range(0,nProcs):
  line = line + " c | "
@@ -473,7 +465,8 @@ else : procList = options.order.split(":")[0].split(",")
 for p in procList:
  #print p
   line=line+ p + " & "
-line =line+"  $\\sigma_{eff} $  & $\\sigma_{HM} $ & (GeV$^{-1}$) & (GeV$^{-1}$ fb^{-1} )& \\\\ "
+#line =line+"  $\\sigma_{eff} $  & $\\sigma_{HM} $ & (GeV$^{-1}$) & (GeV$^{-1}$ fb^{-1} )& \\\\ "
+line =line+"  $\\sigma_{eff} $  & $\\sigma_{HM} $ & (GeV$^{-1}$) & (GeV$^{-1}$ $fb^{-1}$ )& \\\\ "
 print line 
 print "\\hline"
 print "\\hline"
@@ -532,7 +525,8 @@ for l in dataLines :
 
 print "\\hline"
 print "\\hline"
-print "\end{tabular}}"
+#print "\end{tabular}}"
+print "\end{tabular}"
 
 print "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
 
