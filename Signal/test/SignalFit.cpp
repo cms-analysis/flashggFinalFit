@@ -698,11 +698,15 @@ int main(int argc, char *argv[]){
 
         if (verbose_)std::cout << "[INFO] Opening dataset called "<< Form("%s_%d_13TeV_%s",proc.c_str(),mh,cat.c_str()) << " in in WS " << inWS << std::endl;
         RooDataSet *data0   = reduceDataset((RooDataSet*)inWS->data(Form("%s_%d_13TeV_%s",proc.c_str(),mh,cat.c_str())));
-				if (beamSpotReweigh_){
+				//if (beamSpotReweigh_){
+                                if (beamSpotReweigh_ && !(TString(proc).Contains("tth") && mh==125)){
         data = beamSpotReweigh(intLumiReweigh(data0));
 				} else {
         data = intLumiReweigh(data0);
 				}
+                                if (beamSpotReweigh_ && TString(proc).Contains("tth") && mh==125) { 
+                                    std::cout << "WARNING - BEAMSPOT REWEIGH BEING SKIPPED FOR proc " << proc << " and mass point " << mh << std::endl << std::endl;
+                                }
         if (verbose_) std::cout << "[INFO] Old dataset (before intLumi change): " << *data0 << std::endl;
 
         dataRV = rvwvDataset(data,"RV"); 
@@ -733,7 +737,8 @@ int main(int argc, char *argv[]){
           
           //pick the dataset for the replacement proc and cat, reduce it (ie remove pdfWeights etc) ,
           //reweight for lumi, and then get the RV events only.
-					if(beamSpotReweigh_){
+					//if(beamSpotReweigh_){
+                                        if (beamSpotReweigh_ && !(TString(proc).Contains("tth") && mh==125)){
           data0Ref   = beamSpotReweigh(
 													rvwvDataset(
                         		intLumiReweigh(
@@ -753,6 +758,9 @@ int main(int argc, char *argv[]){
                        ), "RV"
                       );
 					}
+                                        if (beamSpotReweigh_ && TString(replancementProc).Contains("tth") && mh==125) { 
+                                            std::cout << "WARNING - BEAMSPOT REWEIGH BEING SKIPPED FOR proc " << proc << " and mass point " << mh << std::endl << std::endl;
+                                        }
           if (data0Ref) {
            std::cout << "[INFO] Found replacement dataset for RV:" << *data0Ref<< std::endl;
           } else {
@@ -780,7 +788,8 @@ int main(int argc, char *argv[]){
         
          //pick the dataset for the replacement proc and cat, reduce it (ie remove pdfWeights etc) ,
          //reweight for lumi and then get the WV events only.
-				 if (beamSpotReweigh_){
+				 //if (beamSpotReweigh_){
+                                 if (beamSpotReweigh_ && !(TString(proc).Contains("tth") && mh==125)){
          data0Ref   = beamSpotReweigh( 
 				               rvwvDataset(
                         intLumiReweigh(
@@ -799,6 +808,9 @@ int main(int argc, char *argv[]){
                        ), "WV"
                       );
 					}
+                                    if (beamSpotReweigh_ && TString(referenceProcWV_).Contains("tth") && mh==125) { 
+                                        std::cout << "WARNING - BEAMSPOT REWEIGH BEING SKIPPED FOR proc " << proc << " and mass point " << mh << std::endl << std::endl;
+                                    }
           if (data0Ref) {
            std::cout << "[INFO] Found replacement dataset for WV:" << *data0Ref<< std::endl;
           } else { // if the dataset was fine to begin with, make the reference dataset the original
