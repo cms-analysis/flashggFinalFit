@@ -98,12 +98,12 @@ float originalIntLumi_;
 float mcBeamSpotWidth_=5.14; //cm // the beamspot has a certain width in MC which is not necessarily the same in data. for the data/MC to agree, we reweight the MC to match the data Beamspot width, using dZ as a proxy (they have a factor of sqrt(2) because you are subtracting one gaussain distributed quantity from another)
 //float dataBeamSpotWidth_=4.24; //cm
 float dataBeamSpotWidth_=3.5; //cm
-//string referenceProc_="ggh";
-string referenceProc_="GG2H";
-//string referenceProcWV_="ggh";
-string referenceProcWV_="GG2H";
-//string referenceProcTTH_="tth";
-string referenceProcTTH_="TTH";
+string referenceProc_="ggh";
+//string referenceProc_="GG2H";
+string referenceProcWV_="ggh";
+//string referenceProcWV_="GG2H";
+string referenceProcTTH_="tth";
+//string referenceProcTTH_="TTH";
 string referenceTagWV_="UntaggedTag_2";
 string referenceTagRV_="UntaggedTag_2";
 vector<string> map_proc_;
@@ -431,10 +431,10 @@ int main(int argc, char *argv[]){
 
   // reference details for low stats cats
   // need to make this configurable ?! -LC
-  //referenceProc_="ggh";
-  referenceProc_="GG2H";
-  //referenceProcTTH_="tth";
-  referenceProcTTH_="TTH";
+  referenceProc_="ggh";
+  //referenceProc_="GG2H";
+  referenceProcTTH_="tth";
+  //referenceProcTTH_="TTH";
   referenceTagWV_="UntaggedTag_2"; // histest stats WV is ggh Untagged 3. 
   referenceTagRV_="UntaggedTag_2"; // fairly low resolution tag even for ggh, more approprioate as te default than re-using the original tag.
   // are WV which needs to borrow should be taken from here
@@ -607,7 +607,7 @@ int main(int argc, char *argv[]){
 
 	  	replace_ = false; // old method of replacing from Matt and Nick
       // have a different appraoch now but could re-use machinery.
-
+      std::cout << " LC DEBUG here is your line " << line << " els.size()==6 " << (els.size()==6) <<  std::endl;
 		  if( els.size()==6 ) { // in this case you have specified a replacement tag!
 			  replaceWith_ = make_pair(els[4],els[5]); // proc, cat
 		   	replace_ = true;
@@ -671,7 +671,7 @@ int main(int argc, char *argv[]){
 
     cout << "-----------------------------------------------------------------" << endl;
     cout << Form("[INFO] Running fits for proc:%s - cat:%s with nGausRV:%d nGausWV:%d",proc.c_str(),cat.c_str(),nGaussiansRV,nGaussiansWV) << endl;
-    //if( replace_ ) { cout << Form("Will replace parameters using  proc:%s - cat:%d",replaceWith_.first.c_str(),replaceWith_.second) << endl; }
+    //if( replace_ ) { cout << Form("Will replace parameters using  proc:%s - cat:%d",replaceWith_.first.c_str(),replaceWith_.second.c_str()) << endl; }
 
     cout << "-----------------------------------------------------------------" << endl;
     // get datasets for each MH here
@@ -861,7 +861,7 @@ int main(int argc, char *argv[]){
     if(useSSF_){
     // right vertex
     if (verbose_) std::cout << "[INFO] preapraing initialfit RV, massList size "<< massList_.size() << std::endl;
-    SimultaneousFit simultaneousFitRV(mass_,MH,mhLow_,mhHigh_,skipMasses_,binnedFit_,nBins_,massList_,cat,proc,Form("%s/rv",plotDir_.c_str()), /*maxOrder of MH depende of RooPolyVars*/ 2);
+    SimultaneousFit simultaneousFitRV(mass_,MH,mhLow_,mhHigh_,skipMasses_,binnedFit_,nBins_,massList_,cat,proc,Form("%s/rv",plotDir_.c_str()), /*maxOrder of MH depende of RooPolyVars*/ 1);
     simultaneousFitRV.setVerbosity(verbose_);
     if (!cloneFits_) {
       if (verbose_) std::cout << "[INFO] RV building sum of gaussians with nGaussiansRV " << nGaussiansRV << std::endl;
@@ -875,16 +875,23 @@ int main(int argc, char *argv[]){
       simultaneousFitRV.setDatasetsSTD(datasetsRV);
       if (verbose_) std::cout << "[INFO] RV running fits" << std::endl;
       simultaneousFitRV.runFits(ncpu_,Form("%s/initialFits/rv_%s_%s",plotDir_.c_str(),proc.c_str(),cat.c_str()),iterativeFitConstraint_);
-      if( replace_ ) {
-        simultaneousFitRV.setFitParams(allParameters[replaceWith_].first); 
-      }
+      std::cout << "[INFO] LC SigFit debug a" << std::endl;
+      //if( replace_ ) {
+      //std::cout << "[INFO] LC SigFit debug b" << std::endl;
+       // simultaneousFitRV.setFitParams(allParameters[replaceWith_].first); 
+     // std::cout << "[INFO] LC SigFit debug c" << std::endl;
+     // }
+      std::cout << "[INFO] LC SigFit debug d" << std::endl;
       if (!skipPlots_) simultaneousFitRV.plotFits(Form("%s/initialFits/%s_%s_rv",plotDir_.c_str(),proc.c_str(),cat.c_str()),"RV");
+      std::cout << "[INFO] LC SigFit debug e" << std::endl;
     }
+      std::cout << "[INFO] LC SigFit debug f" << std::endl;
     parlist_t fitParamsRV = simultaneousFitRV.getFitParams();
+      std::cout << "[INFO] LC SigFit debug g" << std::endl;
 
     // wrong vertex
     if (verbose_) std::cout << "[INFO] preparing initialfit WV, masList size "<< massList_.size() << std::endl;
-    SimultaneousFit simultaneousFitWV(mass_,MH,mhLow_,mhHigh_,skipMasses_,binnedFit_,nBins_,massList_,cat,proc,Form("%s/wv",plotDir_.c_str()), /*maxOrder of MH depende of RooPolyVars*/ 2);
+    SimultaneousFit simultaneousFitWV(mass_,MH,mhLow_,mhHigh_,skipMasses_,binnedFit_,nBins_,massList_,cat,proc,Form("%s/wv",plotDir_.c_str()), /*maxOrder of MH depende of RooPolyVars*/ 1);
     simultaneousFitWV.setVerbosity(verbose_);
     if (!cloneFits_) {
       if (verbose_) std::cout << "[INFO] WV building sum of gaussians wth nGaussiansWV "<< nGaussiansWV << std::endl;
@@ -897,14 +904,22 @@ int main(int argc, char *argv[]){
       simultaneousFitWV.setDatasets(FITdatasetsWV);
       simultaneousFitWV.setDatasetsSTD(datasetsWV);
       if (verbose_) std::cout << "[INFO] WV running fits" << std::endl;
+      std::cout << "[INFO] LC SigFit debug h" << std::endl;
       simultaneousFitWV.runFits(ncpu_,Form("%s/initialFits/wv_%s_%s",plotDir_.c_str(),proc.c_str(),cat.c_str()),iterativeFitConstraint_);
-      if( replace_ ) {
-        simultaneousFitWV.setFitParams(allParameters[replaceWith_].second); 
-      }
+      std::cout << "[INFO] LC SigFit debug i" << std::endl;
+      //if( replace_ ) {
+      //std::cout << "[INFO] LC SigFit debug j" << std::endl;
+        //simultaneousFitWV.setFitParams(allParameters[replaceWith_].second); 
+     // }
+      std::cout << "[INFO] LC SigFit debug k" << std::endl;
       if (!skipPlots_) simultaneousFitWV.plotFits(Form("%s/initialFits/%s_%s_wv",plotDir_.c_str(),proc.c_str(),cat.c_str()),"WV");
+      std::cout << "[INFO] LC SigFit debug l" << std::endl;
     }
+      std::cout << "[INFO] LC SigFit debug m" << std::endl;
     parlist_t fitParamsWV = simultaneousFitWV.getFitParams();
+      std::cout << "[INFO] LC SigFit debug n" << std::endl;
     allParameters[ make_pair(proc,cat) ] = make_pair(fitParamsRV,fitParamsWV);
+      std::cout << "[INFO] LC SigFit debug o" << std::endl;
     
     //Ok, now that we have made the fit parameters eitehr with the regular dataset or the replacement one.
     // Now we should be using the ORIGINAL dataset
@@ -935,18 +950,30 @@ int main(int argc, char *argv[]){
       initFitRV.setDatasets(FITdatasetsRV);
       initFitRV.setDatasetsSTD(datasetsRV);
       if (verbose_) std::cout << "[INFO] RV running fits" << std::endl;
+      std::cout << "[INFO] LC SigFit debug i1" << std::endl;
       initFitRV.runFits(ncpu_);
-      if (!runInitialFitsOnly_ && !replace_) {
-        initFitRV.saveParamsToFileAtMH(Form("dat/in/%s_%s_rv.dat",proc.c_str(),cat.c_str()),constraintValueMass_);
-        initFitRV.loadPriorConstraints(Form("dat/in/%s_%s_rv.dat",proc.c_str(),cat.c_str()),constraintValue_);
-        initFitRV.runFits(ncpu_);
-      }
-      if( replace_ ) {
-        initFitRV.setFitParams(allParameters[replaceWith_].first); 
-      }
+      //std::cout << "[INFO] LC SigFit debug i2 !replace_" << !replace_ << " !runInitialFitsOnly_ " << !runInitialFitsOnly_ << std::endl;
+      //if (!runInitialFitsOnly_ && !replace_) {
+      //std::cout << "[INFO] LC SigFit debug i3" << std::endl;
+        //initFitRV.saveParamsToFileAtMH(Form("dat/in/%s_%s_rv.dat",proc.c_str(),cat.c_str()),constraintValueMass_);
+      //std::cout << "[INFO] LC SigFit debug i4" << Form("dat/in/%s_%s_rv.dat",proc.c_str(),cat.c_str()  )<< std::endl;
+       // initFitRV.loadPriorConstraints(Form("dat/in/%s_%s_rv.dat",proc.c_str(),cat.c_str()),constraintValue_);
+       // initFitRV.runFits(ncpu_);
+     // std::cout << "[INFO] LC SigFit debug i5" << std::endl;
+      //}
+      //std::cout << "[INFO] LC SigFit debug i6" << std::endl;
+      //if( replace_ ) {
+      //std::cout << "[INFO] LC SigFit debug i7" << std::endl;
+       // initFitRV.setFitParams(allParameters[replaceWith_].first); 
+      //std::cout << "[INFO] LC SigFit debug i8" << std::endl;
+      //}
+      std::cout << "[INFO] LC SigFit debug i9" << std::endl;
       if (!skipPlots_) initFitRV.plotFits(Form("%s/initialFits/%s_%s_rv",plotDir_.c_str(),proc.c_str(),cat.c_str()),"RV");
+      std::cout << "[INFO] LC SigFit debug i10" << std::endl;
       }
+      std::cout << "[INFO] LC SigFit debug i11" << std::endl;
       parlist_t fitParamsRV = initFitRV.getFitParams();
+      std::cout << "[INFO] LC SigFit debug i12" << std::endl;
 
       // wrong vertex
       if (verbose_) std::cout << "[INFO] preparing initialfit WV, masList size "<< massList_.size() << std::endl;
@@ -964,14 +991,14 @@ int main(int argc, char *argv[]){
         initFitWV.setDatasetsSTD(datasetsWV);
         if (verbose_) std::cout << "[INFO] WV running fits" << std::endl;
         initFitWV.runFits(ncpu_);
-        if (!runInitialFitsOnly_ && !replace_) {
-          initFitWV.saveParamsToFileAtMH(Form("dat/in/%s_%s_wv.dat",proc.c_str(),cat.c_str()),constraintValueMass_);
-          initFitWV.loadPriorConstraints(Form("dat/in/%s_%s_wv.dat",proc.c_str(),cat.c_str()),constraintValue_);
-          initFitWV.runFits(ncpu_);
-        }
-        if( replace_ ) {
-          initFitWV.setFitParams(allParameters[replaceWith_].second); 
-        }
+       // if (!runInitialFitsOnly_ && !replace_) {
+        //  initFitWV.saveParamsToFileAtMH(Form("dat/in/%s_%s_wv.dat",proc.c_str(),cat.c_str()),constraintValueMass_);
+        //  initFitWV.loadPriorConstraints(Form("dat/in/%s_%s_wv.dat",proc.c_str(),cat.c_str()),constraintValue_);
+        //  initFitWV.runFits(ncpu_);
+      //  }
+       // if( replace_ ) {
+        //  initFitWV.setFitParams(allParameters[replaceWith_].second); 
+      //  }
         if (!skipPlots_) initFitWV.plotFits(Form("%s/initialFits/%s_%s_wv",plotDir_.c_str(),proc.c_str(),cat.c_str()),"WV");
       }
       parlist_t fitParamsWV = initFitWV.getFitParams();
