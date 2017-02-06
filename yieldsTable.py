@@ -216,8 +216,8 @@ print line
 
 Arr["Total"]={"Total":0}
 #for x in Arr.values()[1].keys():
-#for x in Arr.values()[0].keys():
-for x in Arr.values()[2].keys():
+for x in Arr.values()[0].keys():
+#for x in Arr.values()[2].keys():
   Arr["Total"][x]=0
 
 print Arr["Total"]
