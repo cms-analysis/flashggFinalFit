@@ -167,19 +167,33 @@ void InitialFit::buildSumOfGaussians(string name, int nGaussians, bool recursive
 void InitialFit::loadPriorConstraints(string filename, float constraintValue){
 
   ifstream datfile;
+  std::cout << "LC DEBUG  InitialFit::loadPriorConstraints a" << std::endl; 
   datfile.open(filename.c_str());
+  std::cout << "LC DEBUG  InitialFit::loadPriorConstraints b" << std::endl; 
   if (datfile.fail()) return;
+  std::cout << "LC DEBUG  InitialFit::loadPriorConstraints c" << std::endl; 
   while (datfile.good()) {
+  std::cout << "LC DEBUG  InitialFit::loadPriorConstraints d" << std::endl; 
     string line;
+  std::cout << "LC DEBUG  InitialFit::loadPriorConstraints e" << std::endl; 
     getline(datfile,line);
+  std::cout << "LC DEBUG  InitialFit::loadPriorConstraints f" << std::endl; 
     if (line=="\n" || line.substr(0,1)=="#" || line==" " || line.empty()) continue;
+  std::cout << "LC DEBUG  InitialFit::loadPriorConstraints g" << std::endl; 
     string name = line.substr(0,line.find_first_of(" "));
+  std::cout << "LC DEBUG  InitialFit::loadPriorConstraints h" << std::endl; 
     double val = boost::lexical_cast<double>(line.substr(line.find_first_of(" ")+1,string::npos));
+  std::cout << "LC DEBUG  InitialFit::loadPriorConstraints i" << name.substr(name.find("_mh")+3,name.find("_g")-name.find("_mh")-3) << std::endl; 
     int mhS = boost::lexical_cast<int>(name.substr(name.find("_mh")+3,name.find("_g")-name.find("_mh")-3));
+  std::cout << "LC DEBUG  InitialFit::loadPriorConstraints j" << std::endl; 
     if (verbosity_>=2) cout << "[INFO] "<< name << " " << mhS << " " << val << endl;
+  std::cout << "LC DEBUG  InitialFit::loadPriorConstraints k" << std::endl; 
     assert(fitParams.find(mhS)!=fitParams.end());
+  std::cout << "LC DEBUG  InitialFit::loadPriorConstraints l" << std::endl; 
     assert(fitParams[mhS].find(name)!=fitParams[mhS].end());
+  std::cout << "LC DEBUG  InitialFit::loadPriorConstraints m" << std::endl; 
     fitParams[mhS][name]->setVal(val);
+  std::cout << "LC DEBUG  InitialFit::loadPriorConstraints n" << std::endl; 
     if (val>0.) fitParams[mhS][name]->setRange((1.-constraintValue)*val,(1.+constraintValue)*val);
     else fitParams[mhS][name]->setRange((1.+constraintValue)*val,(1.-constraintValue)*val);
   }
@@ -315,7 +329,7 @@ void InitialFit::runFits(int ncpu){
           std::cout<<"Constraints set on sigmas of "<<ng-1<<" gaussians of this model"<<std::endl;
          break;
         }
-       
+       std::cout <<  "LC DEBUG DEBUG DEBUG A" << std::endl;
        RooRealVar* dm = (RooRealVar*)formulaMean->find(Form("dm_mh%d_g%d",mh,ng ));
       if(dm!=NULL){
          //dm->Print();
@@ -337,6 +351,7 @@ void InitialFit::runFits(int ncpu){
         }
        
        
+       std::cout <<  "LC DEBUG DEBUG DEBUG B" << std::endl;
        RooRealVar* frac = (RooRealVar*)formulaMean->find(Form("frac_mh%d_g%d",mh,ng ));
       if(frac!=NULL){
           //frac->Print();
@@ -355,7 +370,9 @@ void InitialFit::runFits(int ncpu){
           std::cout<<"Constraints set on fracs of "<<ng-1<<" gaussians of this model"<<std::endl;
          break;
         }
+       std::cout <<  "LC DEBUG DEBUG DEBUG C" << std::endl;
            }
+       std::cout <<  "LC DEBUG DEBUG DEBUG D" << std::endl;
      
             
       //      RooArgSet* actualvars = formulaMean->getComponents();
@@ -382,6 +399,7 @@ void InitialFit::runFits(int ncpu){
       mass->setVal(mh);
       data->add(RooArgSet(*mass),1.e-5);
     }
+       std::cout <<  "LC DEBUG DEBUG DEBUG E" << std::endl;
     //fitModel->Print();
     //data->Print();
     RooFitResult *fitRes;
@@ -394,6 +412,7 @@ void InitialFit::runFits(int ncpu){
     fitResults.insert(pair<int,RooFitResult*>(mh,fitRes));
     mass->setBins(160); //return to default 
     }
+    std::cout <<  "LC DEBUG DEBUG DEBUG F" << std::endl;
 }
 
 void InitialFit::setFitParams(std::map<int,std::map<std::string,RooRealVar*> >& pars )

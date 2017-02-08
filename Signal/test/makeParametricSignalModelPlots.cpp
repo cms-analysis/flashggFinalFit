@@ -127,6 +127,7 @@ map<string,RooDataSet*> getFlashggDataGranular(RooWorkspace *work, int ncats, in
 
   for (int cat=0; cat<ncats; cat++){
     for (int proc=0; proc < procs_.size() ; proc++){
+     if (verbose_) std::cout << "INFO looking for this workspace: " << Form("sig_%s_mass_m%3d_%s",procs_[proc].c_str(),m_hyp,flashggCats_[cat].c_str()) << std::endl;
      result.insert(pair<string,RooDataSet*>(Form("%s_%s",procs_[proc].c_str(),flashggCats_[cat].c_str()),(RooDataSet*)work->data(Form("sig_%s_mass_m%3d_%s",procs_[proc].c_str(),m_hyp,flashggCats_[cat].c_str()))));
       assert(work->data(Form("sig_%s_mass_m%3d_%s",procs_[proc].c_str(),m_hyp,flashggCats_[cat].c_str())));
     }
@@ -547,7 +548,7 @@ void Plot(RooRealVar *mass, RooDataSet *data, RooAbsPdf *pdf, pair<double,double
   chi2ndof_latex->SetTextSize(0.035);
   chi2ndof_latex->SetTextAlign(33);
   chi2ndof_latex->SetNDC();
-  chi2ndof_latex->DrawLatex(0.93,0.83,Form("#chi^{2}/n_{d.o.f.}=%.3f/%d",chi2_bis,ndof));
+  //chi2ndof_latex->DrawLatex(0.93,0.83,Form("#chi^{2}/n_{d.o.f.}=%.3f/%d",chi2_bis,ndof));
   for (unsigned int i =0 ; i < negWeightBins.size() ; i++){
     TArrow *negBinsArrow = new TArrow(negWeightBins[i],0.0,negWeightBins[i],halfmax/2,0.02,"<>");
     negBinsArrow->SetLineWidth(2.);

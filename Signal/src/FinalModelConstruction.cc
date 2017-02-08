@@ -797,7 +797,7 @@ void FinalModelConstruction::buildRvWvPdf(string name, int nGrv, int nGwv, bool 
   rvPdfs = build_DCBpGaus_Pdf(name,nGrv,recursive,rvSplines,Form("_rv_%dTeV",sqrts_));
   wvPdfs = build_DCBpGaus_Pdf(name,nGwv,recursive,wvSplines,Form("_wv_%dTeV",sqrts_)); 
   } else { // sum of N Gaussians
-  if(verbosity_>1) std::cout << " [INFO] Doing FinalModelConstruction with nGaussians" << std::endl;
+  if(verbosity_>1) std::cout << " [INFO] Doing FinalModelConstruction with nGaussians << recursive " << recursive << std::endl;
   rvPdfs = buildPdf(name,nGrv,recursive,rvSplines,Form("_rv_%dTeV",sqrts_)); 
   wvPdfs = buildPdf(name,nGwv,recursive,wvSplines,Form("_wv_%dTeV",sqrts_)); 
   }
@@ -1258,11 +1258,21 @@ void FinalModelConstruction::plotPdf(string outDir){
   for (unsigned int i=0; i<allMH_.size(); i++){
     int mh=allMH_[i];
     stdDatasets[mh]->plotOn(dataPlot,Binning(160),MarkerColor(colorList[i]));
+    std::cout << "FMC LC DEBUG this dataset for mh=" << mh << std::endl;
+    stdDatasets[mh]->Print();
+    //stdDatasets[mh]->Print("V");
+
     MH->setVal(mh);
     extendPdf->plotOn(dataPlot,LineColor(colorList[i]));
     pt->AddText(Form("RV %d: %s",mh,rvFITDatasets[mh]->GetName())); 
     pt->AddText(Form("WV %d: %s",mh,wvFITDatasets[mh]->GetName())); 
-   // extendPdf->Print("V");
+   //extendPdf->getRamaPrint("V");
+    //RooRealVar *thisParamPostFit;
+    //TIterator *pdfParamsPostFit = 
+    extendPdf->getComponents()->Print();
+   //   while((thisParamPostFit=(RooRealVar*)pdfParamsPostFit->Next())){
+        //thisParamPostFit->Print("");
+    //  }
   }
   dataPlot->SetTitle(Form("combined RV WV fits for %s %s",proc_.c_str(),catname.c_str()));
   dataPlot->Draw();

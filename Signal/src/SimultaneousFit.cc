@@ -321,7 +321,7 @@ void SimultaneousFit::buildDCBplusGaussian(string name, bool recursive){
 void SimultaneousFit::buildSumOfGaussians(string name, int nGaussians, bool recursive, bool forceFracUnity){
   // the "Order" refers to the order of the polynomial describing the dependence of the parameters on MH
   
-
+  std::cout << "SimultaneousFit::buildSumOfGaussians a - nGaussians " << nGaussians << " recursive " << recursive << "forceFracUnity " << forceFracUnity << std::endl;
   // various holders for params and pdfs
   RooArgList *gaussians_order0 = new RooArgList();
   RooArgList *gaussians_order1 = new RooArgList();
@@ -335,11 +335,13 @@ void SimultaneousFit::buildSumOfGaussians(string name, int nGaussians, bool recu
   map<string,RooAbsPdf*> tempPdfsMap_order1;
   map<string,RooAbsPdf*> tempPdfsMap_order2;
   
+  std::cout << "SimultaneousFit::buildSumOfGaussians b " << std::endl;
   // start looping through the desired number of Gaussians
   for (int g=0; g<nGaussians; g++){
     float dmRange =3.;
-    if (g>3) dmRange=3.;
+    if (g>3) dmRange=6.;
     
+  std::cout << "SimultaneousFit::buildSumOfGaussians c : g" << g<< std::endl;
     //start defining parameters
     RooFormulaVar *dMH = new RooFormulaVar(Form("dMH"),Form("dMH",g),"@0-125.0",RooArgList(*MH));
     RooRealVar *dm_p0 = new RooRealVar(Form("dm_g%d_p0",g),Form("dm_g%d_p0",g),0.1,-5.0,5.0);
@@ -351,7 +353,7 @@ void SimultaneousFit::buildSumOfGaussians(string name, int nGaussians, bool recu
     RooFormulaVar *mean_order0 = new RooFormulaVar(Form("mean_g%d_order0",g),Form("mean_g%d_order0",g),"((@0+@1))",RooArgList(*MH,*dm_order0));
     RooFormulaVar *mean_order1 = new RooFormulaVar(Form("mean_g%d_order1",g),Form("mean_g%d_order1",g),"((@0+@1))",RooArgList(*MH,*dm_order1));
     RooFormulaVar *mean_order2 = new RooFormulaVar(Form("mean_g%d_order2",g),Form("mean_g%d_order2",g),"((@0+@1))",RooArgList(*MH,*dm_order2));
-    RooRealVar *sigma_p0 = new RooRealVar(Form("sigma_g%d_p0",g),Form("sigma_g%d_p0",g),1.6,0.0,4.5);
+    RooRealVar *sigma_p0 = new RooRealVar(Form("sigma_g%d_p0",g),Form("sigma_g%d_p0",g),1.6,0.5,10);
     RooRealVar *sigma_p1 = new RooRealVar(Form("sigma_g%d_p1",g),Form("sigma_g%d_p1",g),0.01,-0.01,0.01);
     RooRealVar *sigma_p2 = new RooRealVar(Form("sigma_g%d_p2",g),Form("sigma_g%d_p2",g),0.01,-0.01,0.01);
     RooPolyVar *sigma_order0 = new RooPolyVar(Form("sigma_g%d_order0",g),Form("sigma_g%d_order0",g),*dMH,RooArgList(*sigma_p0));
@@ -360,6 +362,7 @@ void SimultaneousFit::buildSumOfGaussians(string name, int nGaussians, bool recu
     RooAbsPdf *gaus_order0 = new RooGaussian(Form("gaus_g%d_order0",g),Form("gaus_g%d_order0",g),*mass,*mean_order0,*sigma_order0);
     RooAbsPdf *gaus_order1 = new RooGaussian(Form("gaus_g%d_order1",g),Form("gaus_g%d_order1",g),*mass,*mean_order1,*sigma_order1);
     RooAbsPdf *gaus_order2 = new RooGaussian(Form("gaus_g%d_order2",g),Form("gaus_g%d_order2",g),*mass,*mean_order2,*sigma_order2);
+  std::cout << "SimultaneousFit::buildSumOfGaussians d : g" << g<< std::endl;
     tempPdfsMap_order0.insert(pair<string,RooAbsPdf*>(string(gaus_order0->GetName()),gaus_order0));
     tempPdfsMap_order1.insert(pair<string,RooAbsPdf*>(string(gaus_order1->GetName()),gaus_order1));
     tempPdfsMap_order2.insert(pair<string,RooAbsPdf*>(string(gaus_order2->GetName()),gaus_order2));
@@ -376,7 +379,8 @@ void SimultaneousFit::buildSumOfGaussians(string name, int nGaussians, bool recu
     listOfPolyVars_->add(*sigma_order1);
     listOfPolyVars_->add(*sigma_order2);
     
-    if (g<nGaussians) { //nGaussians-1
+  std::cout << "SimultaneousFit::buildSumOfGaussians e : g" << g<< std::endl;
+    if (g<nGaussians-1) { 
       RooRealVar *frac_p0 = new RooRealVar(Form("frac_g%d_p0",g),Form("frac_g%d_p0",g),0.5-0.05*g, 0.01,0.99);
       RooRealVar *frac_p1 = new RooRealVar(Form("frac_g%d_p1",g),Form("frac_g%d_p1",g),0.01,-0.005,0.005);
       RooRealVar *frac_p2 = new RooRealVar(Form("frac_g%d_p2",g),Form("frac_g%d_p2",g),0.00001,-0.00001,0.00001);
@@ -394,6 +398,9 @@ void SimultaneousFit::buildSumOfGaussians(string name, int nGaussians, bool recu
       coeffs_order1->add(*frac_constrained_order1);
       coeffs_order2->add(*frac_constrained_order2);
     }
+  std::cout << "SimultaneousFit::buildSumOfGaussians f : g" << g<< std::endl;
+    
+    std::cout << "LC SSF debug forceFracUnity " << forceFracUnity << " recursive " << recursive  << std::endl;
     if (g==nGaussians-1 && forceFracUnity){
       string formula="1.";
       for (int i=0; i<nGaussians-1; i++) formula += Form("-@%d",i);
@@ -603,7 +610,7 @@ void SimultaneousFit::runFits(int ncpu,string outdir, float epsilon){
     
     //std::cout << "DEBUG c" << std::endl;
     // print the parameter post-fit values if you like
-    if(verbosity_>0){
+    if(verbosity_>-1){
       std::cout << " [INFO] Values pdf PDF params -post fit"<< std::endl;
       RooRealVar *thisParamPostFit;
       TIterator *pdfParamsPostFit = fitModel[iOrder]->getParameters(RooArgSet(*mass,*MH))->selectByAttrib("Constant",kFALSE)->createIterator();
@@ -661,7 +668,7 @@ void SimultaneousFit::runFits(int ncpu,string outdir, float epsilon){
     
     //can also make some debug plots for the individual params (here plotted vs MH)
     // this is turned off by default but if --verbose then they will print
-    if (verbosity_){
+    if (verbosity_>-1){
       TIterator *paramIter = listOfPolyVars_->createIterator();
       RooPolyVar *polyVar;
       // go through each polyvar
@@ -672,9 +679,11 @@ void SimultaneousFit::runFits(int ncpu,string outdir, float epsilon){
         TGraphErrors *tg = new TGraphErrors(); int point=0;
         TLatex *latex = new TLatex(); latex->SetTextSize(0.05); latex->SetNDC();
         for (float thisMH=120; thisMH<130.1 ; thisMH=thisMH+1.0){
+          
           MH->setVal(thisMH);
+          if (thisMH==125.0) polyVar->Print(); 
           tg->SetPoint(point,thisMH,polyVar->getVal());
-          tg->SetPointError(point,0.0,polyVar->getPropagatedError(*fitResults[iOrder]));
+         // tg->SetPointError(point,0.0,polyVar->getPropagatedError(*fitResults[iOrder]));
           point++;
         }
         tg->Draw("ACE");
@@ -812,10 +821,10 @@ void SimultaneousFit::plotFits(string name, string rvwv){
     MH->setConstant(true);
     //assert(allPdfs.find(mh)!=allPdfs.end());
     assert(datasets.find(mh)!=datasets.end());
-    RooAbsPdf *fitModel = allPdfs[2];
+    RooAbsPdf *fitModel = allPdfs[maxOrder_];
     //RooDataSet *data = datasets[mh];
-    mass->setBins(320);
-    //mass->setBins(bins_);
+    //mass->setBins(320);
+    mass->setBins(bins_);
     RooDataHist *data = new RooDataHist(datasets[mh]->GetName(),datasets[mh]->GetName(), RooArgSet(*mass),*normaliseDatasets(datasets[mh]));
     //RooDataHist *data = datasets[mh]->binnedClone();
     //data->plotOn(plot,Binning(160),MarkerColor(kBlue+10*i));
@@ -884,7 +893,7 @@ int SimultaneousFit::isDCBsafe(RooDoubleCBFast* dcb){
     mass->setRange("lcRange",100,180);
     double val = ((RooDoubleCBFast*)dcb)->analyticalIntegral(1,"lcRange");
     if( !(fabs(val)<999)){ // 999 is "some reasonable value"
-      std::cout << " ERROR, this pdf  has a NaN or 0 integral " << val <<"at MH =" << mh_var << " EXIT" << std::endl;
+      std::cout << " ERROR, this p#df  has a NaN or 0 integral " << val <<"at MH =" << mh_var << " EXIT" << std::endl;
       return 0;
     }
   }

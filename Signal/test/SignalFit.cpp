@@ -73,7 +73,8 @@ bool doQuadraticSigmaSum_=false;
 bool runInitialFitsOnly_=false;
 bool cloneFits_=false;
 bool replace_=false;
-pair<string,string> replaceWith_;
+//pair<string,string> replaceWith_RV_;
+//pair<string,string> replaceWith_WV_;
 string cloneFitFile_;
 bool recursive_=true;
 string highR9cats_;
@@ -108,8 +109,10 @@ string referenceTagWV_="UntaggedTag_2";
 string referenceTagRV_="UntaggedTag_2";
 vector<string> map_proc_;
 vector<string> map_cat_;
-vector<string> map_replacement_proc_;
-vector<string> map_replacement_cat_;
+vector<string> map_replacement_proc_RV_;
+vector<string> map_replacement_cat_RV_;
+vector<string> map_replacement_proc_WV_;
+vector<string> map_replacement_cat_WV_;
 vector<int> map_nG_rv_;
 vector<int> map_nG_wv_;
 RooRealVar *mass_;
@@ -594,7 +597,7 @@ int main(int argc, char *argv[]){
 		  if (line=="\n" || line.substr(0,1)=="#" || line==" " || line.empty()) continue;
 		  vector<string> els;
 		  split(els,line,boost::is_any_of(" "));
-		  if( els.size()!=4 && els.size()!=6 ) {
+		  if( els.size()!=4 && els.size()!=6 && els.size()!=8) {
 			  cerr << "Malformed line " << line << " " << els.size() <<endl;
 			  assert(0);
 		  }
@@ -605,30 +608,45 @@ int main(int argc, char *argv[]){
 		  int nGaussiansRV = boost::lexical_cast<int>(els[2]);
 		  int nGaussiansWV = boost::lexical_cast<int>(els[3]);
 
-	  	replace_ = false; // old method of replacing from Matt and Nick
       // have a different appraoch now but could re-use machinery.
-      std::cout << " LC DEBUG here is your line " << line << " els.size()==6 " << (els.size()==6) <<  std::endl;
-		  if( els.size()==6 ) { // in this case you have specified a replacement tag!
-			  replaceWith_ = make_pair(els[4],els[5]); // proc, cat
-		   	replace_ = true;
-        map_replacement_proc_.push_back(els[4]);
-        map_replacement_cat_.push_back(els[5]);
+      //std::cout << " LC DEBUG here is your line " << line << " els.size()==6 " << (els.size()==6) <<  std::endl;
+		  if( els.size()==6 ) { // in this case you have specified a replacement tag for RV!
+			  //replaceWith_RV_ = make_pair(els[4],els[5]); // proc, cat
+        map_replacement_proc_RV_.push_back(els[4]);
+        map_replacement_cat_RV_.push_back(els[5]);
+        map_replacement_proc_WV_.push_back(referenceProc_); //use defaults for replacement WV if they are needed
+        map_replacement_cat_WV_.push_back(referenceTagWV_);//use defaults for replacement WV if they are needed
+		  } else if( els.size()==8 ) { // in this case you have specified a replacement tag for RV and WV!
+			  //replaceWithRV_ = make_pair(els[4],els[5]); // proc, cat
+			  //replaceWithWV_ = make_pair(els[6],els[7]); // proc, cat
+		   	//replace_ = true;
+        std::cout << "LC DEBUG else=8 , pushing back for " << proc <<" "<< cat << " map_replacement_proc_RV_ "<< els[4] << "map_replacement_cat_RV_  i" << els[5] << std::endl;
+        std::cout << "LC DEBUG else=8 , pushing back for " << proc <<" "<< cat << " map_replacement_proc_WV_ "<< els[6] << "map_replacement_cat_WV_  i" << els[7] << std::endl;
+        map_replacement_proc_RV_.push_back(els[4]);
+        map_replacement_cat_RV_.push_back(els[5]);
+        map_replacement_proc_WV_.push_back(els[6]);
+        map_replacement_cat_WV_.push_back(els[7]);
       } else {
         // if no replacement is speficied, use defaults
         if (cat.compare(0,3,"TTH") ==0){
           // if the cat starts with TTH, use TTH reference process.
           // howwver this is over-riden later if the WV needs to be replaced
           // as even teh TTH tags in WV has limited stats
-          map_replacement_proc_.push_back(referenceProcTTH_);
-          map_replacement_cat_.push_back(cat);
+          map_replacement_proc_RV_.push_back(referenceProcTTH_);
+          map_replacement_cat_RV_.push_back(cat);
+          map_replacement_proc_WV_.push_back(referenceProc_); //use defaults for replacement WV if they are needed
+          map_replacement_cat_WV_.push_back(referenceTagWV_);//use defaults for replacement WV if they are needed
         } else {
          // else use the ggh
-         map_replacement_proc_.push_back(referenceProc_);
-         map_replacement_cat_.push_back(referenceTagRV_); //deflaut is ggh UntaggedTag3
+         map_replacement_proc_RV_.push_back(referenceProc_);
+         map_replacement_cat_RV_.push_back(referenceTagRV_); //deflaut is ggh UntaggedTag3
+         map_replacement_proc_WV_.push_back(referenceProc_); //use defaults for replacement WV if they are needed
+         map_replacement_cat_WV_.push_back(referenceTagWV_);//use defaults for replacement WV if they are needed
         }
       }
       if (verbose_) std::cout << "[INFO] dat file listing: "<< proc << " " << cat << " " << nGaussiansRV << " " << nGaussiansWV <<  " " << std::endl;
-      if (verbose_) std::cout << "[INFO] dat file listing: ----> selected replacements if needed " <<  map_replacement_proc_[map_replacement_proc_.size() -1] << " " <<  map_replacement_cat_[map_replacement_cat_.size() -1] << std::endl;
+      if (verbose_) std::cout << "[INFO] dat file listing: ----> selected replacements (RV) if needed " <<  map_replacement_proc_RV_[map_replacement_proc_RV_.size() -1] << " " <<  map_replacement_cat_RV_[map_replacement_cat_RV_.size() -1] << std::endl;
+      if (verbose_) std::cout << "[INFO] dat file listing: ----> selected replacements (WV) if needed " <<  map_replacement_proc_WV_[map_replacement_proc_WV_.size() -1] << " " <<  map_replacement_cat_WV_[map_replacement_cat_WV_.size() -1] << std::endl;
 
       map_proc_.push_back(proc);
       map_cat_.push_back(cat);
@@ -725,10 +743,11 @@ int main(int argc, char *argv[]){
           
           int thisProcCatIndex = getIndexOfReferenceDataset(proc,cat);
           
-          string replancementProc = map_replacement_proc_[thisProcCatIndex];
-          string replancementCat = map_replacement_cat_[thisProcCatIndex];
+          string replancementProc = map_replacement_proc_RV_[thisProcCatIndex];
+          string replancementCat = map_replacement_cat_RV_[thisProcCatIndex];
           int replacementIndex = getIndexOfReferenceDataset(replancementProc,replancementCat);
           nGaussiansRV= map_nG_rv_[replacementIndex]; // if ==-1, want it to stay that way!
+          std::cout << "LC DEBUG DEBUG (RV) " << proc <<  " "<< cat << " thisProcCatIndex " << thisProcCatIndex << " replancementProc " << replancementProc << " replancementCat " << replancementCat << " replacementIndex " << std::endl; 
           std::cout << "[INFO] try to use  dataset for " << replancementProc << ", " << replancementCat << " instead."<< std::endl;
           
           //pick the dataset for the replacement proc and cat, reduce it (ie remove pdfWeights etc) ,
@@ -775,8 +794,14 @@ int main(int argc, char *argv[]){
         
           //things are simpler this time, since almost all WV are bad aside from ggh-UntaggedTag3
          //and anyway the shape of mgg in the WV shoudl be IDENTICAL across all Tags.
-         int replacementIndex = getIndexOfReferenceDataset(referenceProcWV_,referenceTagWV_);
-        nGaussiansWV= map_nG_wv_[replacementIndex]; 
+         //int replacementIndex = getIndexOfReferenceDataset(referenceProcWV_,referenceTagWV_);
+         int thisProcCatIndex = getIndexOfReferenceDataset(proc,cat);
+          
+          string replancementProc = map_replacement_proc_WV_[thisProcCatIndex];
+          string replancementCat = map_replacement_cat_WV_[thisProcCatIndex];
+          int replacementIndex = getIndexOfReferenceDataset(replancementProc,replancementCat);
+          nGaussiansWV= map_nG_wv_[replacementIndex]; 
+          std::cout << "LC DEBUG DEBUG (WV) " << proc <<  " "<< cat << " thisProcCatIndex " << thisProcCatIndex << " replancementProc " << replancementProc << " replancementCat " << replancementCat << " replacementIndex " << std::endl; 
         
          //pick the dataset for the replacement proc and cat, reduce it (ie remove pdfWeights etc) ,
          //reweight for lumi and then get the WV events only.
@@ -785,7 +810,8 @@ int main(int argc, char *argv[]){
 				               rvwvDataset(
                         intLumiReweigh(
                           reduceDataset(
-                          (RooDataSet*)inWS->data(Form("%s_%d_13TeV_%s",referenceProcWV_.c_str(),mh,referenceTagWV_.c_str()))
+                          //(RooDataSet*)inWS->data(Form("%s_%d_13TeV_%s",referenceProcWV_.c_str(),mh,referenceTagWV_.c_str()))
+                            (RooDataSet*)inWS->data(Form("%s_%d_13TeV_%s",replancementProc.c_str(),mh,replancementCat.c_str()))
                          )
                        ), "WV"
                       )
@@ -794,7 +820,8 @@ int main(int argc, char *argv[]){
          data0Ref   = rvwvDataset(
                         intLumiReweigh(
                           reduceDataset(
-                          (RooDataSet*)inWS->data(Form("%s_%d_13TeV_%s",referenceProcWV_.c_str(),mh,referenceTagWV_.c_str()))
+                          //(RooDataSet*)inWS->data(Form("%s_%d_13TeV_%s",referenceProcWV_.c_str(),mh,referenceTagWV_.c_str()))
+                          	(RooDataSet*)inWS->data(Form("%s_%d_13TeV_%s",replancementProc.c_str(),mh,replancementCat.c_str()))
                          )
                        ), "WV"
                       );
