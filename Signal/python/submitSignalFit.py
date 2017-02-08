@@ -96,6 +96,7 @@ def system(exec_line):
 def writePreamble(sub_file):
   #print "[INFO] writing preamble"
   sub_file.write('#!/bin/bash\n')
+  sub_file.write('sleep $[ ( $RANDOM % 10 )  + 1 ]s\n')
   sub_file.write('touch %s.run\n'%os.path.abspath(sub_file.name))
   sub_file.write('cd %s\n'%os.getcwd())
   sub_file.write('eval `scramv1 runtime -sh`\n')
@@ -128,7 +129,7 @@ def writePostamble(sub_file, exec_line):
     system('rm -f %s.err'%os.path.abspath(sub_file.name))
     if (opts.batch == "LSF") : system('bsub -q %s -o %s.log %s'%(opts.queue,os.path.abspath(sub_file.name),os.path.abspath(sub_file.name)))
     if (opts.batch == "IC") : 
-      system('qsub -q %s -o %s.log -e %s.err %s'%(opts.queue,os.path.abspath(sub_file.name),os.path.abspath(sub_file.name),os.path.abspath(sub_file.name)))
+      system('qsub -q %s -l h_rt=0:20:0 -o %s.log -e %s.err %s'%(opts.queue,os.path.abspath(sub_file.name),os.path.abspath(sub_file.name),os.path.abspath(sub_file.name)))
       #print "system(",'qsub -q %s -o %s.log -e %s.err %s '%(opts.queue,os.path.abspath(sub_file.name),os.path.abspath(sub_file.name),os.path.abspath(sub_file.name)),")"
   if opts.runLocal:
      system('bash %s'%os.path.abspath(sub_file.name))

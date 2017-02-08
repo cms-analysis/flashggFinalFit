@@ -73,7 +73,8 @@ bool doQuadraticSigmaSum_=false;
 bool runInitialFitsOnly_=false;
 bool cloneFits_=false;
 bool replace_=false;
-pair<string,string> replaceWith_;
+//pair<string,string> replaceWith_RV_;
+//pair<string,string> replaceWith_WV_;
 string cloneFitFile_;
 bool recursive_=true;
 string highR9cats_;
@@ -108,8 +109,10 @@ string referenceTagWV_="UntaggedTag_2";
 string referenceTagRV_="UntaggedTag_2";
 vector<string> map_proc_;
 vector<string> map_cat_;
-vector<string> map_replacement_proc_;
-vector<string> map_replacement_cat_;
+vector<string> map_replacement_proc_RV_;
+vector<string> map_replacement_cat_RV_;
+vector<string> map_replacement_proc_WV_;
+vector<string> map_replacement_cat_WV_;
 vector<int> map_nG_rv_;
 vector<int> map_nG_wv_;
 RooRealVar *mass_;
@@ -594,7 +597,7 @@ int main(int argc, char *argv[]){
 		  if (line=="\n" || line.substr(0,1)=="#" || line==" " || line.empty()) continue;
 		  vector<string> els;
 		  split(els,line,boost::is_any_of(" "));
-		  if( els.size()!=4 && els.size()!=6 ) {
+		  if( els.size()!=4 && els.size()!=6 && els.size()!=8) {
 			  cerr << "Malformed line " << line << " " << els.size() <<endl;
 			  assert(0);
 		  }
@@ -605,30 +608,45 @@ int main(int argc, char *argv[]){
 		  int nGaussiansRV = boost::lexical_cast<int>(els[2]);
 		  int nGaussiansWV = boost::lexical_cast<int>(els[3]);
 
-	  	//replace_ = false; // old method of replacing from Matt and Nick
       // have a different appraoch now but could re-use machinery.
-
-		  if( els.size()==6 ) { // in this case you have specified a replacement tag!
-			  replaceWith_ = make_pair(els[4],els[5]); // proc, cat
+      //std::cout << " LC DEBUG here is your line " << line << " els.size()==6 " << (els.size()==6) <<  std::endl;
+		  if( els.size()==6 ) { // in this case you have specified a replacement tag for RV!
+			  //replaceWith_RV_ = make_pair(els[4],els[5]); // proc, cat
+        map_replacement_proc_RV_.push_back(els[4]);
+        map_replacement_cat_RV_.push_back(els[5]);
+        map_replacement_proc_WV_.push_back(referenceProc_); //use defaults for replacement WV if they are needed
+        map_replacement_cat_WV_.push_back(referenceTagWV_);//use defaults for replacement WV if they are needed
+		  } else if( els.size()==8 ) { // in this case you have specified a replacement tag for RV and WV!
+			  //replaceWithRV_ = make_pair(els[4],els[5]); // proc, cat
+			  //replaceWithWV_ = make_pair(els[6],els[7]); // proc, cat
 		   	//replace_ = true;
-        map_replacement_proc_.push_back(els[4]);
-        map_replacement_cat_.push_back(els[5]);
+        std::cout << "LC DEBUG else=8 , pushing back for " << proc <<" "<< cat << " map_replacement_proc_RV_ "<< els[4] << "map_replacement_cat_RV_  i" << els[5] << std::endl;
+        std::cout << "LC DEBUG else=8 , pushing back for " << proc <<" "<< cat << " map_replacement_proc_WV_ "<< els[6] << "map_replacement_cat_WV_  i" << els[7] << std::endl;
+        map_replacement_proc_RV_.push_back(els[4]);
+        map_replacement_cat_RV_.push_back(els[5]);
+        map_replacement_proc_WV_.push_back(els[6]);
+        map_replacement_cat_WV_.push_back(els[7]);
       } else {
         // if no replacement is speficied, use defaults
         if (cat.compare(0,3,"TTH") ==0){
           // if the cat starts with TTH, use TTH reference process.
           // howwver this is over-riden later if the WV needs to be replaced
           // as even teh TTH tags in WV has limited stats
-          map_replacement_proc_.push_back(referenceProcTTH_);
-          map_replacement_cat_.push_back(cat);
+          map_replacement_proc_RV_.push_back(referenceProcTTH_);
+          map_replacement_cat_RV_.push_back(cat);
+          map_replacement_proc_WV_.push_back(referenceProc_); //use defaults for replacement WV if they are needed
+          map_replacement_cat_WV_.push_back(referenceTagWV_);//use defaults for replacement WV if they are needed
         } else {
          // else use the ggh
-         map_replacement_proc_.push_back(referenceProc_);
-         map_replacement_cat_.push_back(referenceTagRV_); //deflaut is ggh UntaggedTag3
+         map_replacement_proc_RV_.push_back(referenceProc_);
+         map_replacement_cat_RV_.push_back(referenceTagRV_); //deflaut is ggh UntaggedTag3
+         map_replacement_proc_WV_.push_back(referenceProc_); //use defaults for replacement WV if they are needed
+         map_replacement_cat_WV_.push_back(referenceTagWV_);//use defaults for replacement WV if they are needed
         }
       }
       if (verbose_) std::cout << "[INFO] dat file listing: "<< proc << " " << cat << " " << nGaussiansRV << " " << nGaussiansWV <<  " " << std::endl;
-      if (verbose_) std::cout << "[INFO] dat file listing: ----> selected replacements if needed " <<  map_replacement_proc_[map_replacement_proc_.size() -1] << " " <<  map_replacement_cat_[map_replacement_cat_.size() -1] << std::endl;
+      if (verbose_) std::cout << "[INFO] dat file listing: ----> selected replacements (RV) if needed " <<  map_replacement_proc_RV_[map_replacement_proc_RV_.size() -1] << " " <<  map_replacement_cat_RV_[map_replacement_cat_RV_.size() -1] << std::endl;
+      if (verbose_) std::cout << "[INFO] dat file listing: ----> selected replacements (WV) if needed " <<  map_replacement_proc_WV_[map_replacement_proc_WV_.size() -1] << " " <<  map_replacement_cat_WV_[map_replacement_cat_WV_.size() -1] << std::endl;
 
       map_proc_.push_back(proc);
       map_cat_.push_back(cat);
@@ -671,7 +689,7 @@ int main(int argc, char *argv[]){
 
     cout << "-----------------------------------------------------------------" << endl;
     cout << Form("[INFO] Running fits for proc:%s - cat:%s with nGausRV:%d nGausWV:%d",proc.c_str(),cat.c_str(),nGaussiansRV,nGaussiansWV) << endl;
-    //if( replace_ ) { cout << Form("Will replace parameters using  proc:%s - cat:%d",replaceWith_.first.c_str(),replaceWith_.second) << endl; }
+    //if( replace_ ) { cout << Form("Will replace parameters using  proc:%s - cat:%d",replaceWith_.first.c_str(),replaceWith_.second.c_str()) << endl; }
 
     cout << "-----------------------------------------------------------------" << endl;
     // get datasets for each MH here
@@ -729,10 +747,11 @@ int main(int argc, char *argv[]){
           
           int thisProcCatIndex = getIndexOfReferenceDataset(proc,cat);
           
-          string replancementProc = map_replacement_proc_[thisProcCatIndex];
-          string replancementCat = map_replacement_cat_[thisProcCatIndex];
+          string replancementProc = map_replacement_proc_RV_[thisProcCatIndex];
+          string replancementCat = map_replacement_cat_RV_[thisProcCatIndex];
           int replacementIndex = getIndexOfReferenceDataset(replancementProc,replancementCat);
           nGaussiansRV= map_nG_rv_[replacementIndex]; // if ==-1, want it to stay that way!
+          std::cout << "LC DEBUG DEBUG (RV) " << proc <<  " "<< cat << " thisProcCatIndex " << thisProcCatIndex << " replancementProc " << replancementProc << " replancementCat " << replancementCat << " replacementIndex " << std::endl; 
           std::cout << "[INFO] try to use  dataset for " << replancementProc << ", " << replancementCat << " instead."<< std::endl;
           
           //pick the dataset for the replacement proc and cat, reduce it (ie remove pdfWeights etc) ,
@@ -783,8 +802,14 @@ int main(int argc, char *argv[]){
         
           //things are simpler this time, since almost all WV are bad aside from ggh-UntaggedTag3
          //and anyway the shape of mgg in the WV shoudl be IDENTICAL across all Tags.
-         int replacementIndex = getIndexOfReferenceDataset(referenceProcWV_,referenceTagWV_);
-        nGaussiansWV= map_nG_wv_[replacementIndex]; 
+         //int replacementIndex = getIndexOfReferenceDataset(referenceProcWV_,referenceTagWV_);
+         int thisProcCatIndex = getIndexOfReferenceDataset(proc,cat);
+          
+          string replancementProc = map_replacement_proc_WV_[thisProcCatIndex];
+          string replancementCat = map_replacement_cat_WV_[thisProcCatIndex];
+          int replacementIndex = getIndexOfReferenceDataset(replancementProc,replancementCat);
+          nGaussiansWV= map_nG_wv_[replacementIndex]; 
+          std::cout << "LC DEBUG DEBUG (WV) " << proc <<  " "<< cat << " thisProcCatIndex " << thisProcCatIndex << " replancementProc " << replancementProc << " replancementCat " << replancementCat << " replacementIndex " << std::endl; 
         
          //pick the dataset for the replacement proc and cat, reduce it (ie remove pdfWeights etc) ,
          //reweight for lumi and then get the WV events only.
@@ -794,7 +819,8 @@ int main(int argc, char *argv[]){
 				               rvwvDataset(
                         intLumiReweigh(
                           reduceDataset(
-                          (RooDataSet*)inWS->data(Form("%s_%d_13TeV_%s",referenceProcWV_.c_str(),mh,referenceTagWV_.c_str()))
+                          //(RooDataSet*)inWS->data(Form("%s_%d_13TeV_%s",referenceProcWV_.c_str(),mh,referenceTagWV_.c_str()))
+                            (RooDataSet*)inWS->data(Form("%s_%d_13TeV_%s",replancementProc.c_str(),mh,replancementCat.c_str()))
                          )
                        ), "WV"
                       )
@@ -803,7 +829,8 @@ int main(int argc, char *argv[]){
          data0Ref   = rvwvDataset(
                         intLumiReweigh(
                           reduceDataset(
-                          (RooDataSet*)inWS->data(Form("%s_%d_13TeV_%s",referenceProcWV_.c_str(),mh,referenceTagWV_.c_str()))
+                          //(RooDataSet*)inWS->data(Form("%s_%d_13TeV_%s",referenceProcWV_.c_str(),mh,referenceTagWV_.c_str()))
+                          	(RooDataSet*)inWS->data(Form("%s_%d_13TeV_%s",replancementProc.c_str(),mh,replancementCat.c_str()))
                          )
                        ), "WV"
                       );
@@ -873,7 +900,6 @@ int main(int argc, char *argv[]){
     if(useSSF_){
     // right vertex
     if (verbose_) std::cout << "[INFO] preapraing initialfit RV, massList size "<< massList_.size() << std::endl;
-    //SimultaneousFit simultaneousFitRV(mass_,MH,mhLow_,mhHigh_,skipMasses_,binnedFit_,nBins_,massList_,cat,proc,Form("%s/rv",plotDir_.c_str()), /*maxOrder of MH depende of RooPolyVars*/ 2);
     SimultaneousFit simultaneousFitRV(mass_,MH,mhLow_,mhHigh_,skipMasses_,binnedFit_,nBins_,massList_,cat,proc,Form("%s/rv",plotDir_.c_str()), /*maxOrder of MH depende of RooPolyVars*/ 1);
     simultaneousFitRV.setVerbosity(verbose_);
     if (!cloneFits_) {
@@ -888,16 +914,22 @@ int main(int argc, char *argv[]){
       simultaneousFitRV.setDatasetsSTD(datasetsRV);
       if (verbose_) std::cout << "[INFO] RV running fits" << std::endl;
       simultaneousFitRV.runFits(ncpu_,Form("%s/initialFits/rv_%s_%s",plotDir_.c_str(),proc.c_str(),cat.c_str()),iterativeFitConstraint_);
-      /*if( replace_ ) {
-        simultaneousFitRV.setFitParams(allParameters[replaceWith_].first); 
-      }*/
+      std::cout << "[INFO] LC SigFit debug a" << std::endl;
+      //if( replace_ ) {
+      //std::cout << "[INFO] LC SigFit debug b" << std::endl;
+       // simultaneousFitRV.setFitParams(allParameters[replaceWith_].first); 
+     // std::cout << "[INFO] LC SigFit debug c" << std::endl;
+     // }
+      std::cout << "[INFO] LC SigFit debug d" << std::endl;
       if (!skipPlots_) simultaneousFitRV.plotFits(Form("%s/initialFits/%s_%s_rv",plotDir_.c_str(),proc.c_str(),cat.c_str()),"RV");
+      std::cout << "[INFO] LC SigFit debug e" << std::endl;
     }
+      std::cout << "[INFO] LC SigFit debug f" << std::endl;
     parlist_t fitParamsRV = simultaneousFitRV.getFitParams();
+      std::cout << "[INFO] LC SigFit debug g" << std::endl;
 
     // wrong vertex
     if (verbose_) std::cout << "[INFO] preparing initialfit WV, masList size "<< massList_.size() << std::endl;
-    //SimultaneousFit simultaneousFitWV(mass_,MH,mhLow_,mhHigh_,skipMasses_,binnedFit_,nBins_,massList_,cat,proc,Form("%s/wv",plotDir_.c_str()), /*maxOrder of MH depende of RooPolyVars*/ 2);
     SimultaneousFit simultaneousFitWV(mass_,MH,mhLow_,mhHigh_,skipMasses_,binnedFit_,nBins_,massList_,cat,proc,Form("%s/wv",plotDir_.c_str()), /*maxOrder of MH depende of RooPolyVars*/ 1);
     simultaneousFitWV.setVerbosity(verbose_);
     if (!cloneFits_) {
@@ -911,14 +943,22 @@ int main(int argc, char *argv[]){
       simultaneousFitWV.setDatasets(FITdatasetsWV);
       simultaneousFitWV.setDatasetsSTD(datasetsWV);
       if (verbose_) std::cout << "[INFO] WV running fits" << std::endl;
+      std::cout << "[INFO] LC SigFit debug h" << std::endl;
       simultaneousFitWV.runFits(ncpu_,Form("%s/initialFits/wv_%s_%s",plotDir_.c_str(),proc.c_str(),cat.c_str()),iterativeFitConstraint_);
-      /*if( replace_ ) {
-        simultaneousFitWV.setFitParams(allParameters[replaceWith_].second); 
-      }*/
+      std::cout << "[INFO] LC SigFit debug i" << std::endl;
+      //if( replace_ ) {
+      //std::cout << "[INFO] LC SigFit debug j" << std::endl;
+        //simultaneousFitWV.setFitParams(allParameters[replaceWith_].second); 
+     // }
+      std::cout << "[INFO] LC SigFit debug k" << std::endl;
       if (!skipPlots_) simultaneousFitWV.plotFits(Form("%s/initialFits/%s_%s_wv",plotDir_.c_str(),proc.c_str(),cat.c_str()),"WV");
+      std::cout << "[INFO] LC SigFit debug l" << std::endl;
     }
+      std::cout << "[INFO] LC SigFit debug m" << std::endl;
     parlist_t fitParamsWV = simultaneousFitWV.getFitParams();
+      std::cout << "[INFO] LC SigFit debug n" << std::endl;
     allParameters[ make_pair(proc,cat) ] = make_pair(fitParamsRV,fitParamsWV);
+      std::cout << "[INFO] LC SigFit debug o" << std::endl;
     
     //Ok, now that we have made the fit parameters eitehr with the regular dataset or the replacement one.
     // Now we should be using the ORIGINAL dataset
@@ -949,18 +989,30 @@ int main(int argc, char *argv[]){
       initFitRV.setDatasets(FITdatasetsRV);
       initFitRV.setDatasetsSTD(datasetsRV);
       if (verbose_) std::cout << "[INFO] RV running fits" << std::endl;
+      std::cout << "[INFO] LC SigFit debug i1" << std::endl;
       initFitRV.runFits(ncpu_);
-      /*if (!runInitialFitsOnly_ && !replace_) {
-        initFitRV.saveParamsToFileAtMH(Form("dat/in/%s_%s_rv.dat",proc.c_str(),cat.c_str()),constraintValueMass_);
-        initFitRV.loadPriorConstraints(Form("dat/in/%s_%s_rv.dat",proc.c_str(),cat.c_str()),constraintValue_);
-        initFitRV.runFits(ncpu_);
-      }
-      if( replace_ ) {
-        initFitRV.setFitParams(allParameters[replaceWith_].first); 
-      }*/
+      //std::cout << "[INFO] LC SigFit debug i2 !replace_" << !replace_ << " !runInitialFitsOnly_ " << !runInitialFitsOnly_ << std::endl;
+      //if (!runInitialFitsOnly_ && !replace_) {
+      //std::cout << "[INFO] LC SigFit debug i3" << std::endl;
+        //initFitRV.saveParamsToFileAtMH(Form("dat/in/%s_%s_rv.dat",proc.c_str(),cat.c_str()),constraintValueMass_);
+      //std::cout << "[INFO] LC SigFit debug i4" << Form("dat/in/%s_%s_rv.dat",proc.c_str(),cat.c_str()  )<< std::endl;
+       // initFitRV.loadPriorConstraints(Form("dat/in/%s_%s_rv.dat",proc.c_str(),cat.c_str()),constraintValue_);
+       // initFitRV.runFits(ncpu_);
+     // std::cout << "[INFO] LC SigFit debug i5" << std::endl;
+      //}
+      //std::cout << "[INFO] LC SigFit debug i6" << std::endl;
+      //if( replace_ ) {
+      //std::cout << "[INFO] LC SigFit debug i7" << std::endl;
+       // initFitRV.setFitParams(allParameters[replaceWith_].first); 
+      //std::cout << "[INFO] LC SigFit debug i8" << std::endl;
+      //}
+      std::cout << "[INFO] LC SigFit debug i9" << std::endl;
       if (!skipPlots_) initFitRV.plotFits(Form("%s/initialFits/%s_%s_rv",plotDir_.c_str(),proc.c_str(),cat.c_str()),"RV");
+      std::cout << "[INFO] LC SigFit debug i10" << std::endl;
       }
+      std::cout << "[INFO] LC SigFit debug i11" << std::endl;
       parlist_t fitParamsRV = initFitRV.getFitParams();
+      std::cout << "[INFO] LC SigFit debug i12" << std::endl;
 
       // wrong vertex
       if (verbose_) std::cout << "[INFO] preparing initialfit WV, masList size "<< massList_.size() << std::endl;
@@ -978,14 +1030,14 @@ int main(int argc, char *argv[]){
         initFitWV.setDatasetsSTD(datasetsWV);
         if (verbose_) std::cout << "[INFO] WV running fits" << std::endl;
         initFitWV.runFits(ncpu_);
-        /*if (!runInitialFitsOnly_ && !replace_) {
-          initFitWV.saveParamsToFileAtMH(Form("dat/in/%s_%s_wv.dat",proc.c_str(),cat.c_str()),constraintValueMass_);
-          initFitWV.loadPriorConstraints(Form("dat/in/%s_%s_wv.dat",proc.c_str(),cat.c_str()),constraintValue_);
-          initFitWV.runFits(ncpu_);
-        }
-        if( replace_ ) {
-          initFitWV.setFitParams(allParameters[replaceWith_].second); 
-        }*/
+       // if (!runInitialFitsOnly_ && !replace_) {
+        //  initFitWV.saveParamsToFileAtMH(Form("dat/in/%s_%s_wv.dat",proc.c_str(),cat.c_str()),constraintValueMass_);
+        //  initFitWV.loadPriorConstraints(Form("dat/in/%s_%s_wv.dat",proc.c_str(),cat.c_str()),constraintValue_);
+        //  initFitWV.runFits(ncpu_);
+      //  }
+       // if( replace_ ) {
+        //  initFitWV.setFitParams(allParameters[replaceWith_].second); 
+      //  }
         if (!skipPlots_) initFitWV.plotFits(Form("%s/initialFits/%s_%s_wv",plotDir_.c_str(),proc.c_str(),cat.c_str()),"WV");
       }
       parlist_t fitParamsWV = initFitWV.getFitParams();
