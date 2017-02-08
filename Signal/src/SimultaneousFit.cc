@@ -349,7 +349,8 @@ void SimultaneousFit::buildSumOfGaussians(string name, int nGaussians, bool recu
     RooFormulaVar *mean_order0 = new RooFormulaVar(Form("mean_g%d_order0",g),Form("mean_g%d_order0",g),"((@0+@1))",RooArgList(*MH,*dm_order0));
     RooFormulaVar *mean_order1 = new RooFormulaVar(Form("mean_g%d_order1",g),Form("mean_g%d_order1",g),"((@0+@1))",RooArgList(*MH,*dm_order1));
     RooFormulaVar *mean_order2 = new RooFormulaVar(Form("mean_g%d_order2",g),Form("mean_g%d_order2",g),"((@0+@1))",RooArgList(*MH,*dm_order2));
-    RooRealVar *sigma_p0 = new RooRealVar(Form("sigma_g%d_p0",g),Form("sigma_g%d_p0",g),1.6,0.0,4.5);
+    //RooRealVar *sigma_p0 = new RooRealVar(Form("sigma_g%d_p0",g),Form("sigma_g%d_p0",g),1.6,0.0,4.5);
+    RooRealVar *sigma_p0 = new RooRealVar(Form("sigma_g%d_p0",g),Form("sigma_g%d_p0",g),1.6,0.5,4.5);
     RooRealVar *sigma_p1 = new RooRealVar(Form("sigma_g%d_p1",g),Form("sigma_g%d_p1",g),0.01,-0.01,0.01);
     RooRealVar *sigma_p2 = new RooRealVar(Form("sigma_g%d_p2",g),Form("sigma_g%d_p2",g),0.01,-0.01,0.01);
     RooPolyVar *sigma_order0 = new RooPolyVar(Form("sigma_g%d_order0",g),Form("sigma_g%d_order0",g),*dMH,RooArgList(*sigma_p0));
@@ -374,7 +375,7 @@ void SimultaneousFit::buildSumOfGaussians(string name, int nGaussians, bool recu
     listOfPolyVars_->add(*sigma_order1);
     listOfPolyVars_->add(*sigma_order2);
     
-    if (g<nGaussians) { //nGaussians-1
+    if (g<nGaussians-1) { //nGaussians-1
       RooRealVar *frac_p0 = new RooRealVar(Form("frac_g%d_p0",g),Form("frac_g%d_p0",g),0.5-0.05*g, 0.01,0.99);
       RooRealVar *frac_p1 = new RooRealVar(Form("frac_g%d_p1",g),Form("frac_g%d_p1",g),0.01,-0.005,0.005);
       RooRealVar *frac_p2 = new RooRealVar(Form("frac_g%d_p2",g),Form("frac_g%d_p2",g),0.00001,-0.00001,0.00001);
@@ -673,7 +674,7 @@ void SimultaneousFit::plotFits(string name, string rvwv){
     MH->setConstant(true);
     //assert(allPdfs.find(mh)!=allPdfs.end());
     assert(datasets.find(mh)!=datasets.end());
-    RooAbsPdf *fitModel = allPdfs[2];
+    RooAbsPdf *fitModel = allPdfs[maxOrder_];
     //RooDataSet *data = datasets[mh];
     mass->setBins(320);
     //mass->setBins(bins_);
