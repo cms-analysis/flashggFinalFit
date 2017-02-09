@@ -324,11 +324,18 @@ void plotBeamSpotDZdist(RooDataSet *data0, string suffix=""){
 	}
 	histSmallDZ->Draw();
   histSmallDZ->Fit("gaus","Q");
-	//c->SaveAs(Form("debug-%s_smallDz_%s_%s.pdf",data0->GetName(),extra.c_str(),suffix.c_str()));
+	//c->Print(Form("/vols/build/cms/es811/FreshStart/Pass1/AllTags/CMSSW_7_4_7/src/flashggFinalFit/Signal/debug-%s_smallDz_%s_%s.pdf",data0->GetName(),extra.c_str(),suffix.c_str()));
+	//c->Print(Form("/vols/build/cms/es811/FreshStart/Pass1/AllTags/CMSSW_7_4_7/src/flashggFinalFit/Signal/debug-%s_smallDz_%s_%s.png",data0->GetName(),extra.c_str(),suffix.c_str()));
 	histLargeDZ->Draw();
   histLargeDZ->Fit("gaus","Q");
-	//c->SaveAs(Form("debug-%s_largeDz_%s_%s.pdf",data0->GetName(),extra.c_str(),suffix.c_str()));
+	//c->Print(Form("/vols/build/cms/es811/FreshStart/Pass1/AllTags/CMSSW_7_4_7/src/flashggFinalFit/Signal/debug-%s_largeDz_%s_%s.pdf",data0->GetName(),extra.c_str(),suffix.c_str()));
+	//c->Print(Form("/vols/build/cms/es811/FreshStart/Pass1/AllTags/CMSSW_7_4_7/src/flashggFinalFit/Signal/debug-%s_largeDz_%s_%s.png",data0->GetName(),extra.c_str(),suffix.c_str()));
 //	delete c;
+	histLargeDZ->Add(histSmallDZ);
+	histLargeDZ->Draw();
+  histLargeDZ->Fit("gaus","Q");
+	//c->Print(Form("/vols/build/cms/es811/FreshStart/Pass1/AllTags/CMSSW_7_4_7/src/flashggFinalFit/Signal/debug-%s_totalDz_%s_%s.pdf",data0->GetName(),extra.c_str(),suffix.c_str()));
+	//c->Print(Form("/vols/build/cms/es811/FreshStart/Pass1/AllTags/CMSSW_7_4_7/src/flashggFinalFit/Signal/debug-%s_totalDz_%s_%s.png",data0->GetName(),extra.c_str(),suffix.c_str()));
 	delete histSmallDZ;
 	delete histLargeDZ;
   gStyle->SetOptFit();
@@ -757,7 +764,7 @@ int main(int argc, char *argv[]){
           //pick the dataset for the replacement proc and cat, reduce it (ie remove pdfWeights etc) ,
           //reweight for lumi, and then get the RV events only.
 					//if(beamSpotReweigh_){
-                                        if (beamSpotReweigh_ && !(TString(proc).Contains("tth") && mh==125)){
+                                        if (beamSpotReweigh_ && !(TString(replancementProc).Contains("tth") && mh==125)){
           data0Ref   = beamSpotReweigh(
 													rvwvDataset(
                         		intLumiReweigh(
@@ -814,7 +821,7 @@ int main(int argc, char *argv[]){
          //pick the dataset for the replacement proc and cat, reduce it (ie remove pdfWeights etc) ,
          //reweight for lumi and then get the WV events only.
 				 //if (beamSpotReweigh_){
-                                 if (beamSpotReweigh_ && !(TString(proc).Contains("tth") && mh==125)){
+                                 if (beamSpotReweigh_ && !(TString(replancementProc).Contains("tth") && mh==125)){
          data0Ref   = beamSpotReweigh( 
 				               rvwvDataset(
                         intLumiReweigh(
@@ -835,7 +842,7 @@ int main(int argc, char *argv[]){
                        ), "WV"
                       );
 					}
-                                    if (beamSpotReweigh_ && TString(referenceProcWV_).Contains("tth") && mh==125) { 
+                                    if (beamSpotReweigh_ && TString(replancementProc).Contains("tth") && mh==125) { 
                                         std::cout << "WARNING - BEAMSPOT REWEIGH BEING SKIPPED FOR proc " << proc << " and mass point " << mh << std::endl << std::endl;
                                     }
           if (data0Ref) {

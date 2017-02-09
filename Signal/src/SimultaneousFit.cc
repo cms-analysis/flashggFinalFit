@@ -902,12 +902,12 @@ int SimultaneousFit::isDCBsafe(RooDoubleCBFast* dcb){
       MH->setVal(mh_var);
       mass->setVal(mgg_var);
       
-       double val = ((RooDoubleCBFast*)dcb)->evaluate(); // for some reason this is a private member in the RooDoubleCBFast implementation. If one wants to use this feature it is just a case of moving the evaluate() function from private to public in HiggsAnalysis/GBRLikelihood/inteface/RooDoubleCBFast.h
+       /*double val = ((RooDoubleCBFast*)dcb)->evaluate(); // for some reason this is a private member in the RooDoubleCBFast implementation. If one wants to use this feature it is just a case of moving the evaluate() function from private to public in HiggsAnalysis/GBRLikelihood/inteface/RooDoubleCBFast.h
       if( !(fabs(val)<999)){ // 999 is "some reasonable value"
         std::cout << " ERROR, this pdf  has a NaN or 0 value " << val  << " at MH =" << mh_var << " mgg= " << mgg_var <<  " EXIT" << std::endl;
         listOfPolyVars_->Print("V");
         return 0;
-      }
+      }*/
     }
   }
   return 1;

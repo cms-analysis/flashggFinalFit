@@ -4,7 +4,8 @@ FILE="/vols/cms/szenz/ws_826b/output_GluGluHToGG_M120_13TeV_amcatnloFXFX_pythia8
 
 DATA="/vols/cms/szenz/ws_826b/allData.root"
 
-EXT="AllTags06Feb_nGausSSForder1"
+#EXT="AllTags06Feb_nGausSSForder1"
+EXT="AllTags06Feb_nGausSSFfinetuned"
 echo "Ext is $EXT"
 PROCS="ggh,vbf,tth,wh,zh"
 echo "Procs are $PROCS"
