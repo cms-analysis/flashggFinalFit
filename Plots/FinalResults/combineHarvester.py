@@ -136,7 +136,7 @@ if not os.path.exists(os.path.expandvars('$CMSSW_BASE/bin/$SCRAM_ARCH/combineCar
   sys.exit('ERROR - CombinedLimit package must be installed')
 
 cwd = os.getcwd()
-allowedMethods = ['Asymptotic','AsymptoticGrid','ProfileLikelihood','ProfileLikelihoodStat','ProfileLikelihoodTheo','ChannelCompatibilityCheck','MultiPdfChannelCompatibility','MHScan','MHScanStat','MHScanTheo','MHScanJustThisSyst','MHScanNoGlob','MuScan','MuScanStat','MuScanTheo','MuScanMHProf','RVScan','RFScan','RVRFScan','PerProcessChannelCompatibility','PerProcessChannelCompatibilityStat','PerTagChannelCompatibility','MuMHScan','GenerateOnly', 'RProcScan', 'RTopoScan', 'RBinScan', 'MuVsMHScan','CVCFScan','KGluKGamScan','MultiPdfMuHatvsMH']
+allowedMethods = ['Asymptotic','AsymptoticGrid','ProfileLikelihood','ProfileLikelihoodStat','ProfileLikelihoodTheo','ChannelCompatibilityCheck','MultiPdfChannelCompatibility','MHScan','MHScanStat','MHScanTheo','MHScanJustThisSyst','MHScanNoGlob','MuScan','MuScanStat','MuScanTheo','MuScanMHProf','RVScan','RFScan','RVRFScan','PerProcessChannelCompatibility','PerProcessChannelCompatibilityStat','PerProcessChannelCompatibilityTheo','PerTagChannelCompatibility','MuMHScan','GenerateOnly', 'RProcScan', 'RTopoScan', 'RBinScan', 'MuVsMHScan','CVCFScan','KGluKGamScan','MultiPdfMuHatvsMH']
 
 
 if opts.parallel:
@@ -270,7 +270,8 @@ def makeTheoOnlyCard():
   for line in inf.readlines():
     line_els = line.split()
     if line.startswith('kmax'): line = line.replace(line_els[1],'*')
-    theorySystKeywords=["QCD","pdf_","pdfWeight_","alpha","scaleWeight"]
+    #theorySystKeywords=["QCD","pdf_","pdfWeight_","alpha","scaleWeight"]
+    theorySystKeywords=["QCD","pdf_","pdfWeight_","alpha","scaleWeight","BR_","UEPS","JetVeto"]
     isTheorySystLine=False
     for thSkw in theorySystKeywords: 
       if thSkw in line: isTheorySystLine=True
@@ -669,6 +670,7 @@ def writeMultiDimFit(method=None,wsOnly=False):
         ws_args = { "RVRFScan"   : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:rVrFXSHiggs %s "% profMH ,
     "PerProcessChannelCompatibility" : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:floatingXSHiggs --PO modes=ggH,qqH,VH,ttH %s " % profMH,
     "PerProcessChannelCompatibilityStat" : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:floatingXSHiggs --PO modes=ggH,qqH,VH,ttH %s " % profMH,
+    "PerProcessChannelCompatibilityTheo" : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:floatingXSHiggs --PO modes=ggH,qqH,VH,ttH %s " % profMH,
     #PerProcessChannelCompatibility" : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:floatingXSHiggs --PO modes=ggH,qqH,VH,ttH  " ,
     #"PerProcessChannelCompatibility" : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:floatingXSHiggs --PO modes=ggH,qqH,ttH  %s" % profMH ,
     "PerTagChannelCompatibility" : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel %s %s " %(catsMap,profMH),
@@ -697,9 +699,11 @@ def writeMultiDimFit(method=None,wsOnly=False):
         setpois = {
             #"PerProcessChannelCompatibility" : [ "r_ggH", "r_qqH","r_ZH","r_WH","r_ttH" ],
             "PerTagChannelCompatibility" : perTagChCompPOIs,
-            #"PerProcessChannelCompatibility" : [ "r_ggH", "r_qqH","r_VH","r_ttH" ],
-            "PerProcessChannelCompatibility" : [ "r_ggH", "r_qqH","r_ttH" ],
-            "PerProcessChannelCompatibilityStat" : [ "r_ggH", "r_qqH","r_ttH" ],
+            "PerProcessChannelCompatibility" : [ "r_ggH", "r_qqH","r_VH","r_ttH" ],
+            "PerProcessChannelCompatibilityStat" : [ "r_ggH", "r_qqH","r_VH","r_ttH" ],
+            "PerProcessChannelCompatibilityTheo" : [ "r_ggH", "r_qqH","r_VH","r_ttH" ],
+            #"PerProcessChannelCompatibility" : [ "r_ggH", "r_qqH","r_ttH" ],
+            #"PerProcessChannelCompatibilityStat" : [ "r_ggH", "r_qqH","r_ttH" ],
             "RVRFScan" : [ "RV", "RF" ],
             "RVScan" : [ "RV", "RF" ],
             "RVnpRFScan": [ "RV", "RF" ],
@@ -727,6 +731,7 @@ def writeMultiDimFit(method=None,wsOnly=False):
     "RVRFScan"   : "-P RV -P RF --floatOtherPOIs=1" , 
     "PerProcessChannelCompatibility"   : "-P %s --floatOtherPOIs=1"% opts.perProcessChannelCompatibilityPOI , 
     "PerProcessChannelCompatibilityStat"   : "-P %s --floatOtherPOIs=1"% opts.perProcessChannelCompatibilityPOI , 
+    "PerProcessChannelCompatibilityTheo"   : "-P %s --floatOtherPOIs=1"% opts.perProcessChannelCompatibilityPOI , 
     "PerTagChannelCompatibility"   : "-P %s --floatOtherPOIs=1"% opts.perTagChannelCompatibilityPOI , 
     "RVScan"  : "--floatOtherPOIs=1 -P RV" ,
     "RVnpRFScan"  : "--floatOtherPOIs=0 -P RV" ,
@@ -760,6 +765,7 @@ def writeMultiDimFit(method=None,wsOnly=False):
         #par_ranges["PerProcessChannelCompatibility"]  = "r_ggH=%4.2f,%4.2f:r_qqH=%4.2f,%4.2f::r_ttH=%4.2f,%4.2f"%(-5.0,5.0,-5.0,5.0,-5.0,5.0)
         par_ranges["PerProcessChannelCompatibility"]  = "r_ggH=%4.2f,%4.2f:r_qqH=%4.2f,%4.2f:r_VH=%4.2f,%4.2f:r_ttH=%4.2f,%4.2f"%(0.0,2.0,0.0,2.0,0.0,2.0,0.0,2.0)
         par_ranges["PerProcessChannelCompatibilityStat"]  = "r_ggH=%4.2f,%4.2f:r_qqH=%4.2f,%4.2f:r_VH=%4.2f,%4.2f:r_ttH=%4.2f,%4.2f"%(0.0,2.0,0.0,2.0,0.0,2.0,0.0,2.0)
+        par_ranges["PerProcessChannelCompatibilityTheo"]  = "r_ggH=%4.2f,%4.2f:r_qqH=%4.2f,%4.2f:r_VH=%4.2f,%4.2f:r_ttH=%4.2f,%4.2f"%(0.0,2.0,0.0,2.0,0.0,2.0,0.0,2.0)
         if opts.rvLow!=None and opts.rvHigh!=None and opts.rfLow!=None and opts.rfHigh!=None:
           par_ranges["RVRFScan"]  = "RV=%4.2f,%4.2f:RF=%4.2f,%4.2f"%(opts.rvLow,opts.rvHigh,opts.rfLow,opts.rfHigh)
         if opts.rvLow!=None and opts.rvHigh!=None:
@@ -799,6 +805,8 @@ def writeMultiDimFit(method=None,wsOnly=False):
           makeStatOnlyCard()
         if method=='PerProcessChannelCompatibilityStat':
           makeStatOnlyCard()
+        if method=='PerProcessChannelCompatibilityTheo':
+          makeTheoOnlyCard()
         if method=='MHScanTheo':
           makeTheoOnlyCard()
         if method=='MHScanJustThisSyst':

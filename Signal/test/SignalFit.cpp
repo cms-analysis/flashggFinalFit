@@ -324,18 +324,18 @@ void plotBeamSpotDZdist(RooDataSet *data0, string suffix=""){
 	}
 	histSmallDZ->Draw();
   histSmallDZ->Fit("gaus","Q");
-	//c->Print(Form("/vols/build/cms/es811/FreshStart/Pass1/AllTags/CMSSW_7_4_7/src/flashggFinalFit/Signal/debug-%s_smallDz_%s_%s.pdf",data0->GetName(),extra.c_str(),suffix.c_str()));
-	//c->Print(Form("/vols/build/cms/es811/FreshStart/Pass1/AllTags/CMSSW_7_4_7/src/flashggFinalFit/Signal/debug-%s_smallDz_%s_%s.png",data0->GetName(),extra.c_str(),suffix.c_str()));
+	c->Print(Form("/vols/build/cms/es811/FreshStart/Pass1/AllTags/CMSSW_7_4_7/src/flashggFinalFit/Signal/debug-%s_smallDz_%s_%s.pdf",data0->GetName(),extra.c_str(),suffix.c_str()));
+	c->Print(Form("/vols/build/cms/es811/FreshStart/Pass1/AllTags/CMSSW_7_4_7/src/flashggFinalFit/Signal/debug-%s_smallDz_%s_%s.png",data0->GetName(),extra.c_str(),suffix.c_str()));
 	histLargeDZ->Draw();
   histLargeDZ->Fit("gaus","Q");
-	//c->Print(Form("/vols/build/cms/es811/FreshStart/Pass1/AllTags/CMSSW_7_4_7/src/flashggFinalFit/Signal/debug-%s_largeDz_%s_%s.pdf",data0->GetName(),extra.c_str(),suffix.c_str()));
-	//c->Print(Form("/vols/build/cms/es811/FreshStart/Pass1/AllTags/CMSSW_7_4_7/src/flashggFinalFit/Signal/debug-%s_largeDz_%s_%s.png",data0->GetName(),extra.c_str(),suffix.c_str()));
+	c->Print(Form("/vols/build/cms/es811/FreshStart/Pass1/AllTags/CMSSW_7_4_7/src/flashggFinalFit/Signal/debug-%s_largeDz_%s_%s.pdf",data0->GetName(),extra.c_str(),suffix.c_str()));
+	c->Print(Form("/vols/build/cms/es811/FreshStart/Pass1/AllTags/CMSSW_7_4_7/src/flashggFinalFit/Signal/debug-%s_largeDz_%s_%s.png",data0->GetName(),extra.c_str(),suffix.c_str()));
 //	delete c;
 	histLargeDZ->Add(histSmallDZ);
 	histLargeDZ->Draw();
   histLargeDZ->Fit("gaus","Q");
-	//c->Print(Form("/vols/build/cms/es811/FreshStart/Pass1/AllTags/CMSSW_7_4_7/src/flashggFinalFit/Signal/debug-%s_totalDz_%s_%s.pdf",data0->GetName(),extra.c_str(),suffix.c_str()));
-	//c->Print(Form("/vols/build/cms/es811/FreshStart/Pass1/AllTags/CMSSW_7_4_7/src/flashggFinalFit/Signal/debug-%s_totalDz_%s_%s.png",data0->GetName(),extra.c_str(),suffix.c_str()));
+	c->Print(Form("/vols/build/cms/es811/FreshStart/Pass1/AllTags/CMSSW_7_4_7/src/flashggFinalFit/Signal/debug-%s_totalDz_%s_%s.pdf",data0->GetName(),extra.c_str(),suffix.c_str()));
+	c->Print(Form("/vols/build/cms/es811/FreshStart/Pass1/AllTags/CMSSW_7_4_7/src/flashggFinalFit/Signal/debug-%s_totalDz_%s_%s.png",data0->GetName(),extra.c_str(),suffix.c_str()));
 	delete histSmallDZ;
 	delete histLargeDZ;
   gStyle->SetOptFit();
@@ -372,7 +372,7 @@ RooDataSet * beamSpotReweigh(RooDataSet *data0 /*original dataset*/){
   RooDataSet *data = (RooDataSet*) data0->emptyClone();
 	RooRealVar *weight0 = new RooRealVar("weight","weight",-100000,1000000);
 	//data0->Print();
-	plotBeamSpotDZdist(data0,"before");
+	//plotBeamSpotDZdist(data0,"before");
   for (int i = 0; i < data0->numEntries(); i++) {
     mass_->setVal(data0->get(i)->getRealValue("CMS_hgg_mass"));
     dZ_->setVal(data0->get(i)->getRealValue("dZ"));
@@ -390,7 +390,7 @@ RooDataSet * beamSpotReweigh(RooDataSet *data0 /*original dataset*/){
     data->add( RooArgList(*mass_, *dZ_, *weight0), weight0->getVal() );
   }
 	//data->Print();
-	plotBeamSpotDZdist(data,"after");
+	//plotBeamSpotDZdist(data,"after");
   
 	if (verbose_) std::cout << "[INFO] Old dataset (before beamSpot  reweight): " << *data0 << std::endl;
   if (verbose_) std::cout << "[INFO] New dataset (after beamSpot reweight):  " << *data << std::endl;
@@ -733,6 +733,8 @@ int main(int argc, char *argv[]){
                                     std::cout << "WARNING - BEAMSPOT REWEIGH BEING SKIPPED FOR proc " << proc << " and mass point " << mh << std::endl << std::endl;
                                 }
         if (verbose_) std::cout << "[INFO] Old dataset (before intLumi change): " << *data0 << std::endl;
+
+	plotBeamSpotDZdist(data,"VHdebug");
 
         dataRV = rvwvDataset(data,"RV"); 
         dataWV = rvwvDataset(data,"WV"); 
