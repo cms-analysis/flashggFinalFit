@@ -659,7 +659,8 @@ def writeMultiDimFit(method=None,wsOnly=False):
                         comma ="|"
                 binstr += ").*TeV/.*Bin.*:r_Bin%d[1,0,20]'" % ibin
                 catsMap += binstr
-        perTagChCompPOIs=[] 
+        #perTagChCompPOIs=[]
+        perTagChCompPOIs=["r_ggH","r_qqH","r_ttH","r_VH"]
         if opts.method=="PerTagChannelCompatibility" and catsMap=="":
            cats = getSortedCats()
            catsMap =" --PO verbose "
@@ -758,7 +759,8 @@ def writeMultiDimFit(method=None,wsOnly=False):
         #par_ranges["PerProcessChannelCompatibility"]  = "r_ggH=%4.2f,%4.2f:r_qqH=%4.2f,%4.2f:r_WH=%4.2f,%4.2f:r_ZH=%4.2f,%4.2f:r_ttH=%4.2f,%4.2f"%(-5.0,5.0,-5.0,5.0,-5.0,5.0,-5.0,5.0,-5.0,5.0)
         perTagChCompPOIRanges=""
         for r_tag in perTagChCompPOIs:
-          perTagChCompPOIRanges=perTagChCompPOIRanges+ "%s=-2.0,10.0:"%r_tag
+          #perTagChCompPOIRanges=perTagChCompPOIRanges+ "%s=-2.0,10.0:"%r_tag
+          perTagChCompPOIRanges=perTagChCompPOIRanges+ "%s=0.,2.0:"%r_tag
         perTagChCompPOIRanges[:-1] #remove last character, an extra ":"
         par_ranges["PerTagChannelCompatibility"]  = perTagChCompPOIRanges 
         #par_ranges["PerProcessChannelCompatibility"]  = "r_ggH=%4.2f,%4.2f:r_qqH=%4.2f,%4.2f:r_VH=%4.2f,%4.2f:r_ttH=%4.2f,%4.2f"%(-5.0,5.0,-5.0,5.0,-5.0,20.0,-5.0,5.0)

@@ -38,9 +38,11 @@ int Normalization_8TeV::Init(int sqrtS){
         XSectionMap_zh[mH]	= valXSZH;	
         XSectionMap_wzh[mH]	= valXSWH+valXSZH;	
 
-        XSectionMap_VH2HQQ[mH]	= valXSWH*(67.41*0.01)/*BR(W to hadrons)*/ + valXSZH*(69.91*0.01)/*BR(Z to hadrons)*/;	
         XSectionMap_QQ2HLNU[mH]	= valXSWH*(3.*10.86*0.01)/*3xBR(W to lv)*/;	
         XSectionMap_QQ2HLL[mH]	= valXSZH*(3*3.3658*0.01 + 20.00*0.01)/*BR(Z to ll) + BR(Z to invisible)*/;	
+        XSectionMap_VH2HQQ[mH]	= valXSWH*(67.41*0.01)/*BR(W to hadrons)*/ + valXSZH*(69.91*0.01)/*BR(Z to hadrons)*/;	
+        XSectionMap_WH2HQQ[mH]	= valXSWH*(67.41*0.01)/*BR(W to hadrons)*/;
+        XSectionMap_ZH2HQQ[mH]	= valXSZH*(69.91*0.01)/*BR(Z to hadrons)*/;	
 	
     }
 
@@ -161,12 +163,16 @@ TGraph * Normalization_8TeV::GetSigmaGraph(TString process)
 		XSectionMap = &XSectionMap_zh;
 	} else if (process.Contains("grav")){
 		XSectionMap = &XSectionMap_sm;
-	} else if ( process.Contains("VH2HQQ") ) {
-		XSectionMap = &XSectionMap_VH2HQQ;
 	} else if ( process.Contains("QQ2HLNU") ) {
 		XSectionMap = &XSectionMap_QQ2HLNU;
 	} else if ( process.Contains("QQ2HLL") ) {
 		XSectionMap = &XSectionMap_QQ2HLL;
+	} else if ( process.Contains("VH2HQQ") ) {
+		XSectionMap = &XSectionMap_VH2HQQ;
+	} else if ( process.Contains("WH2HQQ") ) {
+		XSectionMap = &XSectionMap_WH2HQQ;
+	} else if ( process.Contains("ZH2HQQ") ) {
+		XSectionMap = &XSectionMap_ZH2HQQ;
 	} else {
 		std::cout << "[WARNING] Warning ggh, vbf, wh, zh, wzh, tth or grav or STXS proc not found in histname!!!!" << std::endl;
 		//exit(1);
@@ -233,12 +239,16 @@ double Normalization_8TeV::GetXsection(double mass, TString HistName) {
 		XSectionMap = &XSectionMap_tth;
 	} else if (HistName.Contains("grav")) {
 		XSectionMap = &XSectionMap_sm;
-	} else if (HistName.Contains("VH2HQQ")) {
-		XSectionMap = &XSectionMap_VH2HQQ;
 	} else if (HistName.Contains("QQ2HLNU")) {
 		XSectionMap = &XSectionMap_QQ2HLNU;
 	} else if (HistName.Contains("QQ2HLL")) {
 		XSectionMap = &XSectionMap_QQ2HLL;
+	} else if (HistName.Contains("VH2HQQ")) {
+		XSectionMap = &XSectionMap_VH2HQQ;
+	} else if (HistName.Contains("WH2HQQ")) {
+		XSectionMap = &XSectionMap_WH2HQQ;
+	} else if (HistName.Contains("ZH2HQQ")) {
+		XSectionMap = &XSectionMap_ZH2HQQ;
 	} else {
 		std::cout << "[WARNING] Warning ggh, vbf, wh, zh, wzh, tth or grav or STXS proc not found in " << HistName << std::endl;
 		//exit(1);

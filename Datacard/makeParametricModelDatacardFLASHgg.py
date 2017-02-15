@@ -47,7 +47,7 @@ class WSTFileWrapper:
         for i in range(len(self.fnList)):
           this_result_obj = self.wsList[i].data(dataName);
           if ( result and this_result_obj and (not complained_yet) ):
-            complained_yet = true;
+            complained_yet = True;
           if this_result_obj: # [3]
              result = this_result_obj
         return result 
@@ -115,9 +115,11 @@ outFile = open(options.outfilename,'w')
 ## PROCS HANDLING & DICT ######################################################
 ###############################################################################
 # convert flashgg style to combine style process
-combProc = {'ggH':'ggH_hgg','VBF':'qqH_hgg','ggh':'ggH_hgg','vbf':'qqH_hgg','wzh':'VH','wh':'WH_hgg','zh':'ZH_hgg','tth':'ttH_hgg','bkg_mass':'bkg_mass','gg_grav':'ggH_hgg_ALT','qq_grav':'qqbarH_ALT'}
-flashggProc = {'ggH_hgg':'ggh','qqH_hgg':'vbf','VH':'wzh','WH_hgg':'wh','ZH_hgg':'zh','ttH_hgg':'tth','bkg_mass':'bkg_mass','ggH_hgg_ALT':'gg_grav','qqbarH_ALT':'qq_grav'}
-procId = {'ggH_hgg':0,'qqH_hgg':-1,'VH':-2,'WH_hgg':-2,'ZH_hgg':-3,'ttH_hgg':-4,'ggH_hgg_ALT':-5,'qqbarH_ALT':-6,'bkg_mass':1}
+#combProc = {'ggH':'ggH_hgg','VBF':'qqH_hgg','ggh':'ggH_hgg','vbf':'qqH_hgg','wzh':'VH','wh':'WH_hgg','zh':'ZH_hgg','tth':'ttH_hgg','bkg_mass':'bkg_mass','gg_grav':'ggH_hgg_ALT','qq_grav':'qqbarH_ALT'}
+combProc = {'GG2H':'ggH_hgg','VBF':'qqH_hgg','TTH':'ttH_hgg','QQ2HLNU':'WHL_hgg','QQ2HLL':'ZHL_hgg','WH2HQQ':'WHH_hgg','ZH2HQQ':'ZHH_hgg','bkg_mass':'bkg_mass'}
+#flashggProc = {'ggH_hgg':'ggh','qqH_hgg':'vbf','VH':'wzh','WH_hgg':'wh','ZH_hgg':'zh','ttH_hgg':'tth','bkg_mass':'bkg_mass','ggH_hgg_ALT':'gg_grav','qqbarH_ALT':'qq_grav'}
+flashggProc = {'ggH_hgg':'ggh','qqH_hgg':'vbf','ttH_hgg':'tth','WHL_hgg':'wh','ZHL_hgg':'zh','WHH_hgg':'wh','ZHH_hgg':'zh','bkg_mass':'bkg_mass'}
+procId = {'ggH_hgg':0,'qqH_hgg':-1,'ttH_hgg':-2,'WHL_hgg':-2,'ZHL_hgg':-3,'WHH_hgg':-4,'ZHH_hgg':-5,'bkg_mass':1}
 bkgProcs = ['bkg_mass'] #what to treat as background
 #Determine if VH or WZH_hgg
 splitVH=False
@@ -225,14 +227,28 @@ sigWS = 'wsig_%dTeV'%(sqrts)
 fileDetails = {}
 fileDetails['data_obs'] = [dataFile,dataWS,'roohist_data_mass_$CHANNEL']
 fileDetails['bkg_mass']  = [bkgFile,bkgWS,'CMS_hgg_$CHANNEL_%dTeV_bkgshape'%sqrts]
-fileDetails['ggH_hgg']       = [sigFile.replace('$PROC',"ggh"),sigWS,'hggpdfsmrel_%dTeV_ggh_$CHANNEL'%sqrts]
-fileDetails['qqH_hgg']       = [sigFile.replace('$PROC',"vbf"),sigWS,'hggpdfsmrel_%dTeV_vbf_$CHANNEL'%sqrts]
-if splitVH:
-  fileDetails['WH_hgg']       =  [sigFile.replace('$PROC',"wh"),sigWS,'hggpdfsmrel_%dTeV_wh_$CHANNEL'%sqrts]
-  fileDetails['ZH_hgg']       =  [sigFile.replace('$PROC',"zh"),sigWS,'hggpdfsmrel_%dTeV_zh_$CHANNEL'%sqrts]
-else:
-  fileDetails['VH']       =  [sigFile.replace('$PROC',"wzh"),sigWS,'hggpdfsmrel_%dTeV_wzh_$CHANNEL'%sqrts]
-fileDetails['ttH_hgg']       = [sigFile.replace('$PROC',"tth"),sigWS,'hggpdfsmrel_%dTeV_tth_$CHANNEL'%sqrts]
+
+#fileDetails['ggH_hgg']       = [sigFile.replace('$PROC',"ggh"),sigWS,'hggpdfsmrel_%dTeV_ggh_$CHANNEL'%sqrts]
+#fileDetails['qqH_hgg']       = [sigFile.replace('$PROC',"vbf"),sigWS,'hggpdfsmrel_%dTeV_vbf_$CHANNEL'%sqrts]
+#fileDetails['ttH_hgg']       = [sigFile.replace('$PROC',"tth"),sigWS,'hggpdfsmrel_%dTeV_tth_$CHANNEL'%sqrts]
+#fileDetails['WHL_hgg']       = [sigFile.replace('$PROC',"wh"),sigWS,'hggpdfsmrel_%dTeV_wh_$CHANNEL'%sqrts]
+#fileDetails['ZHL_hgg']       = [sigFile.replace('$PROC',"zh"),sigWS,'hggpdfsmrel_%dTeV_zh_$CHANNEL'%sqrts]
+#fileDetails['WHH_hgg']       = [sigFile.replace('$PROC',"wh"),sigWS,'hggpdfsmrel_%dTeV_wh_$CHANNEL'%sqrts]
+#fileDetails['ZHH_hgg']       = [sigFile.replace('$PROC',"zh"),sigWS,'hggpdfsmrel_%dTeV_zh_$CHANNEL'%sqrts]
+
+fileDetails['ggH_hgg']       = [sigFile.replace('$PROC',"GG2H"),sigWS,'hggpdfsmrel_%dTeV_GG2H_$CHANNEL'%sqrts]
+fileDetails['qqH_hgg']       = [sigFile.replace('$PROC',"VBF"),sigWS,'hggpdfsmrel_%dTeV_VBF_$CHANNEL'%sqrts]
+fileDetails['ttH_hgg']       = [sigFile.replace('$PROC',"TTH"),sigWS,'hggpdfsmrel_%dTeV_TTH_$CHANNEL'%sqrts]
+fileDetails['WHL_hgg']       = [sigFile.replace('$PROC',"QQ2HLNU"),sigWS,'hggpdfsmrel_%dTeV_QQ2HLNU_$CHANNEL'%sqrts]
+fileDetails['ZHL_hgg']       = [sigFile.replace('$PROC',"QQ2HLL"),sigWS,'hggpdfsmrel_%dTeV_QQ2HLL_$CHANNEL'%sqrts]
+fileDetails['WHH_hgg']       = [sigFile.replace('$PROC',"WH2HQQ"),sigWS,'hggpdfsmrel_%dTeV_WH2HQQ_$CHANNEL'%sqrts]
+fileDetails['ZHH_hgg']       = [sigFile.replace('$PROC',"ZH2HQQ"),sigWS,'hggpdfsmrel_%dTeV_ZH2HQQ_$CHANNEL'%sqrts]
+
+#if splitVH:
+#  fileDetails['WH_hgg']       =  [sigFile.replace('$PROC',"wh"),sigWS,'hggpdfsmrel_%dTeV_wh_$CHANNEL'%sqrts]
+#  fileDetails['ZH_hgg']       =  [sigFile.replace('$PROC',"zh"),sigWS,'hggpdfsmrel_%dTeV_zh_$CHANNEL'%sqrts]
+#else:
+#  fileDetails['VH']       =  [sigFile.replace('$PROC',"wzh"),sigWS,'hggpdfsmrel_%dTeV_wzh_$CHANNEL'%sqrts]
 ###############################################################################
 
 ###############################################################################
@@ -256,9 +272,13 @@ theorySystAbsScale['names'] = ["QCDscale_qqbar_up","QCDscale_gg_up","QCDscale_qq
 theorySystAbsScale['names_to_consider'] = ["QCDscale_qqbar_up","QCDscale_gg_up","QCDscale_qqbar_down","QCDscale_gg_down","pdf_alphaS_qqbar","pdf_alphaS_gg"] #QCD scale up, QCD scale down, PDF+alpha S, PDF, alpha S 
 theorySystAbsScale['ggH_hgg'] = [0.0   ,0.046 ,0.0    ,-0.067, 0.0   , 0.032 , 0,0    , 0.019  ,0.0   ,0.026] # GGH is a _gg process
 theorySystAbsScale['qqH_hgg'] = [0.004 ,0.0   ,-0.003 ,0.0   , 0.021 , 0.0   , 0.021  , 0.0    ,0.005 ,0.0] # VBF is a _qqbar process 
-theorySystAbsScale['WH_hgg'] =  [0.005 ,0.0   ,-0.007 ,0.0   , 0.019 , 0.0   , 0.017  , 0.0    ,0.009 ,0.0] # WZH_hgg is a _qqbar process, cporrelated with VBF
-theorySystAbsScale['ZH_hgg'] =  [0.038 ,0.0   ,-0.031 ,0.0   , 0.016 , 0.0   , 0.013  , 0.0    ,0.009 ,0.0] # WZH_hgg is a _11bar process correlated with VBF 
 theorySystAbsScale['ttH_hgg'] = [0.0   ,-0.058,0.0    ,0.092 , 0.0   , -0.036, 0.0    , -0.032 ,0.0   ,-0.020]  # TTH should be a _gg process anticorrelated with GGH
+theorySystAbsScale['WHL_hgg'] =  [0.005 ,0.0   ,-0.007 ,0.0   , 0.019 , 0.0   , 0.017  , 0.0    ,0.009 ,0.0] # WZH_hgg is a _qqbar process, cporrelated with VBF
+theorySystAbsScale['ZHL_hgg'] =  [0.038 ,0.0   ,-0.031 ,0.0   , 0.016 , 0.0   , 0.013  , 0.0    ,0.009 ,0.0] # WZH_hgg is a _11bar process correlated with VBF 
+theorySystAbsScale['WHH_hgg'] =  [0.005 ,0.0   ,-0.007 ,0.0   , 0.019 , 0.0   , 0.017  , 0.0    ,0.009 ,0.0] # WZH_hgg is a _qqbar process, cporrelated with VBF
+theorySystAbsScale['ZHH_hgg'] =  [0.038 ,0.0   ,-0.031 ,0.0   , 0.016 , 0.0   , 0.013  , 0.0    ,0.009 ,0.0] # WZH_hgg is a _11bar process correlated with VBF 
+#theorySystAbsScale['WH_hgg'] =  [0.005 ,0.0   ,-0.007 ,0.0   , 0.019 , 0.0   , 0.017  , 0.0    ,0.009 ,0.0] # WZH_hgg is a _qqbar process, cporrelated with VBF
+#theorySystAbsScale['ZH_hgg'] =  [0.038 ,0.0   ,-0.031 ,0.0   , 0.016 , 0.0   , 0.013  , 0.0    ,0.009 ,0.0] # WZH_hgg is a _11bar process correlated with VBF 
 
 #yprinting function
 def printTheorySysts():
@@ -559,6 +579,7 @@ brSyst = [0.0206,-0.0208] #13TeV Values, from YR4 taking  in quadrature THU (+1.
 # lumi syst
 ####lumiSyst = 0.026 #8TeV Values
 lumiSyst=0.062  #Correct for ICHEP 
+#lumiSyst=0.025  #Correct for Moriond17
 
 ##Printing Functions
 def printBRSyst():
@@ -643,15 +664,15 @@ vbfSysts['UnmatchedPUWeight'] = []
 vbfSysts['JER'] = [] 
 vbfSysts['JetVeto'] =[]
 vbfSysts['UEPS'] =[]
-#vbfSysts['RMSShift'] =[]
-vbfSysts['PUJIDShift'] =[]
+vbfSysts['RMSShift'] =[]
+#vbfSysts['PUJIDShift'] =[]
 for dijetCat in dijetCats: #each entry will represent a different migration
    vbfSysts['JER'].append([1.,1.,1.])  #value of 1 given gor both ggh and qqh, since vairations are taken from histograms directly
    vbfSysts['JEC'].append([1.,1.,1.]) #value of 1 given gor both ggh and qqh, since vairations are taken from histograms directly
 vbfSysts['UnmatchedPUWeight'].append([1.,1.]) #should only apply to ggh<->vbf
 vbfSysts['UnmatchedPUWeight'].append([1.,1.]) #should only apply to ggh<->vbf
-#vbfSysts['RMSShift'].append([1.,1.]) #should only apply to ggh<->vbf
-vbfSysts['PUJIDShift'].append([1.,1.]) #should only apply to ggh<->vbf
+vbfSysts['RMSShift'].append([1.,1.]) #should only apply to ggh<->vbf
+#vbfSysts['PUJIDShift'].append([1.,1.]) #should only apply to ggh<->vbf
 vbfSysts['UEPS'].append([0.077,0.071]) # adhoc for ggh<->vbf # UPDATED FOR ICHEP16
 vbfSysts['UEPS'].append([0.042,0.092]) # adhoc for vbf0<->vbf1# UPDATED FOR ICHEP16
 vbfSysts['UEPS'].append([0.042,0.092]) # adhoc by Ed in attempt to fix negative value
