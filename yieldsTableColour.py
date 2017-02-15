@@ -7,7 +7,7 @@ import time
 import ROOT as r
 
 sqrts=13
-lumi=0.
+lumi=36.8
 
 from optparse import OptionParser
 parser = OptionParser()
@@ -514,10 +514,11 @@ for t in tagList :
     exit(1)
   bkgy=bkgYield[t]
   naiveExp=(0.68*Arr[t]["Total"])/(2*float(effSigma[t])*bkgy)**(0.5)
+  s_sb_value=(0.68*Arr[t]["Total"])/(0.68*Arr[t]["Total"] + 2*float(effSigma[t])*bkgy)
   dataLines.append( lineCat + Allline+ " "+line+"& %.2f & %.2f & %.2f & %.2f & %.2f\\\\"%(float(effSigma[t]),float(hmSigma[t]),bkgy,bkgy/options.factor,naiveExp ))
   sigmaEff_hist.SetBinContent(len(tagList)-iTag,float(effSigma[t]))
   sigmaHM_hist.SetBinContent(len(tagList)-iTag,float(hmSigma[t]))
-  s_sb_hist.SetBinContent(len(tagList)-iTag,float(naiveExp))
+  s_sb_hist.SetBinContent(len(tagList)-iTag,float(s_sb_value))
   naiveExpecteds.append(naiveExp)
   iTag=iTag+1
   
@@ -546,7 +547,9 @@ dataLines.append( lineCat + Allline+ " "+line+"& %.2f & %.2f & %.2f & %.2f & %.2
   #dataLines.append( lineCat + Allline+ " "+line+ "& & &")#"& %.2f & %.2f & %.2f \\\\"%(float(effSigma[t]),float(hmSigma[t]),float(bkgYield[t])))
 sigmaEff_hist.SetBinContent(1,float(effSigma[t]))
 sigmaHM_hist.SetBinContent(1,float(hmSigma[t]))
-s_sb_hist.SetBinContent(1,float(totalNaiveExp))
+#s_sb_hist.SetBinContent(1,float(totalNaiveExp))
+s_sb_value=(0.68*Arr[t]["Total"])/(0.68*Arr[t]["Total"] + 2*float(effSigma[t])*bkgy)
+s_sb_hist.SetBinContent(len(tagList)-iTag,float(s_sb_value))
 
 #dataLines.sort()
 for l in dataLines :
@@ -593,9 +596,9 @@ l2.AddEntry(sigmaHM_hist," #sigma_{HM}","F")
 
 l3.AddEntry(s_sb_hist," S/(S+B) in #pm #sigma_{eff}","F")
 
-dummyHist= r.TH2F("h1","",100,0.01,100,15,0,14)
-dummyHist2= r.TH2F("h2","",100,0.01,1.2*sigmaEff_hist.GetMaximum(),15,0,14)
-dummyHist3= r.TH2F("h2","",100,0.01,1.2*s_sb_hist.GetMaximum(),15,0,14)
+dummyHist= r.TH2F("h1","",100,0.01,100,len(tagList),0,len(tagList)-1)
+dummyHist2= r.TH2F("h2","",100,0.01,1.2*sigmaEff_hist.GetMaximum(),len(tagList),0,len(tagList)-1)
+dummyHist3= r.TH2F("h2","",100,0.01,1.2*s_sb_hist.GetMaximum(),len(tagList),0,len(tagList)-1)
 #dummyHist= r.TH2F("h1","h1",15,0,15,100,0.01,100)
 #hstack.Draw()
 #hstack.GetYaxis().SetRangeUser(0.001,100)
@@ -699,7 +702,7 @@ lat.SetTextSize(0.05)
 lat.SetTextAlign(11)
 lat.DrawLatex(0.05,0.95,"#bf{CMS} #it{Preliminary} H#rightarrow#gamma#gamma")
 lat.SetTextAlign(31)
-lat.DrawLatex(0.95,0.95,"36.8 fb^{-1} (13 TeV)")
+lat.DrawLatex(0.95,0.95,"%.1f fb^{-1} (13 TeV)"%lumi)
 pad1.RedrawAxis()
 canv.SaveAs("yieldsTablePlot.pdf")
 canv.SaveAs("yieldsTablePlot.png")
