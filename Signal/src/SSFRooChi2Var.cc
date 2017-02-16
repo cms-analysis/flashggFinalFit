@@ -16,20 +16,12 @@
  
  //////////////////////////////////////////////////////////////////////////////
  // 
- // Class LCRooChi2Var implements a simple chi^2 calculation from a binned dataset
- // and a PDF. The chi^2 is calculated as 
- //
- // / (f_PDF * N_tot/ V_bin) - N_bin \+2
- //Sum[bins] |------------------------------ |
- // \ err_bin/
- //
- // If no user-defined errors are defined for the dataset, poisson errors
- // are used. In extended PDF mode, N_tot is substituted with N_expected.
+ // Class SSFRooChi2Var is an adapted version of RooChi2Var, where the logic of the calculation of the chi2 has been slightly modified so as to ignore empty bins. This was causing crazy values of chi2 to be returned, and for the fits to fail entirely, when using this for SSF.
  //
  
  #include "RooFit.h"
  
- #include "../interface/LCRooChi2Var.h"
+ #include "../interface/SSFRooChi2Var.h"
  #include "RooDataHist.h"
  #include "RooAbsPdf.h"
  #include "RooCmdConfig.h"
@@ -44,33 +36,33 @@
  
  using namespace std;
  
- ClassImp(LCRooChi2Var)
+ ClassImp(SSFRooChi2Var)
  ;
  
- RooArgSet LCRooChi2Var::_emptySet ;
+ RooArgSet SSFRooChi2Var::_emptySet ;
  
  
  ////////////////////////////////////////////////////////////////////////////////
  
- LCRooChi2Var::LCRooChi2Var(const char *name, const char* title, RooAbsReal& func, RooDataHist& hdata,
+ SSFRooChi2Var::SSFRooChi2Var(const char *name, const char* title, RooAbsReal& func, RooDataHist& hdata,
 const RooCmdArg& arg1,const RooCmdArg& arg2,const RooCmdArg& arg3,
 const RooCmdArg& arg4,const RooCmdArg& arg5,const RooCmdArg& arg6,
 const RooCmdArg& arg7,const RooCmdArg& arg8,const RooCmdArg& arg9) :
  RooAbsOptTestStatistic(name,title,func,hdata,_emptySet,
- RooCmdConfig::decodeStringOnTheFly("LCRooChi2Var::LCRooChi2Var","RangeWithName",0,"",arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9),
+ RooCmdConfig::decodeStringOnTheFly("SSFRooChi2Var::SSFRooChi2Var","RangeWithName",0,"",arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9),
  0,
- RooCmdConfig::decodeIntOnTheFly("LCRooChi2Var::LCRooChi2Var","NumCPU",0,1,arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9),
+ RooCmdConfig::decodeIntOnTheFly("SSFRooChi2Var::SSFRooChi2Var","NumCPU",0,1,arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9),
  RooFit::Interleave,
- RooCmdConfig::decodeIntOnTheFly("LCRooChi2Var::LCRooChi2Var","Verbose",0,1,arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9),
+ RooCmdConfig::decodeIntOnTheFly("SSFRooChi2Var::SSFRooChi2Var","Verbose",0,1,arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9),
  0)
- //LCRooChi2Var constructor. Optional arguments taken
+ //SSFRooChi2Var constructor. Optional arguments taken
  //
  //DataError()-- Choose between Poisson errors and Sum-of-weights errors
  //NumCPU() -- Activate parallel processing feature
  //Range()-- Fit only selected region
  //Verbose()-- Verbose output of GOF framework
  {
- RooCmdConfig pc("LCRooChi2Var::LCRooChi2Var") ;
+ RooCmdConfig pc("SSFRooChi2Var::SSFRooChi2Var") ;
  pc.defineInt("etype","DataError",0,(Int_t)RooDataHist::Auto) ;
  pc.defineInt("extended","Extended",0,kFALSE) ;
  pc.allowUndefined() ;
@@ -96,20 +88,20 @@ const RooCmdArg& arg7,const RooCmdArg& arg8,const RooCmdArg& arg9) :
  
  ////////////////////////////////////////////////////////////////////////////////
  
- LCRooChi2Var::LCRooChi2Var(const char *name, const char* title, RooAbsPdf& pdf, RooDataHist& hdata,
+ SSFRooChi2Var::SSFRooChi2Var(const char *name, const char* title, RooAbsPdf& pdf, RooDataHist& hdata,
 const RooCmdArg& arg1,const RooCmdArg& arg2,const RooCmdArg& arg3,
 const RooCmdArg& arg4,const RooCmdArg& arg5,const RooCmdArg& arg6,
 const RooCmdArg& arg7,const RooCmdArg& arg8,const RooCmdArg& arg9) :
  RooAbsOptTestStatistic(name,title,pdf,hdata,
- *(const RooArgSet*)RooCmdConfig::decodeObjOnTheFly("LCRooChi2Var::LCRooChi2Var","ProjectedObservables",0,&_emptySet
+ *(const RooArgSet*)RooCmdConfig::decodeObjOnTheFly("SSFRooChi2Var::SSFRooChi2Var","ProjectedObservables",0,&_emptySet
 ,arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9),
- RooCmdConfig::decodeStringOnTheFly("LCRooChi2Var::LCRooChi2Var","RangeWithName",0,"",arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9),
- RooCmdConfig::decodeStringOnTheFly("LCRooChi2Var::LCRooChi2Var","AddCoefRange",0,"",arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9),
- RooCmdConfig::decodeIntOnTheFly("LCRooChi2Var::LCRooChi2Var","NumCPU",0,1,arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9),
+ RooCmdConfig::decodeStringOnTheFly("SSFRooChi2Var::SSFRooChi2Var","RangeWithName",0,"",arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9),
+ RooCmdConfig::decodeStringOnTheFly("SSFRooChi2Var::SSFRooChi2Var","AddCoefRange",0,"",arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9),
+ RooCmdConfig::decodeIntOnTheFly("SSFRooChi2Var::SSFRooChi2Var","NumCPU",0,1,arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9),
  RooFit::Interleave,
- RooCmdConfig::decodeIntOnTheFly("LCRooChi2Var::LCRooChi2Var","Verbose",0,1,arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9),
- RooCmdConfig::decodeIntOnTheFly("LCRooChi2Var::LCRooChi2Var","SplitRange",0,0,arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9)) 
- //LCRooChi2Var constructor. Optional arguments taken
+ RooCmdConfig::decodeIntOnTheFly("SSFRooChi2Var::SSFRooChi2Var","Verbose",0,1,arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9),
+ RooCmdConfig::decodeIntOnTheFly("SSFRooChi2Var::SSFRooChi2Var","SplitRange",0,0,arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9)) 
+ //SSFRooChi2Var constructor. Optional arguments taken
  //
  //Extended() -- Include extended term in calculation
  //DataError()-- Choose between Poisson errors and Sum-of-weights errors
@@ -120,7 +112,7 @@ const RooCmdArg& arg7,const RooCmdArg& arg8,const RooCmdArg& arg9) :
  //ConditionalObservables() -- Define projected observables 
  //Verbose()-- Verbose output of GOF framework
  {
- RooCmdConfig pc("LCRooChi2Var::LCRooChi2Var") ;
+ RooCmdConfig pc("SSFRooChi2Var::SSFRooChi2Var") ;
  pc.defineInt("extended","Extended",0,kFALSE) ;
  pc.defineInt("etype","DataError",0,(Int_t)RooDataHist::Auto) ;
  pc.allowUndefined() ;
@@ -154,7 +146,7 @@ const RooCmdArg& arg7,const RooCmdArg& arg8,const RooCmdArg& arg9) :
  /// individual cutRange for each RooSimultaneous index category state
  /// name cutRange_{indexStateName}.
  
- LCRooChi2Var::LCRooChi2Var(const char *name, const char *title, RooAbsPdf& pdf, RooDataHist& hdata,
+ SSFRooChi2Var::SSFRooChi2Var(const char *name, const char *title, RooAbsPdf& pdf, RooDataHist& hdata,
 Bool_t extended, const char* cutRange, const char* addCoefRange,
 Int_t nCPU, RooFit::MPSplit interleave, Bool_t verbose, Bool_t splitCutRange, RooDataHist::ErrorType etype) : 
  RooAbsOptTestStatistic(name,title,pdf,hdata,RooArgSet(),cutRange,addCoefRange,nCPU,interleave,verbose,splitCutRange),
@@ -181,8 +173,8 @@ _etype(etype), _funcMode(extended?ExtendedPdf:Pdf)
  /// individual cutRange for each RooSimultaneous index category state
  /// name cutRange_{indexStateName}.
  
- LCRooChi2Var::LCRooChi2Var(const char *name, const char *title, RooAbsReal& func, RooDataHist& hdata,
-const RooArgSet& projDeps, LCRooChi2Var::FuncMode fmode, const char* cutRange, const char* addCoefRange, 
+ SSFRooChi2Var::SSFRooChi2Var(const char *name, const char *title, RooAbsReal& func, RooDataHist& hdata,
+const RooArgSet& projDeps, SSFRooChi2Var::FuncMode fmode, const char* cutRange, const char* addCoefRange, 
 Int_t nCPU, RooFit::MPSplit interleave, Bool_t verbose, Bool_t splitCutRange, RooDataHist::ErrorType etype) : 
  RooAbsOptTestStatistic(name,title,func,hdata,projDeps,cutRange,addCoefRange,nCPU,interleave,verbose,splitCutRange),
  _etype(etype), _funcMode(fmode)
@@ -194,7 +186,7 @@ Int_t nCPU, RooFit::MPSplit interleave, Bool_t verbose, Bool_t splitCutRange, Ro
  ////////////////////////////////////////////////////////////////////////////////
  /// Copy constructor
  
- LCRooChi2Var::LCRooChi2Var(const LCRooChi2Var& other, const char* name) : 
+ SSFRooChi2Var::SSFRooChi2Var(const SSFRooChi2Var& other, const char* name) : 
  RooAbsOptTestStatistic(other,name),
  _etype(other._etype),
  _funcMode(other._funcMode)
@@ -206,7 +198,7 @@ Int_t nCPU, RooFit::MPSplit interleave, Bool_t verbose, Bool_t splitCutRange, Ro
  ////////////////////////////////////////////////////////////////////////////////
  /// Destructor
  
- LCRooChi2Var::~LCRooChi2Var()
+ SSFRooChi2Var::~SSFRooChi2Var()
  {
  }
  
@@ -215,7 +207,7 @@ Int_t nCPU, RooFit::MPSplit interleave, Bool_t verbose, Bool_t splitCutRange, Ro
  ////////////////////////////////////////////////////////////////////////////////
  /// Calculate chi^2 in partition from firstEvent to lastEvent using given stepSize
  
- Double_t LCRooChi2Var::evaluatePartition(Int_t firstEvent, Int_t lastEvent, Int_t stepSize) const 
+ Double_t SSFRooChi2Var::evaluatePartition(Int_t firstEvent, Int_t lastEvent, Int_t stepSize) const 
  {
  // Throughout the calculation, we use Kahan's algorithm for summing to
  // prevent loss of precision - this is a factor four more expensive than
@@ -261,11 +253,12 @@ Int_t nCPU, RooFit::MPSplit interleave, Bool_t verbose, Bool_t splitCutRange, Ro
  }
  
  // Skip cases where pdf=0 and there is no data
+ // In the regular RooChi2Var this condition is not sufficient to skip (also need 0 predicted yield from PDF in that bin and 0 error, which cause needless failures for the far tails of the distrubutions we are fitting)
  if (0. == nData * nData ) continue ;
  
  // Return 0 if eInt=0, special handling in MINUIT will follow
  if (0. == eInt * eInt) {
- coutE(Eval) << "LCRooChi2Var::LCRooChi2Var(" << GetName() << ") INFINITY ERROR: bin " << i 
+ coutE(Eval) << "SSFRooChi2Var::SSFRooChi2Var(" << GetName() << ") INFINITY ERROR: bin " << i 
  << " has zero error" << endl ;
  return 0.;
  }

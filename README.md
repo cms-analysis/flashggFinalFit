@@ -10,28 +10,31 @@ cmsenv
 git cms-init
 # Install Combine as per Twiki: https://twiki.cern.ch/twiki/bin/viewauth/CMS/SWGuideHiggsAnalysisCombinedLimit#ROOT6_SLC6_release_CMSSW_7_4_X
 git clone https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit
-cd ${CMSSW_BASE}/src/HiggsAnalysis/CombinedLimit
-git fetch origin
-cd ${CMSSW_BASE}/src
 # Install the GBRLikelihood package which contains the RooDoubleCBFast implementation
 git clone git@github.com:bendavid/GBRLikelihood.git HiggsAnalysis/GBRLikelihood
 # Compile external libraries
 cd ${CMSSW_BASE}/src/HiggsAnalysis
 cmsenv
 scram b -j9
+cd ${CMSSW_BASE}/src/
+
 # Install Flashgg Final Fit packages
 git clone git@github.com:cms-analysis/flashggFinalFit.git
-cd ${CMSSW_BASE}/src/flashggFinalFit/
-```
 
-Two packages need to be built with their own makefiles, if needed. Please note that there will be verbose warnings from BOOST etc, which can be ignored. So long as the `make` commands finish without error, then the compilation happened fine.:
-
-```
+# Compile the Flashgg Final Fit Packages for Signal and Background
 cd ${CMSSW_BASE}/src/flashggFinalFit/Background
 make
 cd ${CMSSW_BASE}/src/flashggFinalFit/Signal
 make
+cd ${CMSSW_BASE}/src/flashggFinalFit
 ```
+
+## New: Simultaneous Signal Fitting (SSF) feature
+The new feature SSF allows all mass points to be fit at once, providing a smoother interpolation. This is an alternative to the Linear Interpolation (LI), which remains the default.
+To activate SSF intease of LI, simply add the option `--useSSF 1` to your `./bin/SignalFit` command. The helper scripts (ie the bash pilot script and python job submission wrappers) also support this option.
+
+Also avaiable is the use of an alternative functional form DCB+1Gaussian, which can be indepenently activated as for SSF using the `--useDCBpG 1` option. 
+
 
 ## Contents
 The FLASHgg Finals Fits package contains several subfolders which are used for the following steps:

@@ -1,7 +1,7 @@
  /*****************************************************************************
 * Project: RooFit *
 * Package: RooFitCore *
-*File: $Id: LCRooAddition.h,v 1.3 2007/05/11 09:11:30 verkerke Exp $
+*File: $Id: SSFRooAddition.h,v 1.3 2007/05/11 09:11:30 verkerke Exp $
 * Authors:*
 * WV, Wouter Verkerke, UC Santa Barbara, verkerke@slac.stanford.edu *
 * DK, David Kirkby,UC Irvine, dkirkby@uci.edu *
@@ -13,30 +13,33 @@
 * with or without modification, are permitted according to the terms*
 * listed in LICENSE (http://roofit.sourceforge.net/license.txt) *
 *****************************************************************************/
-#ifndef LCROO_ADDITION
-#define LCROO_ADDITION
+
+//Modified version of RooAddition class, where the evaluation of the value allows one to change the value of the MH variable between items.
+
+#ifndef SSFROO_ADDITION
+#define SSFROO_ADDITION
 
 #include "RooAbsReal.h"
 #include "RooRealVar.h"
 #include "RooDataHist.h"
 #include "RooListProxy.h"
 #include "RooObjCacheManager.h"
-#include "../interface/LCRooChi2Var.h"
+#include "../interface/SSFRooChi2Var.h"
 
 class RooRealVar;
 class RooArgList ;
 
-class LCRooAddition : public RooAbsReal {
+class SSFRooAddition : public RooAbsReal {
   public:
 
-    LCRooAddition() ;
-    LCRooAddition(const char* name, const char* title, RooAbsPdf* pdf, std::map<int, RooDataHist*> datasets, RooRealVar* MH, RooRealVar *mgg ) ;
-    LCRooAddition(const char *name, const char *title, const RooArgList& sumSet, Bool_t takeOwnerShip=kFALSE) ;
-    LCRooAddition(const char *name, const char *title, const RooArgList& sumSet1, const RooArgList& sumSet2, Bool_t takeOwnerShip=kFALSE) ;
-    virtual ~LCRooAddition() ;
+    SSFRooAddition() ;
+    SSFRooAddition(const char* name, const char* title, RooAbsPdf* pdf, std::map<int, RooDataHist*> datasets, RooRealVar* MH, RooRealVar *mgg ) ;
+    SSFRooAddition(const char *name, const char *title, const RooArgList& sumSet, Bool_t takeOwnerShip=kFALSE) ;
+    SSFRooAddition(const char *name, const char *title, const RooArgList& sumSet1, const RooArgList& sumSet2, Bool_t takeOwnerShip=kFALSE) ;
+    virtual ~SSFRooAddition() ;
 
-    LCRooAddition(const LCRooAddition& other, const char* name = 0);
-    virtual TObject* clone(const char* newname) const { return new LCRooAddition(*this, newname); }
+    SSFRooAddition(const SSFRooAddition& other, const char* name = 0);
+    virtual TObject* clone(const char* newname) const { return new SSFRooAddition(*this, newname); }
 
     virtual Double_t defaultErrorLevel() const ;
 
@@ -65,7 +68,7 @@ class LCRooAddition : public RooAbsReal {
     std::map<int, RooDataHist*>  _datasets;
     RooRealVar * _MH;
     RooRealVar * _mgg;
-    std::map<int, LCRooChi2Var*> _chi2map;
+    std::map<int, SSFRooChi2Var*> _chi2map;
 
 
 
@@ -86,7 +89,7 @@ class LCRooAddition : public RooAbsReal {
 
     Double_t evaluate() const;
 
-    ClassDef(LCRooAddition,2) // Sum of RooAbsReal objects
+    ClassDef(SSFRooAddition,2) // Sum of RooAbsReal objects
 };
 
 #endif

@@ -15,14 +15,14 @@
  5*****************************************************************************/
 
 /**
-  \file LCRooAddition.cxx
-  \class LCRooAddition
+  \file SSFRooAddition.cxx
+  \class SSFRooAddition
   \ingroup Roofitcore
 
-  LCRooAddition calculates the sum of a set of RooAbsReal terms, or
+  SSFRooAddition is a modified version of the RooAddtion class, which calculates the sum of a set of RooAbsReal terms, or
   when constructed with two sets, it sums the product of the terms
-  in the two sets. This class does not (yet) do any smart handling of integrals, 
-  i.e. all integrals of the product are handled numerically
+  in the two sets. It was adapated so that SSFRooChi2Var could be used for the Simultaneous Signal Fitting interpolation procedure.
+ in particular, we have changed the way the function is evaluated so that it loops through the individual SSFRooChi2Var objects in the list, and evalautes their individual chi2, and then returns the sum. The key point is that _MH is changed in between evaluations of the components of the sum, so that the paramaters of the parametric model are changed adequately.
  **/
 
 
@@ -35,7 +35,7 @@
 #include <algorithm>
 using namespace std ;
 
-#include "../interface/LCRooAddition.h"
+#include "../interface/SSFRooAddition.h"
 #include "RooProduct.h"
 #include "RooAbsReal.h"
 #include "RooErrorHandler.h"
@@ -45,20 +45,20 @@ using namespace std ;
 #include "RooChi2Var.h"
 #include "RooMsgService.h"
 
-ClassImp(LCRooAddition)
+ClassImp(SSFRooAddition)
   ;
 
 
   ////////////////////////////////////////////////////////////////////////////////
 
-  LCRooAddition::LCRooAddition()
+  SSFRooAddition::SSFRooAddition()
 : _setIter( _set.createIterator() )
 {
 }
 
 
 
-  LCRooAddition::LCRooAddition(const char* name, const char* title, RooAbsPdf* pdf, std::map<int, RooDataHist*> datasets, RooRealVar* MH, RooRealVar *mgg ) 
+  SSFRooAddition::SSFRooAddition(const char* name, const char* title, RooAbsPdf* pdf, std::map<int, RooDataHist*> datasets, RooRealVar* MH, RooRealVar *mgg ) 
   : RooAbsReal(name, title)
   , _pdf(pdf)
   , _datasets(datasets)
@@ -67,10 +67,11 @@ ClassImp(LCRooAddition)
   , _set("!set","set of components",this)
   , _setIter( _set.createIterator() ) // yes, _setIter is defined _after_ _set ;-)
   , _cacheMgr(this,10)
-{
+{ 
+  //the constructor for this class takes the list of datasets for eahc MH, and creates a special SSF-RooChi2Var for each one, which comapres the Datasets for a given MH with the 2D model evaluated at the relevant MH.
   for (map<int,RooDataHist*>::iterator dataIt=datasets.begin(); dataIt!=datasets.end(); dataIt++){
     _MH->setVal(dataIt->first);
-    _chi2map.insert(std::pair<int,LCRooChi2Var*>(dataIt->first, new LCRooChi2Var(Form("chi2_%d",dataIt->first),Form("chi2_%d",dataIt->first),*(pdf),*(dataIt->second),RooFit::DataError(RooAbsData::SumW2))));
+    _chi2map.insert(std::pair<int,SSFRooChi2Var*>(dataIt->first, new SSFRooChi2Var(Form("chi2_%d",dataIt->first),Form("chi2_%d",dataIt->first),*(pdf),*(dataIt->second),RooFit::DataError(RooAbsData::SumW2))));
   //  _set.add(pdf->getParameters(RooArgSet(*MH,*mgg)));
   }
   
@@ -78,7 +79,7 @@ ClassImp(LCRooAddition)
   RooAbsArg* comp ;
   while((comp = (RooAbsArg*)inputIter->Next())) {
     if (!dynamic_cast<RooAbsReal*>(comp)) {
-      coutE(InputArguments) << "LCRooAddition::ctor(" << GetName() << ") ERROR: component " << comp->GetName() 
+      coutE(InputArguments) << "SSFRooAddition::ctor(" << GetName() << ") ERROR: component " << comp->GetName() 
         << " is not of type RooAbsReal" << endl ;
       RooErrorHandler::softAbort() ;
     }
@@ -89,10 +90,10 @@ ClassImp(LCRooAddition)
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Constructor with a single set of RooAbsReals. The value of the function will be
-/// the sum of the values in sumSet. If takeOwnership is true the LCRooAddition object
+/// the sum of the values in sumSet. If takeOwnership is true the SSFRooAddition object
 /// will take ownership of the arguments in sumSet
 
-  LCRooAddition::LCRooAddition(const char* name, const char* title, const RooArgList& sumSet,  Bool_t takeOwnership) 
+  SSFRooAddition::SSFRooAddition(const char* name, const char* title, const RooArgList& sumSet,  Bool_t takeOwnership) 
 : RooAbsReal(name, title)
   , _set("!set","set of components",this)
   , _setIter( _set.createIterator() ) // yes, _setIter is defined _after_ _set ;-)
@@ -102,7 +103,7 @@ ClassImp(LCRooAddition)
   RooAbsArg* comp ;
   while((comp = (RooAbsArg*)inputIter->Next())) {
     if (!dynamic_cast<RooAbsReal*>(comp)) {
-      coutE(InputArguments) << "LCRooAddition::ctor(" << GetName() << ") ERROR: component " << comp->GetName() 
+      coutE(InputArguments) << "SSFRooAddition::ctor(" << GetName() << ") ERROR: component " << comp->GetName() 
         << " is not of type RooAbsReal" << endl ;
       RooErrorHandler::softAbort() ;
     }
@@ -119,16 +120,16 @@ ClassImp(LCRooAddition)
 ///
 ///A = sum_i sumSet1(i)*sumSet2(i) 
 ///
-/// If takeOwnership is true the LCRooAddition object will take ownership of the arguments in sumSet
+/// If takeOwnership is true the SSFRooAddition object will take ownership of the arguments in sumSet
 
-  LCRooAddition::LCRooAddition(const char* name, const char* title, const RooArgList& sumSet1, const RooArgList& sumSet2, Bool_t takeOwnership) 
+  SSFRooAddition::SSFRooAddition(const char* name, const char* title, const RooArgList& sumSet1, const RooArgList& sumSet2, Bool_t takeOwnership) 
 : RooAbsReal(name, title)
   , _set("!set","set of components",this)
   , _setIter( _set.createIterator() ) // yes, _setIter is defined _after_ _set ;-)
   , _cacheMgr(this,10)
 {
   if (sumSet1.getSize() != sumSet2.getSize()) {
-    coutE(InputArguments) << "LCRooAddition::ctor(" << GetName() << ") ERROR: input lists should be of equal length" << endl ;
+    coutE(InputArguments) << "SSFRooAddition::ctor(" << GetName() << ") ERROR: input lists should be of equal length" << endl ;
     RooErrorHandler::softAbort() ;
   }
 
@@ -137,13 +138,13 @@ ClassImp(LCRooAddition)
   RooAbsArg *comp1(0),*comp2(0) ;
   while((comp1 = (RooAbsArg*)inputIter1->Next())) {
     if (!dynamic_cast<RooAbsReal*>(comp1)) {
-      coutE(InputArguments) << "LCRooAddition::ctor(" << GetName() << ") ERROR: component " << comp1->GetName() 
+      coutE(InputArguments) << "SSFRooAddition::ctor(" << GetName() << ") ERROR: component " << comp1->GetName() 
         << " in first list is not of type RooAbsReal" << endl ;
       RooErrorHandler::softAbort() ;
     }
     comp2 = (RooAbsArg*)inputIter2->Next();
     if (!dynamic_cast<RooAbsReal*>(comp2)) {
-      coutE(InputArguments) << "LCRooAddition::ctor(" << GetName() << ") ERROR: component " << comp2->GetName() 
+      coutE(InputArguments) << "SSFRooAddition::ctor(" << GetName() << ") ERROR: component " << comp2->GetName() 
         << " in first list is not of type RooAbsReal" << endl ;
       RooErrorHandler::softAbort() ;
     }
@@ -169,7 +170,7 @@ ClassImp(LCRooAddition)
 ////////////////////////////////////////////////////////////////////////////////
 /// Copy constructor
 
-  LCRooAddition::LCRooAddition(const LCRooAddition& other, const char* name) 
+  SSFRooAddition::SSFRooAddition(const SSFRooAddition& other, const char* name) 
 : RooAbsReal(other, name)
   , _set("!set",this,other._set)
   , _setIter( _set.createIterator() ) // yes, _setIter is defined _after_ _set ;-)
@@ -181,15 +182,16 @@ ClassImp(LCRooAddition)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-LCRooAddition::~LCRooAddition() 
+SSFRooAddition::~SSFRooAddition() 
 { // Destructor
   delete _setIter ;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Calculate and return current value of self
+// in SSFRooAddition, we have changed the way the function is evaluated so that it loops through the individual SSFRooChi2Var objects in the list, and evalautes their individual chi2, and then returns the sum. The key point is that _MH is changed in between evaluations of the components of the sum, so that the paramaters of the parametric model are changed adequately.
 
-Double_t LCRooAddition::evaluate() const 
+Double_t SSFRooAddition::evaluate() const 
 {
   RooRealVar *thisParam;
   TIterator *pdfParams = _pdf->getParameters(RooArgSet(*_mgg,*_MH))->selectByAttrib("Constant",kFALSE)->createIterator();
@@ -201,7 +203,7 @@ Double_t LCRooAddition::evaluate() const
 
   Double_t sum(0);
   //std::cout << " [INFO] --> chi2 at " ;
-  for ( map<int,LCRooChi2Var*>::const_iterator thisChi2= _chi2map.begin(); thisChi2!=_chi2map.end(); thisChi2++){
+  for ( map<int,SSFRooChi2Var*>::const_iterator thisChi2= _chi2map.begin(); thisChi2!=_chi2map.end(); thisChi2++){
     _MH->setVal(thisChi2->first);
     float chi2 = thisChi2->second->getVal(); 
     sum =sum + chi2;
@@ -221,7 +223,7 @@ Double_t LCRooAddition::evaluate() const
 /// RooChi2Var. If the addition contains neither or both
 /// issue a warning message and return a value of 1
 
-Double_t LCRooAddition::defaultErrorLevel() const 
+Double_t SSFRooAddition::defaultErrorLevel() const 
 {
   RooAbsReal* nllArg(0) ;
   RooAbsReal* chi2Arg(0) ;
@@ -242,18 +244,18 @@ Double_t LCRooAddition::defaultErrorLevel() const
   delete comps ;
 
   if (nllArg && !chi2Arg) {
-    coutI(Fitting) << "LCRooAddition::defaultErrorLevel(" << GetName() 
+    coutI(Fitting) << "SSFRooAddition::defaultErrorLevel(" << GetName() 
       << ") Summation contains a RooNLLVar, using its error level" << endl ;
     return nllArg->defaultErrorLevel() ;
   } else if (chi2Arg && !nllArg) {
-    coutI(Fitting) << "LCRooAddition::defaultErrorLevel(" << GetName() 
+    coutI(Fitting) << "SSFRooAddition::defaultErrorLevel(" << GetName() 
       << ") Summation contains a RooChi2Var, using its error level" << endl ;
     return chi2Arg->defaultErrorLevel() ;
   } else if (!nllArg && !chi2Arg) {
-    coutI(Fitting) << "LCRooAddition::defaultErrorLevel(" << GetName() << ") WARNING: "
+    coutI(Fitting) << "SSFRooAddition::defaultErrorLevel(" << GetName() << ") WARNING: "
       << "Summation contains neither RooNLLVar nor RooChi2Var server, using default level of 1.0" << endl ;
   } else {
-    coutI(Fitting) << "LCRooAddition::defaultErrorLevel(" << GetName() << ") WARNING: "
+    coutI(Fitting) << "SSFRooAddition::defaultErrorLevel(" << GetName() << ") WARNING: "
       << "Summation contains BOTH RooNLLVar and RooChi2Var server, using default level of 1.0" << endl ;
   }
 
@@ -263,7 +265,7 @@ Double_t LCRooAddition::defaultErrorLevel() const
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void LCRooAddition::enableOffsetting(Bool_t flag) 
+void SSFRooAddition::enableOffsetting(Bool_t flag) 
 {
   _setIter->Reset() ;
 
@@ -277,7 +279,7 @@ void LCRooAddition::enableOffsetting(Bool_t flag)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-Bool_t LCRooAddition::setData(RooAbsData& data, Bool_t cloneData) 
+Bool_t SSFRooAddition::setData(RooAbsData& data, Bool_t cloneData) 
 {
   _setIter->Reset() ;
 
@@ -292,7 +294,7 @@ Bool_t LCRooAddition::setData(RooAbsData& data, Bool_t cloneData)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void LCRooAddition::printMetaArgs(ostream& os) const 
+void SSFRooAddition::printMetaArgs(ostream& os) const 
 {
   _setIter->Reset() ;
 
@@ -309,7 +311,7 @@ void LCRooAddition::printMetaArgs(ostream& os) const
 
 ////////////////////////////////////////////////////////////////////////////////
 
-Int_t LCRooAddition::getAnalyticalIntegral(RooArgSet& allVars, RooArgSet& analVars, const char* rangeName) const
+Int_t SSFRooAddition::getAnalyticalIntegral(RooArgSet& allVars, RooArgSet& analVars, const char* rangeName) const
 {
   // we always do things ourselves -- actually, always delegate further down the line ;-)
   analVars.add(allVars);
@@ -338,7 +340,7 @@ Int_t LCRooAddition::getAnalyticalIntegral(RooArgSet& allVars, RooArgSet& analVa
 ////////////////////////////////////////////////////////////////////////////////
 /// Calculate integral internally from appropriate integral cache
 
-Double_t LCRooAddition::analyticalIntegral(Int_t code, const char* rangeName) const 
+Double_t SSFRooAddition::analyticalIntegral(Int_t code, const char* rangeName) const 
 {
   // note: rangeName implicit encoded in code: see _cacheMgr.setObj in getPartIntList...
   CacheElem *cache = (CacheElem*) _cacheMgr.getObjByIndex(code-1);
@@ -366,7 +368,7 @@ Double_t LCRooAddition::analyticalIntegral(Int_t code, const char* rangeName) co
 
 ////////////////////////////////////////////////////////////////////////////////
 
-std::list<Double_t>* LCRooAddition::binBoundaries(RooAbsRealLValue& obs, Double_t xlo, Double_t xhi) const
+std::list<Double_t>* SSFRooAddition::binBoundaries(RooAbsRealLValue& obs, Double_t xlo, Double_t xhi) const
 {
   std::list<Double_t>* sumBinB = 0 ;
   Bool_t needClean(kFALSE) ;
@@ -410,7 +412,7 @@ std::list<Double_t>* LCRooAddition::binBoundaries(RooAbsRealLValue& obs, Double_
 
 
 //_____________________________________________________________________________B
-Bool_t LCRooAddition::isBinnedDistribution(const RooArgSet& obs) const 
+Bool_t SSFRooAddition::isBinnedDistribution(const RooArgSet& obs) const 
 {
   // If all components that depend on obs are binned that so is the product
 
@@ -430,7 +432,7 @@ Bool_t LCRooAddition::isBinnedDistribution(const RooArgSet& obs) const
 
 ////////////////////////////////////////////////////////////////////////////////
 
-std::list<Double_t>* LCRooAddition::plotSamplingHint(RooAbsRealLValue& obs, Double_t xlo, Double_t xhi) const
+std::list<Double_t>* SSFRooAddition::plotSamplingHint(RooAbsRealLValue& obs, Double_t xlo, Double_t xhi) const
 {
   std::list<Double_t>* sumHint = 0 ;
   Bool_t needClean(kFALSE) ;
@@ -478,13 +480,13 @@ std::list<Double_t>* LCRooAddition::plotSamplingHint(RooAbsRealLValue& obs, Doub
 ////////////////////////////////////////////////////////////////////////////////
 /// Return list of all RooAbsArgs in cache element
 
-RooArgList LCRooAddition::CacheElem::containedArgs(Action)
+RooArgList SSFRooAddition::CacheElem::containedArgs(Action)
 {
   RooArgList ret(_I) ;
   return ret ;
 }
 
-LCRooAddition::CacheElem::~CacheElem()
+SSFRooAddition::CacheElem::~CacheElem()
 {
   // Destructor
 }

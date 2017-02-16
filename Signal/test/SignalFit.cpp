@@ -627,8 +627,6 @@ int main(int argc, char *argv[]){
 			  //replaceWithRV_ = make_pair(els[4],els[5]); // proc, cat
 			  //replaceWithWV_ = make_pair(els[6],els[7]); // proc, cat
 		   	//replace_ = true;
-        std::cout << "LC DEBUG else=8 , pushing back for " << proc <<" "<< cat << " map_replacement_proc_RV_ "<< els[4] << "map_replacement_cat_RV_  i" << els[5] << std::endl;
-        std::cout << "LC DEBUG else=8 , pushing back for " << proc <<" "<< cat << " map_replacement_proc_WV_ "<< els[6] << "map_replacement_cat_WV_  i" << els[7] << std::endl;
         map_replacement_proc_RV_.push_back(els[4]);
         map_replacement_cat_RV_.push_back(els[5]);
         map_replacement_proc_WV_.push_back(els[6]);
@@ -760,7 +758,6 @@ int main(int argc, char *argv[]){
           string replancementCat = map_replacement_cat_RV_[thisProcCatIndex];
           int replacementIndex = getIndexOfReferenceDataset(replancementProc,replancementCat);
           nGaussiansRV= map_nG_rv_[replacementIndex]; // if ==-1, want it to stay that way!
-          std::cout << "LC DEBUG DEBUG (RV) " << proc <<  " "<< cat << " thisProcCatIndex " << thisProcCatIndex << " replancementProc " << replancementProc << " replancementCat " << replancementCat << " replacementIndex " << std::endl; 
           std::cout << "[INFO] try to use  dataset for " << replancementProc << ", " << replancementCat << " instead."<< std::endl;
           
           //pick the dataset for the replacement proc and cat, reduce it (ie remove pdfWeights etc) ,
@@ -818,7 +815,6 @@ int main(int argc, char *argv[]){
           string replancementCat = map_replacement_cat_WV_[thisProcCatIndex];
           int replacementIndex = getIndexOfReferenceDataset(replancementProc,replancementCat);
           nGaussiansWV= map_nG_wv_[replacementIndex]; 
-          std::cout << "LC DEBUG DEBUG (WV) " << proc <<  " "<< cat << " thisProcCatIndex " << thisProcCatIndex << " replancementProc " << replancementProc << " replancementCat " << replancementCat << " replacementIndex " << std::endl; 
         
          //pick the dataset for the replacement proc and cat, reduce it (ie remove pdfWeights etc) ,
          //reweight for lumi and then get the WV events only.
@@ -870,7 +866,7 @@ int main(int argc, char *argv[]){
       FITdatasetsRV.insert(pair<int,RooDataSet*>(mh,dataRVRef));
       if (verbose_) std::cout << "[INFO] inserting FIT WVdatasets" << *dataWVRef << std::endl;
       FITdatasetsWV.insert(pair<int,RooDataSet*>(mh,dataWVRef));
-      if (verbose_)std::cout << "[INFO] inserting refular RV+WV " << *data << std::endl;
+      if (verbose_)std::cout << "[INFO] inserting regular RV+WV " << *data << std::endl;
       datasets.insert(pair<int,RooDataSet*>(mh,data));
       if (verbose_) std::cout << "[INFO] Original Dataset: "<< *data << std::endl;
     }
@@ -883,7 +879,6 @@ int main(int argc, char *argv[]){
         check = name.ReplaceAll(TString(Form("%d",it->first)),TString(""));
        } else {
        TString name=it->second->GetName();
-       std::cout << "check, name replaced = " << check.Data() << ", " << name.ReplaceAll(TString(Form("%d",it->first)),TString("")) << std::endl;
        assert (check ==name.ReplaceAll(TString(Form("%d",it->first)),TString("")) );
        }
     }
@@ -894,7 +889,6 @@ int main(int argc, char *argv[]){
         check = name.ReplaceAll(TString(Form("%d",it->first)),TString(""));
        } else {
        TString name=it->second->GetName();
-       std::cout << "check, name replaced = " << check.Data() << ", " << name.ReplaceAll(TString(Form("%d",it->first)),TString("")) << std::endl;
        assert (check ==name.ReplaceAll(TString(Form("%d",it->first)),TString("")) );
        }
     }
@@ -923,19 +917,9 @@ int main(int argc, char *argv[]){
       simultaneousFitRV.setDatasetsSTD(datasetsRV);
       if (verbose_) std::cout << "[INFO] RV running fits" << std::endl;
       simultaneousFitRV.runFits(ncpu_,Form("%s/initialFits/rv_%s_%s",plotDir_.c_str(),proc.c_str(),cat.c_str()),iterativeFitConstraint_);
-      std::cout << "[INFO] LC SigFit debug a" << std::endl;
-      //if( replace_ ) {
-      //std::cout << "[INFO] LC SigFit debug b" << std::endl;
-       // simultaneousFitRV.setFitParams(allParameters[replaceWith_].first); 
-     // std::cout << "[INFO] LC SigFit debug c" << std::endl;
-     // }
-      std::cout << "[INFO] LC SigFit debug d" << std::endl;
       if (!skipPlots_) simultaneousFitRV.plotFits(Form("%s/initialFits/%s_%s_rv",plotDir_.c_str(),proc.c_str(),cat.c_str()),"RV");
-      std::cout << "[INFO] LC SigFit debug e" << std::endl;
     }
-      std::cout << "[INFO] LC SigFit debug f" << std::endl;
     parlist_t fitParamsRV = simultaneousFitRV.getFitParams();
-      std::cout << "[INFO] LC SigFit debug g" << std::endl;
 
     // wrong vertex
     if (verbose_) std::cout << "[INFO] preparing initialfit WV, masList size "<< massList_.size() << std::endl;
@@ -952,22 +936,11 @@ int main(int argc, char *argv[]){
       simultaneousFitWV.setDatasets(FITdatasetsWV);
       simultaneousFitWV.setDatasetsSTD(datasetsWV);
       if (verbose_) std::cout << "[INFO] WV running fits" << std::endl;
-      std::cout << "[INFO] LC SigFit debug h" << std::endl;
       simultaneousFitWV.runFits(ncpu_,Form("%s/initialFits/wv_%s_%s",plotDir_.c_str(),proc.c_str(),cat.c_str()),iterativeFitConstraint_);
-      std::cout << "[INFO] LC SigFit debug i" << std::endl;
-      //if( replace_ ) {
-      //std::cout << "[INFO] LC SigFit debug j" << std::endl;
-        //simultaneousFitWV.setFitParams(allParameters[replaceWith_].second); 
-     // }
-      std::cout << "[INFO] LC SigFit debug k" << std::endl;
       if (!skipPlots_) simultaneousFitWV.plotFits(Form("%s/initialFits/%s_%s_wv",plotDir_.c_str(),proc.c_str(),cat.c_str()),"WV");
-      std::cout << "[INFO] LC SigFit debug l" << std::endl;
     }
-      std::cout << "[INFO] LC SigFit debug m" << std::endl;
     parlist_t fitParamsWV = simultaneousFitWV.getFitParams();
-      std::cout << "[INFO] LC SigFit debug n" << std::endl;
     allParameters[ make_pair(proc,cat) ] = make_pair(fitParamsRV,fitParamsWV);
-      std::cout << "[INFO] LC SigFit debug o" << std::endl;
     
     //Ok, now that we have made the fit parameters eitehr with the regular dataset or the replacement one.
     // Now we should be using the ORIGINAL dataset
@@ -998,30 +971,10 @@ int main(int argc, char *argv[]){
       initFitRV.setDatasets(FITdatasetsRV);
       initFitRV.setDatasetsSTD(datasetsRV);
       if (verbose_) std::cout << "[INFO] RV running fits" << std::endl;
-      std::cout << "[INFO] LC SigFit debug i1" << std::endl;
       initFitRV.runFits(ncpu_);
-      //std::cout << "[INFO] LC SigFit debug i2 !replace_" << !replace_ << " !runInitialFitsOnly_ " << !runInitialFitsOnly_ << std::endl;
-      //if (!runInitialFitsOnly_ && !replace_) {
-      //std::cout << "[INFO] LC SigFit debug i3" << std::endl;
-        //initFitRV.saveParamsToFileAtMH(Form("dat/in/%s_%s_rv.dat",proc.c_str(),cat.c_str()),constraintValueMass_);
-      //std::cout << "[INFO] LC SigFit debug i4" << Form("dat/in/%s_%s_rv.dat",proc.c_str(),cat.c_str()  )<< std::endl;
-       // initFitRV.loadPriorConstraints(Form("dat/in/%s_%s_rv.dat",proc.c_str(),cat.c_str()),constraintValue_);
-       // initFitRV.runFits(ncpu_);
-     // std::cout << "[INFO] LC SigFit debug i5" << std::endl;
-      //}
-      //std::cout << "[INFO] LC SigFit debug i6" << std::endl;
-      //if( replace_ ) {
-      //std::cout << "[INFO] LC SigFit debug i7" << std::endl;
-       // initFitRV.setFitParams(allParameters[replaceWith_].first); 
-      //std::cout << "[INFO] LC SigFit debug i8" << std::endl;
-      //}
-      std::cout << "[INFO] LC SigFit debug i9" << std::endl;
       if (!skipPlots_) initFitRV.plotFits(Form("%s/initialFits/%s_%s_rv",plotDir_.c_str(),proc.c_str(),cat.c_str()),"RV");
-      std::cout << "[INFO] LC SigFit debug i10" << std::endl;
       }
-      std::cout << "[INFO] LC SigFit debug i11" << std::endl;
       parlist_t fitParamsRV = initFitRV.getFitParams();
-      std::cout << "[INFO] LC SigFit debug i12" << std::endl;
 
       // wrong vertex
       if (verbose_) std::cout << "[INFO] preparing initialfit WV, masList size "<< massList_.size() << std::endl;

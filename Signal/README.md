@@ -1,6 +1,14 @@
 # Signal Scripts
 This is where the signal model built from the MC workspaces. Including: fitting each Tag/Process distribution in right vertex (RV) and wrong vertex (WV) scenarios, interpolation between mass points, and normalisation.
 
+## New: Simultaneous Signal Fitting (SSF) feature
+The new feature SSF allows all mass points to be fit at once, providing a smoother interpolation. This is an alternative to the Linear Interpolation (LI), which remains the default.
+To activate SSF intease of LI, simply add the option `--useSSF 1` to your `./bin/SignalFit` command. The helper scripts (ie the bash pilot script and python job submission wrappers) also support this option.
+
+Also avaiable is the use of an alternative functional form DCB+1Gaussian, which can be indepenently activated as for SSF using the `--useDCBpG 1` option. 
+
+
+
 ## Signal workflow
 
 The workflow looks like this:
