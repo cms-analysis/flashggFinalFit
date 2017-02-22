@@ -142,15 +142,23 @@ class WSTFileWrapper:
 
 ###############################################################################
 
-procOrder=('ggh', 'vbf', 'wzh', 'wh', 'zh', 'tth')
+#procOrder=('ggh', 'vbf', 'wzh', 'wh', 'zh', 'tth')
+procOrder=('GG2H', 'VBF', 'TTH', 'QQ2HLNU', 'QQ2HLL', 'WH2HQQ', 'ZH2HQQ')
 
 adHocFactors={
-  'ggh': 1.0,
-  'vbf': 1.0,
-  'wzh': 1.0,
-  'wh': 1.0,
-  'zh': 1.0,
-  'tth': 1.0,
+#  'ggh': 1.0,
+#  'vbf': 1.0,
+#  'wzh': 1.0,
+#  'wh': 1.0,
+#  'zh': 1.0,
+#  'tth': 1.0,
+  'GG2H': 1.0,
+  'VBF': 1.0,
+  'TTH': 1.0,
+  'QQ2HLNU': 1.0,
+  'QQ2HLL': 1.0,
+  'WH2HQQ': 1.0,
+  'ZH2HQQ': 1.0,
 }
 
 
@@ -209,7 +217,8 @@ Masses = range(120,135,5)
 #Masses = range(120) 
 # -------------------------------------------------------------
 
-procs=["ggh","vbf","wh","zh","tth"]
+#procs=["ggh","vbf","wh","zh","tth"]
+procs=["GG2H","VBF","TTH","QQ2HLNU","QQ2HLL","WH2HQQ","ZH2HQQ"]
 masses=[120.,125.,130.]
 #cats=["UntaggedTag_0","UntaggedTag_1","UntaggedTag_2","UntaggedTag_3","VBFTag_0","VBFTag_1","TTHLeptonicTag","TTHHadronicTag"]
 cats=["UntaggedTag_0","UntaggedTag_1","UntaggedTag_2","UntaggedTag_3","VBFTag_0","VBFTag_1","VBFTag_2","TTHLeptonicTag","TTHHadronicTag","ZHLeptonicTag","WHLeptonicTag","VHLeptonicLooseTag","VHHadronicTag","VHMetTag"]
@@ -220,7 +229,8 @@ extraFile=sys.argv[2]
 
 #if len(sys.argv)==4 : lumi = 1000* float(sys.argv[3])
 lRRV = ws.var("IntLumi")
-lumi = lRRV.getVal()
+#lumi = lRRV.getVal()
+lumi = 1000.
 norm.Init(int(sqrts))
 
 

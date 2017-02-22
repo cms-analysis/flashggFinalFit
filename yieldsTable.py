@@ -21,19 +21,19 @@ parser.add_option("-o","--order",default="",help="tell teh script what order to 
 parser.add_option("-f","--flashggCats",default="UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,VBFTag_0,VBFTag_1,VBFTag_2,TTHHadronicTag,TTHLeptonicTag,ZHLeptonicTag,WHLeptonicTag,VHLeptonicLooseTag,VHHadronicTag,VHMetTag")
 (options,args) = parser.parse_args()
 
-if not (options.workspaces ==""):
-  print "execute"
-  if (len(options.workspaces.split(","))>1) :
-    os.system("./Signal/bin/SignalFit -i %s --checkYield 1 | grep Tag | grep _125_ > %s"%(options.workspaces,options.input))
-  else:
-    os.system("./Background/bin/workspaceTool -i %s --print 1 | grep RooData | grep it > %s"%(options.workspaces,options.input))
-    os.system("./Background/bin/workspaceTool -i %s --print 1 | grep intLumi >> %s"%(options.workspaces,options.input))
-
-  if (len(options.workspaces.split(","))>1) :
-    os.system("./Signal/bin/SignalFit -i %s --checkYield 1 | grep Tag | grep _125_ > %s"%(options.workspaces,options.input))
-  else:
-    os.system("./Background/bin/workspaceTool -i %s --print 1 | grep RooData | grep it > %s"%(options.workspaces,options.input))
-    os.system("./Background/bin/workspaceTool -i %s --print 1 | grep intLumi >> %s"%(options.workspaces,options.input))
+#if not (options.workspaces ==""):
+#  print "execute"
+#  if (len(options.workspaces.split(","))>1) :
+#    os.system("./Signal/bin/SignalFit -i %s --checkYield 1 | grep Tag | grep _125_ > %s"%(options.workspaces,options.input))
+#  else:
+#    os.system("./Background/bin/workspaceTool -i %s --print 1 | grep RooData | grep it > %s"%(options.workspaces,options.input))
+#    os.system("./Background/bin/workspaceTool -i %s --print 1 | grep intLumi >> %s"%(options.workspaces,options.input))
+#
+#  if (len(options.workspaces.split(","))>1) :
+#    os.system("./Signal/bin/SignalFit -i %s --checkYield 1 | grep Tag | grep _125_ > %s"%(options.workspaces,options.input))
+#  else:
+#    os.system("./Background/bin/workspaceTool -i %s --print 1 | grep RooData | grep it > %s"%(options.workspaces,options.input))
+#    os.system("./Background/bin/workspaceTool -i %s --print 1 | grep intLumi >> %s"%(options.workspaces,options.input))
 
 procs=[]
 tags=[]
@@ -59,9 +59,14 @@ with open(options.input) as i:
     if "pdfWeight" in line : continue 
     line=line.replace("Tag_","Tag ")
     line=line.replace("Tag"," Tag")
-    line=line.replace("TTH","TTH ")
-    line=line.replace("WH","WH ")
-    line=line.replace("ZH","ZH ")
+    #line=line.replace("TTH","TTH ")
+    #line=line.replace("WH","WH ")
+    #line=line.replace("ZH","ZH ")
+    #line=line.replace("VH","VH ")
+    line=line.replace("TTHL","TTH L")
+    line=line.replace("TTHH","TTH H")
+    line=line.replace("WHL","WH L")
+    line=line.replace("ZHL","ZH L")
     line=line.replace("VH","VH ")
     line=line.replace(",","_ ")
     line=line.replace("\n","")

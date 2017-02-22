@@ -24,22 +24,22 @@ parser.add_option("-f","--flashggCats",default="UntaggedTag_0,UntaggedTag_1,Unta
 
 if not (options.workspaces ==""):
   print "execute"
-  if (len(options.workspaces.split(","))>1) :
-    print "test1"
-    os.system("./Signal/bin/SignalFit -i %s --checkYield 1 | grep Tag | grep _125_ > %s"%(options.workspaces,options.input))
-    print "test2"
-  else:
-    print "test3"
-    os.system("./Background/bin/workspaceTool -i %s --print 1 | grep RooData | grep it > %s"%(options.workspaces,options.input))
-    print "test4"
-    os.system("./Background/bin/workspaceTool -i %s --print 1 | grep intLumi >> %s"%(options.workspaces,options.input))
-    print "test5"
+  #if (len(options.workspaces.split(","))>1) :
+  #  print "test1"
+  #  os.system("./Signal/bin/SignalFit -i %s --checkYield 1 | grep Tag | grep _125_ > %s"%(options.workspaces,options.input))
+  #  print "test2"
+  #else:
+  #  print "test3"
+  #  os.system("./Background/bin/workspaceTool -i %s --print 1 | grep RooData | grep it > %s"%(options.workspaces,options.input))
+  #  print "test4"
+  #  os.system("./Background/bin/workspaceTool -i %s --print 1 | grep intLumi >> %s"%(options.workspaces,options.input))
+  #  print "test5"
 
-  if (len(options.workspaces.split(","))>1) :
-    os.system("./Signal/bin/SignalFit -i %s --checkYield 1 | grep Tag | grep _125_ > %s"%(options.workspaces,options.input))
-  else:
-    os.system("./Background/bin/workspaceTool -i %s --print 1 | grep RooData | grep it > %s"%(options.workspaces,options.input))
-    os.system("./Background/bin/workspaceTool -i %s --print 1 | grep intLumi >> %s"%(options.workspaces,options.input))
+  #if (len(options.workspaces.split(","))>1) :
+  #  os.system("./Signal/bin/SignalFit -i %s --checkYield 1 | grep Tag | grep _125_ > %s"%(options.workspaces,options.input))
+  #else:
+  #  os.system("./Background/bin/workspaceTool -i %s --print 1 | grep RooData | grep it > %s"%(options.workspaces,options.input))
+  #  os.system("./Background/bin/workspaceTool -i %s --print 1 | grep intLumi >> %s"%(options.workspaces,options.input))
 
 procs=[]
 tags=[]
@@ -65,9 +65,14 @@ with open(options.input) as i:
     if "pdfWeight" in line : continue 
     line=line.replace("Tag_","Tag ")
     line=line.replace("Tag"," Tag")
-    line=line.replace("TTH","TTH ")
-    line=line.replace("WH","WH ")
-    line=line.replace("ZH","ZH ")
+    #line=line.replace("TTH","TTH ")
+    #line=line.replace("WH","WH ")
+    #line=line.replace("ZH","ZH ")
+    #line=line.replace("VH","VH ")
+    line=line.replace("TTHL","TTH L")
+    line=line.replace("TTHH","TTH H")
+    line=line.replace("WHL","WH L")
+    line=line.replace("ZHL","ZH L")
     line=line.replace("VH","VH ")
     line=line.replace(",","_ ")
     line=line.replace("\n","")
@@ -325,6 +330,7 @@ line="  &  "
 procList=[]
 if (options.order==""): procList=Arr.values()[0].keys() 
 else : procList = options.order.split(":")[0].split(",")
+print "procList", procList
 for p in procList:
  #print p
   line=line+ p + " & "
@@ -565,7 +571,7 @@ print "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
 r.gROOT.SetBatch()
 r.gStyle.SetOptStat(0)
 hstack = r.THStack("hs","")
-colorList=[r.kGreen+3,r.kRed+2,r.kCyan+2, r.kBlue+2, r.kOrange-3,r.kPink]
+colorList=[r.kGreen+3,r.kRed+2,r.kCyan+2, r.kBlue+2, r.kOrange-3,r.kPink,r.kBlack,r.kYellow]
 iColor=0
 print "content_hists ", content_hists
 l1 = r.TLegend(0.0,0.9,1.0,0.95)
@@ -574,7 +580,7 @@ l3 = r.TLegend(0.0,0.9,1.0,0.95)
 l1.SetNColumns(len(options.order.split(":")[0].split(","))-1)
 l2.SetNColumns(2)
 l3.SetNColumns(1)
-l1.SetTextSize(0.05)
+l1.SetTextSize(0.03)
 l2.SetTextSize(0.09)
 l3.SetTextSize(0.07)
 l1.SetBorderSize(0)

@@ -1211,10 +1211,16 @@ def plotMPdfChComp(plottype="perTag"):
          options.method = 'muProc'
          options.xvar[k] = 'r_%s'%catName
          debugCatName=catName
-         if "ggH" in catName: catName ="#scale[1.5]{#mu_{ggH}}"
+         #if "ggH" in catName: catName ="#scale[1.5]{#mu_{ggH}}"
+         if "ggH" in catName: catName ="#scale[1.5]{#mu_{GG2H}}"
          if "qqH" in catName: catName ="#scale[1.5]{#mu_{VBF}}"
-         if "ttH" in catName: catName ="#scale[1.5]{#mu_{ttH}}"
-         if "VH"  in catName: catName ="#scale[1.5]{#mu_{VH}}"
+         #if "ttH" in catName: catName ="#scale[1.5]{#mu_{ttH}}"
+         if "ttH" in catName: catName ="#scale[1.5]{#mu_{TTH}}"
+         #if "VH"  in catName: catName ="#scale[1.5]{#mu_{VH}}"
+         if "VH2HQQ"  in catName: catName ="#scale[1.5]{#mu_{VH2HQQ}}"
+         elif "VH"  in catName: catName ="#scale[1.5]{#mu_{VH}}"
+         if "QQ2HLNU"  in catName: catName ="#scale[1.5]{#mu_{QQ2HLNU}}"
+         if "QQ2HLL"  in catName: catName ="#scale[1.5]{#mu_{QQ2HLL}}"
          print "DEBUG LC b CATBAME ", catName
       else:
          options.method = 'mu'
