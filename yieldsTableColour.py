@@ -7,7 +7,7 @@ import time
 import ROOT as r
 
 sqrts=13
-lumi=36.8
+lumi=35.9
 
 from optparse import OptionParser
 parser = OptionParser()

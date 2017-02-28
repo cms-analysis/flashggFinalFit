@@ -734,7 +734,7 @@ int main(int argc, char *argv[]){
                                 }
         if (verbose_) std::cout << "[INFO] Old dataset (before intLumi change): " << *data0 << std::endl;
 
-	plotBeamSpotDZdist(data,"VHdebug");
+	//plotBeamSpotDZdist(data,"VHdebug");
 
         dataRV = rvwvDataset(data,"RV"); 
         dataWV = rvwvDataset(data,"WV"); 

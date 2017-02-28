@@ -264,21 +264,18 @@ theorySyst['alphaSWeight'] = [[0,1],"asym"]
 theorySyst['pdfWeight'] = [[0,60],"sym"]
 
 theorySystAbsScale={}
-#theorySystAbsScale['names'] = ["QCDscale_qqbar_up","QCDscale_gg_up","QCDscale_qqbar_down","QCDscale_gg_down","pdf_alphaS_qqbar","pdf_alphaS_gg","pdf_qqbar","pdf_gg","alphaS_qqbar","alphaS_gg"] #QCD scale up, QCD scale down, PDF+alpha S, PDF, alpha S 
-#theorySystAbsScale['names'] = ["QCDscale_qqH_up","QCDscale_ggH_up","QCDscale_qqH_down","QCDscale_ggH_down","pdf_alphaS_qqH","pdf_alphaS_ggH","pdf_Higgs_qqbar","pdf_Higgs_ggH","alphaS_qqH","alphaS_ggH"] #QCD scale up, QCD scale down, PDF+alpha S, PDF, alpha S 
-#theorySystAbsScale['names_to_consider'] = ["QCDscale_qqbar_up","QCDscale_gg_up","QCDscale_qqbar_down","QCDscale_gg_down","pdf_alphaS_qqbar","pdf_alphaS_gg"] #QCD scale up, QCD scale down, PDF+alpha S, PDF, alpha S 
-#theorySystAbsScale['names_to_consider'] = [] #QCD scale up, QCD scale down, PDF+alpha S, PDF, alpha S 
-theorySystAbsScale['names'] = ["QCDscale_qqbar_up","QCDscale_gg_up","QCDscale_qqbar_down","QCDscale_gg_down","pdf_alphaS_qqbar","pdf_alphaS_gg"] #QCD scale up, QCD scale down, PDF+alpha S, PDF, alpha S 
-theorySystAbsScale['names_to_consider'] = ["QCDscale_qqbar_up","QCDscale_gg_up","QCDscale_qqbar_down","QCDscale_gg_down","pdf_alphaS_qqbar","pdf_alphaS_gg"] #QCD scale up, QCD scale down, PDF+alpha S, PDF, alpha S 
-theorySystAbsScale['ggH_hgg'] = [0.0   ,0.046 ,0.0    ,-0.067, 0.0   , 0.032 , 0,0    , 0.019  ,0.0   ,0.026] # GGH is a _gg process
-theorySystAbsScale['qqH_hgg'] = [0.004 ,0.0   ,-0.003 ,0.0   , 0.021 , 0.0   , 0.021  , 0.0    ,0.005 ,0.0] # VBF is a _qqbar process 
-theorySystAbsScale['ttH_hgg'] = [0.0   ,-0.058,0.0    ,0.092 , 0.0   , -0.036, 0.0    , -0.032 ,0.0   ,-0.020]  # TTH should be a _gg process anticorrelated with GGH
-theorySystAbsScale['WHL_hgg'] =  [0.005 ,0.0   ,-0.007 ,0.0   , 0.019 , 0.0   , 0.017  , 0.0    ,0.009 ,0.0] # WZH_hgg is a _qqbar process, cporrelated with VBF
-theorySystAbsScale['ZHL_hgg'] =  [0.038 ,0.0   ,-0.031 ,0.0   , 0.016 , 0.0   , 0.013  , 0.0    ,0.009 ,0.0] # WZH_hgg is a _11bar process correlated with VBF 
-theorySystAbsScale['WHH_hgg'] =  [0.005 ,0.0   ,-0.007 ,0.0   , 0.019 , 0.0   , 0.017  , 0.0    ,0.009 ,0.0] # WZH_hgg is a _qqbar process, cporrelated with VBF
-theorySystAbsScale['ZHH_hgg'] =  [0.038 ,0.0   ,-0.031 ,0.0   , 0.016 , 0.0   , 0.013  , 0.0    ,0.009 ,0.0] # WZH_hgg is a _11bar process correlated with VBF 
-#theorySystAbsScale['WH_hgg'] =  [0.005 ,0.0   ,-0.007 ,0.0   , 0.019 , 0.0   , 0.017  , 0.0    ,0.009 ,0.0] # WZH_hgg is a _qqbar process, cporrelated with VBF
-#theorySystAbsScale['ZH_hgg'] =  [0.038 ,0.0   ,-0.031 ,0.0   , 0.016 , 0.0   , 0.013  , 0.0    ,0.009 ,0.0] # WZH_hgg is a _11bar process correlated with VBF 
+#theorySystAbsScale['names'] = ["QCDscale_qqbar_up","QCDscale_gg_up","QCDscale_qqbar_down","QCDscale_gg_down","pdf_alphaS_qqbar","pdf_alphaS_gg"] #QCD scale up, QCD scale down, PDF+alpha S, PDF, alpha S
+#theorySystAbsScale['names_to_consider'] = ["QCDscale_qqbar_up","QCDscale_gg_up","QCDscale_qqbar_down","QCDscale_gg_down","pdf_alphaS_qqbar","pdf_alphaS_gg"]  
+#theorySystAbsScale['names'] = ["QCDscale_qqbar_up","QCDscale_gg_up","QCDscale_qqbar_down","QCDscale_gg_down","pdf_alphaS_qqbar","pdf_alphaS_gg"] 
+#theorySystAbsScale['names_to_consider'] =   ["QCDscale_ggH_up",  "QCDscale_qqH_up",  "QCDscale_VH_up",  "QCDscale_ttH_up",  "QCDscale_ggH_down",  "QCDscale_qqH_down",  "QCDscale_VH_down",  "QCDscale_ttH_down",  "pdf_Higgs_qqbar",  "pdf_alphaS_gg",  "pdf_alphaS_ttH"] #QCD scale up, QCD scale down, PDF+alpha S, PDF, alpha S 
+theorySystAbsScale['names'] =   ["QCDscale_ggH_up",  "QCDscale_qqH_up",  "QCDscale_VH_up",  "QCDscale_ttH_up",  "QCDscale_ggH_down",  "QCDscale_qqH_down",  "QCDscale_VH_down",  "QCDscale_ttH_down",  "pdf_Higgs_qqbar",  "pdf_Higgs_gg",  "pdf_Higgs_ttH"] #QCD scale up, QCD scale down, PDF+alpha S, PDF, alpha S 
+theorySystAbsScale['ttH_hgg'] = [0.0,                 0.0,                0.0,               0.058,              0.0,                   0.0,                 0.0,                 -0.092,               0.0,                0.0,              0.036] # ttH is a _qqbar process
+theorySystAbsScale['ZHL_hgg'] =  [0.0,                 0.0,                0.038,             0.0,                0.0,                   0.0,                 -0.03,               0.0,                  0.016,              0.0,              0.0] # WH is a _qqbar process
+theorySystAbsScale['ZHH_hgg'] =  [0.0,                 0.0,                0.038,             0.0,                0.0,                   0.0,                 -0.03,               0.0,                  0.016,              0.0,              0.0] # WH is a _qqbar process
+theorySystAbsScale['WHL_hgg'] =  [0.0,                 0.0,                0.005,             0.0,                0.0,                   0.0,                 -0.007,              0.0,                  0.019,              0.0,              0.0] # ZH is a _qqbar process
+theorySystAbsScale['WHH_hgg'] =  [0.0,                 0.0,                0.005,             0.0,                0.0,                   0.0,                 -0.007,              0.0,                  0.019,              0.0,              0.0] # ZH is a _qqbar process
+theorySystAbsScale['qqH_hgg'] = [0.0,                 0.004,              0.0,               0.0,                0.0,                   -0.003,              0.0,                 0.0,                  0.021,              0.0,              0.0] # qqH is a _qqbar process
+theorySystAbsScale['ggH_hgg'] = [0.046,               0.0,                0.0,               0.0,                -0.067,               0.0,                  0.0,                 0.0,                  0.0,                0.032,            0.0] # GGH is a _gg process
 
 #yprinting function
 def printTheorySysts():
@@ -334,7 +331,7 @@ def printTheorySysts():
       outFile.write('\n')
   
   #absolute scales for theory uncertainties.
-  for syst in theorySystAbsScale['names_to_consider'] :
+  for syst in theorySystAbsScale['names'] :
     if (not "Theory" in allSystList ) :allSystList.append("Theory")
     if (not options.justThisSyst=="") :
       if (not options.justThisSyst=="Theory"): continue
@@ -726,7 +723,8 @@ def interp1Sigma(th1f_nom,th1f_down,th1f_up,factor=1.):
 
 def interp1SigmaDataset(d_nom,d_down,d_up,factor=1.):
   nomE = d_nom.sumEntries()
-  if abs(nomE)< 1.e-6 or d_down.sumEntries()<0 or d_up.sumEntries()<0 or abs(nomE -d_down.sumEntries())<1.e-6 or abs(nomE -d_up.sumEntries())<1.e-6:
+  #if abs(nomE)< 1.e-6 or d_down.sumEntries()<0 or d_up.sumEntries()<0 or abs(nomE -d_down.sumEntries())<1.e-6 or abs(nomE -d_up.sumEntries())<1.e-6:
+  if nomE<1.e-6 or d_down.sumEntries()<0 or d_up.sumEntries()<0 or abs(nomE -d_down.sumEntries())<1.e-6 or abs(nomE -d_up.sumEntries())<1.e-6:
     return [1.000,1.000]
   downE = 1+ factor*((d_down.sumEntries() - nomE) /nomE)
   upE = 1+ factor*((d_up.sumEntries() - nomE) /nomE)
@@ -998,6 +996,7 @@ def printFlashggSysts():
       for c in options.cats:
         for p in options.procs:
           if '%s:%s'%(p,c) in options.toSkip: continue
+          print "p,c is",p,c
           if p in bkgProcs or ('pdfWeight' in flashggSyst and (p!='ggH_hgg' and p!='qqH_hgg')):
             outFile.write('- ')
           else:
