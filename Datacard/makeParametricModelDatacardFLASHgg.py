@@ -41,15 +41,29 @@ class WSTFileWrapper:
         self.wsList.append(self.fileList[-1].Get(wsname))
         f.Close()
 
+   def convertTemplatedName(self,dataName):
+        theProcName = ""
+        tpMap = {"GG2H":"ggh","VBF":"vbf","TTH":"tth","QQ2HLNU":"wh","QQ2HLL":"zh","WH2HQQ":"wh","ZH2HQQ":"zh"}
+        for stxsProc in tpMap:
+          if dataName.startswith(stxsProc):
+            theProcName = stxsProc
+            dataName.replace(stxsProc,tpMap[stxsProc])
+        return [dataName,theProcName]
+
    def data(self,dataName):
+        thePair = self.convertTemplatedName(dataName)
+        newDataName = thePair[0]
+        newProcName = thePair[1]
         result = None
-        complained_yet =0 
+        complained_yet = 0 
         for i in range(len(self.fnList)):
-          this_result_obj = self.wsList[i].data(dataName);
-          if ( result and this_result_obj and (not complained_yet) ):
-            complained_yet = True;
-          if this_result_obj: # [3]
-             result = this_result_obj
+          if self.fnList[i]!="current file":
+            if newProcName not in self.fnList[i]: continue
+            this_result_obj = self.wsList[i].data(newDataName);
+            if ( result and this_result_obj and (not complained_yet) ):
+              complained_yet = True;
+            if this_result_obj: # [3]
+               result = this_result_obj
         return result 
    
    def var(self,varName):
@@ -575,8 +589,8 @@ def getFlashggLineTheoryEnvelope(proc,cat,name,details):
 brSyst = [0.0206,-0.0208] #13TeV Values, from YR4 taking  in quadrature THU (+1.73 -1.72), PU(mq) (+0.93,-0.99) , PU(as) (+0.61 -0.62)
 # lumi syst
 ####lumiSyst = 0.026 #8TeV Values
-lumiSyst=0.062  #Correct for ICHEP 
-#lumiSyst=0.025  #Correct for Moriond17
+#lumiSyst=0.062  #Correct for ICHEP 
+lumiSyst=0.025  #Correct for Moriond17
 
 ##Printing Functions
 def printBRSyst():
