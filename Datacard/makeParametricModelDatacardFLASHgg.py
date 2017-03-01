@@ -43,12 +43,13 @@ class WSTFileWrapper:
 
    def convertTemplatedName(self,dataName):
         theProcName = ""
+        theDataName = ""
         tpMap = {"GG2H":"ggh","VBF":"vbf","TTH":"tth","QQ2HLNU":"wh","QQ2HLL":"zh","WH2HQQ":"wh","ZH2HQQ":"zh"}
         for stxsProc in tpMap:
           if dataName.startswith(stxsProc):
             theProcName = stxsProc
-            dataName.replace(stxsProc,tpMap[stxsProc])
-        return [dataName,theProcName]
+            theDataName = dataName.replace(stxsProc,tpMap[stxsProc],1)
+        return [theDataName,theProcName]
 
    def data(self,dataName):
         thePair = self.convertTemplatedName(dataName)
@@ -58,7 +59,7 @@ class WSTFileWrapper:
         complained_yet = 0 
         for i in range(len(self.fnList)):
           if self.fnList[i]!="current file":
-            if newProcName not in self.fnList[i]: continue
+            if newProcName not in self.fnList[i] and newProcName!="": continue
             this_result_obj = self.wsList[i].data(newDataName);
             if ( result and this_result_obj and (not complained_yet) ):
               complained_yet = True;
@@ -132,7 +133,8 @@ outFile = open(options.outfilename,'w')
 #combProc = {'ggH':'ggH_hgg','VBF':'qqH_hgg','ggh':'ggH_hgg','vbf':'qqH_hgg','wzh':'VH','wh':'WH_hgg','zh':'ZH_hgg','tth':'ttH_hgg','bkg_mass':'bkg_mass','gg_grav':'ggH_hgg_ALT','qq_grav':'qqbarH_ALT'}
 combProc = {'GG2H':'ggH_hgg','VBF':'qqH_hgg','TTH':'ttH_hgg','QQ2HLNU':'WHL_hgg','QQ2HLL':'ZHL_hgg','WH2HQQ':'WHH_hgg','ZH2HQQ':'ZHH_hgg','bkg_mass':'bkg_mass'}
 #flashggProc = {'ggH_hgg':'ggh','qqH_hgg':'vbf','VH':'wzh','WH_hgg':'wh','ZH_hgg':'zh','ttH_hgg':'tth','bkg_mass':'bkg_mass','ggH_hgg_ALT':'gg_grav','qqbarH_ALT':'qq_grav'}
-flashggProc = {'ggH_hgg':'ggh','qqH_hgg':'vbf','ttH_hgg':'tth','WHL_hgg':'wh','ZHL_hgg':'zh','WHH_hgg':'wh','ZHH_hgg':'zh','bkg_mass':'bkg_mass'}
+#flashggProc = {'ggH_hgg':'ggh','qqH_hgg':'vbf','ttH_hgg':'tth','WHL_hgg':'wh','ZHL_hgg':'zh','WHH_hgg':'wh','ZHH_hgg':'zh','bkg_mass':'bkg_mass'}
+flashggProc = {'ggH_hgg':'GG2H','qqH_hgg':'VBF','ttH_hgg':'TTH','WHL_hgg':'QQ2HLNU','ZHL_hgg':'QQ2HLL','WHH_hgg':'WH2HQQ','ZHH_hgg':'ZH2HQQ','bkg_mass':'bkg_mass'}
 procId = {'ggH_hgg':0,'qqH_hgg':-1,'ttH_hgg':-2,'WHL_hgg':-2,'ZHL_hgg':-3,'WHH_hgg':-4,'ZHH_hgg':-5,'bkg_mass':1}
 bkgProcs = ['bkg_mass'] #what to treat as background
 #Determine if VH or WZH_hgg
@@ -1010,7 +1012,7 @@ def printFlashggSysts():
       for c in options.cats:
         for p in options.procs:
           if '%s:%s'%(p,c) in options.toSkip: continue
-          print "p,c is",p,c
+          #print "p,c is",p,c
           if p in bkgProcs or ('pdfWeight' in flashggSyst and (p!='ggH_hgg' and p!='qqH_hgg')):
             outFile.write('- ')
           else:
