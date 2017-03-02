@@ -20,26 +20,29 @@ parser.add_option("-v","--sigworkspaces",default="")
 parser.add_option("-u","--bkgworkspaces",default="")
 parser.add_option("-o","--order",default="",help="tell teh script what order to print tags and procs in. Usage proc1,proc2,proc3..:tag1,tag2,tag3...")
 parser.add_option("-f","--flashggCats",default="UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,VBFTag_0,VBFTag_1,VBFTag_2,TTHHadronicTag,TTHLeptonicTag,ZHLeptonicTag,WHLeptonicTag,VHLeptonicLooseTag,VHHadronicTag,VHMetTag")
+parser.add_option("--makeTable",default=False,action="store_true",help="Make the table and plot instead of making numbers.txt")
 (options,args) = parser.parse_args()
 
-if not (options.workspaces ==""):
-  print "execute"
-  #if (len(options.workspaces.split(","))>1) :
-  #  print "test1"
-  #  os.system("./Signal/bin/SignalFit -i %s --checkYield 1 | grep Tag | grep _125_ > %s"%(options.workspaces,options.input))
-  #  print "test2"
-  #else:
-  #  print "test3"
-  #  os.system("./Background/bin/workspaceTool -i %s --print 1 | grep RooData | grep it > %s"%(options.workspaces,options.input))
-  #  print "test4"
-  #  os.system("./Background/bin/workspaceTool -i %s --print 1 | grep intLumi >> %s"%(options.workspaces,options.input))
-  #  print "test5"
+if not (options.workspaces =="") and not options.makeTable:
+  print "Generating numbers.txt"
+  if (len(options.workspaces.split(","))>1) :
+    print "test1"
+    os.system("./Signal/bin/SignalFit -i %s --checkYield 1 | grep Tag | grep _125_ > %s"%(options.workspaces,options.input))
+    print "test2"
+  else:
+    print "test3"
+    os.system("./Background/bin/workspaceTool -i %s --print 1 | grep RooData | grep it > %s"%(options.workspaces,options.input))
+    print "test4"
+    os.system("./Background/bin/workspaceTool -i %s --print 1 | grep intLumi >> %s"%(options.workspaces,options.input))
+    print "test5"
 
-  #if (len(options.workspaces.split(","))>1) :
-  #  os.system("./Signal/bin/SignalFit -i %s --checkYield 1 | grep Tag | grep _125_ > %s"%(options.workspaces,options.input))
-  #else:
-  #  os.system("./Background/bin/workspaceTool -i %s --print 1 | grep RooData | grep it > %s"%(options.workspaces,options.input))
-  #  os.system("./Background/bin/workspaceTool -i %s --print 1 | grep intLumi >> %s"%(options.workspaces,options.input))
+  if (len(options.workspaces.split(","))>1) :
+    os.system("./Signal/bin/SignalFit -i %s --checkYield 1 | grep Tag | grep _125_ > %s"%(options.workspaces,options.input))
+  else:
+    os.system("./Background/bin/workspaceTool -i %s --print 1 | grep RooData | grep it > %s"%(options.workspaces,options.input))
+    os.system("./Background/bin/workspaceTool -i %s --print 1 | grep intLumi >> %s"%(options.workspaces,options.input))
+  print ""
+  exit("Now manually edit the numbers.txt file and then rerun with the --makeTable option\n")
 
 procs=[]
 tags=[]
@@ -63,6 +66,7 @@ with open(options.input) as i:
     #print line
     if "intLumi" in line: lumi=float(line[line.find("value")+6:])
     if "pdfWeight" in line : continue 
+    if "NoTag" in line : continue 
     line=line.replace("Tag_","Tag ")
     line=line.replace("Tag"," Tag")
     #line=line.replace("TTH","TTH ")
@@ -508,7 +512,7 @@ for t in tagList :
     if p=="Total": continue
     val=100*Arr[t][p]/Arr[t]["Total"]
     line = line+" &  "+str('%.2f \%%'%(val))
-    print " filling content hist ", p, " for bin ", len(tagList)-iTag, " =", tagList[iTag], " ==", val
+    #print " filling content hist ", p, " for bin ", len(tagList)-iTag, " =", tagList[iTag], " ==", val
     content_hists[p].SetBinContent(len(tagList)-iTag,val)
     #content_hists[p].GetXaxis().SetBinLabel(iTag,'%s'%t)
   Allline=" "+str('%.2f'%Arr[t]["Total"])
@@ -536,7 +540,7 @@ for p in procList:
    if p=="Total": continue
    val=100*Arr[t][p]/Arr[t]["Total"]
    line = line+" &  "+str('%.2f \%%'%(100*Arr[t][p]/Arr[t]["Total"]))
-   print " filling content hist ", p, " for bin ", 1, " =", t, " ==", val
+   #print " filling content hist ", p, " for bin ", 1, " =", t, " ==", val
    content_hists[p].SetBinContent(1,val)
 Allline=" "+str('%.2f'%Arr[t]["Total"])
   #bkgy=0
