@@ -119,6 +119,8 @@ RooDataSet* SimultaneousFit::mergeNormalisedDatasets(map<int,RooDataSet*> data){
   
   //loop over vector of datasets for different MH values
   for (map<int,RooDataSet*>::iterator dataIt=data.begin(); dataIt!=data.end(); dataIt++){
+    std::cout << "ED DEBUG: mass = " << dataIt->first << std::endl;
+    std::cout << "ED DEBUG: dataset = " << dataIt->second << std::endl;
     
     double weight =0;
     double factor = 1.0/dataIt->second->sumEntries();
@@ -533,40 +535,49 @@ void SimultaneousFit::runFits(int ncpu,string outdir, float epsilon){
       RooDataSet * norm_datax_125 =   normaliseDatasets(datasets[125]);   
       RooDataHist * plotDatax_125 = new RooDataHist(Form("%s_binned",norm_datax_125->GetName()),Form("%s_binned",norm_datax_125->GetName()),RooArgSet(*mass),*norm_datax_125);
      
-     RooDataSet * norm_datax_120 = normaliseDatasets(datasets[120]);
+     std::cout << "ED DEBUG a" << std::endl;
+     /*RooDataSet * norm_datax_120 = normaliseDatasets(datasets[120]);
+     std::cout << "ED DEBUG b" << std::endl;
       RooDataHist * plotDatax_120 = new RooDataHist(Form("%s_binned",norm_datax_120->GetName()),Form("%s_binned",norm_datax_120->GetName()),RooArgSet(*mass),*norm_datax_120);
+     std::cout << "ED DEBUG c" << std::endl;
      RooDataSet * norm_datax_130 = normaliseDatasets(datasets[130]);
-      RooDataHist * plotDatax_130 = new RooDataHist(Form("%s_binned",norm_datax_130->GetName()),Form("%s_binned",norm_datax_130->GetName()),RooArgSet(*mass),*norm_datax_130);
+      RooDataHist * plotDatax_130 = new RooDataHist(Form("%s_binned",norm_datax_130->GetName()),Form("%s_binned",norm_datax_130->GetName()),RooArgSet(*mass),*norm_datax_130);*/
     //plotDatax_120->Print("V");
 
     TCanvas *canvasx = new TCanvas("c","c",500,500);
     RooPlot *framex = mass->frame(Range(mhLow_-10,mhHigh_+10));
-    MH->setVal(120);
+    /*MH->setVal(120);
     plotDatax_120->plotOn(framex);
     fitModel[iOrder]->plotOn(framex,RooFit::LineColor(kRed),RooFit::LineStyle(kDashed));
-    LCRooChi2Var chi2_120("chi2_120","chi2_120",*(fitModel[iOrder]),*plotDatax_120,RooFit::DataError(RooAbsData::SumW2));
+    LCRooChi2Var chi2_120("chi2_120","chi2_120",*(fitModel[iOrder]),*plotDatax_120,RooFit::DataError(RooAbsData::SumW2));*/
     MH->setVal(125);
     plotDatax_125->plotOn(framex);
+    std::cout << "ED DEBUG b" << std::endl;
     fitModel[iOrder]->plotOn(framex,RooFit::LineColor(kBlue),RooFit::LineStyle(kDashed));
-    plotDatax_130->plotOn(framex);
+    /*plotDatax_130->plotOn(framex);
     MH->setVal(130);
-    fitModel[iOrder]->plotOn(framex,RooFit::LineColor(kGreen),RooFit::LineStyle(kDashed));
+    fitModel[iOrder]->plotOn(framex,RooFit::LineColor(kGreen),RooFit::LineStyle(kDashed));*/
+    std::cout << "ED DEBUG c" << std::endl;
     LCRooChi2Var chi2_125("chi2_125","chi2_125",*(fitModel[iOrder]),*plotDatax_125,RooFit::DataError(RooAbsData::SumW2));
+    std::cout << "ED DEBUG d" << std::endl;
     //MH->setVal(130);
     //LCRooChi2Var chi2_130("chi2_130","chi2_130",*(fitModel[iOrder]),*plotDatax,RooFit::DataError(RooAbsData::SumW2));
     //RooAddition * lcChi2= new RooAddition("lc_chi2","lc_chi2",RooArgList(chi2_120,chi2_125));
     std::map<int, RooDataHist*> ourDatasets;
     for (int iMH =0 ; iMH<allMH_.size() ; iMH++){
+    if( proc_=="testBBH" && allMH_[iMH]!=125 ) continue;
     ourDatasets.insert(pair<int, RooDataHist*>(allMH_[iMH], new RooDataHist(Form("%d_binned",allMH_[iMH]),Form("%d_binned",allMH_[iMH]),RooArgSet(*mass),*(normaliseDatasets(datasets[allMH_[iMH]])))));
     }
+    std::cout << "ED DEBUG e" << std::endl;
     
     LCRooAddition * lcChi2 = new LCRooAddition("lc_chi2",  "lc_chi2",(fitModel[iOrder]),  ourDatasets, MH, mass ) ;
+    std::cout << "ED DEBUG f" << std::endl;
      
     //std::cout << " DEBUG B lcchi2 " << lcChi2->getVal() << " floating params" << std::endl;
     //lcChi2->getParameters(RooArgSet())->Print();
     //lcChi2->getParameters(RooArgSet(*MH,*mass))->Print();
     RooMinuit m(*lcChi2);
-    //std::cout << " DEBUG C "<< std::endl;
+    std::cout << " DEBUG C "<< std::endl;
      m.migrad();
     //std::cout << " DEBUG D "<< std::endl;
      m.hesse();
@@ -575,12 +586,12 @@ void SimultaneousFit::runFits(int ncpu,string outdir, float epsilon){
     //std::cout << " DEBUG F lcchi2 " << lcChi2->getVal()  << std::endl;
     
     
-    MH->setVal(120);
-    fitModel[iOrder]->plotOn(framex,RooFit::LineColor(kRed),RooFit::ProjWData(*plotDatax_120));
+    //MH->setVal(120);
+    //fitModel[iOrder]->plotOn(framex,RooFit::LineColor(kRed),RooFit::ProjWData(*plotDatax_120));
     MH->setVal(125);
     fitModel[iOrder]->plotOn(framex,RooFit::LineColor(kBlue),RooFit::ProjWData(*plotDatax_125));
-    MH->setVal(130);
-    fitModel[iOrder]->plotOn(framex,RooFit::LineColor(kGreen),RooFit::ProjWData(*plotDatax_130));
+    //MH->setVal(130);
+    //fitModel[iOrder]->plotOn(framex,RooFit::LineColor(kGreen),RooFit::ProjWData(*plotDatax_130));
     framex->Draw();
     //canvasx->SaveAs(Form("%s_wtf_iOrder%d.pdf",outdir.c_str(),iOrder));
     
@@ -603,12 +614,12 @@ void SimultaneousFit::runFits(int ncpu,string outdir, float epsilon){
     // some fit details
     std::cout << Form("Order %d, fit result minNLL to 2D dataset %.9f",iOrder,fitRes->minNll()) << std::endl;
     double minNll=fitRes->minNll();
-    //std::cout << "DEBUG a" << std::endl;
+    std::cout << "DEBUG a" << std::endl;
     //vecFitRes.push_back(fitRes*);
-   // std::cout << "DEBUG b" << std::endl;
+    std::cout << "DEBUG b" << std::endl;
     int thisNDOF=(fitModel[iOrder]->getParameters(RooArgSet(*mass,*MH)))->getSize();
     
-    //std::cout << "DEBUG c" << std::endl;
+    std::cout << "DEBUG c" << std::endl;
     // print the parameter post-fit values if you like
     if(verbosity_>-1){
       std::cout << " [INFO] Values pdf PDF params -post fit"<< std::endl;
@@ -619,19 +630,19 @@ void SimultaneousFit::runFits(int ncpu,string outdir, float epsilon){
       }
     }
 
-    //std::cout << "DEBUG d" << std::endl;
+    std::cout << "DEBUG d" << std::endl;
     //make some plots of the fits at each order
     int index=0;
     RooPlot *frame = mass->frame(Range(mhLow_-10,mhHigh_+10));
-    //std::cout << "DEBUG e" << std::endl;
+    std::cout << "DEBUG e" << std::endl;
     float totalChi2=0; // summing the chi2 for each mass point
     int ndof=0;
     //loop through each dataset
-   // std::cout << "DEBUG f" << std::endl;
+    std::cout << "DEBUG f" << std::endl;
     for (map<int,RooDataSet*>::iterator dataIt=datasets.begin(); dataIt!=datasets.end(); dataIt++){
       int mh=dataIt->first;
 
-    //std::cout << "DEBUG g" << std::endl;
+    std::cout << "DEBUG g" << std::endl;
       //get the plotting datasets
       RooAbsData* plotData;
       if (binnedFit_){
@@ -820,7 +831,7 @@ void SimultaneousFit::plotFits(string name, string rvwv){
     MH->setVal(mh);
     MH->setConstant(true);
     //assert(allPdfs.find(mh)!=allPdfs.end());
-    assert(datasets.find(mh)!=datasets.end());
+    //assert(datasets.find(mh)!=datasets.end());
     RooAbsPdf *fitModel = allPdfs[maxOrder_];
     //RooDataSet *data = datasets[mh];
     //mass->setBins(320);

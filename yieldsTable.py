@@ -57,6 +57,8 @@ with open(options.input) as i:
     #print line
     if "intLumi" in line: lumi=float(line[line.find("value")+6:])
     if "pdfWeight" in line : continue 
+    if "ZHLeptonic" in line : continue 
+    if "No" in line : continue 
     line=line.replace("Tag_","Tag ")
     line=line.replace("Tag"," Tag")
     #line=line.replace("TTH","TTH ")
@@ -219,6 +221,13 @@ for p in Arr :
 print line
 
 
+print ""
+print ""
+print "ED DEBUG: Arr = ",Arr
+print ""
+print ""
+
+
 Arr["Total"]={"Total":0}
 #for x in Arr.values()[1].keys():
 for x in Arr.values()[0].keys():
@@ -290,6 +299,7 @@ for t in Arr :
   lineCat=t+" &   " 
   line=""
   for p in Arr[t]:
+    print "ED DEBUG: p,t = ",p,t
     if p=="Total": continue
     line = line+" &  "+str('%.2f'%Arr[t][p])
   Allline=" "+str('%.2f'%Arr[t]["Total"])

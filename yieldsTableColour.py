@@ -22,24 +22,24 @@ parser.add_option("-o","--order",default="",help="tell teh script what order to 
 parser.add_option("-f","--flashggCats",default="UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,VBFTag_0,VBFTag_1,VBFTag_2,TTHHadronicTag,TTHLeptonicTag,ZHLeptonicTag,WHLeptonicTag,VHLeptonicLooseTag,VHHadronicTag,VHMetTag")
 (options,args) = parser.parse_args()
 
-if not (options.workspaces ==""):
-  print "execute"
-  #if (len(options.workspaces.split(","))>1) :
-  #  print "test1"
-  #  os.system("./Signal/bin/SignalFit -i %s --checkYield 1 | grep Tag | grep _125_ > %s"%(options.workspaces,options.input))
-  #  print "test2"
-  #else:
-  #  print "test3"
-  #  os.system("./Background/bin/workspaceTool -i %s --print 1 | grep RooData | grep it > %s"%(options.workspaces,options.input))
-  #  print "test4"
-  #  os.system("./Background/bin/workspaceTool -i %s --print 1 | grep intLumi >> %s"%(options.workspaces,options.input))
-  #  print "test5"
-
-  #if (len(options.workspaces.split(","))>1) :
-  #  os.system("./Signal/bin/SignalFit -i %s --checkYield 1 | grep Tag | grep _125_ > %s"%(options.workspaces,options.input))
-  #else:
-  #  os.system("./Background/bin/workspaceTool -i %s --print 1 | grep RooData | grep it > %s"%(options.workspaces,options.input))
-  #  os.system("./Background/bin/workspaceTool -i %s --print 1 | grep intLumi >> %s"%(options.workspaces,options.input))
+#if not (options.workspaces ==""):
+#  print "execute"
+#  if (len(options.workspaces.split(","))>1) :
+#    print "test1"
+#    os.system("./Signal/bin/SignalFit -i %s --checkYield 1 | grep Tag | grep _125_ > %s"%(options.workspaces,options.input))
+#    print "test2"
+#  else:
+#    print "test3"
+#    os.system("./Background/bin/workspaceTool -i %s --print 1 | grep RooData | grep it > %s"%(options.workspaces,options.input))
+#    print "test4"
+#    os.system("./Background/bin/workspaceTool -i %s --print 1 | grep intLumi >> %s"%(options.workspaces,options.input))
+#    print "test5"
+#
+#  if (len(options.workspaces.split(","))>1) :
+#    os.system("./Signal/bin/SignalFit -i %s --checkYield 1 | grep Tag | grep _125_ > %s"%(options.workspaces,options.input))
+#  else:
+#    os.system("./Background/bin/workspaceTool -i %s --print 1 | grep RooData | grep it > %s"%(options.workspaces,options.input))
+#    os.system("./Background/bin/workspaceTool -i %s --print 1 | grep intLumi >> %s"%(options.workspaces,options.input))
 
 procs=[]
 tags=[]
@@ -63,6 +63,8 @@ with open(options.input) as i:
     #print line
     if "intLumi" in line: lumi=float(line[line.find("value")+6:])
     if "pdfWeight" in line : continue 
+    if "ZHLeptonic" in line : continue 
+    if "No" in line : continue 
     line=line.replace("Tag_","Tag ")
     line=line.replace("Tag"," Tag")
     #line=line.replace("TTH","TTH ")
@@ -571,7 +573,7 @@ print "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
 r.gROOT.SetBatch()
 r.gStyle.SetOptStat(0)
 hstack = r.THStack("hs","")
-colorList=[r.kGreen+3,r.kRed+2,r.kCyan+2, r.kBlue+2, r.kOrange-3,r.kPink,r.kBlack,r.kYellow]
+colorList=[r.kGreen+3,r.kRed+2,r.kCyan+2, r.kYellow, r.kBlue+2, r.kOrange-3,r.kPink,r.kBlack]
 iColor=0
 print "content_hists ", content_hists
 l1 = r.TLegend(0.0,0.9,1.0,0.95)

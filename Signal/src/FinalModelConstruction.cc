@@ -534,8 +534,8 @@ void FinalModelConstruction::setSecondaryModelVars(RooRealVar *mh_sm, RooRealVar
 void FinalModelConstruction::getRvFractionFunc(string name){
   
   // check you have the right number of datasets for the mass points
-  assert(allMH_.size()==rvDatasets.size());
-  assert(allMH_.size()==wvDatasets.size());
+  //assert(allMH_.size()==rvDatasets.size());
+  //assert(allMH_.size()==wvDatasets.size());
   
   //holder for the values of MH and roght vertex fraction
   vector<double> mhValues, rvFracValues;
@@ -545,6 +545,7 @@ void FinalModelConstruction::getRvFractionFunc(string name){
   // fill the holders/TGraph
   for (unsigned int i=0; i<allMH_.size(); i++){
     int mh = allMH_[i];
+    if( proc_=="testBBH" && mh!=125 ) continue;
     mhValues.push_back(mh);
     double rvN = rvDatasets[mh]->sumEntries();
     double wvN = wvDatasets[mh]->sumEntries();
@@ -1224,6 +1225,7 @@ void FinalModelConstruction::makeSTDdatasets(){
 	if (sqrts_ ==13) catname = Form("%s",cat_.c_str());
   for (unsigned int i=0; i<allMH_.size(); i++){
     int mh=allMH_[i];
+    if( proc_=="testBBH" && mh!=125 ) continue;
 		RooDataSet *data = (RooDataSet*)rvDatasets[mh]->Clone(Form("sig_%s_mass_m%d_%s",proc_.c_str(),mh,catname.c_str()));
 		data->append(*wvDatasets[mh]);
 		stdDatasets.insert(pair<int,RooDataSet*>(mh,data));
@@ -1236,6 +1238,7 @@ void FinalModelConstruction::makeFITdatasets(){
 	if (sqrts_ ==13) catname = Form("%s",cat_.c_str());
   for (unsigned int i=0; i<allMH_.size(); i++){
     int mh=allMH_[i];
+    if( proc_=="testBBH" && mh!=125 ) continue;
 		RooDataSet *data = (RooDataSet*)rvFITDatasets[mh]->Clone(Form("sig_%s_mass_m%d_%s",proc_.c_str(),mh,catname.c_str()));
 		data->append(*wvFITDatasets[mh]);
 		fitDatasets.insert(pair<int,RooDataSet*>(mh,data));
@@ -1324,6 +1327,7 @@ RooSpline1D* FinalModelConstruction::graphToSpline(string name, TGraph *graph, R
 
 //here is how the normalisation is set
 void FinalModelConstruction::getNormalization(){
+  std::cout << "ED DEBUG: in FMC::getNormalization" << std::endl;
 	string catname;
 	if (sqrts_==8 || sqrts_==7) catname=Form("cat%s",cat_.c_str()); //obsolete
 	if (sqrts_ ==13) catname = Form("%s",cat_.c_str()); //should probably factorise this from other functions
@@ -1332,9 +1336,13 @@ void FinalModelConstruction::getNormalization(){
 	std::string procLowerCase_ = proc_;
   //std::transform(procLowerCase_.begin(), procLowerCase_.end(), procLowerCase_.begin(), ::tolower); 
   TGraph *temp = new TGraph();
+  std::cout << "ED DEBUG: initialised temp graph" << std::endl;
+  std::cout << "ED DEBUG: it has " << temp->GetN() << " points" << std::endl;
+  std::cout << "ED DEBUG: which are" << std::endl;
   bool fitToConstant=0; //if low-stats category, don;' try to fit to polynomial
   for (unsigned int i=0; i<allMH_.size(); i++){
     double mh = double(allMH_[i]);
+    if( proc_=="testBBH" && mh!=125 ) continue;
     RooDataSet *data = stdDatasets[mh];
 	double effAcc =0.;
 	if (intLumi) {
@@ -1353,7 +1361,14 @@ void FinalModelConstruction::getNormalization(){
 		return ;
 		}
     temp->SetPoint(i,mh,effAcc);
+    std::cout << "ED DEBUG: added point to temp graph: i, mh, effAcc = " << i << ", " << mh << ", " << effAcc << std::endl;
   }
+  if( proc_=="testBBH" ) temp->RemovePoint(0);
+  std::cout << "ED DEBUG: filled temp graph" << std::endl;
+  std::cout << "ED DEBUG: it has " << temp->GetN() << " points" << std::endl;
+  std::cout << "ED DEBUG: which are" << std::endl;
+  temp->Print();
+  std::cout << "ED DEBUG: next try to make into a spline..." << std::endl;
 
   //this bit defines how we turnt he eff*acc into a spline
   //if it is a problem category (ie we have had to subsitute even the RV dataset
@@ -1380,9 +1395,11 @@ void FinalModelConstruction::getNormalization(){
       temp->Fit(pol,"Q");
     }
   } else {
+    std::cout << "ED DEBUG: should be in here with bbH" << std::endl;
     TF1 *pol0= new TF1("pol","pol0",120,130); //  problem dataset, set to constant fit
      pol=pol0;
      temp->Fit(pol,"Q");
+    std::cout << "ED DEBUG: polynomial supposedly fitted now" << std::endl;
   }
   temp->Draw();
   temp->Fit(pol,"Q");
@@ -1394,8 +1411,11 @@ void FinalModelConstruction::getNormalization(){
   tc_lc->Print(Form("%s/%s_%s_ea_fit_to_pol2.pdf",outDir_.c_str(),proc_.c_str(),catname.c_str()));
 
   //turn that graph into a spline!
+  std::cout << "ED DEBUG: about to make graph from pol" << std::endl;
   TGraph *eaGraph = new TGraph(pol);
+  std::cout << "ED DEBUG: about to make spline from graph" << std::endl;
   RooSpline1D *eaSpline = graphToSpline(Form("fea_%s_%s_%dTeV",proc_.c_str(),catname.c_str(),sqrts_),eaGraph);
+  std::cout << "ED DEBUG: presumably this has not worked" << std::endl;
   RooSpline1D *xs = xsSplines[proc_];
   TGraph *  xsGraph = new TGraph();
   TGraph *  brGraph = new TGraph();

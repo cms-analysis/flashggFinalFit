@@ -44,7 +44,7 @@ class WSTFileWrapper:
    def convertTemplatedName(self,dataName):
         theProcName = ""
         theDataName = ""
-        tpMap = {"GG2H":"ggh","VBF":"vbf","TTH":"tth","QQ2HLNU":"wh","QQ2HLL":"zh","WH2HQQ":"wh","ZH2HQQ":"zh"}
+        tpMap = {"GG2H":"ggh","VBF":"vbf","TTH":"tth","QQ2HLNU":"wh","QQ2HLL":"zh","WH2HQQ":"wh","ZH2HQQ":"zh","testBBH":"bbh"}
         for stxsProc in tpMap:
           if dataName.startswith(stxsProc):
             theProcName = stxsProc
@@ -99,7 +99,6 @@ parser.add_option("--photonCatSmearsCorr",default="",help="String list of photon
 parser.add_option("--globalScales",default="NonLinearity:0.001,Geant4:0.0005",help="String list of global scale nuisances names with value separated by a \':\' - WILL NOT correlate across years (default: %default)")
 parser.add_option("--globalScalesCorr",default="",help="String list of global scale nuisances names with value separated by a \':\' - WILL correlate across years (default: %default)")
 parser.add_option("--toSkip",default="",help="proc:cat which are to skipped e.g ggH_hgg:11,qqH_hgg:12 etc. (default: %default)")
-parser.add_option("--theoryNormFactors",default="", help="if provided, will apply normalisation weights per process and per PDF, QCD Scale and alphaS weight.")
 parser.add_option("--isMultiPdf",default=False,action="store_true")
 parser.add_option("--submitSelf",default=False,action="store_true",help="Tells script to submit itself to the batch")
 parser.add_option("--justThisSyst",default="",help="Only calculate the line corresponding to thsi systematic")
@@ -112,10 +111,6 @@ parser.add_option("--intLumi",type="float",default=3.71,help="Integrated Lumi (d
 allSystList=[]
 if options.submitSelf :
   options.justThisSyst="batch_split"
-if (options.theoryNormFactors != ""):
-   #import options.theoryNormFactors as th_norm
-   print "[INFO] IMPORTING theory norm factors ", options.theoryNormFactors
-   exec("import %s as th_norm"%options.theoryNormFactors.replace(".py","")) 
 ###############################################################################
 
 
@@ -131,11 +126,11 @@ outFile = open(options.outfilename,'w')
 ###############################################################################
 # convert flashgg style to combine style process
 #combProc = {'ggH':'ggH_hgg','VBF':'qqH_hgg','ggh':'ggH_hgg','vbf':'qqH_hgg','wzh':'VH','wh':'WH_hgg','zh':'ZH_hgg','tth':'ttH_hgg','bkg_mass':'bkg_mass','gg_grav':'ggH_hgg_ALT','qq_grav':'qqbarH_ALT'}
-combProc = {'GG2H':'ggH_hgg','VBF':'qqH_hgg','TTH':'ttH_hgg','QQ2HLNU':'WHL_hgg','QQ2HLL':'ZHL_hgg','WH2HQQ':'WHH_hgg','ZH2HQQ':'ZHH_hgg','bkg_mass':'bkg_mass'}
+combProc = {'GG2H':'ggH_hgg','VBF':'qqH_hgg','TTH':'ttH_hgg','QQ2HLNU':'WHL_hgg','QQ2HLL':'ZHL_hgg','WH2HQQ':'WHH_hgg','ZH2HQQ':'ZHH_hgg','testBBH':'bbH_hgg','bkg_mass':'bkg_mass'}
 #flashggProc = {'ggH_hgg':'ggh','qqH_hgg':'vbf','VH':'wzh','WH_hgg':'wh','ZH_hgg':'zh','ttH_hgg':'tth','bkg_mass':'bkg_mass','ggH_hgg_ALT':'gg_grav','qqbarH_ALT':'qq_grav'}
 #flashggProc = {'ggH_hgg':'ggh','qqH_hgg':'vbf','ttH_hgg':'tth','WHL_hgg':'wh','ZHL_hgg':'zh','WHH_hgg':'wh','ZHH_hgg':'zh','bkg_mass':'bkg_mass'}
-flashggProc = {'ggH_hgg':'GG2H','qqH_hgg':'VBF','ttH_hgg':'TTH','WHL_hgg':'QQ2HLNU','ZHL_hgg':'QQ2HLL','WHH_hgg':'WH2HQQ','ZHH_hgg':'ZH2HQQ','bkg_mass':'bkg_mass'}
-procId = {'ggH_hgg':0,'qqH_hgg':-1,'ttH_hgg':-2,'WHL_hgg':-2,'ZHL_hgg':-3,'WHH_hgg':-4,'ZHH_hgg':-5,'bkg_mass':1}
+flashggProc = {'ggH_hgg':'GG2H','qqH_hgg':'VBF','ttH_hgg':'TTH','WHL_hgg':'QQ2HLNU','ZHL_hgg':'QQ2HLL','WHH_hgg':'WH2HQQ','ZHH_hgg':'ZH2HQQ','bbH_hgg':'testBBH','bkg_mass':'bkg_mass'}
+procId = {'ggH_hgg':0,'qqH_hgg':-1,'ttH_hgg':-2,'WHL_hgg':-2,'ZHL_hgg':-3,'WHH_hgg':-4,'ZHH_hgg':-5,'bbH_hgg':-6,'bkg_mass':1}
 bkgProcs = ['bkg_mass'] #what to treat as background
 #Determine if VH or WZH_hgg
 splitVH=False
@@ -227,6 +222,7 @@ intL = 1000* options.intLumi
 print "[INFO] Get Intlumi from file, value : ", intL," pb^{-1}", " sqrts ", sqrts
 ###############################################################################
 
+
 ###############################################################################
 ## SHAPE SYSTEMATIC SETUP  ####################################################
 ###############################################################################
@@ -259,6 +255,7 @@ fileDetails['WHL_hgg']       = [sigFile.replace('$PROC',"QQ2HLNU"),sigWS,'hggpdf
 fileDetails['ZHL_hgg']       = [sigFile.replace('$PROC',"QQ2HLL"),sigWS,'hggpdfsmrel_%dTeV_QQ2HLL_$CHANNEL'%sqrts]
 fileDetails['WHH_hgg']       = [sigFile.replace('$PROC',"WH2HQQ"),sigWS,'hggpdfsmrel_%dTeV_WH2HQQ_$CHANNEL'%sqrts]
 fileDetails['ZHH_hgg']       = [sigFile.replace('$PROC',"ZH2HQQ"),sigWS,'hggpdfsmrel_%dTeV_ZH2HQQ_$CHANNEL'%sqrts]
+fileDetails['bbH_hgg']       = [sigFile.replace('$PROC',"testBBH"),sigWS,'hggpdfsmrel_%dTeV_testBBH_$CHANNEL'%sqrts]
 
 #if splitVH:
 #  fileDetails['WH_hgg']       =  [sigFile.replace('$PROC',"wh"),sigWS,'hggpdfsmrel_%dTeV_wh_$CHANNEL'%sqrts]
@@ -292,7 +289,73 @@ theorySystAbsScale['WHL_hgg'] =  [0.0,                 0.0,                0.005
 theorySystAbsScale['WHH_hgg'] =  [0.0,                 0.0,                0.005,             0.0,                0.0,                   0.0,                 -0.007,              0.0,                  0.019,              0.0,              0.0] # ZH is a _qqbar process
 theorySystAbsScale['qqH_hgg'] = [0.0,                 0.004,              0.0,               0.0,                0.0,                   -0.003,              0.0,                 0.0,                  0.021,              0.0,              0.0] # qqH is a _qqbar process
 theorySystAbsScale['ggH_hgg'] = [0.046,               0.0,                0.0,               0.0,                -0.067,               0.0,                  0.0,                 0.0,                  0.0,                0.032,            0.0] # GGH is a _gg process
+theorySystAbsScale['bbH_hgg'] = [0.0,                 0.0,                0.0,               0.058,              0.0,                   0.0,                 0.0,                 -0.092,               0.0,                0.0,              0.036] # ttH is a _qqbar process
 
+##############################################################################
+## Calculate overall effect of theory systematics
+##############################################################################
+result ={}
+mass = inWS.var("CMS_hgg_mass")
+norm_factors_file = open('norm_factors_new.py','w')
+for proc in options.procs:
+  if proc in bkgProcs: continue
+  if "bbH" in proc: continue
+  for name in theorySyst.keys(): #wh_130_13TeV_UntaggedTag_1_pdfWeights
+    norm_factors_file.write("%s_%s = ["%(proc,name.replace("Weight",""))) 
+    result["%s_%s"%(proc,name)] = []
+    n=-1
+    while (n>=-1): 
+      n=n+1
+      runningTotal_nom=0
+      runningTotal_up=0
+      weight = r.RooRealVar("weight","weight",0)
+      weight_up = inWS.var("%s_%d"%(name,n)) # eg pdfWeight_1
+      if (weight_up==None) : 
+        n=-999
+        continue # this will break the while loop, so we just stop when we are out of pdfWeights, scaleWeights or alphaSWeights 
+      weight_central = inWS.var("centralObjectWeight") 
+      weight_sumW = inWS.var("sumW")
+      for cat in options.cats:
+        print "---> this is proc ", proc, "look for", "%s_%d_13TeV_%s_pdfWeights"%(combProc.keys()[combProc.values().index(proc)],options.mass,cat) 
+        data_nominal= inWS.data("%s_%d_13TeV_%s_pdfWeights"%(combProc.keys()[combProc.values().index(proc)],options.mass,cat))
+        print data_nominal
+        data_nominal_sum = data_nominal.sumEntries()
+        data_up = data_nominal.emptyClone();
+        data_nominal_new = data_nominal.emptyClone();
+        zeroWeightEvents=0.
+        for i in range(0,int(data_nominal.numEntries())):
+           mass.setVal(data_nominal.get(i).getRealValue("CMS_hgg_mass"))
+           w_nominal =data_nominal.weight()
+           w_up = data_nominal.get(i).getRealValue("%s_%d"%(name,n))
+           w_central = data_nominal.get(i).getRealValue("scaleWeight_0") #sneaky fix as it doesn't look like central weight is beign propagated correctly in these cases.
+           sumW = data_nominal.get(i).getRealValue("sumW")
+           if (w_central) : print name, n, proc, cat, "entry ", i, " w_nominal ", w_nominal, " w_central " , w_central, " w_up ", w_up , " w_nominal*(w_up/w_central) ", w_nominal*(w_up/w_central)
+           if (abs(w_central)<1E-6 or w_nominal==0. or math.isnan(w_up) or w_central<=0. or w_up<=0. or w_up>10.0): 
+                continue
+           weight_up.setVal(w_nominal*(w_up/w_central))
+           data_up.add(r.RooArgSet(mass,weight_up),weight_up.getVal())
+           data_nominal_new.add(r.RooArgSet(mass,weight),w_nominal)
+        runningTotal_nom_old = runningTotal_nom
+        runningTotal_up_old = runningTotal_up
+        runningTotal_nom =runningTotal_nom + data_nominal.sumEntries() 
+        runningTotal_up =runningTotal_up + data_up.sumEntries()
+        if (runningTotal_nom): effect =runningTotal_up/runningTotal_nom
+        else: effect =-1
+        print name, n, proc, cat, " runningTotal_up ", runningTotal_up, " runningTotal_up_old ", runningTotal_up_old, " data_up.sumEntries() ", data_up.sumEntries() , "runningTotal_nom", runningTotal_nom, " runningTotal_nom_old ", runningTotal_nom_old , " data_nominal.sumEntries() ",  data_nominal.sumEntries(), " effect ", effect
+      effect=-1
+      if (runningTotal_nom==runningTotal_up): effect=1
+      else: effect = runningTotal_up/runningTotal_nom
+      print " effect of %s_%d "%(name,n), "on %s"%(proc) ," is %.3f"%( effect)
+      if (effect <0.5 or effect > 2.0) : exit (1)
+      if (n==0) :norm_factors_file.write(" %.3f"%effect)
+      else: norm_factors_file.write(", %.3f"%effect)
+      result["%s_%s"%(proc,name)].append(effect)
+    norm_factors_file.write("]\n")
+    #print result
+#exit(1)
+norm_factors_file.close()
+theoryNormFactors=result
+  
 #yprinting function
 def printTheorySysts():
   # as these are antisymmetric lnN systematics - implement as [1/(1.+err_down)] for the lower and [1.+err_up] for the upper
@@ -307,7 +370,7 @@ def printTheorySysts():
         outFile.write('%-35s  lnN   '%(name))
         for c in options.cats:
           for p in options.procs:
-            if "bkg" in flashggProc[p] : 
+            if "bkg" or "BBH" in flashggProc[p]: 
               outFile.write('- ')
               continue
             else:
@@ -337,7 +400,7 @@ def printTheorySysts():
         outFile.write('%-35s  lnN   '%(name))
         for c in options.cats:
           for p in options.procs:
-            if "bkg" in flashggProc[p] : 
+            if "bkg" or "BBH" in flashggProc[p]: 
               outFile.write('- ')
               continue
             else:
@@ -375,23 +438,21 @@ def printTheorySysts():
                 else:
                   outFile.write("%1.3f "%(value))
     outFile.write('\n')
-    
+
+
 ## pdf weights printing tool 
 def getFlashggLineTheoryWeights(proc,cat,name,i,asymmetric,j=0,factor=1):
   n = i
   m = i
   ad_hoc_factor =1.
-  theoryNormFactor_n=1. #up
-  theoryNormFactor_m=1. #down
+  #theoryNormFactor_n=1. #up
+  #theoryNormFactor_m=1. #down
   if ( asymmetric ) :
     "SINCE WE are looking at syst ", name , " we apply an ad-hoc factor of ", factor
     ad_hoc_factor=factor
     m = j
-  if (options.theoryNormFactors != ""):
-     values = eval("th_norm.%s_%s"%(proc,name.replace("Weight","")))
-     #print ("th_norm.%s_%s"%(proc,name.replace("Weight","")))
-     theoryNormFactor_n= 1/values[n] #up
-     theoryNormFactor_m= 1/values[m] #down
+  theoryNormFactor_n= 1/theoryNormFactors["%s_%s"%(combProc[proc],name)][n] #up
+  theoryNormFactor_m= 1/theoryNormFactors["%s_%s"%(combProc[proc],name)][m] #up
   
   mass = inWS.var("CMS_hgg_mass")
   weight = r.RooRealVar("weight","weight",0)
@@ -419,11 +480,10 @@ def getFlashggLineTheoryWeights(proc,cat,name,i,asymmetric,j=0,factor=1):
     w_down = theoryNormFactor_m*data_nominal.get(i).getRealValue("%s_%d"%(name,m))
     #w_central = data_nominal.get(i).getRealValue(weight_central.GetName())
     w_central = data_nominal.get(i).getRealValue("scaleWeight_0") #sneaky fix as it doesn't look like central weight is beign propagated correctly in these cases.
-    #print " WARNING] syst ", name,n, " ","procs/cat  " , proc,",",cat , " entry " , i, " w_nom ", w_nominal , "  w_up " , w_up , " w_down ", w_down ,"w_central ", w_central, " theoryNormFactor_m ", theoryNormFactor_m , " theoryNormFactor_n ", theoryNormFactor_n
     sumW = data_nominal.get(i).getRealValue("sumW")
-    if (w_central==0. or w_nominal==0. or math.isnan(w_down) or math.isnan(w_up) or w_down==0. or w_up==0.): 
+    if (w_central<=0. or w_nominal<=0. or math.isnan(w_down) or math.isnan(w_up) or w_down<=0. or w_up<=0.): 
         zeroWeightEvents=zeroWeightEvents+1.0
-        if (zeroWeightEvents%1000==0):
+        if (zeroWeightEvents%1==0):
           print "[WARNING] skipping one event where weight is identically 0 or nan, causing  a seg fault, occured in ",(zeroWeightEvents/data_nominal.numEntries())*100 , " percent of events"
           #print " WARNING] syst ", name,n, " ","procs/cat  " , proc,",",cat , " entry " , i, " w_nom ", w_nominal , "  w_up " , w_up , " w_down ", w_down ,"w_central ", w_central
           #exit(1)
@@ -435,6 +495,7 @@ def getFlashggLineTheoryWeights(proc,cat,name,i,asymmetric,j=0,factor=1):
           #print " WARNING] syst ", name,n, " ","procs/cat  " , proc,",",cat , " entry " , i, " w_nom ", w_nominal , "  w_up " , w_up , " w_down ", w_down ,"w_central ", w_central
           #exit(1)
         continue
+    print " WARNING] syst ", name,n, " ","procs/cat  " , proc,",",cat , " entry " , i, " w_nom ", w_nominal , "  w_up " , w_up , " w_down ", w_down ,"w_central ", w_central, " theoryNormFactor_m ", theoryNormFactor_m , " theoryNormFactor_n ", theoryNormFactor_n, " w_nominal*(w_down/w_central) " , w_nominal*(w_down/w_central) , " w_nominal*(w_up/w_central) " , w_nominal*(w_up/w_central)
     weight_down.setVal(w_nominal*(w_down/w_central))
     weight_up.setVal(w_nominal*(w_up/w_central))
     data_up.add(r.RooArgSet(mass,weight_up),weight_up.getVal())
@@ -469,7 +530,7 @@ def getFlashggLineTheoryWeights(proc,cat,name,i,asymmetric,j=0,factor=1):
     #print "data_nominal_new"
     #data_nominal_new.Print()
     #print "data_down"
-    #data_down.Print()
+    d#ata_down.Print()
     #print "data_up"
     #data_up.Print()
     #print "ad_hoc_factor"
@@ -1355,7 +1416,7 @@ if options.submitSelf:
     f.write('touch %s.run\n'%os.path.abspath(f.name))
     f.write('cd %s\n'%os.getcwd())
     f.write('eval `scramv1 runtime -sh`\n')
-    execLine = '$CMSSW_BASE/src/flashggFinalFit/Datacard/makeParametricModelDatacardFLASHgg.py -i %s -o %s -p %s -c %s --photonCatScales %s --photonCatSmears %s --isMultiPdf --mass %d --justThisSyst %s --theoryNormFactors %s'%(options.infilename,"jobs/"+options.outfilename+"."+syst,",".join(flashggProc[p] for p in options.procs).replace(",bkg_mass",""),",".join(options.cats),",".join(options.photonCatScales),",".join(options.photonCatSmears),options.mass,syst, "norm_factors.py"  )
+    execLine = '$CMSSW_BASE/src/flashggFinalFit/Datacard/makeParametricModelDatacardFLASHgg.py -i %s -o %s -p %s -c %s --photonCatScales %s --photonCatSmears %s --isMultiPdf --mass %d --justThisSyst %s'%(options.infilename,"jobs/"+options.outfilename+"."+syst,",".join(flashggProc[p] for p in options.procs).replace(",bkg_mass",""),",".join(options.cats),",".join(options.photonCatScales),",".join(options.photonCatSmears),options.mass,syst )
     f.write('if (%s) then \n'%execLine);
     f.write('\t touch %s.done\n'%os.path.abspath(f.name))
     f.write('else\n')

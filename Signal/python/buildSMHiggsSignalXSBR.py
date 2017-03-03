@@ -52,6 +52,7 @@ def Init13TeV():
   SM.makeXS("ggH","13TeV") #For now, should update FIXME
   SM.makeXS("qqH","13TeV")#For now, should update FIXME
   SM.makeXS("ttH","13TeV")#For now, should update FIXME
+  SM.makeXS("bbH","13TeV")#For now, should update FIXME
   SM.makeXS("WH","13TeV")#For now, should update FIXME
   SM.makeXS("ZH","13TeV")#For now, should update FIXME
  # options.funcXSext = "14TeV" #For now, should update FIXME

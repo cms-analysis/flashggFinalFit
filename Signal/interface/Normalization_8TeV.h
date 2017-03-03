@@ -60,6 +60,8 @@ class Normalization_8TeV {
 	std::map<double,double> XSectionMap_WH2HQQ;
 	std::map<double,double> XSectionMap_ZH2HQQ;
 
+	std::map<double,double> XSectionMap_testBBH;
+
 	std::map<int,std::pair<TString,double > > SignalTypeMap;
 	
 	bool is2011_;

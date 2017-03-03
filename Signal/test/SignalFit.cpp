@@ -49,7 +49,8 @@ string mergefilename_;
 string datfilename_;
 string systfilename_;
 string plotDir_;
-bool skipPlots_=false;
+//bool skipPlots_=false;
+bool skipPlots_=true;
 int mhLow_=115;
 int mhHigh_=135;
 int nCats_;
@@ -712,6 +713,7 @@ int main(int argc, char *argv[]){
     for (int mhIndex=0; mhIndex< massList_.size() ; mhIndex++){
       int mh=massList_[mhIndex];
       if (skipMass(mh)) continue;
+      if( (mh==120||mh==130) && proc=="testBBH" ) continue;
       RooDataSet *dataRV; 
       RooDataSet *dataWV; 
       RooDataSet *dataRVRef; 
@@ -1083,23 +1085,37 @@ int main(int argc, char *argv[]){
       outWS->import(*intLumi_);
       FinalModelConstruction finalModel(massList_, mass_,MH,intLumi_,mhLow_,mhHigh_,proc,cat,doSecondaryModels_,systfilename_,skipMasses_,verbose_,procs_, flashggCats_,plotDir_, isProblemCategory,isCutBased_,sqrts_,doQuadraticSigmaSum_);
     
+      std::cout << "ED DEBUG: initialised FinalModelConstruction" << std::endl;
       finalModel.setSecondaryModelVars(MH_SM,DeltaM,MH_2,higgsDecayWidth);
+      std::cout << "ED DEBUG: a" << std::endl;
       finalModel.setRVsplines(splinesRV);
+      std::cout << "ED DEBUG: b" << std::endl;
       finalModel.setWVsplines(splinesWV);
+      std::cout << "ED DEBUG: c" << std::endl;
       finalModel.setRVdatasets(datasetsRV);
+      std::cout << "ED DEBUG: d" << std::endl;
       finalModel.setWVdatasets(datasetsWV);
+      std::cout << "ED DEBUG: e" << std::endl;
       finalModel.setFITRVdatasets(FITdatasetsRV);
+      std::cout << "ED DEBUG: f" << std::endl;
       finalModel.setFITWVdatasets(FITdatasetsWV);
+      std::cout << "ED DEBUG: g" << std::endl;
       //finalModel.setSTDdatasets(datasets);
       finalModel.makeSTDdatasets();
+      std::cout << "ED DEBUG: h" << std::endl;
       finalModel.makeFITdatasets();
+      std::cout << "ED DEBUG: i" << std::endl;
       if( isFlashgg_){
         if (verbose_>1) std::cout << "[INFO] About to do Final Model Construction with useDCBplusGaus_=" << useDCBplusGaus_ << std::endl;
         finalModel.buildRvWvPdf("hggpdfsmrel_13TeV",nGaussiansRV,nGaussiansWV,recursive_,useDCBplusGaus_);
       }
+      std::cout << "ED DEBUG: j" << std::endl;
       finalModel.getNormalization();
+      std::cout << "ED DEBUG: k" << std::endl;
       if (!skipPlots_) finalModel.plotPdf(plotDir_);
+      std::cout << "ED DEBUG: l" << std::endl;
       finalModel.save(outWS);
+      std::cout << "ED DEBUG: m" << std::endl;
     }
   }
 
