@@ -342,7 +342,9 @@ for proc in options.procs:
       if (runningTotal_nom==runningTotal_up): effect=1
       else: effect = runningTotal_up/runningTotal_nom
       print " effect of %s_%d "%(name,n), "on %s"%(proc) ," is %.3f"%( effect)
-      if (effect <0.5 or effect > 2.0) : exit (1)
+      if (effect <0.5 or effect > 2.0) : 
+        #exit ("effect is greater than a factor of two - shouldn't happen, exiting...")
+        print "effect is greater than a factor of two - shouldn't happen, exiting...\n"
       if (n==0) :norm_factors_file.write(" %.3f"%effect)
       else: norm_factors_file.write(", %.3f"%effect)
       result["%s_%s"%(proc,name)].append(effect)
@@ -700,7 +702,8 @@ flashggSystDump = open('flashggSystDump.dat','w')
 flashggSysts={}
 
 # vtx eff
-vtxSyst = 0.015 
+#vtxSyst = 0.015 
+vtxSyst = 0.02 #updated for Moriond17
 
 #photon ID
 flashggSysts['MvaShift'] =  'phoIdMva'
@@ -715,6 +718,10 @@ flashggSysts['TriggerWeight'] = 'TriggerWeight'
 flashggSysts['JetBTagCutWeight'] = 'eff_b'
 #flashggSysts['MvaLinearSyst'] = 'MvaLinearSyst'
 #flashggSysts[''] =  ''
+flashggSysts['metPhoUncertainty'] = 'MET_PhotonScale'
+flashggSysts['metUncUncertainty'] = 'MET_Unclustered'
+flashggSysts['metJecUncertainty'] = 'MET_JEC'
+flashggSysts['metJerUncertainty'] = 'MET_JER'
 
 #tth Tags
 tthSysts={}
