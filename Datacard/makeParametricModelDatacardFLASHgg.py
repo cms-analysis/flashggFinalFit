@@ -295,6 +295,8 @@ theorySystAbsScale['ggH_hgg'] = [0.046,               0.0,                0.0,  
 result ={}
 mass = inWS.var("CMS_hgg_mass")
 norm_factors_file = open('norm_factors_new.py','w')
+inclusiveCats = list(options.cats) #need the list() otherwise NoTag will also be appended to options.cats
+inclusiveCats.append("NoTag")
 for proc in options.procs:
   if proc in bkgProcs: continue
   for name in theorySyst.keys(): #wh_130_13TeV_UntaggedTag_1_pdfWeights
@@ -312,7 +314,7 @@ for proc in options.procs:
         continue # this will break the while loop, so we just stop when we are out of pdfWeights, scaleWeights or alphaSWeights 
       weight_central = inWS.var("centralObjectWeight") 
       weight_sumW = inWS.var("sumW")
-      for cat in options.cats:
+      for cat in inclusiveCats:
         #print "---> this is proc ", proc, "look for", "%s_%d_13TeV_%s_pdfWeights"%(combProc.keys()[combProc.values().index(proc)],options.mass,cat) 
         data_nominal= inWS.data("%s_%d_13TeV_%s_pdfWeights"%(combProc.keys()[combProc.values().index(proc)],options.mass,cat))
         data_nominal_sum = data_nominal.sumEntries()
@@ -326,8 +328,7 @@ for proc in options.procs:
            w_central = data_nominal.get(i).getRealValue("scaleWeight_0") #sneaky fix as it doesn't look like central weight is beign propagated correctly in these cases.
            sumW = data_nominal.get(i).getRealValue("sumW")
            if (w_central) : print name, n, proc, cat, "entry ", i, " w_nominal ", w_nominal, " w_central " , w_central, " w_up ", w_up , " w_nominal*(w_up/w_central) ", w_nominal*(w_up/w_central)
-           if (abs(w_central)<1E-6 or w_nominal==0. or math.isnan(w_up) or w_central<=0. or w_up<=0. or w_up>10.0): 
-                continue
+           if (abs(w_central)<1E-4 or abs(w_nominal)<1E-4 or w_nominal<=0. or math.isnan(w_up) or w_central<=0. or w_up<=0. or w_up>10.0): continue
            weight_up.setVal(w_nominal*(w_up/w_central))
            data_up.add(r.RooArgSet(mass,weight_up),weight_up.getVal())
            data_nominal_new.add(r.RooArgSet(mass,weight),w_nominal)
@@ -750,10 +751,14 @@ vbfSysts['UnmatchedPUWeight'].append([1.,1.]) #should only apply to ggh<->vbf
 vbfSysts['UnmatchedPUWeight'].append([1.,1.]) #should only apply to ggh<->vbf
 vbfSysts['RMSShift'].append([1.,1.]) #should only apply to ggh<->vbf
 #vbfSysts['PUJIDShift'].append([1.,1.]) #should only apply to ggh<->vbf
+#all below still need to be updated for four-tag Moriond17 scenario
 vbfSysts['UEPS'].append([0.077,0.071]) # adhoc for ggh<->vbf # UPDATED FOR ICHEP16
 vbfSysts['UEPS'].append([0.042,0.092]) # adhoc for vbf0<->vbf1# UPDATED FOR ICHEP16
 vbfSysts['UEPS'].append([0.042,0.092]) # adhoc by Ed in attempt to fix negative value
+vbfSysts['UEPS'].append([0.042,0.092]) # adhoc by Ed in attempt to fix negative value
 vbfSysts['JetVeto'].append([0.39,0.0]) # adhoc for ggh<->vbf # UPDATED FOR ICHEP16
+vbfSysts['JetVeto'].append([0.10,0.0]) # adhoc for vbf0<->vbf1# UPDATED FOR ICHEP16
+vbfSysts['JetVeto'].append([0.10,0.0]) # adhoc for vbf0<->vbf1# UPDATED FOR ICHEP16
 vbfSysts['JetVeto'].append([0.10,0.0]) # adhoc for vbf0<->vbf1# UPDATED FOR ICHEP16
 
 #lepton, MET tags  ## lepton tags not considered for Dry run...
