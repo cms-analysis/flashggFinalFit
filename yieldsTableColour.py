@@ -20,29 +20,31 @@ parser.add_option("-v","--sigworkspaces",default="")
 parser.add_option("-u","--bkgworkspaces",default="")
 parser.add_option("-o","--order",default="",help="tell teh script what order to print tags and procs in. Usage proc1,proc2,proc3..:tag1,tag2,tag3...")
 parser.add_option("-f","--flashggCats",default="UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,VBFTag_0,VBFTag_1,VBFTag_2,TTHHadronicTag,TTHLeptonicTag,ZHLeptonicTag,WHLeptonicTag,VHLeptonicLooseTag,VHHadronicTag,VHMetTag")
-parser.add_option("--makeTable",default=False,action="store_true",help="Make the table and plot instead of making numbers.txt")
 (options,args) = parser.parse_args()
 
-if not (options.workspaces =="") and not options.makeTable:
-  print "Generating numbers.txt"
-  if (len(options.workspaces.split(","))>1) :
-    print "test1"
-    os.system("./Signal/bin/SignalFit -i %s --checkYield 1 | grep Tag | grep _125_ > %s"%(options.workspaces,options.input))
-    print "test2"
-  else:
-    print "test3"
-    os.system("./Background/bin/workspaceTool -i %s --print 1 | grep RooData | grep it > %s"%(options.workspaces,options.input))
-    print "test4"
-    os.system("./Background/bin/workspaceTool -i %s --print 1 | grep intLumi >> %s"%(options.workspaces,options.input))
-    print "test5"
-
-  if (len(options.workspaces.split(","))>1) :
-    os.system("./Signal/bin/SignalFit -i %s --checkYield 1 | grep Tag | grep _125_ > %s"%(options.workspaces,options.input))
-  else:
-    os.system("./Background/bin/workspaceTool -i %s --print 1 | grep RooData | grep it > %s"%(options.workspaces,options.input))
-    os.system("./Background/bin/workspaceTool -i %s --print 1 | grep intLumi >> %s"%(options.workspaces,options.input))
-  print ""
-  exit("Now manually edit the numbers.txt file and then rerun with the --makeTable option\n")
+if not (options.workspaces ==""):
+  tpMap = {"GG2H":"ggh","VBF":"vbf","TTH":"tth","QQ2HLNU":"wh","QQ2HLL":"zh","WH2HQQ":"wh","ZH2HQQ":"zh"}
+  for ws in options.workspaces.split(","):
+    oldProc = ""
+    newProc = ""
+    if "M125" not in ws: continue #shouldn't be any but just in case
+    for stxsProc in tpMap:
+      if stxsProc in ws:
+        if newProc != "": exit("more than one STXS process name found in file name - wtf, shouldn't happen, exiting...")
+        newProc = stxsProc
+        oldProc = tpMap[stxsProc]
+    print "\nrunning the yields code for process",newProc
+    os.system("./Signal/bin/SignalFit -i %s --checkYield 1 | grep Tag | grep _125_ > %s.%s.old"%(ws,options.input,newProc))
+    oldFile = open("%s.%s.old"%(options.input,newProc),'r')
+    newFile = open("%s.%s.new"%(options.input,newProc),'w')
+    for line in oldFile.readlines():
+      line = line.replace(oldProc,newProc)
+      newFile.write(line)
+    oldFile.close()
+    newFile.close()
+  os.system("rm %s*.old"%(options.input))
+  os.system("cat %s*.new > %s"%(options.input,options.input))
+  os.system("rm %s*.new"%(options.input))
 
 procs=[]
 tags=[]

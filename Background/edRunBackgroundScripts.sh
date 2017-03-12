@@ -7,11 +7,14 @@ FILE="/vols/cms/es811/FinalFits/ws_888/output_GluGluHToGG_M120_13TeV_amcatnloFXF
 DATA="/vols/cms/es811/FinalFits/ws_888/allData.root"
 
 #EXT="STXSreMiniAOD_04March"
-EXT="STXSreMiniAOD_05MarchTighterVBF"
+#EXT="STXSreMiniAOD_04March_NoCat3"
+#EXT="STXSreMiniAOD_05MarchTighterVBF"
+EXT="STXSreMiniAOD_05MarchTighterVBF_NoCat3"
 echo "Ext is $EXT"
 PROCS="GG2H,VBF,TTH,QQ2HLL,QQ2HLNU,WH2HQQ,ZH2HQQ"
 echo "Procs are $PROCS"
-CATS="UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,VBFTag_0,VBFTag_1,VBFTag_2,VBFTag_3,TTHHadronicTag,TTHLeptonicTag,ZHLeptonicTag,WHLeptonicTag,VHLeptonicLooseTag,VHHadronicTag,VHMetTag"
+#CATS="UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,VBFTag_0,VBFTag_1,VBFTag_2,VBFTag_3,TTHHadronicTag,TTHLeptonicTag,ZHLeptonicTag,WHLeptonicTag,VHLeptonicLooseTag,VHHadronicTag,VHMetTag"
+CATS="UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,VBFTag_0,VBFTag_1,VBFTag_2,TTHHadronicTag,TTHLeptonicTag,ZHLeptonicTag,WHLeptonicTag,VHLeptonicLooseTag,VHHadronicTag,VHMetTag"
 echo "Cats are $CATS"
 INTLUMI=35.9
 echo "Intlumi is $INTLUMI"

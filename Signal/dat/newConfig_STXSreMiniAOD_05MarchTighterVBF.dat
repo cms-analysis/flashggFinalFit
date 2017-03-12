@@ -1,7 +1,7 @@
 #proc cat nGausRV nGausWV
 GG2H TTHHadronicTag -1 -1 TTH TTHHadronicTag
 GG2H TTHLeptonicTag -1 -1 TTH TTHHadronicTag
-GG2H UntaggedTag_0 3 1
+GG2H UntaggedTag_0 2 1
 GG2H UntaggedTag_1 3 3
 GG2H UntaggedTag_2 4 3
 GG2H UntaggedTag_3 4 3
