@@ -48,8 +48,8 @@ def writeJobFileAndSubmit(directory,nuisance_group,POI="r"):
     #sub_file.write('touch %s/sub_job.%s.sh.run\n'%(directory,nuisance_group))
     freezeNuisancesCommand=""
     if not "none" in nuisance_group: freezeNuisancesCommand=" --freezeNuisanceGroups=%s"%nuisance_group
-    if (POI=="r") : sub_file.write('eval combine  CMS-HGG_mva_13TeV_datacard.root -M MultiDimFit --robustFit 1 -t -1 --expectSignal 1 -m125 --setPhysicsModelParameters pdfindex_UntaggedTag_0_13TeV=1,pdfindex_UntaggedTag_1_13TeV=3,pdfindex_UntaggedTag_2_13TeV=3,pdfindex_UntaggedTag_3_13TeV=3,pdfindex_VBFTag_0_13TeV=2,pdfindex_VBFTag_1_13TeV=0,pdfindex_VBFTag_2_13TeV=9,pdfindex_TTHHadronicTag_13TeV=0,pdfindex_TTHLeptonicTag_13TeV=2,pdfindex_VHHadronicTag_13TeV=0,pdfindex_VHLeptonicLooseTag_13TeV=1,pdfindex_VHMetTag_13TeV=2,pdfindex_WHLeptonicTag_13TeV=1,pdfindex_ZHLeptonicTag_13TeV=0 --algo singles --cl=0.68 --minimizerAlgoForMinos Minuit2,Migrad -n %s %s\n'%(nuisance_group,freezeNuisancesCommand))
-    else         :  sub_file.write('eval combine  CMS-HGG_mva_13TeV_datacard.perProc.root -M MultiDimFit --robustFit 1 -t -1 --redefineSignalPOIs %s -P %s --floatOtherPOIs 1 --expectSignal 1 -m125 --setPhysicsModelParameterRanges r_ggH=-1.00,3.00:r_qqH=-1,3:r_VH=-1.00,3.00:r_ttH=-1.00,3.00 --setPhysicsModelParameters pdfindex_UntaggedTag_0_13TeV=1,pdfindex_UntaggedTag_1_13TeV=3,pdfindex_UntaggedTag_2_13TeV=3,pdfindex_UntaggedTag_3_13TeV=3,pdfindex_VBFTag_0_13TeV=2,pdfindex_VBFTag_1_13TeV=0,pdfindex_VBFTag_2_13TeV=9,pdfindex_TTHHadronicTag_13TeV=0,pdfindex_TTHLeptonicTag_13TeV=2,pdfindex_VHHadronicTag_13TeV=0,pdfindex_VHLeptonicLooseTag_13TeV=1,pdfindex_VHMetTag_13TeV=2,pdfindex_WHLeptonicTag_13TeV=1,pdfindex_ZHLeptonicTag_13TeV=0 --algo singles --cl=0.68 --minimizerAlgoForMinos Minuit2,Migrad -n %s %s\n'%(POI,POI,nuisance_group,freezeNuisancesCommand))
+    if (POI=="r") : sub_file.write('eval combine  CMS-HGG_mva_13TeV_datacard.root -M MultiDimFit --robustFit 1 -t -1 --expectSignal 1 -m125 --setPhysicsModelParameters pdfindex_UntaggedTag_0_13TeV=1,pdfindex_UntaggedTag_1_13TeV=3,pdfindex_UntaggedTag_2_13TeV=2,pdfindex_UntaggedTag_3_13TeV=1,pdfindex_VBFTag_0_13TeV=2,pdfindex_VBFTag_1_13TeV=2,pdfindex_VBFTag_2_13TeV=6,pdfindex_TTHHadronicTag_13TeV=0,pdfindex_TTHLeptonicTag_13TeV=1,pdfindex_ZHLeptonicTag_13TeV=0,pdfindex_WHLeptonicTag_13TeV=1,pdfindex_VHLeptonicLooseTag_13TeV=2,pdfindex_VHHadronicTag_13TeV=1,pdfindex_VHMetTag_13TeV=2 --algo singles --cl=0.68 --minimizerAlgoForMinos Minuit2,Migrad -n %s %s\n'%(nuisance_group,freezeNuisancesCommand))
+    else         :  sub_file.write('eval combine  CMS-HGG_mva_13TeV_datacard.perProc.root -M MultiDimFit --robustFit 1 -t -1 --redefineSignalPOIs %s -P %s --floatOtherPOIs 1 --expectSignal 1 -m125 --setPhysicsModelParameterRanges r_ggH=-1.00,3.00:r_qqH=-1,3:r_VH=-1.00,3.00:r_ttH=-1.00,3.00 --setPhysicsModelParameters pdfindex_UntaggedTag_0_13TeV=1,pdfindex_UntaggedTag_1_13TeV=3,pdfindex_UntaggedTag_2_13TeV=2,pdfindex_UntaggedTag_3_13TeV=1,pdfindex_VBFTag_0_13TeV=2,pdfindex_VBFTag_1_13TeV=2,pdfindex_VBFTag_2_13TeV=6,pdfindex_TTHHadronicTag_13TeV=0,pdfindex_TTHLeptonicTag_13TeV=1,pdfindex_ZHLeptonicTag_13TeV=0,pdfindex_WHLeptonicTag_13TeV=1,pdfindex_VHLeptonicLooseTag_13TeV=2,pdfindex_VHHadronicTag_13TeV=1,pdfindex_VHMetTag_13TeV=2 --algo singles --cl=0.68 --minimizerAlgoForMinos Minuit2,Migrad -n %s %s\n'%(POI,POI,nuisance_group,freezeNuisancesCommand))
     sub_file.close()
     os.system(' chmod +x %s'%(filename))
     exec_line='qsub %s -l h_rt=0:59:00 -q hep.q -o %s.log -e %s.err'%(filename,filename,filename)
@@ -134,7 +134,7 @@ if opts.makeTable:
 #ggF_contamination_in_ttH_categories group = CMS_hgg_tth_parton_shower CMS_hgg_tth_gluon_splitting CMS_hgg_tth_mc_low_stat 
 #ggF_contamination_in_VBF_categories group = CMS_hgg_JetVeto_migration0 CMS_hgg_JetVeto_migration1 
 #Branching_ratio group = BR_hgg
-#UE_and_PS group = CMS_hgg_UEPS_migration0 CMS_hgg_UEPS_migration1 CMS_hgg_UEPS_migration2
+#UE_and_PS group = CMS_hgg_UE CMS_hgg_PS
 #Photon_energy_scale_and_smearing group = CMS_hgg_nuisance_HighR9EB_13TeVscale CMS_hgg_nuisance_HighR9EE_13TeVscale CMS_hgg_nuisance_LowR9EB_13TeVscale CMS_hgg_nuisance_LowR9EE_13TeVscale CMS_hgg_nuisance_HighR9EBPhi_13TeVsmear CMS_hgg_nuisance_HighR9EBRho_13TeVsmear CMS_hgg_nuisance_HighR9EEPhi_13TeVsmear CMS_hgg_nuisance_HighR9EERho_13TeVsmear CMS_hgg_nuisance_LowR9EBPhi_13TeVsmear  CMS_hgg_nuisance_LowR9EBRho_13TeVsmear CMS_hgg_nuisance_LowR9EEPhi_13TeVsmear CMS_hgg_nuisance_LowR9EERho_13TeVsmear 
 #Modelling_of_material_budget group = CMS_hgg_nuisance_MaterialCentral_scale CMS_hgg_nuisance_MaterialForward_scale
 #Nonlinearity_of_detector_response group = CMS_hgg_nuisance_NonLinearity_13TeVscale 
@@ -147,7 +147,7 @@ if opts.makeTable:
 #Trigger_efficiency group = CMS_hgg_TriggerWeight
 #Vertex_finding_efficiency group = CMS_hgg_nuisance_deltafracright
 #Jet_energy_scale_and_resolution group = CMS_hgg_JER_TTH CMS_hgg_JEC_TTH CMS_hgg_JER_migration0 CMS_hgg_JER_migration1 CMS_hgg_JER_migration2 CMS_hgg_JEC_migration0 CMS_hgg_JEC_migration1 CMS_hgg_JEC_migration2
-#Lepton_reconstruction_and_btag_efficiencies group = CMS_eff_b CMS_eff_m CMS_eff_e
+#Lepton_reconstruction_and_btag_efficiencies group = CMS_eff_b CMS_eff_m CMS_eff_m_MiniIso CMS_eff_e
 #Photon_identification group = CMS_hgg_phoIdMva
 #Diphoton_selection group = CMS_hgg_LooseMvaSF
 #Electron_veto group = CMS_hgg_electronVetoSF

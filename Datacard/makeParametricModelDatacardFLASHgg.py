@@ -714,6 +714,7 @@ flashggSysts['SigmaEOverEShift'] = 'SigmaEOverEShift'
 flashggSysts['ElectronWeight'] = 'eff_e'
 flashggSysts['electronVetoSF'] = 'electronVetoSF'
 flashggSysts['MuonWeight'] = 'eff_m'
+flashggSysts['MuonMiniIsoWeight'] = 'eff_m_MiniIso'
 flashggSysts['TriggerWeight'] = 'TriggerWeight'
 #flashggSysts['JetBTagWeight'] = 'eff_b'
 flashggSysts['JetBTagCutWeight'] = 'eff_b'
@@ -738,7 +739,7 @@ puJetIdEff = []
 # naming is important to correlate with combination
 vbfSysts={}
 vbfSysts['JEC'] = [] 
-vbfSysts['UnmatchedPUWeight'] = [] 
+#vbfSysts['UnmatchedPUWeight'] = [] #removed for Moriond17
 vbfSysts['JER'] = [] 
 vbfSysts['JetVeto'] =[]
 vbfSysts['UEPS'] =[]
@@ -747,8 +748,8 @@ vbfSysts['RMSShift'] =[]
 for dijetCat in dijetCats: #each entry will represent a different migration
    vbfSysts['JER'].append([1.,1.,1.])  #value of 1 given gor both ggh and qqh, since vairations are taken from histograms directly
    vbfSysts['JEC'].append([1.,1.,1.]) #value of 1 given gor both ggh and qqh, since vairations are taken from histograms directly
-vbfSysts['UnmatchedPUWeight'].append([1.,1.]) #should only apply to ggh<->vbf
-vbfSysts['UnmatchedPUWeight'].append([1.,1.]) #should only apply to ggh<->vbf
+#vbfSysts['UnmatchedPUWeight'].append([1.,1.]) #should only apply to ggh<->vbf
+#vbfSysts['UnmatchedPUWeight'].append([1.,1.]) #should only apply to ggh<->vbf
 vbfSysts['RMSShift'].append([1.,1.]) #should only apply to ggh<->vbf
 #vbfSysts['PUJIDShift'].append([1.,1.]) #should only apply to ggh<->vbf
 #all below still need to be updated for four-tag Moriond17 scenario
