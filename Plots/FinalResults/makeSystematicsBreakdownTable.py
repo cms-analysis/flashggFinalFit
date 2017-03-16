@@ -149,7 +149,7 @@ if opts.makeTable:
 #Jet_energy_scale_and_resolution group = CMS_hgg_JER_TTH CMS_hgg_JEC_TTH CMS_hgg_JER_migration0 CMS_hgg_JER_migration1 CMS_hgg_JER_migration2 CMS_hgg_JEC_migration0 CMS_hgg_JEC_migration1 CMS_hgg_JEC_migration2
 #Lepton_reconstruction_and_btag_efficiencies group = CMS_eff_b CMS_eff_m CMS_eff_m_MiniIso CMS_eff_e
 #Photon_identification group = CMS_hgg_phoIdMva
-#Diphoton_selection group = CMS_hgg_LooseMvaSF
+#Diphoton_MVA_preselection group = CMS_hgg_LooseMvaSF
 #Electron_veto group = CMS_hgg_electronVetoSF
 #Unmatched_pileup group = CMS_hgg_UnmatchedPUWeight_migration0 CMS_hgg_UnmatchedPUWeight_migration1 
 #MET group = CMS_hgg_MET_JEC CMS_hgg_MET_JER CMS_hgg_MET_Unclustered CMS_hgg_MET_PhotonScale
