@@ -795,6 +795,8 @@ flashggSysts['metJerUncertainty'] = 'MET_JER'
 tthSysts={}
 tthSysts['JEC'] = 'JEC_TTH'
 tthSysts['JER'] = 'JER_TTH'
+tthSysts['JetBTagReshapeWeight'] = 'BTagReshape_TTH'
+btagReshapeSyst = 0.042 #ad hoc from Saranya for Moriond17, combination of various sources
 #flashggSysts['regSig'] = 'n_sigmae'
 #flashggSysts['idEff'] = 'n_id_eff'
 #flashggSysts['triggerEff'] = 'n_trig_eff'
@@ -845,9 +847,9 @@ metSyst['ttH_hgg'] = [0.011,0.012,0.040]#not used for ICHEP16
 ggHforttHSysts = {}
 
 # spec for ggh in tth cats - [MC_low_stat,gluon_splitting,parton_shower]
-ggHforttHSysts['CMS_hgg_tth_mc_low_stat'] = 0.10 ##FIXME 13TeV Flashgg!!
-ggHforttHSysts['CMS_hgg_tth_gluon_splitting'] = 0.18 ##FIXME 13TeV Flashgg!!
-ggHforttHSysts['CMS_hgg_tth_parton_shower'] = 0.45 ##FIXME 13TeV Flashgg!!
+ggHforttHSysts['CMS_hgg_tth_mc_low_stat'] = 0.10 ##FIXME needs double checking for Moriond17
+ggHforttHSysts['CMS_hgg_tth_gluon_splitting'] = 0.52 #re-evaluated for Moriond17, using TOP-16-010
+ggHforttHSysts['CMS_hgg_tth_parton_shower'] = 0.35 #updated for Moriond17
 
 # rate adjustments
 tthLepRateScale = 1.0 #not used for ICHEP16
@@ -1410,6 +1412,11 @@ def printTTHSysts():
             outFile.write('- ')
           elif c not in tthCats:
             outFile.write('- ')
+          elif 'Reshape' in tthSyst:
+            if 'ttH' in p and 'Hadronic' in c:
+              outFile.write('%1.4g '%(btagReshapeSyst))
+            else:
+              outFile.write('- ')
           else:
             outFile.write(getFlashggLine(p,c,tthSyst))
       outFile.write('\n')
