@@ -21,7 +21,7 @@ parser.add_option("-v","--sigworkspaces",default="")
 parser.add_option("-u","--bkgworkspaces",default="")
 parser.add_option("-o","--order",default="",help="tell teh script what order to print tags and procs in. Usage proc1,proc2,proc3..:tag1,tag2,tag3...")
 parser.add_option("-f","--flashggCats",default="UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,VBFTag_0,VBFTag_1,VBFTag_2,TTHHadronicTag,TTHLeptonicTag,ZHLeptonicTag,WHLeptonicTag,VHLeptonicLooseTag,VHHadronicTag,VHMetTag")
-parser.add_option("-v","--verbose",default=0)
+parser.add_option("--verbose",default=0)
 (options,args) = parser.parse_args()
 
 if not (options.workspaces ==""):
@@ -529,9 +529,9 @@ for t in tagList :
     print bkgYield
     exit(1)
   bkgy=bkgYield[t]
-  #naiveExp=(0.68*Arr[t]["Total"])/(2*float(effSigma[t])*bkgy)**(0.5) #think should be s/sqrt(s+b), rather than s/sqrt(b)
+  naiveExp=(0.68*Arr[t]["Total"])/(2*float(effSigma[t])*bkgy)**(0.5) #think should be s/sqrt(s+b), rather than s/sqrt(b)
   oldNaiveExp=(0.68*Arr[t]["Total"])/(2*float(effSigma[t])*bkgy)**(0.5)
-  naiveExp=(0.68*Arr[t]["Total"])/((2*float(effSigma[t])*bkgy) + 0.68*Arr[t]["Total"])**(0.5)
+  #naiveExp=(0.68*Arr[t]["Total"])/((2*float(effSigma[t])*bkgy) + 0.68*Arr[t]["Total"])**(0.5)
   vbfNaiveExp=(0.68*Arr[t]["VBF"])/((2*float(effSigma[t])*bkgy) + 0.68*Arr[t]["GG2H"] + 0.68*Arr[t]["VBF"])**(0.5)
   fancyExp=(2*( (0.68*Arr[t]["Total"]+2*float(effSigma[t])*bkgy) * math.log(1 + 0.68*Arr[t]["Total"]/(2*float(effSigma[t])*bkgy)) - 0.68*Arr[t]["Total"] ))**0.5 #2*((s+b)ln(1+s/b)-s)
   vbfFancyExp=(2*( (0.68*Arr[t]["VBF"]+2*float(effSigma[t])*bkgy+0.68*Arr[t]["GG2H"]) * math.log(1 + 0.68*Arr[t]["VBF"]/(2*float(effSigma[t])*bkgy+0.68*Arr[t]["GG2H"])) - 0.68*Arr[t]["VBF"] ))**0.5

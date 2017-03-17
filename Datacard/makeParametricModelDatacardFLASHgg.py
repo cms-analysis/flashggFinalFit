@@ -90,6 +90,7 @@ parser.add_option("-i","--infilename", help="Input file (binned signal from flas
 parser.add_option("-o","--outfilename",default="cms_hgg_datacard.txt",help="Name of card to print (default: %default)")
 parser.add_option("-p","--procs",default="ggh,vbf,wh,zh,tth",help="String list of procs (default: %default)")
 parser.add_option("-c","--cats",default="UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,UntaggedTag_4,VBFTag_0,VBFTag_1,VBFTag_2",help="Flashgg Categories (default: %default)")
+parser.add_option("--uepsfilename",default="",help="input files for calculating UEPS systematics; leave blank to use most recent set")
 parser.add_option("--batch",default="LSF",help="Batch system  (default: %default)")
 parser.add_option("--photonCatScales",default="HighR9EE,LowR9EE,HighR9EB,LowR9EB",help="String list of photon scale nuisance names - WILL NOT correlate across years (default: %default)")
 parser.add_option("--photonCatScalesCorr",default="MaterialCentral,MaterialForward,FNUFEE,FNUFEB,ShowerShapeHighR9EE,ShowerShapeHighR9EB,ShowerShapeLowR9EE,ShowerShapeLowR9EB",help="String list of photon scale nuisance names - WILL correlate across years (default: %default)")
@@ -694,6 +695,71 @@ def printTrigSyst():
         outFile.write('%5.3f '%(1.+trigEff))
   outFile.write('\n')
   outFile.write('\n')
+
+def printUEPSSyst():
+  print '[INFO] UEPS...'
+  if options.uepsfilename=="none": options.uepsfilename=""
+  if options.uepsfilename=="" and not os.path.isfile('ueps_lines.dat'): exit("ueps_lines.dat doesn't exist - you need to either get it somehow or generate from UEPS MC files")
+  elif options.uepsfilename=="" and os.path.isfile('ueps_lines.dat'):
+    for line in open('ueps_lines.dat', 'r').readlines():
+      outFile.write(line)
+  else:
+    uncertainties = ['UE','PS']
+    uepsFiles = {}
+    uepsFiles['UE'] = options.uepsfilename.split(',UEPS,')[0].split(',')
+    print uepsFiles['UE']
+    uepsFiles['PS'] = options.uepsfilename.split(',UEPS,')[1].split(',')
+    print uepsFiles['PS']
+    
+    tpMap = {'GG2H':'ggh','VBF':'vbf','TTH':'tth','QQ2HLNU':'wh','QQ2HLL':'zh','WH2HQQ':'wh','ZH2HQQ':'zh','bkg_mass':'bkg_mass'}
+    
+    lines = {}
+
+    for uncertainty in uncertainties:
+      lines[uncertainty] = ''
+      allValues = {}
+      for proc in options.procs:
+        proc = flashggProc[proc]
+        procValues = {}
+        for filename in uepsFiles[uncertainty]:
+          if proc in filename and 'Up' in filename: 
+            wsUp = (r.TFile(filename)).Get("tagsDumper/cms_hgg_13TeV")
+            continue
+          elif proc in filename and 'Down' in filename: 
+            wsDown = (r.TFile(filename)).Get("tagsDumper/cms_hgg_13TeV")
+            continue
+          else: continue
+        for cat in options.cats:
+          if not ('GG2H' in proc or 'VBF' in proc): 
+            continue
+          elif not ('Untagged' in cat or 'VBF' in cat): 
+            continue
+          dataUp = "%s_%sUp_13TeV_%s" % (tpMap[proc],uncertainty,cat) 
+          dataDown = "%s_%sDown_13TeV_%s" % (tpMap[proc],uncertainty,cat) 
+          weightUp = wsUp.data(dataUp).sumEntries()
+          weightDown = wsDown.data(dataDown).sumEntries()
+          delta = weightUp - weightDown
+          sumBoth = weightUp + weightDown
+          value = 1. + (delta / sumBoth)
+          procValues[cat] = value
+        allValues[proc] = procValues
+      for cat in options.cats:
+        for proc in options.procs:
+          proc = flashggProc[proc]
+          if not ('GG2H' in proc or 'VBF' in proc): 
+            lines[uncertainty] += '- '
+            continue
+          elif not ('Untagged' in cat or 'VBF' in cat): 
+            lines[uncertainty] += '- '
+            continue
+          value = (allValues[proc])[cat]
+          lines[uncertainty] += '%5.3f ' % value
+      uncName = 'CMS_hgg_'+uncertainty
+      print '%-35s   lnN   '%(uncName)+lines[uncertainty]
+      outFile.write('%-35s   lnN   '%(uncName)+lines[uncertainty]+'\n')
+    outFile.write('\n')
+    
+
 ###############################################################################
 
 ###############################################################################
@@ -729,6 +795,8 @@ flashggSysts['metJerUncertainty'] = 'MET_JER'
 tthSysts={}
 tthSysts['JEC'] = 'JEC_TTH'
 tthSysts['JER'] = 'JER_TTH'
+tthSysts['JetBTagReshapeWeight'] = 'BTagReshape_TTH'
+btagReshapeSyst = 0.042 #ad hoc from Saranya for Moriond17, combination of various sources
 #flashggSysts['regSig'] = 'n_sigmae'
 #flashggSysts['idEff'] = 'n_id_eff'
 #flashggSysts['triggerEff'] = 'n_trig_eff'
@@ -742,25 +810,24 @@ vbfSysts['JEC'] = []
 #vbfSysts['UnmatchedPUWeight'] = [] #removed for Moriond17
 vbfSysts['JER'] = [] 
 vbfSysts['JetVeto'] =[]
-vbfSysts['UEPS'] =[]
-vbfSysts['RMSShift'] =[]
-#vbfSysts['PUJIDShift'] =[]
+#vbfSysts['UEPS'] =[] #superseded by new method, no longer a bin migration
+#vbfSysts['RMSShift'] =[]
+vbfSysts['PUJIDShift'] =[]
 for dijetCat in dijetCats: #each entry will represent a different migration
    vbfSysts['JER'].append([1.,1.,1.])  #value of 1 given gor both ggh and qqh, since vairations are taken from histograms directly
    vbfSysts['JEC'].append([1.,1.,1.]) #value of 1 given gor both ggh and qqh, since vairations are taken from histograms directly
 #vbfSysts['UnmatchedPUWeight'].append([1.,1.]) #should only apply to ggh<->vbf
 #vbfSysts['UnmatchedPUWeight'].append([1.,1.]) #should only apply to ggh<->vbf
-vbfSysts['RMSShift'].append([1.,1.]) #should only apply to ggh<->vbf
-#vbfSysts['PUJIDShift'].append([1.,1.]) #should only apply to ggh<->vbf
-#all below still need to be updated for four-tag Moriond17 scenario
-vbfSysts['UEPS'].append([0.077,0.071]) # adhoc for ggh<->vbf # UPDATED FOR ICHEP16
-vbfSysts['UEPS'].append([0.042,0.092]) # adhoc for vbf0<->vbf1# UPDATED FOR ICHEP16
-vbfSysts['UEPS'].append([0.042,0.092]) # adhoc by Ed in attempt to fix negative value
+#vbfSysts['RMSShift'].append([1.,1.]) #should only apply to ggh<->vbf
+vbfSysts['PUJIDShift'].append([1.,1.]) #should only apply to ggh<->vbf
+#UEPS method no longer needs these
+#vbfSysts['UEPS'].append([0.077,0.071]) # adhoc for ggh<->vbf # UPDATED FOR ICHEP16
+#vbfSysts['UEPS'].append([0.042,0.092]) # adhoc for vbf0<->vbf1# UPDATED FOR ICHEP16
 #vbfSysts['UEPS'].append([0.042,0.092]) # adhoc by Ed in attempt to fix negative value
+#still waiting for new recipe here
 vbfSysts['JetVeto'].append([0.39,0.0]) # adhoc for ggh<->vbf # UPDATED FOR ICHEP16
 vbfSysts['JetVeto'].append([0.10,0.0]) # adhoc for vbf0<->vbf1# UPDATED FOR ICHEP16
 vbfSysts['JetVeto'].append([0.10,0.0]) # adhoc for vbf0<->vbf1# UPDATED FOR ICHEP16
-#vbfSysts['JetVeto'].append([0.10,0.0]) # adhoc for vbf0<->vbf1# UPDATED FOR ICHEP16
 
 #lepton, MET tags  ## lepton tags not considered for Dry run...
 # [VH tight, VH loose, ttH leptonic]
@@ -780,9 +847,9 @@ metSyst['ttH_hgg'] = [0.011,0.012,0.040]#not used for ICHEP16
 ggHforttHSysts = {}
 
 # spec for ggh in tth cats - [MC_low_stat,gluon_splitting,parton_shower]
-ggHforttHSysts['CMS_hgg_tth_mc_low_stat'] = 0.10 ##FIXME 13TeV Flashgg!!
-ggHforttHSysts['CMS_hgg_tth_gluon_splitting'] = 0.18 ##FIXME 13TeV Flashgg!!
-ggHforttHSysts['CMS_hgg_tth_parton_shower'] = 0.45 ##FIXME 13TeV Flashgg!!
+ggHforttHSysts['CMS_hgg_tth_mc_low_stat'] = 0.10 ##FIXME needs double checking for Moriond17
+ggHforttHSysts['CMS_hgg_tth_gluon_splitting'] = 0.52 #re-evaluated for Moriond17, using TOP-16-010
+ggHforttHSysts['CMS_hgg_tth_parton_shower'] = 0.35 #updated for Moriond17
 
 # rate adjustments
 tthLepRateScale = 1.0 #not used for ICHEP16
@@ -1345,6 +1412,11 @@ def printTTHSysts():
             outFile.write('- ')
           elif c not in tthCats:
             outFile.write('- ')
+          elif 'Reshape' in tthSyst:
+            if 'ttH' in p and 'Hadronic' in c:
+              outFile.write('%1.4g '%(btagReshapeSyst))
+            else:
+              outFile.write('- ')
           else:
             outFile.write(getFlashggLine(p,c,tthSyst))
       outFile.write('\n')
@@ -1381,7 +1453,6 @@ def printMultiPdf():
 # __main__ here
 #preamble
 
-
 print "JustThisSyst == " , options.justThisSyst
 if ((options.justThisSyst== "batch_split") or options.justThisSyst==""):
   printPreamble()
@@ -1401,6 +1472,7 @@ if (len(tthCats) > 0 ):  printTTHSysts()
 printTheorySysts()
 # lnN systematics
 printFlashggSysts()
+printUEPSSyst()
 #catgeory migrations
 #if (len(dijetCats) > 0 and len(tthCats)>0):  printVbfSysts()
 if (len(dijetCats) > 0 ):  printVbfSysts()

@@ -18,7 +18,8 @@ rvwv=['rv','wv']
 
 #ext='STXSreMiniAOD_04March'
 #ext='STXSreMiniAOD_05MarchTighterVBF'
-ext='STXSreMiniAOD_11March_GainScales'
+#ext='STXSreMiniAOD_11March_GainScales'
+ext='STXSreMiniAOD_16March_AllMasses'
 
 
 for proc in procs:

@@ -59,7 +59,7 @@ def writeJobFileAndSubmit(directory,nuisance_group,POI="r"):
 
 
 
-nuisance_groups = ["none","AlphaS_migrations","Branching_ratio","Diphoton_selection","Electron_veto","Integrated_luminosity","Jet_energy_scale_and_resolution","Lepton_reconstruction_and_btag_efficiencies","Modelling_of_detector_response_in_GEANT4","Modelling_of_material_budget","Nonlinearity_of_detector_response","Nonuniformity_of_light_collection","PDF_and_alphaS_yield","PDF_migrations","Per_photon_energy_resolution_estimate","Photon_energy_scale_and_smearing","Photon_identification","Photon_preselection","QCD_scale_migrations","QCD_scale_yield","Shower_shape_corrections","Trigger_efficiency","UE_and_PS","Unmatched_pileup","Vertex_finding_efficiency","ggF_contamination_in_VBF_categories","ggF_contamination_in_ttH_categories"]
+nuisance_groups = ["none","AlphaS_migrations","Branching_ratio","Diphoton_MVA_preselection","Electron_veto","Integrated_luminosity","Jet_energy_scale_and_resolution","Lepton_reconstruction_and_btag_efficiencies","Modelling_of_detector_response_in_GEANT4","Modelling_of_material_budget","Nonlinearity_of_detector_response","Nonuniformity_of_light_collection","PDF_and_alphaS_yield","PDF_migrations","Per_photon_energy_resolution_estimate","Photon_energy_scale_and_smearing","Photon_identification","Photon_preselection","QCD_scale_migrations","QCD_scale_yield","Shower_shape_corrections","Trigger_efficiency","UE_and_PS","Vertex_finding_efficiency","ggF_contamination_in_VBF_categories","ggF_contamination_in_ttH_categories"]
 POIs =["r","r_ggH","r_qqH","r_VH","r_ttH"]
 
 if not opts.makeTable:
@@ -151,6 +151,5 @@ if opts.makeTable:
 #Photon_identification group = CMS_hgg_phoIdMva
 #Diphoton_MVA_preselection group = CMS_hgg_LooseMvaSF
 #Electron_veto group = CMS_hgg_electronVetoSF
-#Unmatched_pileup group = CMS_hgg_UnmatchedPUWeight_migration0 CMS_hgg_UnmatchedPUWeight_migration1 
 #MET group = CMS_hgg_MET_JEC CMS_hgg_MET_JER CMS_hgg_MET_Unclustered CMS_hgg_MET_PhotonScale
 #Rejections_of_jets_from_pileup group = CMS_hgg_RMSShift_migration0
