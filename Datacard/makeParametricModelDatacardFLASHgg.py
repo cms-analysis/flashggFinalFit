@@ -127,11 +127,11 @@ outFile = open(options.outfilename,'w')
 ###############################################################################
 # convert flashgg style to combine style process
 #combProc = {'ggH':'ggH_hgg','VBF':'qqH_hgg','ggh':'ggH_hgg','vbf':'qqH_hgg','wzh':'VH','wh':'WH_hgg','zh':'ZH_hgg','tth':'ttH_hgg','bkg_mass':'bkg_mass','gg_grav':'ggH_hgg_ALT','qq_grav':'qqbarH_ALT'}
-combProc = {'GG2H':'ggH_hgg','VBF':'qqH_hgg','TTH':'ttH_hgg','QQ2HLNU':'WHL_hgg','QQ2HLL':'ZHL_hgg','WH2HQQ':'WHH_hgg','ZH2HQQ':'ZHH_hgg','bkg_mass':'bkg_mass'}
+combProc = {'GG2H':'ggH_hgg','VBF':'qqH_hgg','TTH':'ttH_hgg','QQ2HLNU':'WH_lep_hgg','QQ2HLL':'ZH_lep_hgg','WH2HQQ':'WH_had_hgg','ZH2HQQ':'ZH_had_hgg','bkg_mass':'bkg_mass'}
 #flashggProc = {'ggH_hgg':'ggh','qqH_hgg':'vbf','VH':'wzh','WH_hgg':'wh','ZH_hgg':'zh','ttH_hgg':'tth','bkg_mass':'bkg_mass','ggH_hgg_ALT':'gg_grav','qqbarH_ALT':'qq_grav'}
-#flashggProc = {'ggH_hgg':'ggh','qqH_hgg':'vbf','ttH_hgg':'tth','WHL_hgg':'wh','ZHL_hgg':'zh','WHH_hgg':'wh','ZHH_hgg':'zh','bkg_mass':'bkg_mass'}
-flashggProc = {'ggH_hgg':'GG2H','qqH_hgg':'VBF','ttH_hgg':'TTH','WHL_hgg':'QQ2HLNU','ZHL_hgg':'QQ2HLL','WHH_hgg':'WH2HQQ','ZHH_hgg':'ZH2HQQ','bkg_mass':'bkg_mass'}
-procId = {'ggH_hgg':0,'qqH_hgg':-1,'ttH_hgg':-2,'WHL_hgg':-2,'ZHL_hgg':-3,'WHH_hgg':-4,'ZHH_hgg':-5,'bkg_mass':1}
+#flashggProc = {'ggH_hgg':'ggh','qqH_hgg':'vbf','ttH_hgg':'tth','WH_lep_hgg':'wh','ZH_lep_hgg':'zh','WH_had_hgg':'wh','ZH_had_hgg':'zh','bkg_mass':'bkg_mass'}
+flashggProc = {'ggH_hgg':'GG2H','qqH_hgg':'VBF','ttH_hgg':'TTH','WH_lep_hgg':'QQ2HLNU','ZH_lep_hgg':'QQ2HLL','WH_had_hgg':'WH2HQQ','ZH_had_hgg':'ZH2HQQ','bkg_mass':'bkg_mass'}
+procId = {'ggH_hgg':0,'qqH_hgg':-1,'ttH_hgg':-2,'WH_lep_hgg':-2,'ZH_lep_hgg':-3,'WH_had_hgg':-4,'ZH_had_hgg':-5,'bkg_mass':1}
 bkgProcs = ['bkg_mass'] #what to treat as background
 #Determine if VH or WZH_hgg
 splitVH=False
@@ -244,18 +244,18 @@ fileDetails['bkg_mass']  = [bkgFile,bkgWS,'CMS_hgg_$CHANNEL_%dTeV_bkgshape'%sqrt
 #fileDetails['ggH_hgg']       = [sigFile.replace('$PROC',"ggh"),sigWS,'hggpdfsmrel_%dTeV_ggh_$CHANNEL'%sqrts]
 #fileDetails['qqH_hgg']       = [sigFile.replace('$PROC',"vbf"),sigWS,'hggpdfsmrel_%dTeV_vbf_$CHANNEL'%sqrts]
 #fileDetails['ttH_hgg']       = [sigFile.replace('$PROC',"tth"),sigWS,'hggpdfsmrel_%dTeV_tth_$CHANNEL'%sqrts]
-#fileDetails['WHL_hgg']       = [sigFile.replace('$PROC',"wh"),sigWS,'hggpdfsmrel_%dTeV_wh_$CHANNEL'%sqrts]
-#fileDetails['ZHL_hgg']       = [sigFile.replace('$PROC',"zh"),sigWS,'hggpdfsmrel_%dTeV_zh_$CHANNEL'%sqrts]
-#fileDetails['WHH_hgg']       = [sigFile.replace('$PROC',"wh"),sigWS,'hggpdfsmrel_%dTeV_wh_$CHANNEL'%sqrts]
-#fileDetails['ZHH_hgg']       = [sigFile.replace('$PROC',"zh"),sigWS,'hggpdfsmrel_%dTeV_zh_$CHANNEL'%sqrts]
+#fileDetails['WH_lep_hgg']       = [sigFile.replace('$PROC',"wh"),sigWS,'hggpdfsmrel_%dTeV_wh_$CHANNEL'%sqrts]
+#fileDetails['ZH_lep_hgg']       = [sigFile.replace('$PROC',"zh"),sigWS,'hggpdfsmrel_%dTeV_zh_$CHANNEL'%sqrts]
+#fileDetails['WH_had_hgg']       = [sigFile.replace('$PROC',"wh"),sigWS,'hggpdfsmrel_%dTeV_wh_$CHANNEL'%sqrts]
+#fileDetails['ZH_had_hgg']       = [sigFile.replace('$PROC',"zh"),sigWS,'hggpdfsmrel_%dTeV_zh_$CHANNEL'%sqrts]
 
 fileDetails['ggH_hgg']       = [sigFile.replace('$PROC',"GG2H"),sigWS,'hggpdfsmrel_%dTeV_GG2H_$CHANNEL'%sqrts]
 fileDetails['qqH_hgg']       = [sigFile.replace('$PROC',"VBF"),sigWS,'hggpdfsmrel_%dTeV_VBF_$CHANNEL'%sqrts]
 fileDetails['ttH_hgg']       = [sigFile.replace('$PROC',"TTH"),sigWS,'hggpdfsmrel_%dTeV_TTH_$CHANNEL'%sqrts]
-fileDetails['WHL_hgg']       = [sigFile.replace('$PROC',"QQ2HLNU"),sigWS,'hggpdfsmrel_%dTeV_QQ2HLNU_$CHANNEL'%sqrts]
-fileDetails['ZHL_hgg']       = [sigFile.replace('$PROC',"QQ2HLL"),sigWS,'hggpdfsmrel_%dTeV_QQ2HLL_$CHANNEL'%sqrts]
-fileDetails['WHH_hgg']       = [sigFile.replace('$PROC',"WH2HQQ"),sigWS,'hggpdfsmrel_%dTeV_WH2HQQ_$CHANNEL'%sqrts]
-fileDetails['ZHH_hgg']       = [sigFile.replace('$PROC',"ZH2HQQ"),sigWS,'hggpdfsmrel_%dTeV_ZH2HQQ_$CHANNEL'%sqrts]
+fileDetails['WH_lep_hgg']       = [sigFile.replace('$PROC',"QQ2HLNU"),sigWS,'hggpdfsmrel_%dTeV_QQ2HLNU_$CHANNEL'%sqrts]
+fileDetails['ZH_lep_hgg']       = [sigFile.replace('$PROC',"QQ2HLL"),sigWS,'hggpdfsmrel_%dTeV_QQ2HLL_$CHANNEL'%sqrts]
+fileDetails['WH_had_hgg']       = [sigFile.replace('$PROC',"WH2HQQ"),sigWS,'hggpdfsmrel_%dTeV_WH2HQQ_$CHANNEL'%sqrts]
+fileDetails['ZH_had_hgg']       = [sigFile.replace('$PROC',"ZH2HQQ"),sigWS,'hggpdfsmrel_%dTeV_ZH2HQQ_$CHANNEL'%sqrts]
 
 #if splitVH:
 #  fileDetails['WH_hgg']       =  [sigFile.replace('$PROC',"wh"),sigWS,'hggpdfsmrel_%dTeV_wh_$CHANNEL'%sqrts]
@@ -283,10 +283,10 @@ theorySystAbsScale={}
 #theorySystAbsScale['names_to_consider'] =   ["QCDscale_ggH_up",  "QCDscale_qqH_up",  "QCDscale_VH_up",  "QCDscale_ttH_up",  "QCDscale_ggH_down",  "QCDscale_qqH_down",  "QCDscale_VH_down",  "QCDscale_ttH_down",  "pdf_Higgs_qqbar",  "pdf_alphaS_gg",  "pdf_alphaS_ttH"] #QCD scale up, QCD scale down, PDF+alpha S, PDF, alpha S 
 theorySystAbsScale['names'] =   ["QCDscale_ggH_up",  "QCDscale_qqH_up",  "QCDscale_VH_up",  "QCDscale_ttH_up",  "QCDscale_ggH_down",  "QCDscale_qqH_down",  "QCDscale_VH_down",  "QCDscale_ttH_down",  "pdf_Higgs_qqbar",  "pdf_Higgs_gg",  "pdf_Higgs_ttH"] #QCD scale up, QCD scale down, PDF+alpha S, PDF, alpha S 
 theorySystAbsScale['ttH_hgg'] = [0.0,                 0.0,                0.0,               0.058,              0.0,                   0.0,                 0.0,                 -0.092,               0.0,                0.0,              0.036] # ttH is a _qqbar process
-theorySystAbsScale['ZHL_hgg'] =  [0.0,                 0.0,                0.038,             0.0,                0.0,                   0.0,                 -0.03,               0.0,                  0.016,              0.0,              0.0] # WH is a _qqbar process
-theorySystAbsScale['ZHH_hgg'] =  [0.0,                 0.0,                0.038,             0.0,                0.0,                   0.0,                 -0.03,               0.0,                  0.016,              0.0,              0.0] # WH is a _qqbar process
-theorySystAbsScale['WHL_hgg'] =  [0.0,                 0.0,                0.005,             0.0,                0.0,                   0.0,                 -0.007,              0.0,                  0.019,              0.0,              0.0] # ZH is a _qqbar process
-theorySystAbsScale['WHH_hgg'] =  [0.0,                 0.0,                0.005,             0.0,                0.0,                   0.0,                 -0.007,              0.0,                  0.019,              0.0,              0.0] # ZH is a _qqbar process
+theorySystAbsScale['ZH_lep_hgg'] =  [0.0,                 0.0,                0.038,             0.0,                0.0,                   0.0,                 -0.03,               0.0,                  0.016,              0.0,              0.0] # WH is a _qqbar process
+theorySystAbsScale['ZH_had_hgg'] =  [0.0,                 0.0,                0.038,             0.0,                0.0,                   0.0,                 -0.03,               0.0,                  0.016,              0.0,              0.0] # WH is a _qqbar process
+theorySystAbsScale['WH_lep_hgg'] =  [0.0,                 0.0,                0.005,             0.0,                0.0,                   0.0,                 -0.007,              0.0,                  0.019,              0.0,              0.0] # ZH is a _qqbar process
+theorySystAbsScale['WH_had_hgg'] =  [0.0,                 0.0,                0.005,             0.0,                0.0,                   0.0,                 -0.007,              0.0,                  0.019,              0.0,              0.0] # ZH is a _qqbar process
 theorySystAbsScale['qqH_hgg'] = [0.0,                 0.004,              0.0,               0.0,                0.0,                   -0.003,              0.0,                 0.0,                  0.021,              0.0,              0.0] # qqH is a _qqbar process
 theorySystAbsScale['ggH_hgg'] = [0.039,               0.0,                0.0,               0.0,                -0.039,               0.0,                  0.0,                 0.0,                  0.0,                0.032,            0.0] # GGH is a _gg process
 
