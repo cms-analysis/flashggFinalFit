@@ -5,6 +5,7 @@ import fnmatch
 import sys
 import time
 import ROOT as r
+import math
 
 sqrts=13
 lumi=35.9
@@ -20,27 +21,32 @@ parser.add_option("-v","--sigworkspaces",default="")
 parser.add_option("-u","--bkgworkspaces",default="")
 parser.add_option("-o","--order",default="",help="tell teh script what order to print tags and procs in. Usage proc1,proc2,proc3..:tag1,tag2,tag3...")
 parser.add_option("-f","--flashggCats",default="UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,VBFTag_0,VBFTag_1,VBFTag_2,TTHHadronicTag,TTHLeptonicTag,ZHLeptonicTag,WHLeptonicTag,VHLeptonicLooseTag,VHHadronicTag,VHMetTag")
+parser.add_option("--verbose",default=0)
 (options,args) = parser.parse_args()
 
-#if not (options.workspaces ==""):
-#  print "execute"
-#  if (len(options.workspaces.split(","))>1) :
-#    print "test1"
-#    os.system("./Signal/bin/SignalFit -i %s --checkYield 1 | grep Tag | grep _125_ > %s"%(options.workspaces,options.input))
-#    print "test2"
-#  else:
-#    print "test3"
-#    os.system("./Background/bin/workspaceTool -i %s --print 1 | grep RooData | grep it > %s"%(options.workspaces,options.input))
-#    print "test4"
-#    os.system("./Background/bin/workspaceTool -i %s --print 1 | grep intLumi >> %s"%(options.workspaces,options.input))
-#    print "test5"
-#
-#  if (len(options.workspaces.split(","))>1) :
-#    os.system("./Signal/bin/SignalFit -i %s --checkYield 1 | grep Tag | grep _125_ > %s"%(options.workspaces,options.input))
-#  else:
-#    os.system("./Background/bin/workspaceTool -i %s --print 1 | grep RooData | grep it > %s"%(options.workspaces,options.input))
-#    os.system("./Background/bin/workspaceTool -i %s --print 1 | grep intLumi >> %s"%(options.workspaces,options.input))
-#  exit(1)
+if not (options.workspaces ==""):
+  tpMap = {"GG2H":"ggh","VBF":"vbf","TTH":"tth","QQ2HLNU":"wh","QQ2HLL":"zh","WH2HQQ":"wh","ZH2HQQ":"zh"}
+  for ws in options.workspaces.split(","):
+    oldProc = ""
+    newProc = ""
+    if "M125" not in ws: continue #shouldn't be any but just in case
+    for stxsProc in tpMap:
+      if stxsProc in ws:
+        if newProc != "": exit("more than one STXS process name found in file name - wtf, shouldn't happen, exiting...")
+        newProc = stxsProc
+        oldProc = tpMap[stxsProc]
+    print "\nrunning the yields code for process",newProc
+    os.system("./Signal/bin/SignalFit -i %s --checkYield 1 | grep Tag | grep _125_ > %s.%s.old"%(ws,options.input,newProc))
+    oldFile = open("%s.%s.old"%(options.input,newProc),'r')
+    newFile = open("%s.%s.new"%(options.input,newProc),'w')
+    for line in oldFile.readlines():
+      line = line.replace(oldProc,newProc)
+      newFile.write(line)
+    oldFile.close()
+    newFile.close()
+  os.system("rm %s*.old"%(options.input))
+  os.system("cat %s*.new > %s"%(options.input,options.input))
+  os.system("rm %s*.new"%(options.input))
 
 procs=[]
 tags=[]
@@ -64,8 +70,7 @@ with open(options.input) as i:
     #print line
     if "intLumi" in line: lumi=float(line[line.find("value")+6:])
     if "pdfWeight" in line : continue 
-    if "ZHLeptonic" in line : continue 
-    if "No" in line : continue 
+    if "NoTag" in line : continue 
     line=line.replace("Tag_","Tag ")
     line=line.replace("Tag"," Tag")
     #line=line.replace("TTH","TTH ")
@@ -480,6 +485,7 @@ i#print "\\multicolumn{%d}{|l|}{Expected Signal} \\\\"%(nProcs+3)
 print "\\hline"
 print "\\hline"
 print "\\multirow{2}{*}{Event Categories} &\multicolumn{%d}{|l|}{SM 125GeV Higgs boson expected signal} & Bkg & Bkg &naive expected\\\\ \\cline{2-%d}"%(nProcs+2,nProcs+3)
+#print "\\multirow{2}{*}{Event Categories} &\multicolumn{%d}{|l|}{SM 125GeV Higgs boson expected signal} & Bkg & Bkg &wise expected\\\\ \\cline{2-%d}"%(nProcs+2,nProcs+3)
 line="  &  "
 
 procList=[]
@@ -503,6 +509,7 @@ else :
   
 naiveExpecteds=[]
 iTag=0
+vbfTotals = [0.,0.,0.,0.,0.]
 for t in tagList :
   #print p
   if t=="Total" : continue
@@ -512,7 +519,7 @@ for t in tagList :
     if p=="Total": continue
     val=100*Arr[t][p]/Arr[t]["Total"]
     line = line+" &  "+str('%.2f \%%'%(val))
-    print " filling content hist ", p, " for bin ", len(tagList)-iTag, " =", tagList[iTag], " ==", val
+    if options.verbose: print " filling content hist ", p, " for bin ", len(tagList)-iTag, " =", tagList[iTag], " ==", val
     content_hists[p].SetBinContent(len(tagList)-iTag,val)
     #content_hists[p].GetXaxis().SetBinLabel(iTag,'%s'%t)
   Allline=" "+str('%.2f'%Arr[t]["Total"])
@@ -523,14 +530,40 @@ for t in tagList :
     print bkgYield
     exit(1)
   bkgy=bkgYield[t]
-  naiveExp=(0.68*Arr[t]["Total"])/(2*float(effSigma[t])*bkgy)**(0.5)
+  naiveExp=(0.68*Arr[t]["Total"])/(2*float(effSigma[t])*bkgy)**(0.5) #think should be s/sqrt(s+b), rather than s/sqrt(b)
+  oldNaiveExp=(0.68*Arr[t]["Total"])/(2*float(effSigma[t])*bkgy)**(0.5)
+  #naiveExp=(0.68*Arr[t]["Total"])/((2*float(effSigma[t])*bkgy) + 0.68*Arr[t]["Total"])**(0.5)
+  vbfNaiveExp=(0.68*Arr[t]["VBF"])/((2*float(effSigma[t])*bkgy) + 0.68*Arr[t]["GG2H"] + 0.68*Arr[t]["VBF"])**(0.5)
+  fancyExp=(2*( (0.68*Arr[t]["Total"]+2*float(effSigma[t])*bkgy) * math.log(1 + 0.68*Arr[t]["Total"]/(2*float(effSigma[t])*bkgy)) - 0.68*Arr[t]["Total"] ))**0.5 #2*((s+b)ln(1+s/b)-s)
+  vbfFancyExp=(2*( (0.68*Arr[t]["VBF"]+2*float(effSigma[t])*bkgy+0.68*Arr[t]["GG2H"]) * math.log(1 + 0.68*Arr[t]["VBF"]/(2*float(effSigma[t])*bkgy+0.68*Arr[t]["GG2H"])) - 0.68*Arr[t]["VBF"] ))**0.5
+  if "VBF" in t and options.verbose:
+    print "\nfor tag",t
+    print "oldNaiveExp =",oldNaiveExp
+    vbfTotals[0] += oldNaiveExp**2
+    print "naiveExp =",naiveExp
+    vbfTotals[1] += naiveExp**2
+    print "vbfNaiveExp =",vbfNaiveExp
+    vbfTotals[2] += vbfNaiveExp**2
+    print "fancyExp =",fancyExp
+    vbfTotals[3] += fancyExp**2
+    print "vbfFancyExp =",vbfFancyExp
+    vbfTotals[4] += vbfFancyExp**2
   s_sb_value=(0.68*Arr[t]["Total"])/(0.68*Arr[t]["Total"] + 2*float(effSigma[t])*bkgy)
   dataLines.append( lineCat + Allline+ " "+line+"& %.2f & %.2f & %.2f & %.2f & %.2f\\\\"%(float(effSigma[t]),float(hmSigma[t]),bkgy,bkgy/options.factor,naiveExp ))
+  #dataLines.append( lineCat + Allline+ " "+line+"& %.2f & %.2f & %.2f & %.2f & %.2f\\\\"%(float(effSigma[t]),float(hmSigma[t]),bkgy,bkgy/options.factor,fancyExp ))
   sigmaEff_hist.SetBinContent(len(tagList)-iTag,float(effSigma[t]))
   sigmaHM_hist.SetBinContent(len(tagList)-iTag,float(hmSigma[t]))
   s_sb_hist.SetBinContent(len(tagList)-iTag,float(s_sb_value))
   naiveExpecteds.append(naiveExp)
+  #naiveExpecteds.append(fancyExp)
   iTag=iTag+1
+if options.verbose:
+  print "\nVBF total significances"
+  print "oldNaive",(vbfTotals[0])**0.5
+  print "naive",(vbfTotals[1])**0.5
+  print "vbfNaive",(vbfTotals[2])**0.5
+  print "fancy",(vbfTotals[3])**0.5
+  print "vbfFancy",(vbfTotals[4])**0.5
   
 # now do total line
 t=="Total" 
@@ -540,7 +573,7 @@ for p in procList:
    if p=="Total": continue
    val=100*Arr[t][p]/Arr[t]["Total"]
    line = line+" &  "+str('%.2f \%%'%(100*Arr[t][p]/Arr[t]["Total"]))
-   print " filling content hist ", p, " for bin ", 1, " =", t, " ==", val
+   #print " filling content hist ", p, " for bin ", 1, " =", t, " ==", val
    content_hists[p].SetBinContent(1,val)
 Allline=" "+str('%.2f'%Arr[t]["Total"])
   #bkgy=0

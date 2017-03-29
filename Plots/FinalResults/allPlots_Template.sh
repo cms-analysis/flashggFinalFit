@@ -56,6 +56,8 @@ INTLUMI=!INTLUMI!
 #./makeCombinePlots.py -f combineJobs13TeV_$EXT/RVRFScanProfileMH/RVRFScanProfileMH.root --rvrf -t "$INTLUMI fb^{-1} (13#scale[0.5]{ }TeV)" -o RVRFScanProfileMH --xbinning 51,-0.99,3.49 --ybinning 25,-0.49,4.49 --MHtext 0.17:0.16:"#scale[0.9]{m_{H} Profiled}" --legend 0.71,0.65,0.89,0.89 -b 
 #./makeCombinePlots.py -f combineJobs13TeV_$EXT/RVRFScanFixMH/RVRFScanFixMH.root --rvrf -t "$INTLUMI fb^{-1} (13#scale[0.5]{ }TeV)" -o RVRFScanFixMH --xbinning 28,-0.99,3.49 --ybinning 9,-0.49,3.49 --MHtext 0.17:0.17:"m_{H}=125.09 GeV" --legend 0.71,0.65,0.89,0.89 -b 
 #./makeCombinePlots.py -f combineJobs13TeV_$EXT/RVRFScanFixMH125.97/RVRFScanFixMH125.97.root --rvrf -t "$INTLUMI fb^{-1} (13#scale[0.5]{ }TeV)" -o RVRFScanFixMH125.97 --xbinning 28,-0.99,3.49 --ybinning 9,-0.49,3.49  --MHtext 0.17:0.17:"m_{H}=125.97 GeV" --legend 0.71,0.65,0.89,0.89 -b 
+./makeCombinePlots.py -f combineJobs13TeV_$EXT/RVRFScanProfileMH/RVRFScanProfileMH.root --rvrf -t "$INTLUMI fb^{-1} (13#scale[0.5]{ }TeV)" -o RVRFScanProfileMH --xbinning 50,-1.,3. --ybinning 50,-1.,3. --MHtext 0.17:0.17:"m_{H} profiled" --legend 0.68,0.63,0.82,0.87 -b 
+./makeCombinePlots.py -f combineJobs13TeV_$EXT/RVRFScanProfileMH/RVRFScanProfileMH.root --rvrf -t "$INTLUMI fb^{-1} (13#scale[0.5]{ }TeV)" -o RVRFScanProfileMHalaICHEP --xbinning 50,-0.99,3.49 --ybinning 50,-0.49,4.49 --MHtext 0.17:0.17:"m_{H} profiled" --legend 0.68,0.63,0.82,0.87 -b 
 
 ##########################################
 ##########  CV vs CF 2D SCANS   ##########

@@ -90,6 +90,7 @@ parser.add_option("-i","--infilename", help="Input file (binned signal from flas
 parser.add_option("-o","--outfilename",default="cms_hgg_datacard.txt",help="Name of card to print (default: %default)")
 parser.add_option("-p","--procs",default="ggh,vbf,wh,zh,tth",help="String list of procs (default: %default)")
 parser.add_option("-c","--cats",default="UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,UntaggedTag_4,VBFTag_0,VBFTag_1,VBFTag_2",help="Flashgg Categories (default: %default)")
+parser.add_option("--uepsfilename",default="",help="input files for calculating UEPS systematics; leave blank to use most recent set")
 parser.add_option("--batch",default="LSF",help="Batch system  (default: %default)")
 parser.add_option("--photonCatScales",default="HighR9EE,LowR9EE,HighR9EB,LowR9EB",help="String list of photon scale nuisance names - WILL NOT correlate across years (default: %default)")
 parser.add_option("--photonCatScalesCorr",default="MaterialCentral,MaterialForward,FNUFEE,FNUFEB,ShowerShapeHighR9EE,ShowerShapeHighR9EB,ShowerShapeLowR9EE,ShowerShapeLowR9EB",help="String list of photon scale nuisance names - WILL correlate across years (default: %default)")
@@ -126,11 +127,11 @@ outFile = open(options.outfilename,'w')
 ###############################################################################
 # convert flashgg style to combine style process
 #combProc = {'ggH':'ggH_hgg','VBF':'qqH_hgg','ggh':'ggH_hgg','vbf':'qqH_hgg','wzh':'VH','wh':'WH_hgg','zh':'ZH_hgg','tth':'ttH_hgg','bkg_mass':'bkg_mass','gg_grav':'ggH_hgg_ALT','qq_grav':'qqbarH_ALT'}
-combProc = {'GG2H':'ggH_hgg','VBF':'qqH_hgg','TTH':'ttH_hgg','QQ2HLNU':'WHL_hgg','QQ2HLL':'ZHL_hgg','WH2HQQ':'WHH_hgg','ZH2HQQ':'ZHH_hgg','testBBH':'bbH_hgg','bkg_mass':'bkg_mass'}
+combProc = {'GG2H':'ggH_hgg','VBF':'qqH_hgg','TTH':'ttH_hgg','QQ2HLNU':'WH_lep_hgg','QQ2HLL':'ZH_lep_hgg','WH2HQQ':'WH_had_hgg','ZH2HQQ':'ZH_had_hgg','bkg_mass':'bkg_mass'}
 #flashggProc = {'ggH_hgg':'ggh','qqH_hgg':'vbf','VH':'wzh','WH_hgg':'wh','ZH_hgg':'zh','ttH_hgg':'tth','bkg_mass':'bkg_mass','ggH_hgg_ALT':'gg_grav','qqbarH_ALT':'qq_grav'}
-#flashggProc = {'ggH_hgg':'ggh','qqH_hgg':'vbf','ttH_hgg':'tth','WHL_hgg':'wh','ZHL_hgg':'zh','WHH_hgg':'wh','ZHH_hgg':'zh','bkg_mass':'bkg_mass'}
-flashggProc = {'ggH_hgg':'GG2H','qqH_hgg':'VBF','ttH_hgg':'TTH','WHL_hgg':'QQ2HLNU','ZHL_hgg':'QQ2HLL','WHH_hgg':'WH2HQQ','ZHH_hgg':'ZH2HQQ','bbH_hgg':'testBBH','bkg_mass':'bkg_mass'}
-procId = {'ggH_hgg':0,'qqH_hgg':-1,'ttH_hgg':-2,'WHL_hgg':-2,'ZHL_hgg':-3,'WHH_hgg':-4,'ZHH_hgg':-5,'bbH_hgg':-6,'bkg_mass':1}
+#flashggProc = {'ggH_hgg':'ggh','qqH_hgg':'vbf','ttH_hgg':'tth','WH_lep_hgg':'wh','ZH_lep_hgg':'zh','WH_had_hgg':'wh','ZH_had_hgg':'zh','bkg_mass':'bkg_mass'}
+flashggProc = {'ggH_hgg':'GG2H','qqH_hgg':'VBF','ttH_hgg':'TTH','WH_lep_hgg':'QQ2HLNU','ZH_lep_hgg':'QQ2HLL','WH_had_hgg':'WH2HQQ','ZH_had_hgg':'ZH2HQQ','bkg_mass':'bkg_mass'}
+procId = {'ggH_hgg':0,'qqH_hgg':-1,'ttH_hgg':-2,'WH_lep_hgg':-2,'ZH_lep_hgg':-3,'WH_had_hgg':-4,'ZH_had_hgg':-5,'bkg_mass':1}
 bkgProcs = ['bkg_mass'] #what to treat as background
 #Determine if VH or WZH_hgg
 splitVH=False
@@ -243,19 +244,18 @@ fileDetails['bkg_mass']  = [bkgFile,bkgWS,'CMS_hgg_$CHANNEL_%dTeV_bkgshape'%sqrt
 #fileDetails['ggH_hgg']       = [sigFile.replace('$PROC',"ggh"),sigWS,'hggpdfsmrel_%dTeV_ggh_$CHANNEL'%sqrts]
 #fileDetails['qqH_hgg']       = [sigFile.replace('$PROC',"vbf"),sigWS,'hggpdfsmrel_%dTeV_vbf_$CHANNEL'%sqrts]
 #fileDetails['ttH_hgg']       = [sigFile.replace('$PROC',"tth"),sigWS,'hggpdfsmrel_%dTeV_tth_$CHANNEL'%sqrts]
-#fileDetails['WHL_hgg']       = [sigFile.replace('$PROC',"wh"),sigWS,'hggpdfsmrel_%dTeV_wh_$CHANNEL'%sqrts]
-#fileDetails['ZHL_hgg']       = [sigFile.replace('$PROC',"zh"),sigWS,'hggpdfsmrel_%dTeV_zh_$CHANNEL'%sqrts]
-#fileDetails['WHH_hgg']       = [sigFile.replace('$PROC',"wh"),sigWS,'hggpdfsmrel_%dTeV_wh_$CHANNEL'%sqrts]
-#fileDetails['ZHH_hgg']       = [sigFile.replace('$PROC',"zh"),sigWS,'hggpdfsmrel_%dTeV_zh_$CHANNEL'%sqrts]
+#fileDetails['WH_lep_hgg']       = [sigFile.replace('$PROC',"wh"),sigWS,'hggpdfsmrel_%dTeV_wh_$CHANNEL'%sqrts]
+#fileDetails['ZH_lep_hgg']       = [sigFile.replace('$PROC',"zh"),sigWS,'hggpdfsmrel_%dTeV_zh_$CHANNEL'%sqrts]
+#fileDetails['WH_had_hgg']       = [sigFile.replace('$PROC',"wh"),sigWS,'hggpdfsmrel_%dTeV_wh_$CHANNEL'%sqrts]
+#fileDetails['ZH_had_hgg']       = [sigFile.replace('$PROC',"zh"),sigWS,'hggpdfsmrel_%dTeV_zh_$CHANNEL'%sqrts]
 
 fileDetails['ggH_hgg']       = [sigFile.replace('$PROC',"GG2H"),sigWS,'hggpdfsmrel_%dTeV_GG2H_$CHANNEL'%sqrts]
 fileDetails['qqH_hgg']       = [sigFile.replace('$PROC',"VBF"),sigWS,'hggpdfsmrel_%dTeV_VBF_$CHANNEL'%sqrts]
 fileDetails['ttH_hgg']       = [sigFile.replace('$PROC',"TTH"),sigWS,'hggpdfsmrel_%dTeV_TTH_$CHANNEL'%sqrts]
-fileDetails['WHL_hgg']       = [sigFile.replace('$PROC',"QQ2HLNU"),sigWS,'hggpdfsmrel_%dTeV_QQ2HLNU_$CHANNEL'%sqrts]
-fileDetails['ZHL_hgg']       = [sigFile.replace('$PROC',"QQ2HLL"),sigWS,'hggpdfsmrel_%dTeV_QQ2HLL_$CHANNEL'%sqrts]
-fileDetails['WHH_hgg']       = [sigFile.replace('$PROC',"WH2HQQ"),sigWS,'hggpdfsmrel_%dTeV_WH2HQQ_$CHANNEL'%sqrts]
-fileDetails['ZHH_hgg']       = [sigFile.replace('$PROC',"ZH2HQQ"),sigWS,'hggpdfsmrel_%dTeV_ZH2HQQ_$CHANNEL'%sqrts]
-fileDetails['bbH_hgg']       = [sigFile.replace('$PROC',"testBBH"),sigWS,'hggpdfsmrel_%dTeV_testBBH_$CHANNEL'%sqrts]
+fileDetails['WH_lep_hgg']       = [sigFile.replace('$PROC',"QQ2HLNU"),sigWS,'hggpdfsmrel_%dTeV_QQ2HLNU_$CHANNEL'%sqrts]
+fileDetails['ZH_lep_hgg']       = [sigFile.replace('$PROC',"QQ2HLL"),sigWS,'hggpdfsmrel_%dTeV_QQ2HLL_$CHANNEL'%sqrts]
+fileDetails['WH_had_hgg']       = [sigFile.replace('$PROC',"WH2HQQ"),sigWS,'hggpdfsmrel_%dTeV_WH2HQQ_$CHANNEL'%sqrts]
+fileDetails['ZH_had_hgg']       = [sigFile.replace('$PROC',"ZH2HQQ"),sigWS,'hggpdfsmrel_%dTeV_ZH2HQQ_$CHANNEL'%sqrts]
 
 #if splitVH:
 #  fileDetails['WH_hgg']       =  [sigFile.replace('$PROC',"wh"),sigWS,'hggpdfsmrel_%dTeV_wh_$CHANNEL'%sqrts]
@@ -283,12 +283,11 @@ theorySystAbsScale={}
 #theorySystAbsScale['names_to_consider'] =   ["QCDscale_ggH_up",  "QCDscale_qqH_up",  "QCDscale_VH_up",  "QCDscale_ttH_up",  "QCDscale_ggH_down",  "QCDscale_qqH_down",  "QCDscale_VH_down",  "QCDscale_ttH_down",  "pdf_Higgs_qqbar",  "pdf_alphaS_gg",  "pdf_alphaS_ttH"] #QCD scale up, QCD scale down, PDF+alpha S, PDF, alpha S 
 theorySystAbsScale['names'] =   ["QCDscale_ggH_up",  "QCDscale_qqH_up",  "QCDscale_VH_up",  "QCDscale_ttH_up",  "QCDscale_ggH_down",  "QCDscale_qqH_down",  "QCDscale_VH_down",  "QCDscale_ttH_down",  "pdf_Higgs_qqbar",  "pdf_Higgs_gg",  "pdf_Higgs_ttH"] #QCD scale up, QCD scale down, PDF+alpha S, PDF, alpha S 
 theorySystAbsScale['ttH_hgg'] = [0.0,                 0.0,                0.0,               0.058,              0.0,                   0.0,                 0.0,                 -0.092,               0.0,                0.0,              0.036] # ttH is a _qqbar process
-theorySystAbsScale['ZHL_hgg'] =  [0.0,                 0.0,                0.038,             0.0,                0.0,                   0.0,                 -0.03,               0.0,                  0.016,              0.0,              0.0] # WH is a _qqbar process
-theorySystAbsScale['ZHH_hgg'] =  [0.0,                 0.0,                0.038,             0.0,                0.0,                   0.0,                 -0.03,               0.0,                  0.016,              0.0,              0.0] # WH is a _qqbar process
-theorySystAbsScale['WHL_hgg'] =  [0.0,                 0.0,                0.005,             0.0,                0.0,                   0.0,                 -0.007,              0.0,                  0.019,              0.0,              0.0] # ZH is a _qqbar process
-theorySystAbsScale['WHH_hgg'] =  [0.0,                 0.0,                0.005,             0.0,                0.0,                   0.0,                 -0.007,              0.0,                  0.019,              0.0,              0.0] # ZH is a _qqbar process
+theorySystAbsScale['ZH_lep_hgg'] =  [0.0,                 0.0,                0.038,             0.0,                0.0,                   0.0,                 -0.03,               0.0,                  0.016,              0.0,              0.0] # WH is a _qqbar process
+theorySystAbsScale['ZH_had_hgg'] =  [0.0,                 0.0,                0.038,             0.0,                0.0,                   0.0,                 -0.03,               0.0,                  0.016,              0.0,              0.0] # WH is a _qqbar process
+theorySystAbsScale['WH_lep_hgg'] =  [0.0,                 0.0,                0.005,             0.0,                0.0,                   0.0,                 -0.007,              0.0,                  0.019,              0.0,              0.0] # ZH is a _qqbar process
+theorySystAbsScale['WH_had_hgg'] =  [0.0,                 0.0,                0.005,             0.0,                0.0,                   0.0,                 -0.007,              0.0,                  0.019,              0.0,              0.0] # ZH is a _qqbar process
 theorySystAbsScale['qqH_hgg'] = [0.0,                 0.004,              0.0,               0.0,                0.0,                   -0.003,              0.0,                 0.0,                  0.021,              0.0,              0.0] # qqH is a _qqbar process
-theorySystAbsScale['ggH_hgg'] = [0.046,               0.0,                0.0,               0.0,                -0.067,               0.0,                  0.0,                 0.0,                  0.0,                0.032,            0.0] # GGH is a _gg process
 theorySystAbsScale['bbH_hgg'] = [0.0,                 0.0,                0.0,               0.058,              0.0,                   0.0,                 0.0,                 -0.092,               0.0,                0.0,              0.036] # ttH is a _qqbar process
 
 ##############################################################################
@@ -297,6 +296,8 @@ theorySystAbsScale['bbH_hgg'] = [0.0,                 0.0,                0.0,  
 result ={}
 mass = inWS.var("CMS_hgg_mass")
 norm_factors_file = open('norm_factors_new.py','w')
+inclusiveCats = list(options.cats) #need the list() otherwise NoTag will also be appended to options.cats
+inclusiveCats.append("NoTag")
 for proc in options.procs:
   if proc in bkgProcs: continue
   if "bbH" in proc: continue
@@ -315,10 +316,9 @@ for proc in options.procs:
         continue # this will break the while loop, so we just stop when we are out of pdfWeights, scaleWeights or alphaSWeights 
       weight_central = inWS.var("centralObjectWeight") 
       weight_sumW = inWS.var("sumW")
-      for cat in options.cats:
-        print "---> this is proc ", proc, "look for", "%s_%d_13TeV_%s_pdfWeights"%(combProc.keys()[combProc.values().index(proc)],options.mass,cat) 
+      for cat in inclusiveCats:
+        #print "---> this is proc ", proc, "look for", "%s_%d_13TeV_%s_pdfWeights"%(combProc.keys()[combProc.values().index(proc)],options.mass,cat) 
         data_nominal= inWS.data("%s_%d_13TeV_%s_pdfWeights"%(combProc.keys()[combProc.values().index(proc)],options.mass,cat))
-        print data_nominal
         data_nominal_sum = data_nominal.sumEntries()
         data_up = data_nominal.emptyClone();
         data_nominal_new = data_nominal.emptyClone();
@@ -330,8 +330,7 @@ for proc in options.procs:
            w_central = data_nominal.get(i).getRealValue("scaleWeight_0") #sneaky fix as it doesn't look like central weight is beign propagated correctly in these cases.
            sumW = data_nominal.get(i).getRealValue("sumW")
            if (w_central) : print name, n, proc, cat, "entry ", i, " w_nominal ", w_nominal, " w_central " , w_central, " w_up ", w_up , " w_nominal*(w_up/w_central) ", w_nominal*(w_up/w_central)
-           if (abs(w_central)<1E-6 or w_nominal==0. or math.isnan(w_up) or w_central<=0. or w_up<=0. or w_up>10.0): 
-                continue
+           if (abs(w_central)<1E-4 or abs(w_nominal)<1E-4 or w_nominal<=0. or math.isnan(w_up) or w_central<=0. or w_up<=0. or w_up>10.0): continue
            weight_up.setVal(w_nominal*(w_up/w_central))
            data_up.add(r.RooArgSet(mass,weight_up),weight_up.getVal())
            data_nominal_new.add(r.RooArgSet(mass,weight),w_nominal)
@@ -346,7 +345,9 @@ for proc in options.procs:
       if (runningTotal_nom==runningTotal_up): effect=1
       else: effect = runningTotal_up/runningTotal_nom
       print " effect of %s_%d "%(name,n), "on %s"%(proc) ," is %.3f"%( effect)
-      if (effect <0.5 or effect > 2.0) : exit (1)
+      if (effect <0.5 or effect > 2.0) : 
+        #exit ("effect is greater than a factor of two - shouldn't happen, exiting...")
+        print "effect is greater than a factor of two - shouldn't happen, exiting...\n"
       if (n==0) :norm_factors_file.write(" %.3f"%effect)
       else: norm_factors_file.write(", %.3f"%effect)
       result["%s_%s"%(proc,name)].append(effect)
@@ -695,6 +696,71 @@ def printTrigSyst():
         outFile.write('%5.3f '%(1.+trigEff))
   outFile.write('\n')
   outFile.write('\n')
+
+def printUEPSSyst():
+  print '[INFO] UEPS...'
+  if options.uepsfilename=="none": options.uepsfilename=""
+  if options.uepsfilename=="" and not os.path.isfile('ueps_lines.dat'): exit("ueps_lines.dat doesn't exist - you need to either get it somehow or generate from UEPS MC files")
+  elif options.uepsfilename=="" and os.path.isfile('ueps_lines.dat'):
+    for line in open('ueps_lines.dat', 'r').readlines():
+      outFile.write(line)
+  else:
+    uncertainties = ['UE','PS']
+    uepsFiles = {}
+    uepsFiles['UE'] = options.uepsfilename.split(',UEPS,')[0].split(',')
+    print uepsFiles['UE']
+    uepsFiles['PS'] = options.uepsfilename.split(',UEPS,')[1].split(',')
+    print uepsFiles['PS']
+    
+    tpMap = {'GG2H':'ggh','VBF':'vbf','TTH':'tth','QQ2HLNU':'wh','QQ2HLL':'zh','WH2HQQ':'wh','ZH2HQQ':'zh','bkg_mass':'bkg_mass'}
+    
+    lines = {}
+
+    for uncertainty in uncertainties:
+      lines[uncertainty] = ''
+      allValues = {}
+      for proc in options.procs:
+        proc = flashggProc[proc]
+        procValues = {}
+        for filename in uepsFiles[uncertainty]:
+          if proc in filename and 'Up' in filename: 
+            wsUp = (r.TFile(filename)).Get("tagsDumper/cms_hgg_13TeV")
+            continue
+          elif proc in filename and 'Down' in filename: 
+            wsDown = (r.TFile(filename)).Get("tagsDumper/cms_hgg_13TeV")
+            continue
+          else: continue
+        for cat in options.cats:
+          if not ('GG2H' in proc or 'VBF' in proc): 
+            continue
+          elif not ('Untagged' in cat or 'VBF' in cat): 
+            continue
+          dataUp = "%s_%sUp_13TeV_%s" % (tpMap[proc],uncertainty,cat) 
+          dataDown = "%s_%sDown_13TeV_%s" % (tpMap[proc],uncertainty,cat) 
+          weightUp = wsUp.data(dataUp).sumEntries()
+          weightDown = wsDown.data(dataDown).sumEntries()
+          delta = weightUp - weightDown
+          sumBoth = weightUp + weightDown
+          value = 1. + (delta / sumBoth)
+          procValues[cat] = value
+        allValues[proc] = procValues
+      for cat in options.cats:
+        for proc in options.procs:
+          proc = flashggProc[proc]
+          if not ('GG2H' in proc or 'VBF' in proc): 
+            lines[uncertainty] += '- '
+            continue
+          elif not ('Untagged' in cat or 'VBF' in cat): 
+            lines[uncertainty] += '- '
+            continue
+          value = (allValues[proc])[cat]
+          lines[uncertainty] += '%5.3f ' % value
+      uncName = 'CMS_hgg_'+uncertainty
+      print '%-35s   lnN   '%(uncName)+lines[uncertainty]
+      outFile.write('%-35s   lnN   '%(uncName)+lines[uncertainty]+'\n')
+    outFile.write('\n')
+    
+
 ###############################################################################
 
 ###############################################################################
@@ -704,7 +770,8 @@ flashggSystDump = open('flashggSystDump.dat','w')
 flashggSysts={}
 
 # vtx eff
-vtxSyst = 0.015 
+#vtxSyst = 0.015 
+vtxSyst = 0.02 #updated for Moriond17
 
 #photon ID
 flashggSysts['MvaShift'] =  'phoIdMva'
@@ -714,16 +781,23 @@ flashggSysts['SigmaEOverEShift'] = 'SigmaEOverEShift'
 flashggSysts['ElectronWeight'] = 'eff_e'
 flashggSysts['electronVetoSF'] = 'electronVetoSF'
 flashggSysts['MuonWeight'] = 'eff_m'
+flashggSysts['MuonMiniIsoWeight'] = 'eff_m_MiniIso'
 flashggSysts['TriggerWeight'] = 'TriggerWeight'
 #flashggSysts['JetBTagWeight'] = 'eff_b'
 flashggSysts['JetBTagCutWeight'] = 'eff_b'
 #flashggSysts['MvaLinearSyst'] = 'MvaLinearSyst'
 #flashggSysts[''] =  ''
+flashggSysts['metPhoUncertainty'] = 'MET_PhotonScale'
+flashggSysts['metUncUncertainty'] = 'MET_Unclustered'
+flashggSysts['metJecUncertainty'] = 'MET_JEC'
+flashggSysts['metJerUncertainty'] = 'MET_JER'
 
 #tth Tags
 tthSysts={}
 tthSysts['JEC'] = 'JEC_TTH'
 tthSysts['JER'] = 'JER_TTH'
+tthSysts['JetBTagReshapeWeight'] = 'BTagReshape_TTH'
+btagReshapeSyst = 1.042 #ad hoc from Saranya for Moriond17, combination of various sources
 #flashggSysts['regSig'] = 'n_sigmae'
 #flashggSysts['idEff'] = 'n_id_eff'
 #flashggSysts['triggerEff'] = 'n_trig_eff'
@@ -734,23 +808,26 @@ puJetIdEff = []
 # naming is important to correlate with combination
 vbfSysts={}
 vbfSysts['JEC'] = [] 
-vbfSysts['UnmatchedPUWeight'] = [] 
+#vbfSysts['UnmatchedPUWeight'] = [] #removed for Moriond17
 vbfSysts['JER'] = [] 
 vbfSysts['JetVeto'] =[]
-vbfSysts['UEPS'] =[]
-vbfSysts['RMSShift'] =[]
-#vbfSysts['PUJIDShift'] =[]
+#vbfSysts['UEPS'] =[] #superseded by new method, no longer a bin migration
+#vbfSysts['RMSShift'] =[]
+vbfSysts['PUJIDShift'] =[]
 for dijetCat in dijetCats: #each entry will represent a different migration
    vbfSysts['JER'].append([1.,1.,1.])  #value of 1 given gor both ggh and qqh, since vairations are taken from histograms directly
    vbfSysts['JEC'].append([1.,1.,1.]) #value of 1 given gor both ggh and qqh, since vairations are taken from histograms directly
-vbfSysts['UnmatchedPUWeight'].append([1.,1.]) #should only apply to ggh<->vbf
-vbfSysts['UnmatchedPUWeight'].append([1.,1.]) #should only apply to ggh<->vbf
-vbfSysts['RMSShift'].append([1.,1.]) #should only apply to ggh<->vbf
-#vbfSysts['PUJIDShift'].append([1.,1.]) #should only apply to ggh<->vbf
-vbfSysts['UEPS'].append([0.077,0.071]) # adhoc for ggh<->vbf # UPDATED FOR ICHEP16
-vbfSysts['UEPS'].append([0.042,0.092]) # adhoc for vbf0<->vbf1# UPDATED FOR ICHEP16
-vbfSysts['UEPS'].append([0.042,0.092]) # adhoc by Ed in attempt to fix negative value
+#vbfSysts['UnmatchedPUWeight'].append([1.,1.]) #should only apply to ggh<->vbf
+#vbfSysts['UnmatchedPUWeight'].append([1.,1.]) #should only apply to ggh<->vbf
+#vbfSysts['RMSShift'].append([1.,1.]) #should only apply to ggh<->vbf
+vbfSysts['PUJIDShift'].append([1.,1.]) #should only apply to ggh<->vbf
+#UEPS method no longer needs these
+#vbfSysts['UEPS'].append([0.077,0.071]) # adhoc for ggh<->vbf # UPDATED FOR ICHEP16
+#vbfSysts['UEPS'].append([0.042,0.092]) # adhoc for vbf0<->vbf1# UPDATED FOR ICHEP16
+#vbfSysts['UEPS'].append([0.042,0.092]) # adhoc by Ed in attempt to fix negative value
+#still waiting for new recipe here
 vbfSysts['JetVeto'].append([0.39,0.0]) # adhoc for ggh<->vbf # UPDATED FOR ICHEP16
+vbfSysts['JetVeto'].append([0.10,0.0]) # adhoc for vbf0<->vbf1# UPDATED FOR ICHEP16
 vbfSysts['JetVeto'].append([0.10,0.0]) # adhoc for vbf0<->vbf1# UPDATED FOR ICHEP16
 
 #lepton, MET tags  ## lepton tags not considered for Dry run...
@@ -771,9 +848,9 @@ metSyst['ttH_hgg'] = [0.011,0.012,0.040]#not used for ICHEP16
 ggHforttHSysts = {}
 
 # spec for ggh in tth cats - [MC_low_stat,gluon_splitting,parton_shower]
-ggHforttHSysts['CMS_hgg_tth_mc_low_stat'] = 0.10 ##FIXME 13TeV Flashgg!!
-ggHforttHSysts['CMS_hgg_tth_gluon_splitting'] = 0.18 ##FIXME 13TeV Flashgg!!
-ggHforttHSysts['CMS_hgg_tth_parton_shower'] = 0.45 ##FIXME 13TeV Flashgg!!
+ggHforttHSysts['CMS_hgg_tth_mc_low_stat'] = 0.10 ##FIXME needs double checking for Moriond17
+ggHforttHSysts['CMS_hgg_tth_gluon_splitting'] = 0.52 #re-evaluated for Moriond17, using TOP-16-010
+ggHforttHSysts['CMS_hgg_tth_parton_shower'] = 0.35 #updated for Moriond17
 
 # rate adjustments
 tthLepRateScale = 1.0 #not used for ICHEP16
@@ -1336,6 +1413,11 @@ def printTTHSysts():
             outFile.write('- ')
           elif c not in tthCats:
             outFile.write('- ')
+          elif 'Reshape' in tthSyst:
+            if 'ttH' in p and 'Hadronic' in c:
+              outFile.write('%1.4g '%(btagReshapeSyst))
+            else:
+              outFile.write('- ')
           else:
             outFile.write(getFlashggLine(p,c,tthSyst))
       outFile.write('\n')
@@ -1372,7 +1454,6 @@ def printMultiPdf():
 # __main__ here
 #preamble
 
-
 print "JustThisSyst == " , options.justThisSyst
 if ((options.justThisSyst== "batch_split") or options.justThisSyst==""):
   printPreamble()
@@ -1392,6 +1473,7 @@ if (len(tthCats) > 0 ):  printTTHSysts()
 printTheorySysts()
 # lnN systematics
 printFlashggSysts()
+printUEPSSyst()
 #catgeory migrations
 #if (len(dijetCats) > 0 and len(tthCats)>0):  printVbfSysts()
 if (len(dijetCats) > 0 ):  printVbfSysts()

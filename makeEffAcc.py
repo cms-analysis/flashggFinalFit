@@ -108,6 +108,7 @@ class WSTFileWrapper:
     self.fnList = files.split(",") # [1]       
     self.fileList = []
     self.wsList = [] #now list of ws names...
+    #print files
     for fn in self.fnList: # [2]
         f = r.TFile.Open(fn) 
         self.fileList.append(f)
@@ -115,18 +116,30 @@ class WSTFileWrapper:
         self.wsList.append(self.fileList[-1].Get(wsname))
         f.Close()
 
+   def convertTemplatedName(self,dataName):
+        theProcName = ""
+        theDataName = ""
+        tpMap = {"GG2H":"ggh","VBF":"vbf","TTH":"tth","QQ2HLNU":"wh","QQ2HLL":"zh","WH2HQQ":"wh","ZH2HQQ":"zh"}
+        for stxsProc in tpMap:
+          if dataName.startswith(stxsProc):
+            theProcName = stxsProc
+            theDataName = dataName.replace(stxsProc,tpMap[stxsProc],1)
+        return [theDataName,theProcName]
+
    def data(self,dataName):
+        thePair = self.convertTemplatedName(dataName)
+        newDataName = thePair[0]
+        newProcName = thePair[1]
         result = None
-        complained_yet =0 
+        complained_yet = 0 
         for i in range(len(self.fnList)):
-          #f = r.TFile.Open(self.fnList[i])  
-          this_result_obj = self.wsList[i].data(dataName);
-          if ( result and this_result_obj and (not complained_yet) ):
-            print "[WSTFileWrapper] Uh oh, multiple RooAbsDatas from the file list with the same name: ",  dataName 
-            complained_yet = true;
-            exit(1)
-          if this_result_obj: # [3]
-             result = this_result_obj
+          if self.fnList[i]!="current file":
+            if newProcName not in self.fnList[i] and newProcName!="": continue
+            this_result_obj = self.wsList[i].data(newDataName);
+            if ( result and this_result_obj and (not complained_yet) ):
+              complained_yet = True;
+            if this_result_obj: # [3]
+               result = this_result_obj
         return result 
    
    def var(self,varName):
@@ -136,7 +149,6 @@ class WSTFileWrapper:
           this_result_obj = self.wsList[i].var(varName);
           if this_result_obj: # [3]
              result = this_result_obj
-                
         return result 
 
 
@@ -220,7 +232,6 @@ Masses = range(120,135,5)
 #procs=["ggh","vbf","wh","zh","tth"]
 procs=["GG2H","VBF","TTH","QQ2HLNU","QQ2HLL","WH2HQQ","ZH2HQQ"]
 masses=[120.,125.,130.]
-#cats=["UntaggedTag_0","UntaggedTag_1","UntaggedTag_2","UntaggedTag_3","VBFTag_0","VBFTag_1","TTHLeptonicTag","TTHHadronicTag"]
 cats=["UntaggedTag_0","UntaggedTag_1","UntaggedTag_2","UntaggedTag_3","VBFTag_0","VBFTag_1","VBFTag_2","TTHLeptonicTag","TTHHadronicTag","ZHLeptonicTag","WHLeptonicTag","VHLeptonicLooseTag","VHHadronicTag","VHMetTag"]
 sqrts = 13
 ws = WSTFileWrapper(sys.argv[1],"tagsDumper/cms_hgg_%sTeV"%sqrts)
@@ -413,7 +424,7 @@ MG.GetXaxis().SetRangeUser(120.1,129.9)
 #MG.GetXaxis().SetRangeUser(120.0,130)
 MG.GetYaxis().SetTitle("Efficiency #times Acceptance (%)")
 #MG.GetYaxis().SetRangeUser(35.1,45.9)
-MG.GetYaxis().SetRangeUser(36.1,44.9)
+MG.GetYaxis().SetRangeUser(34.6,43.4)
 #MG.GetYaxis().SetTitleSize(0.055)
 MG.GetYaxis().SetTitleSize(0.05)
 MG.GetYaxis().SetTitleOffset(0.8)
