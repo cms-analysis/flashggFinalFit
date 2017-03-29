@@ -128,6 +128,7 @@ map<string,RooDataSet*> getFlashggDataGranular(RooWorkspace *work, int ncats, in
   for (int cat=0; cat<ncats; cat++){
     for (int proc=0; proc < procs_.size() ; proc++){
      if (verbose_) std::cout << "INFO looking for this workspace: " << Form("sig_%s_mass_m%3d_%s",procs_[proc].c_str(),m_hyp,flashggCats_[cat].c_str()) << std::endl;
+     std::cerr << "INFO looking for this workspace: " << Form("sig_%s_mass_m%3d_%s",procs_[proc].c_str(),m_hyp,flashggCats_[cat].c_str()) << std::endl;
      result.insert(pair<string,RooDataSet*>(Form("%s_%s",procs_[proc].c_str(),flashggCats_[cat].c_str()),(RooDataSet*)work->data(Form("sig_%s_mass_m%3d_%s",procs_[proc].c_str(),m_hyp,flashggCats_[cat].c_str()))));
       assert(work->data(Form("sig_%s_mass_m%3d_%s",procs_[proc].c_str(),m_hyp,flashggCats_[cat].c_str())));
     }

@@ -11,52 +11,48 @@ import ROOT as r
 
 r.gSystem.Load("libHiggsAnalysisCombinedLimit")
 r.gSystem.Load("libHiggsAnalysisGBRLikelihood")
-procs=['ggh','vbf','zh','wh','tth']
-cats=['UntaggedTag_0','UntaggedTag_1','UntaggedTag_2','UntaggedTag_3','VBFTag_0','VBFTag_1','TTHLeptonicTag','TTHHadronicTag']
+#procs=['ggh','vbf','zh','wh','tth']
+procs=['GG2H','VBF','TTH','testBBH','QQ2HLNU','QQ2HLL','WH2HQQ','ZH2HQQ']
+#procs=['testBBH']
+cats=['UntaggedTag_0','UntaggedTag_1','UntaggedTag_2','UntaggedTag_3','VBFTag_0','VBFTag_1','VBFTag_2','TTHLeptonicTag','TTHHadronicTag','WHLeptonicTag','VHLeptonicLooseTag','VHHadronicTag','VHMetTag']
+#cats=['UntaggedTag_2']
 rvwv=['rv','wv']
+ext='testBBH'
+#rvwv=['wv']
 
 
 for proc in procs:
   for cat in cats:
-    f = r.TFile("outdir_HggAnalysis_SimultaneousSignalFit_stage2/CMS-HGG_sigfit_HggAnalysis_SimultaneousSignalFit_stage2_%s_%s.root"%(proc,cat))
+    f = r.TFile("outdir_%s/CMS-HGG_sigfit_%s_%s_%s.root"%(ext,ext,proc,cat))
     w = f.Get("wsig_13TeV")
+    #w.Print();
+    #exit(1)
     MH = w.var("MH")
+    mass = w.var("CMS_hgg_mass")
     for v in rvwv:
      print " consider ", proc, cat, v
      nGaussian=-1
      coeffs=[]
      #dynamiccaly get nGaussians
-     for n in range(0,5):
-        c=w.obj("frac_g%d_%s_%s_%s_13TeV"%(n,proc,cat,v)) 
-        #print "is c an empty ppinter?", (c==None)
-        if (c==None): 
-          nGaussian=n-1
-          break
-        coeffs.append(c)
-     #print " --> now check each param"
-     for n in range(1,nGaussian):
-      func = w.function("hggpdfsmrel_13TeV_%s_%s_%s_13TeV_recursive_fraction_gaus_g%d_%s_%s_%s_13TeV"%(proc,cat,v,n,proc,cat,v))
-      print " checking param ", func.GetName()
-      d=119.9
-      numberOfSuccessive0Or1Values=0
-      while (d<130.0):
-        d=d+0.1
-        MH.setVal(d)
-        if (func.getVal()<0 or func.getVal()>1):
-          print "ERROR one of the parameters has gone bonkers at mh ", d, "! ", func.GetName(), func.getVal()
-          for c in coeffs:
-            print "value of this coef" , c.GetName(), c.getVal()
-          exit(1)
-        if (func.getVal()==0 or func.getVal()>0.99):
-          #print " mh= ", d," param  ",func.GetName(), " has dodgy value", func.getVal()
-          numberOfSuccessive0Or1Values=numberOfSuccessive0Or1Values+1
-      if (numberOfSuccessive0Or1Values>2):
-         print "ERROR too many 0 or 1 values in a row ! try reducing number of gaussians for " , proc, cat, v
-         #exit(1)
-
-          
-
-
-
-
-exit(1)
+     pdf= w.pdf("hggpdfsmrel_13TeV_%s_%s_%s_13TeV"%(proc,cat,v));
+     #pdf= r.RooDoubleCBFast(w.pdf("dcb_%s_%s_%s_13TeV"%(proc,cat,v)),"test");
+     pdf.Print()
+     #exit (1)
+     d=119.9
+     increment=0.1
+     while (d<130.0):
+       d=d+increment
+       MH.setVal(d)
+       m=179.875
+       #norm = pdf.createIntegral(r.RooArgSet(mass,MH))
+       #thisint= norm.getVal()
+       h =pdf.createHistogram("htemp_%.2f_%.2f_%s_%s_%s"%(d,m,proc,cat,v),mass)
+       h.Print()
+       #print "integral " , thisint
+       #while (m<179.9):
+        #mass.setVal(m)
+        #print " this is the value of ", pdf.GetName() , " at mh= ", d , " and mgg= ", m ,  "  : " ,  
+        #thiseval =pdf.evaluate(), " norm ", 
+        #m=m+increment
+    #exit(1)
+     

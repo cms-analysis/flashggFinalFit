@@ -40,6 +40,7 @@ parser.add_option("-f","--flashggCats",default="UntaggedTag_0,UntaggedTag_1,Unta
 #  else:
 #    os.system("./Background/bin/workspaceTool -i %s --print 1 | grep RooData | grep it > %s"%(options.workspaces,options.input))
 #    os.system("./Background/bin/workspaceTool -i %s --print 1 | grep intLumi >> %s"%(options.workspaces,options.input))
+#  exit(1)
 
 procs=[]
 tags=[]
@@ -301,6 +302,7 @@ for t in Arr :
     line = line+" &  "+str('%.2f'%Arr[t][p])
   Allline=" "+str('%.2f'%Arr[t]["Total"])
   #dataLines.append( lineCat + Allline+ " "+line+ " & & &" )#+"& %s & %s & %.2f\\\\"%(effSigma[t],hmSigma[t],float(bkgYield[t]) ))
+  print "Arr[t], effSigma",Arr[t],effSigma
   esig =effSigma[t]
   hmsig =hmSigma[t]
   bkgy=0

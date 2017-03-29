@@ -911,7 +911,9 @@ int main(int argc, char *argv[]){
     if(useSSF_){
     // right vertex
     if (verbose_) std::cout << "[INFO] preapraing initialfit RV, massList size "<< massList_.size() << std::endl;
-    SimultaneousFit simultaneousFitRV(mass_,MH,mhLow_,mhHigh_,skipMasses_,binnedFit_,nBins_,massList_,cat,proc,Form("%s/rv",plotDir_.c_str()), /*maxOrder of MH depende of RooPolyVars*/ 1);
+    int maxOrder = 1;
+    if( proc=="testBBH" ) maxOrder=0;
+    SimultaneousFit simultaneousFitRV(mass_,MH,mhLow_,mhHigh_,skipMasses_,binnedFit_,nBins_,massList_,cat,proc,Form("%s/rv",plotDir_.c_str()), /*maxOrder of MH depende of RooPolyVars*/ maxOrder);
     simultaneousFitRV.setVerbosity(verbose_);
     if (!cloneFits_) {
       if (verbose_) std::cout << "[INFO] RV building sum of gaussians with nGaussiansRV " << nGaussiansRV << std::endl;
@@ -941,7 +943,7 @@ int main(int argc, char *argv[]){
 
     // wrong vertex
     if (verbose_) std::cout << "[INFO] preparing initialfit WV, masList size "<< massList_.size() << std::endl;
-    SimultaneousFit simultaneousFitWV(mass_,MH,mhLow_,mhHigh_,skipMasses_,binnedFit_,nBins_,massList_,cat,proc,Form("%s/wv",plotDir_.c_str()), /*maxOrder of MH depende of RooPolyVars*/ 1);
+    SimultaneousFit simultaneousFitWV(mass_,MH,mhLow_,mhHigh_,skipMasses_,binnedFit_,nBins_,massList_,cat,proc,Form("%s/wv",plotDir_.c_str()), /*maxOrder of MH depende of RooPolyVars*/ maxOrder);
     simultaneousFitWV.setVerbosity(verbose_);
     if (!cloneFits_) {
       if (verbose_) std::cout << "[INFO] WV building sum of gaussians wth nGaussiansWV "<< nGaussiansWV << std::endl;
@@ -1112,7 +1114,8 @@ int main(int argc, char *argv[]){
       std::cout << "ED DEBUG: j" << std::endl;
       finalModel.getNormalization();
       std::cout << "ED DEBUG: k" << std::endl;
-      if (!skipPlots_) finalModel.plotPdf(plotDir_);
+      //if (!skipPlots_) finalModel.plotPdf(plotDir_);
+      finalModel.plotPdf(plotDir_);
       std::cout << "ED DEBUG: l" << std::endl;
       finalModel.save(outWS);
       std::cout << "ED DEBUG: m" << std::endl;

@@ -1260,6 +1260,7 @@ void FinalModelConstruction::plotPdf(string outDir){
   std::vector<int> colorList ={7,9,4,2,8,5,1,14};//kCyan,kMagenta,kBlue, kRed,kGreen,kYellow,kBlack, kGray};
   for (unsigned int i=0; i<allMH_.size(); i++){
     int mh=allMH_[i];
+    if( proc_=="testBBH" && mh!=125 ) continue;
     stdDatasets[mh]->plotOn(dataPlot,Binning(160),MarkerColor(colorList[i]));
     std::cout << "FMC LC DEBUG this dataset for mh=" << mh << std::endl;
     stdDatasets[mh]->Print();
