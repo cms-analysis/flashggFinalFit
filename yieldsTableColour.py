@@ -25,11 +25,12 @@ parser.add_option("--verbose",default=0)
 (options,args) = parser.parse_args()
 
 if not (options.workspaces ==""):
-  tpMap = {"GG2H":"ggh","VBF":"vbf","TTH":"tth","QQ2HLNU":"wh","QQ2HLL":"zh","WH2HQQ":"wh","ZH2HQQ":"zh"}
+  #tpMap = {"GG2H":"ggh","VBF":"vbf","TTH":"tth","QQ2HLNU":"wh","QQ2HLL":"zh","WH2HQQ":"wh","ZH2HQQ":"zh"}
+  tpMap = {"GG2H":"ggh","VBF":"vbf","TTH":"tth","QQ2HLNU":"wh","QQ2HLL":"zh","WH2HQQ":"wh","ZH2HQQ":"zh","testBBH":"bbh"}
   for ws in options.workspaces.split(","):
     oldProc = ""
     newProc = ""
-    if "M125" not in ws: continue #shouldn't be any but just in case
+    #if "M125" not in ws: continue #shouldn't be any but just in case
     for stxsProc in tpMap:
       if stxsProc in ws:
         if newProc != "": exit("more than one STXS process name found in file name - wtf, shouldn't happen, exiting...")
@@ -234,8 +235,8 @@ print line
 
 Arr["Total"]={"Total":0}
 #for x in Arr.values()[1].keys():
-for x in Arr.values()[0].keys():
-#for x in Arr.values()[2].keys():
+#for x in Arr.values()[0].keys():
+for x in Arr.values()[2].keys():
   Arr["Total"][x]=0
 
 print Arr["Total"]
@@ -361,6 +362,7 @@ for t in tagList :
   line=""
   for p in procList:
     if p=="Total": continue
+    print "Arr[t]",Arr[t]
     line = line+" &  "+str('%.2f \%%'%(100*Arr[t][p]/Arr[t]["Total"]))
   Allline=" "+str('%.2f'%Arr[t]["Total"])
   #bkgy=0
