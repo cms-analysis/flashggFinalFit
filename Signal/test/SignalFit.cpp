@@ -713,7 +713,7 @@ int main(int argc, char *argv[]){
     for (int mhIndex=0; mhIndex< massList_.size() ; mhIndex++){
       int mh=massList_[mhIndex];
       if (skipMass(mh)) continue;
-      if( (mh==120||mh==130) && proc=="testBBH" ) continue;
+      if( (mh!=125) && proc=="testBBH" ) continue;
       RooDataSet *dataRV; 
       RooDataSet *dataWV; 
       RooDataSet *dataRVRef; 

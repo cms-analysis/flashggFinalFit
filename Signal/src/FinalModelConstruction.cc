@@ -1361,7 +1361,8 @@ void FinalModelConstruction::getNormalization(){
 		  std::cout << "[ERROR] IntLumi rooRealVar is not in this workspace. exit." << std::endl;
 		return ;
 		}
-    temp->SetPoint(i,mh,effAcc);
+    if( proc_=="testBBH" ) temp->SetPoint(0,mh,effAcc);
+    else temp->SetPoint(i,mh,effAcc);
     std::cout << "ED DEBUG: added point to temp graph: i, mh, effAcc = " << i << ", " << mh << ", " << effAcc << std::endl;
   }
   if( proc_=="testBBH" ) temp->RemovePoint(0);
