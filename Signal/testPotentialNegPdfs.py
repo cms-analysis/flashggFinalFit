@@ -16,10 +16,7 @@ procs=['GG2H','VBF','TTH','QQ2HLNU','QQ2HLL','WH2HQQ','ZH2HQQ']
 cats=['UntaggedTag_0','UntaggedTag_1','UntaggedTag_2','UntaggedTag_3','VBFTag_0','VBFTag_1','VBFTag_2','TTHLeptonicTag','TTHHadronicTag','ZHLeptonicTag','WHLeptonicTag','VHLeptonicLooseTag','VHHadronicTag','VHMetTag']
 rvwv=['rv','wv']
 
-#ext='STXSreMiniAOD_04March'
-#ext='STXSreMiniAOD_05MarchTighterVBF'
-#ext='STXSreMiniAOD_11March_GainScales'
-ext='STXSreMiniAOD_16March_AllMasses'
+ext='STXSreMiniAOD_01April'
 
 
 for proc in procs:
