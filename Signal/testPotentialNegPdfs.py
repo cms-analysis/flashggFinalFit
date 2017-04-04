@@ -16,7 +16,7 @@ procs=['GG2H','VBF','TTH','QQ2HLNU','QQ2HLL','WH2HQQ','ZH2HQQ']
 cats=['UntaggedTag_0','UntaggedTag_1','UntaggedTag_2','UntaggedTag_3','VBFTag_0','VBFTag_1','VBFTag_2','TTHLeptonicTag','TTHHadronicTag','ZHLeptonicTag','WHLeptonicTag','VHLeptonicLooseTag','VHHadronicTag','VHMetTag']
 rvwv=['rv','wv']
 
-ext='ws906id_withBBH'
+ext='ws912'
 
 
 for proc in procs:

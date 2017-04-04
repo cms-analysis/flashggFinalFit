@@ -219,6 +219,11 @@ if [ $ISDATA == 0 ]; then
 FAKE="_FAKE"
 fi
 
+if [ ! -d "Signal/$OUTDIR" ]; then
+  echo "Signal/$OUTDIR doesn't exist, maybe your EXT is wrong? Exiting..."
+  exit 1
+fi
+
 cd Plots/FinalResults
 ls ../../Signal/$OUTDIR/CMS-HGG_*sigfit*oot  > tmp.txt
 while read p;
@@ -286,7 +291,7 @@ LEDGER=" --it $COUNTER --itLedger itLedger_$EXT.txt"
 echo INTLUMI = "$INTLUMI"
 echo "./makeCombinePlots.py -d combinePlotsOptions_${EXT}${FAKE}.dat -b $LEDGER "
 ./makeCombinePlots.py -d combinePlotsOptions_$EXT${FAKE}.dat -b $LEDGER
-#./allPlots_${EXT}${FAKE}.sh
+./allPlots_${EXT}${FAKE}.sh
 #./makeCombinePlots.py -f combineJobs13TeV_$EXT/MuScanFloatMH/MuScanFloatMH.root --mu -t "#sqrt{s}\=13TeV L\=$INTLUMI fb^{-1}" -o muFloatMH -b $LEDGER #for some reason doesn't work in datfile
 #./makeCombinePlots.py -f combineJobs13TeV_$EXT/MuScanFixMH/MuScanFixMH.root --mu -t "#sqrt{s}\=13TeV L\=$INTLUMI fb^{-1}" -o muFixMH -b $LEDGER #for some reason doesn't work in datfile
 #./makeCombinePlots.py -f combineJobs13TeV_$EXT/RVRFScan/RVRFScan.root --rvrf -t "#sqrt{s}\=13TeV L\=$INTLUMI fb^{-1}" -o RVRF --xbinning 30,-1.5,2.5 --ybinning 30,-3,8 -b $LEDGER #
@@ -296,8 +301,8 @@ echo "./makeCombinePlots.py -d combinePlotsOptions_${EXT}${FAKE}.dat -b $LEDGER 
 mkdir -p $OUTDIR/combinePlots
 cp *pdf $OUTDIR/combinePlots/.
 cp *png $OUTDIR/combinePlots/.
-#rm *pdf
-#rm *png
+rm *pdf
+rm *png
 
 if [ $USER == "lcorpe" ]; then
 cp -r $OUTDIR ~/www/${OUTDIR}

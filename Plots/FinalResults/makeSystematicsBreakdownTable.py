@@ -49,7 +49,7 @@ def writeJobFileAndSubmit(directory,nuisance_group,POI="r"):
     freezeNuisancesCommand=""
     if not "none" in nuisance_group: freezeNuisancesCommand=" --freezeNuisanceGroups=%s"%nuisance_group
     if (POI=="r") : sub_file.write('eval combine  CMS-HGG_mva_13TeV_datacard.root -M MultiDimFit --robustFit 1 -t -1 --expectSignal 1 -m125 --setPhysicsModelParameters pdfindex_UntaggedTag_0_13TeV=1,pdfindex_UntaggedTag_1_13TeV=3,pdfindex_UntaggedTag_2_13TeV=3,pdfindex_UntaggedTag_3_13TeV=1,pdfindex_VBFTag_0_13TeV=2,pdfindex_VBFTag_1_13TeV=1,pdfindex_VBFTag_2_13TeV=6,pdfindex_TTHHadronicTag_13TeV=0,pdfindex_TTHLeptonicTag_13TeV=1,pdfindex_ZHLeptonicTag_13TeV=0,pdfindex_WHLeptonicTag_13TeV=1,pdfindex_VHLeptonicLooseTag_13TeV=2,pdfindex_VHHadronicTag_13TeV=1,pdfindex_VHMetTag_13TeV=2 --algo singles --cl=0.68 --minimizerAlgoForMinos Minuit2,Migrad -n %s %s\n'%(nuisance_group,freezeNuisancesCommand))
-    else         :  sub_file.write('eval combine  CMS-HGG_mva_13TeV_datacard.perProc.root -M MultiDimFit --robustFit 1 -t -1 --redefineSignalPOIs %s -P %s --floatOtherPOIs 1 --expectSignal 1 -m125 --setPhysicsModelParameterRanges r_ggH=-1.00,3.00:r_qqH=-1,3:r_VH=-1.00,3.00:r_ttH=-1.00,3.00 --setPhysicsModelParameters pdfindex_UntaggedTag_0_13TeV=1,pdfindex_UntaggedTag_1_13TeV=3,pdfindex_UntaggedTag_2_13TeV=3,pdfindex_UntaggedTag_3_13TeV=1,pdfindex_VBFTag_0_13TeV=2,pdfindex_VBFTag_1_13TeV=1,pdfindex_VBFTag_2_13TeV=6,pdfindex_TTHHadronicTag_13TeV=0,pdfindex_TTHLeptonicTag_13TeV=1,pdfindex_ZHLeptonicTag_13TeV=0,pdfindex_WHLeptonicTag_13TeV=1,pdfindex_VHLeptonicLooseTag_13TeV=2,pdfindex_VHHadronicTag_13TeV=1,pdfindex_VHMetTag_13TeV=2 --algo singles --cl=0.68 --minimizerAlgoForMinos Minuit2,Migrad -n %s %s\n'%(POI,POI,nuisance_group,freezeNuisancesCommand))
+    else         :  sub_file.write('eval combine  CMS-HGG_mva_13TeV_datacard.perProc.root -M MultiDimFit --robustFit 1 -t -1 --redefineSignalPOIs %s -P %s --floatOtherPOIs 1 --expectSignal 1 -m125 --setPhysicsModelParameters<pdfindex_UntaggedTag_0_13TeV=1,pdfindex_UntaggedTag_1_13TeV=3,pdfindex_UntaggedTag_2_13TeV=2,pdfindex_UntaggedTag_3_13TeV=1,pdfindex_VBFTag_0_13TeV=2,pdfindex_VBFTag_1_13TeV=1,pdfindex_VBFTag_2_13TeV=4,pdfindex_TTHHadronicTag_13TeV=0,pdfindex_TTHLeptonicTag_13TeV=1,pdfindex_ZHLeptonicTag_13TeV=0,pdfindex_WHLeptonicTag_13TeV=1,pdfindex_VHLeptonicLooseTag_13TeV=2,pdfindex_VHHadronicTag_13TeV=1,pdfindex_VHMetTag_13TeV=0 --algo singles --cl=0.68 --minimizerAlgoForMinos Minuit2,Migrad -n %s %s\n'%(POI,POI,nuisance_group,freezeNuisancesCommand))
     sub_file.close()
     os.system(' chmod +x %s'%(filename))
     exec_line='qsub %s -l h_rt=0:59:00 -q hep.q -o %s.log -e %s.err'%(filename,filename,filename)
@@ -61,6 +61,7 @@ def writeJobFileAndSubmit(directory,nuisance_group,POI="r"):
 
 nuisance_groups = ["none","AlphaS_migrations","Branching_ratio","Diphoton_MVA_preselection","Electron_veto","Integrated_luminosity","Jet_energy_scale_and_resolution","Lepton_reconstruction_and_btag_efficiencies","Modelling_of_detector_response_in_GEANT4","Modelling_of_material_budget","Nonlinearity_of_detector_response","Nonuniformity_of_light_collection","PDF_and_alphaS_yield","PDF_migrations","Per_photon_energy_resolution_estimate","Photon_energy_scale_and_smearing","Photon_identification","Photon_preselection","QCD_scale_migrations","QCD_scale_yield","Shower_shape_corrections","Trigger_efficiency","UE_and_PS","Vertex_finding_efficiency","ggF_contamination_in_VBF_categories","ggF_contamination_in_ttH_categories"]
 POIs =["r","r_ggH","r_qqH","r_VH","r_ttH"]
+#POIs =["r_ggH","r_qqH","r_VH","r_ttH"]
 
 if not opts.makeTable:
    print "text2workspace.py  CMS-HGG_mva_13TeV_datacard.txt -m125 -o CMS-HGG_mva_13TeV_datacard.root"
@@ -80,7 +81,9 @@ if not opts.makeTable:
 
 if opts.makeTable:
   overall_array = {}
+  sumInQuad = {}
   for POI in POIs:
+     sumInQuad[POI] = 0.
      poi_array = {}
      directory="%s/SystematicsTable/%s"%(os.getcwd(),POI)
      nominalValues = values= getUpDownUncertainties(directory,"none",POI) 
@@ -91,10 +94,11 @@ if opts.makeTable:
        thisDownWrtCentral = (abs(nominalValues[1] **2 - values[1]**2))**(0.5)
        thisSymmWrtCentral = (abs(nominalValues[2] **2 - values[2]**2))**(0.5)
        poi_array[ng]=[thisUpWrtCentral,thisDownWrtCentral,thisSymmWrtCentral]
+       sumInQuad[POI] += thisSymmWrtCentral**2
      valueMap={}
      for this_ng in sorted(poi_array.items(),key=lambda e: e[1][2], reverse=True):
-      #print this_ng, this_ng[1][2]
-      valueMap[this_ng[0]]=100*this_ng[1][2]
+       #print this_ng, this_ng[1][2]
+       valueMap[this_ng[0]]=100*this_ng[1][2]
      overall_array[POI]=valueMap
   #now make final table:
   print " \\resizebox{\\textwidth}{!}{"
@@ -114,12 +118,20 @@ if opts.makeTable:
   print column_headers
   print "\\hline"
   #for this_ng in sorted(overall_array[POIs[0]].items(),key=lambda e: e[1], reverse=True):
+  #for this_ng in sorted(overall_array[POIs[1]].items(),key=lambda e: e[1], reverse=True):
   for this_ng in sorted(overall_array[POIs[2]].items(),key=lambda e: e[1], reverse=True):
       if (this_ng[0] == "none") : continue
       print_line= this_ng[0].replace("_"," ") + " "
       for POI in POIs   : print_line = print_line + " &  %.2f \%%"% overall_array[POI][this_ng[0]]
       print_line = print_line + " \\\\ "
       print print_line
+  print "\\hline"
+  print_line = "Total "
+  for POI in POIs: 
+    total = 100.*((sumInQuad[POI])**(0.5))
+    print_line = print_line + " &  %.2f \%%"% total
+  print_line = print_line + " \\\\ "
+  print print_line
   print "\\hline"
   print "\end{tabular}}" 
   
@@ -152,4 +164,4 @@ if opts.makeTable:
 #Diphoton_MVA_preselection group = CMS_hgg_LooseMvaSF
 #Electron_veto group = CMS_hgg_electronVetoSF
 #MET group = CMS_hgg_MET_JEC CMS_hgg_MET_JER CMS_hgg_MET_Unclustered CMS_hgg_MET_PhotonScale
-#Rejections_of_jets_from_pileup group = CMS_hgg_RMSShift_migration0
+#Rejections_of_jets_from_pileup group = CMS_hgg_PUJIDShift_migration0

@@ -827,7 +827,6 @@ for dijetCat in dijetCats: #each entry will represent a different migration
    vbfSysts['JER'].append([1.,1.,1.])  #value of 1 given gor both ggh and qqh, since vairations are taken from histograms directly
    vbfSysts['JEC'].append([1.,1.,1.]) #value of 1 given gor both ggh and qqh, since vairations are taken from histograms directly
 #vbfSysts['UnmatchedPUWeight'].append([1.,1.]) #should only apply to ggh<->vbf
-#vbfSysts['UnmatchedPUWeight'].append([1.,1.]) #should only apply to ggh<->vbf
 #vbfSysts['RMSShift'].append([1.,1.]) #should only apply to ggh<->vbf
 vbfSysts['PUJIDShift'].append([1.,1.]) #should only apply to ggh<->vbf
 #UEPS method no longer needs these
@@ -835,9 +834,9 @@ vbfSysts['PUJIDShift'].append([1.,1.]) #should only apply to ggh<->vbf
 #vbfSysts['UEPS'].append([0.042,0.092]) # adhoc for vbf0<->vbf1# UPDATED FOR ICHEP16
 #vbfSysts['UEPS'].append([0.042,0.092]) # adhoc by Ed in attempt to fix negative value
 #still waiting for new recipe here
-vbfSysts['JetVeto'].append([0.39,0.0]) # adhoc for ggh<->vbf # UPDATED FOR ICHEP16
-vbfSysts['JetVeto'].append([0.10,0.0]) # adhoc for vbf0<->vbf1# UPDATED FOR ICHEP16
-vbfSysts['JetVeto'].append([0.10,0.0]) # adhoc for vbf0<->vbf1# UPDATED FOR ICHEP16
+vbfSysts['JetVeto'].append([0.289,0.0]) # Untagged <-> VBF, updated for (post)Moriond17
+vbfSysts['JetVeto'].append([0.077,0.0]) # VBF 0,1 <-> VBF 2, updated for (post)Moriond17
+vbfSysts['JetVeto'].append([0.031,0.0]) # VBF 0 <-> VBF 1, updated for (post)Moriond17
 
 #lepton, MET tags  ## lepton tags not considered for Dry run...
 # [VH tight, VH loose, ttH leptonic]
@@ -1232,8 +1231,8 @@ def printVbfSysts():
     vbfMigrateToCats.reverse()
     vbfMigrateFromCats.reverse()
     #summary
-    #print "--> cats To " , vbfMigrateToCats 
-    #print "--> cats From " , vbfMigrateFromCats 
+    print "--> cats To " , vbfMigrateToCats 
+    print "--> cats From " , vbfMigrateFromCats 
       
     # now get relevant event counts
     for p in options.procs:
