@@ -291,7 +291,9 @@ theorySystAbsScale['ZH_had_hgg'] =  [0.0,                 0.0,                0.
 theorySystAbsScale['WH_lep_hgg'] =  [0.0,                 0.0,                0.005,             0.0,                0.0,                   0.0,                 -0.007,              0.0,                  0.019,              0.0,              0.0] # ZH is a _qqbar process
 theorySystAbsScale['WH_had_hgg'] =  [0.0,                 0.0,                0.005,             0.0,                0.0,                   0.0,                 -0.007,              0.0,                  0.019,              0.0,              0.0] # ZH is a _qqbar process
 theorySystAbsScale['qqH_hgg'] = [0.0,                 0.004,              0.0,               0.0,                0.0,                   -0.003,              0.0,                 0.0,                  0.021,              0.0,              0.0] # qqH is a _qqbar process
-theorySystAbsScale['bbH_hgg'] = [0.0,                 0.0,                0.0,               0.058,              0.0,                   0.0,                 0.0,                 -0.092,               0.0,                0.0,              0.036] # ttH is a _qqbar process
+theorySystAbsScale['bbH_hgg'] = [0.0,                 0.0,                0.0,               0.202,              0.0,                   0.0,                 0.0,                 -0.239,               0.0,                0.0,              0.036] # ttH is a _qqbar process
+theorySystAbsScale['tHq_hgg'] = [0.0,                 0.0,                0.0,               0.065,              0.0,                   0.0,                 0.0,                 -0.149,               0.0,                0.0,              0.036] # ttH is a _qqbar process
+theorySystAbsScale['tHW_hgg'] = [0.0,                 0.0,                0.0,               0.049,              0.0,                   0.0,                 0.0,                 -0.067,               0.0,                0.0,              0.036] # ttH is a _qqbar process
 theorySystAbsScale['ggH_hgg'] = [0.039,               0.0,                0.0,               0.0,                -0.039,               0.0,                  0.0,                 0.0,                  0.0,                0.032,            0.0] # GGH is a _gg process
 
 ##############################################################################
@@ -428,7 +430,8 @@ def printTheorySysts():
     outFile.write('%-35s  lnN   '%(syst.replace("_up",""))) # if it doesn;t contain "_up", the replace has no effect anyway 
     for c in options.cats:
       for p in options.procs:
-            if "bkg" in flashggProc[p] or "BBH" in flashggProc[p] or "THQ" in flashggProc[p] or "THW" in flashggProc[p]:
+            #if "bkg" in flashggProc[p] or "BBH" in flashggProc[p] or "THQ" in flashggProc[p] or "THW" in flashggProc[p]:
+            if "bkg" in flashggProc[p]:
               outFile.write('- ')
               continue
             else:
