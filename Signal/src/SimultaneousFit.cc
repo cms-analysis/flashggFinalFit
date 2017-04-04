@@ -565,7 +565,7 @@ void SimultaneousFit::runFits(int ncpu,string outdir, float epsilon){
     //RooAddition * lcChi2= new RooAddition("lc_chi2","lc_chi2",RooArgList(chi2_120,chi2_125));
     std::map<int, RooDataHist*> ourDatasets;
     for (int iMH =0 ; iMH<allMH_.size() ; iMH++){
-    if( proc_=="testBBH" && allMH_[iMH]!=125 ) continue;
+    if( (proc_=="testBBH" || proc_=="testTHQ" || proc_=="testTHW") && allMH_[iMH]!=125 ) continue;
     ourDatasets.insert(pair<int, RooDataHist*>(allMH_[iMH], new RooDataHist(Form("%d_binned",allMH_[iMH]),Form("%d_binned",allMH_[iMH]),RooArgSet(*mass),*(normaliseDatasets(datasets[allMH_[iMH]])))));
     }
     std::cout << "ED DEBUG e" << std::endl;

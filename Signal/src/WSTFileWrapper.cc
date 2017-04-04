@@ -74,7 +74,8 @@ std::pair<std::string,std::string> WSTFileWrapper::convertTemplatedName(std::str
   tpMap["WH2HQQ"] = "wh";
   tpMap["ZH2HQQ"] = "zh";
   tpMap["testBBH"] = "bbh";
-  tpMap["testTH"] = "th";
+  tpMap["testTHW"] = "th";
+  tpMap["testTHQ"] = "th";
   for( std::map<std::string,std::string>::iterator it = tpMap.begin(); it != tpMap.end(); it++ ) {
     if( theDataName.BeginsWith(it->first) ) { 
       theProcName = it->first;

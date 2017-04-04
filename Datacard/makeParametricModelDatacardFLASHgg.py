@@ -44,7 +44,7 @@ class WSTFileWrapper:
    def convertTemplatedName(self,dataName):
         theProcName = ""
         theDataName = ""
-        tpMap = {"GG2H":"ggh","VBF":"vbf","TTH":"tth","QQ2HLNU":"wh","QQ2HLL":"zh","WH2HQQ":"wh","ZH2HQQ":"zh","testBBH":"bbh"}
+        tpMap = {"GG2H":"ggh","VBF":"vbf","TTH":"tth","QQ2HLNU":"wh","QQ2HLL":"zh","WH2HQQ":"wh","ZH2HQQ":"zh","testBBH":"bbh","testTHQ":"th","testTHW":"th"}
         for stxsProc in tpMap:
           if dataName.startswith(stxsProc):
             theProcName = stxsProc
@@ -127,11 +127,11 @@ outFile = open(options.outfilename,'w')
 ###############################################################################
 # convert flashgg style to combine style process
 #combProc = {'ggH':'ggH_hgg','VBF':'qqH_hgg','ggh':'ggH_hgg','vbf':'qqH_hgg','wzh':'VH','wh':'WH_hgg','zh':'ZH_hgg','tth':'ttH_hgg','bkg_mass':'bkg_mass','gg_grav':'ggH_hgg_ALT','qq_grav':'qqbarH_ALT'}
-combProc = {'GG2H':'ggH_hgg','VBF':'qqH_hgg','TTH':'ttH_hgg','QQ2HLNU':'WH_lep_hgg','QQ2HLL':'ZH_lep_hgg','WH2HQQ':'WH_had_hgg','ZH2HQQ':'ZH_had_hgg','testBBH':'bbH_hgg','bkg_mass':'bkg_mass'}
+combProc = {'GG2H':'ggH_hgg','VBF':'qqH_hgg','TTH':'ttH_hgg','QQ2HLNU':'WH_lep_hgg','QQ2HLL':'ZH_lep_hgg','WH2HQQ':'WH_had_hgg','ZH2HQQ':'ZH_had_hgg','testBBH':'bbH_hgg','testTHQ':'tHq_hgg','testTHW':'tHW_hgg','bkg_mass':'bkg_mass'}
 #flashggProc = {'ggH_hgg':'ggh','qqH_hgg':'vbf','VH':'wzh','WH_hgg':'wh','ZH_hgg':'zh','ttH_hgg':'tth','bkg_mass':'bkg_mass','ggH_hgg_ALT':'gg_grav','qqbarH_ALT':'qq_grav'}
 #flashggProc = {'ggH_hgg':'ggh','qqH_hgg':'vbf','ttH_hgg':'tth','WH_lep_hgg':'wh','ZH_lep_hgg':'zh','WH_had_hgg':'wh','ZH_had_hgg':'zh','bkg_mass':'bkg_mass'}
-flashggProc = {'ggH_hgg':'GG2H','qqH_hgg':'VBF','ttH_hgg':'TTH','WH_lep_hgg':'QQ2HLNU','ZH_lep_hgg':'QQ2HLL','WH_had_hgg':'WH2HQQ','ZH_had_hgg':'ZH2HQQ','bbH_hgg':'testBBH','bkg_mass':'bkg_mass'}
-procId = {'ggH_hgg':0,'qqH_hgg':-1,'ttH_hgg':-2,'WH_lep_hgg':-2,'ZH_lep_hgg':-3,'WH_had_hgg':-4,'ZH_had_hgg':-5,'bbH_hgg':-6,'bkg_mass':1}
+flashggProc = {'ggH_hgg':'GG2H','qqH_hgg':'VBF','ttH_hgg':'TTH','WH_lep_hgg':'QQ2HLNU','ZH_lep_hgg':'QQ2HLL','WH_had_hgg':'WH2HQQ','ZH_had_hgg':'ZH2HQQ','bbH_hgg':'testBBH','tHq_hgg':'testTHQ','tHW_hgg':'testTHW','bkg_mass':'bkg_mass'}
+procId = {'ggH_hgg':0,'qqH_hgg':-1,'ttH_hgg':-2,'WH_lep_hgg':-2,'ZH_lep_hgg':-3,'WH_had_hgg':-4,'ZH_had_hgg':-5,'bbH_hgg':-6,'tHq_hgg':-7,'tHW_hgg':-8,'bkg_mass':1}
 bkgProcs = ['bkg_mass'] #what to treat as background
 #Determine if VH or WZH_hgg
 splitVH=False
@@ -257,6 +257,8 @@ fileDetails['ZH_lep_hgg']       = [sigFile.replace('$PROC',"QQ2HLL"),sigWS,'hggp
 fileDetails['WH_had_hgg']       = [sigFile.replace('$PROC',"WH2HQQ"),sigWS,'hggpdfsmrel_%dTeV_WH2HQQ_$CHANNEL'%sqrts]
 fileDetails['ZH_had_hgg']       = [sigFile.replace('$PROC',"ZH2HQQ"),sigWS,'hggpdfsmrel_%dTeV_ZH2HQQ_$CHANNEL'%sqrts]
 fileDetails['bbH_hgg']       = [sigFile.replace('$PROC',"testBBH"),sigWS,'hggpdfsmrel_%dTeV_testBBH_$CHANNEL'%sqrts]
+fileDetails['tHq_hgg']       = [sigFile.replace('$PROC',"testTHQ"),sigWS,'hggpdfsmrel_%dTeV_testTHQ_$CHANNEL'%sqrts]
+fileDetails['tHW_hgg']       = [sigFile.replace('$PROC',"testTHW"),sigWS,'hggpdfsmrel_%dTeV_testTHW_$CHANNEL'%sqrts]
 
 #if splitVH:
 #  fileDetails['WH_hgg']       =  [sigFile.replace('$PROC',"wh"),sigWS,'hggpdfsmrel_%dTeV_wh_$CHANNEL'%sqrts]
@@ -303,6 +305,8 @@ inclusiveCats.append("NoTag")
 for proc in options.procs:
   if proc in bkgProcs: continue
   if "bbH" in proc: continue
+  if "tHq" in proc: continue
+  if "tHW" in proc: continue
   for name in theorySyst.keys(): #wh_130_13TeV_UntaggedTag_1_pdfWeights
     norm_factors_file.write("%s_%s = ["%(proc,name.replace("Weight",""))) 
     result["%s_%s"%(proc,name)] = []
@@ -373,7 +377,7 @@ def printTheorySysts():
         outFile.write('%-35s  lnN   '%(name))
         for c in options.cats:
           for p in options.procs:
-            if "bkg" in flashggProc[p] or "BBH" in flashggProc[p]: 
+            if "bkg" in flashggProc[p] or "BBH" in flashggProc[p] or "THQ" in flashggProc[p] or "THW" in flashggProc[p]:
               outFile.write('- ')
               continue
             else:
@@ -403,7 +407,7 @@ def printTheorySysts():
         outFile.write('%-35s  lnN   '%(name))
         for c in options.cats:
           for p in options.procs:
-            if "bkg" in flashggProc[p] or "BBH" in flashggProc[p]: 
+            if "bkg" in flashggProc[p] or "BBH" in flashggProc[p] or "THQ" in flashggProc[p] or "THW" in flashggProc[p]:
               outFile.write('- ')
               continue
             else:
@@ -424,7 +428,7 @@ def printTheorySysts():
     outFile.write('%-35s  lnN   '%(syst.replace("_up",""))) # if it doesn;t contain "_up", the replace has no effect anyway 
     for c in options.cats:
       for p in options.procs:
-            if "bkg" in flashggProc[p] or "BBH" in flashggProc[p]: 
+            if "bkg" in flashggProc[p] or "BBH" in flashggProc[p] or "THQ" in flashggProc[p] or "THW" in flashggProc[p]:
               outFile.write('- ')
               continue
             else:

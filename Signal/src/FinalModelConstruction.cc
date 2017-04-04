@@ -545,7 +545,7 @@ void FinalModelConstruction::getRvFractionFunc(string name){
   // fill the holders/TGraph
   for (unsigned int i=0; i<allMH_.size(); i++){
     int mh = allMH_[i];
-    if( proc_=="testBBH" && mh!=125 ) continue;
+    if( (proc_=="testBBH" || proc_=="testTHQ" || proc_=="testTHW") && mh!=125 ) continue;
     mhValues.push_back(mh);
     double rvN = rvDatasets[mh]->sumEntries();
     double wvN = wvDatasets[mh]->sumEntries();
@@ -1225,7 +1225,7 @@ void FinalModelConstruction::makeSTDdatasets(){
 	if (sqrts_ ==13) catname = Form("%s",cat_.c_str());
   for (unsigned int i=0; i<allMH_.size(); i++){
     int mh=allMH_[i];
-    if( proc_=="testBBH" && mh!=125 ) continue;
+    if( (proc_=="testBBH" || proc_=="testTHQ" || proc_=="testTHW") && mh!=125 ) continue;
 		RooDataSet *data = (RooDataSet*)rvDatasets[mh]->Clone(Form("sig_%s_mass_m%d_%s",proc_.c_str(),mh,catname.c_str()));
 		data->append(*wvDatasets[mh]);
 		stdDatasets.insert(pair<int,RooDataSet*>(mh,data));
@@ -1238,7 +1238,7 @@ void FinalModelConstruction::makeFITdatasets(){
 	if (sqrts_ ==13) catname = Form("%s",cat_.c_str());
   for (unsigned int i=0; i<allMH_.size(); i++){
     int mh=allMH_[i];
-    if( proc_=="testBBH" && mh!=125 ) continue;
+    if( (proc_=="testBBH" || proc_=="testTHQ" || proc_=="testTHW") && mh!=125 ) continue;
 		RooDataSet *data = (RooDataSet*)rvFITDatasets[mh]->Clone(Form("sig_%s_mass_m%d_%s",proc_.c_str(),mh,catname.c_str()));
 		data->append(*wvFITDatasets[mh]);
 		fitDatasets.insert(pair<int,RooDataSet*>(mh,data));
@@ -1260,7 +1260,7 @@ void FinalModelConstruction::plotPdf(string outDir){
   std::vector<int> colorList ={7,9,4,2,8,5,1,14};//kCyan,kMagenta,kBlue, kRed,kGreen,kYellow,kBlack, kGray};
   for (unsigned int i=0; i<allMH_.size(); i++){
     int mh=allMH_[i];
-    if( proc_=="testBBH" && mh!=125 ) continue;
+    if( (proc_=="testBBH" || proc_=="testTHQ" || proc_=="testTHW") && mh!=125 ) continue;
     stdDatasets[mh]->plotOn(dataPlot,Binning(160),MarkerColor(colorList[i]));
     std::cout << "FMC LC DEBUG this dataset for mh=" << mh << std::endl;
     stdDatasets[mh]->Print();
@@ -1343,7 +1343,7 @@ void FinalModelConstruction::getNormalization(){
   bool fitToConstant=0; //if low-stats category, don;' try to fit to polynomial
   for (unsigned int i=0; i<allMH_.size(); i++){
     double mh = double(allMH_[i]);
-    if( proc_=="testBBH" && mh!=125 ) continue;
+    if( (proc_=="testBBH" || proc_=="testTHQ" || proc_=="testTHW") && mh!=125 ) continue;
     RooDataSet *data = stdDatasets[mh];
 	double effAcc =0.;
 	if (intLumi) {
@@ -1361,11 +1361,11 @@ void FinalModelConstruction::getNormalization(){
 		  std::cout << "[ERROR] IntLumi rooRealVar is not in this workspace. exit." << std::endl;
 		return ;
 		}
-    if( proc_=="testBBH" ) temp->SetPoint(0,mh,effAcc);
+    if( (proc_=="testBBH" || proc_=="testTHQ" || proc_=="testTHW") ) temp->SetPoint(0,mh,effAcc);
     else temp->SetPoint(i,mh,effAcc);
     std::cout << "ED DEBUG: added point to temp graph: i, mh, effAcc = " << i << ", " << mh << ", " << effAcc << std::endl;
   }
-  if( proc_=="testBBH" ) temp->RemovePoint(0);
+  //if( (proc_=="testBBH" || proc_=="testTHQ" || proc_=="testTHW") ) temp->RemovePoint(0);
   std::cout << "ED DEBUG: filled temp graph" << std::endl;
   std::cout << "ED DEBUG: it has " << temp->GetN() << " points" << std::endl;
   std::cout << "ED DEBUG: which are" << std::endl;
