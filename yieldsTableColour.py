@@ -26,7 +26,7 @@ parser.add_option("--verbose",default=0)
 
 if not (options.workspaces ==""):
   #tpMap = {"GG2H":"ggh","VBF":"vbf","TTH":"tth","QQ2HLNU":"wh","QQ2HLL":"zh","WH2HQQ":"wh","ZH2HQQ":"zh"}
-  tpMap = {"GG2H":"ggh","VBF":"vbf","TTH":"tth","QQ2HLNU":"wh","QQ2HLL":"zh","WH2HQQ":"wh","ZH2HQQ":"zh","testBBH":"bbh"}
+  tpMap = {"GG2H":"ggh","VBF":"vbf","TTH":"tth","QQ2HLNU":"wh","QQ2HLL":"zh","WH2HQQ":"wh","ZH2HQQ":"zh","testBBH":"bbh","testTHQ":"th","testTHW":"th"}
   for ws in options.workspaces.split(","):
     oldProc = ""
     newProc = ""
@@ -235,8 +235,8 @@ print line
 
 Arr["Total"]={"Total":0}
 #for x in Arr.values()[1].keys():
-#for x in Arr.values()[0].keys():
-for x in Arr.values()[2].keys():
+for x in Arr.values()[0].keys():
+#for x in Arr.values()[2].keys():
   Arr["Total"][x]=0
 
 print Arr["Total"]
@@ -300,6 +300,7 @@ print "\\hline"
 
 dataLines=[]
 for t in Arr :
+  if t=='Total': continue #ED MUST FIX
   #print p
   lineCat=t+" &   " 
   line=""
@@ -308,7 +309,7 @@ for t in Arr :
     line = line+" &  "+str('%.2f'%Arr[t][p])
   Allline=" "+str('%.2f'%Arr[t]["Total"])
   #dataLines.append( lineCat + Allline+ " "+line+ " & & &" )#+"& %s & %s & %.2f\\\\"%(effSigma[t],hmSigma[t],float(bkgYield[t]) ))
-  print "Arr[t], effSigma",Arr[t],effSigma
+  print "\neffSigma is\n",effSigma,"\n"
   esig =effSigma[t]
   hmsig =hmSigma[t]
   bkgy=0
@@ -357,6 +358,7 @@ else :
   tagList = options.order.split(":")[1].split(",")
 
 for t in tagList :
+  if t=='Total': continue #ED MUST FIX
   #print p
   lineCat=t+" &   " 
   line=""
@@ -453,7 +455,8 @@ totalNaiveExp=0.
 for n in naiveExpecteds:
   totalNaiveExp=totalNaiveExp+(n**2)
 totalNaiveExp=(totalNaiveExp)**(0.5)
-dataLines.append( lineCat + Allline+ " "+line+"& %.2f & %.2f & %.2f & %.2f\\\\"%(float(effSigma[t]),float(hmSigma[t]),bkgy,totalNaiveExp))
+dataLines.append( lineCat + Allline+ " "+line+"& %.2f & %.2f & %.2f & %.2f\\\\"%((2.0),(2.0),bkgy,totalNaiveExp)) #ED MUST FIX (original line below)
+#dataLines.append( lineCat + Allline+ " "+line+"& %.2f & %.2f & %.2f & %.2f\\\\"%(float(effSigma[t]),float(hmSigma[t]),bkgy,totalNaiveExp))
   #dataLines.append( lineCat + Allline+ " "+line+ "& & &")#"& %.2f & %.2f & %.2f \\\\"%(float(effSigma[t]),float(hmSigma[t]),float(bkgYield[t])))
 
 #dataLines.sort()
@@ -588,12 +591,16 @@ totalNaiveExp=0.
 for n in naiveExpecteds:
   totalNaiveExp=totalNaiveExp+(n**2)
 totalNaiveExp=(totalNaiveExp)**(0.5)
-dataLines.append( lineCat + Allline+ " "+line+"& %.2f & %.2f & %.2f & %.2f & %.2f\\\\"%(float(effSigma[t]),float(hmSigma[t]),bkgy,bkgy/options.factor,totalNaiveExp))
+dataLines.append( lineCat + Allline+ " "+line+"& %.2f & %.2f & %.2f & %.2f & %.2f\\\\"%((2.0),(2.0),bkgy,bkgy/options.factor,totalNaiveExp)) #ED MUST FIX
+#dataLines.append( lineCat + Allline+ " "+line+"& %.2f & %.2f & %.2f & %.2f & %.2f\\\\"%(float(effSigma[t]),float(hmSigma[t]),bkgy,bkgy/options.factor,totalNaiveExp))
   #dataLines.append( lineCat + Allline+ " "+line+ "& & &")#"& %.2f & %.2f & %.2f \\\\"%(float(effSigma[t]),float(hmSigma[t]),float(bkgYield[t])))
-sigmaEff_hist.SetBinContent(1,float(effSigma[t]))
-sigmaHM_hist.SetBinContent(1,float(hmSigma[t]))
+sigmaEff_hist.SetBinContent(1,(2.0)) #ED MUST FIX
+#sigmaEff_hist.SetBinContent(1,float(effSigma[t]))
+sigmaHM_hist.SetBinContent(1,(2.0))
+#sigmaHM_hist.SetBinContent(1,float(hmSigma[t]))
 #s_sb_hist.SetBinContent(1,float(totalNaiveExp))
-s_sb_value=(0.68*Arr[t]["Total"])/(0.68*Arr[t]["Total"] + 2*float(effSigma[t])*bkgy)
+s_sb_value=(0.68*Arr[t]["Total"])/(0.68*Arr[t]["Total"] + 2*(2.0)*bkgy) #ED MUST FIX
+#s_sb_value=(0.68*Arr[t]["Total"])/(0.68*Arr[t]["Total"] + 2*float(effSigma[t])*bkgy)
 s_sb_hist.SetBinContent(len(tagList)-iTag,float(s_sb_value))
 
 #dataLines.sort()
@@ -610,7 +617,7 @@ print "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
 r.gROOT.SetBatch()
 r.gStyle.SetOptStat(0)
 hstack = r.THStack("hs","")
-colorList=[r.kGreen+3,r.kRed+2,r.kCyan+2, r.kYellow, r.kBlue+2, r.kOrange-3,r.kPink,r.kBlack]
+colorList=[r.kGreen+3,r.kRed+2,r.kCyan+2, r.kYellow, r.kYellow+1, r.kYellow+2, r.kBlue+2, r.kOrange-3,r.kPink,r.kBlack]
 iColor=0
 print "content_hists ", content_hists
 l1 = r.TLegend(0.0,0.9,1.0,0.95)
