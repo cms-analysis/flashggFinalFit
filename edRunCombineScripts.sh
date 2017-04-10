@@ -41,8 +41,8 @@ SIGFILE="/vols/build/cms/es811/FreshStart/Pass3/TTHstudies/CMSSW_7_4_7/src/flash
 #./runFinalFitsScripts.sh -i $FILE125 -p $PROCS -f $CATS --ext $EXT --intLumi $INTLUMI --batch $BATCH --dataFile $DATA --isData --datacardOnly \
 #                         --smears $SMEARS --scales $SCALES --scalesCorr $SCALESCORR --scalesGlobal $SCALESGLOBAL --uepsFile $UEPSFILE
 #./runFinalFitsScripts.sh -i $FILE -p $PROCS -f $CATS --ext $EXT --intLumi $INTLUMI --batch $BATCH --dataFile $DATA --isData --combineOnly
-./runFinalFitsScripts.sh -i $FILE -p $PROCS -f $CATS --ext $EXT --intLumi $INTLUMI --batch $BATCH --dataFile $DATA --isData --combinePlotsOnly
+#./runFinalFitsScripts.sh -i $FILE -p $PROCS -f $CATS --ext $EXT --intLumi $INTLUMI --batch $BATCH --dataFile $DATA --isData --combinePlotsOnly
 
 #./yieldsTableColour.py -w $FILE125 -s Signal/signumbers_${EXT}.txt -u Background/CMS-HGG_multipdf_$EXT.root --factor $INTLUMI -f $CATS --order "Total,GG2H,VBF,TTH,QQ2HLNU,QQ2HLL,WH2HQQ,ZH2HQQ:Untagged Tag 0,Untagged Tag 1,Untagged Tag 2,Untagged Tag 3,VBF Tag 0,VBF Tag 1,VBF Tag 2,TTH Hadronic Tag,TTH Leptonic Tag,ZH Leptonic Tag,WH Leptonic Tag,VH LeptonicLoose Tag,VH Hadronic Tag,VH Met Tag,Total"
-#./yieldsTableColour.py -w $FILE125 -s Signal/signumbers_${EXT}.txt -u Background/CMS-HGG_multipdf_$EXT.root --factor $INTLUMI -f $CATS --order "Total,GG2H,VBF,TTH,testBBH,testTHQ,testTHW,QQ2HLNU,QQ2HLL,WH2HQQ,ZH2HQQ:Untagged Tag 0,Untagged Tag 1,Untagged Tag 2,Untagged Tag 3,VBF Tag 0,VBF Tag 1,VBF Tag 2,TTH Hadronic Tag,TTH Leptonic Tag,ZH Leptonic Tag,WH Leptonic Tag,VH LeptonicLoose Tag,VH Hadronic Tag,VH Met Tag,Total"
+./yieldsTableColour.py -w $FILE125 -s Signal/signumbers_${EXT}.txt -u Background/CMS-HGG_multipdf_$EXT.root --factor $INTLUMI -f $CATS --order "Total,GG2H,VBF,TTH,testBBH,testTHQ,testTHW,QQ2HLNU,QQ2HLL,WH2HQQ,ZH2HQQ:Untagged Tag 0,Untagged Tag 1,Untagged Tag 2,Untagged Tag 3,VBF Tag 0,VBF Tag 1,VBF Tag 2,TTH Hadronic Tag,TTH Leptonic Tag,ZH Leptonic Tag,WH Leptonic Tag,VH LeptonicLoose Tag,VH Hadronic Tag,VH Met Tag,Total"
 #./makeEffAcc.py $FILE Signal/outdir_${EXT}/sigfit/effAccCheck_all.root $INTLUMI

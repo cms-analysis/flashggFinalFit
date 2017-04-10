@@ -244,7 +244,10 @@ pair<double,double> getEffSigmaData(RooRealVar *mass, RooDataHist *dataHist, dou
 
 pair<double,double> getEffSigma(RooRealVar *mass, RooAbsPdf *pdf, double wmin=110., double wmax=130., double step=0.002, double epsilon=1.e-4){
 
-  cout << "the pdf is" << pdf << endl;
+  cout << "ED DEBUG: the pdf is " << pdf << endl;
+  cout << "ED DEBUG: the pdf is " << pdf->getNorm() << endl;
+  //cout << "ED DEBUG: the pdf is " << pdf->printValue() << endl;
+  //cout << "ED DEBUG: the pdf is " << pdf->printMultiline() << endl;
   RooAbsReal *cdf = pdf->createCdf(RooArgList(*mass));
   cout << "Computing effSigma...." << endl;
   TStopwatch sw;
@@ -640,12 +643,14 @@ int main(int argc, char *argv[]){
 
 
   for (map<string,RooDataSet*>::iterator dataIt=dataSets.begin(); dataIt!=dataSets.end(); dataIt++){
-    std::cout << "About to do effSigma for " << dataIt->first << std::endl;
-    pair<double,double> thisSigRange = getEffSigma(mass,pdfs[dataIt->first],m_hyp_-10.,m_hyp_+10.);
-    //pair<double,double> thisSigRange = getEffSigBinned(mass,pdf[dataIt->first],m_hyp_-10.,m_hyp_+10);
-    //RooDataHist *binned = new RooDataHist("test","test",*mass, (dataIt->second)->createHistogram("test",*mass,RooFit::Binning(1000,m_hyp_-10.,m_hyp_+10.)));
-
-    //pair<double,double> thisSigRange = getEffSigmaData(mass,binned,m_hyp_-10.,m_hyp_+10.);
+    std::cout << "ED DEBUG: About to do effSigma for " << dataIt->first << std::endl;
+    pair<double,double> thisSigRange;
+    if(dataIt->first!="all") thisSigRange = getEffSigma(mass,pdfs[dataIt->first],m_hyp_-10.,m_hyp_+10.);
+    else {
+      thisSigRange = getEffSigBinned(mass,pdfs[dataIt->first],m_hyp_-10.,m_hyp_+10);
+      //RooDataHist *binned = new RooDataHist("test","test",*mass, (dataIt->second)->createHistogram("test",*mass,RooFit::Binning(1000,m_hyp_-10.,m_hyp_+10.)));
+      //thisSigRange = getEffSigmaData(mass,binned,m_hyp_-10.,m_hyp_+10.);
+    }
 
     vector<double> thisFWHMRange = getFWHM(mass,pdfs[dataIt->first],dataIt->second,m_hyp_-10.,m_hyp_+10.);
 

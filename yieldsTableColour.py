@@ -300,7 +300,7 @@ print "\\hline"
 
 dataLines=[]
 for t in Arr :
-  if t=='Total': continue #ED MUST FIX
+  #if t=='Total': continue #ED MUST FIX
   #print p
   lineCat=t+" &   " 
   line=""
@@ -358,7 +358,7 @@ else :
   tagList = options.order.split(":")[1].split(",")
 
 for t in tagList :
-  if t=='Total': continue #ED MUST FIX
+  #if t=='Total': continue #ED MUST FIX
   #print p
   lineCat=t+" &   " 
   line=""
@@ -455,8 +455,8 @@ totalNaiveExp=0.
 for n in naiveExpecteds:
   totalNaiveExp=totalNaiveExp+(n**2)
 totalNaiveExp=(totalNaiveExp)**(0.5)
-dataLines.append( lineCat + Allline+ " "+line+"& %.2f & %.2f & %.2f & %.2f\\\\"%((2.0),(2.0),bkgy,totalNaiveExp)) #ED MUST FIX (original line below)
-#dataLines.append( lineCat + Allline+ " "+line+"& %.2f & %.2f & %.2f & %.2f\\\\"%(float(effSigma[t]),float(hmSigma[t]),bkgy,totalNaiveExp))
+#dataLines.append( lineCat + Allline+ " "+line+"& %.2f & %.2f & %.2f & %.2f\\\\"%((2.0),(2.0),bkgy,totalNaiveExp)) #ED MUST FIX (original line below)
+dataLines.append( lineCat + Allline+ " "+line+"& %.2f & %.2f & %.2f & %.2f\\\\"%(float(effSigma[t]),float(hmSigma[t]),bkgy,totalNaiveExp))
   #dataLines.append( lineCat + Allline+ " "+line+ "& & &")#"& %.2f & %.2f & %.2f \\\\"%(float(effSigma[t]),float(hmSigma[t]),float(bkgYield[t])))
 
 #dataLines.sort()
@@ -591,16 +591,16 @@ totalNaiveExp=0.
 for n in naiveExpecteds:
   totalNaiveExp=totalNaiveExp+(n**2)
 totalNaiveExp=(totalNaiveExp)**(0.5)
-dataLines.append( lineCat + Allline+ " "+line+"& %.2f & %.2f & %.2f & %.2f & %.2f\\\\"%((2.0),(2.0),bkgy,bkgy/options.factor,totalNaiveExp)) #ED MUST FIX
-#dataLines.append( lineCat + Allline+ " "+line+"& %.2f & %.2f & %.2f & %.2f & %.2f\\\\"%(float(effSigma[t]),float(hmSigma[t]),bkgy,bkgy/options.factor,totalNaiveExp))
+#dataLines.append( lineCat + Allline+ " "+line+"& %.2f & %.2f & %.2f & %.2f & %.2f\\\\"%((2.0),(2.0),bkgy,bkgy/options.factor,totalNaiveExp)) #ED MUST FIX
+dataLines.append( lineCat + Allline+ " "+line+"& %.2f & %.2f & %.2f & %.2f & %.2f\\\\"%(float(effSigma[t]),float(hmSigma[t]),bkgy,bkgy/options.factor,totalNaiveExp))
   #dataLines.append( lineCat + Allline+ " "+line+ "& & &")#"& %.2f & %.2f & %.2f \\\\"%(float(effSigma[t]),float(hmSigma[t]),float(bkgYield[t])))
-sigmaEff_hist.SetBinContent(1,(2.0)) #ED MUST FIX
-#sigmaEff_hist.SetBinContent(1,float(effSigma[t]))
+#sigmaEff_hist.SetBinContent(1,(2.0)) #ED MUST FIX
+sigmaEff_hist.SetBinContent(1,float(effSigma[t]))
 sigmaHM_hist.SetBinContent(1,(2.0))
 #sigmaHM_hist.SetBinContent(1,float(hmSigma[t]))
 #s_sb_hist.SetBinContent(1,float(totalNaiveExp))
-s_sb_value=(0.68*Arr[t]["Total"])/(0.68*Arr[t]["Total"] + 2*(2.0)*bkgy) #ED MUST FIX
-#s_sb_value=(0.68*Arr[t]["Total"])/(0.68*Arr[t]["Total"] + 2*float(effSigma[t])*bkgy)
+#s_sb_value=(0.68*Arr[t]["Total"])/(0.68*Arr[t]["Total"] + 2*(2.0)*bkgy) #ED MUST FIX
+s_sb_value=(0.68*Arr[t]["Total"])/(0.68*Arr[t]["Total"] + 2*float(effSigma[t])*bkgy)
 s_sb_hist.SetBinContent(len(tagList)-iTag,float(s_sb_value))
 
 #dataLines.sort()
@@ -617,19 +617,28 @@ print "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
 r.gROOT.SetBatch()
 r.gStyle.SetOptStat(0)
 hstack = r.THStack("hs","")
-colorList=[r.kGreen+3,r.kRed+2,r.kCyan+2, r.kYellow, r.kYellow+1, r.kYellow+2, r.kBlue+2, r.kOrange-3,r.kPink,r.kBlack]
+colorList=[r.kViolet-7, r.kRed+2, r.kSpring, r.kOrange+7, r.kSpring-7, r.kSpring+3, r.kBlue, r.kBlue+3, r.kAzure+10, r.kAzure+7] #set for ggH,VBF,ttH-type,VH-type
 iColor=0
 print "content_hists ", content_hists
-l1 = r.TLegend(0.0,0.9,1.0,0.95)
+numProcs = len(options.order.split(":")[0].split(","))-1
+l1 = r.TLegend(0.0,0.94,1.0,0.98)
+lExtra = r.TLegend(0.0,0.90,1.0,0.94)
 l2 = r.TLegend(0.0,0.9,1.0,0.95)
 l3 = r.TLegend(0.0,0.9,1.0,0.95)
-l1.SetNColumns(len(options.order.split(":")[0].split(","))-1)
+nProcLim = 6
+if numProcs<=nProcLim:
+  l1.SetNColumns(numProcs)
+else:
+  l1.SetNColumns(nProcLim)
+  lExtra.SetNColumns(numProcs-nProcLim)
 l2.SetNColumns(2)
 l3.SetNColumns(1)
 l1.SetTextSize(0.03)
+lExtra.SetTextSize(0.03)
 l2.SetTextSize(0.09)
 l3.SetTextSize(0.07)
 l1.SetBorderSize(0)
+lExtra.SetBorderSize(0)
 l2.SetBorderSize(0)
 l3.SetBorderSize(0)
 for ih in options.order.split(":")[0].split(","):
@@ -640,7 +649,9 @@ for ih in options.order.split(":")[0].split(","):
  h.SetLineColor(0)
  h.SetMarkerColor(colorList[iColor])
  h.SetBarWidth(0.9)
- l1.AddEntry(h," "+ih,"f")
+ ih = ih.replace("test","")
+ if iColor<=nProcLim-1: l1.AddEntry(h," "+ih,"f")
+ else: lExtra.AddEntry(h," "+ih,"f")
  hstack.Add(h)
  iColor=iColor+1
 l2.AddEntry(sigmaEff_hist," #sigma_{eff}","F")
@@ -728,6 +739,7 @@ pad1.RedrawAxis()
 #hstack.GetXaxis().SetRangeUser(0.001,100)
 #hstack.Draw("hbar")
 l1.Draw()
+lExtra.Draw()
 #hist1.SetTitle("x;y;z")
 #hist1.Fill(0.5,0.5,1)
 #hist1.Draw()
