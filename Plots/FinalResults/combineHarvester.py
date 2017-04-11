@@ -765,8 +765,8 @@ def writeMultiDimFit(method=None,wsOnly=False):
           perTagChCompPOIRanges=perTagChCompPOIRanges+ "%s=0.,2.0:"%r_tag
         perTagChCompPOIRanges[:-1] #remove last character, an extra ":"
         #par_ranges["PerTagChannelCompatibility"]  = perTagChCompPOIRanges 
-        #par_ranges["PerTagChannelCompatibility"]  = "r_ggH=%4.2f,%4.2f:r_qqH=%4.2f,%4.2f:r_ttH=%4.2f,%4.2f:r_QQ2HLNU=%4.2f,%4.2f:r_QQ2HLL=%4.2f,%4.2f:r_VH2HQQ=%4.2f,%4.2f"%(0.0,2.0,0.0,2.0,0.0,2.0,-1.0,3.0,-2.0,4.0,-2.0,4.0)
         par_ranges["PerTagChannelCompatibility"]  = "r_ggH=%4.2f,%4.2f:r_qqH=%4.2f,%4.2f:r_ttH=%4.2f,%4.2f:r_VH=%4.2f,%4.2f"%(0.0,2.0,0.0,2.0,0.0,2.0,-1.0,3.0)
+        #par_ranges["PerTagChannelCompatibility"]  = "r_ggH=%4.2f,%4.2f:r_qqH=%4.2f,%4.2f:r_ttH=%4.2f,%4.2f:r_QQ2HLNU=%4.2f,%4.2f:r_QQ2HLL=%4.2f,%4.2f:r_VH2HQQ=%4.2f,%4.2f"%(0.0,2.0,0.0,2.0,0.0,2.0,-2.0,4.0,-2.0,4.0,-2.0,4.0)
         #par_ranges["PerProcessChannelCompatibility"]  = "r_ggH=%4.2f,%4.2f:r_qqH=%4.2f,%4.2f:r_VH=%4.2f,%4.2f:r_ttH=%4.2f,%4.2f"%(-5.0,5.0,-5.0,5.0,-5.0,20.0,-5.0,5.0)
         #par_ranges["PerProcessChannelCompatibility"]  = "r_ggH=%4.2f,%4.2f:r_qqH=%4.2f,%4.2f::r_ttH=%4.2f,%4.2f"%(-5.0,5.0,-5.0,5.0,-5.0,5.0)
         par_ranges["PerProcessChannelCompatibility"]  = "r_ggH=%4.2f,%4.2f:r_qqH=%4.2f,%4.2f:r_VH=%4.2f,%4.2f:r_ttH=%4.2f,%4.2f"%(0.0,2.0,0.0,2.0,0.0,2.0,0.0,2.0)

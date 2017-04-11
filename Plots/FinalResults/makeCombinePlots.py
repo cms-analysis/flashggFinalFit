@@ -1211,17 +1211,34 @@ def plotMPdfChComp(plottype="perTag"):
          options.method = 'muProc'
          options.xvar[k] = 'r_%s'%catName
          debugCatName=catName
-         if "ggH" in catName: catName ="#scale[1.5]{#mu_{ggH}}"
-         #if "ggH" in catName: catName ="#scale[1.5]{#mu_{GG2H}}"
-         if "qqH" in catName: catName ="#scale[1.5]{#mu_{VBF}}"
-         if "ttH" in catName: catName ="#scale[1.5]{#mu_{ttH}}"
-         #if "ttH" in catName: catName ="#scale[1.5]{#mu_{TTH}}"
-         #if "VH"  in catName: catName ="#scale[1.5]{#mu_{VH}}"
-         if "VH2HQQ"  in catName: catName ="#scale[1.5]{#mu_{VH2HQQ}}"
-         elif "VH"  in catName: catName ="#scale[1.5]{#mu_{VH}}"
-         if "QQ2HLNU"  in catName: catName ="#scale[1.5]{#mu_{QQ2HLNU}}"
-         if "QQ2HLL"  in catName: catName ="#scale[1.5]{#mu_{QQ2HLL}}"
-         print "DEBUG LC b CATBAME ", catName
+         
+         #temp workaround, needs to be new method/changed 
+         doStxs = False
+         #doStxs = True
+         if doStxs:
+           #if "ggH" in catName: catName ="#scale[1.5]{#sigma_{ggH}/#sigma_{theo}}"
+           if "ggH" in catName: catName ="#scale[1.5]{#sigma_{GG2H}/#sigma_{theo}}"
+           if "qqH" in catName: catName ="#scale[1.5]{#sigma_{VBF}/#sigma_{theo}}"
+           #if "ttH" in catName: catName ="#scale[1.5]{#sigma_{ttH}/#sigma_{theo}}"
+           if "ttH" in catName: catName ="#scale[1.5]{#sigma_{TTH}/#sigma_{theo}}"
+           #if "VH"  in catName: catName ="#scale[1.5]{#sigma_{VH}}"
+           if "VH2HQQ"  in catName: catName ="#scale[1.5]{#sigma_{VH2HQQ}/#sigma_{theo}}"
+           elif "VH"  in catName: catName ="#scale[1.5]{#sigma_{VH}/#sigma_{theo}}"
+           if "QQ2HLNU"  in catName: catName ="#scale[1.5]{#sigma_{QQ2HLNU}/#sigma_{theo}}"
+           if "QQ2HLL"  in catName: catName ="#scale[1.5]{#sigma_{QQ2HLL}/#sigma_{theo}}"
+           print "DEBUG LC b CATBAME ", catName
+
+         else:
+           if "ggH" in catName: catName ="#scale[1.5]{#mu_{ggH}}"
+           #if "ggH" in catName: catName ="#scale[1.5]{#mu_{GG2H}}"
+           if "qqH" in catName: catName ="#scale[1.5]{#mu_{VBF}}"
+           if "ttH" in catName: catName ="#scale[1.5]{#mu_{ttH}}"
+           #if "ttH" in catName: catName ="#scale[1.5]{#mu_{TTH}}"
+           #if "VH"  in catName: catName ="#scale[1.5]{#mu_{VH}}"
+           if "VH2HQQ"  in catName: catName ="#scale[1.5]{#mu_{VH2HQQ}}"
+           elif "VH"  in catName: catName ="#scale[1.5]{#mu_{VH}}"
+           if "QQ2HLNU"  in catName: catName ="#scale[1.5]{#mu_{QQ2HLNU}}"
+           if "QQ2HLL"  in catName: catName ="#scale[1.5]{#mu_{QQ2HLL}}"
       else:
          options.method = 'mu'
          debugCatName=catName
