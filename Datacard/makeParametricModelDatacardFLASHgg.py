@@ -132,7 +132,7 @@ combProc = {'GG2H':'ggH_hgg','VBF':'qqH_hgg','TTH':'ttH_hgg','QQ2HLNU':'WH_lep_h
 #flashggProc = {'ggH_hgg':'ggh','qqH_hgg':'vbf','ttH_hgg':'tth','WH_lep_hgg':'wh','ZH_lep_hgg':'zh','WH_had_hgg':'wh','ZH_had_hgg':'zh','bkg_mass':'bkg_mass'}
 flashggProc = {'ggH_hgg':'GG2H','qqH_hgg':'VBF','ttH_hgg':'TTH','WH_lep_hgg':'QQ2HLNU','ZH_lep_hgg':'QQ2HLL','WH_had_hgg':'WH2HQQ','ZH_had_hgg':'ZH2HQQ','bbH_hgg':'testBBH','tHq_hgg':'testTHQ','tHW_hgg':'testTHW','bkg_mass':'bkg_mass'}
 procId = {'ggH_hgg':0,'qqH_hgg':-1,'ttH_hgg':-2,'WH_lep_hgg':-2,'ZH_lep_hgg':-3,'WH_had_hgg':-4,'ZH_had_hgg':-5,'bbH_hgg':-6,'tHq_hgg':-7,'tHW_hgg':-8,'bkg_mass':1}
-bkgProcs = ['bkg_mass'] #what to treat as background
+bkgProcs = ['bkg_mass','bbH_hgg','tHq_hgg','tHW_hgg'] #what to treat as background
 #Determine if VH or WZH_hgg
 splitVH=False
 if 'wzh'in options.procs.split(','):
@@ -306,9 +306,6 @@ inclusiveCats = list(options.cats) #need the list() otherwise NoTag will also be
 inclusiveCats.append("NoTag")
 for proc in options.procs:
   if proc in bkgProcs: continue
-  if "bbH" in proc: continue
-  if "tHq" in proc: continue
-  if "tHW" in proc: continue
   for name in theorySyst.keys(): #wh_130_13TeV_UntaggedTag_1_pdfWeights
     norm_factors_file.write("%s_%s = ["%(proc,name.replace("Weight",""))) 
     result["%s_%s"%(proc,name)] = []
@@ -714,6 +711,7 @@ def printUEPSSyst():
     for line in open('ueps_lines.dat', 'r').readlines():
       outFile.write(line)
   else:
+    uepsOutFile = open('ueps_lines.dat','w')
     uncertainties = ['UE','PS']
     uepsFiles = {}
     uepsFiles['UE'] = options.uepsfilename.split(',UEPS,')[0].split(',')
@@ -766,7 +764,10 @@ def printUEPSSyst():
           lines[uncertainty] += '%5.3f ' % value
       uncName = 'CMS_hgg_'+uncertainty
       print '%-35s   lnN   '%(uncName)+lines[uncertainty]
+      uepsOutFile.write('%-35s   lnN   '%(uncName)+lines[uncertainty]+'\n')
       outFile.write('%-35s   lnN   '%(uncName)+lines[uncertainty]+'\n')
+    uepsOutFile.write('\n')
+    uepsOutFile.close()
     outFile.write('\n')
     
 

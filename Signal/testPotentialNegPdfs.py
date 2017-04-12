@@ -7,17 +7,14 @@ import shlex
 from array import array
 import ROOT as r
 
-
+ext='ws916'
 
 r.gSystem.Load("libHiggsAnalysisCombinedLimit")
 r.gSystem.Load("libHiggsAnalysisGBRLikelihood")
 #procs=['ggh','vbf','zh','wh','tth']
-procs=['GG2H','VBF','TTH','QQ2HLNU','QQ2HLL','WH2HQQ','ZH2HQQ']
+procs=['GG2H','VBF','TTH','QQ2HLNU','QQ2HLL','WH2HQQ','ZH2HQQ','testBBH','testTHQ','testTHW']
 cats=['UntaggedTag_0','UntaggedTag_1','UntaggedTag_2','UntaggedTag_3','VBFTag_0','VBFTag_1','VBFTag_2','TTHLeptonicTag','TTHHadronicTag','ZHLeptonicTag','WHLeptonicTag','VHLeptonicLooseTag','VHHadronicTag','VHMetTag']
 rvwv=['rv','wv']
-
-ext='ws912'
-
 
 for proc in procs:
   for cat in cats:

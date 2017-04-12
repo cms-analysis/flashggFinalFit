@@ -661,8 +661,8 @@ def writeMultiDimFit(method=None,wsOnly=False):
                 catsMap += binstr
         #perTagChCompPOIs=[]
         perTagChCompPOIs=["r_ggH","r_qqH","r_ttH","r_VH"]
-        #perTagChCompPOIs=["r_ggH","r_qqH","r_ttH","r_VH","r_bbH","r_tHq","r_tHW"]
         #perTagChCompPOIs=["r_ggH","r_qqH","r_ttH","r_QQ2HLNU","r_QQ2HLL","r_VH2HQQ"]
+        #perTagChCompPOIs=["r_ggH","r_qqH","r_ttH","r_VH","r_bbH","r_tHq","r_tHW"]
         if opts.method=="PerTagChannelCompatibility" and catsMap=="":
            cats = getSortedCats()
            catsMap =" --PO verbose "
