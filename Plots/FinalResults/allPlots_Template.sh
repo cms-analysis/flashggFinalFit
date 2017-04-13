@@ -19,6 +19,15 @@ INTLUMI=!INTLUMI!
 ##########################################
 
 #./makeCombinePlots.py -f combineJobs13TeV_$EXT/MHScan/MHScan.root --mh -t "$INTLUMI fb^{-1} (13#scale[0.5]{ }TeV)"  -o MHScan  -b
+./makeCombinePlots.py -f combineJobs13TeV_$EXT/ExpMHScan/ExpMHScan.root --mh -t "$INTLUMI fb^{-1} (13#scale[0.5]{ }TeV)"  -o ExpMHScan  -b
+./makeCombinePlots.py -f combineJobs13TeV_$EXT/ExpMHScanStat/ExpMHScanStat.root --mh -t "$INTLUMI fb^{-1} (13#scale[0.5]{ }TeV)"  -o ExpMHScanStat  -b
+./makeCombinePlots.py -f combineJobs13TeV_$EXT/ExpMHScanTheo/ExpMHScanTheo.root --mh -t "$INTLUMI fb^{-1} (13#scale[0.5]{ }TeV)"  -o ExpMHScanTheo  -b
+./makeCombinePlots.py -f combineJobs13TeV_$EXT/ExpMHScanJustNonLinearity/ExpMHScanJustNonLinearity.root --mh -t "$INTLUMI fb^{-1} (13#scale[0.5]{ }TeV)"  -o ExpMHScanJustNonLinearity  -b
+./makeCombinePlots.py -f combineJobs13TeV_$EXT/ExpMHScanJustSmearScale/ExpMHScanJustSmearScale.root --mh -t "$INTLUMI fb^{-1} (13#scale[0.5]{ }TeV)"  -o ExpMHScanJustSmearScale -b
+./makeCombinePlots.py -f combineJobs13TeV_$EXT/ExpMHScanJustShowerShape/ExpMHScanJustShowerShape.root --mh -t "$INTLUMI fb^{-1} (13#scale[0.5]{ }TeV)"  -o ExpMHScanJustShowerShape -b
+./makeCombinePlots.py -f combineJobs13TeV_$EXT/ExpMHScanJustMaterial/ExpMHScanJustMaterial.root --mh -t "$INTLUMI fb^{-1} (13#scale[0.5]{ }TeV)"  -o ExpMHScanJustMaterial -b
+./makeCombinePlots.py -f combineJobs13TeV_$EXT/ExpMHScanJustFNUF/ExpMHScanJustFNUF.root --mh -t "$INTLUMI fb^{-1} (13#scale[0.5]{ }TeV)"  -o ExpMHScanJustFNUF -b
+./makeCombinePlots.py -f combineJobs13TeV_$EXT/ExpMHScanJustGeant4/ExpMHScanJustGeant4.root --mh -t "$INTLUMI fb^{-1} (13#scale[0.5]{ }TeV)"  -o ExpMHScanJustGeant4 -b
 
 ##########################################
 #########  PER TAG CH COMP ###############
@@ -60,7 +69,7 @@ INTLUMI=!INTLUMI!
 #./makeCombinePlots.py -f combineJobs13TeV_$EXT/RVRFScanFixMH/RVRFScanFixMH.root --rvrf -t "$INTLUMI fb^{-1} (13#scale[0.5]{ }TeV)" -o RVRFScanFixMH --xbinning 28,-0.99,3.49 --ybinning 9,-0.49,3.49 --MHtext 0.17:0.17:"m_{H}=125.09 GeV" --legend 0.71,0.65,0.89,0.89 -b 
 #./makeCombinePlots.py -f combineJobs13TeV_$EXT/RVRFScanFixMH125.97/RVRFScanFixMH125.97.root --rvrf -t "$INTLUMI fb^{-1} (13#scale[0.5]{ }TeV)" -o RVRFScanFixMH125.97 --xbinning 28,-0.99,3.49 --ybinning 9,-0.49,3.49  --MHtext 0.17:0.17:"m_{H}=125.97 GeV" --legend 0.71,0.65,0.89,0.89 -b 
 ./makeCombinePlots.py -f combineJobs13TeV_$EXT/RVRFScanProfileMH/RVRFScanProfileMH.root --rvrf -t "$INTLUMI fb^{-1} (13#scale[0.5]{ }TeV)" -o RVRFScanProfileMH --xbinning 50,-1.,3. --ybinning 50,-1.,3. --MHtext 0.17:0.17:"m_{H} profiled" --legend 0.68,0.63,0.82,0.87 -b 
-./makeCombinePlots.py -f combineJobs13TeV_$EXT/RVRFScanProfileMH/RVRFScanProfileMH.root --rvrf -t "$INTLUMI fb^{-1} (13#scale[0.5]{ }TeV)" -o RVRFScanProfileMHalaICHEP --xbinning 50,-0.99,3.49 --ybinning 50,-0.49,4.49 --MHtext 0.17:0.17:"m_{H} profiled" --legend 0.68,0.63,0.82,0.87 -b 
+#./makeCombinePlots.py -f combineJobs13TeV_$EXT/RVRFScanProfileMH/RVRFScanProfileMH.root --rvrf -t "$INTLUMI fb^{-1} (13#scale[0.5]{ }TeV)" -o RVRFScanProfileMHalaICHEP --xbinning 50,-0.99,3.49 --ybinning 50,-0.49,4.49 --MHtext 0.17:0.17:"m_{H} profiled" --legend 0.68,0.63,0.82,0.87 -b 
 
 ##########################################
 ##########  CV vs CF 2D SCANS   ##########
