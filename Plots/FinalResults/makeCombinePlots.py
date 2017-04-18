@@ -1721,11 +1721,11 @@ def run():
   elif options.method=='rvrf':
     plot2DNLL("RF","RV","#mu_{ggH,ttH}","#mu_{VBF,VH}")
   elif options.method=='cvcf':
-    plot2DNLL("CV","CF","#kappa_{V}","#kappa_{f}")
+    plot2DNLL("kappa_V","kappa_F","#kappa_{V}","#kappa_{f}")
   elif options.method=='xdm':
     plot2DNLL("x","deltaM","x","#Delta m (GeV)")
   elif options.method=='kglukgam':
-    plot2DNLL("kgamma","kgluon","#kappa_{#gamma}","#kappa_{g}")
+    plot2DNLL("kappa_gam","kappa_g","#kappa_{#gamma}","#kappa_{g}")
 
 # __MAIN__
 

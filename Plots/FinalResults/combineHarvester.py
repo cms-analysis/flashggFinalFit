@@ -687,12 +687,19 @@ def writeMultiDimFit(method=None,wsOnly=False):
     "MuScanTheo"  : "",
     "MuScanMHProf"  : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:floatingHiggsMass",
     "CVCFScan"  : "-P HiggsAnalysis.CombinedLimit.HiggsCouplings:cVcF       %s" % profMH,
-    "KGluKGamScan"  : "-P HiggsAnalysis.CombinedLimit.HiggsCouplings:higgsLoops %s" % profMH,
-    "MHScan"  : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:rVrFXSHiggs  %s" % profMH,
-    "MHScanStat"   : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:rVrFXSHiggs  %s" % profMH,
-    "MHScanTheo"   : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:rVrFXSHiggs  %s" % profMH,
-    "MHScanJustThisSyst"   : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:rVrFXSHiggs  %s" % profMH,
-    "MHScanNoGlob"  : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:rVrFXSHiggs  %s" % profMH,
+    #"KGluKGamScan"  : "-P HiggsAnalysis.CombinedLimit.HiggsCouplings:higgsLoops %s" % profMH,
+    "KGluKGamScan"  : "-P HiggsAnalysis.CombinedLimit.HiggsCouplings:c7 %s" % profMH, #updated version. Needs freezing of other five vars
+    #"MHScan"  : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:rVrFXSHiggs  %s" % profMH,
+    #"MHScanStat"   : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:rVrFXSHiggs  %s" % profMH,
+    #"MHScanTheo"   : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:rVrFXSHiggs  %s" % profMH,
+    #"MHScanJustThisSyst"   : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:rVrFXSHiggs  %s" % profMH,
+    #"MHScanNoGlob"  : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:rVrFXSHiggs  %s" % profMH,
+    #now use custom mapping for new STXS process names
+    "MHScan"  : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel %s %s" %(catsMap,profMH),
+    "MHScanStat"   : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel %s %s" %(catsMap,profMH),
+    "MHScanTheo"   : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel %s %s" %(catsMap,profMH),
+    "MHScanJustThisSyst"   : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel %s %s" %(catsMap,profMH),
+    "MHScanNoGlob"  : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel %s %s" %(catsMap,profMH),
     "MuMHScan"  : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:floatingHiggsMass",
     "RTopoScan"  : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel %s %s" % ( catsMap, profMH ),
     "RBinScan"  : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel %s %s" % ( catsMap, profMH ),
@@ -717,13 +724,20 @@ def writeMultiDimFit(method=None,wsOnly=False):
             "MuScanStat": [ ],
             "MuScanTheo": [ ],
             "MuScanMHProf": [ ],
-            "CVCFScan": [ "CV", "CF" ],
-            "KGluKGamScan": [ "kgluon", "kgamma" ],
-            "MHScan": [ ],
-            "MHScanStat": [ ],
-            "MHScanTheo": [ ],
-            "MHScanJustThisSyst": [ ],
-            "MHScanNoGlob": [ ],
+            #"CVCFScan": [ "CV", "CF" ],
+            "CVCFScan": [ "kappa_V", "kappa_F" ],
+            #"KGluKGamScan": [ "kgluon", "kgamma" ],
+            "KGluKGamScan": [ "kappa_g", "kappa_gam" ],
+            #"MHScan": [ ],
+            #"MHScanStat": [ ],
+            #"MHScanTheo": [ ],
+            #"MHScanJustThisSyst": [ ],
+            #"MHScanNoGlob": [ ],
+            "MHScan": [ "RV", "RF" ],
+            "MHScanStat": [ "RV", "RF" ],
+            "MHScanTheo": [ "RV", "RF" ],
+            "MHScanJustThisSyst": [ "RV", "RF" ],
+            "MHScanNoGlob": [ "RV", "RF" ],
             "MuMHScan": [ ],
             "RProcScan": [ "r_ggH","r_qqH","r_VH","r_ttH" ],
             "RTopoScan": [ "r_untag","r_qqHtag","r_VHtag","r_ttHtag" ],
@@ -745,8 +759,10 @@ def writeMultiDimFit(method=None,wsOnly=False):
     "MuScanStat"  : "-P r",
     "MuScanTheo"  : "-P r",
     "MuScanMHProf"  : "-P r --floatOtherPOIs=1",
-    "CVCFScan"  : "-P CV -P CF --floatOtherPOIs=1", 
-    "KGluKGamScan"  : "-P kgluon -P kgamma --floatOtherPOIs=1", 
+    #"CVCFScan"  : "-P CV -P CF --floatOtherPOIs=1", 
+    "CVCFScan"  : "-P kappa_V -P kappa_F --floatOtherPOIs=1", 
+    #"KGluKGamScan"  : "-P kgluon -P kgamma --floatOtherPOIs=1", 
+    "KGluKGamScan"  : "-P kappa_g -P kappa_gam --floatOtherPOIs=1", 
     "MHScan"  : "--floatOtherPOIs=1 -P MH",
     "MHScanStat"  : "--floatOtherPOIs=1 -P MH",
     "MHScanTheo"  : "--floatOtherPOIs=1 -P MH",
@@ -794,9 +810,11 @@ def writeMultiDimFit(method=None,wsOnly=False):
           par_ranges["RBinScan"]    = "%s=%4.2f,%4.2f"%(opts.poix,opts.muLow,opts.muHigh)
           par_ranges["RDiffXsScan"] = "%s=%4.2f,%4.2f"%(opts.poix,opts.muLow,opts.muHigh)
         if opts.cvLow!=None and opts.cvHigh!=None and opts.cfLow!=None and opts.cfHigh!=None:
-          par_ranges["CVCFScan"]    = "CV=%4.2f,%4.2f:CF=%4.2f,%4.2f"%(opts.cvLow,opts.cvHigh,opts.cfLow,opts.cfHigh)
+          #par_ranges["CVCFScan"]    = "CV=%4.2f,%4.2f:CF=%4.2f,%4.2f"%(opts.cvLow,opts.cvHigh,opts.cfLow,opts.cfHigh)
+          par_ranges["CVCFScan"]    = "kappa_V=%4.2f,%4.2f:kappa_F=%4.2f,%4.2f"%(opts.cvLow,opts.cvHigh,opts.cfLow,opts.cfHigh)
         if opts.kgamLow!=None and opts.kgamHigh!=None and opts.kgluLow!=None and opts.kgluHigh!=None:
-          par_ranges["KGluKGamScan"] = "kgamma=%4.2f,%4.2f:kgluon=%4.2f,%4.2f"%(opts.kgamLow,opts.kgamHigh,opts.kgluLow,opts.kgluHigh)
+          #par_ranges["KGluKGamScan"] = "kgamma=%4.2f,%4.2f:kgluon=%4.2f,%4.2f"%(opts.kgamLow,opts.kgamHigh,opts.kgluLow,opts.kgluHigh)
+          par_ranges["KGluKGamScan"] = "kappa_gam=%4.2f,%4.2f:kappa_g=%4.2f,%4.2f"%(opts.kgamLow,opts.kgamHigh,opts.kgluLow,opts.kgluHigh)
         if opts.mhLow!=None and opts.mhHigh!=None:
           par_ranges["MHScan"]    = "MH=%6.2f,%6.2f"%(opts.mhLow,opts.mhHigh)
           par_ranges["MHScanStat"]  = "MH=%6.2f,%6.2f"%(opts.mhLow,opts.mhHigh)

@@ -75,7 +75,9 @@ INTLUMI=!INTLUMI!
 ##########  CV vs CF 2D SCANS   ##########
 ##########################################
 #./makeCombinePlots.py -f combineJobs13TeV_$EXT/CVCFScanFixMH/CVCFScanFixMH.root --cvcf -t "$INTLUMI fb^{-1} (13#scale[0.5]{ }TeV)" -o CVCFScanFixMH --xbinning 30,0,2 --ybinning 40,-1,3 --MHtext 0.17:0.17:"m_{H}=125.09 GeV" --legend 0.71,0.65,0.89,0.89 -b 
+./makeCombinePlots.py -f combineJobs13TeV_$EXT/CVCFScanProfileMH/CVCFScanProfileMH.root --cvcf -t "$INTLUMI fb^{-1} (13#scale[0.5]{ }TeV)" -o CVCFScanProfileMH --xbinning 30,0,2 --ybinning 40,-1,3 --MHtext 0.17:0.17:"m_{H}=125.09 GeV" --legend 0.71,0.65,0.89,0.89 -b 
 ##########################################
 ##########  K GLU vs K GAM 2D SCANS   ##########
 ##########################################
 #./makeCombinePlots.py -f combineJobs13TeV_$EXT/KGluKGamScanFixMH/KGluKGamScanFixMH.root --kglukgam -t "$INTLUMI fb^{-1} (13#scale[0.5]{ }TeV)" -o KGluKGamScanFixMH --xbinning 25,0,2 --ybinning 25,0,2 --MHtext 0.17:0.17:"m_{H}=125.09 GeV" --legend 0.71,0.65,0.89,0.89 -b 
+./makeCombinePlots.py -f combineJobs13TeV_$EXT/KGluKGamScanProfileMH/KGluKGamScanProfileMH.root --kglukgam -t "$INTLUMI fb^{-1} (13#scale[0.5]{ }TeV)" -o KGluKGamScanProfileMH --xbinning 25,0,2 --ybinning 25,0,2 --MHtext 0.17:0.17:"m_{H}=125.09 GeV" --legend 0.71,0.65,0.89,0.89 -b 
