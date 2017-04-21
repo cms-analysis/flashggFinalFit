@@ -7,7 +7,7 @@ import shlex
 from array import array
 import ROOT as r
 
-ext='ws916'
+ext='ws919'
 
 r.gSystem.Load("libHiggsAnalysisCombinedLimit")
 r.gSystem.Load("libHiggsAnalysisGBRLikelihood")

@@ -207,6 +207,7 @@ int main(int argc, char *argv[]) {
   const double leftpos = 102.0;
    
    
+  std::cout << "about open file with name " <<  filename_[0] << std::endl;
   TFile *fin = TFile::Open(filename_[0].c_str());
   if (verbose_) std::cout << "[INFO] Opened file " << fin << std::endl; 
   

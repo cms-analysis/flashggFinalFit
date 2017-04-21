@@ -268,7 +268,8 @@ def cleanSpikes1D(rfix):
 
  # cindex is where deltaNLL = 0 (pre anything)
  MAXDER = 1.0
- for i,r,m in enumerate(rfix):
+ #for i,r,m in enumerate(rfix):
+ for i,r in enumerate(rfix):
    if abs(r[1]) <0.001: cindex = i
 
  lhs = rfix[0:cindex]; lhs.reverse()
@@ -276,7 +277,8 @@ def cleanSpikes1D(rfix):
  keeplhs = []
  keeprhs = []
 
- for i,lr,m in enumerate(lhs): 
+ #for i,lr,m in enumerate(lhs): 
+ for i,lr in enumerate(lhs): 
    if i==0: 
    	prev = lr[1]
 	idiff = 1
@@ -288,7 +290,8 @@ def cleanSpikes1D(rfix):
    idiff=1
  keeplhs.reverse()
 
- for i,rr,m in enumerate(rhs):
+ #for i,rr,m in enumerate(rhs):
+ for i,rr in enumerate(rhs):
    if i==0: 
    	prev = rr[1]
 	idiff = 1
@@ -303,7 +306,8 @@ def cleanSpikes1D(rfix):
  
  rkeep = []
  #now try to remove small jagged spikes
- for i,r,m in enumerate(rfix):
+ #for i,r,m in enumerate(rfix):
+ for i,r in enumerate(rfix):
    if i==0 or i==len(rfix)-1: 
    	rkeep.append(r)
    	continue
@@ -662,6 +666,7 @@ def plot1DNLL(returnErrors=False,xvar="", ext=""):
       if re[1]<100: rfix.append(re) 
     
     # clean out spikes :(
+    #print "rfix",rfix
     if options.cleanNll: rfix = cleanSpikes1D(rfix)
 
     res = rfix[:] 
@@ -1195,6 +1200,11 @@ def plotMPdfChComp(plottype="perTag"):
       catName=loffiles[0].split("/")[-1].replace(".root","")
       catName=catName.replace("TTHLeptonicTag","TTH Leptonic Tag")
       catName=catName.replace("TTHHadronicTag","TTH Hadronic Tag")
+      catName=catName.replace("ZHLeptonicTag","ZH Leptonic Tag")
+      catName=catName.replace("WHLeptonicTag","WH Leptonic Tag")
+      catName=catName.replace("VHLeptonicLooseTag","VH Lep Loose Tag")
+      catName=catName.replace("VHMetTag","VH MET Tag")
+      catName=catName.replace("VHHadronicTag","VH Hadronic Tag")
       catName=catName.replace("_13TeV","")
       catName=catName.replace("Tag_","Tag ")
       catName=catName.replace("UntaggedTag","Untagged")
@@ -1245,6 +1255,11 @@ def plotMPdfChComp(plottype="perTag"):
          #options.xvar[k] = 'r_%s'%catName
       catName=catName.replace("TTHLeptonicTag","TTH Leptonic Tag")
       catName=catName.replace("TTHHadronicTag","TTH Hadronic Tag")
+      catName=catName.replace("ZHLeptonicTag","ZH Leptonic Tag")
+      catName=catName.replace("WHLeptonicTag","WH Leptonic Tag")
+      catName=catName.replace("VHLeptonicLooseTag","VH Lep Loose Tag")
+      catName=catName.replace("VHMetTag","VH MET Tag")
+      catName=catName.replace("VHHadronicTag","VH Hadronic Tag")
       catName=catName.replace("_13TeV","")
       catName=catName.replace("Tag_","Tag ")
       catName=catName.replace("UntaggedTag","Untagged")

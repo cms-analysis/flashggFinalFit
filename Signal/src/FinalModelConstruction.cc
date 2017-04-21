@@ -1162,6 +1162,7 @@ vector<RooAbsPdf*> FinalModelConstruction::buildPdf(string name, int nGaussians,
   MG_coeffs->Draw("ALP");
   legcoeffs->Draw();
   c->SaveAs(Form("%s/%s_%s_%s_interpolation_debug.pdf",outDir_.c_str(),proc_.c_str(),cat_.c_str(),rvwv.c_str()));
+  c->SaveAs(Form("%s/%s_%s_%s_interpolation_debug.png",outDir_.c_str(),proc_.c_str(),cat_.c_str(),rvwv.c_str()));
   assert(gaussians->getSize()==nGaussians && coeffs->getSize()==nGaussians-1);//-1
   RooAbsPdf *pdf = new RooAddPdf(Form("%s_%s",name.c_str(),ext.c_str()),Form("%s_%s",name.c_str(),ext.c_str()),*gaussians,*coeffs,recursive);
   result.push_back(pdf);
