@@ -296,8 +296,8 @@ int main(int argc, char *argv[]) {
     desc.ReplaceAll("13TeV","");
     desc.ReplaceAll("UntaggedTag","Untagged");
     desc.ReplaceAll("VBFTag","VBF Tag");
-    desc.ReplaceAll("TTHLeptonicTag","TTH Leptonic Tag");
-    desc.ReplaceAll("TTHHadronicTag","TTH Hadronic Tag");
+    desc.ReplaceAll("TTHLeptonicTag","ttH Leptonic Tag");
+    desc.ReplaceAll("TTHHadronicTag","ttH Hadronic Tag");
     desc.ReplaceAll("SigmaMpTTag","#sigma_{M}/M |_{decorr} category");
     catdesc.push_back(desc);
     std::cout << "[INFO] --> description :" << desc << std::endl;
@@ -820,8 +820,8 @@ int main(int argc, char *argv[]) {
     } else {
       catplot->GetYaxis()->SetTitle(TString::Format("Events / GeV"));
     }
-    //catplot->GetYaxis()->SetTitleOffset(1.015*catplot->GetYaxis()->GetTitleOffset());
-    catplot->GetYaxis()->SetTitleOffset(0.9*catplot->GetYaxis()->GetTitleOffset());
+    catplot->GetYaxis()->SetTitleOffset(1.015*catplot->GetYaxis()->GetTitleOffset());
+    //catplot->GetYaxis()->SetTitleOffset(0.9*catplot->GetYaxis()->GetTitleOffset());
     catplot->SetTitle("");
     
     if (catplot->GetXaxis()->GetBinWidth(1) !=1){

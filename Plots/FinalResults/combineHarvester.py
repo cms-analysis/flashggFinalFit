@@ -261,7 +261,7 @@ def makeFloatMHCard():
      f1.close()
      f2.close()
 def makeTheoOnlyCard():
-  print "[INFO] making stats-only card"
+  print "[INFO] making theo-only card"
   
   assert(opts.datacard.endswith('.txt'))
   newcardname = opts.datacard.replace('.txt','_theoonly.txt') 
@@ -660,8 +660,9 @@ def writeMultiDimFit(method=None,wsOnly=False):
                 binstr += ").*TeV/.*Bin.*:r_Bin%d[1,0,20]'" % ibin
                 catsMap += binstr
         actualPerTagChCompPOIs=[]
-        perTagChCompPOIs=["r_ggH","r_qqH","r_ttH","r_VH"]
-        #perTagChCompPOIs=["r_ggH","r_qqH","r_ttH","r_QQ2HLNU","r_QQ2HLL","r_VH2HQQ"]
+        #perTagChCompPOIs=[]
+        #perTagChCompPOIs=["r_ggH","r_qqH","r_ttH","r_VH"] #FIXME
+        perTagChCompPOIs=["r_ggH","r_qqH","r_ttH","r_QQ2HLNU","r_QQ2HLL","r_VH2HQQ"]
         #perTagChCompPOIs=["r_ggH","r_qqH","r_ttH","r_VH","r_bbH","r_tHq","r_tHW"]
         if opts.method=="ActualPerTagChannelCompatibility" and catsMap=="":
            cats = getSortedCats()
@@ -687,9 +688,9 @@ def writeMultiDimFit(method=None,wsOnly=False):
     "MuScanStat"  : "",
     "MuScanTheo"  : "",
     "MuScanMHProf"  : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:floatingHiggsMass",
-    "CVCFScan"  : "-P HiggsAnalysis.CombinedLimit.HiggsCouplings:cVcF       %s" % profMH,
+    "CVCFScan"  : "-P HiggsAnalysis.CombinedLimit.HiggsCouplings:cVcF  --PO BRU=0     %s" % profMH,
     #"KGluKGamScan"  : "-P HiggsAnalysis.CombinedLimit.HiggsCouplings:higgsLoops %s" % profMH,
-    "KGluKGamScan"  : "-P HiggsAnalysis.CombinedLimit.HiggsCouplings:c7 %s" % profMH, #updated version. Needs freezing of other five vars
+    "KGluKGamScan"  : "-P HiggsAnalysis.CombinedLimit.HiggsCouplings:c7  --PO BRU=0  %s" % profMH, #updated version. Needs freezing of other five vars
     #"MHScan"  : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:rVrFXSHiggs  %s" % profMH,
     #"MHScanStat"   : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:rVrFXSHiggs  %s" % profMH,
     #"MHScanTheo"   : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:rVrFXSHiggs  %s" % profMH,
@@ -787,15 +788,16 @@ def writeMultiDimFit(method=None,wsOnly=False):
           elif "VBF" in r_tag: perTagChCompPOIRanges=perTagChCompPOIRanges+ "%s=-1.0,3.0:"%r_tag
           elif "TTH" in r_tag: perTagChCompPOIRanges=perTagChCompPOIRanges+ "%s=0.0,5.0:"%r_tag
           elif "WH" in r_tag: perTagChCompPOIRanges=perTagChCompPOIRanges+ "%s=0.0,5.0:"%r_tag
-          elif "ZH" in r_tag: perTagChCompPOIRanges=perTagChCompPOIRanges+ "%s=-10.0,10.0:"%r_tag
+          elif "ZH" in r_tag: perTagChCompPOIRanges=perTagChCompPOIRanges+ "%s=0.0,10.0:"%r_tag
           elif "VH" in r_tag: perTagChCompPOIRanges=perTagChCompPOIRanges+ "%s=-1.0,6.0:"%r_tag
           else: perTagChCompPOIRanges=perTagChCompPOIRanges+ "%s=-2.0,10.0:"%r_tag
         perTagChCompPOIRanges = perTagChCompPOIRanges[:-1] #remove last character, an extra ":"
         #par_ranges["PerTagChannelCompatibility"]  = perTagChCompPOIRanges 
         #par_ranges["PerTagChannelCompatibility"]  = "r_ggH=%4.2f,%4.2f:r_qqH=%4.2f,%4.2f:r_ttH=%4.2f,%4.2f:r_VH=%4.2f,%4.2f"%(0.0,2.0,0.0,2.0,0.0,2.0,-1.0,3.0) #expected
-        par_ranges["PerTagChannelCompatibility"]  = "r_ggH=%4.2f,%4.2f:r_qqH=%4.2f,%4.2f:r_ttH=%4.2f,%4.2f:r_VH=%4.2f,%4.2f"%(0.0,2.0,0.0,2.0,0.0,4.0,0.0,4.0) #observed
+        #par_ranges["PerTagChannelCompatibility"]  = "r_ggH=%4.2f,%4.2f:r_qqH=%4.2f,%4.2f:r_ttH=%4.2f,%4.2f:r_VH=%4.2f,%4.2f"%(0.0,2.0,0.0,2.0,0.0,4.0,0.0,4.0) #observed
+        par_ranges["PerTagChannelCompatibility"]  = "r_ggH=%4.2f,%4.2f:r_qqH=%4.2f,%4.2f:r_ttH=%4.2f,%4.2f:r_QQ2HLNU=%4.2f,%4.2f:r_QQ2HLL=%4.2f,%4.2f:r_VH2HQQ=%4.2f,%4.2f"%(0.0,2.0,0.0,2.0,0.0,2.0,-2.0,4.0,-2.0,4.0,-2.0,4.0) #stxs expected #FIXME
+        #par_ranges["PerTagChannelCompatibility"]  = "r_ggH=%4.2f,%4.2f:r_qqH=%4.2f,%4.2f:r_ttH=%4.2f,%4.2f:r_QQ2HLNU=%4.2f,%4.2f:r_QQ2HLL=%4.2f,%4.2f:r_VH2HQQ=%4.2f,%4.2f"%(0.0,2.0,0.0,2.0,0.0,4.0,0.,6.0,-10.,6.0,0.,8.0) #stxs observed
         par_ranges["ActualPerTagChannelCompatibility"]  = perTagChCompPOIRanges 
-        #par_ranges["PerTagChannelCompatibility"]  = "r_ggH=%4.2f,%4.2f:r_qqH=%4.2f,%4.2f:r_ttH=%4.2f,%4.2f:r_QQ2HLNU=%4.2f,%4.2f:r_QQ2HLL=%4.2f,%4.2f:r_VH2HQQ=%4.2f,%4.2f"%(0.0,2.0,0.0,2.0,0.0,2.0,-2.0,4.0,-2.0,4.0,-2.0,4.0)
         #par_ranges["PerTagChannelCompatibility"]  = "r_ggH=%4.2f,%4.2f:r_qqH=%4.2f,%4.2f:r_ttH=%4.2f,%4.2f:r_VH=%4.2f,%4.2f:r_bbH=%4.2f,%4.2f:r_tHq=%4.2f,%4.2f:r_tHW=%4.2f,%4.2f"%(0.0,2.0,0.0,2.0,0.0,2.0,-1.0,3.0,-50.0,50.0,-50.,50.,-50.,50.)
         #par_ranges["PerProcessChannelCompatibility"]  = "r_ggH=%4.2f,%4.2f:r_qqH=%4.2f,%4.2f:r_VH=%4.2f,%4.2f:r_ttH=%4.2f,%4.2f"%(-5.0,5.0,-5.0,5.0,-5.0,20.0,-5.0,5.0)
         #par_ranges["PerProcessChannelCompatibility"]  = "r_ggH=%4.2f,%4.2f:r_qqH=%4.2f,%4.2f::r_ttH=%4.2f,%4.2f"%(-5.0,5.0,-5.0,5.0,-5.0,5.0)

@@ -21,6 +21,7 @@ parser.add_option("-v","--sigworkspaces",default="")
 parser.add_option("-u","--bkgworkspaces",default="")
 parser.add_option("-o","--order",default="",help="tell teh script what order to print tags and procs in. Usage proc1,proc2,proc3..:tag1,tag2,tag3...")
 parser.add_option("-f","--flashggCats",default="UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,VBFTag_0,VBFTag_1,VBFTag_2,TTHHadronicTag,TTHLeptonicTag,ZHLeptonicTag,WHLeptonicTag,VHLeptonicLooseTag,VHHadronicTag,VHMetTag")
+parser.add_option("-t","--total",dest="total",default=False,action="store_true",help="do total line in colour plot (always on in table)")
 parser.add_option("--verbose",default=0)
 (options,args) = parser.parse_args()
 
@@ -469,14 +470,26 @@ print "\end{tabular}"
 
 print "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
 
-s_sb_hist= r.TH1F("s_sb","",len(tagList),0,len(tagList)-1)
-sigmaEff_hist= r.TH1F("sigEff","",len(tagList),0,len(tagList)-1)
-sigmaHM_hist= r.TH1F("sigHM","",len(tagList),0,len(tagList)-1)
+doTotals = options.total
+if doTotals:
+  s_sb_hist= r.TH1F("s_sb","",len(tagList),0,len(tagList)-1)
+  sigmaEff_hist= r.TH1F("sigEff","",len(tagList),0,len(tagList)-1)
+  sigmaHM_hist= r.TH1F("sigHM","",len(tagList),0,len(tagList)-1)
+else:
+  s_sb_hist= r.TH1F("s_sb","",len(tagList)-1,0,len(tagList)-2)
+  sigmaEff_hist= r.TH1F("sigEff","",len(tagList)-1,0,len(tagList)-2)
+  sigmaHM_hist= r.TH1F("sigHM","",len(tagList)-1,0,len(tagList)-2)
 content_hists={}
 for i in range(0,nProcs):
  pName=Arr.values()[0].keys()[i]
+ if not doTotals and pName=="Total":
+   print "ED DEBUG ============================================="
+   print "pName is",pName
+   print "ED DEBUG ============================================="
+   continue
  print "making hist with name " , pName
- content_hists[pName]=r.TH1F("content_%s"%pName,"content_%s"%pName,len(tagList),0,len(tagList)-1)
+ if doTotals: content_hists[pName]=r.TH1F("content_%s"%pName,"content_%s"%pName,len(tagList),0,len(tagList)-1)
+ else: content_hists[pName]=r.TH1F("content_%s"%pName,"content_%s"%pName,len(tagList)-1,0,len(tagList)-2)
 
 print "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
 #print "\\resizebox{\\textwidth}{!}{"
@@ -525,7 +538,8 @@ for t in tagList :
     val=100*Arr[t][p]/Arr[t]["Total"]
     line = line+" &  "+str('%.2f \%%'%(val))
     if options.verbose: print " filling content hist ", p, " for bin ", len(tagList)-iTag, " =", tagList[iTag], " ==", val
-    content_hists[p].SetBinContent(len(tagList)-iTag,val)
+    if doTotals: content_hists[p].SetBinContent(len(tagList)-iTag,val)
+    else: content_hists[p].SetBinContent(len(tagList)-1-iTag,val)
     #content_hists[p].GetXaxis().SetBinLabel(iTag,'%s'%t)
   Allline=" "+str('%.2f'%Arr[t]["Total"])
   #content_hists[p].GetXaxis().SetBinLabel(iTag,'Total')
@@ -556,9 +570,14 @@ for t in tagList :
   s_sb_value=(0.68*Arr[t]["Total"])/(0.68*Arr[t]["Total"] + 2*float(effSigma[t])*bkgy)
   dataLines.append( lineCat + Allline+ " "+line+"& %.2f & %.2f & %.2f & %.2f & %.2f\\\\"%(float(effSigma[t]),float(hmSigma[t]),bkgy,bkgy/options.factor,naiveExp ))
   #dataLines.append( lineCat + Allline+ " "+line+"& %.2f & %.2f & %.2f & %.2f & %.2f\\\\"%(float(effSigma[t]),float(hmSigma[t]),bkgy,bkgy/options.factor,fancyExp ))
-  sigmaEff_hist.SetBinContent(len(tagList)-iTag,float(effSigma[t]))
-  sigmaHM_hist.SetBinContent(len(tagList)-iTag,float(hmSigma[t]))
-  s_sb_hist.SetBinContent(len(tagList)-iTag,float(s_sb_value))
+  if doTotals:
+    sigmaEff_hist.SetBinContent(len(tagList)-iTag,float(effSigma[t]))
+    sigmaHM_hist.SetBinContent(len(tagList)-iTag,float(hmSigma[t]))
+    s_sb_hist.SetBinContent(len(tagList)-iTag,float(s_sb_value))
+  else:
+    sigmaEff_hist.SetBinContent(len(tagList)-1-iTag,float(effSigma[t]))
+    sigmaHM_hist.SetBinContent(len(tagList)-1-iTag,float(hmSigma[t]))
+    s_sb_hist.SetBinContent(len(tagList)-1-iTag,float(s_sb_value))
   naiveExpecteds.append(naiveExp)
   #naiveExpecteds.append(fancyExp)
   iTag=iTag+1
@@ -571,6 +590,7 @@ if options.verbose:
   print "vbfFancy",(vbfTotals[4])**0.5
   
 # now do total line
+#print "Are we doing totals?",doTotals
 t=="Total" 
 lineCat=t+" &   " 
 line=""
@@ -579,7 +599,7 @@ for p in procList:
    val=100*Arr[t][p]/Arr[t]["Total"]
    line = line+" &  "+str('%.2f \%%'%(100*Arr[t][p]/Arr[t]["Total"]))
    #print " filling content hist ", p, " for bin ", 1, " =", t, " ==", val
-   content_hists[p].SetBinContent(1,val)
+   if doTotals: content_hists[p].SetBinContent(1,val)
 Allline=" "+str('%.2f'%Arr[t]["Total"])
   #bkgy=0
 if not t in bkgYield.keys():
@@ -595,13 +615,13 @@ totalNaiveExp=(totalNaiveExp)**(0.5)
 dataLines.append( lineCat + Allline+ " "+line+"& %.2f & %.2f & %.2f & %.2f & %.2f\\\\"%(float(effSigma[t]),float(hmSigma[t]),bkgy,bkgy/options.factor,totalNaiveExp))
   #dataLines.append( lineCat + Allline+ " "+line+ "& & &")#"& %.2f & %.2f & %.2f \\\\"%(float(effSigma[t]),float(hmSigma[t]),float(bkgYield[t])))
 #sigmaEff_hist.SetBinContent(1,(2.0)) #ED MUST FIX
-sigmaEff_hist.SetBinContent(1,float(effSigma[t]))
-sigmaHM_hist.SetBinContent(1,(2.0))
-#sigmaHM_hist.SetBinContent(1,float(hmSigma[t]))
+if doTotals: sigmaEff_hist.SetBinContent(1,float(effSigma[t]))
+#sigmaHM_hist.SetBinContent(1,(2.0))
+if doTotals: sigmaHM_hist.SetBinContent(1,float(hmSigma[t]))
 #s_sb_hist.SetBinContent(1,float(totalNaiveExp))
 #s_sb_value=(0.68*Arr[t]["Total"])/(0.68*Arr[t]["Total"] + 2*(2.0)*bkgy) #ED MUST FIX
 s_sb_value=(0.68*Arr[t]["Total"])/(0.68*Arr[t]["Total"] + 2*float(effSigma[t])*bkgy)
-s_sb_hist.SetBinContent(len(tagList)-iTag,float(s_sb_value))
+if doTotals: s_sb_hist.SetBinContent(len(tagList)-iTag,float(s_sb_value))
 
 #dataLines.sort()
 for l in dataLines :
@@ -617,7 +637,8 @@ print "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
 r.gROOT.SetBatch()
 r.gStyle.SetOptStat(0)
 hstack = r.THStack("hs","")
-colorList=[r.kViolet-7, r.kRed+2, r.kSpring, r.kOrange+7, r.kSpring-7, r.kSpring+3, r.kBlue, r.kBlue+3, r.kAzure+10, r.kAzure+7] #set for ggH,VBF,ttH-type,VH-type
+#colorList=[r.kViolet-7, r.kRed+2, r.kSpring, r.kOrange+7, r.kSpring-7, r.kSpring+3, r.kBlue, r.kBlue+3, r.kAzure+10, r.kAzure+7] #set for ggH,VBF,ttH-type,VH-type
+colorList=[r.kBlue, r.kGreen+2, r.kMagenta-7, r.kBlue+3, r.kMagenta-3, r.kMagenta+2, r.kRed, r.kRed+1, r.kOrange+1, r.kOrange+7] #set for ggH,VBF,ttH-type,WH-type,ZH-type (ZZ colors and order)
 iColor=0
 print "content_hists ", content_hists
 numProcs = len(options.order.split(":")[0].split(","))-1
@@ -650,6 +671,15 @@ for ih in options.order.split(":")[0].split(","):
  h.SetMarkerColor(colorList[iColor])
  h.SetBarWidth(0.9)
  ih = ih.replace("test","")
+ ih = ih.replace("TTH","ttH")
+ ih = ih.replace("GG2H","ggH")
+ ih = ih.replace("BBH","bbH")
+ ih = ih.replace("THQ","tHq")
+ ih = ih.replace("THW","tHW")
+ ih = ih.replace("WH2HQQ","WH hadronic")
+ ih = ih.replace("QQ2HLNU","WH leptonic")
+ ih = ih.replace("ZH2HQQ","ZH hadronic")
+ ih = ih.replace("QQ2HLL","ZH leptonic")
  if iColor<=nProcLim-1: l1.AddEntry(h," "+ih,"f")
  else: lExtra.AddEntry(h," "+ih,"f")
  hstack.Add(h)
@@ -657,9 +687,10 @@ for ih in options.order.split(":")[0].split(","):
 l2.AddEntry(sigmaEff_hist," #sigma_{eff}","F")
 l2.AddEntry(sigmaHM_hist," #sigma_{HM}","F")
 
-l3.AddEntry(s_sb_hist," S/(S+B) in #pm #sigma_{eff}","F")
+l3.AddEntry(s_sb_hist," S/(S+B)","F")
 
-dummyHist= r.TH2F("h1","",100,0.01,100,len(tagList),0,len(tagList)-1)
+if doTotals: dummyHist= r.TH2F("h1","",100,0.01,100,len(tagList),0,len(tagList)-1)
+else: dummyHist= r.TH2F("h1","",100,0.01,100,len(tagList)-1,0,len(tagList)-2)
 dummyHist2= r.TH2F("h2","",100,0.01,1.2*sigmaEff_hist.GetMaximum(),len(tagList),0,len(tagList)-1)
 dummyHist3= r.TH2F("h2","",100,0.01,1.2*s_sb_hist.GetMaximum(),len(tagList),0,len(tagList)-1)
 #dummyHist= r.TH2F("h1","h1",15,0,15,100,0.01,100)
@@ -672,9 +703,9 @@ canv = r.TCanvas("c","c",700,400)
   #xax.SetBinLabel(xax.FindBin(i),tagList[i])
   #dummyHist.GetYaxis().SetBinLabel(i, tagList[i])
  
-pad1 = r.TPad("pad1","pad1",0.15,0.0,0.5,0.95)
+pad1 = r.TPad("pad1","pad1",0.15,0.0,0.52,0.95)
 pad2 = r.TPad("pad2","pad2",0.53,0.0,0.71,0.95)
-pad3 = r.TPad("pad3","pad3",0.73,0.0,0.95,0.95)
+pad3 = r.TPad("pad3","pad3",0.73,0.0,0.97,0.95)
 #pad1.SetFillColor(r.kRed)
 #pad2.SetFillColor(r.kPink)
 #pad3.SetFillColor(r.kBlue)
@@ -751,21 +782,34 @@ lat.SetTextFont(42)
 lat.SetTextSize(0.025)
 lat.SetLineWidth(2)
 lat.SetTextAlign(31)
-lat.SetNDC()
+#lat.SetNDC()
 offset=0.0
 for ih in options.order.split(":")[1].split(","):
  print "DBG ih =" , ih
- lat.DrawLatex(0.14,0.82-offset,ih)
- offset=offset+((0.82-0.05)/len(tagList))
+ if not doTotals and ih=="Total": continue
+ lat.SetTextAlign(31)
+ tagLabel = ih.replace("TTH","ttH")
+ tagLabel = tagLabel.replace(" Tag","")
+ tagLabel = tagLabel.replace("Met","MET")
+ lat.DrawLatex(0.14,0.82-offset,tagLabel)
+ evtCount = "#color[0]{%.1f expected events}"%Arr[ih]["Total"]
+ lat.SetTextAlign(11)
+ lat.DrawLatex(0.16,0.82-offset,evtCount)
+ if doTotals: offset=offset+((0.82-0.05)/len(tagList))
+ else: offset=offset+((0.82-0.05)/(len(tagList)-1))
 
+lat.SetTextAlign(31)
 lat.SetTextSize(0.04)
 lat.DrawLatex(0.5,0.02,"Signal Fraction (%)")
 lat.DrawLatex(0.71,0.02,"Width (GeV)")
 lat.DrawLatex(0.95,0.02,"S/(S+B) in #pm #sigma_{eff}")
 lat.SetTextSize(0.05)
+#lat.SetTextSize(0.07)
 lat.SetTextAlign(11)
-lat.DrawLatex(0.05,0.95,"#bf{CMS} #it{Preliminary} H#rightarrow#gamma#gamma")
+lat.DrawLatex(0.05,0.95,"#bf{CMS} #it{Preliminary}   H#rightarrow#gamma#gamma")
 lat.SetTextAlign(31)
+#lat.SetTextSize(0.05)
+lat.SetTextSize(0.045)
 lat.DrawLatex(0.95,0.95,"%.1f fb^{-1} (13 TeV)"%lumi)
 pad1.RedrawAxis()
 canv.SaveAs("yieldsTablePlot.pdf")

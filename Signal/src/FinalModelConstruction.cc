@@ -1255,6 +1255,7 @@ void FinalModelConstruction::plotPdf(string outDir){
   TCanvas *canv = new TCanvas();
   RooPlot *dataPlot = mass->frame(Title(Form("%s_%s",proc_.c_str(),catname.c_str())),Range(110,140));
   TPaveText *pt = new TPaveText(.7,.5,.95,.8,"NDC");
+  TLegend *leg = new TLegend(0.75,0.6,0.95,0.9);
   //TH1F * dummy = new TH1F("d","d",1,0,1);
   //dummy->SetMarkerColor(kWhite);
   //pt->AddText(Form("Fit using PDF from :"); 
@@ -1271,6 +1272,8 @@ void FinalModelConstruction::plotPdf(string outDir){
     extendPdf->plotOn(dataPlot,LineColor(colorList[i]));
     pt->AddText(Form("RV %d: %s",mh,rvFITDatasets[mh]->GetName())); 
     pt->AddText(Form("WV %d: %s",mh,wvFITDatasets[mh]->GetName())); 
+    TObject *pdfLeg = dataPlot->getObject(int(dataPlot->numItems()-1));
+    leg->AddEntry(pdfLeg,Form("m_{H} = %d GeV",mh),"L");
    //extendPdf->getRamaPrint("V");
     //RooRealVar *thisParamPostFit;
     //TIterator *pdfParamsPostFit = 
@@ -1281,7 +1284,8 @@ void FinalModelConstruction::plotPdf(string outDir){
   }
   dataPlot->SetTitle(Form("combined RV WV fits for %s %s",proc_.c_str(),catname.c_str()));
   dataPlot->Draw();
-  pt->Draw("same");
+  //pt->Draw("same");
+  leg->Draw("same");
   canv->Print(Form("%s/%s_%s_fmc_fits.pdf",outDir.c_str(),proc_.c_str(),catname.c_str()));
   canv->Print(Form("%s/%s_%s_fmc_fits.png",outDir.c_str(),proc_.c_str(),catname.c_str()));
   

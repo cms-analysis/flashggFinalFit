@@ -7,8 +7,13 @@
 
 # ones I actually use - observed
 #method=mu:files=combineJobs13TeV_!EXT!/MuScanProfileMH/MuScanProfileMH.root:colors=2:styles=1:widths=2:names=syststat:text=!INTLUMI! fb^{-1} (13TeV):outname=MuScanProfileMH
-method=mu:files=combineJobs13TeV_!EXT!/MuScanProfileMHStat/MuScanProfileMHStat.root,combineJobs13TeV_!EXT!/MuScanProfileMH/MuScanProfileMH.root:colors=2,4:styles=1,1:widths=2,2:names=stat only,syststat:text=!INTLUMI! fb^{-1} (13TeV):outname=MuScanProfileMH
-method=mh:files=combineJobs13TeV_!EXT!/MHScanStat/MHScanStat.root,combineJobs13TeV_!EXT!/MHScan/MHScan.root:colors=2,4:styles=1,1:widths=2,2:names=stat only,syststat:text=!INTLUMI! fb^{-1} (13TeV):outname=MHScan:xvar=MH
+#method=mu:files=combineJobs13TeV_!EXT!/MuScanProfileMHStat/MuScanProfileMHStat.root:colors=2:styles=1:widths=2:names=syststat:text=!INTLUMI! fb^{-1} (13TeV):outname=MuScanProfileMHStat
+#method=mu:files=combineJobs13TeV_!EXT!/MuScanProfileMHNoTheo/MuScanProfileMHNoTheo.root:colors=2:styles=1:widths=2:names=syststat:text=!INTLUMI! fb^{-1} (13TeV):outname=MuScanProfileMHNoTheo
+#method=mu:files=combineJobs13TeV_!EXT!/MuScanFixMH/MuScanFixMH.root:colors=2:styles=1:widths=2:names=syststat:text=!INTLUMI! fb^{-1} (13TeV):outname=MuScanFixMH
+#method=mu:files=combineJobs13TeV_!EXT!/MuScanFixMH_Run1Mass/MuScanFixMH_Run1Mass.root:colors=2:styles=1:widths=2:names=syststat:text=!INTLUMI! fb^{-1} (13TeV):outname=MuScanFixMH_Run1Mass
+#method=mu:files=combineJobs13TeV_!EXT!/MuScanProfileMH/MuScanProfileMH.root,combineJobs13TeV_!EXT!/MuScanProfileMHStat/MuScanProfileMHStat.root:colors=4,2:styles=1,1:widths=2,2:names=stat+syst,stat only:text=!INTLUMI! fb^{-1} (13TeV):outname=MuScanProfileMH #use also --MHtext 0.43:0.655:"m_{H} profiled" --legend 0.415,0.695,0.715,0.8 -x 0.7,1.6
+#method=mu:files=combineJobs13TeV_!EXT!/MuScanProfileMH/MuScanProfileMH.root,combineJobs13TeV_!EXT!/MuScanProfileMHStat/MuScanProfileMHStat.root:colors=4,2:styles=1,1:widths=2,2:names=stat+syst,stat only:text=35.9 fb^{-1} (13TeV):outname=MuScanProfileMH
+#method=mh:files=combineJobs13TeV_!EXT!/MHScan/MHScan.root,combineJobs13TeV_!EXT!/MHScanStat/MHScanStat.root:colors=4,2:styles=1,1:widths=2,2:names=stat+syst,stat only:text=!INTLUMI! fb^{-1} (13TeV):outname=MHScan:xvar=MH
 
 
 #method=pval:files=exp1.root,exp2.root,obs1.root,obs2.root:colors=2,4,2,4:styles=2,2,1,1:widths=2,2,2,2:names=Expected 1,Expected 2,Observed 1,Observed 2:text=!INTLUMI! fb^{-1} (13TeV)
