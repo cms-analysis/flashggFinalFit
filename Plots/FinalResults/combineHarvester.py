@@ -661,8 +661,8 @@ def writeMultiDimFit(method=None,wsOnly=False):
                 catsMap += binstr
         actualPerTagChCompPOIs=[]
         #perTagChCompPOIs=[]
-        #perTagChCompPOIs=["r_ggH","r_qqH","r_ttH","r_VH"] #FIXME
-        perTagChCompPOIs=["r_ggH","r_qqH","r_ttH","r_QQ2HLNU","r_QQ2HLL","r_VH2HQQ"]
+        perTagChCompPOIs=["r_ggH","r_qqH","r_ttH","r_VH"] #FIXME
+        #perTagChCompPOIs=["r_ggH","r_qqH","r_ttH","r_QQ2HLNU","r_QQ2HLL","r_VH2HQQ"]
         #perTagChCompPOIs=["r_ggH","r_qqH","r_ttH","r_VH","r_bbH","r_tHq","r_tHW"]
         if opts.method=="ActualPerTagChannelCompatibility" and catsMap=="":
            cats = getSortedCats()
@@ -785,17 +785,17 @@ def writeMultiDimFit(method=None,wsOnly=False):
           #perTagChCompPOIRanges=perTagChCompPOIRanges+ "%s=-2.0,10.0:"%r_tag
           if "Untagged" in r_tag and "3" not in r_tag: perTagChCompPOIRanges=perTagChCompPOIRanges+ "%s=0.0,2.0:"%r_tag
           elif "Untagged" in r_tag and "3" in r_tag: perTagChCompPOIRanges=perTagChCompPOIRanges+ "%s=0.0,3.0:"%r_tag
-          elif "VBF" in r_tag: perTagChCompPOIRanges=perTagChCompPOIRanges+ "%s=-1.0,3.0:"%r_tag
+          elif "VBF" in r_tag: perTagChCompPOIRanges=perTagChCompPOIRanges+ "%s=0.0,3.0:"%r_tag
           elif "TTH" in r_tag: perTagChCompPOIRanges=perTagChCompPOIRanges+ "%s=0.0,5.0:"%r_tag
           elif "WH" in r_tag: perTagChCompPOIRanges=perTagChCompPOIRanges+ "%s=0.0,5.0:"%r_tag
           elif "ZH" in r_tag: perTagChCompPOIRanges=perTagChCompPOIRanges+ "%s=0.0,10.0:"%r_tag
-          elif "VH" in r_tag: perTagChCompPOIRanges=perTagChCompPOIRanges+ "%s=-1.0,6.0:"%r_tag
-          else: perTagChCompPOIRanges=perTagChCompPOIRanges+ "%s=-2.0,10.0:"%r_tag
+          elif "VH" in r_tag: perTagChCompPOIRanges=perTagChCompPOIRanges+ "%s=0.0,6.0:"%r_tag
+          else: perTagChCompPOIRanges=perTagChCompPOIRanges+ "%s=0.0,10.0:"%r_tag
         perTagChCompPOIRanges = perTagChCompPOIRanges[:-1] #remove last character, an extra ":"
         #par_ranges["PerTagChannelCompatibility"]  = perTagChCompPOIRanges 
         #par_ranges["PerTagChannelCompatibility"]  = "r_ggH=%4.2f,%4.2f:r_qqH=%4.2f,%4.2f:r_ttH=%4.2f,%4.2f:r_VH=%4.2f,%4.2f"%(0.0,2.0,0.0,2.0,0.0,2.0,-1.0,3.0) #expected
-        #par_ranges["PerTagChannelCompatibility"]  = "r_ggH=%4.2f,%4.2f:r_qqH=%4.2f,%4.2f:r_ttH=%4.2f,%4.2f:r_VH=%4.2f,%4.2f"%(0.0,2.0,0.0,2.0,0.0,4.0,0.0,4.0) #observed
-        par_ranges["PerTagChannelCompatibility"]  = "r_ggH=%4.2f,%4.2f:r_qqH=%4.2f,%4.2f:r_ttH=%4.2f,%4.2f:r_QQ2HLNU=%4.2f,%4.2f:r_QQ2HLL=%4.2f,%4.2f:r_VH2HQQ=%4.2f,%4.2f"%(0.0,2.0,0.0,2.0,0.0,2.0,-2.0,4.0,-2.0,4.0,-2.0,4.0) #stxs expected #FIXME
+        par_ranges["PerTagChannelCompatibility"]  = "r_ggH=%4.2f,%4.2f:r_qqH=%4.2f,%4.2f:r_ttH=%4.2f,%4.2f:r_VH=%4.2f,%4.2f"%(0.0,2.0,0.0,2.0,0.0,4.0,0.0,4.0) #observed
+        #par_ranges["PerTagChannelCompatibility"]  = "r_ggH=%4.2f,%4.2f:r_qqH=%4.2f,%4.2f:r_ttH=%4.2f,%4.2f:r_QQ2HLNU=%4.2f,%4.2f:r_QQ2HLL=%4.2f,%4.2f:r_VH2HQQ=%4.2f,%4.2f"%(0.0,2.0,0.0,2.0,0.0,2.0,-2.0,4.0,-2.0,4.0,-2.0,4.0) #stxs expected #FIXME
         #par_ranges["PerTagChannelCompatibility"]  = "r_ggH=%4.2f,%4.2f:r_qqH=%4.2f,%4.2f:r_ttH=%4.2f,%4.2f:r_QQ2HLNU=%4.2f,%4.2f:r_QQ2HLL=%4.2f,%4.2f:r_VH2HQQ=%4.2f,%4.2f"%(0.0,2.0,0.0,2.0,0.0,4.0,0.,6.0,-10.,6.0,0.,8.0) #stxs observed
         par_ranges["ActualPerTagChannelCompatibility"]  = perTagChCompPOIRanges 
         #par_ranges["PerTagChannelCompatibility"]  = "r_ggH=%4.2f,%4.2f:r_qqH=%4.2f,%4.2f:r_ttH=%4.2f,%4.2f:r_VH=%4.2f,%4.2f:r_bbH=%4.2f,%4.2f:r_tHq=%4.2f,%4.2f:r_tHW=%4.2f,%4.2f"%(0.0,2.0,0.0,2.0,0.0,2.0,-1.0,3.0,-50.0,50.0,-50.,50.,-50.,50.)

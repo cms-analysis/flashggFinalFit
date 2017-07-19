@@ -69,6 +69,7 @@ parser.add_option("-v","--verbose",dest="verbose",default=False,action="store_tr
 parser.add_option("-b","--batch",dest="batch",default=False,action="store_true")
 parser.add_option("--it",dest="it",type="string",help="if using superloop, index of iteration")
 parser.add_option("--itLedger",dest="itLedger",type="string",help="ledger to keep track of values of each iteration if using superloop")
+parser.add_option("--specifyX",dest="specifyX",type="string",help="use a specific variable name in mu plots (eg r_Untagged_Tag_0)")
 (options,args)=parser.parse_args()
 
 print "[INFO] Processing Files :"
@@ -258,8 +259,9 @@ def drawGlobals(canv,shifted="False"):
    lat.DrawLatex(0.1,0.92,"#bf{CMS} #scale[0.75]{#it{Preliminary}}")
    #lat.DrawLatex(0.129+0.04,0.85,"H#rightarrow#gamma#gamma")
    lat.SetTextSize(0.05) #FIXME
-   lat.DrawLatex(0.13,0.83,"H#rightarrow#gamma#gamma")
-   #lat.DrawLatex(0.77,0.83,"H#rightarrow#gamma#gamma") #FIXME just for new MuScan
+   #lat.DrawLatex(0.13,0.83,"H#rightarrow#gamma#gamma") #LHCP17
+   #lat.DrawLatex(0.12,0.82,"H#rightarrow#gamma#gamma")
+   lat.DrawLatex(0.77,0.83,"H#rightarrow#gamma#gamma") #FIXME just for new MuScan
    #lat.SetTextSize(0.07)
    lat.SetTextSize(0.045)
    lat.DrawLatex(0.69,0.92,options.text)
@@ -611,6 +613,10 @@ def plot1DNLL(returnErrors=False,xvar="", ext=""):
     x = "r"
     #xtitle = '#sigma / #sigma_{SM}'
     xtitle = '#mu'
+    if options.specifyX:
+      print "setting variable name in tree to",options.specifyX[0]
+      x = options.specifyX[0]
+      xtitle = '#mu_{%s}'%options.specifyX[0]
   elif options.method=='muProc':
     x = xvar
     #xtitle = '#sigma / #sigma_{SM}'
@@ -794,7 +800,8 @@ def plot1DNLL(returnErrors=False,xvar="", ext=""):
     #lat2.SetTextAlign(11)
     #lat2.DrawLatex(0.17,0.78,"#hat{#mu} = %4.2f ^{#font[122]{+}%4.2f}_{#font[122]{-}%4.2f}"%(fit,eplus0,eminus0))
     #lat2.DrawLatex(0.46,0.84,"#hat{#mu} = %4.2f ^{#font[122]{+}%4.2f}_{#font[122]{-}%4.2f}"%(fit,eplus0,eminus0))
-    lat2.DrawLatex(0.52,0.84,"#hat{#mu} = %4.2f ^{#font[122]{+}%4.2f}_{#font[122]{-}%4.2f}"%(fit,eplus0,eminus0))
+    lat2.DrawLatex(0.52,0.84,"#hat{#mu} = %4.2f ^{#font[122]{+}%4.2f}_{#font[122]{-}%4.2f}"%(fit,eplus0,eminus0)) #LHCP17
+    #lat2.DrawLatex(0.47,0.84,"#hat{#mu} = %4.2f ^{#font[122]{+}%4.2f}_{#font[122]{-}%4.2f}"%(fit,eplus0,eminus0))
   elif options.method=='rv': lat2.DrawLatex(0.5,0.85,"#hat{#mu}_{qqH+VH} = %4.2f ^{#font[122]{+}%4.2f}_{#font[122]{-}%4.2f}"%(fit,eplus0,eminus0))
   elif options.method=='rf': lat2.DrawLatex(0.5,0.85,"#hat{#mu}_{ggH+ttH} = %4.2f ^{#font[122]{+}%4.2f}_{#font[122]{-}%4.2f}"%(fit,eplus0,eminus0))
 
