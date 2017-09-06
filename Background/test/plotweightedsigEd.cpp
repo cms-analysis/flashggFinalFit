@@ -794,7 +794,8 @@ int main(int argc, char *argv[]) {
     //lat2.SetTextSize(0.045);
     lat2.SetTextSize(0.04);
     //lat2.SetTextSize(0.035);
-    TLatex lat3(0.31,0.93,"#it{Simulation Preliminary}          13 TeV");
+    //TLatex lat3(0.31,0.93,"#it{Simulation Preliminary}          13 TeV");
+    TLatex lat3(0.31,0.93,"#it{Simulation}                             13 TeV"); // for the paper
     lat3.SetNDC(1);
     lat3.SetTextSize(0.045);
 

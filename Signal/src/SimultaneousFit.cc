@@ -1,6 +1,7 @@
 #include <fstream>
 
 #include "TCanvas.h"
+#include "TH2.h"
 #include "TMath.h"
 #include "TLatex.h"
 #include "RooPlot.h"
@@ -616,6 +617,10 @@ void SimultaneousFit::runFits(int ncpu,string outdir, float epsilon){
     double minNll=fitRes->minNll();
     std::cout << "DEBUG a" << std::endl;
     //vecFitRes.push_back(fitRes*);
+    std::cout << "ED DEBUG: about to print correlation matrix" << std::endl;
+    fitRes->correlationHist()->Print("ALL");
+    std::cout << "ED DEBUG: done printing correlation matrix, below are the parameters" << std::endl;
+    fitRes->Print("ALL");
     std::cout << "DEBUG b" << std::endl;
     int thisNDOF=(fitModel[iOrder]->getParameters(RooArgSet(*mass,*MH)))->getSize();
     

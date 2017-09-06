@@ -18,6 +18,7 @@ def getUpDownUncertainties(directory,nuisance_group,POI):
     centralValue=-1
     loValue=-1
     hiValue=-1
+    print "nuisance group is %s" %nuisance_group
     for i in range(tree.GetEntries()):
       tree.GetEntry(i)
       quantile =  getattr(tree,'quantileExpected')
@@ -47,7 +48,8 @@ def writeJobFileAndSubmit(directory,nuisance_group,POI="r"):
     sub_file.write('cd %s\n'%directory)
     #sub_file.write('touch %s/sub_job.%s.sh.run\n'%(directory,nuisance_group))
     freezeNuisancesCommand=""
-    if not "none" in nuisance_group: freezeNuisancesCommand=" --freezeNuisanceGroups=%s"%nuisance_group
+    if "all" in nuisance_group: freezeNuisancesCommand="--freezeNuisances all"
+    elif not "none" in nuisance_group: freezeNuisancesCommand=" --freezeNuisanceGroups=%s"%nuisance_group
     if (POI=="r") : sub_file.write('eval combine  CMS-HGG_mva_13TeV_datacard.root -M MultiDimFit --robustFit 1 -t -1 --expectSignal 1 -m125 --setPhysicsModelParameters pdfindex_UntaggedTag_0_13TeV=1,pdfindex_UntaggedTag_1_13TeV=3,pdfindex_UntaggedTag_2_13TeV=2,pdfindex_UntaggedTag_3_13TeV=1,pdfindex_VBFTag_0_13TeV=2,pdfindex_VBFTag_1_13TeV=1,pdfindex_VBFTag_2_13TeV=4,pdfindex_TTHHadronicTag_13TeV=0,pdfindex_TTHLeptonicTag_13TeV=1,pdfindex_ZHLeptonicTag_13TeV=0,pdfindex_WHLeptonicTag_13TeV=1,pdfindex_VHLeptonicLooseTag_13TeV=2,pdfindex_VHHadronicTag_13TeV=1,pdfindex_VHMetTag_13TeV=0 --algo singles --cl=0.68 --minimizerAlgoForMinos Minuit2,Migrad -n %s %s\n'%(nuisance_group,freezeNuisancesCommand))
     else         :  sub_file.write('eval combine  CMS-HGG_mva_13TeV_datacard.perProc.root -M MultiDimFit --robustFit 1 -t -1 --redefineSignalPOIs %s -P %s --floatOtherPOIs 1 --expectSignal 1 -m125 --setPhysicsModelParameterRanges r_ggH=0.00,2.00:r_qqH=0.00,2.00:r_ttH=0.00,2.00:r_VH=-1.00,3.00 --setPhysicsModelParameters pdfindex_UntaggedTag_0_13TeV=1,pdfindex_UntaggedTag_1_13TeV=3,pdfindex_UntaggedTag_2_13TeV=2,pdfindex_UntaggedTag_3_13TeV=1,pdfindex_VBFTag_0_13TeV=2,pdfindex_VBFTag_1_13TeV=1,pdfindex_VBFTag_2_13TeV=4,pdfindex_TTHHadronicTag_13TeV=0,pdfindex_TTHLeptonicTag_13TeV=1,pdfindex_ZHLeptonicTag_13TeV=0,pdfindex_WHLeptonicTag_13TeV=1,pdfindex_VHLeptonicLooseTag_13TeV=2,pdfindex_VHHadronicTag_13TeV=1,pdfindex_VHMetTag_13TeV=0 --algo singles --cl=0.68 --minimizerAlgoForMinos Minuit2,Migrad -n %s %s\n'%(POI,POI,nuisance_group,freezeNuisancesCommand))
     sub_file.close()
@@ -59,7 +61,9 @@ def writeJobFileAndSubmit(directory,nuisance_group,POI="r"):
 
 
 
-nuisance_groups = ["none","AlphaS_migrations","Branching_ratio","Diphoton_MVA_preselection","Electron_veto","Integrated_luminosity","Jet_energy_scale_and_resolution","Lepton_reconstruction_and_btag_efficiencies","Modelling_of_detector_response_in_GEANT4","Modelling_of_material_budget","Nonlinearity_of_detector_response","Nonuniformity_of_light_collection","PDF_and_alphaS_yield","PDF_migrations","Per_photon_energy_resolution_estimate","Photon_energy_scale_and_smearing","Photon_identification","Photon_preselection","QCD_scale_migrations","QCD_scale_yield","Shower_shape_corrections","Trigger_efficiency","UE_and_PS","Vertex_finding_efficiency","ggF_contamination_in_VBF_categories","ggF_contamination_in_ttH_categories","MET"]
+#nuisance_groups = ["all","none","AlphaS_migrations","Branching_ratio","Diphoton_MVA_preselection","Electron_veto","Integrated_luminosity","Jet_energy_scale_and_resolution","Lepton_reconstruction_and_btag_efficiencies","Modelling_of_detector_response_in_GEANT4","Modelling_of_material_budget","Nonlinearity_of_detector_response","Nonuniformity_of_light_collection","PDF_and_alphaS_yield","PDF_migrations","Per_photon_energy_resolution_estimate","Photon_energy_scale_and_smearing","Photon_identification","Photon_preselection","QCD_scale_migrations","QCD_scale_yield","Shower_shape_corrections","Trigger_efficiency","UE_and_PS","Vertex_finding_efficiency","ggF_contamination_in_VBF_categories","ggF_contamination_in_ttH_categories","MET"]
+#nuisance_groups = ["all","none","AlphaS_migrations","Branching_ratio","Diphoton_MVA_preselection","Electron_veto","Integrated_luminosity","Jet_energy_scale_and_resolution","Lepton_reconstruction_and_btag_efficiencies","Modelling_of_detector_response_in_GEANT4","Modelling_of_material_budget","Nonlinearity_of_detector_response","Nonuniformity_of_light_collection","PDF_and_alphaS_yield","PDF_migrations","Per_photon_energy_resolution_estimate","Photon_energy_scale_and_smearing","Photon_identification","Photon_preselection","QCD_scale_migrations","QCD_scale_yield","Shower_shape_corrections","Trigger_efficiency","UE_and_PS","Vertex_finding_efficiency","ggF_contamination_in_VBF_categories","ggF_contamination_in_ttH_categories","MET","other_new_ggF"]
+nuisance_groups = ["all","none","AlphaS_migrations","Branching_ratio","Diphoton_MVA_preselection","Electron_veto","Integrated_luminosity","Jet_energy_scale_and_resolution","Lepton_reconstruction_and_btag_efficiencies","Modelling_of_detector_response_in_GEANT4","Modelling_of_material_budget","Nonlinearity_of_detector_response","Nonuniformity_of_light_collection","PDF_and_alphaS_yield","PDF_migrations","Per_photon_energy_resolution_estimate","Photon_energy_scale_and_smearing","Photon_identification","Photon_preselection","QCD_scale_migrations","QCD_scale_yield","Shower_shape_corrections","Trigger_efficiency","UE_and_PS","Vertex_finding_efficiency","ggF_contamination_in_ttH_categories","MET","new_ggF_qmtop","new_ggF_pt","new_ggF_Mig","new_ggF_VBF","new_ggF_ResMu"]
 POIs =["r","r_ggH","r_qqH","r_VH","r_ttH"]
 #POIs =["r_ggH","r_qqH","r_VH","r_ttH"]
 print "considering the following POIs: ",POIs
@@ -97,7 +101,8 @@ if opts.makeTable:
        thisDownWrtCentral = (abs(nominalValues[1] **2 - values[1]**2))**(0.5)
        thisSymmWrtCentral = (abs(nominalValues[2] **2 - values[2]**2))**(0.5)
        poi_array[ng]=[thisUpWrtCentral,thisDownWrtCentral,thisSymmWrtCentral]
-       sumInQuad[POI] += thisSymmWrtCentral**2
+       if ng != "all":
+         sumInQuad[POI] += thisSymmWrtCentral**2
      valueMap={}
      for this_ng in sorted(poi_array.items(),key=lambda e: e[1][2], reverse=True):
        #print this_ng, this_ng[1][2]
@@ -124,15 +129,22 @@ if opts.makeTable:
   #for this_ng in sorted(overall_array[POIs[1]].items(),key=lambda e: e[1], reverse=True):
   for this_ng in sorted(overall_array[POIs[2]].items(),key=lambda e: e[1], reverse=True):
       if (this_ng[0] == "none") : continue
+      if (this_ng[0] == "all") : continue
       print_line= this_ng[0].replace("_"," ") + " "
       for POI in POIs   : print_line = print_line + " &  %.2f \%%"% overall_array[POI][this_ng[0]]
       print_line = print_line + " \\\\ "
       print print_line
   print "\\hline"
-  print_line = "Total "
+  print_line = "Sum "
   for POI in POIs: 
     total = 100.*((sumInQuad[POI])**(0.5))
     print_line = print_line + " &  %.2f \%%"% total
+  print_line = print_line + " \\\\ "
+  print print_line
+  print_line = "Total "
+  for POI in POIs: 
+    fullVal = overall_array[POI]["all"]
+    print_line = print_line + " &  %.2f \%%"% fullVal
   print_line = print_line + " \\\\ "
   print print_line
   print "\\hline"
@@ -147,7 +159,7 @@ if opts.makeTable:
 #QCD_scale_yield group = QCDscale_ggH QCDscale_qqH QCDscale_ttH QCDscale_VH
 #QCD_scale_migrations group = CMS_hgg_scaleWeight_0 CMS_hgg_scaleWeight_1 CMS_hgg_scaleWeight_2
 #ggF_contamination_in_ttH_categories group = CMS_hgg_tth_parton_shower CMS_hgg_tth_gluon_splitting CMS_hgg_tth_mc_low_stat 
-#ggF_contamination_in_VBF_categories group = CMS_hgg_JetVeto_migration0 CMS_hgg_JetVeto_migration1 
+#ggF_contamination_in_VBF_categories group = CMS_hgg_JetVeto_migration0 CMS_hgg_JetVeto_migration1 CMS_hgg_JetVeto_migration2
 #Branching_ratio group = BR_hgg
 #UE_and_PS group = CMS_hgg_UE CMS_hgg_PS
 #Photon_energy_scale_and_smearing group = CMS_hgg_nuisance_HighR9EB_13TeVscale CMS_hgg_nuisance_HighR9EE_13TeVscale CMS_hgg_nuisance_LowR9EB_13TeVscale CMS_hgg_nuisance_LowR9EE_13TeVscale CMS_hgg_nuisance_HighR9EBPhi_13TeVsmear CMS_hgg_nuisance_HighR9EBRho_13TeVsmear CMS_hgg_nuisance_HighR9EEPhi_13TeVsmear CMS_hgg_nuisance_HighR9EERho_13TeVsmear CMS_hgg_nuisance_LowR9EBPhi_13TeVsmear  CMS_hgg_nuisance_LowR9EBRho_13TeVsmear CMS_hgg_nuisance_LowR9EEPhi_13TeVsmear CMS_hgg_nuisance_LowR9EERho_13TeVsmear 
@@ -168,3 +180,13 @@ if opts.makeTable:
 #Electron_veto group = CMS_hgg_electronVetoSF
 #MET group = CMS_hgg_MET_JEC CMS_hgg_MET_JER CMS_hgg_MET_Unclustered CMS_hgg_MET_PhotonScale
 #Rejections_of_jets_from_pileup group = CMS_hgg_PUJIDShift_migration0
+
+#alternatives
+#ggF_contamination_in_VBF_categories group = CMS_hgg_THU_ggH_VBF3j CMS_hgg_THU_ggH_Res CMS_hgg_THU_ggH_Mig12 CMS_hgg_THU_ggH_VBF2j CMS_hgg_THU_ggH_Mig01 CMS_hgg_THU_ggH_Mu
+#other_new_ggF group = CMS_hgg_THU_ggH_qmtop CMS_hgg_THU_ggH_PT120 CMS_hgg_THU_ggH_PT60
+
+#new_ggF_qmtop group = CMS_hgg_THU_ggH_qmtop
+#new_ggF_pt group = CMS_hgg_THU_ggH_PT120 CMS_hgg_THU_ggH_PT60
+#new_ggF_Mig group = CMS_hgg_THU_ggH_Mig12 CMS_hgg_THU_ggH_Mig01
+#new_ggF_VBF group = CMS_hgg_THU_ggH_VBF3j CMS_hgg_THU_ggH_VBF2j
+#new_ggF_ResMu group = CMS_hgg_THU_ggH_Res CMS_hgg_THU_ggH_Mu

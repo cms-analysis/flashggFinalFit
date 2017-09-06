@@ -36,6 +36,7 @@ class InitialFit {
     void setVerbosity(int v);
 
     void setFitParams(std::map<int,std::map<std::string,RooRealVar*> >& pars );
+    void printCorrMatrix(int mh);
   private:
 
     RooRealVar *mass;

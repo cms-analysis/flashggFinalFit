@@ -802,6 +802,20 @@ flashggSysts['metUncUncertainty'] = 'MET_Unclustered'
 flashggSysts['metJecUncertainty'] = 'MET_JEC'
 flashggSysts['metJerUncertainty'] = 'MET_JER'
 
+#new ggH uncert prescriptoin (replaces JetVeto) #FIXME: make configurable
+#doNewGghScheme = False
+doNewGghScheme = True
+if doNewGghScheme:
+  flashggSysts['THU_ggH_Mu'] = 'THU_ggH_Mu'
+  flashggSysts['THU_ggH_Res'] = 'THU_ggH_Res'
+  flashggSysts['THU_ggH_Mig01'] = 'THU_ggH_Mig01'
+  flashggSysts['THU_ggH_Mig12'] = 'THU_ggH_Mig12'
+  flashggSysts['THU_ggH_VBF2j'] = 'THU_ggH_VBF2j'
+  flashggSysts['THU_ggH_VBF3j'] = 'THU_ggH_VBF3j'
+  #flashggSysts['THU_ggH_PT60'] = 'THU_ggH_PT60'
+  #flashggSysts['THU_ggH_PT120'] = 'THU_ggH_PT120'
+  flashggSysts['THU_ggH_qmtop'] = 'THU_ggH_qmtop'
+
 #tth Tags
 tthSysts={}
 tthSysts['JEC'] = 'JEC_TTH'
@@ -820,7 +834,6 @@ vbfSysts={}
 vbfSysts['JEC'] = [] 
 #vbfSysts['UnmatchedPUWeight'] = [] #removed for Moriond17
 vbfSysts['JER'] = [] 
-vbfSysts['JetVeto'] =[]
 #vbfSysts['UEPS'] =[] #superseded by new method, no longer a bin migration
 #vbfSysts['RMSShift'] =[]
 vbfSysts['PUJIDShift'] =[]
@@ -835,9 +848,11 @@ vbfSysts['PUJIDShift'].append([1.,1.]) #should only apply to ggh<->vbf
 #vbfSysts['UEPS'].append([0.042,0.092]) # adhoc for vbf0<->vbf1# UPDATED FOR ICHEP16
 #vbfSysts['UEPS'].append([0.042,0.092]) # adhoc by Ed in attempt to fix negative value
 #still waiting for new recipe here
-vbfSysts['JetVeto'].append([0.289,0.0]) # Untagged <-> VBF, updated for (post)Moriond17
-vbfSysts['JetVeto'].append([0.077,0.0]) # VBF 0,1 <-> VBF 2, updated for (post)Moriond17
-vbfSysts['JetVeto'].append([0.031,0.0]) # VBF 0 <-> VBF 1, updated for (post)Moriond17
+if not doNewGghScheme: 
+  vbfSysts['JetVeto'] =[]
+  vbfSysts['JetVeto'].append([0.289,0.0]) # Untagged <-> VBF, updated for (post)Moriond17
+  vbfSysts['JetVeto'].append([0.077,0.0]) # VBF 0,1 <-> VBF 2, updated for (post)Moriond17
+  vbfSysts['JetVeto'].append([0.031,0.0]) # VBF 0 <-> VBF 1, updated for (post)Moriond17
 
 #lepton, MET tags  ## lepton tags not considered for Dry run...
 # [VH tight, VH loose, ttH leptonic]
@@ -1160,7 +1175,7 @@ def printFlashggSysts():
         for p in options.procs:
           if '%s:%s'%(p,c) in options.toSkip: continue
           #print "p,c is",p,c
-          if p in bkgProcs or ('pdfWeight' in flashggSyst and (p!='ggH_hgg' and p!='qqH_hgg')):
+          if p in bkgProcs or ('pdfWeight' in flashggSyst and (p!='ggH_hgg' and p!='qqH_hgg')) or ('THU_ggH' in flashggSyst and p!='ggH_hgg'):
             outFile.write('- ')
           else:
             outFile.write(getFlashggLine(p,c,flashggSyst))

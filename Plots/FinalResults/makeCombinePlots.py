@@ -232,7 +232,8 @@ def drawGlobals(canv,shifted="False"):
    #lat.DrawLatex(0.129+0.03,0.93,"CMS Unpublished H#rightarrow#gamma#gamma")
    #lat.DrawLatex(0.129+0.03,0.93,"CMS H#rightarrow#gamma#gamma")
    lat.SetTextSize(0.07) #FIXME
-   lat.DrawLatex(0.129+0.085,0.93,"#bf{CMS} #scale[0.75]{#it{Preliminary}}")
+   #lat.DrawLatex(0.129+0.085,0.93,"#bf{CMS} #scale[0.75]{#it{Preliminary}}")
+   lat.DrawLatex(0.129+0.085,0.93,"#bf{CMS}") #FIXME for paper
    lat.SetTextSize(0.045)
    lat.DrawLatex(0.129+0.085+0.04,0.85,"H#rightarrow#gamma#gamma")
    #lat.DrawLatex(0.71,0.92,options.text)
@@ -241,7 +242,8 @@ def drawGlobals(canv,shifted="False"):
   elif shifted=="2D":
    #print "AM I SHIFTED ? 2D"
    lat.SetTextSize(0.05)
-   lat.DrawLatex(0.1,0.92,"#bf{CMS} #scale[0.75]{#it{Preliminary}}")
+   #lat.DrawLatex(0.1,0.92,"#bf{CMS} #scale[0.75]{#it{Preliminary}}")
+   lat.DrawLatex(0.1,0.92,"#bf{CMS}") #FIXME for paper
    #lat.DrawLatex(0.129+0.04,0.85,"H#rightarrow#gamma#gamma")
    #lat.DrawLatex(0.13,0.85,"H#rightarrow#gamma#gamma")
    #lat.SetTextSize(0.07)
@@ -256,12 +258,13 @@ def drawGlobals(canv,shifted="False"):
    #lat.DrawLatex(0.129,0.93,"#bf{CMS} #scale[0.75]{#it{Preliminary}}")
    lat.SetTextSize(0.05)
    lat.SetTextSize(0.07) #FIXME
-   lat.DrawLatex(0.1,0.92,"#bf{CMS} #scale[0.75]{#it{Preliminary}}")
+   #lat.DrawLatex(0.1,0.92,"#bf{CMS} #scale[0.75]{#it{Preliminary}}")
+   lat.DrawLatex(0.1,0.92,"#bf{CMS}") #FIXME for paper
    #lat.DrawLatex(0.129+0.04,0.85,"H#rightarrow#gamma#gamma")
    lat.SetTextSize(0.05) #FIXME
-   #lat.DrawLatex(0.13,0.83,"H#rightarrow#gamma#gamma") #LHCP17
+   lat.DrawLatex(0.13,0.83,"H#rightarrow#gamma#gamma") #LHCP17
    #lat.DrawLatex(0.12,0.82,"H#rightarrow#gamma#gamma")
-   lat.DrawLatex(0.77,0.83,"H#rightarrow#gamma#gamma") #FIXME just for new MuScan
+   #lat.DrawLatex(0.77,0.83,"H#rightarrow#gamma#gamma") #FIXME just for new MuScan
    #lat.SetTextSize(0.07)
    lat.SetTextSize(0.045)
    lat.DrawLatex(0.69,0.92,options.text)
@@ -701,9 +704,11 @@ def plot1DNLL(returnErrors=False,xvar="", ext=""):
         p+=1
 
     m,m1 = findQuantile(res,0);
-    l,h  = findQuantile(res,1);
-    l2,h2  = findQuantile(res,4);
-    l3,h3  = findQuantile(res,9); #FIXME: tepm
+    #l,h  = findQuantile(res,1);
+    l,h  = findQuantile(res,r.TMath.ChisquareQuantile(0.68,1)); #FIXME: now using this for 68% CL
+    #l2,h2  = findQuantile(res,4);
+    l2,h2  = findQuantile(res,r.TMath.ChisquareQuantile(0.95,1)); #FIXME: now using this for 95% CL
+    l3,h3  = findQuantile(res,9); #FIXME: temp
 
     if options.shiftNLL:
       shiftNLL(gr,m)
@@ -756,9 +761,13 @@ def plot1DNLL(returnErrors=False,xvar="", ext=""):
         print "opts xaxis ", options.xaxis
         axmin = float(options.xaxis[0])
         axmax = float(options.xaxis[1])
-      lines = [r.TLine(axmin, 1, axmax, 1), r.TLine(xmin-eminus,  0, xmin-eminus,  1), r.TLine(xmin+eplus,  0, xmin+eplus,  1), 
-              r.TLine(axmin, 4, axmax, 4), r.TLine(xmin-eminus2, 0, xmin-eminus2, 4), r.TLine(xmin+eplus2, 0, xmin+eplus2, 4) ] #FIXME temp
+      #lines = [r.TLine(axmin, 1, axmax, 1), r.TLine(xmin-eminus,  0, xmin-eminus,  1), r.TLine(xmin+eplus,  0, xmin+eplus,  1), 
+      #        r.TLine(axmin, 4, axmax, 4), r.TLine(xmin-eminus2, 0, xmin-eminus2, 4), r.TLine(xmin+eplus2, 0, xmin+eplus2, 4) ] #FIXME temp
               #,r.TLine(axmin, 9, axmax, 9), r.TLine(xmin-eminus3, 0, xmin-eminus3, 9), r.TLine(xmin+eplus3, 0, xmin+eplus3, 9) ]
+      the68CL = r.TMath.ChisquareQuantile(0.68,1)
+      the95CL = r.TMath.ChisquareQuantile(0.95,1)
+      lines = [r.TLine(axmin, the68CL, axmax, the68CL), r.TLine(xmin-eminus,  0, xmin-eminus,  the68CL), r.TLine(xmin+eplus,  0, xmin+eplus,  the68CL), 
+              r.TLine(axmin, the95CL, axmax, the95CL), r.TLine(xmin-eminus2, 0, xmin-eminus2, the95CL), r.TLine(xmin+eplus2, 0, xmin+eplus2, the95CL) ] # FIXME: updated for 68% CL in paper
     
   dH = r.TH1D("dH","",1,axmin,axmax)
   dH.GetXaxis().SetTitle(xtitle)
@@ -804,6 +813,13 @@ def plot1DNLL(returnErrors=False,xvar="", ext=""):
     #lat2.DrawLatex(0.47,0.84,"#hat{#mu} = %4.2f ^{#font[122]{+}%4.2f}_{#font[122]{-}%4.2f}"%(fit,eplus0,eminus0))
   elif options.method=='rv': lat2.DrawLatex(0.5,0.85,"#hat{#mu}_{qqH+VH} = %4.2f ^{#font[122]{+}%4.2f}_{#font[122]{-}%4.2f}"%(fit,eplus0,eminus0))
   elif options.method=='rf': lat2.DrawLatex(0.5,0.85,"#hat{#mu}_{ggH+ttH} = %4.2f ^{#font[122]{+}%4.2f}_{#font[122]{-}%4.2f}"%(fit,eplus0,eminus0))
+
+  #draw CL lines
+  lat3 = r.TLatex()
+  lat3.SetNDC()
+  lat3.SetTextAlign(22)
+  lat2.DrawLatex(0.2,0.25,"#font[62]{#scale[0.6]{68% CL}}") #FIXME just for paper mu plot
+  lat2.DrawLatex(0.2,0.63,"#font[62]{#scale[0.6]{95% CL}}") #FIXME just for paper mu plot
 
   drawGlobals(canv)
   canv.RedrawAxis()
@@ -948,6 +964,7 @@ def plot2DNLL(xvar="RF",yvar="RV",xtitle="#mu_{ggH+ttH}",ytitle="#mu_{qqH+VH}"):
       for i in range (0,th2.GetNbinsX()+1):
         if i+j>(0.75*(th2.GetNbinsX()+th2.GetNbinsY())): 
           th2.Fill(xmin+i*((xmax-xmin)/float(xbins)),ymin+j*((ymax-ymin)/float(ybins)),10.)
+    #FIXME: I guess above lines only need to be there for KGluKGam ?
     ############## Simple spike killer ##########
 
     gBF = r.TGraph()
@@ -1066,13 +1083,15 @@ def plot2DNLL(xvar="RF",yvar="RV",xtitle="#mu_{ggH+ttH}",ytitle="#mu_{qqH+VH}"):
 
     cont_1sig = th2.Clone('cont_1_sig')
     cont_1sig.SetContour(2)
-    cont_1sig.SetContourLevel(1,2.3)
+    #cont_1sig.SetContourLevel(1,2.3)
+    cont_1sig.SetContourLevel(1,r.TMath.ChisquareQuantile(0.68,2))
     cont_1sig.SetLineColor((options.colors[fi]))
     cont_1sig.SetLineWidth(3)
     cont_1sig.SetLineStyle(1)
     cont_2sig = th2.Clone('cont_2_sig')
     cont_2sig.SetContour(2)
-    cont_2sig.SetContourLevel(1,6.18)
+    #cont_2sig.SetContourLevel(1,6.18)
+    cont_2sig.SetContourLevel(1,r.TMath.ChisquareQuantile(0.95,2))
     cont_2sig.SetLineColor((options.colors[fi]))
     cont_2sig.SetLineWidth(3)
     cont_2sig.SetLineStyle(2)
@@ -1105,8 +1124,10 @@ def plot2DNLL(xvar="RF",yvar="RV",xtitle="#mu_{ggH+ttH}",ytitle="#mu_{qqH+VH}"):
         if addBFtoLeg: leg.AddEntry(gBF,"Best Fit","P")
         if (options.method=="rvrf") :leg.AddEntry(gSM,"SM","P")
         if (options.method=="mumh") :leg.AddEntry(gSM,"#mu=1, m_H=125.09 GeV","P")
-        leg.AddEntry(cont_1sig,"1#sigma","L")
-        leg.AddEntry(cont_2sig,"2#sigma","L")
+        #leg.AddEntry(cont_1sig,"1#sigma","L")
+        leg.AddEntry(cont_1sig,"68% CL","L") #FIXME: for paper, CL requested
+        #leg.AddEntry(cont_2sig,"2#sigma","L")
+        leg.AddEntry(cont_2sig,"95% CL","L") #FIXME: for paper, CL requested
     else :
       leg.AddEntry(BFgrs[-1],options.names[fi],"P")
   leg.SetBorderSize(0)
@@ -1510,11 +1531,14 @@ def plotMPdfChComp(plottype="perTag"):
   leg.SetTextAlign(12)
   leg.SetBorderSize(0)
   leg.SetTextAlign(12)
-  if not options.noComb: leg.AddEntry(dummyHist,"Combined #pm 1#sigma","LF")
+  #if not options.noComb: leg.AddEntry(dummyHist,"Combined #pm 1#sigma","LF")
+  if not options.noComb: leg.AddEntry(dummyHist,"Combined 68% CL","LF") #FIXME for paper, now CL
   if not options.do1sig and not options.noComb: leg.AddEntry(dummyHist2,"Combined #pm 2#sigma","LF")
   #if not options.noComb: leg.AddEntry(catGraph1sig[0],"Per %s #pm 1#sigma"%options.groupentry,"LP");
-  if plottype =="perTag": leg.AddEntry(catGraph1sig[0],"Per category #pm 1#sigma","LP")
-  elif plottype =="perProc": leg.AddEntry(catGraph1sig[0],"Per process #pm 1#sigma","LP")
+  #if plottype =="perTag": leg.AddEntry(catGraph1sig[0],"Per category #pm 1#sigma","LP")
+  if plottype =="perTag": leg.AddEntry(catGraph1sig[0],"Per category 68% CL","LP") #FIXME
+  #elif plottype =="perProc": leg.AddEntry(catGraph1sig[0],"Per process #pm 1#sigma","LP")
+  elif plottype =="perProc": leg.AddEntry(catGraph1sig[0],"Per process 68% CL","LP") #FIXME
   #elif plottype =="perProc": leg.AddEntry(catGraph1sig[0],"Per category #pm 1#sigma","LP") #FIXME: sort this out
   if not options.do1sig and not options.noComb: 
     if plottype =="perTag":
@@ -1568,6 +1592,8 @@ def plotMPdfChComp(plottype="perTag"):
   #FIXME: temporary, show below zero is excluded
   #doHatching = True
   doHatching = False
+  if doStxs: 
+    doHatching = True #FIXME
   if doHatching:
     hatchBox = r.TBox(-0.2,0.,0.,len(catFits))
     hatchBox.SetFillStyle(3004)
@@ -1609,9 +1635,9 @@ def plotMPdfChComp(plottype="perTag"):
       index =  boxIndexMap[proc]
       smBoxes[proc] = r.TBox(1.-uncertVal[1],index,1.+uncertVal[0],index+1)
       smBoxes[proc].SetFillStyle(1001)
-      #smBoxes[proc].SetFillColor(r.kGreen-3)
-      smBoxes[proc].SetFillColor(r.kGray+1)
-      #smBoxes[proc].SetFillColor(9)
+      #smBoxes[proc].SetFillColor(r.kGreen-3) #default darkish green
+      #smBoxes[proc].SetFillColor(r.kGray+1)
+      smBoxes[proc].SetFillColor(9) #blue chosen for LHCP17 PAS
       #smBoxes[proc].SetFillColor(r.kOrange+6)
       #if proc=="GG2H":
       #  smBoxes[proc].SetLineStyle(1)
@@ -1762,8 +1788,10 @@ def plotMPdfMaxLH():
   #leg.SetTextSize(0.045)
   leg.SetTextAlign(12)
   leg.SetBorderSize(0)
-  leg.AddEntry(oneSigma,"#pm 1 #sigma uncertainty","FL")
-  if not options.do1sig : leg.AddEntry(twoSigma,"#pm 2 #sigma uncert","FL")
+  #leg.AddEntry(oneSigma,"#pm 1 #sigma uncertainty","FL")
+  leg.AddEntry(oneSigma,"68% CL","FL")
+  #if not options.do1sig : leg.AddEntry(twoSigma,"#pm 2 #sigma uncert","FL")
+  if not options.do1sig : leg.AddEntry(twoSigma,"95% CL","FL")
 
   dummyHist.SetStats(0)
   #dummyHist.GetYaxis().SetTitle("#sigma/#sigma_{SM}")

@@ -86,6 +86,10 @@ esac
 shift
 done
 
+#temp for batch submission - std::bad_alloc errors...
+cd /vols/build/cms/es811/FreshStart/Pass6/CMSSW_7_4_7/src/flashggFinalFit/Signal
+eval `scramv1 runtime -sh`
+
 echo "[INFO] processing signal model for INTLUMI $INTLUMI"
 
 OUTDIR="outdir_$EXT"

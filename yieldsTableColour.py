@@ -28,13 +28,22 @@ parser.add_option("--verbose",default=0)
 if not (options.workspaces ==""):
   #tpMap = {"GG2H":"ggh","VBF":"vbf","TTH":"tth","QQ2HLNU":"wh","QQ2HLL":"zh","WH2HQQ":"wh","ZH2HQQ":"zh"}
   tpMap = {"GG2H":"ggh","VBF":"vbf","TTH":"tth","QQ2HLNU":"wh","QQ2HLL":"zh","WH2HQQ":"wh","ZH2HQQ":"zh","testBBH":"bbh","testTHQ":"th","testTHW":"th"}
+  #stage 1 ggH
+  #tpMap = {"GG2H_FWDH":"ggh","GG2H_VBFTOPO_JET3VETO":"ggh","GG2H_VBFTOPO_JET3":"ggh","GG2H_0J":"ggh",
+  #         "GG2H_1J_PTH_0_60":"ggh","GG2H_1J_PTH_60_120":"ggh","GG2H_1J_PTH_120_200":"ggh","GG2H_1J_PTH_GT200":"ggh",
+  #         "GG2H_GE2J_PTH_0_60":"ggh","GG2H_GE2J_PTH_60_120":"ggh", "GG2H_GE2J_PTH_120_200":"ggh", "GG2H_GE2J_PTH_GT200":"ggh",
+  #         "VBF":"vbf","TTH":"tth","QQ2HLNU":"wh","QQ2HLL":"zh","WH2HQQ":"wh","ZH2HQQ":"zh","testBBH":"bbh","testTHQ":"th","testTHW":"th"}
   for ws in options.workspaces.split(","):
     oldProc = ""
     newProc = ""
     #if "M125" not in ws: continue #shouldn't be any but just in case
     for stxsProc in tpMap:
-      if stxsProc in ws:
-        if newProc != "": exit("more than one STXS process name found in file name - wtf, shouldn't happen, exiting...")
+      if "%s.root"%stxsProc in ws:
+        if newProc != "": 
+          print ws
+          print stxsProc
+          print newProc
+          exit("more than one STXS process name found in file name - wtf, shouldn't happen, exiting...")
         newProc = stxsProc
         oldProc = tpMap[stxsProc]
     print "\nrunning the yields code for process",newProc
@@ -86,13 +95,18 @@ with open(options.input) as i:
     line=line.replace("VH","VH ")
     line=line.replace(",","_ ")
     line=line.replace("\n","")
-    words=line.split("_")  
-    print words
+    words=line.split("_")
+    #words=line.split("_125_13TeV_")
     procs.append(words[0])
     tags.append(words[3])
+    #morewords = words[1].split("_")
+    #tags.append(morewords[0])
     weights.append(float(words[4]))
+    #weights.append(float(morewords[1]))
     entries.append(float(words[4]))
+    #entries.append(float(morewords[1]))
     list=[words[0],words[3],options.factor*float(words[4])]
+    #list=[words[0],morewords[0],options.factor*float(morewords[1])]
     yields.append(list)
     continue
 
@@ -806,7 +820,8 @@ lat.DrawLatex(0.95,0.02,"S/(S+B) in #pm #sigma_{eff}")
 lat.SetTextSize(0.05)
 #lat.SetTextSize(0.07)
 lat.SetTextAlign(11)
-lat.DrawLatex(0.05,0.95,"#bf{CMS} #it{Preliminary}   H#rightarrow#gamma#gamma")
+#lat.DrawLatex(0.05,0.95,"#bf{CMS} #it{Preliminary}   H#rightarrow#gamma#gamma")
+lat.DrawLatex(0.05,0.95,"#bf{CMS} #it{Simulation}     H#rightarrow#gamma#gamma")
 lat.SetTextAlign(31)
 #lat.SetTextSize(0.05)
 lat.SetTextSize(0.045)

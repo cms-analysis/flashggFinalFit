@@ -9,6 +9,7 @@
 #include <TStyle.h>
 #include "TFile.h"
 #include "TMath.h"
+#include "TH2.h"
 #include "TStopwatch.h"
 #include "RooWorkspace.h"
 #include "RooDataSet.h"
@@ -1004,6 +1005,9 @@ int main(int argc, char *argv[]){
       if (verbose_) std::cout << "[INFO] RV running fits" << std::endl;
       std::cout << "[INFO] LC SigFit debug i1" << std::endl;
       initFitRV.runFits(ncpu_);
+      std::cout << "ED DEBUG: about to print correlation matrix" << std::endl;
+      initFitRV.printCorrMatrix(125);
+      std::cout << "ED DEBUG: done printing correlation matrix" << std::endl;
       //std::cout << "[INFO] LC SigFit debug i2 !replace_" << !replace_ << " !runInitialFitsOnly_ " << !runInitialFitsOnly_ << std::endl;
       //if (!runInitialFitsOnly_ && !replace_) {
       //std::cout << "[INFO] LC SigFit debug i3" << std::endl;

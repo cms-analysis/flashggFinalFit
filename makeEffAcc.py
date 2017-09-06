@@ -431,7 +431,8 @@ MG.GetYaxis().SetRangeUser(36.6,45.4)
 MG.GetYaxis().SetTitleSize(0.045)
 MG.GetYaxis().SetTitleOffset(0.9)
 #mytext.DrawLatex(0.1,0.92,"#scale[1.15]{CMS} #bf{#it{Simulation Preliminary}}") #for some reason the bf is reversed??
-mytext.DrawLatex(0.1,0.92,"#scale[1.05]{CMS} #bf{#it{Simulation Preliminary}}") #for some reason the bf is reversed??
+#mytext.DrawLatex(0.1,0.92,"#scale[1.05]{CMS} #bf{#it{Simulation Preliminary}}") #for some reason the bf is reversed??
+mytext.DrawLatex(0.1,0.92,"#scale[1.05]{CMS} #bf{#it{Simulation}}") #for the paper
 mytext.DrawLatex(0.75,0.92,"#bf{13#scale[1.1]{ }TeV}")
 mytext.DrawLatex(0.129+0.03,0.82,"#bf{H#rightarrow#gamma#gamma}")
 can.Update()

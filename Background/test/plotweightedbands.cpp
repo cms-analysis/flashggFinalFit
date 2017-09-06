@@ -876,7 +876,8 @@ int main(int argc, char *argv[]) {
     TLatex *lat3 = new TLatex();
     lat3->SetNDC();
     lat3->SetTextSize(0.057);
-    lat3->DrawLatex(0.13,0.93,"#bf{CMS} #scale[0.75]{#it{Preliminary}}");    
+    //lat3->DrawLatex(0.13,0.93,"#bf{CMS} #scale[0.75]{#it{Preliminary}}");
+    lat3->DrawLatex(0.13,0.93,"#bf{CMS}"); // for the paper
     
     TLatex *mytext = new TLatex();
     mytext->SetTextSize(0.055);
