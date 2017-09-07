@@ -33,6 +33,7 @@ VERBOSE=0
 BATCH="LSF"
 DEFAULTQUEUE="1nh"
 UEPS="none"
+NEWGGHSCHEME=0
 usage(){
 	echo "The script runs background scripts:"
 		echo "options:"
@@ -41,6 +42,7 @@ echo "-i|--inputFile) "
 echo "-p|--procs) (default $PROCS)"
 echo "-f|--flashggCats) (default $CATS) "
 echo "--uepsFile) (default $UEPS) "
+echo "--newGghScheme) (default $NEWGGHSCHEME) "
 echo "--ext) (default $EXT)"
 echo "--pseudoDataDat)"
 echo "--combine) "
@@ -65,7 +67,7 @@ echo "--batch) which batch system to use (LSF,IC) (default $BATCH)) "
 
 
 # options may be followed by one colon to indicate they have a required argument
-if ! options=$(getopt -u -o hi:p:f: -l help,inputFile:,procs:,bs:,flashggCats:,uepsFile:,ext:,smears:,massList:,scales:,scalesCorr:,scalesGlobal:,,pseudoDataDat:,sigFile:,combine,combineOnly,combinePlotsOnly,signalOnly,backgroundOnly,datacardOnly,useSSF:,useDCB_1G:,continueLoop:,intLumi:,unblind,isData,isFakeData,dataFile:,batch:,verbose -- "$@")
+if ! options=$(getopt -u -o hi:p:f: -l help,inputFile:,procs:,bs:,flashggCats:,uepsFile:,newGghScheme,ext:,smears:,massList:,scales:,scalesCorr:,scalesGlobal:,,pseudoDataDat:,sigFile:,combine,combineOnly,combinePlotsOnly,signalOnly,backgroundOnly,datacardOnly,useSSF:,useDCB_1G:,continueLoop:,intLumi:,unblind,isData,isFakeData,dataFile:,batch:,verbose -- "$@")
 then
 # something went wrong, getopt will put out an error message for us
 exit 1
@@ -85,6 +87,7 @@ case $1 in
 --massList) MASSLIST=$2; shift ;;
 -f|--flashggCats) CATS=$2; shift ;;
 --uepsFile) UEPS=$2; shift ;;
+--newGghScheme) NEWGGHSCHEME=1;;
 --ext) EXT=$2; echo "test ext $EXT " ; shift ;;
 --pseudoDataDat) PSEUDODATADAT=$2; shift;;
 --dataFile) DATAFILE=$2; shift;;
@@ -200,8 +203,13 @@ cd Datacard
 #echo "./makeParametricModelDatacardFLASHgg.py -i $FILE  -o Datacard_13TeV_${EXT}.txt -p $PROCS -c UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,VBFTag_0,VBFTag_1,TTHHadronicTag,TTHLeptonicTag --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --theoryNormFactors norm_factors.py --submitSelf #--intLumi $INTLUMI"
 #./makeParametricModelDatacardFLASHgg.py -i $FILE  -o Datacard_13TeV_${EXT}.txt -p $PROCS -c UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,VBFTag_0,VBFTag_1,TTHHadronicTag,TTHLeptonicTag --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --theoryNormFactors norm_factors.py --submitSelf --intLumi $INTLUMI --batch $BATCH 
 #./makeParametricModelDatacardFLASHgg.py -i $FILE  -o Datacard_13TeV_${EXT}.txt -p $PROCS -c UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,VBFTag_0,VBFTag_1,TTHHadronicTag,TTHLeptonicTag --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --theoryNormFactors norm_factors.py --intLumi $INTLUMI #--submitSelf
+if [ $NEWGGHSCHEME == 1 ]; then
+echo "./makeParametricModelDatacardFLASHgg.py -i $FILE  -o Datacard_13TeV_${EXT}.txt -p $PROCS -c $CATS --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --theoryNormFactors norm_factors.py --intLumi $INTLUMI --uepsfilename $UEPS --newGghScheme"
+./makeParametricModelDatacardFLASHgg.py -i $FILE  -o Datacard_13TeV_${EXT}.txt -p $PROCS -c $CATS --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --intLumi $INTLUMI --uepsfilename $UEPS --newGghScheme #--submitSelf
+else
 echo "./makeParametricModelDatacardFLASHgg.py -i $FILE  -o Datacard_13TeV_${EXT}.txt -p $PROCS -c $CATS --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --theoryNormFactors norm_factors.py --intLumi $INTLUMI --uepsfilename $UEPS"
 ./makeParametricModelDatacardFLASHgg.py -i $FILE  -o Datacard_13TeV_${EXT}.txt -p $PROCS -c $CATS --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --intLumi $INTLUMI --uepsfilename $UEPS #--submitSelf
+fi
 cd -
 fi
 
