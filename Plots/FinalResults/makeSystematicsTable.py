@@ -14,8 +14,10 @@ parser.add_option("--makeTable",default=False,action="store_true",help="Make the
 parser.add_option("--dryRun",default=False,action="store_true",help="Do not submit jobs")
 parser.add_option("--observed",default=False,action="store_true",help="Observed, rather than expected, uncertainties")
 parser.add_option("--folderName",default='Expected')
+parser.add_option("--folderExt",default='')
 (opts,args) = parser.parse_args()
 if opts.observed: opts.folderName = 'Observed'
+if opts.folderExt != '': opts.folderName += '_%s'%opts.folderExt
 
 
 def getUpDownUncertainties(directory,nuisance_group,POI):
