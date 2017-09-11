@@ -121,6 +121,8 @@ specOpts.add_option("--expectSignal",type="float",default=None)
 specOpts.add_option("--expectSignalMass",type="float",default=None)
 specOpts.add_option("--splitChannels",default=None)
 specOpts.add_option("--perProcessChannelCompatibilityPOI",default=None)
+specOpts.add_option("--perProcMuPOI",default=None)
+specOpts.add_option("--doSTXS",default=False,action="store_true",help="Use STXS POIs")
 specOpts.add_option("--perTagChannelCompatibilityPOI",default=None)
 specOpts.add_option("--profileMH",default=False)
 specOpts.add_option("--toysFile",default=None)
@@ -136,7 +138,7 @@ if not os.path.exists(os.path.expandvars('$CMSSW_BASE/bin/$SCRAM_ARCH/combineCar
   sys.exit('ERROR - CombinedLimit package must be installed')
 
 cwd = os.getcwd()
-allowedMethods = ['Asymptotic','AsymptoticGrid','ProfileLikelihood','ProfileLikelihoodStat','ProfileLikelihoodTheo','ChannelCompatibilityCheck','MultiPdfChannelCompatibility','MHScan','MHScanStat','MHScanTheo','MHScanJustThisSyst','MHScanNoGlob','MuScan','MuScanStat','MuScanTheo','MuScanMHProf','RVScan','RFScan','RVRFScan','PerProcessChannelCompatibility','PerProcessChannelCompatibilityStat','PerProcessChannelCompatibilityTheo','PerTagChannelCompatibility','ActualPerTagChannelCompatibility','MuMHScan','GenerateOnly', 'RProcScan', 'RTopoScan', 'RBinScan', 'MuVsMHScan','CVCFScan','KGluKGamScan','MultiPdfMuHatvsMH']
+allowedMethods = ['Asymptotic','AsymptoticGrid','ProfileLikelihood','ProfileLikelihoodStat','ProfileLikelihoodTheo','ChannelCompatibilityCheck','MultiPdfChannelCompatibility','MHScan','MHScanStat','MHScanTheo','MHScanJustThisSyst','MHScanNoGlob','MuScan','MuScanStat','MuScanTheo','MuScanMHProf','RVScan','RFScan','RVRFScan','PerProcessChannelCompatibility','PerProcessChannelCompatibilityStat','PerProcessChannelCompatibilityTheo','PerProcessMu','PerTagChannelCompatibility','MuMHScan','GenerateOnly', 'RProcScan', 'RTopoScan', 'RBinScan', 'MuVsMHScan','CVCFScan','KGluKGamScan','MultiPdfMuHatvsMH']
 
 
 if opts.parallel:
@@ -659,17 +661,15 @@ def writeMultiDimFit(method=None,wsOnly=False):
                         comma ="|"
                 binstr += ").*TeV/.*Bin.*:r_Bin%d[1,0,20]'" % ibin
                 catsMap += binstr
-        actualPerTagChCompPOIs=[]
-        #perTagChCompPOIs=[]
-        perTagChCompPOIs=["r_ggH","r_qqH","r_ttH","r_VH"] #FIXME
-        #perTagChCompPOIs=["r_ggH","r_qqH","r_ttH","r_QQ2HLNU","r_QQ2HLL","r_VH2HQQ"]
-        #perTagChCompPOIs=["r_ggH","r_qqH","r_ttH","r_VH","r_bbH","r_tHq","r_tHW"]
-        if opts.method=="ActualPerTagChannelCompatibility" and catsMap=="":
+        perTagChCompPOIs=[]
+        perProcMuPOIs=["r_ggH","r_qqH","r_ttH","r_VH"]
+        if opts.doSTXS: perProcMuPOIs=["r_ggH","r_qqH","r_ttH","r_QQ2HLNU","r_QQ2HLL","r_VH2HQQ"]
+        if opts.method=="PerTagChannelCompatibility" and catsMap=="":
            cats = getSortedCats()
            catsMap =" --PO verbose "
            for cat in cats:
             catsMap = catsMap + " --PO 'map=%s/.*hgg:r_%s[1,-5,5]'"%(cat,cat)
-            actualPerTagChCompPOIs.append("r_%s"%cat)
+            perTagChCompPOIs.append("r_%s"%cat)
         print '[INFO] Writing MultiDim Scan'
         #ws_args = { "RVRFScan"   : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:rVrFXSHiggs %s "% profMH ,
         ws_args = { "RVRFScan"   : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel %s %s " %(catsMap,profMH),
@@ -678,8 +678,8 @@ def writeMultiDimFit(method=None,wsOnly=False):
     "PerProcessChannelCompatibilityTheo" : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:floatingXSHiggs --PO modes=ggH,qqH,VH,ttH %s " % profMH,
     #PerProcessChannelCompatibility" : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:floatingXSHiggs --PO modes=ggH,qqH,VH,ttH  " ,
     #"PerProcessChannelCompatibility" : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:floatingXSHiggs --PO modes=ggH,qqH,ttH  %s" % profMH ,
+    "PerProcessMu" : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel %s %s " %(catsMap,profMH),
     "PerTagChannelCompatibility" : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel %s %s " %(catsMap,profMH),
-    "ActualPerTagChannelCompatibility" : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel %s %s " %(catsMap,profMH),
     "RVScan"  : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:rVrFXSHiggs %s" % profMH,
     "RVnpRFScan"   : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:rVrFXSHiggs %s" % profMH,
     "RFScan"  : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:rVrFXSHiggs %s" % profMH,
@@ -711,8 +711,8 @@ def writeMultiDimFit(method=None,wsOnly=False):
 
         setpois = {
             #"PerProcessChannelCompatibility" : [ "r_ggH", "r_qqH","r_ZH","r_WH","r_ttH" ],
+            "PerProcessMu" : perProcMuPOIs,
             "PerTagChannelCompatibility" : perTagChCompPOIs,
-            "ActualPerTagChannelCompatibility" : actualPerTagChCompPOIs,
             "PerProcessChannelCompatibility" : [ "r_ggH", "r_qqH","r_VH","r_ttH" ],
             "PerProcessChannelCompatibilityStat" : [ "r_ggH", "r_qqH","r_VH","r_ttH" ],
             "PerProcessChannelCompatibilityTheo" : [ "r_ggH", "r_qqH","r_VH","r_ttH" ],
@@ -753,8 +753,8 @@ def writeMultiDimFit(method=None,wsOnly=False):
     "PerProcessChannelCompatibility"   : "-P %s --floatOtherPOIs=1"% opts.perProcessChannelCompatibilityPOI , 
     "PerProcessChannelCompatibilityStat"   : "-P %s --floatOtherPOIs=1"% opts.perProcessChannelCompatibilityPOI , 
     "PerProcessChannelCompatibilityTheo"   : "-P %s --floatOtherPOIs=1"% opts.perProcessChannelCompatibilityPOI , 
+    "PerProcessMu"   : "-P %s --floatOtherPOIs=1"% opts.perProcMuPOI, 
     "PerTagChannelCompatibility"   : "-P %s --floatOtherPOIs=1"% opts.perTagChannelCompatibilityPOI , 
-    "ActualPerTagChannelCompatibility"   : "-P %s --floatOtherPOIs=1"% opts.perTagChannelCompatibilityPOI , 
     "RVScan"  : "--floatOtherPOIs=1 -P RV" ,
     "RVnpRFScan"  : "--floatOtherPOIs=0 -P RV" ,
     "RFScan"  : "--floatOtherPOIs=1 -P RF" ,
@@ -781,7 +781,7 @@ def writeMultiDimFit(method=None,wsOnly=False):
         par_ranges = {}
         #par_ranges["PerProcessChannelCompatibility"]  = "r_ggH=%4.2f,%4.2f:r_qqH=%4.2f,%4.2f:r_WH=%4.2f,%4.2f:r_ZH=%4.2f,%4.2f:r_ttH=%4.2f,%4.2f"%(-5.0,5.0,-5.0,5.0,-5.0,5.0,-5.0,5.0,-5.0,5.0)
         perTagChCompPOIRanges=""
-        for r_tag in actualPerTagChCompPOIs:
+        for r_tag in perTagChCompPOIs:
           #perTagChCompPOIRanges=perTagChCompPOIRanges+ "%s=-2.0,10.0:"%r_tag
           if "Untagged" in r_tag and "3" not in r_tag: perTagChCompPOIRanges=perTagChCompPOIRanges+ "%s=0.0,2.0:"%r_tag
           elif "Untagged" in r_tag and "3" in r_tag: perTagChCompPOIRanges=perTagChCompPOIRanges+ "%s=0.0,3.0:"%r_tag
@@ -792,15 +792,11 @@ def writeMultiDimFit(method=None,wsOnly=False):
           elif "VH" in r_tag: perTagChCompPOIRanges=perTagChCompPOIRanges+ "%s=0.0,6.0:"%r_tag
           else: perTagChCompPOIRanges=perTagChCompPOIRanges+ "%s=0.0,10.0:"%r_tag
         perTagChCompPOIRanges = perTagChCompPOIRanges[:-1] #remove last character, an extra ":"
-        #par_ranges["PerTagChannelCompatibility"]  = perTagChCompPOIRanges 
-        #par_ranges["PerTagChannelCompatibility"]  = "r_ggH=%4.2f,%4.2f:r_qqH=%4.2f,%4.2f:r_ttH=%4.2f,%4.2f:r_VH=%4.2f,%4.2f"%(0.0,2.0,0.0,2.0,0.0,2.0,-1.0,3.0) #expected
-        par_ranges["PerTagChannelCompatibility"]  = "r_ggH=%4.2f,%4.2f:r_qqH=%4.2f,%4.2f:r_ttH=%4.2f,%4.2f:r_VH=%4.2f,%4.2f"%(0.0,2.0,0.0,2.0,0.0,4.0,0.0,4.0) #observed
-        #par_ranges["PerTagChannelCompatibility"]  = "r_ggH=%4.2f,%4.2f:r_qqH=%4.2f,%4.2f:r_ttH=%4.2f,%4.2f:r_QQ2HLNU=%4.2f,%4.2f:r_QQ2HLL=%4.2f,%4.2f:r_VH2HQQ=%4.2f,%4.2f"%(0.0,2.0,0.0,2.0,0.0,2.0,-2.0,4.0,-2.0,4.0,-2.0,4.0) #stxs expected #FIXME
-        #par_ranges["PerTagChannelCompatibility"]  = "r_ggH=%4.2f,%4.2f:r_qqH=%4.2f,%4.2f:r_ttH=%4.2f,%4.2f:r_QQ2HLNU=%4.2f,%4.2f:r_QQ2HLL=%4.2f,%4.2f:r_VH2HQQ=%4.2f,%4.2f"%(0.0,2.0,0.0,2.0,0.0,4.0,0.,6.0,0.,6.0,0.,8.0) #stxs observed
-        par_ranges["ActualPerTagChannelCompatibility"]  = perTagChCompPOIRanges 
-        #par_ranges["PerTagChannelCompatibility"]  = "r_ggH=%4.2f,%4.2f:r_qqH=%4.2f,%4.2f:r_ttH=%4.2f,%4.2f:r_VH=%4.2f,%4.2f:r_bbH=%4.2f,%4.2f:r_tHq=%4.2f,%4.2f:r_tHW=%4.2f,%4.2f"%(0.0,2.0,0.0,2.0,0.0,2.0,-1.0,3.0,-50.0,50.0,-50.,50.,-50.,50.)
-        #par_ranges["PerProcessChannelCompatibility"]  = "r_ggH=%4.2f,%4.2f:r_qqH=%4.2f,%4.2f:r_VH=%4.2f,%4.2f:r_ttH=%4.2f,%4.2f"%(-5.0,5.0,-5.0,5.0,-5.0,20.0,-5.0,5.0)
-        #par_ranges["PerProcessChannelCompatibility"]  = "r_ggH=%4.2f,%4.2f:r_qqH=%4.2f,%4.2f::r_ttH=%4.2f,%4.2f"%(-5.0,5.0,-5.0,5.0,-5.0,5.0)
+        if opts.expected and not opts.doSTXS: par_ranges["PerProcMu"]  = "r_ggH=%4.2f,%4.2f:r_qqH=%4.2f,%4.2f:r_ttH=%4.2f,%4.2f:r_VH=%4.2f,%4.2f"%(0.0,2.0,0.0,2.0,0.0,2.0,-1.0,3.0)
+        elif not opts.expected and not opts.doSTXS: par_ranges["PerProcMu"]  = "r_ggH=%4.2f,%4.2f:r_qqH=%4.2f,%4.2f:r_ttH=%4.2f,%4.2f:r_VH=%4.2f,%4.2f"%(0.0,2.0,0.0,2.0,0.0,4.0,0.0,4.0)
+        elif opts.expected and opts.doSTXS: par_ranges["PerProcMu"]  = "r_ggH=%4.2f,%4.2f:r_qqH=%4.2f,%4.2f:r_ttH=%4.2f,%4.2f:r_QQ2HLNU=%4.2f,%4.2f:r_QQ2HLL=%4.2f,%4.2f:r_VH2HQQ=%4.2f,%4.2f"%(0.0,2.0,0.0,2.0,0.0,2.0,-2.0,4.0,-2.0,4.0,-2.0,4.0)
+        elif not opts.expected and opts.doSTXS: par_ranges["PerProcMu"]  = "r_ggH=%4.2f,%4.2f:r_qqH=%4.2f,%4.2f:r_ttH=%4.2f,%4.2f:r_QQ2HLNU=%4.2f,%4.2f:r_QQ2HLL=%4.2f,%4.2f:r_VH2HQQ=%4.2f,%4.2f"%(0.0,2.0,0.0,2.0,0.0,4.0,0.,6.0,0.,6.0,0.,8.0)
+        par_ranges["PerTagChannelCompatibility"]  = perTagChCompPOIRanges 
         par_ranges["PerProcessChannelCompatibility"]  = "r_ggH=%4.2f,%4.2f:r_qqH=%4.2f,%4.2f:r_VH=%4.2f,%4.2f:r_ttH=%4.2f,%4.2f"%(0.0,2.0,0.0,2.0,0.0,2.0,0.0,2.0)
         par_ranges["PerProcessChannelCompatibilityStat"]  = "r_ggH=%4.2f,%4.2f:r_qqH=%4.2f,%4.2f:r_VH=%4.2f,%4.2f:r_ttH=%4.2f,%4.2f"%(0.0,2.0,0.0,2.0,0.0,2.0,0.0,2.0)
         par_ranges["PerProcessChannelCompatibilityTheo"]  = "r_ggH=%4.2f,%4.2f:r_qqH=%4.2f,%4.2f:r_VH=%4.2f,%4.2f:r_ttH=%4.2f,%4.2f"%(0.0,2.0,0.0,2.0,0.0,2.0,0.0,2.0)
@@ -1013,7 +1009,8 @@ def configure(config_line):
     if option.startswith('pointsperjob='): opts.pointsperjob = int(option.split('=')[1])
     if option.startswith('splitChannels='): opts.splitChannels = option.split('=')[1].split(',')
     if option.startswith('perProcessChannelCompatibilityPOI='): opts.perProcessChannelCompatibilityPOI = option.split('=')[1]
-    if option.startswith('perTagChannelCompatibilityPOI='): opts.perTagChannelCompatibilityPOI = option.split('=')[1]
+    if option.startswith('perProcMuPOI='): opts.perProcMuPOI = option.split('=')[1]
+    if option.startswith('perTagChannelCompatibilityPOI='): opts.perTagChannelCompatibilityPOI= option.split('=')[1]
     if option.startswith('justThisSyst='): opts.justThisSyst = option.split('=')[1].split(',')
     if option.startswith('toysFile='): opts.toysFile = option.split('=')[1]
     if option.startswith('mh='): 
@@ -1065,6 +1062,7 @@ def configure(config_line):
       catRanges = strtodict(opts.catRanges)
     if option == "skipWorkspace": opts.skipWorkspace = True
     if option == "postFit":  opts.postFit = True
+    if option == "doSTXS":  opts.doSTXS = True
     if option == "expected": opts.expected = 1
     if option == "profileMH": opts.profileMH = True
   if opts.postFitAll: opts.postFit = True
