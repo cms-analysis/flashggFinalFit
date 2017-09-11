@@ -63,6 +63,7 @@ parser.add_option("","--xdm",dest="xdm",default=False,action="store_true",help="
 parser.add_option("","--zmax",dest="zmax",default=10.,type='float',help="Maximum on 2D plots for the Z axis")
 parser.add_option("","--mpdfchcomp",dest="mpdfchcomp",default=False,action="store_true",help="Do MultiPdf channel compatbility plot")
 parser.add_option("","--perprocchcomp",dest="perprocchcomp",default=False,action="store_true",help="Do PerProc channel compatbility plot")
+parser.add_option("","--percatchcomp",dest="percatchcomp",default=False,action="store_true",help="Do per cat modifications (use with --perprocchcomp)")
 parser.add_option("","--mpdfmaxlh",dest="mpdfmaxlh",default=False,action="store_true",help="Do MultiPdf best fit mu as a function of MH plot")
 parser.add_option("","--stxs",dest="stxs",default=False,action="store_true",help="Do plots for simplified template cross-section processes")
 parser.add_option("-v","--verbose",dest="verbose",default=False,action="store_true")
@@ -70,6 +71,7 @@ parser.add_option("-b","--batch",dest="batch",default=False,action="store_true")
 parser.add_option("--it",dest="it",type="string",help="if using superloop, index of iteration")
 parser.add_option("--itLedger",dest="itLedger",type="string",help="ledger to keep track of values of each iteration if using superloop")
 parser.add_option("--specifyX",dest="specifyX",type="string",help="use a specific variable name in mu plots (eg r_Untagged_Tag_0)")
+parser.add_option("--paperStyle",dest="paperStyle",default=False,action="store_true",help="Make plots in paper style (without preliminary etc)")
 (options,args)=parser.parse_args()
 
 print "[INFO] Processing Files :"
@@ -231,9 +233,10 @@ def drawGlobals(canv,shifted="False"):
    #print "AM I SHIFTED ? YES"
    #lat.DrawLatex(0.129+0.03,0.93,"CMS Unpublished H#rightarrow#gamma#gamma")
    #lat.DrawLatex(0.129+0.03,0.93,"CMS H#rightarrow#gamma#gamma")
-   lat.SetTextSize(0.07) #FIXME
-   #lat.DrawLatex(0.129+0.085,0.93,"#bf{CMS} #scale[0.75]{#it{Preliminary}}")
-   lat.DrawLatex(0.129+0.085,0.93,"#bf{CMS}") #FIXME for paper
+   if not options.paperStyle: lat.DrawLatex(0.129+0.085,0.93,"#bf{CMS} #scale[0.75]{#it{Preliminary}}")
+   else:
+     lat.SetTextSize(0.07)
+     lat.DrawLatex(0.129+0.085,0.93,"#bf{CMS}")
    lat.SetTextSize(0.045)
    lat.DrawLatex(0.129+0.085+0.04,0.85,"H#rightarrow#gamma#gamma")
    #lat.DrawLatex(0.71,0.92,options.text)
@@ -242,8 +245,8 @@ def drawGlobals(canv,shifted="False"):
   elif shifted=="2D":
    #print "AM I SHIFTED ? 2D"
    lat.SetTextSize(0.05)
-   #lat.DrawLatex(0.1,0.92,"#bf{CMS} #scale[0.75]{#it{Preliminary}}")
-   lat.DrawLatex(0.1,0.92,"#bf{CMS}") #FIXME for paper
+   if not options.paperStyle: lat.DrawLatex(0.1,0.92,"#bf{CMS} #scale[0.75]{#it{Preliminary}}")
+   else: lat.DrawLatex(0.1,0.92,"#bf{CMS}")
    #lat.DrawLatex(0.129+0.04,0.85,"H#rightarrow#gamma#gamma")
    #lat.DrawLatex(0.13,0.85,"H#rightarrow#gamma#gamma")
    #lat.SetTextSize(0.07)
@@ -257,14 +260,15 @@ def drawGlobals(canv,shifted="False"):
    #lat.DrawLatex(0.173,0.85,"#splitline{#bf{CMS}}{#it{Preliminary}}")
    #lat.DrawLatex(0.129,0.93,"#bf{CMS} #scale[0.75]{#it{Preliminary}}")
    lat.SetTextSize(0.05)
-   lat.SetTextSize(0.07) #FIXME
-   #lat.DrawLatex(0.1,0.92,"#bf{CMS} #scale[0.75]{#it{Preliminary}}")
-   lat.DrawLatex(0.1,0.92,"#bf{CMS}") #FIXME for paper
+   if not options.paperStyle: lat.DrawLatex(0.1,0.92,"#bf{CMS} #scale[0.75]{#it{Preliminary}}")
+   else: 
+     lat.SetTextSize(0.07)
+     lat.DrawLatex(0.1,0.92,"#bf{CMS}")
    #lat.DrawLatex(0.129+0.04,0.85,"H#rightarrow#gamma#gamma")
-   lat.SetTextSize(0.05) #FIXME
+   lat.SetTextSize(0.05)
    lat.DrawLatex(0.13,0.83,"H#rightarrow#gamma#gamma") #LHCP17
    #lat.DrawLatex(0.12,0.82,"H#rightarrow#gamma#gamma")
-   #lat.DrawLatex(0.77,0.83,"H#rightarrow#gamma#gamma") #FIXME just for new MuScan
+   #lat.DrawLatex(0.77,0.83,"H#rightarrow#gamma#gamma") #used only for new MuScan
    #lat.SetTextSize(0.07)
    lat.SetTextSize(0.045)
    lat.DrawLatex(0.69,0.92,options.text)
@@ -705,10 +709,10 @@ def plot1DNLL(returnErrors=False,xvar="", ext=""):
 
     m,m1 = findQuantile(res,0);
     #l,h  = findQuantile(res,1);
-    l,h  = findQuantile(res,r.TMath.ChisquareQuantile(0.68,1)); #FIXME: now using this for 68% CL
+    l,h  = findQuantile(res,r.TMath.ChisquareQuantile(0.68,1)); #now using this, for 68% CL. One-sigma line is above
     #l2,h2  = findQuantile(res,4);
-    l2,h2  = findQuantile(res,r.TMath.ChisquareQuantile(0.95,1)); #FIXME: now using this for 95% CL
-    l3,h3  = findQuantile(res,9); #FIXME: temp
+    l2,h2  = findQuantile(res,r.TMath.ChisquareQuantile(0.95,1)); #now using this, for 68% CL. One-sigma line is above
+    #l3,h3  = findQuantile(res,9);
 
     if options.shiftNLL:
       shiftNLL(gr,m)
@@ -733,8 +737,8 @@ def plot1DNLL(returnErrors=False,xvar="", ext=""):
     eminus = m-l
     eplus2 = h2-m
     eminus2 = m-l2
-    eplus3 = h3-m #FIXME:temp
-    eminus3 = m-l3 #FIXME:temp
+    #eplus3 = h3-m
+    #eminus3 = m-l3
 
     print "%15s : %4.6f +%4.6g -%4.6g" % ( ntitle+" "+ext, xmin, eplus , eminus )
     if (options.method=="mu"):
@@ -761,13 +765,13 @@ def plot1DNLL(returnErrors=False,xvar="", ext=""):
         print "opts xaxis ", options.xaxis
         axmin = float(options.xaxis[0])
         axmax = float(options.xaxis[1])
-      #lines = [r.TLine(axmin, 1, axmax, 1), r.TLine(xmin-eminus,  0, xmin-eminus,  1), r.TLine(xmin+eplus,  0, xmin+eplus,  1), 
-      #        r.TLine(axmin, 4, axmax, 4), r.TLine(xmin-eminus2, 0, xmin-eminus2, 4), r.TLine(xmin+eplus2, 0, xmin+eplus2, 4) ] #FIXME temp
-              #,r.TLine(axmin, 9, axmax, 9), r.TLine(xmin-eminus3, 0, xmin-eminus3, 9), r.TLine(xmin+eplus3, 0, xmin+eplus3, 9) ]
+      #lines = [r.TLine(axmin, 1, axmax, 1), r.TLine(xmin-eminus,  0, xmin-eminus,  1), r.TLine(xmin+eplus,  0, xmin+eplus,  1),
+      #        r.TLine(axmin, 4, axmax, 4), r.TLine(xmin-eminus2, 0, xmin-eminus2, 4), r.TLine(xmin+eplus2, 0, xmin+eplus2, 4) ]
+      #        ,r.TLine(axmin, 9, axmax, 9), r.TLine(xmin-eminus3, 0, xmin-eminus3, 9), r.TLine(xmin+eplus3, 0, xmin+eplus3, 9) ]
       the68CL = r.TMath.ChisquareQuantile(0.68,1)
       the95CL = r.TMath.ChisquareQuantile(0.95,1)
       lines = [r.TLine(axmin, the68CL, axmax, the68CL), r.TLine(xmin-eminus,  0, xmin-eminus,  the68CL), r.TLine(xmin+eplus,  0, xmin+eplus,  the68CL), 
-              r.TLine(axmin, the95CL, axmax, the95CL), r.TLine(xmin-eminus2, 0, xmin-eminus2, the95CL), r.TLine(xmin+eplus2, 0, xmin+eplus2, the95CL) ] # FIXME: updated for 68% CL in paper
+              r.TLine(axmin, the95CL, axmax, the95CL), r.TLine(xmin-eminus2, 0, xmin-eminus2, the95CL), r.TLine(xmin+eplus2, 0, xmin+eplus2, the95CL) ] #updated for 68% CL
     
   dH = r.TH1D("dH","",1,axmin,axmax)
   dH.GetXaxis().SetTitle(xtitle)
@@ -776,7 +780,7 @@ def plot1DNLL(returnErrors=False,xvar="", ext=""):
   if options.method=='mh': dH.GetXaxis().SetNdivisions(505)
   dH.GetYaxis().SetTitle('-2 #Delta ln L')
   if not options.yaxis: dH.GetYaxis().SetRangeUser(0.,6)
-  #if not options.yaxis: dH.GetYaxis().SetRangeUser(0.,10.) #FIXME temp
+  #if not options.yaxis: dH.GetYaxis().SetRangeUser(0.,10.)
   else: dH.GetYaxis().SetRangeUser(float(options.yaxis.split(',')[0]),float(options.yaxis.split(',')[1]))
   dH.SetLineColor(0)
   dH.SetStats(0)
@@ -815,11 +819,12 @@ def plot1DNLL(returnErrors=False,xvar="", ext=""):
   elif options.method=='rf': lat2.DrawLatex(0.5,0.85,"#hat{#mu}_{ggH+ttH} = %4.2f ^{#font[122]{+}%4.2f}_{#font[122]{-}%4.2f}"%(fit,eplus0,eminus0))
 
   #draw CL lines
-  lat3 = r.TLatex()
-  lat3.SetNDC()
-  lat3.SetTextAlign(22)
-  lat2.DrawLatex(0.2,0.25,"#font[62]{#scale[0.6]{68% CL}}") #FIXME just for paper mu plot
-  lat2.DrawLatex(0.2,0.63,"#font[62]{#scale[0.6]{95% CL}}") #FIXME just for paper mu plot
+  if options.method=='mu':
+    lat3 = r.TLatex()
+    lat3.SetNDC()
+    lat3.SetTextAlign(22)
+    lat2.DrawLatex(0.2,0.25,"#font[62]{#scale[0.6]{68% CL}}")
+    lat2.DrawLatex(0.2,0.63,"#font[62]{#scale[0.6]{95% CL}}")
 
   drawGlobals(canv)
   canv.RedrawAxis()
@@ -929,8 +934,7 @@ def plot2DNLL(xvar="RF",yvar="RV",xtitle="#mu_{ggH+ttH}",ytitle="#mu_{qqH+VH}"):
            for bin in range(1,tempY.GetNbinsX()+1):
               if tempY.GetBinContent(bin)!=0: ybins+=1
 
-        #tree.Draw("2.*deltaNLL:%s:%s>>h%d%s%s(%d,%1.4f,%1.4f,%d,%1.4f,%1.4f)"%(yvar,xvar,fi,yvar,xvar,xbins,xmin,xmax,ybins,ymin,ymax),"deltaNLL>0.","prof")
-        tree.Draw("2.*deltaNLL:%s:%s>>h%d%s%s(%d,%1.4f,%1.4f,%d,%1.4f,%1.4f)"%(yvar,xvar,fi,yvar,xvar,xbins,xmin,xmax,ybins,ymin,ymax),"deltaNLL>0.&&deltaNLL<10000.","prof") #FIXME remove inf points
+        tree.Draw("2.*deltaNLL:%s:%s>>h%d%s%s(%d,%1.4f,%1.4f,%d,%1.4f,%1.4f)"%(yvar,xvar,fi,yvar,xvar,xbins,xmin,xmax,ybins,ymin,ymax),"deltaNLL>0.&&deltaNLL<10000.","prof")#remove inf points
         th2 = r.gROOT.FindObject('h%d%s%s'%(fi,yvar,xvar))
 
     if options.xaxis :
@@ -958,14 +962,15 @@ def plot2DNLL(xvar="RF",yvar="RV",xtitle="#mu_{ggH+ttH}",ytitle="#mu_{qqH+VH}"):
     #      th2.SetBinContent(i,j,newContent*factor)
     #    else:
     #      prevBin= th2.GetBinContent(i,j)
-    #FIXME: spike killer above doesn't seem to work, to do with object being a TProfile2D with some methods overloaded and some not.
-    # the section below is temporary, for making failed jobs the background colour
-    for j in range (0,th2.GetNbinsY()+1):
-      for i in range (0,th2.GetNbinsX()+1):
-        if i+j>(0.75*(th2.GetNbinsX()+th2.GetNbinsY())): 
-          th2.Fill(xmin+i*((xmax-xmin)/float(xbins)),ymin+j*((ymax-ymin)/float(ybins)),10.)
-    #FIXME: I guess above lines only need to be there for KGluKGam ?
     ############## Simple spike killer ##########
+
+    #spike killer above doesn't seem to work, to do with object being a TProfile2D with some methods overloaded and some not.
+    # the section below is a horrible hack for the KGluKGam plot, making failed jobs the background colour
+    if options.method=='kglukgam':
+      for j in range (0,th2.GetNbinsY()+1):
+        for i in range (0,th2.GetNbinsX()+1):
+          if i+j>(0.75*(th2.GetNbinsX()+th2.GetNbinsY())): 
+            th2.Fill(xmin+i*((xmax-xmin)/float(xbins)),ymin+j*((ymax-ymin)/float(ybins)),10.)
 
     gBF = r.TGraph()
     gSM = r.TGraph()
@@ -1125,9 +1130,9 @@ def plot2DNLL(xvar="RF",yvar="RV",xtitle="#mu_{ggH+ttH}",ytitle="#mu_{qqH+VH}"):
         if (options.method=="rvrf") :leg.AddEntry(gSM,"SM","P")
         if (options.method=="mumh") :leg.AddEntry(gSM,"#mu=1, m_H=125.09 GeV","P")
         #leg.AddEntry(cont_1sig,"1#sigma","L")
-        leg.AddEntry(cont_1sig,"68% CL","L") #FIXME: for paper, CL requested
         #leg.AddEntry(cont_2sig,"2#sigma","L")
-        leg.AddEntry(cont_2sig,"95% CL","L") #FIXME: for paper, CL requested
+        leg.AddEntry(cont_1sig,"68% CL","L") #for paper, CL requested
+        leg.AddEntry(cont_2sig,"95% CL","L") #for paper, CL requested
     else :
       leg.AddEntry(BFgrs[-1],options.names[fi],"P")
   leg.SetBorderSize(0)
@@ -1351,10 +1356,11 @@ def plotMPdfChComp(plottype="perTag"):
   if addDummyPoint : 
     catNames.append("Dummy")
     points.append(["",0,0,0,0,0])
-    #catNames.append("DummySecond") #FIXME: temporary for category plot
-    #points.append(["",0,0,0,0,0])
-    #catNames.insert(1,"DummyThird") #FIXME: temporary for category plot
-    #points.insert(1,["",0,0,0,0,0])
+    if options.percatchcomp: #for spacing the now very busy per cat mu plot
+      catNames.append("DummySecond")
+      points.append(["",0,0,0,0,0])
+      catNames.insert(1,"DummyThird")
+      points.insert(1,["",0,0,0,0,0])
   if not options.noComb:  catNames=catNames[1:]
 
   r.gROOT.SetBatch(options.batch)
@@ -1429,11 +1435,7 @@ def plotMPdfChComp(plottype="perTag"):
         catGraph2sig[grIndex].SetPoint(pIndex,point[1],pIndex+yshift)
 
 
-    #catGraph1sig[grIndex].SetPointError(pIndex,point[3],point[2],0.,0.)
-    if not catNames[p]=="VH MET":
-      catGraph1sig[grIndex].SetPointError(pIndex,point[3],point[2],0.,0.) #FIXME
-    else:
-      catGraph1sig[grIndex].SetPointError(pIndex,point[1],point[2],0.,0.) #FIXME
+    catGraph1sig[grIndex].SetPointError(pIndex,point[3],point[2],0.,0.)
     catGraph2sig[grIndex].SetPointError(pIndex,point[5],point[4],0.,0.)
     
     #if point[0]=='': binlabel = 'cat%d'%p
@@ -1471,7 +1473,7 @@ def plotMPdfChComp(plottype="perTag"):
     dummyHist.GetYaxis().SetBinLabel(p+1,binlabel)
     dummyHist.GetYaxis().SetLabelOffset(-0.045)
     dummyHist.GetYaxis().SetLabelSize(0.05)
-    #dummyHist.GetYaxis().SetTickSize(0.02) #FIXME: temporary for category plot
+    if options.percatchcomp: dummyHist.GetYaxis().SetTickSize(0.02)
 
     catGraph1sig[grIndex].SetLineColor(int(options.colors[grIndex]))
     catGraph1sig[grIndex].SetLineWidth(2)
@@ -1532,14 +1534,15 @@ def plotMPdfChComp(plottype="perTag"):
   leg.SetBorderSize(0)
   leg.SetTextAlign(12)
   #if not options.noComb: leg.AddEntry(dummyHist,"Combined #pm 1#sigma","LF")
-  if not options.noComb: leg.AddEntry(dummyHist,"Combined 68% CL","LF") #FIXME for paper, now CL
+  if not options.noComb: leg.AddEntry(dummyHist,"Combined 68% CL","LF")
   if not options.do1sig and not options.noComb: leg.AddEntry(dummyHist2,"Combined #pm 2#sigma","LF")
   #if not options.noComb: leg.AddEntry(catGraph1sig[0],"Per %s #pm 1#sigma"%options.groupentry,"LP");
   #if plottype =="perTag": leg.AddEntry(catGraph1sig[0],"Per category #pm 1#sigma","LP")
-  if plottype =="perTag": leg.AddEntry(catGraph1sig[0],"Per category 68% CL","LP") #FIXME
+  if plottype =="perTag": leg.AddEntry(catGraph1sig[0],"Per category 68% CL","LP")
+  #elif plottype =="perProc" and options.percatchcomp: leg.AddEntry(catGraph1sig[0],"Per category #pm 1#sigma","LP")
   #elif plottype =="perProc": leg.AddEntry(catGraph1sig[0],"Per process #pm 1#sigma","LP")
-  elif plottype =="perProc": leg.AddEntry(catGraph1sig[0],"Per process 68% CL","LP") #FIXME
-  #elif plottype =="perProc": leg.AddEntry(catGraph1sig[0],"Per category #pm 1#sigma","LP") #FIXME: sort this out
+  elif plottype =="perProc" and options.percatchcomp: leg.AddEntry(catGraph1sig[0],"Per category 68% CL","LP")
+  elif plottype =="perProc": leg.AddEntry(catGraph1sig[0],"Per process 68% CL","LP")
   if not options.do1sig and not options.noComb: 
     if plottype =="perTag":
       leg.AddEntry(catGraph2sig[0],"Per category #pm 2#sigma","LP");
@@ -1579,9 +1582,10 @@ def plotMPdfChComp(plottype="perTag"):
     bestFitBand1.Draw()
     bestFitLine.Draw()
 
-  #FIXME: temporary, to grey out the ZH leptonic tag because has no data in signal region
+  #temporary, to grey out the ZH leptonic tag because has no data in signal region
   #doGreying = True
   doGreying = False
+  if percatchcomp: doGreying = True 
   if doGreying:
     #greyBox = r.TBox(-3.,3.,0.,4.)
     greyBox = r.TBox(-2.,1.,0.,2.)
@@ -1589,11 +1593,11 @@ def plotMPdfChComp(plottype="perTag"):
     greyBox.SetFillColor(15)
     greyBox.Draw("same")
 
-  #FIXME: temporary, show below zero is excluded
+  #temporary, show below zero is excluded
   #doHatching = True
   doHatching = False
   if doStxs: 
-    doHatching = True #FIXME
+    doHatching = True
   if doHatching:
     hatchBox = r.TBox(-0.2,0.,0.,len(catFits))
     hatchBox.SetFillStyle(3004)
