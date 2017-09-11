@@ -1,9 +1,7 @@
 # NOTICE THAT TO PASS AN = SIGN IN A STRING USE \= e.g #sqrt{s}\=13TeV
 
 # ones I actually use - expected
-#method=pval:files=combineJobs13TeV_!EXT!/ExpProfileLikelihood/All/All.root,combineJobs13TeV_!EXT!/ExpProfileLikelihood_m125.09/All/All.root:colors=2,4:styles=1,1:widths=2,2:names=Expected ,Expected m_{H} \= 125.09 GeV,:text=!INTLUMI! fb^{-1} (13TeV):outname=pval13TeV
 #method=mu:files=combineJobs13TeV_!EXT!/ExpMuScanStat/ExpMuScanStat.root,combineJobs13TeV_!EXT!/ExpMuScan/ExpMuScan.root:colors=2,4:styles=1,1:widths=2,2:names=stat only,syststat:text=!INTLUMI! fb^{-1} (13TeV):outname=expected_mu
-#method=pval:files=combineJobs13TeV_!EXT!/ExpProfileLikelihood/All/All.root,combineJobs13TeV_!EXT!/ExpProfileLikelihood/Untagged/Untagged.root,combineJobs13TeV_!EXT!/ExpProfileLikelihood/VBF/VBF.root,combineJobs13TeV_!EXT!/ExpProfileLikelihood/TTH/TTH.root,combineJobs13TeV_!EXT!/ExpProfileLikelihood/VH/VH.root,combineJobs13TeV_!EXT!/ExpProfileLikelihood_m125.09/All/All.root,combineJobs13TeV_!EXT!/ExpProfileLikelihood_m125.09/Untagged/Untagged.root,combineJobs13TeV_!EXT!/ExpProfileLikelihood_m125.09/VBF/VBF.root,combineJobs13TeV_!EXT!/ExpProfileLikelihood_m125.09/TTH/TTH.root,combineJobs13TeV_!EXT!/ExpProfileLikelihood_m125.09/VH/VH.root:colors=2,3,4,5,6,2,3,4,5,6:styles=1,1,1,1,1,2,2,2,2,2:widths=2,1,1,1,1,2,1,1,1,1:names=Expected, Exp Untagged, Exp VBF, Exp TTH, Exp VH, Expected m_{H} \= 125.09 GeV,Expected m_{H} \= 125.09 GeV Untagged,Expected m_{H} \= 125.09 GeV VBF,Expected m_{H} \= 125.09 GeV TTH,Expected m_{H} \= 125.09 GeV VH:text=!INTLUMI! fb^{-1} (13TeV):outname=pval13TeV_per_Tag_Type
 
 # ones I actually use - observed
 #method=mu:files=combineJobs13TeV_!EXT!/MuScanProfileMH/MuScanProfileMH.root:colors=2:styles=1:widths=2:names=syststat:text=!INTLUMI! fb^{-1} (13TeV):outname=MuScanProfileMH
