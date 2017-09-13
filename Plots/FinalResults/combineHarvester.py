@@ -121,7 +121,7 @@ specOpts.add_option("--expectSignal",type="float",default=None)
 specOpts.add_option("--expectSignalMass",type="float",default=None)
 specOpts.add_option("--splitChannels",default=None)
 specOpts.add_option("--perProcessChannelCompatibilityPOI",default=None)
-specOpts.add_option("--perProcMuPOI",default=None)
+specOpts.add_option("--perProcessMuPOI",default=None)
 specOpts.add_option("--doSTXS",default=False,action="store_true",help="Use STXS POIs")
 specOpts.add_option("--perTagChannelCompatibilityPOI",default=None)
 specOpts.add_option("--profileMH",default=False)
@@ -753,7 +753,7 @@ def writeMultiDimFit(method=None,wsOnly=False):
     "PerProcessChannelCompatibility"   : "-P %s --floatOtherPOIs=1"% opts.perProcessChannelCompatibilityPOI , 
     "PerProcessChannelCompatibilityStat"   : "-P %s --floatOtherPOIs=1"% opts.perProcessChannelCompatibilityPOI , 
     "PerProcessChannelCompatibilityTheo"   : "-P %s --floatOtherPOIs=1"% opts.perProcessChannelCompatibilityPOI , 
-    "PerProcessMu"   : "-P %s --floatOtherPOIs=1"% opts.perProcMuPOI, 
+    "PerProcessMu"   : "-P %s --floatOtherPOIs=1"% opts.perProcessMuPOI, 
     "PerTagChannelCompatibility"   : "-P %s --floatOtherPOIs=1"% opts.perTagChannelCompatibilityPOI , 
     "RVScan"  : "--floatOtherPOIs=1 -P RV" ,
     "RVnpRFScan"  : "--floatOtherPOIs=0 -P RV" ,
@@ -1009,7 +1009,7 @@ def configure(config_line):
     if option.startswith('pointsperjob='): opts.pointsperjob = int(option.split('=')[1])
     if option.startswith('splitChannels='): opts.splitChannels = option.split('=')[1].split(',')
     if option.startswith('perProcessChannelCompatibilityPOI='): opts.perProcessChannelCompatibilityPOI = option.split('=')[1]
-    if option.startswith('perProcMuPOI='): opts.perProcMuPOI = option.split('=')[1]
+    if option.startswith('perProcessMuPOI='): opts.perProcessMuPOI = option.split('=')[1]
     if option.startswith('perTagChannelCompatibilityPOI='): opts.perTagChannelCompatibilityPOI= option.split('=')[1]
     if option.startswith('justThisSyst='): opts.justThisSyst = option.split('=')[1].split(',')
     if option.startswith('toysFile='): opts.toysFile = option.split('=')[1]

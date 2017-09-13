@@ -1585,7 +1585,7 @@ def plotMPdfChComp(plottype="perTag"):
   #temporary, to grey out the ZH leptonic tag because has no data in signal region
   #doGreying = True
   doGreying = False
-  if percatchcomp: doGreying = True 
+  if options.percatchcomp: doGreying = True 
   if doGreying:
     #greyBox = r.TBox(-3.,3.,0.,4.)
     greyBox = r.TBox(-2.,1.,0.,2.)
