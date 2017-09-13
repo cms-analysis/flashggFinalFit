@@ -201,10 +201,8 @@ vector<float> effSigma(TH1 * hist, double quantile=TMath::Erf(1.0/sqrt(2.0)))
   if(ierr != 0) cout << "effsigma: Error of type " << ierr << endl;
   
   //return widmin;
-  //cout << "ED DEBUG:: widmin   = " << widmin << endl;;
   retvec[0] = sigeffmin;
   retvec[1] = sigeffmax;
-  //cout << "ED DEBUG:: sigmaeff = " << 0.5*(retvec[1]-retvec[0]) << endl;;
   return retvec;
 }
 
@@ -280,9 +278,7 @@ map<string,RooDataSet*> getFlashggData(RooWorkspace *work, std::vector<TString> 
   for (int cat=0; cat<catNames.size(); cat++){
     catNames[cat].ReplaceAll("_13TeV","");
     if( catNames[cat].Contains("combcat") ) continue;
-    cout << "ED DEBUG:: " << catNames[cat].Data() << endl;
     result.insert(pair<string,RooDataSet*>(Form("%s",catNames[cat].Data()),(RooDataSet*)work->data(Form("sig_mass_m%3d_%s",m_hyp,catNames[cat].Data()))));
-    cout << "ED DEBUG:: " << result[catNames[cat].Data()] << endl;
   }
   result.insert(pair<string,RooDataSet*>("all",(RooDataSet*)work->data(Form("sig_mass_m%3d_AllCats",m_hyp))));
 
@@ -722,7 +718,6 @@ int main(int argc, char *argv[]) {
   //get MC datasets 
   //TFile *hggFile = TFile::Open("../../Signal/outdir_EdWeightTest/CMS-HGG_sigfit_EdWeightTest.root");
   TFile *hggFile = TFile::Open("/vols/build/cms/es811/FreshStart/Pass6/CMSSW_7_4_7/src/flashggFinalFit/Signal/outdir_ws919/CMS-HGG_sigfit_ws919.root");
-  cout << "hggFile = " << hggFile << endl;
   RooWorkspace *hggWS;
   int sqrts_ = 13;
   hggWS = (RooWorkspace*)hggFile->Get(Form("wsig_%dTeV",sqrts_));
@@ -730,16 +725,12 @@ int main(int argc, char *argv[]) {
     cerr << "Workspace is null" << endl;
     exit(1);
   }
-  cout << "hggWS = " << hggWS << endl;
   RooRealVar *mcMass= (RooRealVar*)hggWS->var("CMS_hgg_mass");
-  cout << "mcMass = " << mcMass << endl;
   RooRealVar *mcMh = (RooRealVar*)hggWS->var("MH");
-  cout << "mcMh = " << mcMh << endl;
   mcMh->setVal(125);
   mcMass->setRange("higgsRange",105.,140.);
   map<string,RooDataSet*> dataSets;
   dataSets = getFlashggData( hggWS, catnamesVector[0], 125 );
-  cout << "dataSets.size() = " << dataSets.size() << endl;
   TH1* hWeightedMC =  new TH1F("hWeightedMC","desc",70,105.,140.);
   vector<TString> mcCatNames = catnamesVector[0];
   vector<TH1*> vecMChists;
@@ -750,16 +741,14 @@ int main(int argc, char *argv[]) {
     hWeightedMC->Add(vecMChists[icat],catweightsFinal[icat]);
   }
   vecMChists.push_back( dataSets["all"]->createHistogram("hAllUnweighted", *mcMass, Binning(70,105.,140.)) );
-  cout << "hWeightedMC entries = " << hWeightedMC->GetEntries() << endl;
   vecMChists.push_back( hWeightedMC );
-  cout << "vecMChists.size() = " << vecMChists.size() << endl;
 
 
   //gStyle->SetPalette(57);
   for (int iCat=0 ; iCat < catnamesVector[0].size(); iCat++){
     TString thisCatName =catnamesVector[0][iCat] ; 
     TString thisCatDesc =catdescVector[0][iCat] ; 
-    std::cout << "now considering category " <<thisCatName <<std::endl;  
+    if(verbose_) std::cout << "now considering category " <<thisCatName <<std::endl;  
     //make a dummy histogram for plotting
     double lowedge = 105.;
     double highedge = 140;
@@ -811,8 +800,8 @@ int main(int argc, char *argv[]) {
     hdummy->Draw("HIST");
 
     TH1* hMChist = vecMChists[iCat];
-    cout << "hMChist = " << hMChist << endl;
-    cout << "hMChist entries = " << hMChist->GetEntries() << endl;
+    if (verbose_) cout << "hMChist = " << hMChist << endl;
+    if (verbose_) cout << "hMChist entries = " << hMChist->GetEntries() << endl;
 
     float fwmin  = 0.;
     float fwmax = 0.;
@@ -831,15 +820,12 @@ int main(int argc, char *argv[]) {
       hsigplotfinesigmaeff->SetFillColor(19);
       hsigplotfinesigmaeff->SetFillStyle(1001);
       hsigplotfinesigmaeff->Draw("HISTSAME,F");
-      cout << "hsigplotfinesigmaeff = " << hsigplotfinesigmaeff->Integral( hsigplotfinesigmaeff->FindBin(105.),hsigplotfinesigmaeff->FindBin(140.) ) << endl;
       hsigplotfine->Draw("HISTSAME");
-      cout << "hsigplotfinesigmaeff = " << hsigplotfine->Integral( hsigplotfine->FindBin(105.),hsigplotfine->FindBin(140.) ) << endl;
       hMChist->SetMarkerStyle(kOpenSquare);
       float tempScale = hsigplotfine->Integral("width");
       float tempNorm  = hMChist->Integral("width");
       hMChist->Scale(tempScale/tempNorm);
       hMChist->Draw("SAME");
-      cout << "hMChist = " << hMChist->Integral() << endl;
 
       leg->AddEntry(hMChist,"Simulation","lep");
       leg->AddEntry(hsigplotfine,"#splitline{Parametric}{model}","l");
@@ -847,11 +833,6 @@ int main(int argc, char *argv[]) {
       halfmax = 0.5*hsigplotfine->GetMaximum();
       fwmin = hsigplotfine->GetBinCenter(hsigplotfine->FindFirstBinAbove(halfmax));
       fwmax = hsigplotfine->GetBinCenter(hsigplotfine->FindLastBinAbove(halfmax));
-      cout << "ED DEBUG:: halfmax = " << halfmax << endl;
-      cout << "ED DEBUG:: fwmin   = " << fwmin   << endl;
-      cout << "ED DEBUG:: fwmax   = " << fwmax   << endl;
-      cout << "ED DEBUG:: fwhm   = " << fwmax-fwmin   << endl;
-      cout << "ED DEBUG:: sigma_eff   = " << 0.5*(vecsigmaeff[1]-vecsigmaeff[0]) << endl;
       //halfmax = halfmax / hsigplotfine->Integral();
 
       //offset=offset+0.11;

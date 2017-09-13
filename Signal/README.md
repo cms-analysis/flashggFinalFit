@@ -157,3 +157,12 @@ Example output can be found here:
 ```
 https://twiki.cern.ch/twiki/bin/view/CMS/FLASHggFramework#Signal #(Under Signal Validation Plots)
 ```
+
+### Weighted Signal Plot
+
+In recent analyses we have made a sum of all signal models weighted by S/B. This can be made after you've run the full workflow using the script `plotweightedsigEd.cpp`, which lives in the Background directory. Step-by-step instructions, starting from `Plots/FinalResults/`:
+```
+text2workspace.py CMS-HGG_mva_13TeV_datacard.txt -m 125
+combine CMS-HGG_mva_13TeV_datacard.root -M MultiDimFit -n _SigModel -m 125.0 --saveWorkspace
+../../Background/bin/plotweightedsigEd -i higgsCombine_SigModel.MultiDimFit.mH125.root --name myWeightedSignalPlot -v1 --label m_{H}=125GeV
+```
