@@ -1583,9 +1583,9 @@ def plotMPdfChComp(plottype="perTag"):
     bestFitLine.Draw()
 
   #temporary, to grey out the ZH leptonic tag because has no data in signal region
+  #deprecated, use hatching instead. 
   #doGreying = True
   doGreying = False
-  if options.percatchcomp: doGreying = True 
   if doGreying:
     #greyBox = r.TBox(-3.,3.,0.,4.)
     greyBox = r.TBox(-2.,1.,0.,2.)
@@ -1593,10 +1593,10 @@ def plotMPdfChComp(plottype="perTag"):
     greyBox.SetFillColor(15)
     greyBox.Draw("same")
 
-  #temporary, show below zero is excluded
+  #show below zero is excluded
   #doHatching = True
   doHatching = False
-  if doStxs: 
+  if doStxs or options.percatchcomp:
     doHatching = True
   if doHatching:
     hatchBox = r.TBox(-0.2,0.,0.,len(catFits))
