@@ -116,6 +116,9 @@ p=0 ; while (( $p<20 )); do bsub -q 1nh $PWD/../scripts/s_sb_errorbands.sh $p $P
 #well done, you have produced you plots, one for each category and one for the weighted and unweighed sums !
 ```
 
+## Nuisance impacts
+The impacts plot is a useful tool for cross-checking the analysis and often used during (pre)approval. You can follow the documentation from the combine group [here](https://twiki.cern.ch/twiki/bin/view/CMS/HiggsWG/SWGuideNonStandardCombineUses#Nuisance_parameter_impacts) and use either the `impactsPerProc.sh` or `impactsTotal.sh` guiding scripts.
+
 ## Notes
 
 Running Notes:
