@@ -9,9 +9,12 @@ cd CMSSW_7_4_7/src
 cmsenv
 git cms-init
 # Install Combine as per Twiki: https://twiki.cern.ch/twiki/bin/viewauth/CMS/SWGuideHiggsAnalysisCombinedLimit#ROOT6_SLC6_release_CMSSW_7_4_X
+# They recently migrated to 81X; we will follow shortly, but checkout 74X branch for now
 git clone https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit
 cd ${CMSSW_BASE}/src/HiggsAnalysis/CombinedLimit
 git fetch origin
+git checkout origin/74x-root6
+git checkout -b mybranch
 cd ${CMSSW_BASE}/src
 # Install the GBRLikelihood package which contains the RooDoubleCBFast implementation
 git clone git@github.com:bendavid/GBRLikelihood.git HiggsAnalysis/GBRLikelihood
