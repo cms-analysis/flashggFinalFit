@@ -1,0 +1,141 @@
+#proc cat nGausRV nGausWV
+GG2H TTHHadronicTag -1 -1 TTH TTHHadronicTag
+GG2H TTHLeptonicTag -1 -1 TTH TTHHadronicTag
+GG2H UntaggedTag_0 3 1
+GG2H UntaggedTag_1 3 3
+GG2H UntaggedTag_2 4 3
+GG2H UntaggedTag_3 4 3
+GG2H VBFTag_0 -1 -1 VBF VBFTag_0
+GG2H VBFTag_1 -1 -1 VBF VBFTag_1
+GG2H VBFTag_2 4 -1
+GG2H VHHadronicTag 1 1
+GG2H VHLeptonicLooseTag 3 1
+GG2H VHMetTag -1 -1 QQ2HLNU VHMetTag
+GG2H WHLeptonicTag 3 1
+GG2H ZHLeptonicTag 2 1
+QQ2HLL TTHHadronicTag -1 -1 TTH TTHHadronicTag
+QQ2HLL TTHLeptonicTag 3 3
+QQ2HLL UntaggedTag_0 -1 -1 GG2H UntaggedTag_0
+QQ2HLL UntaggedTag_1 -1 -1 GG2H UntaggedTag_1
+QQ2HLL UntaggedTag_2 2 -1
+QQ2HLL UntaggedTag_3 3 1
+QQ2HLL VBFTag_0 3 1
+QQ2HLL VBFTag_1 3 1
+QQ2HLL VBFTag_2 3 1
+QQ2HLL VHHadronicTag -1 -1 WH2HQQ VHHadronicTag
+QQ2HLL VHLeptonicLooseTag 1 1
+QQ2HLL VHMetTag -1 -1 QQ2HLNU WHLeptonicTag
+QQ2HLL WHLeptonicTag -1 -1 QQ2HLNU WHLeptonicTag
+QQ2HLL ZHLeptonicTag -1 -1 QQ2HLNU WHLeptonicTag
+QQ2HLNU TTHHadronicTag -1 -1 TTH TTHHadronicTag
+QQ2HLNU TTHLeptonicTag 3 1
+QQ2HLNU UntaggedTag_0 -1 -1 GG2H UntaggedTag_0
+QQ2HLNU UntaggedTag_1 3 -1 GG2H UntaggedTag_1
+QQ2HLNU UntaggedTag_2 4 1
+QQ2HLNU UntaggedTag_3 3 1
+QQ2HLNU VBFTag_0 3 1
+QQ2HLNU VBFTag_1 3 1
+QQ2HLNU VBFTag_2 3 1
+QQ2HLNU VHHadronicTag -1 -1 WH2HQQ VHHadronicTag
+QQ2HLNU VHLeptonicLooseTag 3 3
+QQ2HLNU VHMetTag 3 -1
+QQ2HLNU WHLeptonicTag 4 3
+QQ2HLNU ZHLeptonicTag 2 1
+TTH TTHHadronicTag 4 3
+TTH TTHLeptonicTag 4 3
+TTH UntaggedTag_0 3 3
+TTH UntaggedTag_1 3 3
+TTH UntaggedTag_2 3 -1
+TTH UntaggedTag_3 3 -1 GG2H UntaggedTag_3
+TTH VBFTag_0 -1 -1 VBF VBFTag_0
+TTH VBFTag_1 -1 -1 VBF VBFTag_1
+TTH VBFTag_2 -1 -1 VBF VBFTag_2
+TTH VHHadronicTag 3 -1 WH2HQQ VHHadronicTag
+TTH VHLeptonicLooseTag -1 -1 QQ2HLNU VHLeptonicLooseTag
+TTH VHMetTag 2 1
+TTH WHLeptonicTag 1 1
+TTH ZHLeptonicTag 3 3
+testBBH TTHHadronicTag -1 -1 TTH TTHHadronicTag
+testBBH TTHLeptonicTag -1 -1 TTH TTHHadronicTag
+testBBH UntaggedTag_0 -1 -1 GG2H UntaggedTag_0
+testBBH UntaggedTag_1 -1 -1 GG2H UntaggedTag_1
+testBBH UntaggedTag_2 -1 -1 GG2H UntaggedTag_2
+testBBH UntaggedTag_3 -1 -1 GG2H UntaggedTag_3
+testBBH VBFTag_0 -1 -1 VBF VBFTag_0
+testBBH VBFTag_1 -1 -1 VBF VBFTag_1
+testBBH VBFTag_2 -1 -1 VBF VBFTag_2
+testBBH VHHadronicTag -1 -1 WH2HQQ VHHadronicTag
+testBBH VHLeptonicLooseTag -1 -1 QQ2HLNU VHLeptonicLooseTag
+testBBH VHMetTag -1 -1 QQ2HLNU VHMetTag
+testBBH WHLeptonicTag -1 -1 QQ2HLNU WHLeptonicTag
+testBBH ZHLeptonicTag -1 -1 GG2H UntaggedTag_2
+testTHQ TTHHadronicTag -1 -1 TTH TTHHadronicTag
+testTHQ TTHLeptonicTag -1 -1 TTH TTHHadronicTag
+testTHQ UntaggedTag_0 -1 -1 GG2H UntaggedTag_0
+testTHQ UntaggedTag_1 -1 -1 GG2H UntaggedTag_1
+testTHQ UntaggedTag_2 -1 -1 GG2H UntaggedTag_2
+testTHQ UntaggedTag_3 -1 -1 GG2H UntaggedTag_3
+testTHQ VBFTag_0 -1 -1 VBF VBFTag_0
+testTHQ VBFTag_1 -1 -1 VBF VBFTag_1
+testTHQ VBFTag_2 -1 -1 VBF VBFTag_2
+testTHQ VHHadronicTag -1 -1 WH2HQQ VHHadronicTag
+testTHQ VHLeptonicLooseTag -1 -1 QQ2HLNU VHLeptonicLooseTag
+testTHQ VHMetTag -1 -1 QQ2HLNU VHMetTag
+testTHQ WHLeptonicTag -1 -1 QQ2HLNU WHLeptonicTag
+testTHQ ZHLeptonicTag -1 -1 GG2H UntaggedTag_2
+testTHW TTHHadronicTag -1 -1 TTH TTHHadronicTag
+testTHW TTHLeptonicTag -1 -1 TTH TTHHadronicTag
+testTHW UntaggedTag_0 -1 -1 GG2H UntaggedTag_0
+testTHW UntaggedTag_1 -1 -1 GG2H UntaggedTag_1
+testTHW UntaggedTag_2 -1 -1 GG2H UntaggedTag_2
+testTHW UntaggedTag_3 -1 -1 GG2H UntaggedTag_3
+testTHW VBFTag_0 -1 -1 VBF VBFTag_0
+testTHW VBFTag_1 -1 -1 VBF VBFTag_1
+testTHW VBFTag_2 -1 -1 VBF VBFTag_2
+testTHW VHHadronicTag -1 -1 WH2HQQ VHHadronicTag
+testTHW VHLeptonicLooseTag -1 -1 QQ2HLNU VHLeptonicLooseTag
+testTHW VHMetTag -1 -1 QQ2HLNU VHMetTag
+testTHW WHLeptonicTag -1 -1 QQ2HLNU WHLeptonicTag
+testTHW ZHLeptonicTag -1 -1 GG2H UntaggedTag_2
+VBF TTHHadronicTag 3 3
+VBF TTHLeptonicTag -1 -1 TTH TTHLeptonicTag
+VBF UntaggedTag_0 3 1
+VBF UntaggedTag_1 4 3
+VBF UntaggedTag_2 4 3
+VBF UntaggedTag_3 4 3
+VBF VBFTag_0 4 3
+VBF VBFTag_1 4 3
+VBF VBFTag_2 4 3
+VBF VHHadronicTag 1 1
+VBF VHLeptonicLooseTag -1 -1 QQ2HLNU VHLeptonicLooseTag
+VBF VHMetTag -1 -1 QQ2HLNU VHMetTag
+VBF WHLeptonicTag 3 3
+VBF ZHLeptonicTag 3 1
+WH2HQQ TTHHadronicTag 3 1
+WH2HQQ TTHLeptonicTag 3 1
+WH2HQQ UntaggedTag_0 3 3
+WH2HQQ UntaggedTag_1 3 -1 GG2H UntaggedTag_1
+WH2HQQ UntaggedTag_2 3 1
+WH2HQQ UntaggedTag_3 3 1
+WH2HQQ VBFTag_0 -1 -1 VBF VBFTag_0
+WH2HQQ VBFTag_1 -1 -1 VBF VBFTag_1
+WH2HQQ VBFTag_2 -1 -1 VBF VBFTag_2
+WH2HQQ VHHadronicTag 2 1
+WH2HQQ VHLeptonicLooseTag 3 1
+WH2HQQ VHMetTag 3 3
+WH2HQQ WHLeptonicTag 3 3
+WH2HQQ ZHLeptonicTag 3 1
+ZH2HQQ TTHHadronicTag -1 -1 TTH TTHHadronicTag
+ZH2HQQ TTHLeptonicTag -1 -1 TTH TTHLeptonicTag
+ZH2HQQ UntaggedTag_0 2 2
+ZH2HQQ UntaggedTag_1 3 3
+ZH2HQQ UntaggedTag_2 2 -1
+ZH2HQQ UntaggedTag_3 3 -1 GG2H UntaggedTag_3
+ZH2HQQ VBFTag_0 3 3
+ZH2HQQ VBFTag_1 3 3
+ZH2HQQ VBFTag_2 -1 -1 VBF VBFTag_2
+ZH2HQQ VHHadronicTag 3 1
+ZH2HQQ VHLeptonicLooseTag 3 1
+ZH2HQQ VHMetTag 3 3
+ZH2HQQ WHLeptonicTag 3 1
+ZH2HQQ ZHLeptonicTag 3 3
