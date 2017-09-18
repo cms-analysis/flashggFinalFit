@@ -1,5 +1,5 @@
 # Signal Scripts
-This is where the signal model built from the MC workspaces. Including: fitting each Tag/Process distribution in right vertex (RV) and wrong vertex (WV) scenarios, interpolation between mass points, and normalisation.
+This is where the signal model built from the MC workspaces. Including: fitting each Tag/Process distribution in right vertex (RV) and wrong vertex (WV) scenarios, interpolation between mass points, and normalisation. The latest developments are the Simultaneous Signal Fitting (SSF - fitting all mass points simultaneously, rather than using linear interpolation) and using a Gaussian core plus DCBs rather than a sum of Gaussians for the model. The corresponding options are `--useSSF 1` and `--useDCB1G 1`, both of which are off by default, but the former was used for the LHCP 2017 result and will be for the HIG-16-040 paper. 
 
 ## Signal workflow
 
