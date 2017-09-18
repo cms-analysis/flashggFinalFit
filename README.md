@@ -23,6 +23,7 @@ cd ${CMSSW_BASE}/src/HiggsAnalysis
 cmsenv
 scram b -j9
 # Install Flashgg Final Fit packages
+cd ${CMSSW_BASE}/src/
 git clone git@github.com:cms-analysis/flashggFinalFit.git
 cd ${CMSSW_BASE}/src/flashggFinalFit/
 ```
