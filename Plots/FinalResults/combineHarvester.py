@@ -123,6 +123,7 @@ specOpts.add_option("--splitChannels",default=None)
 specOpts.add_option("--perProcessChannelCompatibilityPOI",default=None)
 specOpts.add_option("--perProcessMuPOI",default=None)
 specOpts.add_option("--doSTXS",default=False,action="store_true",help="Use STXS POIs")
+specOpts.add_option("--stxsFreezeNuisances",default="QCDscale_qqH,QCDscale_ttH,QCDscale_VH,pdf_Higgs_qqbar,pdf_Higgs_ttH,pdf_Higgs_gg,CMS_hgg_THU_ggH_Res,CMS_hgg_THU_ggH_Mu",help="The nuisances to be frozen when doing the STXS measurements")
 specOpts.add_option("--perTagChannelCompatibilityPOI",default=None)
 specOpts.add_option("--profileMH",default=False)
 specOpts.add_option("--toysFile",default=None)
@@ -927,6 +928,7 @@ def writeMultiDimFit(method=None,wsOnly=False):
           #exec_line += ' --verbose -1 --saveSpecifiedIndex pdfindex_UntaggedTag_0_13TeV,pdfindex_UntaggedTag_1_13TeV,pdfindex_UntaggedTag_2_13TeV,pdfindex_UntaggedTag_3_13TeV,pdfindex_VBFTag_0_13TeV,pdfindex_VBFTag_1_13TeV,pdfindex_TTHLeptonicTag_13TeV,pdfindex_TTHHadronicTag_13TeV' 
           if opts.expectSignal: exec_line += ' --expectSignal %4.2f'%opts.expectSignal
           if opts.expectSignalMass: exec_line += ' --expectSignalMass %6.2f'%opts.expectSignalMass
+          if method == 'PerProcessMu' and opts.doSTXS: exec_line += ' --freezeNuisances %s'%opts.stxsFreezeNuisances
           if opts.additionalOptions: exec_line += ' %s'%opts.additionalOptions
           if opts.toysFile: exec_line += ' --toysFile %s'%opts.toysFile
           if opts.verbose: print '\t', exec_line
@@ -1047,6 +1049,7 @@ def configure(config_line):
     if option.startswith('nBins='): opts.nBins = int(option.split('=')[1])
     if option.startswith('freezeAll='): opts.freezeAll = int(option.split('=')[1])
     if option.startswith('float='): opts.float = str(option.split('=')[1])
+    if option.startswith('stxsFreezeNuisances='): opts.stxsFreezeNuisances = str(option.split('=')[1])
     if option.startswith('opts='): 
       addoptstr = option.split("=")[1:]
       addoptstr = "=".join(addoptstr)
