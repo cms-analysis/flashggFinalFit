@@ -123,4 +123,8 @@ The impacts plot is a useful tool for cross-checking the analysis and often used
 
 Running Notes:
 * Make sure your copied files have exactly the names listed below: these are the names expected in the first section of the datacard, and if they do not match, your combine jobs will fail instantly.
-
+* We previously had some issues with expected values not being exactly one, which was due to the best-fit background indices not being picked in the S+B fit. You can get around this by first doing the following command 
+```
+combine CMS-HGG_mva_13TeV_datacard.txt -M MultiDimFit -t -1 --expectSignal=1 -m 125 --saveSpecifiedIndex pdfindex_UntaggedTag_0_13TeV,pdfindex_UntaggedTag_1_13TeV,pdfindex_UntaggedTag_2_13TeV,pdfindex_UntaggedTag_3_13TeV,pdfindex_VBFTag_0_13TeV,pdfindex_VBFTag_1_13TeV,pdfindex_VBFTag_2_13TeV,pdfindex_TTHHadronicTag_13TeV,pdfindex_TTHLeptonicTag_13TeV,pdfindex_ZHLeptonicTag_13TeV,pdfindex_WHLeptonicTag_13TeV,pdfindex_VHLeptonicLooseTag_13TeV,pdfindex_VHHadronicTag_13TeV,pdfindex_VHMetTag_13TeV
+```
+and then looking at the indices and manually adjusting their values in the `--setPhysicsModelParameter` options in `combineHarvesterOptions13TeV_Template.dat`. This should fix the problem, providing your subsequent scan is then fine enough to get exactly one. 
