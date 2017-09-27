@@ -1,5 +1,5 @@
 # Signal Scripts
-This is where the signal model built from the MC workspaces. Including: fitting each Tag/Process distribution in right vertex (RV) and wrong vertex (WV) scenarios, interpolation between mass points, and normalisation.
+This is where the signal model built from the MC workspaces. Including: fitting each Tag/Process distribution in right vertex (RV) and wrong vertex (WV) scenarios, interpolation between mass points, and normalisation. The latest developments are the Simultaneous Signal Fitting (SSF - fitting all mass points simultaneously, rather than using linear interpolation) and using a Gaussian core plus DCBs rather than a sum of Gaussians for the model. The corresponding options are `--useSSF 1` and `--useDCB1G 1`, both of which are off by default, but the former was used for the LHCP 2017 result and will be for the HIG-16-040 paper. 
 
 ## Signal workflow
 
@@ -156,4 +156,13 @@ Example output can be found here:
 
 ```
 https://twiki.cern.ch/twiki/bin/view/CMS/FLASHggFramework#Signal #(Under Signal Validation Plots)
+```
+
+### Weighted Signal Plot
+
+In recent analyses we have made a sum of all signal models weighted by S/B. This can be made after you've run the full workflow using the script `plotweightedsigEd.cpp`, which lives in the Background directory. Step-by-step instructions, starting from `Plots/FinalResults/`:
+```
+text2workspace.py CMS-HGG_mva_13TeV_datacard.txt -m 125
+combine CMS-HGG_mva_13TeV_datacard.root -M MultiDimFit -n _SigModel -m 125.0 --saveWorkspace
+../../Background/bin/plotweightedsigEd -i higgsCombine_SigModel.MultiDimFit.mH125.root --name myWeightedSignalPlot -v1 --label m_{H}=125GeV
 ```

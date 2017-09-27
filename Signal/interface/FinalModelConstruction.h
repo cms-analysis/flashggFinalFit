@@ -20,6 +20,7 @@
 #include "RooConstVar.h"
 #include "RooWorkspace.h"
 #include "HiggsAnalysis/CombinedLimit/interface/RooSpline1D.h"
+#include "HiggsAnalysis/GBRLikelihood/interface/RooDoubleCBFast.h"
 #include "Normalization_8TeV.h"
 
 class FinalModelConstruction {
@@ -34,9 +35,10 @@ class FinalModelConstruction {
 
     void setSecondaryModelVars(RooRealVar *mh_sm, RooRealVar *deltam, RooAddition *mh_2, RooRealVar *width);
 
-    void buildRvWvPdf(std::string name, int nGrv, int nGwv, bool recusive);
+    void buildRvWvPdf(std::string name, int nGrv, int nGwv, bool recusive, bool useDCBplusGaus);
     void buildStdPdf(std::string name, int nGaussians, bool recursive);
-    std::vector<RooAddPdf*> buildPdf(std::string name, int nGaussians, bool recursive, std::map<std::string,RooSpline1D*> splines, string add="");
+    std::vector<RooAbsPdf*> buildPdf(std::string name, int nGaussians, bool recursive, std::map<std::string,RooSpline1D*> splines, string add="");
+    std::vector<RooAbsPdf*> build_DCBpGaus_Pdf(std::string name, int nGaussians, bool recursive, std::map<std::string,RooSpline1D*> splines, string add="");
     void getRvFractionFunc(std::string name);
     void setupSystematics();
     void getNormalization();
@@ -115,15 +117,15 @@ class FinalModelConstruction {
     RooSpline1D *rvFracFunc_2;
     RooSpline1D *rvFracFunc_NW;
 
-    RooAddPdf *finalPdf;
+    RooAbsPdf *finalPdf;
     RooAbsReal *finalNorm;
     RooAbsReal *finalNormThisLum;
     RooExtendPdf *extendPdfRel;
     RooExtendPdf *extendPdf;
     // secondary models
-    RooAddPdf *finalPdf_SM;
-    RooAddPdf *finalPdf_2;
-    RooAddPdf *finalPdf_NW;
+    RooAbsPdf *finalPdf_SM;
+    RooAbsPdf *finalPdf_2;
+    RooAbsPdf *finalPdf_NW;
     RooAbsReal *finalNorm_SM;
     RooAbsReal *finalNorm_2;
     RooAbsReal *finalNorm_NW;

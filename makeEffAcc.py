@@ -108,6 +108,7 @@ class WSTFileWrapper:
     self.fnList = files.split(",") # [1]       
     self.fileList = []
     self.wsList = [] #now list of ws names...
+    #print files
     for fn in self.fnList: # [2]
         f = r.TFile.Open(fn) 
         self.fileList.append(f)
@@ -115,18 +116,30 @@ class WSTFileWrapper:
         self.wsList.append(self.fileList[-1].Get(wsname))
         f.Close()
 
+   def convertTemplatedName(self,dataName):
+        theProcName = ""
+        theDataName = ""
+        tpMap = {"GG2H":"ggh","VBF":"vbf","TTH":"tth","QQ2HLNU":"wh","QQ2HLL":"zh","WH2HQQ":"wh","ZH2HQQ":"zh"}
+        for stxsProc in tpMap:
+          if dataName.startswith(stxsProc):
+            theProcName = stxsProc
+            theDataName = dataName.replace(stxsProc,tpMap[stxsProc],1)
+        return [theDataName,theProcName]
+
    def data(self,dataName):
+        thePair = self.convertTemplatedName(dataName)
+        newDataName = thePair[0]
+        newProcName = thePair[1]
         result = None
-        complained_yet =0 
+        complained_yet = 0 
         for i in range(len(self.fnList)):
-          #f = r.TFile.Open(self.fnList[i])  
-          this_result_obj = self.wsList[i].data(dataName);
-          if ( result and this_result_obj and (not complained_yet) ):
-            print "[WSTFileWrapper] Uh oh, multiple RooAbsDatas from the file list with the same name: ",  dataName 
-            complained_yet = true;
-            exit(1)
-          if this_result_obj: # [3]
-             result = this_result_obj
+          if self.fnList[i]!="current file":
+            if newProcName not in self.fnList[i] and newProcName!="": continue
+            this_result_obj = self.wsList[i].data(newDataName);
+            if ( result and this_result_obj and (not complained_yet) ):
+              complained_yet = True;
+            if this_result_obj: # [3]
+               result = this_result_obj
         return result 
    
    def var(self,varName):
@@ -136,21 +149,28 @@ class WSTFileWrapper:
           this_result_obj = self.wsList[i].var(varName);
           if this_result_obj: # [3]
              result = this_result_obj
-                
         return result 
 
 
 ###############################################################################
 
-procOrder=('ggh', 'vbf', 'wzh', 'wh', 'zh', 'tth')
+#procOrder=('ggh', 'vbf', 'wzh', 'wh', 'zh', 'tth')
+procOrder=('GG2H', 'VBF', 'TTH', 'QQ2HLNU', 'QQ2HLL', 'WH2HQQ', 'ZH2HQQ')
 
 adHocFactors={
-  'ggh': 1.0,
-  'vbf': 1.0,
-  'wzh': 1.0,
-  'wh': 1.0,
-  'zh': 1.0,
-  'tth': 1.0,
+#  'ggh': 1.0,
+#  'vbf': 1.0,
+#  'wzh': 1.0,
+#  'wh': 1.0,
+#  'zh': 1.0,
+#  'tth': 1.0,
+  'GG2H': 1.0,
+  'VBF': 1.0,
+  'TTH': 1.0,
+  'QQ2HLNU': 1.0,
+  'QQ2HLL': 1.0,
+  'WH2HQQ': 1.0,
+  'ZH2HQQ': 1.0,
 }
 
 
@@ -209,17 +229,21 @@ Masses = range(120,135,5)
 #Masses = range(120) 
 # -------------------------------------------------------------
 
-procs=["ggh","vbf","wh","zh","tth"]
+#procs=["ggh","vbf","wh","zh","tth"]
+procs=["GG2H","VBF","TTH","QQ2HLNU","QQ2HLL","WH2HQQ","ZH2HQQ"]
 masses=[120.,125.,130.]
-cats=["UntaggedTag_0","UntaggedTag_1","UntaggedTag_2","UntaggedTag_3","VBFTag_0","VBFTag_1","TTHLeptonicTag","TTHHadronicTag"]
+cats=["UntaggedTag_0","UntaggedTag_1","UntaggedTag_2","UntaggedTag_3","VBFTag_0","VBFTag_1","VBFTag_2","TTHLeptonicTag","TTHHadronicTag","ZHLeptonicTag","WHLeptonicTag","VHLeptonicLooseTag","VHHadronicTag","VHMetTag"]
 sqrts = 13
+print "guessing breaks here"
 ws = WSTFileWrapper(sys.argv[1],"tagsDumper/cms_hgg_%sTeV"%sqrts)
+print "maybe not"
 extraFile=sys.argv[2]
 #lumi = 3710
 
 #if len(sys.argv)==4 : lumi = 1000* float(sys.argv[3])
 lRRV = ws.var("IntLumi")
-lumi = lRRV.getVal()
+#lumi = lRRV.getVal()
+lumi = 1000.
 norm.Init(int(sqrts))
 
 
@@ -396,15 +420,19 @@ leg.AddEntry(graph,"Signal model #varepsilon #times A","l")
 leg.AddEntry(efficiencyPAS,"#pm 1 #sigma syst. uncertainty","F")
 MG.Draw("APL3")
 MG.GetXaxis().SetTitle("m_{H} (GeV)")
-MG.GetXaxis().SetTitleSize(0.055)
-MG.GetXaxis().SetTitleOffset(0.7)
+MG.GetXaxis().SetTitleSize(0.045)
+MG.GetXaxis().SetTitleOffset(0.9)
 MG.GetXaxis().SetRangeUser(120.1,129.9)
 #MG.GetXaxis().SetRangeUser(120.0,130)
 MG.GetYaxis().SetTitle("Efficiency #times Acceptance (%)")
-MG.GetYaxis().SetRangeUser(35.1,45.9)
-MG.GetYaxis().SetTitleSize(0.055)
-MG.GetYaxis().SetTitleOffset(0.7)
-mytext.DrawLatex(0.1,0.92,"#scale[1.15]{CMS} #bf{#it{Simulation Preliminary}}") #for some reason the bf is reversed??
+#MG.GetYaxis().SetRangeUser(35.1,45.9)
+MG.GetYaxis().SetRangeUser(36.6,45.4)
+#MG.GetYaxis().SetTitleSize(0.055)
+MG.GetYaxis().SetTitleSize(0.045)
+MG.GetYaxis().SetTitleOffset(0.9)
+#mytext.DrawLatex(0.1,0.92,"#scale[1.15]{CMS} #bf{#it{Simulation Preliminary}}") #for some reason the bf is reversed??
+#mytext.DrawLatex(0.1,0.92,"#scale[1.05]{CMS} #bf{#it{Simulation Preliminary}}") #for some reason the bf is reversed??
+mytext.DrawLatex(0.1,0.92,"#scale[1.05]{CMS} #bf{#it{Simulation}}") #for the paper
 mytext.DrawLatex(0.75,0.92,"#bf{13#scale[1.1]{ }TeV}")
 mytext.DrawLatex(0.129+0.03,0.82,"#bf{H#rightarrow#gamma#gamma}")
 can.Update()

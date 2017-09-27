@@ -20,7 +20,8 @@ BKGONLY=1
 DATACARDONLY=1
 COMBINEONLY=1
 COMBINEPLOTSONLY=0
-SUPERLOOP=1
+SIMULATENOUSMASSPOINTFITTING=0
+USEDCBP1G=0
 COUNTER=0
 CONTINUELOOP=0
 INTLUMI=1
@@ -31,6 +32,9 @@ BS=0
 VERBOSE=0
 BATCH="LSF"
 DEFAULTQUEUE="1nh"
+UEPS="none"
+NEWGGHSCHEME=0
+DOSTXS=0
 usage(){
 	echo "The script runs background scripts:"
 		echo "options:"
@@ -38,12 +42,16 @@ echo "-h|--help)"
 echo "-i|--inputFile) "
 echo "-p|--procs) (default $PROCS)"
 echo "-f|--flashggCats) (default $CATS) "
+echo "--uepsFile) (default $UEPS) "
+echo "--newGghScheme) (default $NEWGGHSCHEME) "
+echo "--doSTXS) (default $DOSTXS) "
 echo "--ext) (default $EXT)"
 echo "--pseudoDataDat)"
 echo "--combine) "
 echo "--combineOnly) "
 echo "--combinePlotsOnly) "
-echo "--superloop) Used to loop over the whole process N times (default $SUPERLOOP)"
+echo "--useDCB_1G) Use the functional form ofi a Double Crystal Ball + one Gaussian (same mean) (default $USEDCBP1G)"
+echo "--useSSF) SSF = Simultaneous Signal Fitting. Do a fit where the mass points are all fitted at once where the parameters have MH dependence (default $SIMULATENOUSMASSPOINTFITTING)"
 echo "--signalOnly)"
 echo "--backgroundOnly) "
 echo "--datacardOnly)"
@@ -61,7 +69,7 @@ echo "--batch) which batch system to use (LSF,IC) (default $BATCH)) "
 
 
 # options may be followed by one colon to indicate they have a required argument
-if ! options=$(getopt -u -o hi:p:f: -l help,inputFile:,procs:,bs:,flashggCats:,ext:,smears:,massList:,scales:,scalesCorr:,scalesGlobal:,,pseudoDataDat:,sigFile:,combine,combineOnly,combinePlotsOnly,signalOnly,backgroundOnly,datacardOnly,superloop:,continueLoop:,intLumi:,unblind,isData,isFakeData,dataFile:,batch:,verbose -- "$@")
+if ! options=$(getopt -u -o hi:p:f: -l help,inputFile:,procs:,bs:,flashggCats:,uepsFile:,newGghScheme,doSTXS,ext:,smears:,massList:,scales:,scalesCorr:,scalesGlobal:,,pseudoDataDat:,sigFile:,combine,combineOnly,combinePlotsOnly,signalOnly,backgroundOnly,datacardOnly,useSSF:,useDCB_1G:,continueLoop:,intLumi:,unblind,isData,isFakeData,dataFile:,batch:,verbose -- "$@")
 then
 # something went wrong, getopt will put out an error message for us
 exit 1
@@ -80,6 +88,9 @@ case $1 in
 --smears) SMEARS=$2; shift ;;
 --massList) MASSLIST=$2; shift ;;
 -f|--flashggCats) CATS=$2; shift ;;
+--uepsFile) UEPS=$2; shift ;;
+--newGghScheme) NEWGGHSCHEME=1;;
+--doSTXS) DOSTXS=1;;
 --ext) EXT=$2; echo "test ext $EXT " ; shift ;;
 --pseudoDataDat) PSEUDODATADAT=$2; shift;;
 --dataFile) DATAFILE=$2; shift;;
@@ -90,7 +101,8 @@ case $1 in
 --combine) COMBINEONLY=1;;#;BKGONLY=0;SIGONLY=0;DATACARDONLY=0;;
 --combineOnly) COMBINEONLY=1;BKGONLY=0;SIGONLY=0;DATACARDONLY=0;;
 --combinePlotsOnly) COMBINEPLOTSONLY=1;COMBINEONLY=1;BKGONLY=0;SIGONLY=0;DATACARDONLY=0;;
---superloop) SUPERLOOP=$2 ; shift;;
+--useSSF) SIMULATENOUSMASSPOINTFITTING=$2 ; shift;;
+--useDCB_1G) USEDCBP1G=$2 ; shift;;
 --continueLoop) COUNTER=$2; CONTINUELOOP=1 ; shift;;
 --intLumi) INTLUMI=$2; echo " test $INTLUMI" ;shift ;;
 --bs) BS=$2; echo " test BS $BS" ;shift ;;
@@ -139,18 +151,14 @@ echo "------------------------------------------------"
 echo "------------>> Running SIGNAL"
 echo "------------------------------------------------"
 cd Signal
-echo "./runSignalScripts.sh -i $FILE -p $PROCS -f $CATS --ext $EXT --intLumi $INTLUMI $BATCHOPTION --smears $SMEARS --scales $SCALES --scalesCorr $SCALESCORR --scalesGlobal $SCALESGLOBAL --bs $BS --massList $MASSLIST"
-./runSignalScripts.sh -i $FILE -p $PROCS -f $CATS --ext $EXT --intLumi $INTLUMI $BATCHOPTION --smears $SMEARS --scales $SCALES --scalesCorr $SCALESCORR --scalesGlobal $SCALESGLOBAL --bs $BS --massList $MASSLIST
+echo "./runSignalScripts.sh -i $FILE -p $PROCS -f $CATS --ext $EXT --intLumi $INTLUMI $BATCHOPTION --smears $SMEARS --scales $SCALES --scalesCorr $SCALESCORR --scalesGlobal $SCALESGLOBAL --bs $BS --useDCB_1G $USEDCBP1G --useSSF $SIMULATENOUSMASSPOINTFITTING  --massList $MASSLIST"
+./runSignalScripts.sh -i $FILE -p $PROCS -f $CATS --ext $EXT --intLumi $INTLUMI $BATCHOPTION --smears $SMEARS --scales $SCALES --scalesCorr $SCALESCORR --scalesGlobal $SCALESGLOBAL --bs $BS --useDCB_1G $USEDCBP1G --useSSF $SIMULATENOUSMASSPOINTFITTING  --massList $MASSLIST
 cd -
 if [ $USER == lcorpe ]; then
 echo " Processing of the Signal model for final fit exercice $EXT is done, see output here: https://lcorpe.web.cern.ch/lcorpe/$OUTDIR/ " |  mail -s "FINAL FITS: $EXT " lc1113@imperial.ac.uk
 fi
 fi
 fi
-
-##Signal script only need to be run once, outside of superloop
-while [ $COUNTER -lt $SUPERLOOP ]; do
-echo "[INFO] on loop number $COUNTER/$SUPERLOOP"
 
 
 
@@ -195,9 +203,23 @@ echo "------------> Create DATACARD"
 echo "------------------------------------------------"
 
 cd Datacard
-echo "./makeParametricModelDatacardFLASHgg.py -i $FILE  -o Datacard_13TeV_${EXT}.txt -p $PROCS -c UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,VBFTag_0,VBFTag_1,TTHHadronicTag,TTHLeptonicTag --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --theoryNormFactors norm_factors.py --submitSelf #--intLumi $INTLUMI"
-#./makeParametricModelDatacardFLASHgg.py -i $FILE  -o Datacard_13TeV_${EXT}.txt -p $PROCS -c UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,VBFTag_0,VBFTag_1,TTHHadronicTag,TTHLeptonicTag --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --theoryNormFactors norm_factors.py --submitSelf --intLumi $INTLUMI --batch $BATCH 
-./makeParametricModelDatacardFLASHgg.py -i $FILE  -o Datacard_13TeV_${EXT}.txt -p $PROCS -c UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,VBFTag_0,VBFTag_1,TTHHadronicTag,TTHLeptonicTag --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --theoryNormFactors norm_factors.py --intLumi $INTLUMI #--submitSelf
+if [ $NEWGGHSCHEME == 1 ] && [ $DOSTXS == 1 ]; then
+echo "./makeParametricModelDatacardFLASHgg.py -i $FILE  -o Datacard_13TeV_${EXT}.txt -p $PROCS -c $CATS --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --theoryNormFactors norm_factors.py --intLumi $INTLUMI --uepsfilename $UEPS --newGghScheme --doSTXS"
+./makeParametricModelDatacardFLASHgg.py -i $FILE  -o Datacard_13TeV_${EXT}.txt -p $PROCS -c $CATS --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --intLumi $INTLUMI --uepsfilename $UEPS --newGghScheme --doSTXS #--submitSelf
+fi
+if [ $NEWGGHSCHEME == 1 ] && [ $DOSTXS == 0 ]; then
+    echo "./makeParametricModelDatacardFLASHgg.py -i $FILE  -o Datacard_13TeV_${EXT}.txt -p $PROCS -c $CATS --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --theoryNormFactors norm_factors.py --intLumi $INTLUMI --uepsfilename $UEPS --newGghScheme"
+    ./makeParametricModelDatacardFLASHgg.py -i $FILE  -o Datacard_13TeV_${EXT}.txt -p $PROCS -c $CATS --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --intLumi $INTLUMI --uepsfilename $UEPS --newGghScheme #--submitSelf
+fi
+if [ $NEWGGHSCHEME == 0 ] && [ $DOSTXS == 1 ]; then
+echo "./makeParametricModelDatacardFLASHgg.py -i $FILE  -o Datacard_13TeV_${EXT}.txt -p $PROCS -c $CATS --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --theoryNormFactors norm_factors.py --intLumi $INTLUMI --uepsfilename $UEPS --doSTXS"
+./makeParametricModelDatacardFLASHgg.py -i $FILE  -o Datacard_13TeV_${EXT}.txt -p $PROCS -c $CATS --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --intLumi $INTLUMI --uepsfilename $UEPS --doSTXS #--submitSelf
+fi
+if [ $NEWGGHSCHEME == 0 ] && [ $DOSTXS == 0 ]; then
+echo "./makeParametricModelDatacardFLASHgg.py -i $FILE  -o Datacard_13TeV_${EXT}.txt -p $PROCS -c $CATS --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --theoryNormFactors norm_factors.py --intLumi $INTLUMI --uepsfilename $UEPS"
+./makeParametricModelDatacardFLASHgg.py -i $FILE  -o Datacard_13TeV_${EXT}.txt -p $PROCS -c $CATS --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --intLumi $INTLUMI --uepsfilename $UEPS #--submitSelf
+fi
+
 cd -
 fi
 
@@ -213,6 +235,11 @@ echo "------------------------------------------------"
 
 if [ $ISDATA == 0 ]; then
 FAKE="_FAKE"
+fi
+
+if [ ! -d "Signal/$OUTDIR" ]; then
+  echo "Signal/$OUTDIR doesn't exist, maybe your EXT is wrong? Exiting..."
+  exit 1
 fi
 
 cd Plots/FinalResults
@@ -247,6 +274,7 @@ sed -i -e "s/\!INTLUMI\!/$INTLUMI/g"  allPlots_${EXT}${FAKE}.sh
 if [ $COMBINEPLOTSONLY == 0 ]; then
 echo "./combineHarvester.py -d combineHarvesterOptions13TeV_$EXT.dat -q $DEFAULTQUEUE --batch $BATCH --verbose"
 ./combineHarvester.py -d combineHarvesterOptions13TeV_${EXT}${FAKE}.dat -q $DEFAULTQUEUE --batch $BATCH --verbose #--S0
+#./combineHarvester.py -d combineHarvesterOptions13TeV_${EXT}${FAKE}.dat -q $DEFAULTQUEUE --batch $BATCH --verbose --dryRun
 
 JOBS=999
 RUN=999
@@ -259,7 +287,8 @@ JOBS=`find combineJobs13TeV_$EXT/   -name "*.sh" | wc -l`
 #echo "JOBS=`find combineJobs13TeV_$EXT/ -name "*.sh" | wc -l`"
 DONE=`find combineJobs13TeV_$EXT/   -name "*.sh.done" | wc -l`
 FAIL=`find combineJobs13TeV_$EXT/   -name "*.sh.fail" | wc -l`
-((RUN=$JOBS-$DONE-$FAIL-1))
+#((RUN=$JOBS-$DONE-$FAIL-1))
+((RUN=$JOBS-$DONE-$FAIL))
 echo "RUN=$RUN"
 echo "JOBS=$JOBS"
 echo "DONE=$DONE"
@@ -281,7 +310,7 @@ LEDGER=" --it $COUNTER --itLedger itLedger_$EXT.txt"
 echo INTLUMI = "$INTLUMI"
 echo "./makeCombinePlots.py -d combinePlotsOptions_${EXT}${FAKE}.dat -b $LEDGER "
 ./makeCombinePlots.py -d combinePlotsOptions_$EXT${FAKE}.dat -b $LEDGER
-#./allPlots_${EXT}${FAKE}.sh
+./allPlots_${EXT}${FAKE}.sh
 #./makeCombinePlots.py -f combineJobs13TeV_$EXT/MuScanFloatMH/MuScanFloatMH.root --mu -t "#sqrt{s}\=13TeV L\=$INTLUMI fb^{-1}" -o muFloatMH -b $LEDGER #for some reason doesn't work in datfile
 #./makeCombinePlots.py -f combineJobs13TeV_$EXT/MuScanFixMH/MuScanFixMH.root --mu -t "#sqrt{s}\=13TeV L\=$INTLUMI fb^{-1}" -o muFixMH -b $LEDGER #for some reason doesn't work in datfile
 #./makeCombinePlots.py -f combineJobs13TeV_$EXT/RVRFScan/RVRFScan.root --rvrf -t "#sqrt{s}\=13TeV L\=$INTLUMI fb^{-1}" -o RVRF --xbinning 30,-1.5,2.5 --ybinning 30,-3,8 -b $LEDGER #
@@ -291,8 +320,8 @@ echo "./makeCombinePlots.py -d combinePlotsOptions_${EXT}${FAKE}.dat -b $LEDGER 
 mkdir -p $OUTDIR/combinePlots
 cp *pdf $OUTDIR/combinePlots/.
 cp *png $OUTDIR/combinePlots/.
-#rm *pdf
-#rm *png
+rm *pdf
+rm *png
 
 if [ $USER == "lcorpe" ]; then
 cp -r $OUTDIR ~/www/${OUTDIR}
@@ -325,6 +354,4 @@ echo "background output at Background/$OUTDIR"
 echo "combine output at Plots/FinalResuls/$OUTDIR"
 
 
-COUNTER=$[COUNTER + 1]
-done
 

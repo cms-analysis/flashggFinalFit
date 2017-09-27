@@ -1,0 +1,11 @@
+#proc cat nGausRV nGausWV
+ggh TTHHadronicTag -1 -1 tth TTHHadronicTag
+ggh TTHLeptonicTag 4 1
+tth TTHHadronicTag 3 -1
+tth TTHLeptonicTag 3 -1
+vbf TTHHadronicTag 4 3
+vbf TTHLeptonicTag 4 1
+wh TTHHadronicTag -1 -1 tth TTHHadronicTag
+wh TTHLeptonicTag 4 1
+zh TTHHadronicTag -1 -1 tth TTHHadronicTag
+zh TTHLeptonicTag 3 1

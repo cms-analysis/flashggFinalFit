@@ -1,0 +1,4 @@
+# plots used in LHCP17 PAS
+# NOTICE THAT TO PASS AN = SIGN IN A STRING USE \= e.g #sqrt{s}\=13TeV
+
+method=mu:files=combineJobs13TeV_!EXT!/MuScanProfileMH/MuScanProfileMH.root,combineJobs13TeV_!EXT!/MuScanProfileMHStat/MuScanProfileMHStat.root:colors=4,2:styles=1,1:widths=2,2:names=stat+syst,stat only:text=!INTLUMI! fb^{-1} (13TeV):outname=MuScanProfileMH #use also --MHtext 0.43:0.655:"m_{H} profiled" --legend 0.415,0.695,0.715,0.8 -x 0.7,1.6

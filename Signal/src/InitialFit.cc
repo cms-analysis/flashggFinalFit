@@ -1,12 +1,15 @@
 #include <fstream>
 
 #include "TCanvas.h"
+#include "TH2.h"
 #include "TMath.h"
 #include "RooPlot.h"
 #include "TColor.h"
 #include "RooFormulaVar.h"
 #include "RooMsgService.h"
 #include "TPaveText.h"
+#include <RooCBShape.h>
+#include "HiggsAnalysis/GBRLikelihood/interface/RooDoubleCBFast.h" 
 
 #include "boost/lexical_cast.hpp"
 
@@ -72,6 +75,48 @@ void InitialFit::addDataset(int mh, RooDataSet *data){
   datasets.insert(pair<int,RooDataSet*>(mh,data));
 }
 
+// this method builds the DCB plus 1 Gaussian with same mean
+void InitialFit::buildDCBplusGaussian(string name){
+  
+  for (unsigned int i=0; i<allMH_.size(); i++){
+    int mh = allMH_[i];
+    MH->setConstant(false);
+    MH->setVal(mh);
+    MH->setConstant(true);
+    map<string,RooRealVar*> tempFitParams;
+    map<string,RooAbsReal*> tempFitUtils;
+    map<string,RooAbsPdf*> tempGaussians;
+    RooRealVar*dm_dcb = new RooRealVar(Form("dm_mh%d_dcb",mh),Form("dm_mh%d_dcb",mh), 0.,-5.,5.);
+    RooAbsReal *mean_dcb = new RooFormulaVar(Form("mean_mh%d_dcb",mh),Form("mean_mh%d_dcb",mh),"@0+@1",RooArgList(*MH,*dm_dcb));
+    RooRealVar *sigma_dcb = new RooRealVar(Form("sigma_mh%d_dcb",mh),Form("sigma_mh%d_dcb",mh), 2., 1.0, 20.);
+    RooRealVar *a1_dcb = new RooRealVar(Form("a1_mh%d_dcb",mh),Form("a1_mh%d_dcb",mh), 5., 0.01, 100.);   
+    RooRealVar *a2_dcb = new RooRealVar(Form("a2_mh%d_dcb",mh),Form("a2_mh%d_dcb",mh), 5., 0.01, 100.);   
+    RooRealVar *n1_dcb = new RooRealVar(Form("n1_mh%d_dcb",mh),Form("n1_mh%d_dcb",mh), 20.,2.0001,500.);
+    RooRealVar *n2_dcb = new RooRealVar(Form("n2_mh%d_dcb",mh),Form("n2_mh%d_dcb",mh), 20.,2.0001,500);
+    RooAbsPdf *pdf_dcb = new RooDoubleCBFast(Form("dcb_mh%d",mh),Form("dcb_mh%d",mh), *mass,*mean_dcb,*sigma_dcb, *a1_dcb, *n1_dcb, *a2_dcb, *n2_dcb);
+    //RooRealVar*dm_gaus = new RooRealVar(Form("dm_mh%d_gaus",mh),Form("dm_mh%d_gaus",mh), 0.,-5.,5.);
+    //RooAbsReal *mean_gaus = new RooFormulaVar(Form("mean_mh%d_gaus%d",mh,g),Form("mean_mh%d_gaus%d",mh,g),"@0+@1",RooArgList(*MH,*dm_gaus));
+    RooRealVar *sigma_gaus = new RooRealVar(Form("sigma_mh%d_gaus",mh),Form("sigma_mh%d_gaus",mh),2.,1.0,3.); 
+    RooGaussian *pdf_gaus = new RooGaussian(Form("gaus_mh%d",mh),Form("gaus_mh%d",mh),*mass,*mean_dcb,*sigma_gaus);// use same mean as for DCB
+    RooRealVar *frac_gaus = new RooRealVar(Form("frac_mh%d",mh),Form("frac_mh%d",mh),0.5,0.01,0.99);
+    RooAddPdf *pdf = new RooAddPdf(Form("%s_mh%d",name.c_str(),mh),Form("%s_mh%d",name.c_str(),mh),*pdf_dcb,*pdf_gaus,*frac_gaus);
+    
+    //tempFitParams.insert(pair<string,RooRealVar*>(string(dm_gaus->GetName()),dm_gaus));
+    tempFitParams.insert(pair<string,RooRealVar*>(string(sigma_gaus->GetName()),sigma_gaus));
+    tempFitParams.insert(pair<string,RooRealVar*>(string(dm_dcb->GetName()),dm_dcb));
+    tempFitParams.insert(pair<string,RooRealVar*>(string(sigma_dcb->GetName()),sigma_dcb));
+    tempFitParams.insert(pair<string,RooRealVar*>(string(frac_gaus->GetName()),frac_gaus));
+    tempFitParams.insert(pair<string,RooRealVar*>(string(n1_dcb->GetName()),n1_dcb));
+    tempFitParams.insert(pair<string,RooRealVar*>(string(n2_dcb->GetName()),n2_dcb));
+    tempFitParams.insert(pair<string,RooRealVar*>(string(a1_dcb->GetName()),a1_dcb));
+    tempFitParams.insert(pair<string,RooRealVar*>(string(a2_dcb->GetName()),a2_dcb));
+    
+    fitPdfs.insert(pair<int,RooAbsPdf*>(mh,pdf));
+    fitParams.insert(pair<int,map<string,RooRealVar*> >(mh,tempFitParams));
+  }
+}
+
+
 void InitialFit::buildSumOfGaussians(string name, int nGaussians, bool recursive, bool forceFracUnity){
 
   for (unsigned int i=0; i<allMH_.size(); i++){
@@ -91,7 +136,8 @@ void InitialFit::buildSumOfGaussians(string name, int nGaussians, bool recursive
       if (g>3) dmRange=3.;
       RooRealVar *dm = new RooRealVar(Form("dm_mh%d_g%d",mh,g),Form("dm_mh%d_g%d",mh,g),0.1,-dmRange,dmRange);
       RooAbsReal *mean = new RooFormulaVar(Form("mean_mh%d_g%d",mh,g),Form("mean_mh%d_g%d",mh,g),"@0+@1",RooArgList(*MH,*dm));
-      RooRealVar *sigma = new RooRealVar(Form("sigma_mh%d_g%d",mh,g),Form("sigma_mh%d_g%d",mh,g),2.,0.4,20.);
+      //RooRealVar *sigma = new RooRealVar(Form("sigma_mh%d_g%d",mh,g),Form("sigma_mh%d_g%d",mh,g),2.,0.4,20.);
+      RooRealVar *sigma = new RooRealVar(Form("sigma_mh%d_g%d",mh,g),Form("sigma_mh%d_g%d",mh,g),1.*(g+1),0.4,20.);
       RooGaussian *gaus = new RooGaussian(Form("gaus_mh%d_g%d",mh,g),Form("gaus_mh%d_g%d",mh,g),*mass,*mean,*sigma);
       tempFitParams.insert(pair<string,RooRealVar*>(string(dm->GetName()),dm));
       tempFitParams.insert(pair<string,RooRealVar*>(string(sigma->GetName()),sigma));
@@ -112,8 +158,8 @@ void InitialFit::buildSumOfGaussians(string name, int nGaussians, bool recursive
       }
     }
     assert(gaussians->getSize()==nGaussians && coeffs->getSize()==nGaussians-(1*!forceFracUnity));
-    RooAddPdf *tempSumOfGaussians = new RooAddPdf(Form("%s_mh%d",name.c_str(),mh),Form("%s_mh%d",name.c_str(),mh),*gaussians,*coeffs,recursive);
-    sumOfGaussians.insert(pair<int,RooAddPdf*>(mh,tempSumOfGaussians));
+    RooAbsPdf *tempSumOfGaussians = new RooAddPdf(Form("%s_mh%d",name.c_str(),mh),Form("%s_mh%d",name.c_str(),mh),*gaussians,*coeffs,recursive);
+    fitPdfs.insert(pair<int,RooAbsPdf*>(mh,tempSumOfGaussians));
     fitParams.insert(pair<int,map<string,RooRealVar*> >(mh,tempFitParams));
     fitUtils.insert(pair<int,map<string,RooAbsReal*> >(mh,tempFitUtils));
     initialGaussians.insert(pair<int,map<string,RooGaussian*> >(mh,tempGaussians));
@@ -123,19 +169,33 @@ void InitialFit::buildSumOfGaussians(string name, int nGaussians, bool recursive
 void InitialFit::loadPriorConstraints(string filename, float constraintValue){
 
   ifstream datfile;
+  std::cout << "LC DEBUG  InitialFit::loadPriorConstraints a" << std::endl; 
   datfile.open(filename.c_str());
+  std::cout << "LC DEBUG  InitialFit::loadPriorConstraints b" << std::endl; 
   if (datfile.fail()) return;
+  std::cout << "LC DEBUG  InitialFit::loadPriorConstraints c" << std::endl; 
   while (datfile.good()) {
+  std::cout << "LC DEBUG  InitialFit::loadPriorConstraints d" << std::endl; 
     string line;
+  std::cout << "LC DEBUG  InitialFit::loadPriorConstraints e" << std::endl; 
     getline(datfile,line);
+  std::cout << "LC DEBUG  InitialFit::loadPriorConstraints f" << std::endl; 
     if (line=="\n" || line.substr(0,1)=="#" || line==" " || line.empty()) continue;
+  std::cout << "LC DEBUG  InitialFit::loadPriorConstraints g" << std::endl; 
     string name = line.substr(0,line.find_first_of(" "));
+  std::cout << "LC DEBUG  InitialFit::loadPriorConstraints h" << std::endl; 
     double val = boost::lexical_cast<double>(line.substr(line.find_first_of(" ")+1,string::npos));
+  std::cout << "LC DEBUG  InitialFit::loadPriorConstraints i" << name.substr(name.find("_mh")+3,name.find("_g")-name.find("_mh")-3) << std::endl; 
     int mhS = boost::lexical_cast<int>(name.substr(name.find("_mh")+3,name.find("_g")-name.find("_mh")-3));
+  std::cout << "LC DEBUG  InitialFit::loadPriorConstraints j" << std::endl; 
     if (verbosity_>=2) cout << "[INFO] "<< name << " " << mhS << " " << val << endl;
+  std::cout << "LC DEBUG  InitialFit::loadPriorConstraints k" << std::endl; 
     assert(fitParams.find(mhS)!=fitParams.end());
+  std::cout << "LC DEBUG  InitialFit::loadPriorConstraints l" << std::endl; 
     assert(fitParams[mhS].find(name)!=fitParams[mhS].end());
+  std::cout << "LC DEBUG  InitialFit::loadPriorConstraints m" << std::endl; 
     fitParams[mhS][name]->setVal(val);
+  std::cout << "LC DEBUG  InitialFit::loadPriorConstraints n" << std::endl; 
     if (val>0.) fitParams[mhS][name]->setRange((1.-constraintValue)*val,(1.+constraintValue)*val);
     else fitParams[mhS][name]->setRange((1.+constraintValue)*val,(1.-constraintValue)*val);
   }
@@ -192,9 +252,9 @@ void InitialFit::runFits(int ncpu){
     MH->setConstant(false);
     MH->setVal(mh);
     MH->setConstant(true);
-    assert(sumOfGaussians.find(mh)!=sumOfGaussians.end());
+    assert(fitPdfs.find(mh)!=fitPdfs.end());
     assert(datasets.find(mh)!=datasets.end());
-    RooAddPdf *fitModel125 = sumOfGaussians[mh];
+    RooAbsPdf *fitModel125 = fitPdfs[mh];
     //RooDataSet *data125 = datasets[mh];
     RooAbsData *data125;
     if (binnedFit_){
@@ -209,6 +269,7 @@ void InitialFit::runFits(int ncpu){
        }
     //fitModel125->Print();
     //data125->Print();
+    
     RooFitResult *fitRes125;
     mass->setBins(bins_);
     verbosity_ >=3 ?
@@ -230,9 +291,9 @@ void InitialFit::runFits(int ncpu){
       MH->setConstant(false);
       MH->setVal(mh);
       MH->setConstant(true);
-      assert(sumOfGaussians.find(mh)!=sumOfGaussians.end());
+      assert(fitPdfs.find(mh)!=fitPdfs.end());
       assert(datasets.find(mh)!=datasets.end());
-      RooAddPdf *fitModel = sumOfGaussians[mh];
+      RooAbsPdf *fitModel = fitPdfs[mh];
       //RooDataSet *data = datasets[mh];
 
 
@@ -270,7 +331,7 @@ void InitialFit::runFits(int ncpu){
           std::cout<<"Constraints set on sigmas of "<<ng-1<<" gaussians of this model"<<std::endl;
          break;
         }
-       
+       std::cout <<  "LC DEBUG DEBUG DEBUG A" << std::endl;
        RooRealVar* dm = (RooRealVar*)formulaMean->find(Form("dm_mh%d_g%d",mh,ng ));
       if(dm!=NULL){
          //dm->Print();
@@ -292,6 +353,7 @@ void InitialFit::runFits(int ncpu){
         }
        
        
+       std::cout <<  "LC DEBUG DEBUG DEBUG B" << std::endl;
        RooRealVar* frac = (RooRealVar*)formulaMean->find(Form("frac_mh%d_g%d",mh,ng ));
       if(frac!=NULL){
           //frac->Print();
@@ -310,7 +372,9 @@ void InitialFit::runFits(int ncpu){
           std::cout<<"Constraints set on fracs of "<<ng-1<<" gaussians of this model"<<std::endl;
          break;
         }
+       std::cout <<  "LC DEBUG DEBUG DEBUG C" << std::endl;
            }
+       std::cout <<  "LC DEBUG DEBUG DEBUG D" << std::endl;
      
             
       //      RooArgSet* actualvars = formulaMean->getComponents();
@@ -337,6 +401,7 @@ void InitialFit::runFits(int ncpu){
       mass->setVal(mh);
       data->add(RooArgSet(*mass),1.e-5);
     }
+       std::cout <<  "LC DEBUG DEBUG DEBUG E" << std::endl;
     //fitModel->Print();
     //data->Print();
     RooFitResult *fitRes;
@@ -349,6 +414,7 @@ void InitialFit::runFits(int ncpu){
     fitResults.insert(pair<int,RooFitResult*>(mh,fitRes));
     mass->setBins(160); //return to default 
     }
+    std::cout <<  "LC DEBUG DEBUG DEBUG F" << std::endl;
 }
 
 void InitialFit::setFitParams(std::map<int,std::map<std::string,RooRealVar*> >& pars )
@@ -378,9 +444,9 @@ void InitialFit::plotFits(string name, string rvwv){
     MH->setConstant(false);
     MH->setVal(mh);
     MH->setConstant(true);
-    assert(sumOfGaussians.find(mh)!=sumOfGaussians.end());
+    assert(fitPdfs.find(mh)!=fitPdfs.end());
     assert(datasets.find(mh)!=datasets.end());
-    RooAddPdf *fitModel = sumOfGaussians[mh];
+    RooAbsPdf *fitModel = fitPdfs[mh];
     //RooDataSet *data = datasets[mh];
     mass->setBins(bins_);
     RooDataHist *data = new RooDataHist(datasets[mh]->GetName(),datasets[mh]->GetName(), RooArgSet(*mass),*datasets[mh]);
@@ -407,4 +473,8 @@ void InitialFit::plotFits(string name, string rvwv){
   canv->Print(Form("%s.png",name.c_str()));
   mass->setBins(160); //return to default 
   delete canv;
+}
+
+void InitialFit::printCorrMatrix( int mh ) {
+  fitResults[mh]->correlationHist()->Print("ALL");
 }

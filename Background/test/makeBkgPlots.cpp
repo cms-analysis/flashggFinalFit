@@ -56,12 +56,16 @@
 #include "../../tdrStyle/tdrstyle.C"
 #include "../../tdrStyle/CMS_lumi.C"
 
+#include <TSystem.h>
+
 using namespace RooFit;
 using namespace std;
 using namespace boost;
 namespace po = boost::program_options;
 
 bool verbose_=false;
+
+RooRealVar *intLumi_ = new RooRealVar("IntLumi","hacked int lumi", 1000.);
 
 int getBestFitFunction(RooMultiPdf *bkg, RooAbsData *data, RooCategory *cat, bool silent=false){
 
@@ -679,6 +683,7 @@ void plotAllPdfs(RooRealVar *mgg, RooAbsData *data, RooMultiPdf *mpdf, RooCatego
 }
 
 int main(int argc, char* argv[]){
+  gSystem->Load("$CMSSW_BASE/lib/$SCRAM_ARCH/libHiggsAnalysisGBRLikelihood.so");
   
   setTDRStyle();
   writeExtraText = true;       // if extra text
@@ -979,7 +984,8 @@ int main(int argc, char* argv[]){
   pad1->cd();
   // enf extra bit for ratio plot///
     canv->SetTickx(); canv->SetTicky();
-		RooRealVar *lumi = (RooRealVar*)inWS->var("IntLumi");
+		//RooRealVar *lumi = (RooRealVar*)inWS->var("IntLumi");
+		RooRealVar *lumi = intLumi_;
 		plot->Draw();
 
 		if (!unblind) {

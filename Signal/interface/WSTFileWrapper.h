@@ -22,6 +22,7 @@ class WSTFileWrapper  {
     RooAbsReal* function(std::string);
     RooArgSet allVars();
     RooArgSet allFunctions();
+    std::pair<std::string,std::string> convertTemplatedName(std::string);
     std::list<RooAbsData*> allData();
     std::vector<RooWorkspace*> getWsList(){ return wsList;}
     void Close();

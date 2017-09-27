@@ -207,6 +207,7 @@ int main(int argc, char *argv[]) {
   const double leftpos = 102.0;
    
    
+  std::cout << "about open file with name " <<  filename_[0] << std::endl;
   TFile *fin = TFile::Open(filename_[0].c_str());
   if (verbose_) std::cout << "[INFO] Opened file " << fin << std::endl; 
   
@@ -295,8 +296,8 @@ int main(int argc, char *argv[]) {
     desc.ReplaceAll("13TeV","");
     desc.ReplaceAll("UntaggedTag","Untagged");
     desc.ReplaceAll("VBFTag","VBF Tag");
-    desc.ReplaceAll("TTHLeptonicTag","TTH Leptonic Tag");
-    desc.ReplaceAll("TTHHadronicTag","TTH Hadronic Tag");
+    desc.ReplaceAll("TTHLeptonicTag","ttH Leptonic Tag");
+    desc.ReplaceAll("TTHHadronicTag","ttH Hadronic Tag");
     desc.ReplaceAll("SigmaMpTTag","#sigma_{M}/M |_{decorr} category");
     catdesc.push_back(desc);
     std::cout << "[INFO] --> description :" << desc << std::endl;
@@ -819,8 +820,8 @@ int main(int argc, char *argv[]) {
     } else {
       catplot->GetYaxis()->SetTitle(TString::Format("Events / GeV"));
     }
-    //catplot->GetYaxis()->SetTitleOffset(1.015*catplot->GetYaxis()->GetTitleOffset());
-    catplot->GetYaxis()->SetTitleOffset(0.9*catplot->GetYaxis()->GetTitleOffset());
+    catplot->GetYaxis()->SetTitleOffset(1.015*catplot->GetYaxis()->GetTitleOffset());
+    //catplot->GetYaxis()->SetTitleOffset(0.9*catplot->GetYaxis()->GetTitleOffset());
     catplot->SetTitle("");
     
     if (catplot->GetXaxis()->GetBinWidth(1) !=1){
@@ -875,7 +876,8 @@ int main(int argc, char *argv[]) {
     TLatex *lat3 = new TLatex();
     lat3->SetNDC();
     lat3->SetTextSize(0.057);
-    lat3->DrawLatex(0.13,0.93,"#bf{CMS} #scale[0.75]{#it{Preliminary}}");    
+    //lat3->DrawLatex(0.13,0.93,"#bf{CMS} #scale[0.75]{#it{Preliminary}}");
+    lat3->DrawLatex(0.13,0.93,"#bf{CMS}"); // for the paper
     
     TLatex *mytext = new TLatex();
     mytext->SetTextSize(0.055);

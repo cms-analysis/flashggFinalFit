@@ -290,14 +290,17 @@ void Packager::makePlots(){
 
 void Packager::makePlot(RooRealVar *mass, RooRealVar *MH, RooAddPdf *pdf, map<int,RooDataSet*> data, string name){
 
+  std::vector<int> colorList ={7,9,4,2,8,5,1,14};//kCyan,kMagenta,kBlue, kRed,kGreen,kYellow,kBlack, kGray};
 	TCanvas *canv = new TCanvas();
 	RooPlot *dataPlot = mass->frame(Title(name.c_str()),Range(110,140));
+  int i=0;
 	for (map<int,RooDataSet*>::iterator it=data.begin(); it!=data.end(); it++){
 		int mh = it->first;
 		RooDataSet *dset = it->second;
-		dset->plotOn(dataPlot,Binning(320));
+		dset->plotOn(dataPlot,Binning(320),MarkerColor(colorList[i]));
 		MH->setVal(mh);
-		pdf->plotOn(dataPlot);
+		pdf->plotOn(dataPlot,LineColor(colorList[i]));
+  i++;
 	}
 	dataPlot->Draw();
 	canv->Print(Form("%s/%s_fits.pdf",outDir_.c_str(),name.c_str()));

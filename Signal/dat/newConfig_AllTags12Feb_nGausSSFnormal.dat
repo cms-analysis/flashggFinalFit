@@ -1,0 +1,71 @@
+#proc cat nGausRV nGausWV
+ggh TTHHadronicTag -1 -1 tth TTHHadronicTag
+ggh TTHLeptonicTag -1 -1 tth TTHLeptonicTag
+ggh UntaggedTag_0 4 1
+ggh UntaggedTag_1 3 4
+ggh UntaggedTag_2 4 3
+ggh UntaggedTag_3 5 4
+ggh VBFTag_0 3 3
+ggh VBFTag_1 -1 -1 vbf VBFTag_1 vbf VBFTag_1
+ggh VBFTag_2 3 -1
+ggh VHHadronicTag 3 1
+ggh VHLeptonicLooseTag 1 3
+ggh VHMetTag -1 -1 zh VHMetTag zh VHMetTag
+ggh WHLeptonicTag -1 1 wh VHLeptonicLooseTag
+ggh ZHLeptonicTag 2 1
+tth TTHHadronicTag 3 -1
+tth TTHLeptonicTag 3 -1
+tth UntaggedTag_0 3 3
+tth UntaggedTag_1 3 -1
+tth UntaggedTag_2 3 -1
+tth UntaggedTag_3 3 -1
+tth VBFTag_0 -1 -1 vbf VBFTag_0
+tth VBFTag_1 -1 -1 vbf VBFTag_1
+tth VBFTag_2 -1 -1 vbf VBFTag_2
+tth VHHadronicTag -1 -1 wh VHHadronicTag
+tth VHLeptonicLooseTag -1 -1 wh VHLeptonicLooseTag
+tth VHMetTag 3 3
+tth WHLeptonicTag -1 1 wh WHLeptonicTag
+tth ZHLeptonicTag -1 -1 wh WHLeptonicTag
+vbf TTHHadronicTag 4 3
+vbf TTHLeptonicTag -1 -1 tth TTHLeptonicTag
+vbf UntaggedTag_0 2 1
+vbf UntaggedTag_1 2 3
+vbf UntaggedTag_2 4 3
+vbf UntaggedTag_3 3 3
+vbf VBFTag_0 3 3
+vbf VBFTag_1 4 2
+vbf VBFTag_2 4 1
+vbf VHHadronicTag -1 3 wh VHHadronicTag
+vbf VHLeptonicLooseTag -1 1 wh VHLeptonicLooseTag
+vbf VHMetTag -1 -1 tth VHMetTag tth VHMetTag
+vbf WHLeptonicTag -1 1 wh VHLeptonicLooseTag
+vbf ZHLeptonicTag -1 -1 wh WHLeptonicTag
+wh TTHHadronicTag -1 -1 tth TTHHadronicTag
+wh TTHLeptonicTag -1 -1 tth TTHLeptonicTag
+wh UntaggedTag_0 1 3
+wh UntaggedTag_1 3 1
+wh UntaggedTag_2 4 3
+wh UntaggedTag_3 3 3
+wh VBFTag_0 -1 -1 vbf VBFTag_0
+wh VBFTag_1 -1 -1 vbf VBFTag_1
+wh VBFTag_2 -1 -1 vbf VBFTag_2
+wh VHHadronicTag 2 -1 wh VHHadronicTag zh VHHadronicTag
+wh VHLeptonicLooseTag 3 3
+wh VHMetTag -1 2 tth VHMetTag
+wh WHLeptonicTag 2 2
+wh ZHLeptonicTag -1 -1 wh WHLeptonicTag
+zh TTHHadronicTag -1 -1 tth TTHHadronicTag
+zh TTHLeptonicTag 3 1
+zh UntaggedTag_0 -1 -1 ggh UntaggedTag_0
+zh UntaggedTag_1 3 -1
+zh UntaggedTag_2 4 -1
+zh UntaggedTag_3 3 -1
+zh VBFTag_0 -1 -1 vbf VBFTag_0
+zh VBFTag_1 -1 -1 vbf VBFTag_1
+zh VBFTag_2 -1 -1 vbf VBFTag_2
+zh VHHadronicTag -1 3 wh VHHadronicTag
+zh VHLeptonicLooseTag -1 -1 wh VHLeptonicLooseTag wh VHLeptonicLooseTag
+zh VHMetTag 4 4
+zh WHLeptonicTag -1 -1 wh WHLeptonicTag
+zh ZHLeptonicTag -1 -1 wh WHLeptonicTag wh WHLeptonicTag

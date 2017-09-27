@@ -433,7 +433,7 @@ void printInfo(ofstream &outfile, string name, vector<string> systs, string ext)
 }
 
 int main(int argc, char *argv[]){
-
+  
 	OptionParser(argc,argv);
 
 	TStopwatch sw;
@@ -465,6 +465,7 @@ int main(int argc, char *argv[]){
 	if (!globalScalesCorrStr_.empty()) printInfo(outfile,"globalScalesCorr=",globalScalesCorr_,"_scale");
 	outfile << endl;
 	outfile << "# photonCat                   mean_change    sigma_change    rate_change" << endl;
+
 
 	if(isFlashgg_){ nCats_ = flashggCats_.size();}
 	for (int cat=0; cat<nCats_; cat++){

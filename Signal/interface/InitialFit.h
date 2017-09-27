@@ -21,6 +21,7 @@ class InitialFit {
     InitialFit(RooRealVar *massVar, RooRealVar *MHvar, int mhLow, int mhHigh, std::vector<int> skipMasses, bool binnedFit, int binso, std::vector<int> massList);
     ~InitialFit();
 
+    void buildDCBplusGaussian(std::string name);
     void buildSumOfGaussians(std::string name, int nGaussians, bool recursive=false, bool forceFracUnity=false);
     void loadPriorConstraints(std::string filename, float constraintValue);
     void saveParamsToFile(std::string filename);
@@ -35,11 +36,12 @@ class InitialFit {
     void setVerbosity(int v);
 
     void setFitParams(std::map<int,std::map<std::string,RooRealVar*> >& pars );
+    void printCorrMatrix(int mh);
   private:
 
     RooRealVar *mass;
     RooRealVar *MH;
-    std::map<int,RooAddPdf*> sumOfGaussians;
+    std::map<int,RooAbsPdf*> fitPdfs;
     std::map<int,RooDataSet*> datasets; 
     std::map<int,RooDataSet*> datasetsSTD; 
     std::map<int,std::map<std::string,RooRealVar*> > fitParams;

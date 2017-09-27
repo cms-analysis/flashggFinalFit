@@ -78,6 +78,8 @@ parser.add_option("--changeIntLumi",default="1.")
 parser.add_option("-o","--outfilename",default=None)
 parser.add_option("-p","--outDir",default="./")
 parser.add_option("--procs",default=None)
+parser.add_option("--useDCB_1G",default="0")
+parser.add_option("--useSSF",default="0")
 parser.add_option("--massList",default="120,125,130")
 parser.add_option("-f","--flashggCats",default=None)
 parser.add_option("--bs",default=5.14)
@@ -94,6 +96,7 @@ def system(exec_line):
 def writePreamble(sub_file):
   #print "[INFO] writing preamble"
   sub_file.write('#!/bin/bash\n')
+  sub_file.write('sleep $[ ( $RANDOM % 10 )  + 1 ]s\n')
   sub_file.write('touch %s.run\n'%os.path.abspath(sub_file.name))
   sub_file.write('cd %s\n'%os.getcwd())
   sub_file.write('eval `scramv1 runtime -sh`\n')
@@ -126,7 +129,7 @@ def writePostamble(sub_file, exec_line):
     system('rm -f %s.err'%os.path.abspath(sub_file.name))
     if (opts.batch == "LSF") : system('bsub -q %s -o %s.log %s'%(opts.queue,os.path.abspath(sub_file.name),os.path.abspath(sub_file.name)))
     if (opts.batch == "IC") : 
-      system('qsub -q %s -o %s.log -e %s.err %s'%(opts.queue,os.path.abspath(sub_file.name),os.path.abspath(sub_file.name),os.path.abspath(sub_file.name)))
+      system('qsub -q %s -l h_rt=0:20:0 -o %s.log -e %s.err %s'%(opts.queue,os.path.abspath(sub_file.name),os.path.abspath(sub_file.name),os.path.abspath(sub_file.name)))
       #print "system(",'qsub -q %s -o %s.log -e %s.err %s '%(opts.queue,os.path.abspath(sub_file.name),os.path.abspath(sub_file.name),os.path.abspath(sub_file.name)),")"
   if opts.runLocal:
      system('bash %s'%os.path.abspath(sub_file.name))
@@ -149,7 +152,7 @@ for proc in  opts.procs.split(","):
       bsRW=0
     else:
       bsRW=1
-    exec_line = "%s/bin/SignalFit --verbose 0 -i %s -d %s/%s  --mhLow=%s --mhHigh=%s -s %s/%s --procs %s -o  %s/%s -p %s/%s -f %s --changeIntLumi %s --binnedFit 1 --nBins 320 --split %s,%s --beamSpotReweigh %d --dataBeamSpotWidth %f --massList %s" %(os.getcwd(), opts.infile,os.getcwd(),opts.datfile,opts.mhLow, opts.mhHigh, os.getcwd(),opts.systdatfile, opts.procs,os.getcwd(),opts.outfilename.replace(".root","_%s_%s.root"%(proc,cat)), os.getcwd(),opts.outDir, opts.flashggCats ,opts.changeIntLumi, proc,cat,bsRW,float(opts.bs), opts.massList)
+    exec_line = "%s/bin/SignalFit --verbose 0 -i %s -d %s/%s  --mhLow=%s --mhHigh=%s -s %s/%s --procs %s -o  %s/%s -p %s/%s -f %s --changeIntLumi %s --binnedFit 1 --nBins 320 --split %s,%s --beamSpotReweigh %d --dataBeamSpotWidth %f --massList %s --useDCBplusGaus %s --useSSF %s -C -1" %(os.getcwd(), opts.infile,os.getcwd(),opts.datfile,opts.mhLow, opts.mhHigh, os.getcwd(),opts.systdatfile, opts.procs,os.getcwd(),opts.outfilename.replace(".root","_%s_%s.root"%(proc,cat)), os.getcwd(),opts.outDir, opts.flashggCats ,opts.changeIntLumi, proc,cat,bsRW,float(opts.bs), opts.massList, opts.useDCB_1G, opts.useSSF)
     #print exec_line
     writePostamble(file,exec_line)
 

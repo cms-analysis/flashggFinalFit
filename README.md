@@ -9,15 +9,22 @@ cd CMSSW_7_4_7/src
 cmsenv
 git cms-init
 # Install Combine as per Twiki: https://twiki.cern.ch/twiki/bin/viewauth/CMS/SWGuideHiggsAnalysisCombinedLimit#ROOT6_SLC6_release_CMSSW_7_4_X
+# They recently migrated to 81X; we will follow shortly, but checkout 74X branch for now
 git clone https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit
 cd ${CMSSW_BASE}/src/HiggsAnalysis/CombinedLimit
 git fetch origin
+git checkout origin/74x-root6
+git checkout -b mybranch
 cd ${CMSSW_BASE}/src
-# Install Flashgg Final Fit packages
-git clone git@github.com:cms-analysis/flashggFinalFit.git
-cd ${CMSSW_BASE}/src
+# Install the GBRLikelihood package which contains the RooDoubleCBFast implementation
+git clone git@github.com:bendavid/GBRLikelihood.git HiggsAnalysis/GBRLikelihood
+# Compile external libraries
+cd ${CMSSW_BASE}/src/HiggsAnalysis
 cmsenv
 scram b -j9
+# Install Flashgg Final Fit packages
+cd ${CMSSW_BASE}/src/
+git clone git@github.com:cms-analysis/flashggFinalFit.git
 cd ${CMSSW_BASE}/src/flashggFinalFit/
 ```
 
@@ -66,7 +73,7 @@ You can run `./runFinalFitsScripts.sh -h` to check the available options.
 
 ## Some interesting options
 
-	Most fo the options are fairly self-explanatory, but some of them could use a little extra explanation:
+	Most of the options are fairly self-explanatory, but some of them could use a little extra explanation:
 	* inputFile : The default file to `file` mentioned above.
 	* procs: The comma-separated list of processes to run over. eg `ggh,vbf,tth,wzh`. Convention is to use lower case.
 	* flashggCats: The comma-separated list of FLASHgg categories you wish to consider. Obviously the more you include the longer everything will take. These again must obviously match the ones in your workspace input `file`.
@@ -80,3 +87,6 @@ You can run `./runFinalFitsScripts.sh -h` to check the available options.
 	* intLumi: Override signal weight and intLumi value and adjust to be compatible with the intlumi sepcified witht his option (in fb^{-1}).
 	* bs: reweight the beamspot to be this value, specified in cm (should be the value from data)
 
+## Known issues
+
+Recently some issues with memory have been observed with the workspaces (probably because there are so many processes and tags now). Crashes can occur due to a `std::bad_alloc()` error, which for now I have managed to circumvent by submitting to the batch (this is at Imperial College), e.g. for making the photon systematic dat files and the S+B fits. The problem is due to all the workspaces being loaded by the WSTFileWrapper class, so at some point this should be revisited and improved somwhow. 

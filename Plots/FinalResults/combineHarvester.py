@@ -121,6 +121,9 @@ specOpts.add_option("--expectSignal",type="float",default=None)
 specOpts.add_option("--expectSignalMass",type="float",default=None)
 specOpts.add_option("--splitChannels",default=None)
 specOpts.add_option("--perProcessChannelCompatibilityPOI",default=None)
+specOpts.add_option("--perProcessMuPOI",default=None)
+specOpts.add_option("--doSTXS",default=False,action="store_true",help="Use STXS POIs")
+specOpts.add_option("--stxsFreezeNuisances",default="QCDscale_qqH,QCDscale_ttH,QCDscale_VH,pdf_Higgs_qqbar,pdf_Higgs_ttH,pdf_Higgs_gg,CMS_hgg_THU_ggH_Res,CMS_hgg_THU_ggH_Mu",help="The nuisances to be frozen when doing the STXS measurements")
 specOpts.add_option("--perTagChannelCompatibilityPOI",default=None)
 specOpts.add_option("--profileMH",default=False)
 specOpts.add_option("--toysFile",default=None)
@@ -136,7 +139,7 @@ if not os.path.exists(os.path.expandvars('$CMSSW_BASE/bin/$SCRAM_ARCH/combineCar
   sys.exit('ERROR - CombinedLimit package must be installed')
 
 cwd = os.getcwd()
-allowedMethods = ['Asymptotic','AsymptoticGrid','ProfileLikelihood','ProfileLikelihoodStat','ProfileLikelihoodTheo','ChannelCompatibilityCheck','MultiPdfChannelCompatibility','MHScan','MHScanStat','MHScanTheo','MHScanJustThisSyst','MHScanNoGlob','MuScan','MuScanStat','MuScanTheo','MuScanMHProf','RVScan','RFScan','RVRFScan','PerProcessChannelCompatibility','PerTagChannelCompatibility','MuMHScan','GenerateOnly', 'RProcScan', 'RTopoScan', 'RBinScan', 'MuVsMHScan','CVCFScan','KGluKGamScan','MultiPdfMuHatvsMH']
+allowedMethods = ['Asymptotic','AsymptoticGrid','ProfileLikelihood','ProfileLikelihoodStat','ProfileLikelihoodTheo','ChannelCompatibilityCheck','MultiPdfChannelCompatibility','MHScan','MHScanStat','MHScanTheo','MHScanJustThisSyst','MHScanNoGlob','MuScan','MuScanStat','MuScanTheo','MuScanMHProf','RVScan','RFScan','RVRFScan','PerProcessChannelCompatibility','PerProcessChannelCompatibilityStat','PerProcessChannelCompatibilityTheo','PerProcessMu','PerTagChannelCompatibility','MuMHScan','GenerateOnly', 'RProcScan', 'RTopoScan', 'RBinScan', 'MuVsMHScan','CVCFScan','KGluKGamScan','MultiPdfMuHatvsMH']
 
 
 if opts.parallel:
@@ -261,7 +264,7 @@ def makeFloatMHCard():
      f1.close()
      f2.close()
 def makeTheoOnlyCard():
-  print "[INFO] making stats-only card"
+  print "[INFO] making theo-only card"
   
   assert(opts.datacard.endswith('.txt'))
   newcardname = opts.datacard.replace('.txt','_theoonly.txt') 
@@ -270,7 +273,8 @@ def makeTheoOnlyCard():
   for line in inf.readlines():
     line_els = line.split()
     if line.startswith('kmax'): line = line.replace(line_els[1],'*')
-    theorySystKeywords=["QCD","pdf_","pdfWeight_","alpha","scaleWeight"]
+    #theorySystKeywords=["QCD","pdf_","pdfWeight_","alpha","scaleWeight"]
+    theorySystKeywords=["QCD","pdf_","pdfWeight_","alpha","scaleWeight","BR_","UEPS","JetVeto"]
     isTheorySystLine=False
     for thSkw in theorySystKeywords: 
       if thSkw in line: isTheorySystLine=True
@@ -409,7 +413,7 @@ def writeAsymptotic():
     writePreamble(file)
     exec_line = ''
     for mass in mass_set:
-      exec_line +=  'combine %s -M Asymptotic -m %6.2f --cminDefaultMinimizerType=Minuit2'%(opts.datacard,mass)
+      exec_line +=  'combine %s -M Asymptotic -m %6.2f --cminDefaultMinimizerType=Minuit2 -L $CMSSW_BASE/lib/$SCRAM_ARCH/libHiggsAnalysisGBRLikelihood.so '%(opts.datacard,mass)
       if opts.S0: exec_line += ' --S0 '
       if opts.additionalOptions: exec_line += ' %s'%opts.additionalOptions
       if opts.expected: exec_line += ' --run=expected'
@@ -430,7 +434,7 @@ def writeAsymptoticGrid():
   # create specialised limit grid workspace
   if not opts.skipWorkspace:
     print '[INFO] Creating workspace for %s...'%opts.method
-    ws_exec_line = 'text2workspace.py %s -o %s'%(os.path.abspath(opts.datacard),os.path.abspath(opts.datacard).replace('.txt','.root')) 
+    ws_exec_line = 'text2workspace.py %s -o %s -L $CMSSW_BASE/lib/$SCRAM_ARCH/libHiggsAnalysisGBRLikelihood.so'%(os.path.abspath(opts.datacard),os.path.abspath(opts.datacard).replace('.txt','.root')) 
     #print ws_exec_line
     system(ws_exec_line)
   opts.datacard = opts.datacard.replace('.txt','.root')
@@ -480,7 +484,7 @@ def writeProfileLikelhood():
     writePreamble(file)
     exec_line = ''
     for mass in mass_set:
-      exec_line +=  'combine %s -M ProfileLikelihood -m %6.2f --signif --pval --cminDefaultMinimizerType=Minuit2'%(opts.datacard,mass)
+      exec_line +=  'combine %s -M ProfileLikelihood -m %6.2f --signif --pval --cminDefaultMinimizerType=Minuit2 -L $CMSSW_BASE/lib/$SCRAM_ARCH/libHiggsAnalysisGBRLikelihood.so'%(opts.datacard,mass)
       if opts.additionalOptions: exec_line += ' %s'%opts.additionalOptions
       if opts.expected: exec_line += ' -t -1 '
       if opts.expectSignal: exec_line += ' --expectSignal=%3.1f'%opts.expectSignal
@@ -503,14 +507,14 @@ def writeChannelCompatibility():
 
   file = open('%s/sub_m%6.2f.sh'%(opts.outDir,opts.mh),'w')
   writePreamble(file)
-  exec_line = 'combine %s -M ChannelCompatibilityCheck -m %6.2f --rMin=-25. --saveFitResult --cminDefaultMinimizerType=Minuit2'%(opts.datacard,opts.mh)
+  exec_line = 'combine %s -M ChannelCompatibilityCheck -m %6.2f --rMin=-25. --saveFitResult --cminDefaultMinimizerType=Minuit2 -L $CMSSW_BASE/lib/$SCRAM_ARCH/libHiggsAnalysisGBRLikelihood.so'%(opts.datacard,opts.mh)
   writePostamble(file,exec_line)
 
 def writeSingleGenerateOnly():
   
   file = open('%s/sub.sh'%(opts.outDir),'w')
   writePreamble(file)
-  exec_line = 'combine %s -M GenerateOnly -m %6.2f --saveToys '%(opts.datacard,opts.mh)
+  exec_line = 'combine %s -M GenerateOnly -m %6.2f --saveToys -L $CMSSW_BASE/lib/$SCRAM_ARCH/libHiggsAnalysisGBRLikelihood.so'%(opts.datacard,opts.mh)
   if opts.expected: exec_line += ' -t -1'
   if opts.expectSignal: exec_line += ' --expectSignal=%3.1f'%opts.expectSignal
   if opts.expectSignalMass: exec_line += ' --expectSignalMass=%6.2f'%opts.expectSignalMass
@@ -658,7 +662,9 @@ def writeMultiDimFit(method=None,wsOnly=False):
                         comma ="|"
                 binstr += ").*TeV/.*Bin.*:r_Bin%d[1,0,20]'" % ibin
                 catsMap += binstr
-        perTagChCompPOIs=[] 
+        perTagChCompPOIs=[]
+        perProcMuPOIs=["r_ggH","r_qqH","r_ttH","r_VH"]
+        if opts.doSTXS: perProcMuPOIs=["r_ggH","r_qqH","r_ttH","r_QQ2HLNU","r_QQ2HLL","r_VH2HQQ"]
         if opts.method=="PerTagChannelCompatibility" and catsMap=="":
            cats = getSortedCats()
            catsMap =" --PO verbose "
@@ -666,10 +672,14 @@ def writeMultiDimFit(method=None,wsOnly=False):
             catsMap = catsMap + " --PO 'map=%s/.*hgg:r_%s[1,-5,5]'"%(cat,cat)
             perTagChCompPOIs.append("r_%s"%cat)
         print '[INFO] Writing MultiDim Scan'
-        ws_args = { "RVRFScan"   : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:rVrFXSHiggs %s "% profMH ,
-    #"PerProcessChannelCompatibility" : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:floatingXSHiggs --PO modes=ggH,qqH,VH,ttH %s " % profMH,
+        #ws_args = { "RVRFScan"   : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:rVrFXSHiggs %s "% profMH ,
+        ws_args = { "RVRFScan"   : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel %s %s " %(catsMap,profMH),
+    "PerProcessChannelCompatibility" : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:floatingXSHiggs --PO modes=ggH,qqH,VH,ttH %s " % profMH,
+    "PerProcessChannelCompatibilityStat" : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:floatingXSHiggs --PO modes=ggH,qqH,VH,ttH %s " % profMH,
+    "PerProcessChannelCompatibilityTheo" : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:floatingXSHiggs --PO modes=ggH,qqH,VH,ttH %s " % profMH,
     #PerProcessChannelCompatibility" : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:floatingXSHiggs --PO modes=ggH,qqH,VH,ttH  " ,
-    "PerProcessChannelCompatibility" : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:floatingXSHiggs --PO modes=ggH,qqH,ttH  %s" % profMH ,
+    #"PerProcessChannelCompatibility" : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:floatingXSHiggs --PO modes=ggH,qqH,ttH  %s" % profMH ,
+    "PerProcessMu" : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel %s %s " %(catsMap,profMH),
     "PerTagChannelCompatibility" : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel %s %s " %(catsMap,profMH),
     "RVScan"  : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:rVrFXSHiggs %s" % profMH,
     "RVnpRFScan"   : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:rVrFXSHiggs %s" % profMH,
@@ -679,13 +689,20 @@ def writeMultiDimFit(method=None,wsOnly=False):
     "MuScanStat"  : "",
     "MuScanTheo"  : "",
     "MuScanMHProf"  : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:floatingHiggsMass",
-    "CVCFScan"  : "-P HiggsAnalysis.CombinedLimit.HiggsCouplings:cVcF       %s" % profMH,
-    "KGluKGamScan"  : "-P HiggsAnalysis.CombinedLimit.HiggsCouplings:higgsLoops %s" % profMH,
-    "MHScan"  : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:rVrFXSHiggs  %s" % profMH,
-    "MHScanStat"   : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:rVrFXSHiggs  %s" % profMH,
-    "MHScanTheo"   : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:rVrFXSHiggs  %s" % profMH,
-    "MHScanJustThisSyst"   : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:rVrFXSHiggs  %s" % profMH,
-    "MHScanNoGlob"  : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:rVrFXSHiggs  %s" % profMH,
+    "CVCFScan"  : "-P HiggsAnalysis.CombinedLimit.HiggsCouplings:cVcF  --PO BRU=0     %s" % profMH,
+    #"KGluKGamScan"  : "-P HiggsAnalysis.CombinedLimit.HiggsCouplings:higgsLoops %s" % profMH,
+    "KGluKGamScan"  : "-P HiggsAnalysis.CombinedLimit.HiggsCouplings:c7  --PO BRU=0  %s" % profMH, #updated version. Needs freezing of other five vars
+    #"MHScan"  : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:rVrFXSHiggs  %s" % profMH,
+    #"MHScanStat"   : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:rVrFXSHiggs  %s" % profMH,
+    #"MHScanTheo"   : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:rVrFXSHiggs  %s" % profMH,
+    #"MHScanJustThisSyst"   : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:rVrFXSHiggs  %s" % profMH,
+    #"MHScanNoGlob"  : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:rVrFXSHiggs  %s" % profMH,
+    #now use custom mapping for new STXS process names
+    "MHScan"  : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel %s %s" %(catsMap,profMH),
+    "MHScanStat"   : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel %s %s" %(catsMap,profMH),
+    "MHScanTheo"   : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel %s %s" %(catsMap,profMH),
+    "MHScanJustThisSyst"   : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel %s %s" %(catsMap,profMH),
+    "MHScanNoGlob"  : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel %s %s" %(catsMap,profMH),
     "MuMHScan"  : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:floatingHiggsMass",
     "RTopoScan"  : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel %s %s" % ( catsMap, profMH ),
     "RBinScan"  : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel %s %s" % ( catsMap, profMH ),
@@ -695,9 +712,13 @@ def writeMultiDimFit(method=None,wsOnly=False):
 
         setpois = {
             #"PerProcessChannelCompatibility" : [ "r_ggH", "r_qqH","r_ZH","r_WH","r_ttH" ],
+            "PerProcessMu" : perProcMuPOIs,
             "PerTagChannelCompatibility" : perTagChCompPOIs,
-            #"PerProcessChannelCompatibility" : [ "r_ggH", "r_qqH","r_VH","r_ttH" ],
-            "PerProcessChannelCompatibility" : [ "r_ggH", "r_qqH","r_ttH" ],
+            "PerProcessChannelCompatibility" : [ "r_ggH", "r_qqH","r_VH","r_ttH" ],
+            "PerProcessChannelCompatibilityStat" : [ "r_ggH", "r_qqH","r_VH","r_ttH" ],
+            "PerProcessChannelCompatibilityTheo" : [ "r_ggH", "r_qqH","r_VH","r_ttH" ],
+            #"PerProcessChannelCompatibility" : [ "r_ggH", "r_qqH","r_ttH" ],
+            #"PerProcessChannelCompatibilityStat" : [ "r_ggH", "r_qqH","r_ttH" ],
             "RVRFScan" : [ "RV", "RF" ],
             "RVScan" : [ "RV", "RF" ],
             "RVnpRFScan": [ "RV", "RF" ],
@@ -707,13 +728,20 @@ def writeMultiDimFit(method=None,wsOnly=False):
             "MuScanStat": [ ],
             "MuScanTheo": [ ],
             "MuScanMHProf": [ ],
-            "CVCFScan": [ "CV", "CF" ],
-            "KGluKGamScan": [ "kgluon", "kgamma" ],
-            "MHScan": [ ],
-            "MHScanStat": [ ],
-            "MHScanTheo": [ ],
-            "MHScanJustThisSyst": [ ],
-            "MHScanNoGlob": [ ],
+            #"CVCFScan": [ "CV", "CF" ],
+            "CVCFScan": [ "kappa_V", "kappa_F" ],
+            #"KGluKGamScan": [ "kgluon", "kgamma" ],
+            "KGluKGamScan": [ "kappa_g", "kappa_gam" ],
+            #"MHScan": [ ],
+            #"MHScanStat": [ ],
+            #"MHScanTheo": [ ],
+            #"MHScanJustThisSyst": [ ],
+            #"MHScanNoGlob": [ ],
+            "MHScan": [ "RV", "RF" ],
+            "MHScanStat": [ "RV", "RF" ],
+            "MHScanTheo": [ "RV", "RF" ],
+            "MHScanJustThisSyst": [ "RV", "RF" ],
+            "MHScanNoGlob": [ "RV", "RF" ],
             "MuMHScan": [ ],
             "RProcScan": [ "r_ggH","r_qqH","r_VH","r_ttH" ],
             "RTopoScan": [ "r_untag","r_qqHtag","r_VHtag","r_ttHtag" ],
@@ -724,6 +752,9 @@ def writeMultiDimFit(method=None,wsOnly=False):
         combine_args = {
     "RVRFScan"   : "-P RV -P RF --floatOtherPOIs=1" , 
     "PerProcessChannelCompatibility"   : "-P %s --floatOtherPOIs=1"% opts.perProcessChannelCompatibilityPOI , 
+    "PerProcessChannelCompatibilityStat"   : "-P %s --floatOtherPOIs=1"% opts.perProcessChannelCompatibilityPOI , 
+    "PerProcessChannelCompatibilityTheo"   : "-P %s --floatOtherPOIs=1"% opts.perProcessChannelCompatibilityPOI , 
+    "PerProcessMu"   : "-P %s --floatOtherPOIs=1"% opts.perProcessMuPOI, 
     "PerTagChannelCompatibility"   : "-P %s --floatOtherPOIs=1"% opts.perTagChannelCompatibilityPOI , 
     "RVScan"  : "--floatOtherPOIs=1 -P RV" ,
     "RVnpRFScan"  : "--floatOtherPOIs=0 -P RV" ,
@@ -733,8 +764,10 @@ def writeMultiDimFit(method=None,wsOnly=False):
     "MuScanStat"  : "-P r",
     "MuScanTheo"  : "-P r",
     "MuScanMHProf"  : "-P r --floatOtherPOIs=1",
-    "CVCFScan"  : "-P CV -P CF --floatOtherPOIs=1", 
-    "KGluKGamScan"  : "-P kgluon -P kgamma --floatOtherPOIs=1", 
+    #"CVCFScan"  : "-P CV -P CF --floatOtherPOIs=1", 
+    "CVCFScan"  : "-P kappa_V -P kappa_F --floatOtherPOIs=1", 
+    #"KGluKGamScan"  : "-P kgluon -P kgamma --floatOtherPOIs=1", 
+    "KGluKGamScan"  : "-P kappa_g -P kappa_gam --floatOtherPOIs=1", 
     "MHScan"  : "--floatOtherPOIs=1 -P MH",
     "MHScanStat"  : "--floatOtherPOIs=1 -P MH",
     "MHScanTheo"  : "--floatOtherPOIs=1 -P MH",
@@ -750,11 +783,24 @@ def writeMultiDimFit(method=None,wsOnly=False):
         #par_ranges["PerProcessChannelCompatibility"]  = "r_ggH=%4.2f,%4.2f:r_qqH=%4.2f,%4.2f:r_WH=%4.2f,%4.2f:r_ZH=%4.2f,%4.2f:r_ttH=%4.2f,%4.2f"%(-5.0,5.0,-5.0,5.0,-5.0,5.0,-5.0,5.0,-5.0,5.0)
         perTagChCompPOIRanges=""
         for r_tag in perTagChCompPOIs:
-          perTagChCompPOIRanges=perTagChCompPOIRanges+ "%s=-2.0,10.0:"%r_tag
-        perTagChCompPOIRanges[:-1] #remove last character, an extra ":"
+          #perTagChCompPOIRanges=perTagChCompPOIRanges+ "%s=-2.0,10.0:"%r_tag
+          if "Untagged" in r_tag and "3" not in r_tag: perTagChCompPOIRanges=perTagChCompPOIRanges+ "%s=0.0,2.0:"%r_tag
+          elif "Untagged" in r_tag and "3" in r_tag: perTagChCompPOIRanges=perTagChCompPOIRanges+ "%s=0.0,3.0:"%r_tag
+          elif "VBF" in r_tag: perTagChCompPOIRanges=perTagChCompPOIRanges+ "%s=0.0,3.0:"%r_tag
+          elif "TTH" in r_tag: perTagChCompPOIRanges=perTagChCompPOIRanges+ "%s=0.0,5.0:"%r_tag
+          elif "WH" in r_tag: perTagChCompPOIRanges=perTagChCompPOIRanges+ "%s=0.0,5.0:"%r_tag
+          elif "ZH" in r_tag: perTagChCompPOIRanges=perTagChCompPOIRanges+ "%s=0.0,10.0:"%r_tag
+          elif "VH" in r_tag: perTagChCompPOIRanges=perTagChCompPOIRanges+ "%s=0.0,6.0:"%r_tag
+          else: perTagChCompPOIRanges=perTagChCompPOIRanges+ "%s=0.0,10.0:"%r_tag
+        perTagChCompPOIRanges = perTagChCompPOIRanges[:-1] #remove last character, an extra ":"
+        if opts.expected and not opts.doSTXS: par_ranges["PerProcessMu"]  = "r_ggH=%4.2f,%4.2f:r_qqH=%4.2f,%4.2f:r_ttH=%4.2f,%4.2f:r_VH=%4.2f,%4.2f"%(0.0,2.0,0.0,2.0,0.0,2.0,-1.0,3.0)
+        elif not opts.expected and not opts.doSTXS: par_ranges["PerProcessMu"]  = "r_ggH=%4.2f,%4.2f:r_qqH=%4.2f,%4.2f:r_ttH=%4.2f,%4.2f:r_VH=%4.2f,%4.2f"%(0.0,2.0,0.0,2.0,0.0,4.0,0.0,4.0)
+        elif opts.expected and opts.doSTXS: par_ranges["PerProcessMu"]  = "r_ggH=%4.2f,%4.2f:r_qqH=%4.2f,%4.2f:r_ttH=%4.2f,%4.2f:r_QQ2HLNU=%4.2f,%4.2f:r_QQ2HLL=%4.2f,%4.2f:r_VH2HQQ=%4.2f,%4.2f"%(0.0,2.0,0.0,2.0,0.0,2.0,-2.0,4.0,-2.0,4.0,-2.0,4.0)
+        elif not opts.expected and opts.doSTXS: par_ranges["PerProcessMu"]  = "r_ggH=%4.2f,%4.2f:r_qqH=%4.2f,%4.2f:r_ttH=%4.2f,%4.2f:r_QQ2HLNU=%4.2f,%4.2f:r_QQ2HLL=%4.2f,%4.2f:r_VH2HQQ=%4.2f,%4.2f"%(0.0,2.0,0.0,2.0,0.0,4.0,0.,6.0,0.,6.0,0.,8.0)
         par_ranges["PerTagChannelCompatibility"]  = perTagChCompPOIRanges 
-        #par_ranges["PerProcessChannelCompatibility"]  = "r_ggH=%4.2f,%4.2f:r_qqH=%4.2f,%4.2f:r_VH=%4.2f,%4.2f:r_ttH=%4.2f,%4.2f"%(-5.0,5.0,-5.0,5.0,-5.0,20.0,-5.0,5.0)
-        par_ranges["PerProcessChannelCompatibility"]  = "r_ggH=%4.2f,%4.2f:r_qqH=%4.2f,%4.2f::r_ttH=%4.2f,%4.2f"%(-5.0,5.0,-5.0,5.0,-5.0,5.0)
+        par_ranges["PerProcessChannelCompatibility"]  = "r_ggH=%4.2f,%4.2f:r_qqH=%4.2f,%4.2f:r_VH=%4.2f,%4.2f:r_ttH=%4.2f,%4.2f"%(0.0,2.0,0.0,2.0,0.0,2.0,0.0,2.0)
+        par_ranges["PerProcessChannelCompatibilityStat"]  = "r_ggH=%4.2f,%4.2f:r_qqH=%4.2f,%4.2f:r_VH=%4.2f,%4.2f:r_ttH=%4.2f,%4.2f"%(0.0,2.0,0.0,2.0,0.0,2.0,0.0,2.0)
+        par_ranges["PerProcessChannelCompatibilityTheo"]  = "r_ggH=%4.2f,%4.2f:r_qqH=%4.2f,%4.2f:r_VH=%4.2f,%4.2f:r_ttH=%4.2f,%4.2f"%(0.0,2.0,0.0,2.0,0.0,2.0,0.0,2.0)
         if opts.rvLow!=None and opts.rvHigh!=None and opts.rfLow!=None and opts.rfHigh!=None:
           par_ranges["RVRFScan"]  = "RV=%4.2f,%4.2f:RF=%4.2f,%4.2f"%(opts.rvLow,opts.rvHigh,opts.rfLow,opts.rfHigh)
         if opts.rvLow!=None and opts.rvHigh!=None:
@@ -769,15 +815,17 @@ def writeMultiDimFit(method=None,wsOnly=False):
           par_ranges["MuScan"]  = "r=%4.2f,%4.2f"%(opts.muLow,opts.muHigh) 
           par_ranges["MuScanStat"]  = "r=%4.2f,%4.2f"%(opts.muLow,opts.muHigh) 
           par_ranges["MuScanTheo"]  = "r=%4.2f,%4.2f"%(opts.muLow,opts.muHigh) 
-          par_ranges["MuScanMHProf"]= "r=%4.2f,%4.2f"%(opts.muLow,opts.muHigh) 
+          par_ranges["MuScanMHProf"]= "r=%4.2f,%4.2f:MH=120.0,130.0"%(opts.muLow,opts.muHigh) 
           par_ranges["RProcScan"]    = "%s=%4.2f,%4.2f"%(opts.poix,opts.muLow,opts.muHigh)
           par_ranges["RTopoScan"]    = "%s=%4.2f,%4.2f"%(opts.poix,opts.muLow,opts.muHigh)
           par_ranges["RBinScan"]    = "%s=%4.2f,%4.2f"%(opts.poix,opts.muLow,opts.muHigh)
           par_ranges["RDiffXsScan"] = "%s=%4.2f,%4.2f"%(opts.poix,opts.muLow,opts.muHigh)
         if opts.cvLow!=None and opts.cvHigh!=None and opts.cfLow!=None and opts.cfHigh!=None:
-          par_ranges["CVCFScan"]    = "CV=%4.2f,%4.2f:CF=%4.2f,%4.2f"%(opts.cvLow,opts.cvHigh,opts.cfLow,opts.cfHigh)
+          #par_ranges["CVCFScan"]    = "CV=%4.2f,%4.2f:CF=%4.2f,%4.2f"%(opts.cvLow,opts.cvHigh,opts.cfLow,opts.cfHigh)
+          par_ranges["CVCFScan"]    = "kappa_V=%4.2f,%4.2f:kappa_F=%4.2f,%4.2f"%(opts.cvLow,opts.cvHigh,opts.cfLow,opts.cfHigh)
         if opts.kgamLow!=None and opts.kgamHigh!=None and opts.kgluLow!=None and opts.kgluHigh!=None:
-          par_ranges["KGluKGamScan"] = "kgamma=%4.2f,%4.2f:kgluon=%4.2f,%4.2f"%(opts.kgamLow,opts.kgamHigh,opts.kgluLow,opts.kgluHigh)
+          #par_ranges["KGluKGamScan"] = "kgamma=%4.2f,%4.2f:kgluon=%4.2f,%4.2f"%(opts.kgamLow,opts.kgamHigh,opts.kgluLow,opts.kgluHigh)
+          par_ranges["KGluKGamScan"] = "kappa_gam=%4.2f,%4.2f:kappa_g=%4.2f,%4.2f"%(opts.kgamLow,opts.kgamHigh,opts.kgluLow,opts.kgluHigh)
         if opts.mhLow!=None and opts.mhHigh!=None:
           par_ranges["MHScan"]    = "MH=%6.2f,%6.2f"%(opts.mhLow,opts.mhHigh)
           par_ranges["MHScanStat"]  = "MH=%6.2f,%6.2f"%(opts.mhLow,opts.mhHigh)
@@ -792,6 +840,10 @@ def writeMultiDimFit(method=None,wsOnly=False):
           makeStatOnlyCard()
         if method=='MuScanStat':
           makeStatOnlyCard()
+        if method=='PerProcessChannelCompatibilityStat':
+          makeStatOnlyCard()
+        if method=='PerProcessChannelCompatibilityTheo':
+          makeTheoOnlyCard()
         if method=='MHScanTheo':
           makeTheoOnlyCard()
         if method=='MHScanJustThisSyst':
@@ -807,10 +859,10 @@ def writeMultiDimFit(method=None,wsOnly=False):
         if not opts.skipWorkspace:
           datacardname = os.path.basename(opts.datacard).replace('.txt','')
           print 'Creating workspace for %s...'%method
-          exec_line = 'text2workspace.py %s -o %s %s'%(os.path.abspath(opts.datacard),os.path.abspath(opts.datacard).replace('.txt',method+'.root'),ws_args[method]) 
+          exec_line = 'text2workspace.py %s -o %s %s -L $CMSSW_BASE/lib/$SCRAM_ARCH/libHiggsAnalysisGBRLikelihood.so'%(os.path.abspath(opts.datacard),os.path.abspath(opts.datacard).replace('.txt',method+'.root'),ws_args[method]) 
           print exec_line
           if opts.postFit:
-                          exec_line += ' && combine -m %.2f -M MultiDimFit --saveWorkspace -n %s_postFit %s' % ( opts.mh, datacardname+method, os.path.abspath(opts.datacard).replace('.txt',method+'.root') )
+                          exec_line += ' && combine -m %.2f -M MultiDimFit --saveWorkspace -n %s_postFit %s -L $CMSSW_BASE/lib/$SCRAM_ARCH/libHiggsAnalysisGBRLikelihood.so' % ( opts.mh, datacardname+method, os.path.abspath(opts.datacard).replace('.txt',method+'.root') )
                           exec_line += ' && cp higgsCombine%s_postFit.MultiDimFit.mH%.2f.root %s' % ( datacardname+method, opts.mh, os.path.abspath(opts.datacard).replace('.txt',method+'_postFit.root') )
           if opts.parallel and opts.dryRun:
                           parallel.run(system,(exec_line,))
@@ -866,7 +918,7 @@ def writeMultiDimFit(method=None,wsOnly=False):
         for i in range(opts.jobs):
           file = open('%s/sub_m%1.5g_job%d.sh'%(opts.outDir,getattr(opts,"mh",0.),i),'w')
           writePreamble(file)
-          exec_line = 'combine %s  -M MultiDimFit --cminDefaultMinimizerType Minuit2 --cminDefaultMinimizerAlgo migrad --algo=grid  %s --points=%d --firstPoint=%d --lastPoint=%d -n %sJob%d'%(opts.datacard,combine_args[method],opts.pointsperjob*opts.jobs,i*opts.pointsperjob,(i+1)*opts.pointsperjob-1,method,i)
+          exec_line = 'combine %s  -M MultiDimFit --cminDefaultMinimizerType Minuit2 --cminDefaultMinimizerAlgo migrad --algo=grid  %s --points=%d --firstPoint=%d --lastPoint=%d -n %sJob%d -L $CMSSW_BASE/lib/$SCRAM_ARCH/libHiggsAnalysisGBRLikelihood.so'%(opts.datacard,combine_args[method],opts.pointsperjob*opts.jobs,i*opts.pointsperjob,(i+1)*opts.pointsperjob-1,method,i)
           if ("FloatMH" in opts.outDir) : exec_line += " --saveSpecifiedNuis MH" 
           if method in par_ranges.keys(): exec_line+=" --setPhysicsModelParameterRanges %s "%(par_ranges[method])
           if getattr(opts,"mh",None): exec_line += ' -m %6.2f'%opts.mh
@@ -876,6 +928,7 @@ def writeMultiDimFit(method=None,wsOnly=False):
           #exec_line += ' --verbose -1 --saveSpecifiedIndex pdfindex_UntaggedTag_0_13TeV,pdfindex_UntaggedTag_1_13TeV,pdfindex_UntaggedTag_2_13TeV,pdfindex_UntaggedTag_3_13TeV,pdfindex_VBFTag_0_13TeV,pdfindex_VBFTag_1_13TeV,pdfindex_TTHLeptonicTag_13TeV,pdfindex_TTHHadronicTag_13TeV' 
           if opts.expectSignal: exec_line += ' --expectSignal %4.2f'%opts.expectSignal
           if opts.expectSignalMass: exec_line += ' --expectSignalMass %6.2f'%opts.expectSignalMass
+          if method == 'PerProcessMu' and opts.doSTXS: exec_line += ' --freezeNuisances %s'%opts.stxsFreezeNuisances
           if opts.additionalOptions: exec_line += ' %s'%opts.additionalOptions
           if opts.toysFile: exec_line += ' --toysFile %s'%opts.toysFile
           if opts.verbose: print '\t', exec_line
@@ -958,7 +1011,8 @@ def configure(config_line):
     if option.startswith('pointsperjob='): opts.pointsperjob = int(option.split('=')[1])
     if option.startswith('splitChannels='): opts.splitChannels = option.split('=')[1].split(',')
     if option.startswith('perProcessChannelCompatibilityPOI='): opts.perProcessChannelCompatibilityPOI = option.split('=')[1]
-    if option.startswith('perTagChannelCompatibilityPOI='): opts.perTagChannelCompatibilityPOI = option.split('=')[1]
+    if option.startswith('perProcessMuPOI='): opts.perProcessMuPOI = option.split('=')[1]
+    if option.startswith('perTagChannelCompatibilityPOI='): opts.perTagChannelCompatibilityPOI= option.split('=')[1]
     if option.startswith('justThisSyst='): opts.justThisSyst = option.split('=')[1].split(',')
     if option.startswith('toysFile='): opts.toysFile = option.split('=')[1]
     if option.startswith('mh='): 
@@ -995,6 +1049,7 @@ def configure(config_line):
     if option.startswith('nBins='): opts.nBins = int(option.split('=')[1])
     if option.startswith('freezeAll='): opts.freezeAll = int(option.split('=')[1])
     if option.startswith('float='): opts.float = str(option.split('=')[1])
+    if option.startswith('stxsFreezeNuisances='): opts.stxsFreezeNuisances = str(option.split('=')[1])
     if option.startswith('opts='): 
       addoptstr = option.split("=")[1:]
       addoptstr = "=".join(addoptstr)
@@ -1010,6 +1065,7 @@ def configure(config_line):
       catRanges = strtodict(opts.catRanges)
     if option == "skipWorkspace": opts.skipWorkspace = True
     if option == "postFit":  opts.postFit = True
+    if option == "doSTXS":  opts.doSTXS = True
     if option == "expected": opts.expected = 1
     if option == "profileMH": opts.profileMH = True
   if opts.postFitAll: opts.postFit = True
