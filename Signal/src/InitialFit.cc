@@ -277,18 +277,6 @@ void InitialFit::runFits(int ncpu){
        verbosity_ >=2 ?
        fitRes125 = fitModel125->fitTo(*data125,NumCPU(ncpu),RooFit::Minimizer("Minuit","minimize"),SumW2Error(true),Save(true),PrintLevel(-1)) :
        fitRes125 = fitModel125->fitTo(*data125,NumCPU(ncpu),RooFit::Minimizer("Minuit","minimize"),SumW2Error(true),Save(true),PrintLevel(-1),PrintEvalErrors(-1));
-    std::cout << "ED DEBUG: about to print correlation hist" << std::endl;
-    fitRes125->correlationHist()->Print("ALL");
-    std::cout << "ED DEBUG: done printing correlation hist, now here are param names" << std::endl;
-    fitRes125->Print("ALL");
-    std::cout << "0th gaussian dm, error = " << ((RooRealVar*)fitRes125->floatParsFinal().find("dm_mh125_g0"))->getVal() << ", " << ((RooRealVar*)fitRes125->floatParsFinal().find("dm_mh125_g0"))->getError() << std::endl;
-    std::cout << "0th gaussian sigma, error = " << ((RooRealVar*)fitRes125->floatParsFinal().find("sigma_mh125_g0"))->getVal() << ", " << ((RooRealVar*)fitRes125->floatParsFinal().find("sigma_mh125_g0"))->getError() << std::endl;
-    std::cout << "0th gaussian frac, error = " << ((RooRealVar*)fitRes125->floatParsFinal().find("frac_mh125_g0"))->getVal() << ", " << ((RooRealVar*)fitRes125->floatParsFinal().find("frac_mh125_g0"))->getError() << std::endl;
-    std::cout << "1th gaussian dm, error = " << ((RooRealVar*)fitRes125->floatParsFinal().find("dm_mh125_g1"))->getVal() << ", " << ((RooRealVar*)fitRes125->floatParsFinal().find("dm_mh125_g1"))->getError() << std::endl;
-    std::cout << "1th gaussian sigma, error = " << ((RooRealVar*)fitRes125->floatParsFinal().find("sigma_mh125_g1"))->getVal() << ", " << ((RooRealVar*)fitRes125->floatParsFinal().find("sigma_mh125_g1"))->getError() << std::endl;
-    std::cout << "1th gaussian frac, error = " << ((RooRealVar*)fitRes125->floatParsFinal().find("frac_mh125_g1"))->getVal() << ", " << ((RooRealVar*)fitRes125->floatParsFinal().find("frac_mh125_g1"))->getError() << std::endl;
-    std::cout << "2th gaussian dm, error = " << ((RooRealVar*)fitRes125->floatParsFinal().find("dm_mh125_g2"))->getVal() << ", " << ((RooRealVar*)fitRes125->floatParsFinal().find("dm_mh125_g2"))->getError() << std::endl;
-    std::cout << "2th gaussian sigma, error = " << ((RooRealVar*)fitRes125->floatParsFinal().find("sigma_mh125_g2"))->getVal() << ", " << ((RooRealVar*)fitRes125->floatParsFinal().find("sigma_mh125_g2"))->getError() << std::endl;
     fitResults.insert(pair<int,RooFitResult*>(mh,fitRes125));
     mass->setBins(160); //return to default 
 

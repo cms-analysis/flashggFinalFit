@@ -109,6 +109,7 @@ parser.add_option("--quadInterpolate",type="int",default=0,help="Do a quadratic 
 parser.add_option("--mass",type="int",default=125,help="Mass at which to calculate the systematic variations (default: %default)")
 parser.add_option("--intLumi",type="float",default=3.71,help="Integrated Lumi (default: %default)")
 parser.add_option("--newGghScheme",default=False,action="store_true",help="Use new WG1 scheme for ggH theory uncertainties" )
+parser.add_option("--doSTXS",default=False,action="store_true",help="Use STXS Stage 0 processes" )
 (options,args)=parser.parse_args()
 allSystList=[]
 if options.submitSelf :
@@ -127,11 +128,12 @@ outFile = open(options.outfilename,'w')
 ## PROCS HANDLING & DICT ######################################################
 ###############################################################################
 # convert flashgg style to combine style process
-#combProc = {'ggH':'ggH_hgg','VBF':'qqH_hgg','ggh':'ggH_hgg','vbf':'qqH_hgg','wzh':'VH','wh':'WH_hgg','zh':'ZH_hgg','tth':'ttH_hgg','bkg_mass':'bkg_mass','gg_grav':'ggH_hgg_ALT','qq_grav':'qqbarH_ALT'}
-combProc = {'GG2H':'ggH_hgg','VBF':'qqH_hgg','TTH':'ttH_hgg','QQ2HLNU':'WH_lep_hgg','QQ2HLL':'ZH_lep_hgg','WH2HQQ':'WH_had_hgg','ZH2HQQ':'ZH_had_hgg','testBBH':'bbH_hgg','testTHQ':'tHq_hgg','testTHW':'tHW_hgg','bkg_mass':'bkg_mass'}
-#flashggProc = {'ggH_hgg':'ggh','qqH_hgg':'vbf','VH':'wzh','WH_hgg':'wh','ZH_hgg':'zh','ttH_hgg':'tth','bkg_mass':'bkg_mass','ggH_hgg_ALT':'gg_grav','qqbarH_ALT':'qq_grav'}
-#flashggProc = {'ggH_hgg':'ggh','qqH_hgg':'vbf','ttH_hgg':'tth','WH_lep_hgg':'wh','ZH_lep_hgg':'zh','WH_had_hgg':'wh','ZH_had_hgg':'zh','bkg_mass':'bkg_mass'}
-flashggProc = {'ggH_hgg':'GG2H','qqH_hgg':'VBF','ttH_hgg':'TTH','WH_lep_hgg':'QQ2HLNU','ZH_lep_hgg':'QQ2HLL','WH_had_hgg':'WH2HQQ','ZH_had_hgg':'ZH2HQQ','bbH_hgg':'testBBH','tHq_hgg':'testTHQ','tHW_hgg':'testTHW','bkg_mass':'bkg_mass'}
+combProc = {'ggH':'ggH_hgg','VBF':'qqH_hgg','ggh':'ggH_hgg','vbf':'qqH_hgg','wzh':'VH','wh':'WH_hgg','zh':'ZH_hgg','tth':'ttH_hgg','bkg_mass':'bkg_mass','gg_grav':'ggH_hgg_ALT','qq_grav':'qqbarH_ALT'}
+if options.doSTXS: 
+  combProc = {'GG2H':'ggH_hgg','VBF':'qqH_hgg','TTH':'ttH_hgg','QQ2HLNU':'WH_lep_hgg','QQ2HLL':'ZH_lep_hgg','WH2HQQ':'WH_had_hgg','ZH2HQQ':'ZH_had_hgg','testBBH':'bbH_hgg','testTHQ':'tHq_hgg','testTHW':'tHW_hgg','bkg_mass':'bkg_mass'}
+flashggProc = {'ggH_hgg':'ggh','qqH_hgg':'vbf','VH':'wzh','WH_hgg':'wh','ZH_hgg':'zh','ttH_hgg':'tth','bkg_mass':'bkg_mass','ggH_hgg_ALT':'gg_grav','qqbarH_ALT':'qq_grav'}
+if options.doSTXS: 
+  flashggProc = {'ggH_hgg':'GG2H','qqH_hgg':'VBF','ttH_hgg':'TTH','WH_lep_hgg':'QQ2HLNU','ZH_lep_hgg':'QQ2HLL','WH_had_hgg':'WH2HQQ','ZH_had_hgg':'ZH2HQQ','bbH_hgg':'testBBH','tHq_hgg':'testTHQ','tHW_hgg':'testTHW','bkg_mass':'bkg_mass'}
 procId = {'ggH_hgg':0,'qqH_hgg':-1,'ttH_hgg':-2,'WH_lep_hgg':-2,'ZH_lep_hgg':-3,'WH_had_hgg':-4,'ZH_had_hgg':-5,'bbH_hgg':-6,'tHq_hgg':-7,'tHW_hgg':-8,'bkg_mass':1}
 bkgProcs = ['bkg_mass','bbH_hgg','tHq_hgg','tHW_hgg'] #what to treat as background
 #Determine if VH or WZH_hgg
@@ -242,30 +244,26 @@ fileDetails = {}
 fileDetails['data_obs'] = [dataFile,dataWS,'roohist_data_mass_$CHANNEL']
 fileDetails['bkg_mass']  = [bkgFile,bkgWS,'CMS_hgg_$CHANNEL_%dTeV_bkgshape'%sqrts]
 
-#fileDetails['ggH_hgg']       = [sigFile.replace('$PROC',"ggh"),sigWS,'hggpdfsmrel_%dTeV_ggh_$CHANNEL'%sqrts]
-#fileDetails['qqH_hgg']       = [sigFile.replace('$PROC',"vbf"),sigWS,'hggpdfsmrel_%dTeV_vbf_$CHANNEL'%sqrts]
-#fileDetails['ttH_hgg']       = [sigFile.replace('$PROC',"tth"),sigWS,'hggpdfsmrel_%dTeV_tth_$CHANNEL'%sqrts]
-#fileDetails['WH_lep_hgg']       = [sigFile.replace('$PROC',"wh"),sigWS,'hggpdfsmrel_%dTeV_wh_$CHANNEL'%sqrts]
-#fileDetails['ZH_lep_hgg']       = [sigFile.replace('$PROC',"zh"),sigWS,'hggpdfsmrel_%dTeV_zh_$CHANNEL'%sqrts]
-#fileDetails['WH_had_hgg']       = [sigFile.replace('$PROC',"wh"),sigWS,'hggpdfsmrel_%dTeV_wh_$CHANNEL'%sqrts]
-#fileDetails['ZH_had_hgg']       = [sigFile.replace('$PROC',"zh"),sigWS,'hggpdfsmrel_%dTeV_zh_$CHANNEL'%sqrts]
-
-fileDetails['ggH_hgg']       = [sigFile.replace('$PROC',"GG2H"),sigWS,'hggpdfsmrel_%dTeV_GG2H_$CHANNEL'%sqrts]
-fileDetails['qqH_hgg']       = [sigFile.replace('$PROC',"VBF"),sigWS,'hggpdfsmrel_%dTeV_VBF_$CHANNEL'%sqrts]
-fileDetails['ttH_hgg']       = [sigFile.replace('$PROC',"TTH"),sigWS,'hggpdfsmrel_%dTeV_TTH_$CHANNEL'%sqrts]
-fileDetails['WH_lep_hgg']       = [sigFile.replace('$PROC',"QQ2HLNU"),sigWS,'hggpdfsmrel_%dTeV_QQ2HLNU_$CHANNEL'%sqrts]
-fileDetails['ZH_lep_hgg']       = [sigFile.replace('$PROC',"QQ2HLL"),sigWS,'hggpdfsmrel_%dTeV_QQ2HLL_$CHANNEL'%sqrts]
-fileDetails['WH_had_hgg']       = [sigFile.replace('$PROC',"WH2HQQ"),sigWS,'hggpdfsmrel_%dTeV_WH2HQQ_$CHANNEL'%sqrts]
-fileDetails['ZH_had_hgg']       = [sigFile.replace('$PROC',"ZH2HQQ"),sigWS,'hggpdfsmrel_%dTeV_ZH2HQQ_$CHANNEL'%sqrts]
-fileDetails['bbH_hgg']       = [sigFile.replace('$PROC',"testBBH"),sigWS,'hggpdfsmrel_%dTeV_testBBH_$CHANNEL'%sqrts]
-fileDetails['tHq_hgg']       = [sigFile.replace('$PROC',"testTHQ"),sigWS,'hggpdfsmrel_%dTeV_testTHQ_$CHANNEL'%sqrts]
-fileDetails['tHW_hgg']       = [sigFile.replace('$PROC',"testTHW"),sigWS,'hggpdfsmrel_%dTeV_testTHW_$CHANNEL'%sqrts]
-
-#if splitVH:
-#  fileDetails['WH_hgg']       =  [sigFile.replace('$PROC',"wh"),sigWS,'hggpdfsmrel_%dTeV_wh_$CHANNEL'%sqrts]
-#  fileDetails['ZH_hgg']       =  [sigFile.replace('$PROC',"zh"),sigWS,'hggpdfsmrel_%dTeV_zh_$CHANNEL'%sqrts]
-#else:
-#  fileDetails['VH']       =  [sigFile.replace('$PROC',"wzh"),sigWS,'hggpdfsmrel_%dTeV_wzh_$CHANNEL'%sqrts]
+if options.doSTXS:
+  fileDetails['ggH_hgg']       = [sigFile.replace('$PROC',"GG2H"),sigWS,'hggpdfsmrel_%dTeV_GG2H_$CHANNEL'%sqrts]
+  fileDetails['qqH_hgg']       = [sigFile.replace('$PROC',"VBF"),sigWS,'hggpdfsmrel_%dTeV_VBF_$CHANNEL'%sqrts]
+  fileDetails['ttH_hgg']       = [sigFile.replace('$PROC',"TTH"),sigWS,'hggpdfsmrel_%dTeV_TTH_$CHANNEL'%sqrts]
+  fileDetails['WH_lep_hgg']    = [sigFile.replace('$PROC',"QQ2HLNU"),sigWS,'hggpdfsmrel_%dTeV_QQ2HLNU_$CHANNEL'%sqrts]
+  fileDetails['ZH_lep_hgg']    = [sigFile.replace('$PROC',"QQ2HLL"),sigWS,'hggpdfsmrel_%dTeV_QQ2HLL_$CHANNEL'%sqrts]
+  fileDetails['WH_had_hgg']    = [sigFile.replace('$PROC',"WH2HQQ"),sigWS,'hggpdfsmrel_%dTeV_WH2HQQ_$CHANNEL'%sqrts]
+  fileDetails['ZH_had_hgg']    = [sigFile.replace('$PROC',"ZH2HQQ"),sigWS,'hggpdfsmrel_%dTeV_ZH2HQQ_$CHANNEL'%sqrts]
+  fileDetails['bbH_hgg']       = [sigFile.replace('$PROC',"testBBH"),sigWS,'hggpdfsmrel_%dTeV_testBBH_$CHANNEL'%sqrts]
+  fileDetails['tHq_hgg']       = [sigFile.replace('$PROC',"testTHQ"),sigWS,'hggpdfsmrel_%dTeV_testTHQ_$CHANNEL'%sqrts]
+  fileDetails['tHW_hgg']       = [sigFile.replace('$PROC',"testTHW"),sigWS,'hggpdfsmrel_%dTeV_testTHW_$CHANNEL'%sqrts]
+else:
+  fileDetails['ggH_hgg']       = [sigFile.replace('$PROC',"ggh"),sigWS,'hggpdfsmrel_%dTeV_ggh_$CHANNEL'%sqrts]
+  fileDetails['qqH_hgg']       = [sigFile.replace('$PROC',"vbf"),sigWS,'hggpdfsmrel_%dTeV_vbf_$CHANNEL'%sqrts]
+  fileDetails['ttH_hgg']       = [sigFile.replace('$PROC',"tth"),sigWS,'hggpdfsmrel_%dTeV_tth_$CHANNEL'%sqrts]
+  if splitVH:
+    fileDetails['WH_hgg']      =  [sigFile.replace('$PROC',"wh"),sigWS,'hggpdfsmrel_%dTeV_wh_$CHANNEL'%sqrts]
+    fileDetails['ZH_hgg']      =  [sigFile.replace('$PROC',"zh"),sigWS,'hggpdfsmrel_%dTeV_zh_$CHANNEL'%sqrts]
+  else:
+    fileDetails['VH']          =  [sigFile.replace('$PROC',"wzh"),sigWS,'hggpdfsmrel_%dTeV_wzh_$CHANNEL'%sqrts]
 ###############################################################################
 
 ###############################################################################

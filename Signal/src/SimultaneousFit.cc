@@ -120,8 +120,6 @@ RooDataSet* SimultaneousFit::mergeNormalisedDatasets(map<int,RooDataSet*> data){
   
   //loop over vector of datasets for different MH values
   for (map<int,RooDataSet*>::iterator dataIt=data.begin(); dataIt!=data.end(); dataIt++){
-    std::cout << "ED DEBUG: mass = " << dataIt->first << std::endl;
-    std::cout << "ED DEBUG: dataset = " << dataIt->second << std::endl;
     
     double weight =0;
     double factor = 1.0/dataIt->second->sumEntries();
@@ -324,7 +322,6 @@ void SimultaneousFit::buildDCBplusGaussian(string name, bool recursive){
 void SimultaneousFit::buildSumOfGaussians(string name, int nGaussians, bool recursive, bool forceFracUnity){
   // the "Order" refers to the order of the polynomial describing the dependence of the parameters on MH
   
-  std::cout << "SimultaneousFit::buildSumOfGaussians a - nGaussians " << nGaussians << " recursive " << recursive << "forceFracUnity " << forceFracUnity << std::endl;
   // various holders for params and pdfs
   RooArgList *gaussians_order0 = new RooArgList();
   RooArgList *gaussians_order1 = new RooArgList();
@@ -338,13 +335,11 @@ void SimultaneousFit::buildSumOfGaussians(string name, int nGaussians, bool recu
   map<string,RooAbsPdf*> tempPdfsMap_order1;
   map<string,RooAbsPdf*> tempPdfsMap_order2;
   
-  std::cout << "SimultaneousFit::buildSumOfGaussians b " << std::endl;
   // start looping through the desired number of Gaussians
   for (int g=0; g<nGaussians; g++){
     float dmRange =3.;
     if (g>3) dmRange=6.;
     
-  std::cout << "SimultaneousFit::buildSumOfGaussians c : g" << g<< std::endl;
     //start defining parameters
     RooFormulaVar *dMH = new RooFormulaVar(Form("dMH"),Form("dMH",g),"@0-125.0",RooArgList(*MH));
     RooRealVar *dm_p0 = new RooRealVar(Form("dm_g%d_p0",g),Form("dm_g%d_p0",g),0.1,-5.0,5.0);
@@ -365,7 +360,6 @@ void SimultaneousFit::buildSumOfGaussians(string name, int nGaussians, bool recu
     RooAbsPdf *gaus_order0 = new RooGaussian(Form("gaus_g%d_order0",g),Form("gaus_g%d_order0",g),*mass,*mean_order0,*sigma_order0);
     RooAbsPdf *gaus_order1 = new RooGaussian(Form("gaus_g%d_order1",g),Form("gaus_g%d_order1",g),*mass,*mean_order1,*sigma_order1);
     RooAbsPdf *gaus_order2 = new RooGaussian(Form("gaus_g%d_order2",g),Form("gaus_g%d_order2",g),*mass,*mean_order2,*sigma_order2);
-  std::cout << "SimultaneousFit::buildSumOfGaussians d : g" << g<< std::endl;
     tempPdfsMap_order0.insert(pair<string,RooAbsPdf*>(string(gaus_order0->GetName()),gaus_order0));
     tempPdfsMap_order1.insert(pair<string,RooAbsPdf*>(string(gaus_order1->GetName()),gaus_order1));
     tempPdfsMap_order2.insert(pair<string,RooAbsPdf*>(string(gaus_order2->GetName()),gaus_order2));
@@ -382,7 +376,6 @@ void SimultaneousFit::buildSumOfGaussians(string name, int nGaussians, bool recu
     listOfPolyVars_->add(*sigma_order1);
     listOfPolyVars_->add(*sigma_order2);
     
-  std::cout << "SimultaneousFit::buildSumOfGaussians e : g" << g<< std::endl;
     if (g<nGaussians-1) { 
       RooRealVar *frac_p0 = new RooRealVar(Form("frac_g%d_p0",g),Form("frac_g%d_p0",g),0.5-0.05*g, 0.01,0.99);
       RooRealVar *frac_p1 = new RooRealVar(Form("frac_g%d_p1",g),Form("frac_g%d_p1",g),0.01,-0.005,0.005);
@@ -401,9 +394,7 @@ void SimultaneousFit::buildSumOfGaussians(string name, int nGaussians, bool recu
       coeffs_order1->add(*frac_constrained_order1);
       coeffs_order2->add(*frac_constrained_order2);
     }
-  std::cout << "SimultaneousFit::buildSumOfGaussians f : g" << g<< std::endl;
     
-    std::cout << "LC SSF debug forceFracUnity " << forceFracUnity << " recursive " << recursive  << std::endl;
     if (g==nGaussians-1 && forceFracUnity){
       string formula="1.";
       for (int i=0; i<nGaussians-1; i++) formula += Form("-@%d",i);
@@ -472,26 +463,14 @@ void SimultaneousFit::runFits(int ncpu,string outdir, float epsilon){
   fitModel.push_back(fitModel_order1);
   fitModel.push_back(fitModel_order2);
 
-  //get the raw data by normalising the datasets for each mass point and adding them into a big 2D dataset mgg vs MH
-  RooDataSet *dataRaw = mergeNormalisedDatasets(datasets);
-  //RooAbsData *data; 
-  RooDataHist *data; 
   if (binnedFit_){
     MH->setVal(125);
     MH->setBins(10);
     mass->setBins(bins_);
     mass->setVal(125);
-    data = new RooDataHist(Form("%s_binned",dataRaw->GetName()),Form("%s_binned",dataRaw->GetName()),RooArgSet(*mass,*MH),*dataRaw);
   } else {
-    //data = dataRaw;
     std::cout << "EROR unbinned fit not compatible with SSF. exit." << std::endl;
     exit(1);
-  }
-  
-  // help when dataset has no entries
-  if (data->sumEntries()<1.e-5) {
-    //should never happen!
-    assert(data->sumEntries()!=0.0);
   }
   
   // now loop through orders, and iteratively fit.
@@ -511,93 +490,20 @@ void SimultaneousFit::runFits(int ncpu,string outdir, float epsilon){
       }
     }
     
-    // now do the fit
-   /* RooFitResult *fitRes;
-    verbosity_ >=3 ?
-      fitRes = fitModel[iOrder]->fitTo(*data,NumCPU(ncpu),RooFit::Minimizer("Minuit","minimize"),SumW2Error(true),Save(true),RooFit::ConditionalObservables(*MH)) :
-      verbosity_ >=2 ?                                                                                          
-      fitRes = fitModel[iOrder]->fitTo(*data,NumCPU(ncpu),RooFit::Minimizer("Minuit","minimize"),SumW2Error(true),Save(true),PrintLevel(-1),RooFit::ConditionalObservables(*MH)) :
-      fitRes = fitModel[iOrder]->fitTo(*data,NumCPU(ncpu),RooFit::Minimizer("Minuit","minimize"),SumW2Error(true),Save(true),PrintLevel(-1),PrintEvalErrors(-1),RooFit::ConditionalObservables(*MH));
-    fitResults.insert(pair<int,RooFitResult*>(iOrder,fitRes));*/
-
-    //std::cout << " DEBUG A fitModel[iOrder] "<< fitModel[iOrder] << " data " << data   << std::endl;
-   // data->Print("V");
-    /*RooFitResult *fitRes;
-   fitRes = fitModel[iOrder]->chi2FitTo(*data,NumCPU(ncpu),RooFit::Minimizer("Minuit","minimize"),SumW2Error(true),Save(true),PrintLevel(-1),PrintEvalErrors(-1),RooFit::ConditionalObservables(*MH));
-    fitResults.insert(pair<int,RooFitResult*>(iOrder,fitRes));*/
-    //
-    //std::cout << " DEBUG A fitModel[iOrder] "<< fitModel[iOrder] << " data " << data   << std::endl;
-    //fitModel[iOrder]->Print();
-    //data->Print();
-    RooArgSet* arg = new RooArgSet(*MH);
-    //LCRooChi2Var chi2("chi2","chi2",*(fitModel[iOrder]),*data);//,RooFit::DataError(RooAbsData::SumW2),RooFit::ProjectedObservables(*MH));
-    //LCRooChi2Var chi2("chi2","chi2",*(fitModel[iOrder]),*data,RooFit::DataError(RooAbsData::SumW2))
-      
-      RooDataSet * norm_datax_125 =   normaliseDatasets(datasets[125]);   
-      RooDataHist * plotDatax_125 = new RooDataHist(Form("%s_binned",norm_datax_125->GetName()),Form("%s_binned",norm_datax_125->GetName()),RooArgSet(*mass),*norm_datax_125);
-     
-     std::cout << "ED DEBUG a" << std::endl;
-     /*RooDataSet * norm_datax_120 = normaliseDatasets(datasets[120]);
-     std::cout << "ED DEBUG b" << std::endl;
-      RooDataHist * plotDatax_120 = new RooDataHist(Form("%s_binned",norm_datax_120->GetName()),Form("%s_binned",norm_datax_120->GetName()),RooArgSet(*mass),*norm_datax_120);
-     std::cout << "ED DEBUG c" << std::endl;
-     RooDataSet * norm_datax_130 = normaliseDatasets(datasets[130]);
-      RooDataHist * plotDatax_130 = new RooDataHist(Form("%s_binned",norm_datax_130->GetName()),Form("%s_binned",norm_datax_130->GetName()),RooArgSet(*mass),*norm_datax_130);*/
-    //plotDatax_120->Print("V");
-
-    TCanvas *canvasx = new TCanvas("c","c",500,500);
-    RooPlot *framex = mass->frame(Range(mhLow_-10,mhHigh_+10));
-    /*MH->setVal(120);
-    plotDatax_120->plotOn(framex);
-    fitModel[iOrder]->plotOn(framex,RooFit::LineColor(kRed),RooFit::LineStyle(kDashed));
-    LCRooChi2Var chi2_120("chi2_120","chi2_120",*(fitModel[iOrder]),*plotDatax_120,RooFit::DataError(RooAbsData::SumW2));*/
-    MH->setVal(125);
-    plotDatax_125->plotOn(framex);
-    std::cout << "ED DEBUG b" << std::endl;
-    fitModel[iOrder]->plotOn(framex,RooFit::LineColor(kBlue),RooFit::LineStyle(kDashed));
-    /*plotDatax_130->plotOn(framex);
-    MH->setVal(130);
-    fitModel[iOrder]->plotOn(framex,RooFit::LineColor(kGreen),RooFit::LineStyle(kDashed));*/
-    std::cout << "ED DEBUG c" << std::endl;
-    LCRooChi2Var chi2_125("chi2_125","chi2_125",*(fitModel[iOrder]),*plotDatax_125,RooFit::DataError(RooAbsData::SumW2));
-    std::cout << "ED DEBUG d" << std::endl;
-    //MH->setVal(130);
-    //LCRooChi2Var chi2_130("chi2_130","chi2_130",*(fitModel[iOrder]),*plotDatax,RooFit::DataError(RooAbsData::SumW2));
-    //RooAddition * lcChi2= new RooAddition("lc_chi2","lc_chi2",RooArgList(chi2_120,chi2_125));
+    //prepare the individual normalised datasets, and put them into a map which the lcChi2 can understand
     std::map<int, RooDataHist*> ourDatasets;
     for (int iMH =0 ; iMH<allMH_.size() ; iMH++){
     if( (proc_=="testBBH" || proc_=="testTHQ" || proc_=="testTHW") && allMH_[iMH]!=125 ) continue;
     ourDatasets.insert(pair<int, RooDataHist*>(allMH_[iMH], new RooDataHist(Form("%d_binned",allMH_[iMH]),Form("%d_binned",allMH_[iMH]),RooArgSet(*mass),*(normaliseDatasets(datasets[allMH_[iMH]])))));
     }
-    std::cout << "ED DEBUG e" << std::endl;
     
+    // now add the datasets and the model into our special RooAddition class, which takes the datasets and the model evaluated at the corresponding MH, and then evaluates a chi2 for each MH before summing them and returning the total chi2
     LCRooAddition * lcChi2 = new LCRooAddition("lc_chi2",  "lc_chi2",(fitModel[iOrder]),  ourDatasets, MH, mass ) ;
-    std::cout << "ED DEBUG f" << std::endl;
-     
-    //std::cout << " DEBUG B lcchi2 " << lcChi2->getVal() << " floating params" << std::endl;
-    //lcChi2->getParameters(RooArgSet())->Print();
-    //lcChi2->getParameters(RooArgSet(*MH,*mass))->Print();
     RooMinuit m(*lcChi2);
-    std::cout << " DEBUG C "<< std::endl;
-     m.migrad();
-    //std::cout << " DEBUG D "<< std::endl;
-     m.hesse();
-    //std::cout << " DEBUG E "<< std::endl;
+    m.migrad();
+    m.hesse();
     RooFitResult* fitRes=m.save();
-    //std::cout << " DEBUG F lcchi2 " << lcChi2->getVal()  << std::endl;
     
-    
-    //MH->setVal(120);
-    //fitModel[iOrder]->plotOn(framex,RooFit::LineColor(kRed),RooFit::ProjWData(*plotDatax_120));
-    MH->setVal(125);
-    fitModel[iOrder]->plotOn(framex,RooFit::LineColor(kBlue),RooFit::ProjWData(*plotDatax_125));
-    //MH->setVal(130);
-    //fitModel[iOrder]->plotOn(framex,RooFit::LineColor(kGreen),RooFit::ProjWData(*plotDatax_130));
-    framex->Draw();
-    //canvasx->SaveAs(Form("%s_wtf_iOrder%d.pdf",outdir.c_str(),iOrder));
-    
-    //if (iOrder <2) continue;
-    //exit(1);
     // now go through the PDFs  sometimes the DCB is badly behaved, so check it does not have infinite values anywhere in the range
     for (int ipdf = 0 ; ipdf < ((RooAddPdf*)fitModel[iOrder])->pdfList().getSize() ; ipdf++){
       // check if the pdf in the RooAddPDf can be cast as a DCB
@@ -613,18 +519,11 @@ void SimultaneousFit::runFits(int ncpu,string outdir, float epsilon){
       } else { std::cout << "pdf " << ipdf << " is not a dcb " << std::endl;}
     }
     // some fit details
-    std::cout << Form("Order %d, fit result minNLL to 2D dataset %.9f",iOrder,fitRes->minNll()) << std::endl;
+    std::cout << Form("[INFO] Order %d, fit result minNLL to 2D dataset %.9f",iOrder,fitRes->minNll()) << std::endl;
     double minNll=fitRes->minNll();
-    std::cout << "DEBUG a" << std::endl;
     //vecFitRes.push_back(fitRes*);
-    std::cout << "ED DEBUG: about to print correlation matrix" << std::endl;
-    fitRes->correlationHist()->Print("ALL");
-    std::cout << "ED DEBUG: done printing correlation matrix, below are the parameters" << std::endl;
-    fitRes->Print("ALL");
-    std::cout << "DEBUG b" << std::endl;
     int thisNDOF=(fitModel[iOrder]->getParameters(RooArgSet(*mass,*MH)))->getSize();
     
-    std::cout << "DEBUG c" << std::endl;
     // print the parameter post-fit values if you like
     if(verbosity_>-1){
       std::cout << " [INFO] Values pdf PDF params -post fit"<< std::endl;
@@ -635,19 +534,15 @@ void SimultaneousFit::runFits(int ncpu,string outdir, float epsilon){
       }
     }
 
-    std::cout << "DEBUG d" << std::endl;
     //make some plots of the fits at each order
     int index=0;
     RooPlot *frame = mass->frame(Range(mhLow_-10,mhHigh_+10));
-    std::cout << "DEBUG e" << std::endl;
     float totalChi2=0; // summing the chi2 for each mass point
     int ndof=0;
     //loop through each dataset
-    std::cout << "DEBUG f" << std::endl;
     for (map<int,RooDataSet*>::iterator dataIt=datasets.begin(); dataIt!=datasets.end(); dataIt++){
       int mh=dataIt->first;
 
-    std::cout << "DEBUG g" << std::endl;
       //get the plotting datasets
       RooAbsData* plotData;
       if (binnedFit_){
@@ -657,7 +552,6 @@ void SimultaneousFit::runFits(int ncpu,string outdir, float epsilon){
       } else {
         plotData = normaliseDatasets(datasets[mh]);
       }
-    std::cout << "DEBUG h" << std::endl;
 
       // and plot it with the pdf slide for that mass point
       MH->setVal(mh);
@@ -684,7 +578,7 @@ void SimultaneousFit::runFits(int ncpu,string outdir, float epsilon){
     
     //can also make some debug plots for the individual params (here plotted vs MH)
     // this is turned off by default but if --verbose then they will print
-    if (verbosity_>-1){
+    if (verbosity_>0){
       TIterator *paramIter = listOfPolyVars_->createIterator();
       RooPolyVar *polyVar;
       // go through each polyvar
@@ -717,7 +611,7 @@ void SimultaneousFit::runFits(int ncpu,string outdir, float epsilon){
           latex->DrawLatex(0.50, 0.88-offset,Form("%s = %.6f",thisParam->GetName(),thisParam->getVal()));
           offset=offset+0.07;
         }
-        if(verbosity_>3){
+        if(verbosity_>1){
           canvas1->SaveAs(Form("%s_polyvar_%s.pdf",outdir.c_str(),polyVar->GetName()));
           canvas1->SaveAs(Form("%s_polyvar_%s.png",outdir.c_str(),polyVar->GetName()));
         }
@@ -726,6 +620,7 @@ void SimultaneousFit::runFits(int ncpu,string outdir, float epsilon){
     
     //if using iterative fitting where the params are constrained between each order (size of constraint determined by epsilon) then it is applied here 
     //in pratcice this did not help - fits are already stable.
+    //the code below makes a nice debug graph of the pulls of each parameter for the various orders
     TIterator *pdfParams = fitModel[iOrder]->getParameters(RooArgSet(*mass,*MH))->selectByAttrib("Constant",kFALSE)->createIterator();
     RooRealVar *thisParam;
     double smalloffset0=-0.12;
