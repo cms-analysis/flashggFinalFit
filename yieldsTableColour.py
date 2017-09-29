@@ -155,11 +155,8 @@ for x in effSigma.keys():
       line=line.replace("WH","WH ")
       line=line.replace("ZH","ZH ")
       line=line.replace("VH","VH ")
-      print "LCDEBUG ", line
       words=line.split(',')
-      print "LCDEBUG ", words[1], ", ", words[3]  
       bkgYield[words[1]]=float(words[3])
-      print "LCDEBUG ", bkgYield
 bkgAllYield=0
 for x in bkgYield.values(): bkgAllYield=bkgAllYield+x
 bkgYield["Total"]=bkgAllYield
@@ -249,8 +246,8 @@ print line
 
 
 Arr["Total"]={"Total":0}
-#for x in Arr.values()[1].keys():
 for x in Arr.values()[0].keys():
+#for x in Arr.values()[1].keys():
 #for x in Arr.values()[2].keys():
   Arr["Total"][x]=0
 
@@ -266,7 +263,8 @@ for t in Arr :
   for p in Arr[t]:
     if p=="Total": continue
     Arr[t]["Total"]= Arr[t]["Total"]+Arr[t][p]
-  line=line+" "+str('Total'+":"+'%.2f'%Arr[t]["Total"])
+  #line=line+" "+str('Total'+":"+'%.2f'%Arr[t]["Total"])
+  line=line+" "+str('Total'+":"+'%.1f'%Arr[t]["Total"])
 
 '''
 for t in Arr :
@@ -315,21 +313,21 @@ print "\\hline"
 
 dataLines=[]
 for t in Arr :
-  #if t=='Total': continue #ED MUST FIX
   #print p
   lineCat=t+" &   " 
   line=""
   for p in Arr[t]:
     if p=="Total": continue
-    line = line+" &  "+str('%.2f'%Arr[t][p])
-  Allline=" "+str('%.2f'%Arr[t]["Total"])
-  #dataLines.append( lineCat + Allline+ " "+line+ " & & &" )#+"& %s & %s & %.2f\\\\"%(effSigma[t],hmSigma[t],float(bkgYield[t]) ))
-  print "\neffSigma is\n",effSigma,"\n"
+    #line = line+" &  "+str('%.2f'%Arr[t][p])
+    line = line+" &  "+str('%.1f'%Arr[t][p])
+  #Allline=" "+str('%.2f'%Arr[t]["Total"])
+  Allline=" "+str('%.1f'%Arr[t]["Total"])
+  #print "\neffSigma is\n",effSigma,"\n"
   esig =effSigma[t]
   hmsig =hmSigma[t]
   bkgy=0
-  #bkgy=bkgYield[t]
-  dataLines.append( lineCat + Allline+ " "+line+ "& %s & %s & %.2f\\\\"%(effSigma[t],hmSigma[t],bkgy ))
+  #dataLines.append( lineCat + Allline+ " "+line+ "& %s & %s & %.2f\\\\"%(effSigma[t],hmSigma[t],bkgy ))
+  dataLines.append( lineCat + Allline+ " "+line+ "& %s & %s & %.1f\\\\"%(effSigma[t],hmSigma[t],bkgy ))
 
 dataLines.sort()
 for l in dataLines :
@@ -373,23 +371,23 @@ else :
   tagList = options.order.split(":")[1].split(",")
 
 for t in tagList :
-  #if t=='Total': continue #ED MUST FIX
   #print p
   lineCat=t+" &   " 
   line=""
   for p in procList:
     if p=="Total": continue
-    print "Arr[t]",Arr[t]
-    line = line+" &  "+str('%.2f \%%'%(100*Arr[t][p]/Arr[t]["Total"]))
-  Allline=" "+str('%.2f'%Arr[t]["Total"])
-  #bkgy=0
+    #print "Arr[t]",Arr[t]
+    #line = line+" &  "+str('%.2f \%%'%(100*Arr[t][p]/Arr[t]["Total"]))
+    line = line+" &  "+str('%.1f \%%'%(100*Arr[t][p]/Arr[t]["Total"]))
+  #Allline=" "+str('%.2f'%Arr[t]["Total"])
+  Allline=" "+str('%.1f'%Arr[t]["Total"])
   if not t in bkgYield.keys():
     print "ERROR COULD NOT FIND KEY ", t , " in list of Bkg Numbers:"
     print bkgYield
     exit(1)
   bkgy=bkgYield[t]
-  dataLines.append( lineCat + Allline+ " "+line+"& %.2f & %.2f & %.2f \\\\"%(float(effSigma[t]),float(hmSigma[t]),bkgy))
-  #dataLines.append( lineCat + Allline+ " "+line+ "& & &")#"& %.2f & %.2f & %.2f \\\\"%(float(effSigma[t]),float(hmSigma[t]),float(bkgYield[t])))
+  #dataLines.append( lineCat + Allline+ " "+line+"& %.2f & %.2f & %.2f \\\\"%(float(effSigma[t]),float(hmSigma[t]),bkgy))
+  dataLines.append( lineCat + Allline+ " "+line+"& %.2f & %.2f & %.1f \\\\"%(float(effSigma[t]),float(hmSigma[t]),bkgy))
 
 #dataLines.sort()
 for l in dataLines :
@@ -418,7 +416,7 @@ procList=[]
 if (options.order==""): procList=Arr.values()[0].keys() 
 else : procList = options.order.split(":")[0].split(",")
 for p in procList:
- #print p
+  #print p
   line=line+ p + " & "
 line =line+"  $\\sigma_{eff} $  & $\\sigma_{HM} $ & (GeV$^{-1}$) & \\\\ "
 print line 
@@ -440,16 +438,18 @@ for t in tagList :
   line=""
   for p in procList:
     if p=="Total": continue
-    line = line+" &  "+str('%.2f \%%'%(100*Arr[t][p]/Arr[t]["Total"]))
-  Allline=" "+str('%.2f'%Arr[t]["Total"])
-  #bkgy=0
+    #line = line+" &  "+str('%.2f \%%'%(100*Arr[t][p]/Arr[t]["Total"]))
+    line = line+" &  "+str('%.1f \%%'%(100*Arr[t][p]/Arr[t]["Total"]))
+  #Allline=" "+str('%.2f'%Arr[t]["Total"])
+  Allline=" "+str('%.1f'%Arr[t]["Total"])
   if not t in bkgYield.keys():
     print "ERROR COULD NOT FIND KEY ", t , " in list of Bkg Numbers:"
     print bkgYield
     exit(1)
   bkgy=bkgYield[t]
   naiveExp=(0.68*Arr[t]["Total"])/(2*float(effSigma[t])*bkgy + 0.68*Arr[t]["Total"] )
-  dataLines.append( lineCat + Allline+ " "+line+"& %.2f & %.2f & %.2f & %.2f\\\\"%(float(effSigma[t]),float(hmSigma[t]),bkgy,naiveExp ))
+  #dataLines.append( lineCat + Allline+ " "+line+"& %.2f & %.2f & %.2f & %.2f\\\\"%(float(effSigma[t]),float(hmSigma[t]),bkgy,naiveExp ))
+  dataLines.append( lineCat + Allline+ " "+line+"& %.2f & %.2f & %.1f & %.2f\\\\"%(float(effSigma[t]),float(hmSigma[t]),bkgy,naiveExp ))
   naiveExpecteds.append(naiveExp)
 
 # now do total line
@@ -458,9 +458,10 @@ lineCat=t+" &   "
 line=""
 for p in procList:
    if p=="Total": continue
-   line = line+" &  "+str('%.2f \%%'%(100*Arr[t][p]/Arr[t]["Total"]))
-Allline=" "+str('%.2f'%Arr[t]["Total"])
-  #bkgy=0
+   #line = line+" &  "+str('%.2f \%%'%(100*Arr[t][p]/Arr[t]["Total"]))
+   line = line+" &  "+str('%.1f \%%'%(100*Arr[t][p]/Arr[t]["Total"]))
+#Allline=" "+str('%.2f'%Arr[t]["Total"])
+Allline=" "+str('%.1f'%Arr[t]["Total"])
 if not t in bkgYield.keys():
     print "ERROR COULD NOT FIND KEY ", t , " in list of Bkg Numbers:"
     print bkgYield
@@ -470,9 +471,8 @@ totalNaiveExp=0.
 for n in naiveExpecteds:
   totalNaiveExp=totalNaiveExp+(n**2)
 totalNaiveExp=(totalNaiveExp)**(0.5)
-#dataLines.append( lineCat + Allline+ " "+line+"& %.2f & %.2f & %.2f & %.2f\\\\"%((2.0),(2.0),bkgy,totalNaiveExp)) #ED MUST FIX (original line below)
-dataLines.append( lineCat + Allline+ " "+line+"& %.2f & %.2f & %.2f & %.2f\\\\"%(float(effSigma[t]),float(hmSigma[t]),bkgy,totalNaiveExp))
-  #dataLines.append( lineCat + Allline+ " "+line+ "& & &")#"& %.2f & %.2f & %.2f \\\\"%(float(effSigma[t]),float(hmSigma[t]),float(bkgYield[t])))
+#dataLines.append( lineCat + Allline+ " "+line+"& %.2f & %.2f & %.2f & %.2f\\\\"%(float(effSigma[t]),float(hmSigma[t]),bkgy,totalNaiveExp))
+dataLines.append( lineCat + Allline+ " "+line+"& %.2f & %.2f & %.1f & %.2f\\\\"%(float(effSigma[t]),float(hmSigma[t]),bkgy,totalNaiveExp))
 
 #dataLines.sort()
 for l in dataLines :
@@ -495,21 +495,18 @@ else:
   sigmaHM_hist= r.TH1F("sigHM","",len(tagList)-1,0,len(tagList)-2)
 content_hists={}
 for i in range(0,nProcs):
- pName=Arr.values()[0].keys()[i]
- if not doTotals and pName=="Total":
-   print "ED DEBUG ============================================="
-   print "pName is",pName
-   print "ED DEBUG ============================================="
-   continue
- print "making hist with name " , pName
- if doTotals: content_hists[pName]=r.TH1F("content_%s"%pName,"content_%s"%pName,len(tagList),0,len(tagList)-1)
- else: content_hists[pName]=r.TH1F("content_%s"%pName,"content_%s"%pName,len(tagList)-1,0,len(tagList)-2)
+  pName=Arr.values()[0].keys()[i]
+  if not doTotals and pName=="Total":
+    continue
+  #print "making hist with name " , pName
+  if doTotals: content_hists[pName]=r.TH1F("content_%s"%pName,"content_%s"%pName,len(tagList),0,len(tagList)-1)
+  else: content_hists[pName]=r.TH1F("content_%s"%pName,"content_%s"%pName,len(tagList)-1,0,len(tagList)-2)
 
 print "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
 #print "\\resizebox{\\textwidth}{!}{"
 line="\\begin{tabular}{ |r | c | c | c  | c | c |"
 for x in range(0,nProcs):
- line = line + " c | "
+  line = line + " c | "
 line = line + "}"
 print line
 print "\\hline"
@@ -517,16 +514,14 @@ i#print "\\multicolumn{%d}{|l|}{Expected Signal} \\\\"%(nProcs+3)
 print "\\hline"
 print "\\hline"
 print "\\multirow{2}{*}{Event Categories} &\multicolumn{%d}{|l|}{SM 125GeV Higgs boson expected signal} & Bkg & Bkg &naive expected\\\\ \\cline{2-%d}"%(nProcs+2,nProcs+3)
-#print "\\multirow{2}{*}{Event Categories} &\multicolumn{%d}{|l|}{SM 125GeV Higgs boson expected signal} & Bkg & Bkg &wise expected\\\\ \\cline{2-%d}"%(nProcs+2,nProcs+3)
 line="  &  "
 
 procList=[]
 if (options.order==""): procList=Arr.values()[0].keys() 
 else : procList = options.order.split(":")[0].split(",")
 for p in procList:
- #print p
+  #print p
   line=line+ p + " & "
-#line =line+"  $\\sigma_{eff} $  & $\\sigma_{HM} $ & (GeV$^{-1}$) & (GeV$^{-1}$ fb^{-1} )& \\\\ "
 line =line+"  $\\sigma_{eff} $  & $\\sigma_{HM} $ & (GeV$^{-1}$) & (GeV$^{-1}$ $fb^{-1}$ )& \\\\ "
 print line 
 print "\\hline"
@@ -550,14 +545,13 @@ for t in tagList :
   for p in procList:
     if p=="Total": continue
     val=100*Arr[t][p]/Arr[t]["Total"]
-    line = line+" &  "+str('%.2f \%%'%(val))
+    #line = line+" &  "+str('%.2f \%%'%(val))
+    line = line+" &  "+str('%.1f \%%'%(val))
     if options.verbose: print " filling content hist ", p, " for bin ", len(tagList)-iTag, " =", tagList[iTag], " ==", val
     if doTotals: content_hists[p].SetBinContent(len(tagList)-iTag,val)
     else: content_hists[p].SetBinContent(len(tagList)-1-iTag,val)
-    #content_hists[p].GetXaxis().SetBinLabel(iTag,'%s'%t)
-  Allline=" "+str('%.2f'%Arr[t]["Total"])
-  #content_hists[p].GetXaxis().SetBinLabel(iTag,'Total')
-  #bkgy=0
+  #Allline=" "+str('%.2f'%Arr[t]["Total"])
+  Allline=" "+str('%.1f'%Arr[t]["Total"])
   if not t in bkgYield.keys():
     print "ERROR COULD NOT FIND KEY ", t , " in list of Bkg Numbers:"
     print bkgYield
@@ -582,7 +576,8 @@ for t in tagList :
     print "vbfFancyExp =",vbfFancyExp
     vbfTotals[4] += vbfFancyExp**2
   s_sb_value=(0.68*Arr[t]["Total"])/(0.68*Arr[t]["Total"] + 2*float(effSigma[t])*bkgy)
-  dataLines.append( lineCat + Allline+ " "+line+"& %.2f & %.2f & %.2f & %.2f & %.2f\\\\"%(float(effSigma[t]),float(hmSigma[t]),bkgy,bkgy/options.factor,naiveExp ))
+  #dataLines.append( lineCat + Allline+ " "+line+"& %.2f & %.2f & %.2f & %.2f & %.2f\\\\"%(float(effSigma[t]),float(hmSigma[t]),bkgy,bkgy/options.factor,naiveExp ))
+  dataLines.append( lineCat + Allline+ " "+line+"& %.2f & %.2f & %.1f & %.1f & %.2f\\\\"%(float(effSigma[t]),float(hmSigma[t]),bkgy,bkgy/options.factor,naiveExp ))
   #dataLines.append( lineCat + Allline+ " "+line+"& %.2f & %.2f & %.2f & %.2f & %.2f\\\\"%(float(effSigma[t]),float(hmSigma[t]),bkgy,bkgy/options.factor,fancyExp ))
   if doTotals:
     sigmaEff_hist.SetBinContent(len(tagList)-iTag,float(effSigma[t]))
@@ -609,31 +604,27 @@ t=="Total"
 lineCat=t+" &   " 
 line=""
 for p in procList:
-   if p=="Total": continue
-   val=100*Arr[t][p]/Arr[t]["Total"]
-   line = line+" &  "+str('%.2f \%%'%(100*Arr[t][p]/Arr[t]["Total"]))
-   #print " filling content hist ", p, " for bin ", 1, " =", t, " ==", val
-   if doTotals: content_hists[p].SetBinContent(1,val)
-Allline=" "+str('%.2f'%Arr[t]["Total"])
-  #bkgy=0
+  if p=="Total": continue
+  val=100*Arr[t][p]/Arr[t]["Total"]
+  #line = line+" &  "+str('%.2f \%%'%(100*Arr[t][p]/Arr[t]["Total"]))
+  line = line+" &  "+str('%.1f \%%'%(100*Arr[t][p]/Arr[t]["Total"]))
+  #print " filling content hist ", p, " for bin ", 1, " =", t, " ==", val
+  if doTotals: content_hists[p].SetBinContent(1,val)
+#Allline=" "+str('%.2f'%Arr[t]["Total"])
+Allline=" "+str('%.1f'%Arr[t]["Total"])
 if not t in bkgYield.keys():
-    print "ERROR COULD NOT FIND KEY ", t , " in list of Bkg Numbers:"
-    print bkgYield
-    exit(1)
+  print "ERROR COULD NOT FIND KEY ", t , " in list of Bkg Numbers:"
+  print bkgYield
+  exit(1)
 bkgy=bkgYield[t]
 totalNaiveExp=0.
 for n in naiveExpecteds:
   totalNaiveExp=totalNaiveExp+(n**2)
 totalNaiveExp=(totalNaiveExp)**(0.5)
-#dataLines.append( lineCat + Allline+ " "+line+"& %.2f & %.2f & %.2f & %.2f & %.2f\\\\"%((2.0),(2.0),bkgy,bkgy/options.factor,totalNaiveExp)) #ED MUST FIX
-dataLines.append( lineCat + Allline+ " "+line+"& %.2f & %.2f & %.2f & %.2f & %.2f\\\\"%(float(effSigma[t]),float(hmSigma[t]),bkgy,bkgy/options.factor,totalNaiveExp))
-  #dataLines.append( lineCat + Allline+ " "+line+ "& & &")#"& %.2f & %.2f & %.2f \\\\"%(float(effSigma[t]),float(hmSigma[t]),float(bkgYield[t])))
-#sigmaEff_hist.SetBinContent(1,(2.0)) #ED MUST FIX
+#dataLines.append( lineCat + Allline+ " "+line+"& %.2f & %.2f & %.2f & %.2f & %.2f\\\\"%(float(effSigma[t]),float(hmSigma[t]),bkgy,bkgy/options.factor,totalNaiveExp))
+dataLines.append( lineCat + Allline+ " "+line+"& %.2f & %.2f & %.1f & %.1f & %.2f\\\\"%(float(effSigma[t]),float(hmSigma[t]),bkgy,bkgy/options.factor,totalNaiveExp))
 if doTotals: sigmaEff_hist.SetBinContent(1,float(effSigma[t]))
-#sigmaHM_hist.SetBinContent(1,(2.0))
 if doTotals: sigmaHM_hist.SetBinContent(1,float(hmSigma[t]))
-#s_sb_hist.SetBinContent(1,float(totalNaiveExp))
-#s_sb_value=(0.68*Arr[t]["Total"])/(0.68*Arr[t]["Total"] + 2*(2.0)*bkgy) #ED MUST FIX
 s_sb_value=(0.68*Arr[t]["Total"])/(0.68*Arr[t]["Total"] + 2*float(effSigma[t])*bkgy)
 if doTotals: s_sb_hist.SetBinContent(len(tagList)-iTag,float(s_sb_value))
 
@@ -643,7 +634,6 @@ for l in dataLines :
 
 print "\\hline"
 print "\\hline"
-#print "\end{tabular}}"
 print "\end{tabular}"
 
 print "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
@@ -654,7 +644,7 @@ hstack = r.THStack("hs","")
 #colorList=[r.kViolet-7, r.kRed+2, r.kSpring, r.kOrange+7, r.kSpring-7, r.kSpring+3, r.kBlue, r.kBlue+3, r.kAzure+10, r.kAzure+7] #set for ggH,VBF,ttH-type,VH-type
 colorList=[r.kBlue, r.kGreen+2, r.kMagenta-7, r.kBlue+3, r.kMagenta-3, r.kMagenta+2, r.kRed, r.kRed+1, r.kOrange+1, r.kOrange+7] #set for ggH,VBF,ttH-type,WH-type,ZH-type (ZZ colors and order)
 iColor=0
-print "content_hists ", content_hists
+#print "content_hists ", content_hists
 numProcs = len(options.order.split(":")[0].split(","))-1
 l1 = r.TLegend(0.0,0.94,1.0,0.98)
 lExtra = r.TLegend(0.0,0.90,1.0,0.94)
@@ -677,27 +667,27 @@ lExtra.SetBorderSize(0)
 l2.SetBorderSize(0)
 l3.SetBorderSize(0)
 for ih in options.order.split(":")[0].split(","):
- print "DBG ih =" , ih
- if ih=="Total" : continue
- h=content_hists[ih]
- h.SetFillColor(colorList[iColor])
- h.SetLineColor(0)
- h.SetMarkerColor(colorList[iColor])
- h.SetBarWidth(0.9)
- ih = ih.replace("test","")
- ih = ih.replace("TTH","ttH")
- ih = ih.replace("GG2H","ggH")
- ih = ih.replace("BBH","bbH")
- ih = ih.replace("THQ","tHq")
- ih = ih.replace("THW","tHW")
- ih = ih.replace("WH2HQQ","WH hadronic")
- ih = ih.replace("QQ2HLNU","WH leptonic")
- ih = ih.replace("ZH2HQQ","ZH hadronic")
- ih = ih.replace("QQ2HLL","ZH leptonic")
- if iColor<=nProcLim-1: l1.AddEntry(h," "+ih,"f")
- else: lExtra.AddEntry(h," "+ih,"f")
- hstack.Add(h)
- iColor=iColor+1
+  #print "DBG ih =" , ih
+  if ih=="Total" : continue
+  h=content_hists[ih]
+  h.SetFillColor(colorList[iColor])
+  h.SetLineColor(0)
+  h.SetMarkerColor(colorList[iColor])
+  h.SetBarWidth(0.9)
+  ih = ih.replace("test","")
+  ih = ih.replace("TTH","ttH")
+  ih = ih.replace("GG2H","ggH")
+  ih = ih.replace("BBH","bbH")
+  ih = ih.replace("THQ","tHq")
+  ih = ih.replace("THW","tHW")
+  ih = ih.replace("WH2HQQ","WH hadronic")
+  ih = ih.replace("QQ2HLNU","WH leptonic")
+  ih = ih.replace("ZH2HQQ","ZH hadronic")
+  ih = ih.replace("QQ2HLL","ZH leptonic")
+  if iColor<=nProcLim-1: l1.AddEntry(h," "+ih,"f")
+  else: lExtra.AddEntry(h," "+ih,"f")
+  hstack.Add(h)
+  iColor=iColor+1
 l2.AddEntry(sigmaEff_hist," #sigma_{eff}","F")
 l2.AddEntry(sigmaHM_hist," #sigma_{HM}","F")
 
@@ -707,22 +697,10 @@ if doTotals: dummyHist= r.TH2F("h1","",100,0.01,100,len(tagList),0,len(tagList)-
 else: dummyHist= r.TH2F("h1","",100,0.01,100,len(tagList)-1,0,len(tagList)-2)
 dummyHist2= r.TH2F("h2","",100,0.01,1.2*sigmaEff_hist.GetMaximum(),len(tagList),0,len(tagList)-1)
 dummyHist3= r.TH2F("h2","",100,0.01,1.2*s_sb_hist.GetMaximum(),len(tagList),0,len(tagList)-1)
-#dummyHist= r.TH2F("h1","h1",15,0,15,100,0.01,100)
-#hstack.Draw()
-#hstack.GetYaxis().SetRangeUser(0.001,100)
 canv = r.TCanvas("c","c",700,400)
-#for i in range(0,len(tagList)-1):
-  #if tagList[i]=="Total": continue
-  #xax=hstack.GetXaxis()
-  #xax.SetBinLabel(xax.FindBin(i),tagList[i])
-  #dummyHist.GetYaxis().SetBinLabel(i, tagList[i])
- 
 pad1 = r.TPad("pad1","pad1",0.15,0.0,0.52,0.95)
 pad2 = r.TPad("pad2","pad2",0.53,0.0,0.71,0.95)
 pad3 = r.TPad("pad3","pad3",0.73,0.0,0.97,0.95)
-#pad1.SetFillColor(r.kRed)
-#pad2.SetFillColor(r.kPink)
-#pad3.SetFillColor(r.kBlue)
 pad1.SetBottomMargin(10)
 pad1.SetTopMargin(10)
 pad1.SetRightMargin(0.02)
@@ -750,17 +728,10 @@ sigmaEff_hist.SetLineColor(0)
 sigmaHM_hist.SetBarWidth(0.4)
 sigmaHM_hist.SetBarOffset(0.1)
 sigmaHM_hist.SetLineColor(0)
-#sigmaHM_hist.SetLineColor(r.kRed+2)
-#sigmaHM_hist.SetLineWidth(10)
-#sigmaHM_hist.SetLineColor(r.kBlack)
 sigmaHM_hist.SetFillColor(r.kRed+2)
-#sigmaHM_hist.SetFillStyle(3004)
-#sigmaHM_hist.SetBarWidth(0.9)
-#dummyHist2.Draw()
 sigmaEff_hist.Draw("hbar")
 sigmaHM_hist.Draw("hbar same ")
 l2.Draw()
-#hist2.Draw()
 pad3.cd()
 s_sb_hist.SetFillColor(r.kRed-3)
 s_sb_hist.GetXaxis().SetLabelSize(0.1)
@@ -769,27 +740,14 @@ s_sb_hist.GetYaxis().SetLabelOffset(-0.01)
 s_sb_hist.GetXaxis().SetLabelOffset(99999)
 s_sb_hist.SetBarWidth(0.9)
 s_sb_hist.SetLineColor(0)
-#dummyHist2.Draw()
 s_sb_hist.Draw("hbar")
 l3.Draw()
-#hist1.Draw()
 pad1.cd()
 dummyHist.Draw()
-#hstack.Draw("")
-#hstack.GetYaxis().SetLimits(0.001,100)
-#hstack.GetXaxis().SetLimits(0.001,100)
 hstack.Draw("hbar same")
-#hstack.GetYaxis().SetRangeUser(0.001,100)
 pad1.RedrawAxis()
-#hstack.GetXaxis().SetRangeUser(0.001,100)
-#hstack.Draw("hbar")
 l1.Draw()
 lExtra.Draw()
-#hist1.SetTitle("x;y;z")
-#hist1.Fill(0.5,0.5,1)
-#hist1.Draw()
-#hist2 = r.TH1F("h2","h2",10,0,1)
-#hist2.Fill(0.5)
 canv.cd()
 lat = r.TLatex()
 lat.SetTextFont(42)
@@ -799,18 +757,18 @@ lat.SetTextAlign(31)
 #lat.SetNDC()
 offset=0.0
 for ih in options.order.split(":")[1].split(","):
- print "DBG ih =" , ih
- if not doTotals and ih=="Total": continue
- lat.SetTextAlign(31)
- tagLabel = ih.replace("TTH","ttH")
- tagLabel = tagLabel.replace(" Tag","")
- tagLabel = tagLabel.replace("Met","MET")
- lat.DrawLatex(0.14,0.82-offset,tagLabel)
- evtCount = "#color[0]{%.1f expected events}"%Arr[ih]["Total"]
- lat.SetTextAlign(11)
- lat.DrawLatex(0.16,0.82-offset,evtCount)
- if doTotals: offset=offset+((0.82-0.05)/len(tagList))
- else: offset=offset+((0.82-0.05)/(len(tagList)-1))
+  #print "DBG ih =" , ih
+  if not doTotals and ih=="Total": continue
+  lat.SetTextAlign(31)
+  tagLabel = ih.replace("TTH","ttH")
+  tagLabel = tagLabel.replace(" Tag","")
+  tagLabel = tagLabel.replace("Met","MET")
+  lat.DrawLatex(0.14,0.82-offset,tagLabel)
+  evtCount = "#color[0]{%.1f expected events}"%Arr[ih]["Total"]
+  lat.SetTextAlign(11)
+  lat.DrawLatex(0.16,0.82-offset,evtCount)
+  if doTotals: offset=offset+((0.82-0.05)/len(tagList))
+  else: offset=offset+((0.82-0.05)/(len(tagList)-1))
 
 lat.SetTextAlign(31)
 lat.SetTextSize(0.04)
