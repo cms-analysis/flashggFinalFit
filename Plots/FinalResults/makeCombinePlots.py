@@ -71,7 +71,8 @@ parser.add_option("-b","--batch",dest="batch",default=False,action="store_true")
 parser.add_option("--it",dest="it",type="string",help="if using superloop, index of iteration")
 parser.add_option("--itLedger",dest="itLedger",type="string",help="ledger to keep track of values of each iteration if using superloop")
 parser.add_option("--specifyX",dest="specifyX",type="string",help="use a specific variable name in mu plots (eg r_Untagged_Tag_0)")
-parser.add_option("--paperStyle",dest="paperStyle",default=False,action="store_true",help="Make plots in paper style (without preliminary etc)")
+#parser.add_option("--paperStyle",dest="paperStyle",default=False,action="store_true",help="Make plots in paper style (without preliminary etc)")
+parser.add_option("--paperStyle",dest="paperStyle",default=True,action="store_false",help="Make plots in paper style (without preliminary etc)")
 (options,args)=parser.parse_args()
 
 print "[INFO] Processing Files :"
@@ -621,9 +622,12 @@ def plot1DNLL(returnErrors=False,xvar="", ext=""):
     #xtitle = '#sigma / #sigma_{SM}'
     xtitle = '#mu'
     if options.specifyX:
-      print "setting variable name in tree to",options.specifyX[0]
-      x = options.specifyX[0]
-      xtitle = '#mu_{%s}'%options.specifyX[0]
+      #print "setting variable name in tree to",options.specifyX[0]
+      #x = options.specifyX[0]
+      #xtitle = '#mu_{%s}'%options.specifyX[0]
+      print "setting variable name in tree to",options.specifyX
+      x = options.specifyX
+      xtitle = '#mu_{%s}'%options.specifyX
   elif options.method=='muProc':
     x = xvar
     #xtitle = '#sigma / #sigma_{SM}'
@@ -692,6 +696,8 @@ def plot1DNLL(returnErrors=False,xvar="", ext=""):
     for re in res: 
       if options.correctNLL and re[1]==0.: re[1]=-1
       re[1]-=minNLL
+      #FIXME
+      #if k==0: re[1] += 2*(133.512-131.021)
   
     p=0
     lcMH_bestfit =0;
@@ -972,6 +978,16 @@ def plot2DNLL(xvar="RF",yvar="RV",xtitle="#mu_{ggH+ttH}",ytitle="#mu_{qqH+VH}"):
           if i+j>(0.75*(th2.GetNbinsX()+th2.GetNbinsY())): 
             th2.Fill(xmin+i*((xmax-xmin)/float(xbins)),ymin+j*((ymax-ymin)/float(ybins)),10.)
 
+    if options.method=='cvcf':
+      for j in range (0,th2.GetNbinsY()+1):
+        for i in range (0,th2.GetNbinsX()+1):
+          if i>0.6*th2.GetNbinsX() and j<0.3*th2.GetNbinsY(): 
+            th2.Fill(xmin+i*((xmax-xmin)/float(xbins)),ymin+j*((ymax-ymin)/float(ybins)),10.)
+            th2.Fill(xmin+i*((xmax-xmin)/float(xbins-1)),ymin+j*((ymax-ymin)/float(ybins)),10.)
+            th2.Fill(xmin+i*((xmax-xmin)/float(xbins+1)),ymin+j*((ymax-ymin)/float(ybins)),10.)
+            th2.Fill(xmin+i*((xmax-xmin)/float(xbins)),ymin+j*((ymax-ymin)/float(ybins-1)),10.)
+            th2.Fill(xmin+i*((xmax-xmin)/float(xbins)),ymin+j*((ymax-ymin)/float(ybins+1)),10.)
+
     gBF = r.TGraph()
     gSM = r.TGraph()
     xBF =-99999;
@@ -1068,10 +1084,10 @@ def plot2DNLL(xvar="RF",yvar="RV",xtitle="#mu_{ggH+ttH}",ytitle="#mu_{qqH+VH}"):
     canv.SetRightMargin(0.15)
     canv.SetBottomMargin(0.15)
     th2.GetZaxis().SetTitle(("q(%s,%s)"%(xtitle,ytitle)))
-    th2.GetZaxis().SetTitleOffset(0.85)
+    th2.GetZaxis().SetTitleOffset(1.1)
     th2.GetYaxis().SetTitleOffset(0.85)
     th2.GetXaxis().SetTitleOffset(0.9)
-    th2.GetZaxis().SetTitleSize(0.05)
+    th2.GetZaxis().SetTitleSize(0.04)
     th2.GetYaxis().SetTitleSize(0.05)
     th2.GetXaxis().SetTitleSize(0.05)
     if(options.method=='rvrf'): 

@@ -274,7 +274,7 @@ def makeTheoOnlyCard():
     line_els = line.split()
     if line.startswith('kmax'): line = line.replace(line_els[1],'*')
     #theorySystKeywords=["QCD","pdf_","pdfWeight_","alpha","scaleWeight"]
-    theorySystKeywords=["QCD","pdf_","pdfWeight_","alpha","scaleWeight","BR_","UEPS","JetVeto"]
+    theorySystKeywords=["QCD","pdf_","pdfWeight_","alpha","scaleWeight","BR_","UEPS","JetVeto","THU_ggH"]
     isTheorySystLine=False
     for thSkw in theorySystKeywords: 
       if thSkw in line: isTheorySystLine=True
@@ -672,8 +672,8 @@ def writeMultiDimFit(method=None,wsOnly=False):
             catsMap = catsMap + " --PO 'map=%s/.*hgg:r_%s[1,-5,5]'"%(cat,cat)
             perTagChCompPOIs.append("r_%s"%cat)
         print '[INFO] Writing MultiDim Scan'
-        #ws_args = { "RVRFScan"   : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:rVrFXSHiggs %s "% profMH ,
-        ws_args = { "RVRFScan"   : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel %s %s " %(catsMap,profMH),
+        ws_args = { "RVRFScan"   : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:rVrFXSHiggs %s "% profMH ,
+        #ws_args = { "RVRFScan"   : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel %s %s " %(catsMap,profMH),
     "PerProcessChannelCompatibility" : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:floatingXSHiggs --PO modes=ggH,qqH,VH,ttH %s " % profMH,
     "PerProcessChannelCompatibilityStat" : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:floatingXSHiggs --PO modes=ggH,qqH,VH,ttH %s " % profMH,
     "PerProcessChannelCompatibilityTheo" : "-P HiggsAnalysis.CombinedLimit.PhysicsModel:floatingXSHiggs --PO modes=ggH,qqH,VH,ttH %s " % profMH,
@@ -1092,6 +1092,62 @@ def trawlHadd():
       if opts.verbose: print exec_line
       system(exec_line)
 
+def trawlHaddImproved():
+  print "[INFO] trawling hadd"
+  list_of_dirs=set()
+  for root, dirs, files in os.walk(opts.hadd):
+    for x in files:
+      if 'higgsCombine' in x and '.root' in x: 
+        list_of_dirs.add(root)
+        break
+
+  for dir in list_of_dirs:
+    for root, dirs, files in os.walk(dir):
+      relevantFiles = fnmatch.filter(files,'higgsCombine*.root')
+      if len(relevantFiles) < 1000:
+        list_of_files=''
+        for fileName in relevantFiles:
+          list_of_files += ' '+os.path.join(root,'%s'%fileName)
+        print root, ' -- ', len(list_of_files.split())
+        exec_line = 'hadd -f %s/%s.root%s'%(dir,os.path.basename(dir),list_of_files)
+        if opts.verbose: print exec_line
+        system(exec_line)
+      elif len(relevantFiles) <= 2000: #list of files too long to hadd automatically, so split them into three intermediate files first
+        list_of_files_11 = ''
+        for fileName in fnmatch.filter(relevantFiles,'*Job11*.root'):
+          list_of_files_11 += ' '+os.path.join(root,'%s'%fileName)
+        exec_line = 'hadd -f %s/%s_files_11.root%s'%(dir,os.path.basename(dir),list_of_files_11)
+        if opts.verbose: print exec_line
+        system(exec_line)
+        exec_line = 'rm %s'%list_of_files_11
+        if opts.verbose: print exec_line
+        system(exec_line)
+        list_of_files_1 = ''
+        for fileName in fnmatch.filter(relevantFiles,'*Job1*.root'):
+          if 'Job11' in fileName: continue
+          list_of_files_1 += ' '+os.path.join(root,'%s'%fileName)
+        exec_line = 'hadd -f %s/%s_files_1.root%s'%(dir,os.path.basename(dir),list_of_files_1)
+        if opts.verbose: print exec_line
+        system(exec_line)
+        exec_line = 'rm %s'%list_of_files_1
+        if opts.verbose: print exec_line
+        system(exec_line)
+        list_of_files_other = ''
+        for fileName in relevantFiles:
+          if 'Job1' in fileName: continue
+          list_of_files_other += ' '+os.path.join(root,'%s'%fileName)
+        exec_line = 'hadd -f %s/%s_files_other.root%s'%(dir,os.path.basename(dir),list_of_files_other)
+        if opts.verbose: print exec_line
+        system(exec_line)
+        exec_line = 'rm %s'%list_of_files_other
+        if opts.verbose: print exec_line
+        system(exec_line)
+        exec_line = 'hadd -f %s/%s.root %s/*files*.root'%(dir,os.path.basename(dir),dir)
+        if opts.verbose: print exec_line
+        system(exec_line)
+      else:
+        raise Exception('too many files to hadd')
+
 def resubmitFailures():
   print "[INFO] resubmit failed jobs"
   list_of_dirs=set()
@@ -1120,7 +1176,8 @@ if opts.resubmitFailures:
   resubmitFailures()
 
 if opts.hadd:
-  trawlHadd()
+  #trawlHadd()
+  trawlHaddImproved()
 elif opts.datfile:
   datfile = open(opts.datfile)
   for line in datfile.readlines():

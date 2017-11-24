@@ -1,7 +1,8 @@
 #EXT="ws919"
 #EXT="ws930"
 #EXT="newggHweights"
-EXT="ReweighAndNewggHweights"
+#EXT="ReweighAndNewggHweights"
+EXT="NoDoubleGainCorrection"
 OUTDIR="outdir_${EXT}"
 
 if [ ! -d "Signal/$OUTDIR" ]; then

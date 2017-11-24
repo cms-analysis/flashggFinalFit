@@ -295,9 +295,14 @@ int main(int argc, char *argv[]) {
     desc.ReplaceAll("_"," ");
     desc.ReplaceAll("13TeV","");
     desc.ReplaceAll("UntaggedTag","Untagged");
-    desc.ReplaceAll("VBFTag","VBF Tag");
-    desc.ReplaceAll("TTHLeptonicTag","ttH Leptonic Tag");
-    desc.ReplaceAll("TTHHadronicTag","ttH Hadronic Tag");
+    desc.ReplaceAll("VBFTag","VBF");
+    desc.ReplaceAll("TTHLeptonicTag","ttH Leptonic");
+    desc.ReplaceAll("TTHHadronicTag","ttH Hadronic");
+    desc.ReplaceAll("VHHadronicTag","VH Hadronic");
+    desc.ReplaceAll("VHLeptonicLooseTag","VH Leptonic Loose");
+    desc.ReplaceAll("WHLeptonicTag","WH Leptonic");
+    desc.ReplaceAll("ZHLeptonicTag","ZH Leptonic");
+    desc.ReplaceAll("VHMetTag","VH MET");
     desc.ReplaceAll("SigmaMpTTag","#sigma_{M}/M |_{decorr} category");
     catdesc.push_back(desc);
     std::cout << "[INFO] --> description :" << desc << std::endl;

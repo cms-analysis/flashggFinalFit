@@ -164,6 +164,7 @@ tightLepCat=[]
 looseLepCat=[]
 metCat=[]
 #fill
+#FIXME these labels are out of date
 for i in range(len(options.cats)):
   if "Untagged" in options.cats[i]:
     incCats.append(options.cats[i])
@@ -801,6 +802,7 @@ flashggSysts['TriggerWeight'] = 'TriggerWeight'
 flashggSysts['JetBTagCutWeight'] = 'eff_b'
 #flashggSysts['MvaLinearSyst'] = 'MvaLinearSyst'
 #flashggSysts[''] =  ''
+#FIXME: should really only apply to MET categories
 flashggSysts['metPhoUncertainty'] = 'MET_PhotonScale'
 flashggSysts['metUncUncertainty'] = 'MET_Unclustered'
 flashggSysts['metJecUncertainty'] = 'MET_JEC'
@@ -820,7 +822,7 @@ if options.newGghScheme:
 
 #tth Tags
 tthSysts={}
-tthSysts['JEC'] = 'JEC_TTH'
+tthSysts['JEC'] = 'JEC_TTH' #FIXME: want both of these to apply to VH Hadronic too
 tthSysts['JER'] = 'JER_TTH'
 tthSysts['JetBTagReshapeWeight'] = 'BTagReshape_TTH'
 btagReshapeSyst = 1.042 #ad hoc from Saranya for Moriond17, combination of various sources
@@ -1438,6 +1440,8 @@ def printTTHSysts():
           if '%s:%s'%(p,c) in options.toSkip: continue
           if p in bkgProcs or ('pdfWeight' in tthSyst and (p!='ggH_hgg' and p!='qqH_hgg')):
             outFile.write('- ')
+          elif ('JEC' in tthSyst or 'JER' in tthSyst) and ('Hadronic' in c or 'Leptonic' in c) and 'ZH' not in c: #also want this to apply to VH Hadronic, WHLeptonic and VHLeptonicLoose
+            outFile.write(getFlashggLine(p,c,tthSyst))
           elif c not in tthCats:
             outFile.write('- ')
           elif 'Reshape' in tthSyst:

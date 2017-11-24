@@ -292,15 +292,16 @@ for x in Arr.keys():
 print " Done : Arr[Total]", Arr["Total"]
 
 print "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
-line="\\begin{tabular}{ |r | c | c  | c|"
+line="\\begin{tabular}{ |r | c | c | c |"
 for x in range(0,nProcs):
  line = line + " c | "
-line = line + "}"
+#line = line + "}"
+line = line[:-2] + "}"
 print line
 print "\\hline"
 #print "\\multicolumn{%d}{|l|}{Expected Signal} \\\\"%(nProcs+3)
-print "\\hline"
-print "\\hline"
+#print "\\hline"
+#print "\\hline"
 print "\\multirow{2}{*}{Event Categories} &\multicolumn{%d}{|l|}{SM 125GeV Higgs boson expected signal} & Bkg\\\\ \\cline{2-%d}"%(nProcs+2,nProcs+3)
 line="  &  "
 for p in Arr.values()[0].keys() :
@@ -309,7 +310,7 @@ for p in Arr.values()[0].keys() :
 line =line+"  $\\sigma_{eff} $(GeV)  & $\\sigma_{HM} $ (GeV) & (GeV$^-1$) \\\\ "
 print line 
 print "\\hline"
-print "\\hline"
+#print "\\hline"
 
 dataLines=[]
 for t in Arr :
@@ -334,34 +335,37 @@ for l in dataLines :
   print l
 
 print "\\hline"
-print "\\hline"
+#print "\\hline"
 print "\end{tabular}"
 
 print "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
 print "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
-line="\\begin{tabular}{ |r | c | c | c  |"
+line="\\begin{tabular}{ r | c | c | c |"
 for x in range(0,nProcs):
  line = line + " c | "
-line = line + "}"
+#line = line + "}"
+line = line[:-2] + "}"
 print line
 print "\\hline"
-i#print "\\multicolumn{%d}{|l|}{Expected Signal} \\\\"%(nProcs+3)
-print "\\hline"
-print "\\hline"
+#print "\\multicolumn{%d}{|l|}{Expected Signal} \\\\"%(nProcs+3)
+#print "\\hline"
+#print "\\hline"
 print "\\multirow{2}{*}{Event Categories} &\multicolumn{%d}{|l|}{SM 125GeV Higgs boson expected signal} & Bkg \\\\ \\cline{2-%d}"%(nProcs+2,nProcs+3)
 line="  &  "
 
+procNameMap = {"GG2H":"ggH","VBF":"VBF","TTH":"ttH","QQ2HLNU":"WH lep","QQ2HLL":"ZH lep","WH2HQQ":"WH had","ZH2HQQ":"ZH had","testBBH":"bbH","testTHQ":"tHq","testTHW":"tHW","Total":"Total"}
 procList=[]
 if (options.order==""): procList=Arr.values()[0].keys() 
 else : procList = options.order.split(":")[0].split(",")
-print "procList", procList
+#print "procList", procList
 for p in procList:
  #print p
-  line=line+ p + " & "
+  #line=line+ p + " & "
+  line=line+ procNameMap[p] + " & "
 line =line+"  $\\sigma_{eff} $  & $\\sigma_{HM} $ & (GeV$^{-1}$) \\\\ "
 print line 
 print "\\hline"
-print "\\hline"
+#print "\\hline"
 
 dataLines=[]
 tagList=[]
@@ -372,13 +376,16 @@ else :
 
 for t in tagList :
   #print p
-  lineCat=t+" &   " 
+  #lineCat=t+" &   " 
+  lineCat=t.replace(' Tag','').replace('TTH','ttH').replace('Met','MET')+" &   " 
   line=""
   for p in procList:
     if p=="Total": continue
     #print "Arr[t]",Arr[t]
+    val=100*Arr[t][p]/Arr[t]["Total"]
     #line = line+" &  "+str('%.2f \%%'%(100*Arr[t][p]/Arr[t]["Total"]))
-    line = line+" &  "+str('%.1f \%%'%(100*Arr[t][p]/Arr[t]["Total"]))
+    if val > 0.05: line = line+" &  "+str('%.1f \%%'%(val))
+    else: line = line+" &  "+str('$<$0.05 \%')
   #Allline=" "+str('%.2f'%Arr[t]["Total"])
   Allline=" "+str('%.1f'%Arr[t]["Total"])
   if not t in bkgYield.keys():
@@ -394,21 +401,22 @@ for l in dataLines :
   print l
 
 print "\\hline"
-print "\\hline"
+#print "\\hline"
 print "\end{tabular}"
 
 print "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
 
 print "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
-line="\\begin{tabular}{ |r | c | c | c  | c |"
+line="\\begin{tabular}{ r | c | c | c  | c |"
 for x in range(0,nProcs):
  line = line + " c | "
-line = line + "}"
+#line = line + "}"
+line = line[:-2] + "}"
 print line
 print "\\hline"
-i#print "\\multicolumn{%d}{|l|}{Expected Signal} \\\\"%(nProcs+3)
-print "\\hline"
-print "\\hline"
+#print "\\multicolumn{%d}{|l|}{Expected Signal} \\\\"%(nProcs+3)
+#print "\\hline"
+#print "\\hline"
 print "\\multirow{2}{*}{Event Categories} &\multicolumn{%d}{|l|}{SM 125GeV Higgs boson expected signal} & Bkg & S/(S+B) \\\\ \\cline{2-%d}"%(nProcs+2,nProcs+3)
 line="  &  "
 
@@ -417,11 +425,12 @@ if (options.order==""): procList=Arr.values()[0].keys()
 else : procList = options.order.split(":")[0].split(",")
 for p in procList:
   #print p
-  line=line+ p + " & "
+  #line=line+ p + " & "
+  line=line+ procNameMap[p] + " & "
 line =line+"  $\\sigma_{eff} $  & $\\sigma_{HM} $ & (GeV$^{-1}$) & \\\\ "
 print line 
 print "\\hline"
-print "\\hline"
+#print "\\hline"
 
 dataLines=[]
 tagList=[]
@@ -434,12 +443,15 @@ naiveExpecteds=[]
 for t in tagList :
   #print p
   if t=="Total" : continue
-  lineCat=t+" &   " 
+  #lineCat=t+" &   " 
+  lineCat=t.replace(' Tag','').replace('TTH','ttH').replace('Met','MET')+" &   " 
   line=""
   for p in procList:
     if p=="Total": continue
+    val=100*Arr[t][p]/Arr[t]["Total"]
     #line = line+" &  "+str('%.2f \%%'%(100*Arr[t][p]/Arr[t]["Total"]))
-    line = line+" &  "+str('%.1f \%%'%(100*Arr[t][p]/Arr[t]["Total"]))
+    if val > 0.05: line = line+" &  "+str('%.1f \%%'%(val))
+    else: line = line+" &  "+str('$<$0.05 \%')
   #Allline=" "+str('%.2f'%Arr[t]["Total"])
   Allline=" "+str('%.1f'%Arr[t]["Total"])
   if not t in bkgYield.keys():
@@ -457,9 +469,11 @@ t=="Total"
 lineCat=t+" &   " 
 line=""
 for p in procList:
-   if p=="Total": continue
-   #line = line+" &  "+str('%.2f \%%'%(100*Arr[t][p]/Arr[t]["Total"]))
-   line = line+" &  "+str('%.1f \%%'%(100*Arr[t][p]/Arr[t]["Total"]))
+  if p=="Total": continue
+  val=100*Arr[t][p]/Arr[t]["Total"]
+  #line = line+" &  "+str('%.2f \%%'%(100*Arr[t][p]/Arr[t]["Total"]))
+  if val > 0.05: line = line+" &  "+str('%.1f \%%'%(val))
+  else: line = line+" &  "+str('$<$0.05 \%')
 #Allline=" "+str('%.2f'%Arr[t]["Total"])
 Allline=" "+str('%.1f'%Arr[t]["Total"])
 if not t in bkgYield.keys():
@@ -479,7 +493,7 @@ for l in dataLines :
   print l
 
 print "\\hline"
-print "\\hline"
+#print "\\hline"
 print "\end{tabular}"
 
 print "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
@@ -504,15 +518,16 @@ for i in range(0,nProcs):
 
 print "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
 #print "\\resizebox{\\textwidth}{!}{"
-line="\\begin{tabular}{ |r | c | c | c  | c | c |"
+line="\\begin{tabular}{ r | c | c | c  | c | c |"
 for x in range(0,nProcs):
   line = line + " c | "
-line = line + "}"
+#line = line + "}"
+line = line[:-2] + "}"
 print line
 print "\\hline"
-i#print "\\multicolumn{%d}{|l|}{Expected Signal} \\\\"%(nProcs+3)
-print "\\hline"
-print "\\hline"
+#print "\\multicolumn{%d}{|l|}{Expected Signal} \\\\"%(nProcs+3)
+#print "\\hline"
+#print "\\hline"
 print "\\multirow{2}{*}{Event Categories} &\multicolumn{%d}{|l|}{SM 125GeV Higgs boson expected signal} & Bkg & Bkg &naive expected\\\\ \\cline{2-%d}"%(nProcs+2,nProcs+3)
 line="  &  "
 
@@ -521,11 +536,12 @@ if (options.order==""): procList=Arr.values()[0].keys()
 else : procList = options.order.split(":")[0].split(",")
 for p in procList:
   #print p
-  line=line+ p + " & "
+  #line=line+ p + " & "
+  line=line+ procNameMap[p] + " & "
 line =line+"  $\\sigma_{eff} $  & $\\sigma_{HM} $ & (GeV$^{-1}$) & (GeV$^{-1}$ $fb^{-1}$ )& \\\\ "
 print line 
 print "\\hline"
-print "\\hline"
+#print "\\hline"
 
 dataLines=[]
 tagList=[]
@@ -540,13 +556,15 @@ vbfTotals = [0.,0.,0.,0.,0.]
 for t in tagList :
   #print p
   if t=="Total" : continue
-  lineCat=t+" &   " 
+  #lineCat=t+" &   " 
+  lineCat=t.replace(' Tag','').replace('TTH','ttH').replace('Met','MET')+" &   " 
   line=""
   for p in procList:
     if p=="Total": continue
     val=100*Arr[t][p]/Arr[t]["Total"]
     #line = line+" &  "+str('%.2f \%%'%(val))
-    line = line+" &  "+str('%.1f \%%'%(val))
+    if val > 0.05: line = line+" &  "+str('%.1f \%%'%(val))
+    else: line = line+" &  "+str('$<$0.05 \%')
     if options.verbose: print " filling content hist ", p, " for bin ", len(tagList)-iTag, " =", tagList[iTag], " ==", val
     if doTotals: content_hists[p].SetBinContent(len(tagList)-iTag,val)
     else: content_hists[p].SetBinContent(len(tagList)-1-iTag,val)
@@ -607,7 +625,8 @@ for p in procList:
   if p=="Total": continue
   val=100*Arr[t][p]/Arr[t]["Total"]
   #line = line+" &  "+str('%.2f \%%'%(100*Arr[t][p]/Arr[t]["Total"]))
-  line = line+" &  "+str('%.1f \%%'%(100*Arr[t][p]/Arr[t]["Total"]))
+  if val > 0.05: line = line+" &  "+str('%.1f \%%'%(val))
+  else: line = line+" &  "+str('$<$0.05 \%%')
   #print " filling content hist ", p, " for bin ", 1, " =", t, " ==", val
   if doTotals: content_hists[p].SetBinContent(1,val)
 #Allline=" "+str('%.2f'%Arr[t]["Total"])
@@ -633,7 +652,7 @@ for l in dataLines :
   print l
 
 print "\\hline"
-print "\\hline"
+#print "\\hline"
 print "\end{tabular}"
 
 print "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
