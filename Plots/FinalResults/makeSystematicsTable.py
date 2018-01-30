@@ -11,6 +11,7 @@ import ROOT as r
 
 parser = OptionParser()
 parser.add_option("--makeTable",default=False,action="store_true",help="Make the table instead of submitting jobs")
+parser.add_option("--makePlot",default=False,action="store_true",help="Make pretty plot (requires both observed and expected)")
 parser.add_option("--dryRun",default=False,action="store_true",help="Do not submit jobs")
 parser.add_option("--observed",default=False,action="store_true",help="Observed, rather than expected, uncertainties")
 parser.add_option("--folderName",default='Expected')
@@ -21,61 +22,61 @@ if opts.folderExt != '': opts.folderName += '_%s'%opts.folderExt
 
 
 def getUpDownUncertainties(directory,nuisance_group,POI):
-    tf = r.TFile('%s/higgsCombine_%s.MultiDimFit.mH125.root'%(directory,nuisance_group))
-    tree = tf.Get('limit')
-    centralValue=-1
-    loValue=-1
-    hiValue=-1
-    #print "nuisance group is %s" %nuisance_group
-    for i in range(tree.GetEntries()):
-      tree.GetEntry(i)
-      quantile =  getattr(tree,'quantileExpected')
-      poival =    getattr(tree,POI)
-      if (quantile ==-1) : centralValue=poival
-    for i in range(tree.GetEntries()):
-      tree.GetEntry(i)
-      quantile =  getattr(tree,'quantileExpected')
-      poival =    getattr(tree,POI)
-      if (poival==-1) : continue
-      if (poival >= centralValue) : hiValue=poival
-      if (poival <= centralValue) : loValue=poival
-    tf.Close()
-    up= hiValue - centralValue
-    down = loValue - centralValue
-    symm = (up-down)/2
-    return up,down, symm
+  tf = r.TFile('%s/higgsCombine_%s.MultiDimFit.mH125.root'%(directory,nuisance_group))
+  tree = tf.Get('limit')
+  centralValue=-1
+  loValue=-1
+  hiValue=-1
+  #print "nuisance group is %s" %nuisance_group
+  for i in range(tree.GetEntries()):
+    tree.GetEntry(i)
+    quantile =  getattr(tree,'quantileExpected')
+    poival =    getattr(tree,POI)
+    if (quantile ==-1) : centralValue=poival
+  for i in range(tree.GetEntries()):
+    tree.GetEntry(i)
+    quantile =  getattr(tree,'quantileExpected')
+    poival =    getattr(tree,POI)
+    if (poival==-1) : continue
+    if (poival >= centralValue) : hiValue=poival
+    if (poival <= centralValue) : loValue=poival
+  tf.Close()
+  up= hiValue - centralValue
+  down = loValue - centralValue
+  symm = (up-down)/2
+  return up,down, symm
 
 def writeJobFileAndSubmit(directory,nuisance_group,POI="r"):
-    filename = '%s/sub_job.%s.sh'%(directory,nuisance_group)
-    sub_file = open(filename,'w')
-    sub_file.write('#!/bin/bash\n')
-    sub_file.write('ulimit -s unlimited\n')
-    sub_file.write('cd %s\n'%directory)
-    sub_file.write('export SCRAM_ARCH=slc6_amd64_gcc491\n')
-    sub_file.write('eval `scramv1 runtime -sh`\n')
-    sub_file.write('cd %s\n'%directory)
-    freezeNuisancesCommand=""
-    if "all" in nuisance_group: freezeNuisancesCommand="--freezeNuisances all"
-    elif not "none" in nuisance_group: freezeNuisancesCommand=" --freezeNuisanceGroups=%s"%nuisance_group
+  filename = '%s/sub_job.%s.sh'%(directory,nuisance_group)
+  sub_file = open(filename,'w')
+  sub_file.write('#!/bin/bash\n')
+  sub_file.write('ulimit -s unlimited\n')
+  sub_file.write('cd %s\n'%directory)
+  sub_file.write('export SCRAM_ARCH=slc6_amd64_gcc491\n')
+  sub_file.write('eval `scramv1 runtime -sh`\n')
+  sub_file.write('cd %s\n'%directory)
+  freezeNuisancesCommand=""
+  if "all" in nuisance_group: freezeNuisancesCommand="--freezeNuisances all"
+  elif not "none" in nuisance_group: freezeNuisancesCommand=" --freezeNuisanceGroups=%s"%nuisance_group
 
-    if (POI=="r") : 
-      if opts.observed:
-        sub_file.write('eval combine  CMS-HGG_mva_13TeV_datacard.root -M MultiDimFit --saveWorkspace -n _postFitForTable_%s --robustFit 1 -m125 --setPhysicsModelParameters pdfindex_UntaggedTag_0_13TeV=1,pdfindex_UntaggedTag_1_13TeV=3,pdfindex_UntaggedTag_2_13TeV=2,pdfindex_UntaggedTag_3_13TeV=1,pdfindex_VBFTag_0_13TeV=2,pdfindex_VBFTag_1_13TeV=1,pdfindex_VBFTag_2_13TeV=4,pdfindex_TTHHadronicTag_13TeV=0,pdfindex_TTHLeptonicTag_13TeV=1,pdfindex_ZHLeptonicTag_13TeV=0,pdfindex_WHLeptonicTag_13TeV=1,pdfindex_VHLeptonicLooseTag_13TeV=2,pdfindex_VHHadronicTag_13TeV=1,pdfindex_VHMetTag_13TeV=0 --algo singles --cl=0.68 --minimizerAlgoForMinos Minuit2,Migrad \n'%nuisance_group)
-        sub_file.write('eval combine  higgsCombine_postFitForTable_%s.MultiDimFit.mH125.root  -M MultiDimFit --snapshotName MultiDimFit --robustFit 1 -t -1 -m125 --setPhysicsModelParameters pdfindex_UntaggedTag_0_13TeV=1,pdfindex_UntaggedTag_1_13TeV=3,pdfindex_UntaggedTag_2_13TeV=2,pdfindex_UntaggedTag_3_13TeV=1,pdfindex_VBFTag_0_13TeV=2,pdfindex_VBFTag_1_13TeV=1,pdfindex_VBFTag_2_13TeV=4,pdfindex_TTHHadronicTag_13TeV=0,pdfindex_TTHLeptonicTag_13TeV=1,pdfindex_ZHLeptonicTag_13TeV=0,pdfindex_WHLeptonicTag_13TeV=1,pdfindex_VHLeptonicLooseTag_13TeV=2,pdfindex_VHHadronicTag_13TeV=1,pdfindex_VHMetTag_13TeV=0 --algo singles --cl=0.68 --minimizerAlgoForMinos Minuit2,Migrad -n _%s %s\n'%(nuisance_group,nuisance_group,freezeNuisancesCommand))
-      else:
-        sub_file.write('eval combine  CMS-HGG_mva_13TeV_datacard.root -M MultiDimFit --robustFit 1 -t -1 --expectSignal 1 -m125 --setPhysicsModelParameters pdfindex_UntaggedTag_0_13TeV=1,pdfindex_UntaggedTag_1_13TeV=3,pdfindex_UntaggedTag_2_13TeV=2,pdfindex_UntaggedTag_3_13TeV=1,pdfindex_VBFTag_0_13TeV=2,pdfindex_VBFTag_1_13TeV=1,pdfindex_VBFTag_2_13TeV=4,pdfindex_TTHHadronicTag_13TeV=0,pdfindex_TTHLeptonicTag_13TeV=1,pdfindex_ZHLeptonicTag_13TeV=0,pdfindex_WHLeptonicTag_13TeV=1,pdfindex_VHLeptonicLooseTag_13TeV=2,pdfindex_VHHadronicTag_13TeV=1,pdfindex_VHMetTag_13TeV=0 --algo singles --cl=0.68 --minimizerAlgoForMinos Minuit2,Migrad -n _%s %s\n'%(nuisance_group,freezeNuisancesCommand))
+  if (POI=="r") : 
+    if opts.observed:
+      sub_file.write('eval combine  CMS-HGG_mva_13TeV_datacard.root -M MultiDimFit --saveWorkspace -n _postFitForTable_%s --robustFit 1 -m125 --setPhysicsModelParameters pdfindex_UntaggedTag_0_13TeV=1,pdfindex_UntaggedTag_1_13TeV=3,pdfindex_UntaggedTag_2_13TeV=2,pdfindex_UntaggedTag_3_13TeV=1,pdfindex_VBFTag_0_13TeV=2,pdfindex_VBFTag_1_13TeV=1,pdfindex_VBFTag_2_13TeV=4,pdfindex_TTHHadronicTag_13TeV=0,pdfindex_TTHLeptonicTag_13TeV=1,pdfindex_ZHLeptonicTag_13TeV=0,pdfindex_WHLeptonicTag_13TeV=1,pdfindex_VHLeptonicLooseTag_13TeV=2,pdfindex_VHHadronicTag_13TeV=1,pdfindex_VHMetTag_13TeV=0 --algo singles --cl=0.68 --minimizerAlgoForMinos Minuit2,Migrad \n'%nuisance_group)
+      sub_file.write('eval combine  higgsCombine_postFitForTable_%s.MultiDimFit.mH125.root  -M MultiDimFit --snapshotName MultiDimFit --robustFit 1 -t -1 -m125 --setPhysicsModelParameters pdfindex_UntaggedTag_0_13TeV=1,pdfindex_UntaggedTag_1_13TeV=3,pdfindex_UntaggedTag_2_13TeV=2,pdfindex_UntaggedTag_3_13TeV=1,pdfindex_VBFTag_0_13TeV=2,pdfindex_VBFTag_1_13TeV=1,pdfindex_VBFTag_2_13TeV=4,pdfindex_TTHHadronicTag_13TeV=0,pdfindex_TTHLeptonicTag_13TeV=1,pdfindex_ZHLeptonicTag_13TeV=0,pdfindex_WHLeptonicTag_13TeV=1,pdfindex_VHLeptonicLooseTag_13TeV=2,pdfindex_VHHadronicTag_13TeV=1,pdfindex_VHMetTag_13TeV=0 --algo singles --cl=0.68 --minimizerAlgoForMinos Minuit2,Migrad -n _%s %s\n'%(nuisance_group,nuisance_group,freezeNuisancesCommand))
+    else:
+      sub_file.write('eval combine  CMS-HGG_mva_13TeV_datacard.root -M MultiDimFit --robustFit 1 -t -1 --expectSignal 1 -m125 --setPhysicsModelParameters pdfindex_UntaggedTag_0_13TeV=1,pdfindex_UntaggedTag_1_13TeV=3,pdfindex_UntaggedTag_2_13TeV=2,pdfindex_UntaggedTag_3_13TeV=1,pdfindex_VBFTag_0_13TeV=2,pdfindex_VBFTag_1_13TeV=1,pdfindex_VBFTag_2_13TeV=4,pdfindex_TTHHadronicTag_13TeV=0,pdfindex_TTHLeptonicTag_13TeV=1,pdfindex_ZHLeptonicTag_13TeV=0,pdfindex_WHLeptonicTag_13TeV=1,pdfindex_VHLeptonicLooseTag_13TeV=2,pdfindex_VHHadronicTag_13TeV=1,pdfindex_VHMetTag_13TeV=0 --algo singles --cl=0.68 --minimizerAlgoForMinos Minuit2,Migrad -n _%s %s\n'%(nuisance_group,freezeNuisancesCommand))
 
-    else:  
-      if opts.observed:
-        sub_file.write('eval combine  CMS-HGG_mva_13TeV_datacard.perProc.root -M MultiDimFit --saveWorkspace -n _postFitForTable_%s --robustFit 1 -t -1 --redefineSignalPOIs %s -P %s --floatOtherPOIs 1 -m125 --setPhysicsModelParameterRanges r_ggH=0.00,2.00:r_qqH=0.00,2.00:r_ttH=0.00,2.00:r_VH=-1.00,3.00 --setPhysicsModelParameters pdfindex_UntaggedTag_0_13TeV=1,pdfindex_UntaggedTag_1_13TeV=3,pdfindex_UntaggedTag_2_13TeV=2,pdfindex_UntaggedTag_3_13TeV=1,pdfindex_VBFTag_0_13TeV=2,pdfindex_VBFTag_1_13TeV=1,pdfindex_VBFTag_2_13TeV=4,pdfindex_TTHHadronicTag_13TeV=0,pdfindex_TTHLeptonicTag_13TeV=1,pdfindex_ZHLeptonicTag_13TeV=0,pdfindex_WHLeptonicTag_13TeV=1,pdfindex_VHLeptonicLooseTag_13TeV=2,pdfindex_VHHadronicTag_13TeV=1,pdfindex_VHMetTag_13TeV=0 --algo singles --cl=0.68 --minimizerAlgoForMinos Minuit2,Migrad \n'%(nuisance_group,POI,POI))
-        sub_file.write('eval combine  higgsCombine_postFitForTable_%s.MultiDimFit.mH125.root -M MultiDimFit --snapshotName MultiDimFit --robustFit 1 -t -1 --redefineSignalPOIs %s -P %s --floatOtherPOIs 1 -m125 --setPhysicsModelParameterRanges r_ggH=0.00,2.00:r_qqH=0.00,2.00:r_ttH=0.00,2.00:r_VH=-1.00,3.00 --setPhysicsModelParameters pdfindex_UntaggedTag_0_13TeV=1,pdfindex_UntaggedTag_1_13TeV=3,pdfindex_UntaggedTag_2_13TeV=2,pdfindex_UntaggedTag_3_13TeV=1,pdfindex_VBFTag_0_13TeV=2,pdfindex_VBFTag_1_13TeV=1,pdfindex_VBFTag_2_13TeV=4,pdfindex_TTHHadronicTag_13TeV=0,pdfindex_TTHLeptonicTag_13TeV=1,pdfindex_ZHLeptonicTag_13TeV=0,pdfindex_WHLeptonicTag_13TeV=1,pdfindex_VHLeptonicLooseTag_13TeV=2,pdfindex_VHHadronicTag_13TeV=1,pdfindex_VHMetTag_13TeV=0 --algo singles --cl=0.68 --minimizerAlgoForMinos Minuit2,Migrad -n _%s %s\n'%(nuisance_group,POI,POI,nuisance_group,freezeNuisancesCommand))
-      else:
-        sub_file.write('eval combine  CMS-HGG_mva_13TeV_datacard.perProc.root -M MultiDimFit --robustFit 1 -t -1 --redefineSignalPOIs %s -P %s --floatOtherPOIs 1 --expectSignal 1 -m125 --setPhysicsModelParameterRanges r_ggH=0.00,2.00:r_qqH=0.00,2.00:r_ttH=0.00,2.00:r_VH=-1.00,3.00 --setPhysicsModelParameters pdfindex_UntaggedTag_0_13TeV=1,pdfindex_UntaggedTag_1_13TeV=3,pdfindex_UntaggedTag_2_13TeV=2,pdfindex_UntaggedTag_3_13TeV=1,pdfindex_VBFTag_0_13TeV=2,pdfindex_VBFTag_1_13TeV=1,pdfindex_VBFTag_2_13TeV=4,pdfindex_TTHHadronicTag_13TeV=0,pdfindex_TTHLeptonicTag_13TeV=1,pdfindex_ZHLeptonicTag_13TeV=0,pdfindex_WHLeptonicTag_13TeV=1,pdfindex_VHLeptonicLooseTag_13TeV=2,pdfindex_VHHadronicTag_13TeV=1,pdfindex_VHMetTag_13TeV=0 --algo singles --cl=0.68 --minimizerAlgoForMinos Minuit2,Migrad -n _%s %s\n'%(POI,POI,nuisance_group,freezeNuisancesCommand))
-    sub_file.close()
-    os.system(' chmod +x %s'%(filename))
-    exec_line='qsub %s -l h_rt=0:59:00 -q hep.q -o %s.log -e %s.err'%(filename,filename,filename)
-    print exec_line
-    if not opts.dryRun : os.system(exec_line)
+  else:  
+    if opts.observed:
+      sub_file.write('eval combine  CMS-HGG_mva_13TeV_datacard.perProc.root -M MultiDimFit --saveWorkspace -n _postFitForTable_%s --robustFit 1 -t -1 --redefineSignalPOIs %s -P %s --floatOtherPOIs 1 -m125 --setPhysicsModelParameterRanges r_ggH=0.00,2.00:r_qqH=0.00,2.00:r_ttH=0.00,2.00:r_VH=-1.00,3.00 --setPhysicsModelParameters pdfindex_UntaggedTag_0_13TeV=1,pdfindex_UntaggedTag_1_13TeV=3,pdfindex_UntaggedTag_2_13TeV=2,pdfindex_UntaggedTag_3_13TeV=1,pdfindex_VBFTag_0_13TeV=2,pdfindex_VBFTag_1_13TeV=1,pdfindex_VBFTag_2_13TeV=4,pdfindex_TTHHadronicTag_13TeV=0,pdfindex_TTHLeptonicTag_13TeV=1,pdfindex_ZHLeptonicTag_13TeV=0,pdfindex_WHLeptonicTag_13TeV=1,pdfindex_VHLeptonicLooseTag_13TeV=2,pdfindex_VHHadronicTag_13TeV=1,pdfindex_VHMetTag_13TeV=0 --algo singles --cl=0.68 --minimizerAlgoForMinos Minuit2,Migrad \n'%(nuisance_group,POI,POI))
+      sub_file.write('eval combine  higgsCombine_postFitForTable_%s.MultiDimFit.mH125.root -M MultiDimFit --snapshotName MultiDimFit --robustFit 1 -t -1 --redefineSignalPOIs %s -P %s --floatOtherPOIs 1 -m125 --setPhysicsModelParameterRanges r_ggH=0.00,2.00:r_qqH=0.00,2.00:r_ttH=0.00,2.00:r_VH=-1.00,3.00 --setPhysicsModelParameters pdfindex_UntaggedTag_0_13TeV=1,pdfindex_UntaggedTag_1_13TeV=3,pdfindex_UntaggedTag_2_13TeV=2,pdfindex_UntaggedTag_3_13TeV=1,pdfindex_VBFTag_0_13TeV=2,pdfindex_VBFTag_1_13TeV=1,pdfindex_VBFTag_2_13TeV=4,pdfindex_TTHHadronicTag_13TeV=0,pdfindex_TTHLeptonicTag_13TeV=1,pdfindex_ZHLeptonicTag_13TeV=0,pdfindex_WHLeptonicTag_13TeV=1,pdfindex_VHLeptonicLooseTag_13TeV=2,pdfindex_VHHadronicTag_13TeV=1,pdfindex_VHMetTag_13TeV=0 --algo singles --cl=0.68 --minimizerAlgoForMinos Minuit2,Migrad -n _%s %s\n'%(nuisance_group,POI,POI,nuisance_group,freezeNuisancesCommand))
+    else:
+      sub_file.write('eval combine  CMS-HGG_mva_13TeV_datacard.perProc.root -M MultiDimFit --robustFit 1 -t -1 --redefineSignalPOIs %s -P %s --floatOtherPOIs 1 --expectSignal 1 -m125 --setPhysicsModelParameterRanges r_ggH=0.00,2.00:r_qqH=0.00,2.00:r_ttH=0.00,2.00:r_VH=-1.00,3.00 --setPhysicsModelParameters pdfindex_UntaggedTag_0_13TeV=1,pdfindex_UntaggedTag_1_13TeV=3,pdfindex_UntaggedTag_2_13TeV=2,pdfindex_UntaggedTag_3_13TeV=1,pdfindex_VBFTag_0_13TeV=2,pdfindex_VBFTag_1_13TeV=1,pdfindex_VBFTag_2_13TeV=4,pdfindex_TTHHadronicTag_13TeV=0,pdfindex_TTHLeptonicTag_13TeV=1,pdfindex_ZHLeptonicTag_13TeV=0,pdfindex_WHLeptonicTag_13TeV=1,pdfindex_VHLeptonicLooseTag_13TeV=2,pdfindex_VHHadronicTag_13TeV=1,pdfindex_VHMetTag_13TeV=0 --algo singles --cl=0.68 --minimizerAlgoForMinos Minuit2,Migrad -n _%s %s\n'%(POI,POI,nuisance_group,freezeNuisancesCommand))
+  sub_file.close()
+  os.system(' chmod +x %s'%(filename))
+  exec_line='qsub -l h_rt=0:59:00 -q hep.q -o %s.log -e %s.err %s'%(filename,filename,filename)
+  print exec_line
+  if not opts.dryRun : os.system(exec_line)
 
 
 #main, as it were, begins here
@@ -91,46 +92,46 @@ print "With",len(nuisance_groups),"nuisance groups"
 print "which are ",nuisance_groups
 
 
-if not opts.makeTable:
-   print "text2workspace.py  CMS-HGG_mva_13TeV_datacard.txt -m125 -o CMS-HGG_mva_13TeV_datacard.root"
-   os.system("text2workspace.py  CMS-HGG_mva_13TeV_datacard.txt -m125 -o CMS-HGG_mva_13TeV_datacard.root")
-   print "done text2workspace.py"
-   print "text2workspace.py  CMS-HGG_mva_13TeV_datacard.txt -m125 -o CMS-HGG_mva_13TeV_datacard.perProc.root -P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel --PO map=.*/qqH_hgg:r_qqH[1,-5,5] --PO map=.*/ggH_hgg:r_ggH[1,-5,5] --PO map=.*/ttH_hgg:r_ttH[1,-5,5] --PO map=.*/WH_lep_hgg:r_VH[1,-5,5] --PO map=.*/ZH_lep_hgg:r_VH[1,-5,5] --PO map=.*/WH_had_hgg:r_VH[1,-5,5] --PO map=.*/ZH_had_hgg:r_VH[1,-5,5] --PO higgsMassRange=122,128"
-   os.system("text2workspace.py  CMS-HGG_mva_13TeV_datacard.txt -m125 -o CMS-HGG_mva_13TeV_datacard.perProc.root -P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel --PO map=.*/qqH_hgg:r_qqH[1,-5,5] --PO map=.*/ggH_hgg:r_ggH[1,-5,5] --PO map=.*/ttH_hgg:r_ttH[1,-5,5] --PO map=.*/WH_lep_hgg:r_VH[1,-5,5] --PO map=.*/ZH_lep_hgg:r_VH[1,-5,5] --PO map=.*/WH_had_hgg:r_VH[1,-5,5] --PO map=.*/ZH_had_hgg:r_VH[1,-5,5] --PO higgsMassRange=122,128")
-   print "done text2workspace.py"
+if not opts.makeTable and not opts.makePlot:
+  print "text2workspace.py  CMS-HGG_mva_13TeV_datacard.txt -m125 -o CMS-HGG_mva_13TeV_datacard.root"
+  os.system("text2workspace.py  CMS-HGG_mva_13TeV_datacard.txt -m125 -o CMS-HGG_mva_13TeV_datacard.root")
+  print "done text2workspace.py"
+  print "text2workspace.py  CMS-HGG_mva_13TeV_datacard.txt -m125 -o CMS-HGG_mva_13TeV_datacard.perProc.root -P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel --PO map=.*/qqH_hgg:r_qqH[1,-5,5] --PO map=.*/ggH_hgg:r_ggH[1,-5,5] --PO map=.*/ttH_hgg:r_ttH[1,-5,5] --PO map=.*/WH_lep_hgg:r_VH[1,-5,5] --PO map=.*/ZH_lep_hgg:r_VH[1,-5,5] --PO map=.*/WH_had_hgg:r_VH[1,-5,5] --PO map=.*/ZH_had_hgg:r_VH[1,-5,5] --PO higgsMassRange=122,128"
+  os.system("text2workspace.py  CMS-HGG_mva_13TeV_datacard.txt -m125 -o CMS-HGG_mva_13TeV_datacard.perProc.root -P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel --PO map=.*/qqH_hgg:r_qqH[1,-5,5] --PO map=.*/ggH_hgg:r_ggH[1,-5,5] --PO map=.*/ttH_hgg:r_ttH[1,-5,5] --PO map=.*/WH_lep_hgg:r_VH[1,-5,5] --PO map=.*/ZH_lep_hgg:r_VH[1,-5,5] --PO map=.*/WH_had_hgg:r_VH[1,-5,5] --PO map=.*/ZH_had_hgg:r_VH[1,-5,5] --PO higgsMassRange=122,128")
+  print "done text2workspace.py"
 
-   for POI in POIs:
-     os.system("mkdir -p SystematicsTable%s/%s"%(opts.folderName,POI))
-     os.system("cp CMS-HGG_mva_13TeV_datacard.root SystematicsTable%s/%s/."%(opts.folderName,POI))    
-     os.system("cp CMS-HGG_mva_13TeV_datacard.perProc.root SystematicsTable%s/%s/."%(opts.folderName,POI))    
-     for ng in nuisance_groups:
-       writeJobFileAndSubmit("%s/SystematicsTable%s/%s"%(os.getcwd(),opts.folderName,POI),ng,POI)
+  for POI in POIs:
+    os.system("mkdir -p SystematicsTable%s/%s"%(opts.folderName,POI))
+    os.system("cp CMS-HGG_mva_13TeV_datacard.root SystematicsTable%s/%s/."%(opts.folderName,POI))    
+    os.system("cp CMS-HGG_mva_13TeV_datacard.perProc.root SystematicsTable%s/%s/."%(opts.folderName,POI))    
+    for ng in nuisance_groups:
+      writeJobFileAndSubmit("%s/SystematicsTable%s/%s"%(os.getcwd(),opts.folderName,POI),ng,POI)
 
 
 if opts.makeTable:
   overall_array = {}
   sumInQuad = {}
   for POI in POIs:
-     sumInQuad[POI] = 0.
-     #poi_array = {}
-     poi_array = ordict()
-     directory="%s/SystematicsTable%s/%s"%(os.getcwd(),opts.folderName,POI)
-     nominalValues = values= getUpDownUncertainties(directory,"none",POI) 
-     for ng in nuisance_groups:
-       values= getUpDownUncertainties(directory,ng,POI)
-       #print ng, nominalValues, values
-       thisUpWrtCentral = (abs(nominalValues[0] **2 - values[0]**2))**(0.5)
-       thisDownWrtCentral = (abs(nominalValues[1] **2 - values[1]**2))**(0.5)
-       thisSymmWrtCentral = (abs(nominalValues[2] **2 - values[2]**2))**(0.5)
-       poi_array[ng]=[thisUpWrtCentral,thisDownWrtCentral,thisSymmWrtCentral]
-       if ng != "all":
-         sumInQuad[POI] += thisSymmWrtCentral**2
-     #valueMap={}
-     valueMap=ordict()
-     #for this_ng in sorted(poi_array.items(),key=lambda e: e[1][2], reverse=True):
-     for this_ng in poi_array.items():
-       valueMap[this_ng[0]]=100*this_ng[1][2]
-     overall_array[POI]=valueMap
+    sumInQuad[POI] = 0.
+    #poi_array = {}
+    poi_array = ordict()
+    directory="%s/SystematicsTable%s/%s"%(os.getcwd(),opts.folderName,POI)
+    nominalValues = values= getUpDownUncertainties(directory,"none",POI) 
+    for ng in nuisance_groups:
+      values= getUpDownUncertainties(directory,ng,POI)
+      #print ng, nominalValues, values
+      thisUpWrtCentral = (abs(nominalValues[0] **2 - values[0]**2))**(0.5)
+      thisDownWrtCentral = (abs(nominalValues[1] **2 - values[1]**2))**(0.5)
+      thisSymmWrtCentral = (abs(nominalValues[2] **2 - values[2]**2))**(0.5)
+      poi_array[ng]=[thisUpWrtCentral,thisDownWrtCentral,thisSymmWrtCentral]
+      if ng != "all":
+        sumInQuad[POI] += thisSymmWrtCentral**2
+    #valueMap={}
+    valueMap=ordict()
+    #for this_ng in sorted(poi_array.items(),key=lambda e: e[1][2], reverse=True):
+    for this_ng in poi_array.items():
+      valueMap[this_ng[0]]=100*this_ng[1][2]
+    overall_array[POI]=valueMap
   #now make final table:
   #print "\\resizebox{\\textwidth}{!}{"
   table_definition= "\\begin{tabular} { |l | "
@@ -142,20 +143,20 @@ if opts.makeTable:
   print "\\hline"
   column_headers = " Systematic   "
   for POI in POIs :
-     fancyPOIName = POI.replace("r","\\mu")
-     if (len(POI.split("_"))>1) : fancyPOIName=POI.split("_")[0]+"_{\\text{"+POI.split("_")[1]+"}}" 
-     column_headers = column_headers + " & $" + fancyPOIName.replace("r","\\mu") + "$"
+    fancyPOIName = POI.replace("r","\\mu")
+    if (len(POI.split("_"))>1) : fancyPOIName=POI.split("_")[0]+"_{\\text{"+POI.split("_")[1]+"}}" 
+    column_headers = column_headers + " & $" + fancyPOIName.replace("r","\\mu") + "$"
   column_headers = column_headers +" \\\\"
   print column_headers
   print "\\hline"
   #for this_ng in sorted(overall_array[POIs[0]].items(),key=lambda e: e[1], reverse=True):
   for this_ng in overall_array[POIs[0]].items():
-      if (this_ng[0] == "none") : continue
-      if (this_ng[0] == "all") : continue
-      print_line= this_ng[0].replace("_"," ") + " "
-      for POI in POIs   : print_line = print_line + " &  %.2f \%%"% overall_array[POI][this_ng[0]]
-      print_line = print_line + " \\\\ "
-      print print_line
+    if (this_ng[0] == "none") : continue
+    if (this_ng[0] == "all") : continue
+    print_line= this_ng[0].replace("_"," ") + " "
+    for POI in POIs   : print_line = print_line + " &  %.2f \%%"% overall_array[POI][this_ng[0]]
+    print_line = print_line + " \\\\ "
+    print print_line
   print "\\hline"
   print_line = "Sum "
   for POI in POIs: 
@@ -172,6 +173,186 @@ if opts.makeTable:
   print "\\hline"
   print "\end{tabular}" 
   #print "\end{tabular}}" 
+
+if opts.makePlot:
+  plotNuisances = ["UE_and_PS","PDF_and_alphaS_yield","non_ggH_QCD_scale_migrations","non_ggH_QCD_scale_yield",'new_ggF_contamination_in_VBF_categories','new_ggF_pt','new_ggF_QCDscales',"Branching_ratio","Integrated_luminosity","Jet_energy_scale_and_resolution","Per_photon_energy_resolution_estimate","Photon_energy_scale_and_smearing","Photon_identification"]
+  exp_overall_array = {}
+  obs_overall_array = {}
+  for POI in POIs:
+    exp_poi_array = ordict()
+    obs_poi_array = ordict()
+    exp_directory="%s/SystematicsTable%s/%s"%(os.getcwd(),opts.folderName.replace('Observed','Expected'),POI)
+    obs_directory="%s/SystematicsTable%s/%s"%(os.getcwd(),opts.folderName.replace('Expected','Observed'),POI)
+    expNominalValues = getUpDownUncertainties(exp_directory,"none",POI) 
+    obsNominalValues = getUpDownUncertainties(obs_directory,"none",POI) 
+    for ng in plotNuisances:
+      expValues= getUpDownUncertainties(exp_directory,ng,POI)
+      obsValues= getUpDownUncertainties(obs_directory,ng,POI)
+      #print ng, nominalValues, values
+      thisUpWrtCentral = (abs(expNominalValues[0] **2 - expValues[0]**2))**(0.5)
+      thisDownWrtCentral = (abs(expNominalValues[1] **2 - expValues[1]**2))**(0.5)
+      thisSymmWrtCentral = (abs(expNominalValues[2] **2 - expValues[2]**2))**(0.5)
+      exp_poi_array[ng]=[thisUpWrtCentral,thisDownWrtCentral,thisSymmWrtCentral]
+      thisUpWrtCentral = (abs(obsNominalValues[0] **2 - obsValues[0]**2))**(0.5)
+      thisDownWrtCentral = (abs(obsNominalValues[1] **2 - obsValues[1]**2))**(0.5)
+      thisSymmWrtCentral = (abs(obsNominalValues[2] **2 - obsValues[2]**2))**(0.5)
+      obs_poi_array[ng]=[thisUpWrtCentral,thisDownWrtCentral,thisSymmWrtCentral]
+    expValueMap=ordict()
+    obsValueMap=ordict()
+    for this_ng in exp_poi_array.items():
+      expValueMap[this_ng[0]]=this_ng[1][2]
+    for this_ng in obs_poi_array.items():
+      obsValueMap[this_ng[0]]=this_ng[1][2]
+    exp_overall_array[POI]=expValueMap
+    obs_overall_array[POI]=obsValueMap
+  r.gROOT.SetBatch()
+  r.gStyle.SetOptStat(0)
+  numNuis = len(plotNuisances)
+  plotPOIs =['r','r_qqH','r_ttH']
+  expHists = {}
+  obsHists = {}
+  legends = {}
+  for POI in plotPOIs:
+    expHists[POI] = r.TH1F('expHist_%s'%POI, 'expHist_%s'%POI, 2*numNuis+1, 0, 2*numNuis)
+    expHists[POI].SetFillStyle(0)
+    expHists[POI].SetLineStyle(1)
+    expHists[POI].SetMarkerStyle(1)
+    obsHists[POI] = r.TH1F('obsHist_%s'%POI, 'obsHist_%s'%POI, 2*numNuis+1, 0, 2*numNuis)
+    obsHists[POI].SetLineColor(0)
+    obsHists[POI].SetTitle('')
+    obsHists[POI].GetYaxis().SetNdivisions(2,5,0)
+    if POI == plotPOIs[0]:
+      legends[POI] = r.TLegend(0.7,0.15,0.88,0.25)
+      expHists[POI].GetYaxis().SetTickLength(0.06)
+      obsHists[POI].GetYaxis().SetTickLength(0.06)
+      expHists[POI].GetYaxis().SetLabelSize(0.025)
+      obsHists[POI].GetYaxis().SetLabelSize(0.025)
+      legends[POI].SetTextSize(0.03)
+      legends[POI].SetTextSize(0.03)
+    else:
+      legends[POI] = r.TLegend(0.5,0.15,0.86,0.25)
+      expHists[POI].GetYaxis().SetTickLength(0.03)
+      obsHists[POI].GetYaxis().SetTickLength(0.03)
+      expHists[POI].GetYaxis().SetLabelSize(0.05)
+      obsHists[POI].GetYaxis().SetLabelSize(0.05)
+      #expHists[POI].GetYaxis().SetLabelOffset(0.0001)
+      #obsHists[POI].GetYaxis().SetLabelOffset(0.0001)
+      #expHists[POI].GetYaxis().SetTitleOffset(0.5)
+      #obsHists[POI].GetYaxis().SetTitleOffset(0.5)
+      legends[POI].SetTextSize(0.06)
+      legends[POI].SetTextSize(0.06)
+    legends[POI].SetBorderSize(0)
+    legends[POI].AddEntry(obsHists[POI],' Observed','F')
+    legends[POI].AddEntry(expHists[POI],' Expected','F')
+  nuisCounter = 1
+  for this_ng in exp_overall_array[POIs[0]].items():
+    if this_ng[0] not in plotNuisances: continue
+    #nuisLabel = this_ng[0].replace('_',' ') + ' '
+    #expHists[plotPOIs[0]].GetXaxis().SetBinLabel(nuisCounter, nuisLabel)
+    for POI in plotPOIs:
+      expHists[POI].Fill( nuisCounter, exp_overall_array[POI][this_ng[0]] )
+    nuisCounter += 2
+  nuisCounter = 1
+  for this_ng in obs_overall_array[POIs[0]].items():
+    if this_ng[0] not in plotNuisances: continue
+    #plotNuisances = ['new_ggF_qmtop','new_ggF_contamination_in_VBF_categories','new_ggF_pt','new_ggF_QCDscales',"non_ggH_QCD_scale_yield","non_ggH_QCD_scale_migrations","PDF_and_alphaS_yield","Branching_ratio","Integrated_luminosity","Jet_energy_scale_and_resolution","UE_and_PS","Photon_identification","Per_photon_energy_resolution_estimate","Photon_energy_scale_and_smearing"]
+    nuisLabel = this_ng[0].replace('_',' ') + ' '
+    nuisLabel = nuisLabel.replace('non ggH','Other processes')
+    nuisLabel = nuisLabel.replace('QCDscales','QCD scale')
+    nuisLabel = nuisLabel.replace('new ggF','ggH')
+    nuisLabel = nuisLabel.replace('pt','p_{T} modelling')
+    nuisLabel = nuisLabel.replace('contamination in VBF categories','jet multiplicity')
+    nuisLabel = nuisLabel.replace('UE and PS','Underlying event and parton shower')
+    nuisLabel = nuisLabel.replace('alphaS','#alpha_{s}')
+    obsHists[plotPOIs[0]].GetXaxis().SetBinLabel(nuisCounter+1, nuisLabel)
+    for POI in plotPOIs:
+      obsHists[POI].Fill( nuisCounter, obs_overall_array[POI][this_ng[0]] )
+    nuisCounter += 2
+  canv = r.TCanvas('canv','canv',700,400)
+  pad1 = r.TPad('pad1','pad1',0.0, 0.,0.5 ,1.)
+  pad2 = r.TPad('pad2','pad2',0.5, 0.,0.75,1.)
+  pad3 = r.TPad('pad3','pad3',0.75,0.,1.,  1.)
+  #pad1.SetBottomMargin(10)
+  #pad1.SetTopMargin(10)
+  #pad1.SetRightMargin(0.02)
+  pad1.SetLeftMargin(0.5)
+  #pad2.SetBottomMargin(10)
+  #pad2.SetTopMargin(10)
+  #pad2.SetRightMargin(0.05)
+  #pad2.SetLeftMargin(0.01)
+  #pad3.SetBottomMargin(10)
+  #pad3.SetTopMargin(10)
+  #pad3.SetRightMargin(0)
+  #pad3.SetLeftMargin(0.05)
+  pad1.SetTickx(2)
+  pad2.SetTickx(2)
+  pad3.SetTickx(2)
+  pad1.Draw()
+  pad2.Draw()
+  pad3.Draw()
+  pad1.cd()
+  expHists[plotPOIs[0]].SetLineColor(r.kBlue)
+  #expHists[plotPOIs[0]].SetLineColor(r.kBlack)
+  expHists[plotPOIs[0]].SetMinimum(0.)
+  expHists[plotPOIs[0]].SetMaximum(0.1)
+  expHists[plotPOIs[0]].GetXaxis().SetTickSize(0.)
+  obsHists[plotPOIs[0]].SetFillColorAlpha(r.kBlue,0.5)
+  obsHists[plotPOIs[0]].SetMinimum(0.)
+  obsHists[plotPOIs[0]].SetMaximum(0.1)
+  obsHists[plotPOIs[0]].GetXaxis().SetTickSize(0.)
+  obsHists[plotPOIs[0]].Draw('hbar')
+  expHists[plotPOIs[0]].Draw('hbar,same')
+  legends[plotPOIs[0]].Draw()
+  pad2.cd()
+  expHists[plotPOIs[1]].SetLineColor(r.kGreen+2)
+  #expHists[plotPOIs[1]].SetLineColor(r.kBlack+2)
+  expHists[plotPOIs[1]].SetMinimum(0.)
+  expHists[plotPOIs[1]].SetMaximum(0.3)
+  expHists[plotPOIs[1]].GetXaxis().SetTickSize(0.)
+  expHists[plotPOIs[1]].GetXaxis().SetLabelSize(0.)
+  obsHists[plotPOIs[1]].SetFillColorAlpha(r.kGreen+2,0.5)
+  obsHists[plotPOIs[1]].SetMinimum(0.)
+  obsHists[plotPOIs[1]].SetMaximum(0.3)
+  obsHists[plotPOIs[1]].GetYaxis().SetNdivisions(3,5,0)
+  obsHists[plotPOIs[1]].GetXaxis().SetTickSize(0.)
+  obsHists[plotPOIs[1]].GetXaxis().SetLabelSize(0.)
+  #obsHists[plotPOIs[1]].GetYaxis().SetLabelOffset(0.0001)
+  obsHists[plotPOIs[1]].Draw('hbar')
+  expHists[plotPOIs[1]].Draw('hbar,same')
+  legends[plotPOIs[1]].Draw()
+  pad3.cd()
+  expHists[plotPOIs[2]].SetLineColor(r.kMagenta-7)
+  #expHists[plotPOIs[2]].SetLineColor(r.kBlack)
+  expHists[plotPOIs[2]].SetMinimum(0.)
+  expHists[plotPOIs[2]].SetMaximum(0.15)
+  expHists[plotPOIs[2]].GetXaxis().SetTickSize(0.)
+  expHists[plotPOIs[2]].GetXaxis().SetLabelSize(0.)
+  obsHists[plotPOIs[2]].SetFillColorAlpha(r.kMagenta-7,0.5)
+  obsHists[plotPOIs[2]].SetMinimum(0.)
+  obsHists[plotPOIs[2]].SetMaximum(0.15)
+  obsHists[plotPOIs[2]].GetYaxis().SetNdivisions(3,5,0)
+  obsHists[plotPOIs[2]].GetXaxis().SetTickSize(0.)
+  obsHists[plotPOIs[2]].GetXaxis().SetLabelSize(0.)
+  #obsHists[plotPOIs[2]].GetYaxis().SetLabelOffset(0.0001)
+  obsHists[plotPOIs[2]].Draw('hbar')
+  expHists[plotPOIs[2]].Draw('hbar,same')
+  legends[plotPOIs[2]].Draw()
+  canv.cd()
+  lat = r.TLatex()
+  lat.SetTextFont(42)
+  lat.SetTextSize(0.06)
+  #lat.SetLineWidth(2)
+  #lat.SetTextAlign(31)
+  lat.DrawLatex(0.01,0.93,'#bf{CMS}  H#rightarrow#gamma#gamma')
+  lat.SetTextSize(0.03)
+  #lat.DrawLatex(0.3,0.96,'Uncertainty on #mu')
+  #lat.DrawLatex(0.55,0.96,'Uncertainty on #mu VBF')
+  #lat.DrawLatex(0.8,0.96,'Uncertainty on #mu ttH')
+  lat.DrawLatex(0.27,0.96,'Uncertainty on overall #mu')
+  lat.DrawLatex(0.57,0.96,'Uncertainty on #mu_{VBF}')
+  lat.DrawLatex(0.82,0.96,'Uncertainty on #mu_{ttH}')
+  canv.SaveAs('testSystematicsPlot.pdf')
+  canv.SaveAs('testSystematicsPlot.png')
   
 
 #default groupings
