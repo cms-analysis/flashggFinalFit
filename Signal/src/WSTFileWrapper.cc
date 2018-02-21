@@ -78,8 +78,10 @@ std::pair<std::string,std::string> WSTFileWrapper::convertTemplatedName(std::str
   tpMap["testTHQ"] = "th";
   for( std::map<std::string,std::string>::iterator it = tpMap.begin(); it != tpMap.end(); it++ ) {
     if( theDataName.BeginsWith(it->first) ) { 
-      theProcName = it->first;
-      theDataName.Replace( 0, it->first.size(), it->second );
+      TString theDataNameCopy = theDataName;
+      theDataNameCopy.Resize( theDataName.First( "_1" ) ); //works because mass value always comes after process name
+      theProcName = theDataNameCopy.Data();
+      theDataName.Replace( 0, theProcName.size(), it->second );
       theDataName.ReplaceAll("_FWDH","");
     }
   }
