@@ -1,10 +1,12 @@
 #commands to send to the monolithic runFinalFits.sh script
 from os import system
 
+justPrint=False
+#justPrint=True
 isSubmitted = False
 #isSubmitted = True
-phoSystOnly = False
-#phoSystOnly = True
+#phoSystOnly = False
+phoSystOnly = True
 print 'About to run signal scripts'
 print 'isSubmitted = %s, phoSystOnly = %s'%(str(isSubmitted), str(phoSystOnly))
 
@@ -16,7 +18,7 @@ fileNames     = ['output_WHToGG_M120_13TeV_amcatnloFXFX_madspin_pythia8_QQ2HLNU_
 fullFileNames = '' 
 for fileName in fileNames: fullFileNames += baseFilePath+fileName+','
 fullFileNames = fullFileNames[:-1]
-print 'fileNames = %s'%fullFileNames
+#print 'fileNames = %s'%fullFileNames
 
 #define processes and categories
 procs         = ''
@@ -26,6 +28,8 @@ for fileName in fileNames:
   procs += ','
 procs = procs[:-1]
 cats          = 'RECO_0J,RECO_1J_PTH_0_60,RECO_1J_PTH_60_120,RECO_1J_PTH_120_200,RECO_1J_PTH_GT200,RECO_GE2J_PTH_0_60,RECO_GE2J_PTH_60_120,RECO_GE2J_PTH_120_200,RECO_GE2J_PTH_GT200,RECO_VBFTOPO_JET3VETO,RECO_VBFTOPO_JET3,RECO_VH2JET,RECO_0LEP_PTV_0_150,RECO_0LEP_PTV_150_250_0J,RECO_0LEP_PTV_150_250_GE1J,RECO_0LEP_PTV_GT250,RECO_1LEP_PTV_0_150,RECO_1LEP_PTV_150_250_0J,RECO_1LEP_PTV_150_250_GE1J,RECO_1LEP_PTV_GT250,RECO_2LEP_PTV_0_150,RECO_2LEP_PTV_150_250_0J,RECO_2LEP_PTV_150_250_GE1J,RECO_2LEP_PTV_GT250,RECO_TTH_LEP,RECO_TTH_HAD'
+print 'with processes: %s'%procs
+print 'and categories: %s'%cats
 
 #misc config
 lumi          = '35.9'
@@ -33,22 +37,34 @@ batch         = 'IC'
 queue         = 'hep.q'
 beamspot      = '3.4'
 nBins         = '320'
+print 'lumi %s'%lumi
+print 'batch %s'%batch
+print 'queue %s'%queue
+print 'beamspot %s'%beamspot
+print 'nBins %s'%nBins
 
 #photon shape systematics
 scales        = 'HighR9EB,HighR9EE,LowR9EB,LowR9EE,Gain1EB,Gain6EB'
 scalesCorr    = 'MaterialCentralBarrel,MaterialOuterBarrel,MaterialForward,FNUFEE,FNUFEB,ShowerShapeHighR9EE,ShowerShapeHighR9EB,ShowerShapeLowR9EE,ShowerShapeLowR9EB'
 scalesGlobal  = 'NonLinearity:UntaggedTag_0:2,Geant4'
 smears        = 'HighR9EBPhi,HighR9EBRho,HighR9EEPhi,HighR9EERho,LowR9EBPhi,LowR9EBRho,LowR9EEPhi,LowR9EERho'
+#print 'scales %s'%scales
+#print 'scalesCorr %s'%scalesCorr
+#print 'scalesGlobal %s'%scalesGlobal
+#print 'smears %s'%smears
 
 #masses to be considered
 masses        = '120,123,124,125,126,127,130'
 massLow       = '120'
 massHigh      = '130'
+print 'masses %s'%masses
 
+theCommand = ''
 if isSubmitted:
-  system('cd /vols/build/cms/es811/FreshStart/Pass6/CMSSW_7_4_7/src/flashggFinalFit/Signal')
-  system('eval `scramv1 runtime -sh`')
-theCommand = './runSignalScripts.sh -i '+fullFileNames+' -p '+procs+' -f '+cats+' --ext '+ext+' --intLumi '+lumi+' --batch '+batch+' --massList '+masses+' --bs '+beamspot
+  theCommand += ('cd /vols/build/cms/es811/FreshStart/STXSstage1/CMSSW_7_4_7/src/flashggFinalFit/Signal\n')
+  theCommand += ('eval `scramv1 runtime -sh`\n')
+theCommand += './runSignalScripts.sh -i '+fullFileNames+' -p '+procs+' -f '+cats+' --ext '+ext+' --intLumi '+lumi+' --batch '+batch+' --massList '+masses+' --bs '+beamspot
 theCommand += ' --smears '+smears+' --scales '+scales+' --scalesCorr '+scalesCorr+' --scalesGlobal '+scalesGlobal+' --useSSF 1 --useDCB_1G 0'
 if phoSystOnly: theCommand += ' --calcPhoSystOnly'
-system(theCommand)
+if not justPrint: system(theCommand)
+else: print '\n\n%s'%theCommand

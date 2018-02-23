@@ -475,7 +475,8 @@ int main(int argc, char *argv[]){
 	//TFile *inFile = TFile::Open(filename_[0].c_str());
 
   // extract nEvents per proc/tag etc...
-	if (checkYields_){
+  // FIXME: no need for this...
+  /*if (checkYields_){
 	  
     WSTFileWrapper * inWS0 = new WSTFileWrapper(filenameStr_,"tagsDumper/cms_hgg_13TeV");
 		std::list<RooAbsData*> data =  (inWS0->allData()) ;
@@ -488,19 +489,20 @@ int main(int argc, char *argv[]){
         }
 		}
 		return 1;
-	}
+	}*/
 
   //time to open the signal file for the main script!
 	WSTFileWrapper *inWS;
 	if (isFlashgg_){
     inWS = new WSTFileWrapper(filenameStr_,"tagsDumper/cms_hgg_13TeV");
-		std::list<RooAbsData*> test =  (inWS->allData()) ;
+                //FIXME not needed
+		/*std::list<RooAbsData*> test =  (inWS->allData()) ;
 		if (verbose_) {
 			std::cout << " [INFO] WS contains " << std::endl;
 			for (std::list<RooAbsData*>::const_iterator iterator = test.begin(), end = test.end(); iterator != end; ++iterator) {
 		//		std::cout << **iterator << std::endl;
 			}
-		}
+		}*/
 	} else {
     std::cout << "[ERROR] script is only compatible with flashgg! exit(1)." << std::endl;
     exit(1);

@@ -342,7 +342,8 @@ int main(int argc, char *argv[]){
         }
 
         //print out contents, if you want... 
-				if (verbose_) {
+        // FIXME: no need for this
+        /*if (verbose_) {
 					std::cout << "[INFO] Workspace contains : " << std::endl;
 					std::list<RooAbsData*> data =  (inWS->allData()) ;
 					for (std::list<RooAbsData*>::const_iterator 
@@ -351,7 +352,7 @@ int main(int argc, char *argv[]){
             ++iterator) {
 						  std::cout << **iterator << std::endl;
 					}
-				}
+        }
         
         //more verbosity
 				if (verbose_) {
@@ -359,7 +360,7 @@ int main(int argc, char *argv[]){
             << "[INFO] Retrieved combined RV/WV data " 
             << Form("%s_%d_13TeV_%s",proc.c_str(),mass_,flashggCats_[cat].c_str()) 
             << "? "<< data<<std::endl;
-        }
+        }*/
         
         // now split RV/WV scenarios
         // this method of reducing the dataset is not safe, I think it ignores
