@@ -312,7 +312,7 @@ int main(int argc, char *argv[]){
       
       // access dataset and immediately reduce it!
 			if (isFlashgg_){
-				RooDataSet *data0   = (RooDataSet*)inWS->data(
+				RooDataSet *data0   = (RooDataSet*)inWS->data( Form("%d%s",mass_,proc.c_str()),
           Form("%s_%d_13TeV_%s",proc.c_str(),mass_,flashggCats_[cat].c_str()));
         if(verbose_) {
           std::cout << "[INFO] got dataset data0 ? " << data0 << "now make empty clones " << std::endl;

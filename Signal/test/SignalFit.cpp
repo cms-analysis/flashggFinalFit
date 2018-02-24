@@ -725,7 +725,7 @@ int main(int argc, char *argv[]){
       RooDataHist *dataH;  
 
         if (verbose_)std::cout << "[INFO] Opening dataset called "<< Form("%s_%d_13TeV_%s",proc.c_str(),mh,cat.c_str()) << " in in WS " << inWS << std::endl;
-        RooDataSet *data0   = reduceDataset((RooDataSet*)inWS->data(Form("%s_%d_13TeV_%s",proc.c_str(),mh,cat.c_str())));
+        RooDataSet *data0   = reduceDataset((RooDataSet*)inWS->data(Form("%d%s",mh,proc.c_str()), Form("%s_%d_13TeV_%s",proc.c_str(),mh,cat.c_str())));
 				if (beamSpotReweigh_){
         data = beamSpotReweigh(intLumiReweigh(data0));
 				} else {
@@ -768,7 +768,7 @@ int main(int argc, char *argv[]){
 													rvwvDataset(
                         		intLumiReweigh(
                           		reduceDataset(
-                          			(RooDataSet*)inWS->data(Form("%s_%d_13TeV_%s",replancementProc.c_str(),mh,replancementCat.c_str()))
+                          			(RooDataSet*)inWS->data(Form("%d%s",mh,replancementProc.c_str()), Form("%s_%d_13TeV_%s",replancementProc.c_str(),mh,replancementCat.c_str()))
                               )
                             ), "RV"
                           )
@@ -778,7 +778,7 @@ int main(int argc, char *argv[]){
           data0Ref   = rvwvDataset(
                         intLumiReweigh(
                           reduceDataset(
-                          (RooDataSet*)inWS->data(Form("%s_%d_13TeV_%s",replancementProc.c_str(),mh,replancementCat.c_str()))
+                          (RooDataSet*)inWS->data(Form("%d%s",mh,replancementProc.c_str()), Form("%s_%d_13TeV_%s",replancementProc.c_str(),mh,replancementCat.c_str()))
                          )
                        ), "RV"
                       );
@@ -821,7 +821,7 @@ int main(int argc, char *argv[]){
                         intLumiReweigh(
                           reduceDataset(
                           //(RooDataSet*)inWS->data(Form("%s_%d_13TeV_%s",referenceProcWV_.c_str(),mh,referenceTagWV_.c_str()))
-                            (RooDataSet*)inWS->data(Form("%s_%d_13TeV_%s",replancementProc.c_str(),mh,replancementCat.c_str()))
+                            (RooDataSet*)inWS->data(Form("%d%s",mh,replancementProc.c_str()), Form("%s_%d_13TeV_%s",replancementProc.c_str(),mh,replancementCat.c_str()))
                          )
                        ), "WV"
                       )
@@ -831,7 +831,7 @@ int main(int argc, char *argv[]){
                         intLumiReweigh(
                           reduceDataset(
                           //(RooDataSet*)inWS->data(Form("%s_%d_13TeV_%s",referenceProcWV_.c_str(),mh,referenceTagWV_.c_str()))
-                          	(RooDataSet*)inWS->data(Form("%s_%d_13TeV_%s",replancementProc.c_str(),mh,replancementCat.c_str()))
+                          	(RooDataSet*)inWS->data(Form("%d%s",mh,replancementProc.c_str()), Form("%s_%d_13TeV_%s",replancementProc.c_str(),mh,replancementCat.c_str()))
                          )
                        ), "WV"
                       );

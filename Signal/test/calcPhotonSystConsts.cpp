@@ -336,21 +336,51 @@ double getRateVar(TH1F* nom, TH1F *up, TH1F* down){
 	return val;
 }
 
-vector<TH1F*> getHistograms(vector<TFile*> files, string name, string syst){
+// copy this function from WSTFileWrapper, for accessing data easily... 
+std::pair<std::string,std::string> convertTemplatedName(std::string dataName) {
+  TString theDataName = TString(dataName);
+  std::string theProcName = "";
+  std::map<std::string,std::string> tpMap;
+  tpMap["GG2H"] = "ggh";
+  tpMap["VBF"] = "vbf";
+  tpMap["TTH"] = "tth";
+  tpMap["QQ2HLNU"] = "wh";
+  tpMap["QQ2HLL"] = "zh";
+  tpMap["WH2HQQ"] = "wh";
+  tpMap["ZH2HQQ"] = "zh";
+  tpMap["testBBH"] = "bbh";
+  tpMap["testTHW"] = "th";
+  tpMap["testTHQ"] = "th";
+  for( std::map<std::string,std::string>::iterator it = tpMap.begin(); it != tpMap.end(); it++ ) {
+    if( theDataName.BeginsWith(it->first) ) { 
+      TString theDataNameCopy = theDataName;
+      theDataNameCopy.Resize( theDataName.Index("_13TeV_")-4 ); //works because always of form proc_M1??_13TeV_cat
+      theProcName = theDataNameCopy.Data();
+      theDataName.Replace( 0, theProcName.size(), it->second );
+    }
+  }
+  std::pair<std::string,std::string> thePair;
+  thePair.first  = theDataName.Data();
+  thePair.second = theProcName;
+  return thePair;
+}
+
+//vector<TH1F*> getHistograms(vector<TFile*> files, string name, string syst){
+vector<TH1F*> getHistograms(RooWorkspace* theWS, string name, string syst){
 
 	vector<TH1F*> ret_hists;
-	for (unsigned int i=0; i<files.size(); i++){
-		files[i]->cd();
-		if (isFlashgg_){
+	//for (unsigned int i=0; i<files.size(); i++){
+	//	files[i]->cd();
+		//if (isFlashgg_){
 			TH1F *up =  new TH1F(Form("%s_%sUp01sigma",name.c_str(),syst.c_str()),Form("%s_%sUp01sigma",name.c_str(),syst.c_str()),80,100,180);
 			TH1F *down = new TH1F(Form("%s_%sDown01sigma",name.c_str(),syst.c_str()),Form("%s_%sDown01sigma",name.c_str(),syst.c_str()),80,100,180);
 			TH1F *nominal = new TH1F((Form("%s_%s",name.c_str(),syst.c_str())),(Form("%s%s",name.c_str(),syst.c_str())),80,100,180);
-			RooDataSet *rds_up = (RooDataSet*) inWS_->data((Form("%s_%sUp01sigma",name.c_str(),syst.c_str())));
-			RooDataSet *rds_down = (RooDataSet*) inWS_->data((Form("%s_%sDown01sigma",name.c_str(),syst.c_str())));
-			RooDataSet *rds_nom = (RooDataSet*) inWS_->data((Form("%s",name.c_str())));
+			RooDataSet *rds_up = (RooDataSet*) theWS->data(convertTemplatedName(Form("%s_%sUp01sigma",name.c_str(),syst.c_str())).first.c_str());
+			RooDataSet *rds_down = (RooDataSet*) theWS->data(convertTemplatedName(Form("%s_%sDown01sigma",name.c_str(),syst.c_str())).first.c_str());
+			RooDataSet *rds_nom = (RooDataSet*) theWS->data(convertTemplatedName(Form("%s",name.c_str())).first.c_str());
 				
-			RooDataHist *rds_up_h = (RooDataHist*) inWS_->data((Form("%s_%sUp01sigma",name.c_str(),syst.c_str())));
-			RooDataHist *rds_down_h = (RooDataHist*) inWS_->data((Form("%s_%sDown01sigma",name.c_str(),syst.c_str())));
+			RooDataHist *rds_up_h = (RooDataHist*) theWS->data(convertTemplatedName(Form("%s_%sUp01sigma",name.c_str(),syst.c_str())).first.c_str());
+			RooDataHist *rds_down_h = (RooDataHist*) theWS->data(convertTemplatedName(Form("%s_%sDown01sigma",name.c_str(),syst.c_str())).first.c_str());
 
 			if(rds_up){
 				rds_up->fillHistogram(up,RooArgList(*mass_));
@@ -381,7 +411,7 @@ vector<TH1F*> getHistograms(vector<TFile*> files, string name, string syst){
 				cout << "[ERROR] - at least one of histograms " << Form("tagsDumper/histograms/%s_%sDown01sigmamass",name.c_str(),syst.c_str()) << " "<<Form("tagsDumper/histograms/%s_%sUp01sigmamass",name.c_str(),syst.c_str()) <<", " <<Form("tagsDumper/histograms/%smass",name.c_str()) << std::endl;
 				return vector<TH1F*>(3,NULL);
 			}
-		}	else {
+		/*}	else {
 			TH1F *up = (TH1F*)files[i]->Get(Form("%s_%sUp01_sigma",name.c_str(),syst.c_str()));
 			TH1F *down = (TH1F*)files[i]->Get(Form("%s_%sDown01_sigma",name.c_str(),syst.c_str()));
 			TH1F *nominal = (TH1F*)files[i]->Get(name.c_str());
@@ -400,8 +430,8 @@ vector<TH1F*> getHistograms(vector<TFile*> files, string name, string syst){
 				cout << "[ERROR] - at least one of histograms " << name << ", " << name+"_"+syst+"Up01_sigma, " << name+"_"+syst+"Down01_sigma not found in any file" << endl;
 				return vector<TH1F*>(3,NULL);
 			}
-		}
-	}
+		}*/
+	//}
 	return vector<TH1F*>(3,NULL);
 }
 
@@ -441,12 +471,13 @@ int main(int argc, char *argv[]){
 
 	system(Form("mkdir -p %s/systematics",plotDir_.c_str()));
 
-	vector<TFile*> inFiles;
+        //FIXME experimenting with removing this...
+	/*vector<TFile*> inFiles;
 	for (unsigned int i=0; i<infilenames_.size(); i++){
 		inFiles.push_back(TFile::Open(infilenames_[i].c_str()));
 		if (verbosity_)	cout << "[INFO] Opened file " << infilenames_[i] << endl;
 		inFiles[i]->Print();
-	}
+	}*/
 	//	inWS_ = (RooWorkspace*)inFiles[0]->Get("tagsDumper/cms_hgg_13TeV"); //FIXME should add all workspaces together from various files
 	inWS_ = new WSTFileWrapper(infilenamesStr_,"tagsDumper/cms_hgg_13TeV");
 
@@ -470,6 +501,8 @@ int main(int argc, char *argv[]){
 	if(isFlashgg_){ nCats_ = flashggCats_.size();}
 	for (int cat=0; cat<nCats_; cat++){
 		for (vector<string>::iterator proc=procs_.begin(); proc!=procs_.end(); proc++){
+			cout << "[INFO] Processing "<< *proc << " - cat " << cat << endl;
+                        RooWorkspace* theWS = inWS_->getSpecificWorkspace(Form("%d%s",mh_,proc->c_str()));
 
 			if (verbosity_)	cout << "[INFO] Processing "<< *proc << " - cat " << cat << endl;
 
@@ -489,9 +522,11 @@ int main(int argc, char *argv[]){
 					vector<TH1F*> hists;
 					if (isFlashgg_){
 						string flashggCat = flashggCats_[cat]; 
-						hists= getHistograms(inFiles,Form("%s_%d_13TeV_%s",proc->c_str(),mh_,flashggCat.c_str()),Form("MCScale%s",phoCat->c_str()));
+						//hists= getHistograms(inFiles,Form("%s_%d_13TeV_%s",proc->c_str(),mh_,flashggCat.c_str()),Form("MCScale%s",phoCat->c_str()));
+						hists= getHistograms(theWS, Form("%s_%d_13TeV_%s",proc->c_str(),mh_,flashggCat.c_str()),Form("MCScale%s",phoCat->c_str()));
 					}else{
-						hists= getHistograms(inFiles,Form("th1f_sig_%s_mass_m%d_cat%d",proc->c_str(),mh_,cat),Form("E_scale_%s",phoCat->c_str()));
+						//hists= getHistograms(inFiles,Form("th1f_sig_%s_mass_m%d_cat%d",proc->c_str(),mh_,cat),Form("E_scale_%s",phoCat->c_str()));
+						hists= getHistograms(theWS, Form("th1f_sig_%s_mass_m%d_cat%d",proc->c_str(),mh_,cat),Form("E_scale_%s",phoCat->c_str()));
 					}
 					TH1F *nominal = hists[0];
 					TH1F *scaleUp = hists[1];
@@ -529,11 +564,13 @@ int main(int argc, char *argv[]){
 					vector<TH1F*> hists;
 					if (isFlashgg_){ // Smearing not yet supported for Flashgg
 						string flashggCat = flashggCats_[cat]; 
-						hists= getHistograms(inFiles,Form("%s_%d_13TeV_%s",proc->c_str(),mh_,flashggCat.c_str()),Form("MCSmear%s",phoCat->c_str()));
+						//hists= getHistograms(inFiles,Form("%s_%d_13TeV_%s",proc->c_str(),mh_,flashggCat.c_str()),Form("MCSmear%s",phoCat->c_str()));
+						hists= getHistograms(theWS, Form("%s_%d_13TeV_%s",proc->c_str(),mh_,flashggCat.c_str()),Form("MCSmear%s",phoCat->c_str()));
 					}	 else {
 
 						// this is to ensure nominal comes from the right file
-						hists = getHistograms(inFiles,Form("th1f_sig_%s_mass_m%d_cat%d",proc->c_str(),mh_,cat),Form("E_res_%s",phoCat->c_str()));
+						//hists = getHistograms(inFiles,Form("th1f_sig_%s_mass_m%d_cat%d",proc->c_str(),mh_,cat),Form("E_res_%s",phoCat->c_str()));
+						hists = getHistograms(theWS, Form("th1f_sig_%s_mass_m%d_cat%d",proc->c_str(),mh_,cat),Form("E_res_%s",phoCat->c_str()));
 					}
 					TH1F *nominal = hists[0];
 					TH1F *smearUp = hists[1];
@@ -570,7 +607,8 @@ int main(int argc, char *argv[]){
 				if (photonCatScalesCorrStr_.size()!=0){
 					for (vector<string>::iterator phoCat=photonCatScalesCorr_.begin(); phoCat!=photonCatScalesCorr_.end(); phoCat++){
 						string flashggCat = flashggCats_[cat]; 
-						vector<TH1F*> hists= getHistograms(inFiles,Form("%s_%d_13TeV_%s",proc->c_str(),mh_,flashggCat.c_str()),Form("%s",phoCat->c_str()));
+						//vector<TH1F*> hists= getHistograms(inFiles,Form("%s_%d_13TeV_%s",proc->c_str(),mh_,flashggCat.c_str()),Form("%s",phoCat->c_str()));
+						vector<TH1F*> hists= getHistograms(theWS, Form("%s_%d_13TeV_%s",proc->c_str(),mh_,flashggCat.c_str()),Form("%s",phoCat->c_str()));
 
 						// this is to ensure nominal comes from the right file
 						TH1F *nominal = hists[0];
@@ -609,7 +647,8 @@ int main(int argc, char *argv[]){
 					for (vector<string>::iterator phoCat=photonCatSmearsCorr_.begin(); phoCat!=photonCatSmearsCorr_.end(); phoCat++){
 
 						// this is to ensure nominal comes from the right file
-						vector<TH1F*> hists = getHistograms(inFiles,Form("th1f_sig_%s_mass_m%d_cat%d",proc->c_str(),mh_,cat),Form("E_res_%s",phoCat->c_str()));
+						//vector<TH1F*> hists = getHistograms(inFiles,Form("th1f_sig_%s_mass_m%d_cat%d",proc->c_str(),mh_,cat),Form("E_res_%s",phoCat->c_str()));
+						vector<TH1F*> hists = getHistograms(theWS, Form("th1f_sig_%s_mass_m%d_cat%d",proc->c_str(),mh_,cat),Form("E_res_%s",phoCat->c_str()));
 						TH1F *nominal = hists[0];
 						TH1F *smearUp = hists[1];
 						TH1F *smearDown = hists[2];
@@ -631,15 +670,16 @@ int main(int argc, char *argv[]){
 
 			
 			outfile << endl;	
+                        delete theWS;
 		} // end process loop
 		outfile << endl;
 	} // end category loop
 
-	for (unsigned int i=0; i<inFiles.size(); i++){
+	/*for (unsigned int i=0; i<inFiles.size(); i++){
 		if(verbosity_)	cout << "[INFO] Closed file " << inFiles[i]->GetName() << endl;
 		inFiles[i]->cd();
 		inFiles[i]->Close();
-	}
+	}*/
 	outfile.close();
 
 	sw.Stop();

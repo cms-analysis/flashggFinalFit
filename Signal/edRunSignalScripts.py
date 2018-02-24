@@ -5,8 +5,8 @@ justPrint=False
 #justPrint=True
 isSubmitted = False
 #isSubmitted = True
-#phoSystOnly = False
-phoSystOnly = True
+phoSystOnly = False
+#phoSystOnly = True
 print 'About to run signal scripts'
 print 'isSubmitted = %s, phoSystOnly = %s'%(str(isSubmitted), str(phoSystOnly))
 
