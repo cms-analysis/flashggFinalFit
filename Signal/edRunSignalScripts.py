@@ -7,8 +7,12 @@ isSubmitted = False
 #isSubmitted = True
 phoSystOnly = False
 #phoSystOnly = True
+#sigFitOnly = False
+sigFitOnly = True
+sigPlotsOnly = False
+#sigPlotsOnly = True
 print 'About to run signal scripts'
-print 'isSubmitted = %s, phoSystOnly = %s'%(str(isSubmitted), str(phoSystOnly))
+print 'isSubmitted = %s, phoSystOnly = %s, sigFitOnly = %s, sigPlotsOnly = %s'%(str(isSubmitted), str(phoSystOnly), str(sigFitOnly), str(sigPlotsOnly))
 
 #setup files 
 ext          = 'fullStage1Test'
@@ -66,5 +70,7 @@ if isSubmitted:
 theCommand += './runSignalScripts.sh -i '+fullFileNames+' -p '+procs+' -f '+cats+' --ext '+ext+' --intLumi '+lumi+' --batch '+batch+' --massList '+masses+' --bs '+beamspot
 theCommand += ' --smears '+smears+' --scales '+scales+' --scalesCorr '+scalesCorr+' --scalesGlobal '+scalesGlobal+' --useSSF 1 --useDCB_1G 0'
 if phoSystOnly: theCommand += ' --calcPhoSystOnly'
+elif sigFitOnly: theCommand += ' --sigFitOnly'
+elif sigPlotsOnly: theCommand += ' --sigPlotsOnly'
 if not justPrint: system(theCommand)
 else: print '\n\n%s'%theCommand

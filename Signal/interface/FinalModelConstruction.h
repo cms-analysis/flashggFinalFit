@@ -22,6 +22,7 @@
 #include "HiggsAnalysis/CombinedLimit/interface/RooSpline1D.h"
 #include "HiggsAnalysis/GBRLikelihood/interface/RooDoubleCBFast.h"
 #include "Normalization_8TeV.h"
+#include "Normalization_13TeV.h"
 
 class FinalModelConstruction {
 
@@ -93,7 +94,8 @@ class FinalModelConstruction {
     std::vector<string> flashggCats_;
 		bool skipMass(int mh);
     int verbosity_;
-    Normalization_8TeV *norm;
+    //Normalization_8TeV *norm;
+    Normalization_13TeV *norm;
     ofstream paramDump_;
 
     std::map<std::string,RooSpline1D*> stdSplines;

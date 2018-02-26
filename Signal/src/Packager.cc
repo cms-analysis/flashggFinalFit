@@ -33,7 +33,8 @@ Packager::Packager(WSTFileWrapper *ws, RooWorkspace *wsSave  , vector<string> pr
   sqrts_(sqrts),
   skipMasses_(skipMasses)
 {
-	normalization = new Normalization_8TeV();
+	//normalization = new Normalization_8TeV();
+	normalization = new Normalization_13TeV();
 	normalization->Init(sqrts_);
 }
 
@@ -61,6 +62,9 @@ void Packager::packageOutput(bool split, string process , string tag){
 			RooDataSet *allDataThisCat = NULL;
 			bool merge = mergeWS != 0 && ( find(cats_.begin(),cats_.end(),cat) == cats_.end() );
 			for (vector<string>::iterator proc=procs_.begin(); proc!=procs_.end(); proc++){
+                                if( split_ ) { // no need for all this if only considering one proc,cat...
+                                        if( process!=(*proc) || tag!=catname ) { continue; }
+                                }
 				RooDataSet *tempData = 0;
 				if( merge ) { 
 					tempData = (RooDataSet*)mergeWS->data(Form("sig_%s_mass_m%d_%s",proc->c_str(),mh,catname.c_str()));
@@ -113,6 +117,9 @@ void Packager::packageOutput(bool split, string process , string tag){
     }
 		RooArgList *sumPdfsThisCat = new RooArgList();
 		for (vector<string>::iterator proc=procs_.begin(); proc!=procs_.end(); proc++){
+                        if( split_ ) { // no need for all this if only considering one proc,cat...
+                                if( process!=(*proc) || tag!=catname ) { continue; }
+                        }
 
 			// sum eA
       //WS->Print();

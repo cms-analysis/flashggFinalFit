@@ -102,13 +102,17 @@ float mcBeamSpotWidth_=5.14; //cm // the beamspot has a certain width in MC whic
 //float dataBeamSpotWidth_=4.24; //cm
 float dataBeamSpotWidth_=3.5; //cm
 //string referenceProc_="ggh";
-string referenceProc_="GG2H";
+//string referenceProc_="GG2H";
+string referenceProc_="GG2H_0J";
 //string referenceProcWV_="ggh";
-string referenceProcWV_="GG2H";
+//string referenceProcWV_="GG2H";
+string referenceProcWV_="GG2H_0J";
 //string referenceProcTTH_="tth";
 string referenceProcTTH_="TTH";
-string referenceTagWV_="UntaggedTag_2";
-string referenceTagRV_="UntaggedTag_2";
+//string referenceTagWV_="UntaggedTag_2";
+string referenceTagWV_="RECO_0J";
+//string referenceTagRV_="UntaggedTag_2";
+string referenceTagRV_="RECO_0J";
 vector<string> map_proc_;
 vector<string> map_cat_;
 vector<string> map_replacement_proc_RV_;
@@ -444,11 +448,14 @@ int main(int argc, char *argv[]){
   // reference details for low stats cats
   // need to make this configurable ?! -LC
   //referenceProc_="ggh";
-  referenceProc_="GG2H";
+  //referenceProc_="GG2H";
+  referenceProc_="GG2H_0J";
   //referenceProcTTH_="tth";
   referenceProcTTH_="TTH";
-  referenceTagWV_="UntaggedTag_2"; // histest stats WV is ggh Untagged 3. 
-  referenceTagRV_="UntaggedTag_2"; // fairly low resolution tag even for ggh, more approprioate as te default than re-using the original tag.
+  //referenceTagWV_="UntaggedTag_2"; // histest stats WV is ggh Untagged 3. 
+  referenceTagWV_="RECO_0J";
+  //referenceTagRV_="UntaggedTag_2"; // fairly low resolution tag even for ggh, more approprioate as te default than re-using the original tag.
+  referenceTagRV_="RECO_0J";
   // are WV which needs to borrow should be taken from here
   
   // isFlashgg should now be the only option.

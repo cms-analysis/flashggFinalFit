@@ -81,7 +81,8 @@ FinalModelConstruction::FinalModelConstruction( std::vector<int> massList, RooRe
 	if (sqrts_ ==13) isFlashgg_=1;
   
   // load xs and br info from Normalization_8TeV
-  norm = new Normalization_8TeV();
+  //norm = new Normalization_8TeV();
+  norm = new Normalization_13TeV();
   if(!norm->Init(sqrts_)){
 	  std::cout << "[ERROR] Normalization Initiation failed, exit." << std::endl;
 	  exit(1);

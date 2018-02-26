@@ -11,6 +11,7 @@
 #include "RooDataSet.h"
 
 #include "Normalization_8TeV.h"
+#include "Normalization_13TeV.h"
 
 #include "WSTFileWrapper.h"
 
@@ -45,7 +46,8 @@ class Packager {
     int sqrts_;
     std::vector<int> skipMasses_;
     bool skipMass(int mh);
-    Normalization_8TeV *normalization;
+    //Normalization_8TeV *normalization;
+    Normalization_13TeV *normalization;
 
 };
 #endif

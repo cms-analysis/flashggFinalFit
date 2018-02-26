@@ -15,7 +15,6 @@ WSTFileWrapper::WSTFileWrapper( std::string files, std::string wsname ) {
   std::cout << "inside WST contructor, about to loop over files" << std:: endl;
   for ( std::vector<std::string>::iterator fn = fnList.begin() ; fn != fnList.end() ; fn++ ) {
     std::string keyName = std::string( fileToKey( *fn ) );
-    std::cout << "Entering file into map with key " << keyName << std::endl;
     fileList.emplace( keyName, TFile::Open(fn->c_str()) );
     if (fileList.rbegin()->second == 0) {
       std::cout << "[WSTFileWrapper] got 0 for what should be this file: " << (*fn) << std::endl;
@@ -25,7 +24,7 @@ WSTFileWrapper::WSTFileWrapper( std::string files, std::string wsname ) {
       // this is very verbose otherwise!
       std::cout << "[WSTFileWrapper] successfully opened this file: " << (*fn) << std::endl;
     }
-    //FIXME this is the part that needs to be removed, due to memory issues
+    // this is the part that needed to be removed, due to memory issues
     // try to just access when necessary instead
     // for now keep the wsList and just add the first one
     // useful e.g. for keeping existing constructors, and accessing just the necessary vars (only need one workspace for that)
@@ -72,7 +71,7 @@ std::string WSTFileWrapper::fileToKey( std::string fileName ) {
     procName.Remove( 0, procName.Index("pythia8_")+8 ); // all file names must end pythia8_procName.root
     procName.Resize( procName.Index(".root") ); // all file names must end pythia8_procName.root
     TString massVal = TString(fileName);
-    massVal = massVal.Replace(0, massVal.Index("_13TeV_")-3, "");
+    massVal = massVal.Replace(0, massVal.Index("_13TeV_")-3, ""); //and have mass in the form M1??_13TeV_
     massVal.Resize(3);
     std::string keyName = TString( TString(massVal.Data()) + TString(procName.Data()) ).Data();
     return keyName;
@@ -112,10 +111,21 @@ RooAbsData* WSTFileWrapper::data(std::string dataName) {
   std::string newProcName = thePair.second;
   RooAbsData* result = 0;
   bool complained_yet = 0;
+  // this skips the loop process when the wrapper is not actually considering all files
+  if( fileList.size()==1 ) { 
+    result = (RooAbsData*)wsList[0]->data(newDataName.c_str());
+    if( result ) { return result; }
+  }
   for( auto it=fileList.begin(); it!=fileList.end(); it++ ) {
     TString tempFileName = TString(it->second->GetName());
     if( tempFileName.Index(newProcName) < 0  && newProcName!="" ) { continue; }
     it->second->cd();
+    std::cout << "trying to get data with name " << newDataName << std::endl;
+    std::cout << "the workspace looks like this: " << std::endl;
+    wsList[0]->Print();
+    std::cout << "its name is " << wsName_ << std::endl;
+    std::cout << "the length of the file list is " << fileList.size() << std::endl;
+    std::cout << "this file name is " << tempFileName << std::endl;
     RooAbsData* this_result = (RooAbsData*)((RooWorkspace*)it->second->Get(wsName_.c_str()))->data(newDataName.c_str());
     if (result && this_result && !complained_yet) {
       std::cout << "[WSTFileWrapper] Uh oh, multiple RooAbsDatas from the file list with the same name: " <<  newDataName << std::endl;
@@ -146,6 +156,11 @@ RooAbsData* WSTFileWrapper::data(std::string keyName, std::string dataName) {
 RooAbsPdf* WSTFileWrapper::pdf(std::string pdfName) {
   RooAbsPdf* result = 0;
   bool complained_yet = 0;
+  // this skips the loop process when the wrapper is not actually considering all files
+  if( fileList.size()==1 ) { 
+    result = (RooAbsPdf*)wsList[0]->pdf(pdfName.c_str());
+    if( result ) { return result; }
+  }
   for( auto it=fileList.begin(); it!=fileList.end(); it++ ) {
     it->second->cd();
     RooAbsPdf* this_result = (RooAbsPdf*)((RooWorkspace*)it->second->Get(wsName_.c_str()))->pdf(pdfName.c_str());
@@ -176,6 +191,11 @@ RooAbsPdf* WSTFileWrapper::pdf(std::string keyName, std::string pdfName) {
 RooCategory* WSTFileWrapper::cat(std::string catName) {
   RooCategory* result = 0;
   bool complained_yet = 0;
+  // this skips the loop process when the wrapper is not actually considering all files
+  if( fileList.size()==1 ) { 
+    result = (RooCategory*)wsList[0]->cat(catName.c_str());
+    if( result ) { return result; }
+  }
   for( auto it=fileList.begin(); it!=fileList.end(); it++ ) {
     it->second->cd();
     RooCategory* this_result = (RooCategory*)((RooWorkspace*)it->second->Get(wsName_.c_str()))->cat(catName.c_str());
@@ -206,6 +226,11 @@ RooCategory* WSTFileWrapper::cat(std::string keyName, std::string catName) {
 RooAbsReal* WSTFileWrapper::function(std::string functionName) {
   RooAbsReal* result = 0;
   bool complained_yet = 0;
+  // this skips the loop process when the wrapper is not actually considering all files
+  if( fileList.size()==1 ) { 
+    result = (RooAbsReal*)wsList[0]->function(functionName.c_str());
+    if( result ) { return result; }
+  }
   for( auto it=fileList.begin(); it!=fileList.end(); it++ ) {
     it->second->cd();
     RooAbsReal* this_result = (RooAbsReal*)((RooWorkspace*)it->second->Get(wsName_.c_str()))->function(functionName.c_str());
