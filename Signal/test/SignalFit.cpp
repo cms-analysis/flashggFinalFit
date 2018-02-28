@@ -875,22 +875,26 @@ int main(int argc, char *argv[]){
     TString check="";
     for (std::map<int,RooDataSet*>::iterator it=FITdatasetsRV.begin(); it!=FITdatasetsRV.end(); ++it){
       if (check=="") {
-       TString name=it->second->GetName();
-        check = name.ReplaceAll(TString(Form("%d",it->first)),TString(""));
-       } else {
-       TString name=it->second->GetName();
-       assert (check ==name.ReplaceAll(TString(Form("%d",it->first)),TString("")) );
-       }
+        TString name=it->second->GetName();
+        //check = name.ReplaceAll(TString(Form("%d",it->first)),TString(""));
+        check = name.Replace(name.Index("_13TeV_")-3, 3, "");
+      } else {
+        TString name=it->second->GetName();
+        //assert (check ==name.ReplaceAll(TString(Form("%d",it->first)),TString("")) );
+        assert( check = name.Replace(name.Index("_13TeV_")-3, 3, "") );
+      }
     }
     check="";
     for (std::map<int,RooDataSet*>::iterator it=FITdatasetsWV.begin(); it!=FITdatasetsWV.end(); ++it){
       if (check=="") {
-       TString name=it->second->GetName();
-        check = name.ReplaceAll(TString(Form("%d",it->first)),TString(""));
-       } else {
-       TString name=it->second->GetName();
-       assert (check ==name.ReplaceAll(TString(Form("%d",it->first)),TString("")) );
-       }
+        TString name=it->second->GetName();
+        //check = name.ReplaceAll(TString(Form("%d",it->first)),TString(""));
+        check = name.Replace(name.Index("_13TeV_")-3, 3, "");
+      } else {
+        TString name=it->second->GetName();
+        //assert (check ==name.ReplaceAll(TString(Form("%d",it->first)),TString("")) );
+        assert( check = name.Replace(name.Index("_13TeV_")-3, 3, "") );
+      }
     }
       
       

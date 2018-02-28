@@ -16,6 +16,7 @@ class WSTFileWrapper  {
     WSTFileWrapper( TFile*, RooWorkspace *);
     WSTFileWrapper( RooWorkspace *);
     RooWorkspace* getSpecificWorkspace(std::string);
+    RooWorkspace* getSpecificWorkspace(int);
     RooRealVar* var(std::string);
     RooAbsPdf* pdf(std::string);
     RooAbsPdf* pdf(std::string, std::string);
@@ -27,12 +28,13 @@ class WSTFileWrapper  {
     RooAbsReal* function(std::string, std::string);
     std::pair<std::string,std::string> convertTemplatedName(std::string);
     std::string fileToKey(std::string);
+    int nFiles() { return fileList.size(); }
     void Close();
   private:
     std::vector<std::string> fnList;
     std::map<std::string,TFile*> fileList;
     std::vector<RooWorkspace*> wsList;
-    std::string wsName_;
+    std::string wsName;
 };
 
 #endif

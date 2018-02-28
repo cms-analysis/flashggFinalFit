@@ -1,18 +1,17 @@
-#commands to send to the monolithic runFinalFits.sh script
-from os import system
+#!/usr/bin/env python
+# code to make first-pass stxs transfer matrix plots
 
-justPrint=False
-#justPrint=True
-isSubmitted = False
-#isSubmitted = True
-phoSystOnly = False
-#phoSystOnly = True
-sigFitOnly = False
-#sigFitOnly = True
-#sigPlotsOnly = False
-sigPlotsOnly = True
-print 'About to run signal scripts'
-print 'isSubmitted = %s, phoSystOnly = %s, sigFitOnly = %s, sigPlotsOnly = %s'%(str(isSubmitted), str(phoSystOnly), str(sigFitOnly), str(sigPlotsOnly))
+import os
+import ROOT as r
+from collections import OrderedDict as od
+
+#from optparse import OptionParser
+#parser = OptionParser()
+#parser.add_option('-k', '--key', default='GluGluHToGG', help='choose the sample to run on')
+#parser.add_option('-d', '--doLoose', default=False, action='store_true', help='use loose photons (default false, ie use only tight photons)')
+#(opts,args) = parser.parse_args()
+
+#r.gROOT.SetBatch(True)
 
 #setup files 
 ext          = 'fullStage1Test'
@@ -22,55 +21,54 @@ fileNames     = ['output_WHToGG_M120_13TeV_amcatnloFXFX_madspin_pythia8_QQ2HLNU_
 fullFileNames = '' 
 for fileName in fileNames: fullFileNames += baseFilePath+fileName+','
 fullFileNames = fullFileNames[:-1]
+fullFileNames = fullFileNames.split(',')
 #print 'fileNames = %s'%fullFileNames
 
 #define processes and categories
-procs         = ''
+procs         = od()
 for fileName in fileNames: 
   if 'M125' not in fileName: continue
-  procs += fileName.split('pythia8_')[1].split('.root')[0]
-  procs += ','
-procs = procs[:-1]
-cats          = 'RECO_0J,RECO_1J_PTH_0_60,RECO_1J_PTH_60_120,RECO_1J_PTH_120_200,RECO_1J_PTH_GT200,RECO_GE2J_PTH_0_60,RECO_GE2J_PTH_60_120,RECO_GE2J_PTH_120_200,RECO_GE2J_PTH_GT200,RECO_VBFTOPO_JET3VETO,RECO_VBFTOPO_JET3,RECO_VH2JET,RECO_0LEP_PTV_0_150,RECO_0LEP_PTV_150_250_0J,RECO_0LEP_PTV_150_250_GE1J,RECO_0LEP_PTV_GT250,RECO_1LEP_PTV_0_150,RECO_1LEP_PTV_150_250_0J,RECO_1LEP_PTV_150_250_GE1J,RECO_1LEP_PTV_GT250,RECO_2LEP_PTV_0_150,RECO_2LEP_PTV_150_250_0J,RECO_2LEP_PTV_150_250_GE1J,RECO_2LEP_PTV_GT250,RECO_TTH_LEP,RECO_TTH_HAD'
-print 'with processes: %s'%procs
-print 'and categories: %s'%cats
+  procs[ fileName.split('pythia8_')[1].split('.root')[0] ] = 0.
+cats          = 'NOTAG,RECO_0J,RECO_1J_PTH_0_60,RECO_1J_PTH_60_120,RECO_1J_PTH_120_200,RECO_1J_PTH_GT200,RECO_GE2J_PTH_0_60,RECO_GE2J_PTH_60_120,RECO_GE2J_PTH_120_200,RECO_GE2J_PTH_GT200,RECO_VBFTOPO_JET3VETO,RECO_VBFTOPO_JET3,RECO_VH2JET,RECO_0LEP_PTV_0_150,RECO_0LEP_PTV_150_250_0J,RECO_0LEP_PTV_150_250_GE1J,RECO_0LEP_PTV_GT250,RECO_1LEP_PTV_0_150,RECO_1LEP_PTV_150_250_0J,RECO_1LEP_PTV_150_250_GE1J,RECO_1LEP_PTV_GT250,RECO_2LEP_PTV_0_150,RECO_2LEP_PTV_150_250_0J,RECO_2LEP_PTV_150_250_GE1J,RECO_2LEP_PTV_GT250,RECO_TTH_LEP,RECO_TTH_HAD'
+cats = cats.split(',')
+stage0procs = {}
+stage0procs['GG2H']    = 0.
+stage0procs['VBF']     = 0.
+stage0procs['WH2HQQ']  = 0.
+stage0procs['ZH2HQQ']  = 0.
+stage0procs['QQ2HLL']  = 0.
+stage0procs['QQ2HLNU'] = 0.
+print procs 
+print cats
 
-#misc config
-lumi          = '35.9'
-batch         = 'IC'
-queue         = 'hep.q'
-beamspot      = '3.4'
-nBins         = '320'
-print 'lumi %s'%lumi
-print 'batch %s'%batch
-print 'queue %s'%queue
-print 'beamspot %s'%beamspot
-print 'nBins %s'%nBins
+nameMap  = {}
+nameMap['GG2H']    = 'ggh'
+nameMap['VBF']     = 'vbf'
+nameMap['WH2HQQ']  = 'wh'
+nameMap['ZH2HQQ']  = 'zh'
+nameMap['QQ2HLL']  = 'zh'
+nameMap['QQ2HLNU'] = 'wh'
 
-#photon shape systematics
-scales        = 'HighR9EB,HighR9EE,LowR9EB,LowR9EE,Gain1EB,Gain6EB'
-scalesCorr    = 'MaterialCentralBarrel,MaterialOuterBarrel,MaterialForward,FNUFEE,FNUFEB,ShowerShapeHighR9EE,ShowerShapeHighR9EB,ShowerShapeLowR9EE,ShowerShapeLowR9EB'
-scalesGlobal  = 'NonLinearity:UntaggedTag_0:2,Geant4'
-smears        = 'HighR9EBPhi,HighR9EBRho,HighR9EEPhi,HighR9EERho,LowR9EBPhi,LowR9EBRho,LowR9EEPhi,LowR9EERho'
-#print 'scales %s'%scales
-#print 'scalesCorr %s'%scalesCorr
-#print 'scalesGlobal %s'%scalesGlobal
-#print 'smears %s'%smears
+def main():
+  for fileName in fullFileNames:
+    if 'M125' not in fileName: continue
+    theProc = fileName.split('pythia8_')[1].split('.root')[0]
+    theProc0 = theProc.split('_')[0]
+    print 'processing %s'%theProc
+    theFile = r.TFile(fileName, 'READ')
+    theWS = theFile.Get('tagsDumper/cms_hgg_13TeV')
+    for cat in cats:
+      dataName = '%s_125_13TeV_%s'%(nameMap[theProc0], cat)
+      sumEntries = theWS.data(dataName).sumEntries()
+      stage0procs[theProc0] += sumEntries
+      procs[theProc] += sumEntries
 
-#masses to be considered
-masses        = '120,123,124,125,126,127,130'
-massLow       = '120'
-massHigh      = '130'
-print 'masses %s'%masses
+  print '\n\n\nStage 1 fractions:'
+  for proc,val in procs.iteritems():
+    procTot = stage0procs[ proc.split('_')[0] ]
+    theFrac = val / procTot
+    print 'fraction for process %s is %1.4f'%(proc,theFrac)
+  print '\n'
 
-theCommand = ''
-if isSubmitted:
-  theCommand += ('cd /vols/build/cms/es811/FreshStart/STXSstage1/CMSSW_7_4_7/src/flashggFinalFit/Signal\n')
-  theCommand += ('eval `scramv1 runtime -sh`\n')
-theCommand += './runSignalScripts.sh -i '+fullFileNames+' -p '+procs+' -f '+cats+' --ext '+ext+' --intLumi '+lumi+' --batch '+batch+' --massList '+masses+' --bs '+beamspot
-theCommand += ' --smears '+smears+' --scales '+scales+' --scalesCorr '+scalesCorr+' --scalesGlobal '+scalesGlobal+' --useSSF 1 --useDCB_1G 0'
-if phoSystOnly: theCommand += ' --calcPhoSystOnly'
-elif sigFitOnly: theCommand += ' --sigFitOnly'
-elif sigPlotsOnly: theCommand += ' --sigPlotsOnly'
-if not justPrint: system(theCommand)
-else: print '\n\n%s'%theCommand
+if __name__ == '__main__':
+  main()

@@ -10,7 +10,7 @@ WSTFileWrapper::WSTFileWrapper( std::string files, std::string wsname ) {
     getline( ss, substr, ',' );
     fnList.push_back( substr );
   }
-  wsName_ = wsname;
+  wsName = wsname;
 
   std::cout << "inside WST contructor, about to loop over files" << std:: endl;
   for ( std::vector<std::string>::iterator fn = fnList.begin() ; fn != fnList.end() ; fn++ ) {
@@ -42,7 +42,7 @@ WSTFileWrapper::WSTFileWrapper( std::string files, std::string wsname ) {
 }
 
 WSTFileWrapper::WSTFileWrapper( TFile *tf ,RooWorkspace *inWS ) {
-  wsName_ = inWS->GetName();
+  wsName = inWS->GetName();
   wsList.push_back(inWS);
   fnList.push_back("current file");
   fileList.emplace("current file",tf);
@@ -50,7 +50,7 @@ WSTFileWrapper::WSTFileWrapper( TFile *tf ,RooWorkspace *inWS ) {
 
 WSTFileWrapper::WSTFileWrapper( RooWorkspace *inWS ) {
   TFile *outF = new TFile("WSTFileWrapper.root","RECREATE");
-  wsName_ = inWS->GetName();
+  wsName = inWS->GetName();
   wsList.push_back(inWS);
   fnList.push_back("current file");
   fileList.emplace("current file",outF);
@@ -58,7 +58,18 @@ WSTFileWrapper::WSTFileWrapper( RooWorkspace *inWS ) {
 
 RooWorkspace* WSTFileWrapper::getSpecificWorkspace( std::string keyName ) {
  fileList[keyName]->cd();
- return (RooWorkspace*)fileList[keyName]->Get(wsName_.c_str());
+ return (RooWorkspace*)fileList[keyName]->Get(wsName.c_str());
+}
+
+RooWorkspace* WSTFileWrapper::getSpecificWorkspace( int i ) {
+  int j=0;
+  for( auto it = fileList.begin(); it!=fileList.end(); it++ ) {
+    if( j==i ) { 
+      it->second->cd();
+      return (RooWorkspace*)it->second->Get(wsName.c_str());
+    }
+    j++;
+  }
 }
 
 RooRealVar* WSTFileWrapper::var(std::string varName) {
@@ -120,13 +131,7 @@ RooAbsData* WSTFileWrapper::data(std::string dataName) {
     TString tempFileName = TString(it->second->GetName());
     if( tempFileName.Index(newProcName) < 0  && newProcName!="" ) { continue; }
     it->second->cd();
-    std::cout << "trying to get data with name " << newDataName << std::endl;
-    std::cout << "the workspace looks like this: " << std::endl;
-    wsList[0]->Print();
-    std::cout << "its name is " << wsName_ << std::endl;
-    std::cout << "the length of the file list is " << fileList.size() << std::endl;
-    std::cout << "this file name is " << tempFileName << std::endl;
-    RooAbsData* this_result = (RooAbsData*)((RooWorkspace*)it->second->Get(wsName_.c_str()))->data(newDataName.c_str());
+    RooAbsData* this_result = (RooAbsData*)((RooWorkspace*)it->second->Get(wsName.c_str()))->data(newDataName.c_str());
     if (result && this_result && !complained_yet) {
       std::cout << "[WSTFileWrapper] Uh oh, multiple RooAbsDatas from the file list with the same name: " <<  newDataName << std::endl;
       complained_yet = true;
@@ -146,7 +151,7 @@ RooAbsData* WSTFileWrapper::data(std::string keyName, std::string dataName) {
   std::pair<std::string,std::string> thePair = convertTemplatedName(dataName);
   std::string newDataName = thePair.first;
   fileList[keyName]->cd();
-  RooAbsData* result = (RooAbsData*)((RooWorkspace*)fileList[keyName]->Get(wsName_.c_str()))->data(newDataName.c_str());
+  RooAbsData* result = (RooAbsData*)((RooWorkspace*)fileList[keyName]->Get(wsName.c_str()))->data(newDataName.c_str());
   if (!result) {
     std::cout << "[WSTFileWrapper] Uh oh, never got a good RooAbsData with name " << newDataName << std::endl;
   }
@@ -163,7 +168,7 @@ RooAbsPdf* WSTFileWrapper::pdf(std::string pdfName) {
   }
   for( auto it=fileList.begin(); it!=fileList.end(); it++ ) {
     it->second->cd();
-    RooAbsPdf* this_result = (RooAbsPdf*)((RooWorkspace*)it->second->Get(wsName_.c_str()))->pdf(pdfName.c_str());
+    RooAbsPdf* this_result = (RooAbsPdf*)((RooWorkspace*)it->second->Get(wsName.c_str()))->pdf(pdfName.c_str());
     if (result && this_result && !complained_yet) {
       std::cout << "[WSTFileWrapper] Uh oh, multiple RooAbsPdfs from the file list with the same name: " <<  pdfName << std::endl;
       complained_yet = true;
@@ -181,7 +186,7 @@ RooAbsPdf* WSTFileWrapper::pdf(std::string pdfName) {
 
 RooAbsPdf* WSTFileWrapper::pdf(std::string keyName, std::string pdfName) {
   fileList[keyName]->cd();
-  RooAbsPdf* result = (RooAbsPdf*)((RooWorkspace*)fileList[keyName]->Get(wsName_.c_str()))->pdf(pdfName.c_str());
+  RooAbsPdf* result = (RooAbsPdf*)((RooWorkspace*)fileList[keyName]->Get(wsName.c_str()))->pdf(pdfName.c_str());
   if (!result) {
     std::cout << "[WSTFileWrapper] Uh oh, never got a good RooAbsPdf with name " << pdfName << std::endl;
   }
@@ -198,7 +203,7 @@ RooCategory* WSTFileWrapper::cat(std::string catName) {
   }
   for( auto it=fileList.begin(); it!=fileList.end(); it++ ) {
     it->second->cd();
-    RooCategory* this_result = (RooCategory*)((RooWorkspace*)it->second->Get(wsName_.c_str()))->cat(catName.c_str());
+    RooCategory* this_result = (RooCategory*)((RooWorkspace*)it->second->Get(wsName.c_str()))->cat(catName.c_str());
     if (result && this_result && !complained_yet) {
       std::cout << "[WSTFileWrapper] Uh oh, multiple RooCategories from the file list with the same name: " <<  catName << std::endl;
       complained_yet = true;
@@ -216,7 +221,7 @@ RooCategory* WSTFileWrapper::cat(std::string catName) {
 
 RooCategory* WSTFileWrapper::cat(std::string keyName, std::string catName) {
   fileList[keyName]->cd();
-  RooCategory* result = (RooCategory*)((RooWorkspace*)fileList[keyName]->Get(wsName_.c_str()))->cat(catName.c_str());
+  RooCategory* result = (RooCategory*)((RooWorkspace*)fileList[keyName]->Get(wsName.c_str()))->cat(catName.c_str());
   if (!result) {
     std::cout << "[WSTFileWrapper] Uh oh, never got a good RooCategory with name " << catName << std::endl;
   }
@@ -233,7 +238,7 @@ RooAbsReal* WSTFileWrapper::function(std::string functionName) {
   }
   for( auto it=fileList.begin(); it!=fileList.end(); it++ ) {
     it->second->cd();
-    RooAbsReal* this_result = (RooAbsReal*)((RooWorkspace*)it->second->Get(wsName_.c_str()))->function(functionName.c_str());
+    RooAbsReal* this_result = (RooAbsReal*)((RooWorkspace*)it->second->Get(wsName.c_str()))->function(functionName.c_str());
     if (result && this_result && !complained_yet) {
       std::cout << "[WSTFileWrapper] Uh oh, multiple RooAbsReals from the file list with the same name: " <<  functionName << std::endl;
       complained_yet = true;
@@ -251,7 +256,7 @@ RooAbsReal* WSTFileWrapper::function(std::string functionName) {
 
 RooAbsReal* WSTFileWrapper::function(std::string keyName, std::string functionName) {
   fileList[keyName]->cd();
-  RooAbsReal* result = (RooAbsReal*)((RooWorkspace*)fileList[keyName]->Get(wsName_.c_str()))->function(functionName.c_str());
+  RooAbsReal* result = (RooAbsReal*)((RooWorkspace*)fileList[keyName]->Get(wsName.c_str()))->function(functionName.c_str());
   if (!result) {
     std::cout << "[WSTFileWrapper] Uh oh, never got a good RooAbsReal with name " << functionName << std::endl;
   }
