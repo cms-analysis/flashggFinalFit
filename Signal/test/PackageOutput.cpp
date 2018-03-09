@@ -183,7 +183,8 @@ int main (int argc, char *argv[]){
     cout << "[INFO] Starting to combine fits..." << endl;
     // this guy packages everything up
 	  RooWorkspace *mergeWS = 0;
-    Packager packager(mergedWS, saveWS ,procs_,ncats_,mhLow_,mhHigh_,skipMasses_,/*sqrts*/13,/*skipPlots_*/false,plotDir_,mergeWS,cats_,flashggCats_);
+    //Packager packager(mergedWS, saveWS ,procs_,ncats_,mhLow_,mhHigh_,skipMasses_,/*sqrts*/13,/*skipPlots_*/false,plotDir_,mergeWS,cats_,flashggCats_);
+    Packager packager(mergedWS, saveWS ,procs_,ncats_,mhLow_,mhHigh_,skipMasses_,/*sqrts*/13,/*skipPlots_*/true,plotDir_,mergeWS,cats_,flashggCats_); //FIXME hoping this speeds things up...
     cout << "[INFO] Finished initalising packager." << endl;
     packager.packageOutput(/*split*/ false);
     cout << "[INFO] Combination complete." << endl;
