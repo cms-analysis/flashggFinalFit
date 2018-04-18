@@ -7,13 +7,47 @@ import shlex
 from array import array
 import ROOT as r
 
-ext='ws919'
+#ext='fullStage1Test'
+ext='fullStage1Test_DCB'
 
 r.gSystem.Load("libHiggsAnalysisCombinedLimit")
 r.gSystem.Load("libHiggsAnalysisGBRLikelihood")
-#procs=['ggh','vbf','zh','wh','tth']
-procs=['GG2H','VBF','TTH','QQ2HLNU','QQ2HLL','WH2HQQ','ZH2HQQ','testBBH','testTHQ','testTHW']
-cats=['UntaggedTag_0','UntaggedTag_1','UntaggedTag_2','UntaggedTag_3','VBFTag_0','VBFTag_1','VBFTag_2','TTHLeptonicTag','TTHHadronicTag','ZHLeptonicTag','WHLeptonicTag','VHLeptonicLooseTag','VHHadronicTag','VHMetTag']
+
+##procs=['ggh','vbf','zh','wh','tth']
+#procs=['GG2H','VBF','TTH','QQ2HLNU','QQ2HLL','WH2HQQ','ZH2HQQ','testBBH','testTHQ','testTHW']
+#cats=['UntaggedTag_0','UntaggedTag_1','UntaggedTag_2','UntaggedTag_3','VBFTag_0','VBFTag_1','VBFTag_2','TTHLeptonicTag','TTHHadronicTag','ZHLeptonicTag','WHLeptonicTag','VHLeptonicLooseTag','VHHadronicTag','VHMetTag']
+
+#setup files 
+#baseFilePath  = '/vols/cms/es811/FinalFits/ws_%s/'%ext
+baseFilePath  = '/vols/cms/es811/FinalFits/ws_fullStage1Test/'
+fileNames     = []
+for root,dirs,files in os.walk(baseFilePath):
+  for fileName in files: 
+    if not fileName.startswith('output_'): continue
+    if not fileName.endswith('.root'):     continue
+    fileNames.append(fileName)
+fullFileNames = '' 
+for fileName in fileNames: fullFileNames += baseFilePath+fileName+','
+fullFileNames = fullFileNames[:-1]
+files125 = ''
+for fileName in fileNames: 
+  if 'M125' in fileName: files125 += baseFilePath+fileName+','
+files125 = files125[:-1]
+#print 'fileNames = %s'%fullFileNames
+
+#define processes and categories
+procs         = ''
+for fileName in fileNames: 
+  if 'M125' not in fileName: continue
+  procs += fileName.split('pythia8_')[1].split('.root')[0]
+  procs += ','
+procs = procs[:-1]
+#cats          = 'RECO_0J,RECO_1J_PTH_0_60,RECO_1J_PTH_60_120,RECO_1J_PTH_120_200,RECO_1J_PTH_GT200,RECO_GE2J_PTH_0_60,RECO_GE2J_PTH_60_120,RECO_GE2J_PTH_120_200,RECO_GE2J_PTH_GT200,RECO_VBFTOPO_JET3VETO,RECO_VBFTOPO_JET3,RECO_VH2JET,RECO_0LEP_PTV_0_150,RECO_0LEP_PTV_150_250_0J,RECO_0LEP_PTV_150_250_GE1J,RECO_0LEP_PTV_GT250,RECO_1LEP_PTV_0_150,RECO_1LEP_PTV_150_250_0J,RECO_1LEP_PTV_150_250_GE1J,RECO_1LEP_PTV_GT250,RECO_2LEP_PTV_0_150,RECO_2LEP_PTV_150_250_0J,RECO_2LEP_PTV_150_250_GE1J,RECO_2LEP_PTV_GT250,RECO_TTH_LEP,RECO_TTH_HAD'
+cats          = 'RECO_0J,RECO_1J_PTH_0_60,RECO_1J_PTH_60_120,RECO_1J_PTH_120_200,RECO_1J_PTH_GT200,RECO_GE2J_PTH_0_60,RECO_GE2J_PTH_60_120,RECO_GE2J_PTH_120_200,RECO_GE2J_PTH_GT200,RECO_VBFTOPO_JET3VETO,RECO_VBFTOPO_JET3,RECO_VH2JET,RECO_0LEP_PTV_0_150,RECO_0LEP_PTV_150_250_0J,RECO_0LEP_PTV_150_250_GE1J,RECO_0LEP_PTV_GT250,RECO_1LEP_PTV_0_150,RECO_1LEP_PTV_150_250_0J,RECO_1LEP_PTV_150_250_GE1J,RECO_1LEP_PTV_GT250,RECO_2LEP_PTV_0_150,RECO_TTH_LEP,RECO_TTH_HAD' #zero entry cats removed
+procs = procs.split(',')
+cats  = cats.split(',')
+print 'with processes: %s'%procs
+print 'and categories: %s'%cats
 rvwv=['rv','wv']
 
 for proc in procs:

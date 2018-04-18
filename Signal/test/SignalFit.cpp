@@ -101,18 +101,6 @@ float originalIntLumi_;
 float mcBeamSpotWidth_=5.14; //cm // the beamspot has a certain width in MC which is not necessarily the same in data. for the data/MC to agree, we reweight the MC to match the data Beamspot width, using dZ as a proxy (they have a factor of sqrt(2) because you are subtracting one gaussain distributed quantity from another)
 //float dataBeamSpotWidth_=4.24; //cm
 float dataBeamSpotWidth_=3.5; //cm
-//string referenceProc_="ggh";
-//string referenceProc_="GG2H";
-string referenceProc_="GG2H_0J";
-//string referenceProcWV_="ggh";
-//string referenceProcWV_="GG2H";
-string referenceProcWV_="GG2H_0J";
-//string referenceProcTTH_="tth";
-string referenceProcTTH_="TTH";
-//string referenceTagWV_="UntaggedTag_2";
-string referenceTagWV_="RECO_0J";
-//string referenceTagRV_="UntaggedTag_2";
-string referenceTagRV_="RECO_0J";
 vector<string> map_proc_;
 vector<string> map_cat_;
 vector<string> map_replacement_proc_RV_;
@@ -446,17 +434,68 @@ int main(int argc, char *argv[]){
 	sw.Start();
 
   // reference details for low stats cats
-  // need to make this configurable ?! -LC
-  //referenceProc_="ggh";
-  //referenceProc_="GG2H";
-  referenceProc_="GG2H_0J";
-  //referenceProcTTH_="tth";
-  referenceProcTTH_="TTH";
-  //referenceTagWV_="UntaggedTag_2"; // histest stats WV is ggh Untagged 3. 
-  referenceTagWV_="RECO_0J";
-  //referenceTagRV_="UntaggedTag_2"; // fairly low resolution tag even for ggh, more approprioate as te default than re-using the original tag.
-  referenceTagRV_="RECO_0J";
-  // are WV which needs to borrow should be taken from here
+  // now updated to a map which gives the "most diagonal" proc for each cat
+  std::map<string,string> replacementProcMap;
+  replacementProcMap["RECO_0J"]                    = "GG2H_0J";
+  replacementProcMap["RECO_1J_PTH_0_60"]           = "GG2H_1J_PTH_0_60";
+  replacementProcMap["RECO_1J_PTH_60_120"]         = "GG2H_1J_PTH_60_120";
+  replacementProcMap["RECO_1J_PTH_120_200"]        = "GG2H_1J_PTH_120_200";
+  replacementProcMap["RECO_1J_PTH_GT200"]          = "GG2H_1J_PTH_GT200";
+  replacementProcMap["RECO_GE2J_PTH_0_60"]         = "GG2H_GE2J_PTH_0_60";
+  replacementProcMap["RECO_GE2J_PTH_60_120"]       = "GG2H_GE2J_PTH_60_120";
+  replacementProcMap["RECO_GE2J_PTH_120_200"]      = "GG2H_GE2J_PTH_120_200";
+  replacementProcMap["RECO_GE2J_PTH_GT200"]        = "GG2H_GE2J_PTH_GT200";
+  replacementProcMap["RECO_VBFTOPO_JET3VETO"]      = "VBF_VBFTOPO_JET3VETO";
+  replacementProcMap["RECO_VBFTOPO_JET3"]          = "VBF_VBFTOPO_JET3";
+  replacementProcMap["RECO_VH2JET"]                = "WH2HQQ_VH2JET";
+  replacementProcMap["RECO_0LEP_PTV_0_150"]        = "QQ2HLNU_PTV_0_150";
+  replacementProcMap["RECO_0LEP_PTV_150_250_0J"]   = "QQ2HLNU_PTV_150_250_0J";
+  replacementProcMap["RECO_0LEP_PTV_150_250_GE1J"] = "QQ2HLNU_PTV_150_250_GE1J";
+  replacementProcMap["RECO_0LEP_PTV_GT250"]        = "QQ2HLNU_PTV_GT250";
+  replacementProcMap["RECO_1LEP_PTV_0_150"]        = "QQ2HLNU_PTV_0_150";
+  replacementProcMap["RECO_1LEP_PTV_150_250_0J"]   = "QQ2HLNU_PTV_150_250_0J";
+  replacementProcMap["RECO_1LEP_PTV_150_250_GE1J"] = "QQ2HLNU_PTV_150_250_GE1J";
+  replacementProcMap["RECO_1LEP_PTV_GT250"]        = "QQ2HLNU_PTV_GT250";
+  replacementProcMap["RECO_2LEP_PTV_0_150"]        = "QQ2HLNU_PTV_0_150";
+  replacementProcMap["RECO_2LEP_PTV_150_250_0J"]   = "QQ2HLNU_PTV_150_250_0J";
+  replacementProcMap["RECO_2LEP_PTV_150_250_GE1J"] = "QQ2HLNU_PTV_150_250_GE1J";
+  replacementProcMap["RECO_2LEP_PTV_GT250"]        = "QQ2HLNU_PTV_GT250";
+  //replacementProcMap["RECO_TTH_LEP"]               = "TTH_TTH_LEP"; //FIXME
+  //replacementProcMap["RECO_TTH_HAD"]               = "TTH_TTH_HAD";
+  replacementProcMap["RECO_TTH_LEP"]               = "GG2H_GE2J_PTH_60_120";
+  replacementProcMap["RECO_TTH_HAD"]               = "GG2H_GE2J_PTH_60_120";
+
+  std::map<string,string> replacementCatMap;
+  replacementCatMap["RECO_0J"]                    = "RECO_0J";
+  replacementCatMap["RECO_1J_PTH_0_60"]           = "RECO_1J_PTH_0_60";
+  replacementCatMap["RECO_1J_PTH_60_120"]         = "RECO_1J_PTH_60_120";
+  replacementCatMap["RECO_1J_PTH_120_200"]        = "RECO_1J_PTH_120_200";
+  replacementCatMap["RECO_1J_PTH_GT200"]          = "RECO_1J_PTH_GT200";
+  replacementCatMap["RECO_GE2J_PTH_0_60"]         = "RECO_GE2J_PTH_0_60";
+  replacementCatMap["RECO_GE2J_PTH_60_120"]       = "RECO_GE2J_PTH_60_120";
+  //replacementCatMap["RECO_GE2J_PTH_120_200"]      = "RECO_GE2J_PTH_120_200";
+  replacementCatMap["RECO_GE2J_PTH_120_200"]      = "RECO_1J_PTH_120_200";
+  replacementCatMap["RECO_GE2J_PTH_GT200"]        = "RECO_GE2J_PTH_GT200";
+  replacementCatMap["RECO_VBFTOPO_JET3VETO"]      = "RECO_VBFTOPO_JET3VETO";
+  replacementCatMap["RECO_VBFTOPO_JET3"]          = "RECO_VBFTOPO_JET3";
+  replacementCatMap["RECO_VH2JET"]                = "RECO_VH2JET";
+  replacementCatMap["RECO_0LEP_PTV_0_150"]        = "RECO_0LEP_PTV_0_150";
+  replacementCatMap["RECO_0LEP_PTV_150_250_0J"]   = "RECO_0LEP_PTV_150_250_0J";
+  //replacementCatMap["RECO_0LEP_PTV_150_250_GE1J"] = "RECO_0LEP_PTV_150_250_GE1J";
+  replacementCatMap["RECO_0LEP_PTV_150_250_GE1J"] = "RECO_1LEP_PTV_0_150";
+  replacementCatMap["RECO_0LEP_PTV_GT250"]        = "RECO_0LEP_PTV_GT250";
+  replacementCatMap["RECO_1LEP_PTV_0_150"]        = "RECO_1LEP_PTV_0_150";
+  replacementCatMap["RECO_1LEP_PTV_150_250_0J"]   = "RECO_1LEP_PTV_150_250_0J";
+  replacementCatMap["RECO_1LEP_PTV_150_250_GE1J"] = "RECO_1LEP_PTV_150_250_GE1J";
+  replacementCatMap["RECO_1LEP_PTV_GT250"]        = "RECO_1LEP_PTV_GT250";
+  replacementCatMap["RECO_2LEP_PTV_0_150"]        = "RECO_2LEP_PTV_0_150";
+  replacementCatMap["RECO_2LEP_PTV_150_250_0J"]   = "RECO_2LEP_PTV_150_250_0J";
+  replacementCatMap["RECO_2LEP_PTV_150_250_GE1J"] = "RECO_2LEP_PTV_150_250_GE1J";
+  replacementCatMap["RECO_2LEP_PTV_GT250"]        = "RECO_2LEP_PTV_GT250";
+  //replacementCatMap["RECO_TTH_LEP"]               = "RECO_TTH_LEP";
+  //replacementCatMap["RECO_TTH_HAD"]               = "RECO_TTH_HAD";
+  replacementCatMap["RECO_TTH_LEP"]               = "RECO_TTH_LEP";
+  replacementCatMap["RECO_TTH_HAD"]               = "RECO_TTH_HAD";
   
   // isFlashgg should now be the only option.
 	if (isFlashgg_){ 
@@ -632,8 +671,8 @@ int main(int argc, char *argv[]){
 			  //replaceWith_RV_ = make_pair(els[4],els[5]); // proc, cat
         map_replacement_proc_RV_.push_back(els[4]);
         map_replacement_cat_RV_.push_back(els[5]);
-        map_replacement_proc_WV_.push_back(referenceProc_); //use defaults for replacement WV if they are needed
-        map_replacement_cat_WV_.push_back(referenceTagWV_);//use defaults for replacement WV if they are needed
+        map_replacement_proc_WV_.push_back(replacementProcMap[cat]); //use defaults for replacement WV if they are needed
+        map_replacement_cat_WV_.push_back( replacementCatMap[cat] );//use defaults for replacement WV if they are needed
 		  } else if( els.size()==8 ) { // in this case you have specified a replacement tag for RV and WV!
 			  //replaceWithRV_ = make_pair(els[4],els[5]); // proc, cat
 			  //replaceWithWV_ = make_pair(els[6],els[7]); // proc, cat
@@ -644,20 +683,21 @@ int main(int argc, char *argv[]){
         map_replacement_cat_WV_.push_back(els[7]);
       } else {
         // if no replacement is speficied, use defaults
+        // FIXME no longer needed?
         if (cat.compare(0,3,"TTH") ==0){
           // if the cat starts with TTH, use TTH reference process.
           // howwver this is over-riden later if the WV needs to be replaced
           // as even teh TTH tags in WV has limited stats
-          map_replacement_proc_RV_.push_back(referenceProcTTH_);
-          map_replacement_cat_RV_.push_back(cat);
-          map_replacement_proc_WV_.push_back(referenceProc_); //use defaults for replacement WV if they are needed
-          map_replacement_cat_WV_.push_back(referenceTagWV_);//use defaults for replacement WV if they are needed
+          map_replacement_proc_RV_.push_back(replacementProcMap[cat]);
+          map_replacement_cat_RV_.push_back( replacementCatMap[cat] );
+          map_replacement_proc_WV_.push_back(replacementProcMap[cat]); //use defaults for replacement WV if they are needed
+          map_replacement_cat_WV_.push_back( replacementCatMap[cat] );//use defaults for replacement WV if they are needed
         } else {
          // else use the ggh
-         map_replacement_proc_RV_.push_back(referenceProc_);
-         map_replacement_cat_RV_.push_back(referenceTagRV_); //deflaut is ggh UntaggedTag3
-         map_replacement_proc_WV_.push_back(referenceProc_); //use defaults for replacement WV if they are needed
-         map_replacement_cat_WV_.push_back(referenceTagWV_);//use defaults for replacement WV if they are needed
+         map_replacement_proc_RV_.push_back(replacementProcMap[cat]);
+         map_replacement_cat_RV_.push_back( replacementCatMap[cat] ); //deflaut is ggh UntaggedTag3
+         map_replacement_proc_WV_.push_back(replacementProcMap[cat]); //use defaults for replacement WV if they are needed
+         map_replacement_cat_WV_.push_back( replacementCatMap[cat] );//use defaults for replacement WV if they are needed
         }
       }
       if (verbose_) std::cout << "[INFO] dat file listing: "<< proc << " " << cat << " " << nGaussiansRV << " " << nGaussiansWV <<  " " << std::endl;

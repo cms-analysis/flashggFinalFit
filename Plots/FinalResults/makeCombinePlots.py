@@ -21,7 +21,6 @@ parser.add_option("","--groups",dest="groups",default=1,type="int",help="Set Num
 parser.add_option("-t","--text",dest="text",type="string",default="",help="Add Text")
 parser.add_option("","--MHtext",dest="MHtext",default=[],action='append',help="Add more text (eg mh=XXX for chan-compat plots etc). Modify NDC position by ruing  X:Y:text")
 parser.add_option("","--blacklistMH",dest="blacklistMH",default=[],action='append',type='float',help="Kill an MH value (limits, pvals, Mu vs MH etc)")
-
 parser.add_option("","--xlab",dest="xlab",type="string",default="",help="Label for x-axis")
 parser.add_option("","--xvar",dest="xvar",type="string",default=[],action="append",help="Branch in TTree to pick up as 'x'")
 parser.add_option("-e","--expected",dest="expected",default=False,action="store_true",help="Expected only")
@@ -71,8 +70,8 @@ parser.add_option("-b","--batch",dest="batch",default=False,action="store_true")
 parser.add_option("--it",dest="it",type="string",help="if using superloop, index of iteration")
 parser.add_option("--itLedger",dest="itLedger",type="string",help="ledger to keep track of values of each iteration if using superloop")
 parser.add_option("--specifyX",dest="specifyX",type="string",help="use a specific variable name in mu plots (eg r_Untagged_Tag_0)")
-#parser.add_option("--paperStyle",dest="paperStyle",default=False,action="store_true",help="Make plots in paper style (without preliminary etc)")
-parser.add_option("--paperStyle",dest="paperStyle",default=True,action="store_false",help="Make plots in paper style (without preliminary etc)")
+parser.add_option("--paperStyle",dest="paperStyle",default=False,action="store_true",help="Make plots in paper style (without preliminary etc)")
+#parser.add_option("--paperStyle",dest="paperStyle",default=True,action="store_false",help="Make plots in paper style (without preliminary etc)")
 (options,args)=parser.parse_args()
 
 print "[INFO] Processing Files :"
@@ -596,7 +595,8 @@ def smoothNLL(gr,res):
   minVal = min([re[0] for re in res])
   maxVal = max([re[0] for re in res])
   sp = r.TSpline3('sp_%s'%gr.GetName(),gr,"",minVal,maxVal)
-  for p in range(100):
+  #for p in range(100):
+  for p in range(gr.GetN()):
     x = minVal+p*((maxVal-minVal)/100.)
     y = sp.Eval(x)
     gr.SetPoint(p,x,y)
@@ -1307,8 +1307,10 @@ def plotMPdfChComp(plottype="perTag"):
          doStxs = options.stxs
          if doStxs:
            #if "ggH" in catName: catName ="#scale[1.5]{#sigma_{ggH}/#sigma_{theo}}"
-           if "ggH" in catName: catName ="#scale[1.5]{GG2H}"
-           if "GG2H" in catName: catName ="#scale[1.5]{ggH}"
+           if "ggH_0J" in catName: catName ="#scale[1.5]{ggH 0J}"
+           elif "ggH_1J" in catName: catName ="#scale[1.5]{ggH 1J}"
+           elif "ggH_GE2J" in catName: catName ="#scale[1.5]{ggH GE2J}"
+           elif "GG2H" in catName: catName ="#scale[1.5]{ggH}"
            if "qqH" in catName: catName ="#scale[1.5]{VBF}"
            #if "ttH" in catName: catName ="#scale[1.5]{#sigma_{ttH}/#sigma_{theo}}"
            if "ttH" in catName: catName ="#scale[1.5]{TTH}"
