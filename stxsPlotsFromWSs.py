@@ -15,7 +15,8 @@ r.gROOT.SetBatch(True)
 
 #setup files 
 #ext          = 'fullStage1Test'
-ext          = 'fullerStage1Test'
+#ext          = 'fullerStage1Test'
+ext          = 'reCategorised'
 print 'ext = %s'%ext
 baseFilePath  = '/vols/cms/es811/FinalFits/ws_%s/'%ext
 fileNames     = []
@@ -37,7 +38,12 @@ for fileName in fileNames:
 #procsOfInterest = procs
 procsOfInterest = ['GG2H_0J','GG2H_1J_PTH_0_60','GG2H_1J_PTH_60_120','GG2H_1J_PTH_120_200','GG2H_1J_PTH_GT200','GG2H_GE2J_PTH_0_60','GG2H_GE2J_PTH_60_120','GG2H_GE2J_PTH_120_200','GG2H_GE2J_PTH_GT200']
 #cats          = 'NOTAG,RECO_0J,RECO_1J_PTH_0_60,RECO_1J_PTH_60_120,RECO_1J_PTH_120_200,RECO_1J_PTH_GT200,RECO_GE2J_PTH_0_60,RECO_GE2J_PTH_60_120,RECO_GE2J_PTH_120_200,RECO_GE2J_PTH_GT200,RECO_VBFTOPO_JET3VETO,RECO_VBFTOPO_JET3,RECO_VH2JET,RECO_0LEP_PTV_0_150,RECO_0LEP_PTV_150_250_0J,RECO_0LEP_PTV_150_250_GE1J,RECO_0LEP_PTV_GT250,RECO_1LEP_PTV_0_150,RECO_1LEP_PTV_150_250_0J,RECO_1LEP_PTV_150_250_GE1J,RECO_1LEP_PTV_GT250,RECO_2LEP_PTV_0_150,RECO_2LEP_PTV_150_250_0J,RECO_2LEP_PTV_150_250_GE1J,RECO_2LEP_PTV_GT250,RECO_TTH_LEP,RECO_TTH_HAD'
-cats          = 'RECO_0J,RECO_1J_PTH_0_60,RECO_1J_PTH_60_120,RECO_1J_PTH_120_200,RECO_1J_PTH_GT200,RECO_GE2J_PTH_0_60,RECO_GE2J_PTH_60_120,RECO_GE2J_PTH_120_200,RECO_GE2J_PTH_GT200'
+#cats          = 'RECO_0J,RECO_1J_PTH_0_60,RECO_1J_PTH_60_120,RECO_1J_PTH_120_200,RECO_1J_PTH_GT200,RECO_GE2J_PTH_0_60,RECO_GE2J_PTH_60_120,RECO_GE2J_PTH_120_200,RECO_GE2J_PTH_GT200'
+cats  = 'RECO_0J_Tag0,RECO_0J_Tag1,RECO_1J_PTH_0_60_Tag0,RECO_1J_PTH_0_60_Tag1,RECO_1J_PTH_60_120_Tag0,RECO_1J_PTH_60_120_Tag1,RECO_1J_PTH_120_200_Tag0,RECO_1J_PTH_120_200_Tag1,RECO_1J_PTH_GT200,'
+cats += 'RECO_GE2J_PTH_0_60_Tag0,RECO_GE2J_PTH_0_60_Tag1,RECO_GE2J_PTH_60_120_Tag1,RECO_GE2J_PTH_120_200_Tag0,RECO_GE2J_PTH_120_200_Tag1,RECO_GE2J_PTH_GT200_Tag0,RECO_GE2J_PTH_GT200_Tag1'
+#cats += 'RECO_VBFTOPO_JET3VETO_Tag0,RECO_VBFTOPO_JET3VETO_Tag1,RECO_VBFTOPO_JET3_Tag0,RECO_VBFTOPO_JET3_Tag1,'
+#cats += 'RECO_WHLEP,RECO_ZHLEP,RECO_VHLEPLOOSE,RECO_VHMET,RECO_VHHAD,'
+#cats += 'RECO_TTH_LEP,RECO_TTH_HAD'
 cats = cats.split(',')
 print procs 
 print cats
@@ -80,24 +86,33 @@ def main():
       sumwCatMap[ cat ] += sumEntries
 
   print 'got all values'
-  nBins = len(procsOfInterest)
-  procHist = r.TH2F('procHist','procHist', nBins, -0.5, nBins-0.5, nBins, -0.5, nBins-0.5)
+  nBinsX = len(procsOfInterest)
+  nBinsY = len(cats)
+  procHist = r.TH2F('procHist','procHist', nBinsX, -0.5, nBinsX-0.5, nBinsY, -0.5, nBinsY-0.5)
   procHist.SetTitle('')
-  catHist  = r.TH2F('catHist','catHist', nBins, -0.5, nBins-0.5, nBins, -0.5, nBins-0.5)
+  catHist  = r.TH2F('catHist','catHist', nBinsX, -0.5, nBinsX-0.5, nBinsY, -0.5, nBinsY-0.5)
   catHist.SetTitle('')
   for iProc,proc in enumerate(procsOfInterest):
-    print 'pProc,proc',iProc,proc
+    print 'iProc,proc',iProc,proc
     for iCat,cat in enumerate(cats):
       procWeight = 100. * sumwProcCatMap[(proc,cat)] / sumwProcMap[proc]
       catWeight  = 100. * sumwProcCatMap[(proc,cat)] / sumwCatMap[cat]
 
+      catLabel = cat.split('ECO_')[1]
+      catLabel = catLabel.replace('PTH_0_60','low')
+      catLabel = catLabel.replace('PTH_60_120','med')
+      catLabel = catLabel.replace('PTH_120_200','high')
+      catLabel = catLabel.replace('PTH_GT200','BSM')
+      catLabel = catLabel.replace('GE2J','2J')
+      catLabel = catLabel.replace('_',' ')
+
       procHist.Fill( iProc, iCat, procWeight )
       procHist.GetXaxis().SetBinLabel( iProc+1, procLabelMap[proc] )
-      procHist.GetYaxis().SetBinLabel( iProc+1, procLabelMap[proc] )
+      procHist.GetYaxis().SetBinLabel( iCat+1, catLabel )
 
       catHist.Fill( iProc, iCat, catWeight )
       catHist.GetXaxis().SetBinLabel( iProc+1, procLabelMap[proc] )
-      catHist.GetYaxis().SetBinLabel( iProc+1, procLabelMap[proc] )
+      catHist.GetYaxis().SetBinLabel( iCat+1, catLabel )
   
   canv = r.TCanvas('canv','canv')
   r.gStyle.SetPaintTextFormat('2.0f')

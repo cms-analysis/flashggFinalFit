@@ -65,6 +65,7 @@ bool doTable_;
 bool verbose_;
 bool doCrossCheck_;
 bool markNegativeBins_;
+bool doAllSum_;
 
 void OptionParser(int argc, char *argv[]){
   po::options_description desc1("Allowed options");
@@ -82,6 +83,7 @@ void OptionParser(int argc, char *argv[]){
     ("doCrossCheck",  po::value<bool>(&doCrossCheck_)->default_value(false),                          "output additional details")
     ("verbose",  po::value<bool>(&verbose_)->default_value(false),                          "output additional details")
     ("markNegativeBins",  po::value<bool>(&markNegativeBins_)->default_value(false),                          " show with red arrow if a bin has a negative total value")
+    ("doAllSum",  po::value<bool>(&doAllSum_)->default_value(false),                          "include the sum of all procs, categories (slow)")
     ("flashggCats,f", po::value<string>(&flashggCatsStr_)->default_value("DiPhotonUntaggedCategory_0,DiPhotonUntaggedCategory_1,DiPhotonUntaggedCategory_2,DiPhotonUntaggedCategory_3,DiPhotonUntaggedCategory_4,VBFTag_0,VBFTag_1,VBFTag_2"),       "Flashgg category names to consider")
     ;
 
@@ -105,7 +107,9 @@ map<string,RooDataSet*> getGlobeData(RooWorkspace *work, int ncats, int m_hyp){
   for (int cat=0; cat<ncats; cat++){
     result.insert(pair<string,RooDataSet*>(Form("cat%d",cat),(RooDataSet*)work->data(Form("sig_mass_m%3d_cat%d",m_hyp,cat))));
   }
-  result.insert(pair<string,RooDataSet*>("all",(RooDataSet*)work->data(Form("sig_mass_m%3d_AllCats",m_hyp))));
+  if (doAllSum_) {
+    result.insert(pair<string,RooDataSet*>("all",(RooDataSet*)work->data(Form("sig_mass_m%3d_AllCats",m_hyp))));
+  }
 
   return result;
 }
@@ -116,7 +120,9 @@ map<string,RooDataSet*> getFlashggData(RooWorkspace *work, int ncats, int m_hyp)
   for (int cat=0; cat<ncats; cat++){
     result.insert(pair<string,RooDataSet*>(Form("%s",flashggCats_[cat].c_str()),(RooDataSet*)work->data(Form("sig_mass_m%3d_%s",m_hyp,flashggCats_[cat].c_str()))));
   }
-  result.insert(pair<string,RooDataSet*>("all",(RooDataSet*)work->data(Form("sig_mass_m%3d_AllCats",m_hyp))));
+  if (doAllSum_) {
+    result.insert(pair<string,RooDataSet*>("all",(RooDataSet*)work->data(Form("sig_mass_m%3d_AllCats",m_hyp))));
+  }
 
   return result;
 }
@@ -143,7 +149,9 @@ map<string,RooAddPdf*> getGlobePdfs(RooWorkspace *work, int ncats){
   for (int cat=0; cat<ncats; cat++){
     result.insert(pair<string,RooAddPdf*>(Form("cat%d",cat),(RooAddPdf*)work->pdf(Form("sigpdfrelcat%d_allProcs",cat))));
   }
-  result.insert(pair<string,RooAddPdf*>("all",(RooAddPdf*)work->pdf("sigpdfrelAllCats_allProcs")));
+  if (doAllSum_) {
+    result.insert(pair<string,RooAddPdf*>("all",(RooAddPdf*)work->pdf("sigpdfrelAllCats_allProcs")));
+  }
 
   return result;
 }
@@ -154,7 +162,9 @@ map<string,RooAddPdf*> getFlashggPdfs(RooWorkspace *work, int ncats){
   for (int cat=0; cat<ncats; cat++){
     result.insert(pair<string,RooAddPdf*>(Form("%s",flashggCats_[cat].c_str()),(RooAddPdf*)work->pdf(Form("sigpdfrel%s_allProcs",flashggCats_[cat].c_str()))));
   }
-  result.insert(pair<string,RooAddPdf*>("all",(RooAddPdf*)work->pdf("sigpdfrelAllCats_allProcs")));
+  if (doAllSum_) {
+    result.insert(pair<string,RooAddPdf*>("all",(RooAddPdf*)work->pdf("sigpdfrelAllCats_allProcs")));
+  }
 
   return result;
 }

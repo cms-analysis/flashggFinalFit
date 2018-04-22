@@ -441,6 +441,7 @@ void SimultaneousFit::printFitParams(){
 void SimultaneousFit::runFits(int ncpu,string outdir, float epsilon){
 //epsilon represents the additional constraint on the fits when fitting order 0 first, constraining to +/- (1.+epsilon)*nominal, then fitting order 1 etc...
   
+  std::cout << "ED DEBUG inside runFits" << std:: endl;
   //holder for chi2 values and fitrsults
   std::vector<std::string> chi2_values_str;
   std::vector<RooFitResult> vecFitRes;
@@ -480,6 +481,7 @@ void SimultaneousFit::runFits(int ncpu,string outdir, float epsilon){
   for (int iOrder=0; iOrder <maxOrder_+1 ; iOrder++){
     
 
+    std::cout << "ED DEBUG starting loop for order " << iOrder << std:: endl;
     //if you want to see the values of your PDF's params before the fit, you can
     if (verbosity_){ 
       RooRealVar *thisParamPreFit;
@@ -527,14 +529,17 @@ void SimultaneousFit::runFits(int ncpu,string outdir, float epsilon){
     // print the parameter post-fit values if you like
     if(verbosity_>-1){
       std::cout << " [INFO] Values pdf PDF params -post fit"<< std::endl;
+      std::cout << "ED DEBUG printing params " << iOrder << std:: endl;
       RooRealVar *thisParamPostFit;
       TIterator *pdfParamsPostFit = fitModel[iOrder]->getParameters(RooArgSet(*mass,*MH))->selectByAttrib("Constant",kFALSE)->createIterator();
       while((thisParamPostFit=(RooRealVar*)pdfParamsPostFit->Next())){
         thisParamPostFit->Print("");
       }
+      std::cout << "ED DEBUG done printing params " << iOrder << std:: endl;
     }
 
     //make some plots of the fits at each order
+    std::cout << "ED DEBUG start making plots " << iOrder << std:: endl;
     int index=0;
     RooPlot *frame = mass->frame(Range(mhLow_-10,mhHigh_+10));
     float totalChi2=0; // summing the chi2 for each mass point
@@ -617,6 +622,8 @@ void SimultaneousFit::runFits(int ncpu,string outdir, float epsilon){
         }
       }
     }
+
+    std::cout << "ED DEBUG done first batch of plots " << iOrder << std:: endl;
     
     //if using iterative fitting where the params are constrained between each order (size of constraint determined by epsilon) then it is applied here 
     //in pratcice this did not help - fits are already stable.
@@ -652,6 +659,9 @@ void SimultaneousFit::runFits(int ncpu,string outdir, float epsilon){
   
   }// end of the iOrder loop
 
+  std::cout << "ED DEBUG done second batch of plots " << std:: endl;
+  std::cout << "ED DEBUG so iOrder loop done " << std:: endl;
+
   // make optional plots of the RooPolyVars cs MH for each order on the same plot
   TCanvas *canvas = new TCanvas("c","c",500,500);
   for (auto it = graphs.begin() ; it!=graphs.end(); ++it){
@@ -680,7 +690,9 @@ void SimultaneousFit::runFits(int ncpu,string outdir, float epsilon){
     //latex->DrawLatex(0.6, 0.93-0.1*iColor,Form("#color[%d]{%s}",colorList[iColor],it->first.c_str()));
   }
   mg_perOrder->Draw("AP");
-  mg_perOrder->GetYaxis()->SetTitle("number of standard deviations from 0");
+  std::cout << "ED DEBUG what is going on here " << std::endl;
+  mg_perOrder->Print();
+  //mg_perOrder->GetYaxis()->SetTitle("number of standard deviations from 0");
   mg_perOrder->GetXaxis()->SetRangeUser(0,4);
   mg_perOrder->GetYaxis()->SetRangeUser(-5,5);
   mg_perOrder->GetXaxis()->SetLabelOffset(999);
@@ -701,6 +713,8 @@ void SimultaneousFit::runFits(int ncpu,string outdir, float epsilon){
   latex->DrawLatex(0.16, 0.85,Form("%s %s %s",proc_.c_str(), cat_.c_str(), rvwv.c_str()));
   canvas->SaveAs(Form("%s_paramsPulls.pdf",outdir.c_str()));
   canvas->SaveAs(Form("%s_paramsPulls.png",outdir.c_str()));
+
+  std::cout << "ED DEBUG end of runFits" << std:: endl;
 }
 
 void SimultaneousFit::setFitParams(std::map<int,std::map<std::string,RooRealVar*> >& pars )

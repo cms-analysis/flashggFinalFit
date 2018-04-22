@@ -219,6 +219,8 @@ unsigned int getIndexOfReferenceDataset(string proc, string cat){
   for(unsigned int i =0 ; i < map_proc_.size() ; i++){
     string this_process = map_proc_[i];
     string this_cat = map_cat_[i];
+    //std::cout << "ED DEBUG ipnut proc, cat is " << proc << ", " << cat << std::endl;
+    //std::cout << "ED DEBUG obtained proc, cat is " << this_process << ", " << this_cat << std::endl << std::endl;
     if (this_process.compare(proc) ==0 ){
       if ( this_cat.compare(cat)==0 ){ 
         iLine=i;
@@ -436,66 +438,64 @@ int main(int argc, char *argv[]){
   // reference details for low stats cats
   // now updated to a map which gives the "most diagonal" proc for each cat
   std::map<string,string> replacementProcMap;
-  replacementProcMap["RECO_0J"]                    = "GG2H_0J";
-  replacementProcMap["RECO_1J_PTH_0_60"]           = "GG2H_1J_PTH_0_60";
-  replacementProcMap["RECO_1J_PTH_60_120"]         = "GG2H_1J_PTH_60_120";
-  replacementProcMap["RECO_1J_PTH_120_200"]        = "GG2H_1J_PTH_120_200";
-  replacementProcMap["RECO_1J_PTH_GT200"]          = "GG2H_1J_PTH_GT200";
-  replacementProcMap["RECO_GE2J_PTH_0_60"]         = "GG2H_GE2J_PTH_0_60";
-  replacementProcMap["RECO_GE2J_PTH_60_120"]       = "GG2H_GE2J_PTH_60_120";
-  replacementProcMap["RECO_GE2J_PTH_120_200"]      = "GG2H_GE2J_PTH_120_200";
-  replacementProcMap["RECO_GE2J_PTH_GT200"]        = "GG2H_GE2J_PTH_GT200";
-  replacementProcMap["RECO_VBFTOPO_JET3VETO"]      = "VBF_VBFTOPO_JET3VETO";
-  replacementProcMap["RECO_VBFTOPO_JET3"]          = "VBF_VBFTOPO_JET3";
-  replacementProcMap["RECO_VH2JET"]                = "WH2HQQ_VH2JET";
-  replacementProcMap["RECO_0LEP_PTV_0_150"]        = "QQ2HLNU_PTV_0_150";
-  replacementProcMap["RECO_0LEP_PTV_150_250_0J"]   = "QQ2HLNU_PTV_150_250_0J";
-  replacementProcMap["RECO_0LEP_PTV_150_250_GE1J"] = "QQ2HLNU_PTV_150_250_GE1J";
-  replacementProcMap["RECO_0LEP_PTV_GT250"]        = "QQ2HLNU_PTV_GT250";
-  replacementProcMap["RECO_1LEP_PTV_0_150"]        = "QQ2HLNU_PTV_0_150";
-  replacementProcMap["RECO_1LEP_PTV_150_250_0J"]   = "QQ2HLNU_PTV_150_250_0J";
-  replacementProcMap["RECO_1LEP_PTV_150_250_GE1J"] = "QQ2HLNU_PTV_150_250_GE1J";
-  replacementProcMap["RECO_1LEP_PTV_GT250"]        = "QQ2HLNU_PTV_GT250";
-  replacementProcMap["RECO_2LEP_PTV_0_150"]        = "QQ2HLNU_PTV_0_150";
-  replacementProcMap["RECO_2LEP_PTV_150_250_0J"]   = "QQ2HLNU_PTV_150_250_0J";
-  replacementProcMap["RECO_2LEP_PTV_150_250_GE1J"] = "QQ2HLNU_PTV_150_250_GE1J";
-  replacementProcMap["RECO_2LEP_PTV_GT250"]        = "QQ2HLNU_PTV_GT250";
-  //replacementProcMap["RECO_TTH_LEP"]               = "TTH_TTH_LEP"; //FIXME
-  //replacementProcMap["RECO_TTH_HAD"]               = "TTH_TTH_HAD";
-  replacementProcMap["RECO_TTH_LEP"]               = "GG2H_GE2J_PTH_60_120";
-  replacementProcMap["RECO_TTH_HAD"]               = "GG2H_GE2J_PTH_60_120";
+  replacementProcMap["RECO_0J_Tag0"]                    = "GG2H_0J";
+  replacementProcMap["RECO_0J_Tag1"]                    = "GG2H_0J";
+  replacementProcMap["RECO_1J_PTH_0_60_Tag0"]           = "GG2H_1J_PTH_0_60";
+  replacementProcMap["RECO_1J_PTH_0_60_Tag1"]           = "GG2H_1J_PTH_0_60";
+  replacementProcMap["RECO_1J_PTH_60_120_Tag0"]         = "GG2H_1J_PTH_60_120";
+  replacementProcMap["RECO_1J_PTH_60_120_Tag1"]         = "GG2H_1J_PTH_60_120";
+  replacementProcMap["RECO_1J_PTH_120_200_Tag0"]        = "GG2H_1J_PTH_120_200";
+  replacementProcMap["RECO_1J_PTH_120_200_Tag1"]        = "GG2H_1J_PTH_120_200";
+  replacementProcMap["RECO_1J_PTH_GT200"]               = "GG2H_1J_PTH_GT200";
+  replacementProcMap["RECO_GE2J_PTH_0_60_Tag0"]         = "GG2H_GE2J_PTH_0_60";
+  replacementProcMap["RECO_GE2J_PTH_0_60_Tag1"]         = "GG2H_GE2J_PTH_0_60";
+  replacementProcMap["RECO_GE2J_PTH_60_120_Tag0"]       = "GG2H_GE2J_PTH_60_120";
+  replacementProcMap["RECO_GE2J_PTH_60_120_Tag1"]       = "GG2H_GE2J_PTH_60_120";
+  replacementProcMap["RECO_GE2J_PTH_120_200_Tag0"]      = "GG2H_GE2J_PTH_120_200";
+  replacementProcMap["RECO_GE2J_PTH_120_200_Tag1"]      = "GG2H_GE2J_PTH_120_200";
+  replacementProcMap["RECO_GE2J_PTH_GT200_Tag0"]        = "GG2H_GE2J_PTH_GT200";
+  replacementProcMap["RECO_GE2J_PTH_GT200_Tag1"]        = "GG2H_GE2J_PTH_GT200";
+  replacementProcMap["RECO_VBFTOPO_JET3VETO_Tag0"]      = "VBF_VBFTOPO_JET3VETO";
+  replacementProcMap["RECO_VBFTOPO_JET3VETO_Tag1"]      = "VBF_VBFTOPO_JET3VETO";
+  replacementProcMap["RECO_VBFTOPO_JET3_Tag0"]          = "VBF_VBFTOPO_JET3";
+  replacementProcMap["RECO_VBFTOPO_JET3_Tag1"]          = "VBF_VBFTOPO_JET3";
+  replacementProcMap["RECO_VHHAD"]                      = "ZH2HQQ_VH2JET";
+  replacementProcMap["RECO_VHLEPLOOSE"]                 = "QQ2HLNU_PTV_0_150";
+  replacementProcMap["RECO_VHMET"]                      = "QQ2HLNU_PTV_0_150";
+  replacementProcMap["RECO_WHLEP"]                      = "QQ2HLNU_PTV_0_150";
+  replacementProcMap["RECO_ZHLEP"]                      = "QQ2HLL_PTV_0_150";
+  replacementProcMap["RECO_TTH_LEP"]                    = "TTH";
+  replacementProcMap["RECO_TTH_HAD"]                    = "TTH";
 
   std::map<string,string> replacementCatMap;
-  replacementCatMap["RECO_0J"]                    = "RECO_0J";
-  replacementCatMap["RECO_1J_PTH_0_60"]           = "RECO_1J_PTH_0_60";
-  replacementCatMap["RECO_1J_PTH_60_120"]         = "RECO_1J_PTH_60_120";
-  replacementCatMap["RECO_1J_PTH_120_200"]        = "RECO_1J_PTH_120_200";
-  replacementCatMap["RECO_1J_PTH_GT200"]          = "RECO_1J_PTH_GT200";
-  replacementCatMap["RECO_GE2J_PTH_0_60"]         = "RECO_GE2J_PTH_0_60";
-  replacementCatMap["RECO_GE2J_PTH_60_120"]       = "RECO_GE2J_PTH_60_120";
-  //replacementCatMap["RECO_GE2J_PTH_120_200"]      = "RECO_GE2J_PTH_120_200";
-  replacementCatMap["RECO_GE2J_PTH_120_200"]      = "RECO_1J_PTH_120_200";
-  replacementCatMap["RECO_GE2J_PTH_GT200"]        = "RECO_GE2J_PTH_GT200";
-  replacementCatMap["RECO_VBFTOPO_JET3VETO"]      = "RECO_VBFTOPO_JET3VETO";
-  replacementCatMap["RECO_VBFTOPO_JET3"]          = "RECO_VBFTOPO_JET3";
-  replacementCatMap["RECO_VH2JET"]                = "RECO_VH2JET";
-  replacementCatMap["RECO_0LEP_PTV_0_150"]        = "RECO_0LEP_PTV_0_150";
-  replacementCatMap["RECO_0LEP_PTV_150_250_0J"]   = "RECO_0LEP_PTV_150_250_0J";
-  //replacementCatMap["RECO_0LEP_PTV_150_250_GE1J"] = "RECO_0LEP_PTV_150_250_GE1J";
-  replacementCatMap["RECO_0LEP_PTV_150_250_GE1J"] = "RECO_1LEP_PTV_0_150";
-  replacementCatMap["RECO_0LEP_PTV_GT250"]        = "RECO_0LEP_PTV_GT250";
-  replacementCatMap["RECO_1LEP_PTV_0_150"]        = "RECO_1LEP_PTV_0_150";
-  replacementCatMap["RECO_1LEP_PTV_150_250_0J"]   = "RECO_1LEP_PTV_150_250_0J";
-  replacementCatMap["RECO_1LEP_PTV_150_250_GE1J"] = "RECO_1LEP_PTV_150_250_GE1J";
-  replacementCatMap["RECO_1LEP_PTV_GT250"]        = "RECO_1LEP_PTV_GT250";
-  replacementCatMap["RECO_2LEP_PTV_0_150"]        = "RECO_2LEP_PTV_0_150";
-  replacementCatMap["RECO_2LEP_PTV_150_250_0J"]   = "RECO_2LEP_PTV_150_250_0J";
-  replacementCatMap["RECO_2LEP_PTV_150_250_GE1J"] = "RECO_2LEP_PTV_150_250_GE1J";
-  replacementCatMap["RECO_2LEP_PTV_GT250"]        = "RECO_2LEP_PTV_GT250";
-  //replacementCatMap["RECO_TTH_LEP"]               = "RECO_TTH_LEP";
-  //replacementCatMap["RECO_TTH_HAD"]               = "RECO_TTH_HAD";
-  replacementCatMap["RECO_TTH_LEP"]               = "RECO_TTH_LEP";
-  replacementCatMap["RECO_TTH_HAD"]               = "RECO_TTH_HAD";
+  replacementCatMap["RECO_0J_Tag0"]                    = "RECO_0J_Tag0";
+  replacementCatMap["RECO_0J_Tag1"]                    = "RECO_0J_Tag1";
+  replacementCatMap["RECO_1J_PTH_0_60_Tag0"]           = "RECO_1J_PTH_0_60_Tag0";
+  replacementCatMap["RECO_1J_PTH_0_60_Tag1"]           = "RECO_1J_PTH_0_60_Tag1";
+  replacementCatMap["RECO_1J_PTH_60_120_Tag0"]         = "RECO_1J_PTH_60_120_Tag0";
+  replacementCatMap["RECO_1J_PTH_60_120_Tag1"]         = "RECO_1J_PTH_60_120_Tag1";
+  replacementCatMap["RECO_1J_PTH_120_200_Tag0"]        = "RECO_1J_PTH_120_200_Tag0";
+  replacementCatMap["RECO_1J_PTH_120_200_Tag1"]        = "RECO_1J_PTH_120_200_Tag1";
+  replacementCatMap["RECO_1J_PTH_GT200"]               = "RECO_1J_PTH_GT200";
+  replacementCatMap["RECO_GE2J_PTH_0_60_Tag0"]         = "RECO_GE2J_PTH_0_60_Tag0";
+  replacementCatMap["RECO_GE2J_PTH_0_60_Tag1"]         = "RECO_GE2J_PTH_0_60_Tag1";
+  replacementCatMap["RECO_GE2J_PTH_60_120_Tag0"]       = "RECO_GE2J_PTH_60_120_Tag0";
+  replacementCatMap["RECO_GE2J_PTH_60_120_Tag1"]       = "RECO_GE2J_PTH_60_120_Tag1";
+  replacementCatMap["RECO_GE2J_PTH_120_200_Tag0"]      = "RECO_GE2J_PTH_120_200_Tag0";
+  replacementCatMap["RECO_GE2J_PTH_120_200_Tag1"]      = "RECO_GE2J_PTH_120_200_Tag1";
+  replacementCatMap["RECO_GE2J_PTH_GT200_Tag0"]        = "RECO_GE2J_PTH_GT200_Tag0";
+  replacementCatMap["RECO_GE2J_PTH_GT200_Tag1"]        = "RECO_GE2J_PTH_GT200_Tag1";
+  replacementCatMap["RECO_VBFTOPO_JET3VETO_Tag0"]      = "RECO_VBFTOPO_JET3VETO_Tag0";
+  replacementCatMap["RECO_VBFTOPO_JET3VETO_Tag1"]      = "RECO_VBFTOPO_JET3VETO_Tag1";
+  replacementCatMap["RECO_VBFTOPO_JET3_Tag0"]          = "RECO_VBFTOPO_JET3_Tag0";
+  replacementCatMap["RECO_VBFTOPO_JET3_Tag1"]          = "RECO_VBFTOPO_JET3_Tag1";
+  replacementCatMap["RECO_VHHAD"]                      = "RECO_VHHAD";
+  replacementCatMap["RECO_VHLEPLOOSE"]                 = "RECO_VHLEPLOOSE";
+  replacementCatMap["RECO_VHMET"]                      = "RECO_VHMET";
+  replacementCatMap["RECO_WHLEP"]                      = "RECO_WHLEP";
+  replacementCatMap["RECO_ZHLEP"]                      = "RECO_ZHLEP";
+  replacementCatMap["RECO_TTH_LEP"]                    = "RECO_TTH_LEP";
+  replacementCatMap["RECO_TTH_HAD"]                    = "RECO_TTH_HAD";
   
   // isFlashgg should now be the only option.
 	if (isFlashgg_){ 
@@ -669,14 +669,21 @@ int main(int argc, char *argv[]){
       //std::cout << " LC DEBUG here is your line " << line << " els.size()==6 " << (els.size()==6) <<  std::endl;
 		  if( els.size()==6 ) { // in this case you have specified a replacement tag for RV!
 			  //replaceWith_RV_ = make_pair(els[4],els[5]); // proc, cat
+	//std::cout << "ED DEBUG entering into replacement map: " << els[4] << std::endl;
+	//std::cout << "ED DEBUG coming from line: \n" << line << std::endl << std::endl;
         map_replacement_proc_RV_.push_back(els[4]);
         map_replacement_cat_RV_.push_back(els[5]);
-        map_replacement_proc_WV_.push_back(replacementProcMap[cat]); //use defaults for replacement WV if they are needed
-        map_replacement_cat_WV_.push_back( replacementCatMap[cat] );//use defaults for replacement WV if they are needed
+        //FIXME
+        //map_replacement_proc_WV_.push_back(replacementProcMap[cat]); //use defaults for replacement WV if they are needed
+        //map_replacement_cat_WV_.push_back( replacementCatMap[cat] );//use defaults for replacement WV if they are needed
+        map_replacement_proc_WV_.push_back("GG2H_0J"); //use defaults for replacement WV if they are needed
+        map_replacement_cat_WV_.push_back("RECO_0J_Tag1");//use defaults for replacement WV if they are needed
 		  } else if( els.size()==8 ) { // in this case you have specified a replacement tag for RV and WV!
 			  //replaceWithRV_ = make_pair(els[4],els[5]); // proc, cat
 			  //replaceWithWV_ = make_pair(els[6],els[7]); // proc, cat
 		   	//replace_ = true;
+	//std::cout << "ED DEBUG entering into replacement map: " << els[4] << std::endl;
+	//std::cout << "ED DEBUG coming from line: \n" << line << std::endl << std::endl;
         map_replacement_proc_RV_.push_back(els[4]);
         map_replacement_cat_RV_.push_back(els[5]);
         map_replacement_proc_WV_.push_back(els[6]);
@@ -684,7 +691,7 @@ int main(int argc, char *argv[]){
       } else {
         // if no replacement is speficied, use defaults
         // FIXME no longer needed?
-        if (cat.compare(0,3,"TTH") ==0){
+        if (cat.compare(0,3,"TTH") ==0){ //FIXME this won't work with new tag names
           // if the cat starts with TTH, use TTH reference process.
           // howwver this is over-riden later if the WV needs to be replaced
           // as even teh TTH tags in WV has limited stats
@@ -694,10 +701,15 @@ int main(int argc, char *argv[]){
           map_replacement_cat_WV_.push_back( replacementCatMap[cat] );//use defaults for replacement WV if they are needed
         } else {
          // else use the ggh
+	 //std::cout << "ED DEBUG entering into proc replacement map: " << replacementProcMap[cat] << std::endl;
+	 //std::cout << "ED DEBUG coming from line: \n" << line << std::endl << std::endl;
          map_replacement_proc_RV_.push_back(replacementProcMap[cat]);
          map_replacement_cat_RV_.push_back( replacementCatMap[cat] ); //deflaut is ggh UntaggedTag3
-         map_replacement_proc_WV_.push_back(replacementProcMap[cat]); //use defaults for replacement WV if they are needed
-         map_replacement_cat_WV_.push_back( replacementCatMap[cat] );//use defaults for replacement WV if they are needed
+         //FIXME this is changing the scheme somewhat
+         //map_replacement_proc_WV_.push_back(replacementProcMap[cat]); //use defaults for replacement WV if they are needed
+         //map_replacement_cat_WV_.push_back( replacementCatMap[cat] );//use defaults for replacement WV if they are needed
+         map_replacement_proc_WV_.push_back("GG2H_0J"); //use defaults for replacement WV if they are needed
+         map_replacement_cat_WV_.push_back("RECO_0J_Tag1");//use defaults for replacement WV if they are needed
         }
       }
       if (verbose_) std::cout << "[INFO] dat file listing: "<< proc << " " << cat << " " << nGaussiansRV << " " << nGaussiansWV <<  " " << std::endl;

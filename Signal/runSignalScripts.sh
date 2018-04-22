@@ -18,6 +18,7 @@ SIMULATENOUSMASSPOINTFITTING=0
 USEDCBP1G=0
 SIGFITONLY=0
 DONTPACKAGE=0
+PACKAGEONLY=0
 SIGPLOTSONLY=0
 INTLUMI=1
 BATCH=""
@@ -41,6 +42,7 @@ usage(){
 		echo "--calcPhoSystOnly) "
 		echo "--sigFitOnly) "
 		echo "--dontPackage) "
+		echo "--packageOnly) "
 		echo "--sigPlotsOnly) "
 		echo "--intLumi) specified in fb^-{1} (default $INTLUMI)) "
 		echo "--batch) which batch system to use (None (''),LSF,IC) (default '$BATCH')) "
@@ -51,7 +53,7 @@ usage(){
 
 
 # options may be followed by one colon to indicate they have a required argument
-if ! options=$(getopt -u -o hi:p:f: -l help,inputFile:,procs:,bs:,smears:,massList:,scales:,scalesCorr:,useSSF:,useDCB_1G:,scalesGlobal:,flashggCats:,ext:,fTestOnly,calcPhoSystOnly,sigFitOnly,dontPackage,sigPlotsOnly,intLumi:,batch: -- "$@")
+if ! options=$(getopt -u -o hi:p:f: -l help,inputFile:,procs:,bs:,smears:,massList:,scales:,scalesCorr:,useSSF:,useDCB_1G:,scalesGlobal:,flashggCats:,ext:,fTestOnly,calcPhoSystOnly,sigFitOnly,dontPackage,packageOnly,sigPlotsOnly,intLumi:,batch: -- "$@")
 then
 # something went wrong, getopt will put out an error message for us
 exit 1
@@ -78,6 +80,7 @@ case $1 in
 --calcPhoSystOnly) CALCPHOSYSTONLY=1;;
 --sigFitOnly) SIGFITONLY=1;;
 --dontPackage) DONTPACKAGE=1;;
+--packageOnly) PACKAGEONLY=1;;
 --sigPlotsOnly) SIGPLOTSONLY=1;;
 --intLumi) INTLUMI=$2; shift ;;
 --batch) BATCH=$2; shift;;
@@ -266,6 +269,23 @@ if [ $SIGFITONLY == 1 ]; then
     fi
   fi
 
+fi
+
+if [ $PACKAGEONLY == 1 ]; then
+  ls $OUTDIR/CMS-HGG_sigfit_${EXT}_*.root > out.txt
+  echo "ls ../Signal/$OUTDIR/CMS-HGG_sigfit_${EXT}_*.root > out.txt"
+  counter=0
+  while read p ; do
+    if (($counter==0)); then
+      SIGFILES="$p"
+    else
+      SIGFILES="$SIGFILES,$p"
+    fi
+    ((counter=$counter+1))
+  done < out.txt
+  echo "SIGFILES $SIGFILES"
+  echo "./bin/PackageOutput -i $SIGFILES --procs $PROCS -l $INTLUMI -p $OUTDIR/sigfit -W wsig_13TeV -f $CATS -L 120 -H 130 -o $OUTDIR/CMS-HGG_sigfit_$EXT.root"
+  ./bin/PackageOutput -i $SIGFILES --procs $PROCS -l $INTLUMI -p $OUTDIR/sigfit -W wsig_13TeV -f $CATS -L 120 -H 130 -o $OUTDIR/CMS-HGG_sigfit_$EXT.root > package.out
 fi
 
 #####################################################
