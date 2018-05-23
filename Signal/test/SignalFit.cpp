@@ -219,8 +219,6 @@ unsigned int getIndexOfReferenceDataset(string proc, string cat){
   for(unsigned int i =0 ; i < map_proc_.size() ; i++){
     string this_process = map_proc_[i];
     string this_cat = map_cat_[i];
-    //std::cout << "ED DEBUG ipnut proc, cat is " << proc << ", " << cat << std::endl;
-    //std::cout << "ED DEBUG obtained proc, cat is " << this_process << ", " << this_cat << std::endl << std::endl;
     if (this_process.compare(proc) ==0 ){
       if ( this_cat.compare(cat)==0 ){ 
         iLine=i;
@@ -457,13 +455,16 @@ int main(int argc, char *argv[]){
   replacementProcMap["RECO_GE2J_PTH_GT200_Tag1"]        = "GG2H_GE2J_PTH_GT200";
   replacementProcMap["RECO_VBFTOPO_JET3VETO_Tag0"]      = "VBF_VBFTOPO_JET3VETO";
   replacementProcMap["RECO_VBFTOPO_JET3VETO_Tag1"]      = "VBF_VBFTOPO_JET3VETO";
+  replacementProcMap["RECO_VBFTOPO_JET3VETO_Tag2"]      = "VBF_VBFTOPO_JET3VETO";
   replacementProcMap["RECO_VBFTOPO_JET3_Tag0"]          = "VBF_VBFTOPO_JET3";
   replacementProcMap["RECO_VBFTOPO_JET3_Tag1"]          = "VBF_VBFTOPO_JET3";
+  replacementProcMap["RECO_VBFTOPO_JET3_Tag2"]          = "VBF_VBFTOPO_JET3";
   replacementProcMap["RECO_VHHAD"]                      = "ZH2HQQ_VH2JET";
   replacementProcMap["RECO_VHLEPLOOSE"]                 = "QQ2HLNU_PTV_0_150";
   replacementProcMap["RECO_VHMET"]                      = "QQ2HLNU_PTV_0_150";
   replacementProcMap["RECO_WHLEP"]                      = "QQ2HLNU_PTV_0_150";
-  replacementProcMap["RECO_ZHLEP"]                      = "QQ2HLL_PTV_0_150";
+  //replacementProcMap["RECO_ZHLEP"]                      = "QQ2HLL_PTV_0_150";
+  replacementProcMap["RECO_ZHLEP"]                      = "QQ2HLNU_PTV_0_150";
   replacementProcMap["RECO_TTH_LEP"]                    = "TTH";
   replacementProcMap["RECO_TTH_HAD"]                    = "TTH";
 
@@ -487,13 +488,16 @@ int main(int argc, char *argv[]){
   replacementCatMap["RECO_GE2J_PTH_GT200_Tag1"]        = "RECO_GE2J_PTH_GT200_Tag1";
   replacementCatMap["RECO_VBFTOPO_JET3VETO_Tag0"]      = "RECO_VBFTOPO_JET3VETO_Tag0";
   replacementCatMap["RECO_VBFTOPO_JET3VETO_Tag1"]      = "RECO_VBFTOPO_JET3VETO_Tag1";
+  replacementCatMap["RECO_VBFTOPO_JET3VETO_Tag2"]      = "RECO_VBFTOPO_JET3VETO_Tag2";
   replacementCatMap["RECO_VBFTOPO_JET3_Tag0"]          = "RECO_VBFTOPO_JET3_Tag0";
   replacementCatMap["RECO_VBFTOPO_JET3_Tag1"]          = "RECO_VBFTOPO_JET3_Tag1";
+  replacementCatMap["RECO_VBFTOPO_JET3_Tag2"]          = "RECO_VBFTOPO_JET3_Tag2";
   replacementCatMap["RECO_VHHAD"]                      = "RECO_VHHAD";
   replacementCatMap["RECO_VHLEPLOOSE"]                 = "RECO_VHLEPLOOSE";
   replacementCatMap["RECO_VHMET"]                      = "RECO_VHMET";
   replacementCatMap["RECO_WHLEP"]                      = "RECO_WHLEP";
-  replacementCatMap["RECO_ZHLEP"]                      = "RECO_ZHLEP";
+  //replacementCatMap["RECO_ZHLEP"]                      = "RECO_ZHLEP";
+  replacementCatMap["RECO_ZHLEP"]                      = "RECO_WHLEP";
   replacementCatMap["RECO_TTH_LEP"]                    = "RECO_TTH_LEP";
   replacementCatMap["RECO_TTH_HAD"]                    = "RECO_TTH_HAD";
   

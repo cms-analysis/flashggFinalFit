@@ -1,5 +1,6 @@
-fileName = 'potentialNegPdfs_reCategorised.txt'
+#fileName = 'potentialNegPdfs_reCategorised.txt'
 #fileName = 'potentialNegPdfs_reCategorised_DCB.txt'
+fileName = 'potentialNegPdfs_fullStage1combinedBDT.txt'
 with open(fileName, 'r') as f:
   theInput = f.read().splitlines()
 

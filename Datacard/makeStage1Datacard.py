@@ -1352,9 +1352,11 @@ def printVbfSysts():
               else : outFile.write('%1.4g '%(vbfMigrateToEvCount[p][migIt]/vbfMigrateToEvCountNOMINAL[p][migIt]))
             elif c in vbfMigrateFromCats[migIt]:
               if (asymmetric or asymweight):
-                UP=vbfMigrateFromEvCountUP[p][migIt]/vbfMigrateFromEvCountNOMINAL[p][migIt]
-                DOWN=vbfMigrateFromEvCountDOWN[p][migIt]/vbfMigrateFromEvCountNOMINAL[p][migIt]
-                outFile.write('%1.4g/%1.4g '%(DOWN,UP))
+                if vbfMigrateFromEvCountNOMINAL[p][migIt] > 0.:
+                  UP=vbfMigrateFromEvCountUP[p][migIt]/vbfMigrateFromEvCountNOMINAL[p][migIt]
+                  DOWN=vbfMigrateFromEvCountDOWN[p][migIt]/vbfMigrateFromEvCountNOMINAL[p][migIt]
+                  outFile.write('%1.4g/%1.4g '%(DOWN,UP))
+                else: outFile.write('- ')
               elif (adhoc) :
                 VAR=(1.+thisUncert)
                 #print " FROM categories : " , VAR

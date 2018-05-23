@@ -105,17 +105,19 @@ echo "[ERROR], input file (--inputFile or -i) is mandatory!"
 exit 0
 fi
 
-if [ $FTESTONLY == 0 -a $CALCPHOSYSTONLY == 0 -a $SIGFITONLY == 0 -a $SIGPLOTSONLY == 0 ]; then
+if [ $FTESTONLY == 0 -a $CALCPHOSYSTONLY == 0 -a $SIGFITONLY == 0 -a $SIGPLOTSONLY == 0 -a $PACKAGEONLY == 0 ]; then
 #IF not particular script specified, run all!
 FTESTONLY=1
 CALCPHOSYSTONLY=1
 SIGFITONLY=1
 SIGPLOTSONLY=1
+PACKAGEONLY=1
 fi
-echo "FTESTONLY = $FTESTONLY"
+echo "FTESTONLY       = $FTESTONLY"
 echo "CALCPHOSYSTONLY = $CALCPHOSYSTONLY"
-echo "SIGFITONLY = $SIGFITONLY"
-echo "SIGPLOTSONLY=  $SIGPLOTSONLY"
+echo "SIGFITONLY      = $SIGFITONLY"
+echo "SIGPLOTSONLY    =  $SIGPLOTSONLY"
+echo "PACKAGEONLY     =  $PACKAGEONLY"
 
 if [[ $BATCH == "IC" ]]; then
 DEFAULTQUEUE=hep.q
@@ -284,6 +286,7 @@ if [ $PACKAGEONLY == 1 ]; then
     ((counter=$counter+1))
   done < out.txt
   echo "SIGFILES $SIGFILES"
+  echo ""
   echo "./bin/PackageOutput -i $SIGFILES --procs $PROCS -l $INTLUMI -p $OUTDIR/sigfit -W wsig_13TeV -f $CATS -L 120 -H 130 -o $OUTDIR/CMS-HGG_sigfit_$EXT.root"
   ./bin/PackageOutput -i $SIGFILES --procs $PROCS -l $INTLUMI -p $OUTDIR/sigfit -W wsig_13TeV -f $CATS -L 120 -H 130 -o $OUTDIR/CMS-HGG_sigfit_$EXT.root > package.out
 fi
