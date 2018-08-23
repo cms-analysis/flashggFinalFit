@@ -9,6 +9,7 @@
 #include "RooWorkspace.h"
 #include "RooRealVar.h"
 #include "RooDataSet.h"
+#include "RooAddPdf.h"
 
 #include "Normalization_8TeV.h"
 #include "Normalization_13TeV.h"

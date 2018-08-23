@@ -112,7 +112,7 @@ void Packager::packageOutput(bool split, string process , string tag){
 		bool merge = mergeWS != 0 && ( find(cats_.begin(),cats_.end(),cat) == cats_.end() );
 		//RooWorkspace * inWS = ( merge ? mergeWS : WS );
    if (merge){
-    std::cout << "[ERROR] -  sorry, 'merge' functionailty is disabled in this release because of incompatibility between RooWorkspace and WSTFileWrapper. Exiting"<< std::cout ;
+    std::cout << "[ERROR] -  sorry, 'merge' functionailty is disabled in this release because of incompatibility between RooWorkspace and WSTFileWrapper. Exiting" << std::endl;
     exit(1);
     }
 		RooArgList *sumPdfsThisCat = new RooArgList();

@@ -11,7 +11,7 @@ sigPlotsOnly = False
 
 #justPrint=True
 #isSubmitted = True
-#phoSystOnly = True
+phoSystOnly = True
 #useDCB = True
 #sigFitOnly = True
 #packageOnly = True
@@ -21,9 +21,7 @@ print 'About to run signal scripts'
 print 'isSubmitted = %s, phoSystOnly = %s, sigFitOnly = %s, sigPlotsOnly = %s'%(str(isSubmitted), str(phoSystOnly), str(sigFitOnly), str(sigPlotsOnly))
 
 #setup files 
-#ext          = 'reCategorised'
-#ext          = 'reCategorised_DCB'
-ext          = 'fullStage1combinedBDT'
+ext          = 'xgboostDiphoBDT'
 print 'ext = %s'%ext
 baseFilePath  = '/vols/cms/es811/FinalFits/ws_%s/'%ext
 fileNames     = []
