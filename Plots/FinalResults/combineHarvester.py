@@ -129,6 +129,7 @@ specOpts.add_option("--profileMH",default=False)
 specOpts.add_option("--toysFile",default=None)
 specOpts.add_option("--additionalOptions",default="",type="string")
 specOpts.add_option("--postFit",default=False,action="store_true",help="Use post-fit nuisances")
+specOpts.add_option("--loadWorkspace",default=None,type="string",help="Specify workspace from which to load a multidimfit")
 parser.add_option_group(specOpts)
 (opts,args) = parser.parse_args()
 if not os.path.exists(os.path.expandvars('$CMSSW_BASE/bin/$SCRAM_ARCH/combine')):
@@ -365,6 +366,8 @@ def writePreamble(sub_file):
   sub_file.write('cd scratch_$number\n')
   sub_file.write('cp -p $CMSSW_BASE/bin/$SCRAM_ARCH/combine .\n')
   sub_file.write('cp -p %s .\n'%os.path.abspath(opts.datacard))
+  if opts.loadWorkspace:
+      sub_file.write('cp -p %s .\n'%os.path.abspath(opts.loadWorkspace))
   if opts.toysFile: 
     for f in opts.toysFile.split(','):
       sub_file.write('cp -p %s .\n'%os.path.abspath(f))
@@ -507,7 +510,7 @@ def writeChannelCompatibility():
 
   file = open('%s/sub_m%6.2f.sh'%(opts.outDir,opts.mh),'w')
   writePreamble(file)
-  exec_line = 'combine %s -M ChannelCompatibilityCheck -m %6.2f --rMin=-25. --saveFitResult --cminDefaultMinimizerType=Minuit2 -L $CMSSW_BASE/lib/$SCRAM_ARCH/libHiggsAnalysisGBRLikelihood.so'%(opts.datacard,opts.mh)
+  exec_line = 'combine %s -M ChannelCompatibilityCheck -m %6.2f --rMin=-25. --saveFitResult -L $CMSSW_BASE/lib/$SCRAM_ARCH/libHiggsAnalysisGBRLikelihood.so'%(opts.datacard,opts.mh)
   writePostamble(file,exec_line)
 
 def writeSingleGenerateOnly():
@@ -860,7 +863,9 @@ def writeMultiDimFit(method=None,wsOnly=False):
         if not opts.skipWorkspace:
           datacardname = os.path.basename(opts.datacard).replace('.txt','')
           print 'Creating workspace for %s...'%method
-          exec_line = 'text2workspace.py %s -o %s %s -L $CMSSW_BASE/lib/$SCRAM_ARCH/libHiggsAnalysisGBRLikelihood.so'%(os.path.abspath(opts.datacard),os.path.abspath(opts.datacard).replace('.txt',method+'.root'),ws_args[method]) 
+          exec_line = ''
+          if not opts.loadWorkspace: 
+              exec_line += 'text2workspace.py %s -o %s %s -L $CMSSW_BASE/lib/$SCRAM_ARCH/libHiggsAnalysisGBRLikelihood.so'%(os.path.abspath(opts.datacard),os.path.abspath(opts.datacard).replace('.txt',method+'.root'),ws_args[method]) 
           print exec_line
           if opts.postFit:
                           exec_line += ' && combine -m %.2f -M MultiDimFit --saveWorkspace -n %s_postFit %s -L $CMSSW_BASE/lib/$SCRAM_ARCH/libHiggsAnalysisGBRLikelihood.so' % ( opts.mh, datacardname+method, os.path.abspath(opts.datacard).replace('.txt',method+'.root') )
@@ -896,7 +901,7 @@ def writeMultiDimFit(method=None,wsOnly=False):
                             nuis += ","
                         nuis+=nu
             if nuis != "":
-                opts.additionalOptions += " --freezeNuisances %s" % nuis
+                opts.additionalOptions += " --freezeParameters %s" % nuis
             print opts.additionalOptions
       
         if opts.postFit:
@@ -907,8 +912,8 @@ def writeMultiDimFit(method=None,wsOnly=False):
                           if pars != "": pars+=","
                           pars += "%s=%4.2f" % ( poi, opts.expectSignal )
                       if pars != "":
-                          if not "--setPhysicsModelParameters" in opts.additionalOptions:
-                             opts.additionalOptions += " --setPhysicsModelParameters %s" %pars
+                          if not "--setParameters" in opts.additionalOptions:
+                             opts.additionalOptions += " --setParameters %s" %pars
       
         else:
           opts.datacard = opts.datacard.replace('.txt',method+'.root')
@@ -919,17 +924,20 @@ def writeMultiDimFit(method=None,wsOnly=False):
         for i in range(opts.jobs):
           file = open('%s/sub_m%1.5g_job%d.sh'%(opts.outDir,getattr(opts,"mh",0.),i),'w')
           writePreamble(file)
-          exec_line = 'combine %s  -M MultiDimFit --cminDefaultMinimizerType Minuit2 --cminDefaultMinimizerAlgo migrad --algo=grid  %s --points=%d --firstPoint=%d --lastPoint=%d -n %sJob%d -L $CMSSW_BASE/lib/$SCRAM_ARCH/libHiggsAnalysisGBRLikelihood.so'%(opts.datacard,combine_args[method],opts.pointsperjob*opts.jobs,i*opts.pointsperjob,(i+1)*opts.pointsperjob-1,method,i)
+          if not opts.loadWorkspace: 
+              exec_line = 'combine %s  -M MultiDimFit --algo=grid  %s --points=%d --firstPoint=%d --lastPoint=%d -n %sJob%d -L $CMSSW_BASE/lib/$SCRAM_ARCH/libHiggsAnalysisGBRLikelihood.so'%(opts.datacard,combine_args[method],opts.pointsperjob*opts.jobs,i*opts.pointsperjob,(i+1)*opts.pointsperjob-1,method,i)
+          else:
+              exec_line = 'combine %s --snapshotName MultiDimFit -M MultiDimFit --algo=grid  %s --points=%d --firstPoint=%d --lastPoint=%d -n %sJob%d -L $CMSSW_BASE/lib/$SCRAM_ARCH/libHiggsAnalysisGBRLikelihood.so'%(opts.loadWorkspace,combine_args[method],opts.pointsperjob*opts.jobs,i*opts.pointsperjob,(i+1)*opts.pointsperjob-1,method,i)
           if ("FloatMH" in opts.outDir) : exec_line += " --saveSpecifiedNuis MH" 
-          if method in par_ranges.keys(): exec_line+=" --setPhysicsModelParameterRanges %s "%(par_ranges[method])
+          if method in par_ranges.keys(): exec_line+=" --setParameterRanges %s "%(par_ranges[method])
           if getattr(opts,"mh",None): exec_line += ' -m %6.2f'%opts.mh
-          #if opts.expected: exec_line += ' -t -1 --freezeNuisances=JetVeto_migration0,JetVeto_migration1,pdfindex_UntaggedTag_0_13TeV,pdfindex_UntaggedTag_1_13TeV,pdfindex_UntaggedTag_2_13TeV,pdfindex_UntaggedTag_3_13TeV,pdfindex_VBFTag_0_13TeV,pdfindex_VBFTag_1_13TeV'
+          #if opts.expected: exec_line += ' -t -1 --freezeParameters=JetVeto_migration0,JetVeto_migration1,pdfindex_UntaggedTag_0_13TeV,pdfindex_UntaggedTag_1_13TeV,pdfindex_UntaggedTag_2_13TeV,pdfindex_UntaggedTag_3_13TeV,pdfindex_VBFTag_0_13TeV,pdfindex_VBFTag_1_13TeV'
           if opts.expected: exec_line += ' -t -1 '
           #exec_line += ' --verbose -1 ' # make very quiet
           #exec_line += ' --verbose -1 --saveSpecifiedIndex pdfindex_UntaggedTag_0_13TeV,pdfindex_UntaggedTag_1_13TeV,pdfindex_UntaggedTag_2_13TeV,pdfindex_UntaggedTag_3_13TeV,pdfindex_VBFTag_0_13TeV,pdfindex_VBFTag_1_13TeV,pdfindex_TTHLeptonicTag_13TeV,pdfindex_TTHHadronicTag_13TeV' 
           if opts.expectSignal: exec_line += ' --expectSignal %4.2f'%opts.expectSignal
           if opts.expectSignalMass: exec_line += ' --expectSignalMass %6.2f'%opts.expectSignalMass
-          if method == 'PerProcessMu' and opts.doSTXS: exec_line += ' --freezeNuisances %s'%opts.stxsFreezeNuisances
+          if method == 'PerProcessMu' and opts.doSTXS: exec_line += ' --freezeParameters %s'%opts.stxsFreezeNuisances
           if opts.additionalOptions: exec_line += ' %s'%opts.additionalOptions
           if opts.toysFile: exec_line += ' --toysFile %s'%opts.toysFile
           if opts.verbose: print '\t', exec_line
@@ -955,7 +963,7 @@ def run():
       writeMultiDimFit("MuMHScan",True)
       opts.datacard = opts.datacard.replace('.txt','MuMHScan_postfit.root')
       if opts.expected:
-        opts.additionalOptions += " --overrideSnapshotMass --redefineSignalPOIs r --freezeNuisances MH"
+        opts.additionalOptions += " --overrideSnapshotMass --redefineSignalPOIs r --freezeParameters MH"
   if opts.wspace: opts.datacard=opts.wspace 
   if opts.splitChannels : 
     #print "ERORR acyivated opt splitChannl" 
@@ -1051,6 +1059,7 @@ def configure(config_line):
     if option.startswith('freezeAll='): opts.freezeAll = int(option.split('=')[1])
     if option.startswith('float='): opts.float = str(option.split('=')[1])
     if option.startswith('stxsFreezeNuisances='): opts.stxsFreezeNuisances = str(option.split('=')[1])
+    if option.startswith('loadWorkspace'): opts.loadWorkspace = str(option.split('=')[1])
     if option.startswith('opts='): 
       addoptstr = option.split("=")[1:]
       addoptstr = "=".join(addoptstr)
@@ -1071,7 +1080,7 @@ def configure(config_line):
     if option == "profileMH": opts.profileMH = True
   if opts.postFitAll: opts.postFit = True
   if opts.wspace : opts.skipWorkspace=True
-  if "-P" in opts.poix and (opts.muLow!=None or opts.muHigh!=None): sys.exit("Cannot specify muLow/muHigh with >1 POI. Remove the muLow/muHigh option and add use --setPhysicsModelParameterRanges in opts keyword") 
+  if "-P" in opts.poix and (opts.muLow!=None or opts.muHigh!=None): sys.exit("Cannot specify muLow/muHigh with >1 POI. Remove the muLow/muHigh option and add use --setParameterRanges in opts keyword") 
   if opts.verbose: print opts
   run()
 

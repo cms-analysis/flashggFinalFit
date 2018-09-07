@@ -506,7 +506,7 @@ def getFlashggLineTheoryWeights(proc,cat,name,i,asymmetric,j=0,factor=1):
     #print "data_nominal_new"
     #data_nominal_new.Print()
     #print "data_down"
-    d#ata_down.Print()
+    #data_down.Print()
     #print "data_up"
     #data_up.Print()
     #print "ad_hoc_factor"

@@ -228,7 +228,7 @@ unsigned int getIndexOfReferenceDataset(string proc, string cat){
   }
   
   if (iLine==-1 ) {
-    std::cout << "[ERROR] could not find the index of the category " << proc << ", " << cat << "you wished to look up. Exit!" << std::endl;
+    std::cout << "[ERROR] could not find the index of the category " << proc << ", " << cat << " you wished to look up. Exit!" << std::endl;
      exit(1);
   }
   return iLine;

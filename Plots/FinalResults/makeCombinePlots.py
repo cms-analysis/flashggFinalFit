@@ -678,7 +678,9 @@ def plot1DNLL(returnErrors=False,xvar="", ext=""):
       # tree.quantileExpected==1: continue
       if tree.deltaNLL<0 and options.verbose: print "Warning, found -ve deltaNLL = ",  tree.deltaNLL, " at ", xv 
       if xv in [re[0] for re in res]: continue
-      if 2*tree.deltaNLL < 100:
+      #if 2*tree.deltaNLL < 100:
+      #FIXME
+      if 2*tree.deltaNLL < 100 and tree.deltaNLL>0.:
         res.append([xv,2*tree.deltaNLL,lcMH])
     res.sort()
 
@@ -1308,9 +1310,14 @@ def plotMPdfChComp(plottype="perTag"):
          if doStxs:
            #if "ggH" in catName: catName ="#scale[1.5]{#sigma_{ggH}/#sigma_{theo}}"
            if "ggH_0J" in catName: catName ="#scale[1.5]{ggH 0J}"
+           elif "ggH_1J_low" in catName: catName ="#scale[1.5]{ggH 1J low}"
+           elif "ggH_1J_med" in catName: catName ="#scale[1.5]{ggH 1J med}"
+           elif "ggH_1J_high" in catName: catName ="#scale[1.5]{ggH 1J high}"
            elif "ggH_1J" in catName: catName ="#scale[1.5]{ggH 1J}"
            elif "ggH_GE2J" in catName: catName ="#scale[1.5]{ggH GE2J}"
-           elif "GG2H" in catName: catName ="#scale[1.5]{ggH}"
+           elif "ggH_BSM" in catName: catName ="#scale[1.5]{ggH BSM}"
+           elif "ggH" in catName: catName ="#scale[1.5]{ggH}"
+           #elif "GG2H" in catName: catName ="#scale[1.5]{ggH}"
            if "qqH" in catName: catName ="#scale[1.5]{VBF}"
            #if "ttH" in catName: catName ="#scale[1.5]{#sigma_{ttH}/#sigma_{theo}}"
            if "ttH" in catName: catName ="#scale[1.5]{TTH}"

@@ -1,6 +1,7 @@
-#fileName = 'potentialNegPdfs_reCategorised.txt'
-#fileName = 'potentialNegPdfs_reCategorised_DCB.txt'
-fileName = 'potentialNegPdfs_fullStage1combinedBDT.txt'
+from os import system
+
+ext = 'xgboostDiphoBDT'
+fileName = 'potentialNegPdfs_%s.txt'%ext
 with open(fileName, 'r') as f:
   theInput = f.read().splitlines()
 
@@ -23,4 +24,8 @@ for line in theInput:
     issueCombs.append( (proc,cat,vtx) )
     errorState = True
 
-for issue in issueCombs: print '%s %s %s'%(issue[0], issue[1], issue[2])
+searchDir = '/vols/build/cms/es811/FreshStart/STXSstage1/CMSSW_7_4_7/src/flashggFinalFit/Signal/outdir_xgboostDiphoBDT/sigfit/SignalFitJobs'
+for issue in issueCombs: 
+  grepCmd = 'grep -rl "proc:%s - cat:%s" %s'%(issue[0], issue[1], searchDir)
+  print '%s %s %s'%(issue[0], issue[1], issue[2])
+  system(grepCmd)

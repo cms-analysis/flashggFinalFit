@@ -9,8 +9,8 @@ effAccOnly = False
 yieldsOnly = False
 
 #justPrint = True
-datacardOnly = True
-#combineOnly = True
+#datacardOnly = True
+combineOnly = True
 #combinePlotsOnly = True
 #effAccOnly = True
 #yieldsOnly = True
