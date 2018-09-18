@@ -8,6 +8,7 @@ from array import array
 import ROOT as r
 
 ext='xgboostDiphoBDT'
+#ext='xgboostDiphoBDT2017'
 
 r.gSystem.Load("libHiggsAnalysisCombinedLimit")
 r.gSystem.Load("libHiggsAnalysisGBRLikelihood")

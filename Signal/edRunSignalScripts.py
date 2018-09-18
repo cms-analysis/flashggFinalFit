@@ -22,6 +22,7 @@ print 'isSubmitted = %s, phoSystOnly = %s, sigFitOnly = %s, sigPlotsOnly = %s'%(
 
 #setup files 
 ext          = 'xgboostDiphoBDT'
+#ext          = 'xgboostDiphoBDT2017'
 print 'ext = %s'%ext
 baseFilePath  = '/vols/cms/es811/FinalFits/ws_%s/'%ext
 fileNames     = []
@@ -51,6 +52,7 @@ print 'and categories: %s'%cats
 
 #misc config
 lumi          = '35.9'
+#lumi          = '41.3'
 batch         = 'IC'
 queue         = 'hep.q'
 beamspot      = '3.4'

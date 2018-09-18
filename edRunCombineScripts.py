@@ -9,8 +9,8 @@ effAccOnly = False
 yieldsOnly = False
 
 #justPrint = True
-#datacardOnly = True
-combineOnly = True
+datacardOnly = True
+#combineOnly = True
 #combinePlotsOnly = True
 #effAccOnly = True
 #yieldsOnly = True
@@ -20,6 +20,7 @@ print 'datacardOnly = %s, combineOnly = %s, combinePlotsOnly = %s, effAccOnly = 
 
 #setup files 
 ext          = 'xgboostDiphoBDT'
+#ext          = 'xgboostDiphoBDT2017'
 print 'ext = %s'%ext
 
 baseFilePath  = '/vols/cms/es811/FinalFits/ws_%s/'%ext
@@ -60,6 +61,7 @@ print 'and categories: %s'%cats
 
 #misc config
 lumi          = '35.9'
+#lumi          = '41.3'
 batch         = 'IC'
 queue         = 'hep.q'
 print 'lumi %s'%lumi

@@ -16,6 +16,7 @@ print 'fTestOnly = %s, bkgPlotsOnly = %s'%(str(fTestOnly), str(bkgPlotsOnly))
 
 #setup files 
 ext          = 'xgboostDiphoBDT'
+#ext          = 'xgboostDiphoBDT2017'
 print 'ext = %s'%ext
 
 baseFilePath  = '/vols/cms/es811/FinalFits/ws_%s/'%ext
@@ -46,6 +47,7 @@ print 'and categories: %s'%cats
 
 #misc config
 lumi          = '35.9'
+#lumi          = '41.3'
 batch         = 'IC'
 queue         = 'hep.q'
 print 'lumi %s'%lumi

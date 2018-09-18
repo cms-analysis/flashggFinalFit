@@ -759,8 +759,11 @@ flashggSysts['PreselSF']    =  'PreselSF'
 flashggSysts['SigmaEOverEShift'] = 'SigmaEOverEShift'
 flashggSysts['ElectronWeight'] = 'eff_e'
 flashggSysts['electronVetoSF'] = 'electronVetoSF'
-flashggSysts['MuonWeight'] = 'eff_m'
-flashggSysts['MuonMiniIsoWeight'] = 'eff_m_MiniIso'
+#FIXME: add option for 2016 or 2017
+flashggSysts['MuonWeight'] = 'eff_m' #2016 name
+#flashggSysts['MuonIDWeight'] = 'eff_m' #2017 name
+flashggSysts['MuonMiniIsoWeight'] = 'eff_m_MiniIso' #2016 name
+#flashggSysts['MuonIsoWeight'] = 'eff_m_MiniIso' #2017 name
 flashggSysts['TriggerWeight'] = 'TriggerWeight'
 #flashggSysts['JetBTagWeight'] = 'eff_b'
 flashggSysts['JetBTagCutWeight'] = 'eff_b'
