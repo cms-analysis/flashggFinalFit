@@ -279,16 +279,41 @@ if [ $PACKAGEONLY == 1 ]; then
   counter=0
   while read p ; do
     if (($counter==0)); then
+      #SIGFILES="$PWD/$p"
       SIGFILES="$p"
     else
+      #SIGFILES="$SIGFILES,$PWD/$p"
       SIGFILES="$SIGFILES,$p"
     fi
     ((counter=$counter+1))
   done < out.txt
   echo "SIGFILES $SIGFILES"
   echo ""
-  echo "./bin/PackageOutput -i $SIGFILES --procs $PROCS -l $INTLUMI -p $OUTDIR/sigfit -W wsig_13TeV -f $CATS -L 120 -H 130 -o $OUTDIR/CMS-HGG_sigfit_$EXT.root"
-  ./bin/PackageOutput -i $SIGFILES --procs $PROCS -l $INTLUMI -p $OUTDIR/sigfit -W wsig_13TeV -f $CATS -L 120 -H 130 -o $OUTDIR/CMS-HGG_sigfit_$EXT.root > package.out
+  if [[ $BATCH == "" ]]; then
+    echo "./bin/PackageOutput -i $SIGFILES --procs $PROCS -l $INTLUMI -p $OUTDIR/sigfit -W wsig_13TeV -f $CATS -L 120 -H 130 -o $OUTDIR/CMS-HGG_sigfit_$EXT.root"
+    ./bin/PackageOutput -i $SIGFILES --procs $PROCS -l $INTLUMI -p $OUTDIR/sigfit -W wsig_13TeV -f $CATS -L 120 -H 130 -o $OUTDIR/CMS-HGG_sigfit_$EXT.root > package.out
+  else
+    echo "./python/submitPackager.py -i $SIGFILES --basepath $PWD --procs $PROCS -l $INTLUMI -p $OUTDIR/sigfit -W wsig_13TeV -f $CATS -L 120 -H 130 -o $OUTDIR/CMS-HGG_sigfit_$EXT.root --batch $BATCH -q $DEFAULTQUEUE"
+    ./python/submitPackager.py -i $SIGFILES --basepath $PWD --procs $PROCS -l $INTLUMI -p $OUTDIR/sigfit -W wsig_13TeV -f $CATS -L 120 -H 130 -o $OUTDIR/CMS-HGG_sigfit_$EXT.root --batch $BATCH -q $DEFAULTQUEUE
+    PEND=`ls -l $OUTDIR/sigfit/PackagerJobs/sub*| grep -v "\.run" | grep -v "\.done" | grep -v "\.fail" | grep -v "\.err" |grep -v "\.log"  |wc -l`
+    echo "PEND $PEND"
+    while (( $PEND > 0 )) ;do
+      PEND=`ls -l $OUTDIR/sigfit/PackagerJobs/sub* | grep -v "\.run" | grep -v "\.done" | grep -v "\.fail" | grep -v "\.err" | grep -v "\.log" |wc -l`
+      RUN=`ls -l $OUTDIR/sigfit/PackagerJobs/sub* | grep "\.run" |wc -l`
+      FAIL=`ls -l $OUTDIR/sigfit/PackagerJobs/sub* | grep "\.fail" |wc -l`
+      DONE=`ls -l $OUTDIR/sigfit/PackagerJobs/sub* | grep "\.done" |wc -l`
+      (( PEND=$PEND-$RUN-$FAIL-$DONE ))
+      echo " PEND $PEND - RUN $RUN - DONE $DONE - FAIL $FAIL"
+      if (( $RUN > 0 )) ; then PEND=1 ; fi
+      if (( $FAIL > 0 )) ; then 
+        echo "ERROR at least one job failed :"
+        ls -l $OUTDIR/sigfit/PackagerJobs/sub* | grep "\.fail"
+        exit 1
+      fi
+      sleep 10
+  
+    done
+  fi
 fi
 
 #####################################################

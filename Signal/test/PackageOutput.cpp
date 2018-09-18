@@ -61,6 +61,7 @@ string flashggCatsStr_;
 vector<string> flashggCats_;
 vector<string> procs_;
 string procStr_;
+string basePathStr_;
 
 vector<int> getAllMH(){
   vector<int> result;
@@ -79,6 +80,7 @@ void OptionParser(int argc, char *argv[]){
     ("help,h",                                                                                "Show help")
     ("infilename,i", po::value<string>(&infilename_)->default_value("comma,separated,list"),"Input file name")
 		("procs", po::value<string>(&procStr_)->default_value("ggh,vbf,wh,zh,tth"),					"Processes (comma sep)")
+		("basepath,b", po::value<string>(&basePathStr_)->default_value(""),	"base path if necesary for input files")
     ("outfilename,o", po::value<string>(&outfilename_)->default_value("CMS-HGG_sigfit.root"), "Output file name")
     ("lumi,l", po::value<float>(&lumi_)->default_value(19.620),                              "Luminosity")
 		("plotDir,p", po::value<string>(&plotDir_)->default_value("plots"),						"Put plots in this directory")
@@ -131,8 +133,7 @@ int main (int argc, char *argv[]){
 
   RooRealVar *intLumi = new RooRealVar("IntLumi","IntLumi",lumi_*1000,0.,10.e5);
 
-  	
-	  WSTFileWrapper * inWS = new WSTFileWrapper(infilename_,"wsig_13TeV");
+	  WSTFileWrapper * inWS = new WSTFileWrapper(infilename_,"wsig_13TeV", /*base file path*/ basePathStr_);
 	  RooWorkspace *saveWS = new RooWorkspace();
 	  RooWorkspace *tmpWS = new RooWorkspace();
     //saveWS->import((inWS->allVars()),RecycleConflictNodes());
@@ -186,7 +187,7 @@ int main (int argc, char *argv[]){
     //Packager packager(mergedWS, saveWS ,procs_,ncats_,mhLow_,mhHigh_,skipMasses_,/*sqrts*/13,/*skipPlots_*/false,plotDir_,mergeWS,cats_,flashggCats_);
     Packager packager(mergedWS, saveWS ,procs_,ncats_,mhLow_,mhHigh_,skipMasses_,/*sqrts*/13,/*skipPlots_*/true,plotDir_,mergeWS,cats_,flashggCats_); //FIXME hoping this speeds things up...
     cout << "[INFO] Finished initalising packager." << endl;
-    packager.packageOutput(/*split*/ false);
+    packager.packageOutput(/*split*/ false); //FIXME testing out the below
     cout << "[INFO] Combination complete." << endl;
     cout << "[INFO] cd to output file" << endl;
     outFile->cd();

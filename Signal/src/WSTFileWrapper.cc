@@ -3,12 +3,15 @@
 #include <sstream>
 #include <iostream>
 
-WSTFileWrapper::WSTFileWrapper( std::string files, std::string wsname ) {
+WSTFileWrapper::WSTFileWrapper( std::string files, std::string wsname ) :
+  WSTFileWrapper::WSTFileWrapper( files, wsname, "" ) {}
+
+WSTFileWrapper::WSTFileWrapper( std::string files, std::string wsname, std::string basepath ) {
   std::stringstream ss(files);
   while( ss.good() ) {
     std::string substr;
     getline( ss, substr, ',' );
-    fnList.push_back( substr );
+    fnList.push_back( (basepath+substr) );
   }
   wsName = wsname;
 
