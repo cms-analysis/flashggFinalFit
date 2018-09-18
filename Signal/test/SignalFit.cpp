@@ -673,8 +673,6 @@ int main(int argc, char *argv[]){
       //std::cout << " LC DEBUG here is your line " << line << " els.size()==6 " << (els.size()==6) <<  std::endl;
 		  if( els.size()==6 ) { // in this case you have specified a replacement tag for RV!
 			  //replaceWith_RV_ = make_pair(els[4],els[5]); // proc, cat
-	//std::cout << "ED DEBUG entering into replacement map: " << els[4] << std::endl;
-	//std::cout << "ED DEBUG coming from line: \n" << line << std::endl << std::endl;
         map_replacement_proc_RV_.push_back(els[4]);
         map_replacement_cat_RV_.push_back(els[5]);
         //FIXME
@@ -686,8 +684,6 @@ int main(int argc, char *argv[]){
 			  //replaceWithRV_ = make_pair(els[4],els[5]); // proc, cat
 			  //replaceWithWV_ = make_pair(els[6],els[7]); // proc, cat
 		   	//replace_ = true;
-	//std::cout << "ED DEBUG entering into replacement map: " << els[4] << std::endl;
-	//std::cout << "ED DEBUG coming from line: \n" << line << std::endl << std::endl;
         map_replacement_proc_RV_.push_back(els[4]);
         map_replacement_cat_RV_.push_back(els[5]);
         map_replacement_proc_WV_.push_back(els[6]);
@@ -705,8 +701,6 @@ int main(int argc, char *argv[]){
           map_replacement_cat_WV_.push_back( replacementCatMap[cat] );//use defaults for replacement WV if they are needed
         } else {
          // else use the ggh
-	 //std::cout << "ED DEBUG entering into proc replacement map: " << replacementProcMap[cat] << std::endl;
-	 //std::cout << "ED DEBUG coming from line: \n" << line << std::endl << std::endl;
          map_replacement_proc_RV_.push_back(replacementProcMap[cat]);
          map_replacement_cat_RV_.push_back( replacementCatMap[cat] ); //deflaut is ggh UntaggedTag3
          //FIXME this is changing the scheme somewhat
