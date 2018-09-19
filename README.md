@@ -4,28 +4,23 @@ The Final Fits package is a series of scripts which are used to run the final st
 ## Download and setup instructions
 
 ```
-cmsrel CMSSW_7_4_7
-cd CMSSW_7_4_7/src
+cmsrel CMSSW_8_1_0
+cd CMSSW_8_1_0/src
 cmsenv
 git cms-init
-# Install Combine as per Twiki: https://twiki.cern.ch/twiki/bin/viewauth/CMS/SWGuideHiggsAnalysisCombinedLimit#ROOT6_SLC6_release_CMSSW_7_4_X
-# They recently migrated to 81X; we will follow shortly, but checkout 74X branch for now
-git clone https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit
-cd ${CMSSW_BASE}/src/HiggsAnalysis/CombinedLimit
-git fetch origin
-git checkout origin/74x-root6
-git checkout -b mybranch
-cd ${CMSSW_BASE}/src
+# Install Combine as per the documentation here cms-hcomb.gitbooks.io/combine/content/part1
+# This now uses the latest version of combine
+git clone git@github.com:cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit
 # Install the GBRLikelihood package which contains the RooDoubleCBFast implementation
 git clone git@github.com:bendavid/GBRLikelihood.git HiggsAnalysis/GBRLikelihood
 # Compile external libraries
-cd ${CMSSW_BASE}/src/HiggsAnalysis
+cd HiggsAnalysis
 cmsenv
-scram b -j9
+scram b -j 9
 # Install Flashgg Final Fit packages
-cd ${CMSSW_BASE}/src/
+cd ..
 git clone git@github.com:cms-analysis/flashggFinalFit.git
-cd ${CMSSW_BASE}/src/flashggFinalFit/
+cd flashggFinalFit/
 ```
 
 Two packages need to be built with their own makefiles, if needed. Please note that there will be verbose warnings from BOOST etc, which can be ignored. So long as the `make` commands finish without error, then the compilation happened fine.:
