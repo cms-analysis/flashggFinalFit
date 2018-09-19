@@ -321,19 +321,41 @@ fi
 #####################################################
 
 if [ $SIGPLOTSONLY == 1 ]; then
+  echo "=============================="
+  echo "Make Signal Plots"
+  echo "-->Create Validation plots"
+  echo "=============================="
+  
+  if [ -z $BATCH ]; then
+    echo " ./bin/makeParametricSignalModelPlots -i $OUTDIR/CMS-HGG_sigfit_$EXT.root  -o $OUTDIR -p $PROCS -f $CATS"
+    ./bin/makeParametricSignalModelPlots -i $OUTDIR/CMS-HGG_sigfit_$EXT.root  -o $OUTDIR/sigplots -p $PROCS -f $CATS > signumbers_${EXT}.txt
+    
+    ./makeSlides.sh $OUTDIR
+    mv fullslides.pdf $OUTDIR/fullslides_${EXT}.pdf
+  else
+    echo "./python/submitSignalPlots.py -i $OUTDIR/CMS-HGG_sigfit_$EXT.root -o $OUTDIR/sigplots -p $PROCS -f $CATS --batch $BATCH -q $DEFAULTQUEUE"
+    ./python/submitSignalPlots.py -i $OUTDIR/CMS-HGG_sigfit_$EXT.root -o $OUTDIR/sigplots -p $PROCS -f $CATS --batch $BATCH -q $DEFAULTQUEUE
+    PEND=`ls -l $OUTDIR/sigplots/PlottingJobs/sub*| grep -v "\.run" | grep -v "\.done" | grep -v "\.fail" | grep -v "\.err" |grep -v "\.log"  |wc -l`
+    echo "PEND $PEND"
+    while (( $PEND > 0 )) ;do
+      PEND=`ls -l $OUTDIR/sigplots/PlottingJobs/sub* | grep -v "\.run" | grep -v "\.done" | grep -v "\.fail" | grep -v "\.err" | grep -v "\.log" |wc -l`
+      RUN=`ls -l $OUTDIR/sigplots/PlottingJobs/sub* | grep "\.run" |wc -l`
+      FAIL=`ls -l $OUTDIR/sigplots/PlottingJobs/sub* | grep "\.fail" |wc -l`
+      DONE=`ls -l $OUTDIR/sigplots/PlottingJobs/sub* | grep "\.done" |wc -l`
+      (( PEND=$PEND-$RUN-$FAIL-$DONE ))
+      echo " PEND $PEND - RUN $RUN - DONE $DONE - FAIL $FAIL"
+      if (( $RUN > 0 )) ; then PEND=1 ; fi
+      if (( $FAIL > 0 )) ; then 
+        echo "ERROR at least one job failed :"
+        ls -l $OUTDIR/sigplots/PlottingJobs/sub* | grep "\.fail"
+        exit 1
+      fi
+      sleep 10
+  
+    done
+    cat $OUTDIR/sigplots/PlottingJobs/sub*.log > signumbers_${EXT}.txt
+  fi
 
-echo "=============================="
-echo "Make Signal Plots"
-echo "-->Create Validation plots"
-echo "=============================="
-
-echo " ./bin/makeParametricSignalModelPlots -i $OUTDIR/CMS-HGG_sigfit_$EXT.root  -o $OUTDIR -p $PROCS -f $CATS"
-#./bin/makeParametricSignalModelPlots -i $OUTDIR/CMS-HGG_sigfit_$EXT.root  -o $OUTDIR/sigplots -p $PROCS -f $CATS 
-./bin/makeParametricSignalModelPlots -i $OUTDIR/CMS-HGG_sigfit_$EXT.root  -o $OUTDIR/sigplots -p $PROCS -f $CATS > signumbers_${EXT}.txt
-#mv $OUTDIR/sigfit/initialFits $OUTDIR/initialFits
-
-./makeSlides.sh $OUTDIR
-mv fullslides.pdf $OUTDIR/fullslides_${EXT}.pdf
 fi
 
 

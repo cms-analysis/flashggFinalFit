@@ -67,16 +67,7 @@ for cat in range(ncats):
   if options.higgsResolution:
     execLine += ' --higgsResolution %s'%(options.higgsResolution)
   if options.sigfilename:
-    #sigs=""
-    #for sig in options.sigfilename.split(","):
-    #  if options.flashggCats.split(",")[cat] in sig :
-    #    print options.flashggCats.split(",")[cat]," in ", sig, "so add it"
-    #    sigs=sig+","+sigs
-    #print sigs
-    #if sigs[-1]=="," : sigs=sigs[0:-1]
-    #print sigs
-    execLine += ' -s %s'%(options.sigfilename)
-    #execLine += ' -s %s'%(sigs)
+    execLine += ' -s %s'%(options.sigfilename.replace('.root','_%s.root')%options.catLabels[cat])
   if options.unblind:
     execLine += ' --unblind'
   if options.isMultiPdf:
