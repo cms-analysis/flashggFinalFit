@@ -16,7 +16,8 @@ r.gROOT.SetBatch(True)
 #setup files 
 #ext          = 'fullStage1Test'
 #ext          = 'fullerStage1Test'
-ext          = 'reCategorised'
+#ext          = 'reCategorised'
+ext          = 'xgboostDiphoBDT2017'
 print 'ext = %s'%ext
 baseFilePath  = '/vols/cms/es811/FinalFits/ws_%s/'%ext
 fileNames     = []

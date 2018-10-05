@@ -19,8 +19,10 @@ print 'About to run combine scripts'
 print 'datacardOnly = %s, combineOnly = %s, combinePlotsOnly = %s, effAccOnly = %s, yieldsOnly = %s'%(str(datacardOnly), str(combineOnly), str(combinePlotsOnly), str(effAccOnly), str(yieldsOnly) )
 
 #setup files 
-ext          = 'xgboostDiphoBDT'
+#ext          = 'xgboostDiphoBDT'
 #ext          = 'xgboostDiphoBDT2017'
+#ext          = 'newVBFtags2016'
+ext          = 'newVBFtags2017'
 print 'ext = %s'%ext
 
 baseFilePath  = '/vols/cms/es811/FinalFits/ws_%s/'%ext
@@ -47,9 +49,12 @@ filesEffAcc = filesEffAcc[:-1]
 
 #define processes and categories
 procs         = ''
+#problemProcs = ['WH2HQQ_VBFTOPO_JET3VETO','ZH2HQQ_VBFTOPO_JET3VETO']
 for fileName in fileNames: 
   if 'M125' not in fileName: continue
-  procs += fileName.split('pythia8_')[1].split('.root')[0]
+  proc = fileName.split('pythia8_')[1].split('.root')[0]
+  #if proc in problemProcs: continue
+  procs += proc
   procs += ','
 procs = procs[:-1]
 cats  = 'RECO_0J_Tag0,RECO_0J_Tag1,RECO_1J_PTH_0_60_Tag0,RECO_1J_PTH_0_60_Tag1,RECO_1J_PTH_60_120_Tag0,RECO_1J_PTH_60_120_Tag1,RECO_1J_PTH_120_200_Tag0,RECO_1J_PTH_120_200_Tag1,RECO_1J_PTH_GT200,'
@@ -61,7 +66,7 @@ print 'and categories: %s'%cats
 
 #misc config
 lumi          = '35.9'
-#lumi          = '41.3'
+if '2017' in ext: lumi = '41.3'
 batch         = 'IC'
 queue         = 'hep.q'
 print 'lumi %s'%lumi

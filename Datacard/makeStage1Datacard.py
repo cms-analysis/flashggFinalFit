@@ -296,10 +296,19 @@ for proc in options.procs:
            mass.setVal(data_nominal.get(i).getRealValue("CMS_hgg_mass"))
            w_nominal =data_nominal.weight()
            w_up = data_nominal.get(i).getRealValue("%s_%d"%(name,n))
+           #w_central = data_nominal.get(i).getRealValue("centralObjectWeight") #FIXME ed testing
            w_central = data_nominal.get(i).getRealValue("scaleWeight_0") #sneaky fix as it doesn't look like central weight is beign propagated correctly in these cases.
            sumW = data_nominal.get(i).getRealValue("sumW")
            if (w_central) : print name, n, proc, cat, "entry ", i, " w_nominal ", w_nominal, " w_central " , w_central, " w_up ", w_up , " w_nominal*(w_up/w_central) ", w_nominal*(w_up/w_central)
-           if (abs(w_central)<1E-4 or abs(w_nominal)<1E-4 or w_nominal<=0. or math.isnan(w_up) or w_central<=0. or w_up<=0. or w_up>10.0): continue
+           #FIXME ed testing
+           #if (abs(w_central)<1E-4 or abs(w_nominal)<1E-4 or w_nominal<=0. or math.isnan(w_up) or w_central<=0. or w_up<=0. or w_up>10.0): continue
+           if (abs(w_central)<1E-4 or abs(w_nominal)<1E-4 or w_nominal<=0. or math.isnan(w_central) or math.isnan(w_up) or w_central<=0. or w_up<=0. or w_up>10.0): 
+             w_up = 1.
+             w_central = 1.
+           #FIXME ed testing
+           if abs(w_up/w_central - 1.) > 0.5: 
+             w_up = 1.
+             w_central = 1.
            weight_up.setVal(w_nominal*(w_up/w_central))
            data_up.add(r.RooArgSet(mass,weight_up),weight_up.getVal())
            data_nominal_new.add(r.RooArgSet(mass,weight),w_nominal)
@@ -313,10 +322,10 @@ for proc in options.procs:
       effect=-1
       if (runningTotal_nom==runningTotal_up): effect=1
       else: effect = runningTotal_up/runningTotal_nom
-      print " effect of %s_%d "%(name,n), "on %s"%(proc) ," is %.3f"%( effect)
       if (effect <0.5 or effect > 2.0) : 
         #exit ("effect is greater than a factor of two - shouldn't happen, exiting...")
         print "effect is greater than a factor of two - shouldn't happen, exiting...\n"
+        #exit ("effect is greater than a factor of two for proc %s name %s - shouldn't happen, exiting..."%(proc,name))
       if (n==0) :norm_factors_file.write(" %.3f"%effect)
       else: norm_factors_file.write(", %.3f"%effect)
       result["%s_%s"%(proc,name)].append(effect)
@@ -427,6 +436,7 @@ def getFlashggLineTheoryWeights(proc,cat,name,i,asymmetric,j=0,factor=1):
     "SINCE WE are looking at syst ", name , " we apply an ad-hoc factor of ", factor
     ad_hoc_factor=factor
     m = j
+  print 'ED DEBUG running line theory weights for proc %s cat %s'%(proc,cat)
   theoryNormFactor_n= 1/theoryNormFactors["%s_%s"%(combProcs[proc],name)][n] #up
   theoryNormFactor_m= 1/theoryNormFactors["%s_%s"%(combProcs[proc],name)][m] #up
   
@@ -454,24 +464,32 @@ def getFlashggLineTheoryWeights(proc,cat,name,i,asymmetric,j=0,factor=1):
     w_nominal =data_nominal.weight()
     w_up = theoryNormFactor_n*data_nominal.get(i).getRealValue("%s_%d"%(name,n))
     w_down = theoryNormFactor_m*data_nominal.get(i).getRealValue("%s_%d"%(name,m))
-    #w_central = data_nominal.get(i).getRealValue(weight_central.GetName())
+    #w_central = data_nominal.get(i).getRealValue(weight_central.GetName()) #FIXME ed testing 
     w_central = data_nominal.get(i).getRealValue("scaleWeight_0") #sneaky fix as it doesn't look like central weight is beign propagated correctly in these cases.
     sumW = data_nominal.get(i).getRealValue("sumW")
-    if (w_central<=0. or w_nominal<=0. or math.isnan(w_down) or math.isnan(w_up) or w_down<=0. or w_up<=0.): 
-        zeroWeightEvents=zeroWeightEvents+1.0
-        if (zeroWeightEvents%1==0):
-          print "[WARNING] skipping one event where weight is identically 0 or nan, causing  a seg fault, occured in ",(zeroWeightEvents/data_nominal.numEntries())*100 , " percent of events"
-          #print " WARNING] syst ", name,n, " ","procs/cat  " , proc,",",cat , " entry " , i, " w_nom ", w_nominal , "  w_up " , w_up , " w_down ", w_down ,"w_central ", w_central
-          #exit(1)
-        continue
-    elif ( abs(w_central/w_down) <0.01 or abs(w_central/w_down) >100 ) :
-        zeroWeightEvents=zeroWeightEvents+1.0
-        #if (zeroWeightEvents%1000==0):
-          #print "[WARNING] skipping one event where weight is identically 0 or nan, causing  a seg fault, occured in ",(zeroWeightEvents/data_nominal.numEntries())*100 , " percent of events"
-          #print " WARNING] syst ", name,n, " ","procs/cat  " , proc,",",cat , " entry " , i, " w_nom ", w_nominal , "  w_up " , w_up , " w_down ", w_down ,"w_central ", w_central
-          #exit(1)
-        continue
-    #print " WARNING] syst ", name,n, " ","procs/cat  " , proc,",",cat , " entry " , i, " w_nom ", w_nominal , "  w_up " , w_up , " w_down ", w_down ,"w_central ", w_central, " theoryNormFactor_m ", theoryNormFactor_m , " theoryNormFactor_n ", theoryNormFactor_n, " w_nominal*(w_down/w_central) " , w_nominal*(w_down/w_central) , " w_nominal*(w_up/w_central) " , w_nominal*(w_up/w_central)
+    #FIXME ed testing
+    #if (w_central<=0. or w_nominal<=0. or math.isnan(w_down) or math.isnan(w_up) or w_down<=0. or w_up<=0.): 
+    #    zeroWeightEvents=zeroWeightEvents+1.0
+    #    if (zeroWeightEvents%1==0):
+    #      print "[WARNING] skipping one event where weight is identically 0 or nan, causing  a seg fault, occured in ",(zeroWeightEvents/data_nominal.numEntries())*100 , " percent of events"
+    #      #print " WARNING] syst ", name,n, " ","procs/cat  " , proc,",",cat , " entry " , i, " w_nom ", w_nominal , "  w_up " , w_up , " w_down ", w_down ,"w_central ", w_central
+    #      #exit(1)
+    #    continue
+    #elif ( abs(w_central/w_down) <0.01 or abs(w_central/w_down) >100 ) :
+    #    zeroWeightEvents=zeroWeightEvents+1.0
+    #    #if (zeroWeightEvents%1000==0):
+    #      #print "[WARNING] skipping one event where weight is identically 0 or nan, causing  a seg fault, occured in ",(zeroWeightEvents/data_nominal.numEntries())*100 , " percent of events"
+    #      #print " WARNING] syst ", name,n, " ","procs/cat  " , proc,",",cat , " entry " , i, " w_nom ", w_nominal , "  w_up " , w_up , " w_down ", w_down ,"w_central ", w_central
+    #      #exit(1)
+    #    continue
+    if (w_central<=0. or w_nominal<=0. or math.isnan(w_down) or math.isnan(w_central) or math.isnan(w_up) or w_down<=0. or w_up<=0.): 
+      w_central = 1.
+      w_up = 1.
+      w_down = 1.
+    if abs(w_up/w_central - 1.) > 0.5 or abs(w_central/w_down - 1.) > 0.5:
+      w_central = 1.
+      w_up = 1.
+      w_down = 1.
     weight_down.setVal(w_nominal*(w_down/w_central))
     weight_up.setVal(w_nominal*(w_up/w_central))
     data_up.add(r.RooArgSet(mass,weight_up),weight_up.getVal())
@@ -760,10 +778,10 @@ flashggSysts['SigmaEOverEShift'] = 'SigmaEOverEShift'
 flashggSysts['ElectronWeight'] = 'eff_e'
 flashggSysts['electronVetoSF'] = 'electronVetoSF'
 #FIXME: add option for 2016 or 2017
-flashggSysts['MuonWeight'] = 'eff_m' #2016 name
-#flashggSysts['MuonIDWeight'] = 'eff_m' #2017 name
-flashggSysts['MuonMiniIsoWeight'] = 'eff_m_MiniIso' #2016 name
-#flashggSysts['MuonIsoWeight'] = 'eff_m_MiniIso' #2017 name
+#flashggSysts['MuonWeight'] = 'eff_m' #2016 name
+flashggSysts['MuonIDWeight'] = 'eff_m' #2017 name
+#flashggSysts['MuonMiniIsoWeight'] = 'eff_m_MiniIso' #2016 name
+flashggSysts['MuonIsoWeight'] = 'eff_m_MiniIso' #2017 name
 flashggSysts['TriggerWeight'] = 'TriggerWeight'
 #flashggSysts['JetBTagWeight'] = 'eff_b'
 flashggSysts['JetBTagCutWeight'] = 'eff_b'
