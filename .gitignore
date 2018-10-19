@@ -10,8 +10,12 @@ __init__.py
 crab_*
 crabConfig_*
 
+#config files
+*.dat
+
 # ROOT-related files
 *.root
+*.C
 *_cc.d
 *_cc.so
 *_C.d
@@ -25,3 +29,7 @@ AutoDict_*
 *.log
 *.png
 *.pdf
+*.out
+*.tmp
+*.pcm
+*.o
