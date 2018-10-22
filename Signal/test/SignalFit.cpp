@@ -459,6 +459,7 @@ int main(int argc, char *argv[]){
   replacementProcMap["RECO_VBFTOPO_JET3_Tag0"]          = "VBF_VBFTOPO_JET3";
   replacementProcMap["RECO_VBFTOPO_JET3_Tag1"]          = "VBF_VBFTOPO_JET3";
   replacementProcMap["RECO_VBFTOPO_JET3_Tag2"]          = "VBF_VBFTOPO_JET3";
+  replacementProcMap["RECO_VBFTOPO_REST"]               = "VBF_REST";
   replacementProcMap["RECO_VHHAD"]                      = "ZH2HQQ_VH2JET";
   replacementProcMap["RECO_VHLEPLOOSE"]                 = "QQ2HLNU_PTV_0_150";
   replacementProcMap["RECO_VHMET"]                      = "QQ2HLNU_PTV_0_150";
@@ -492,6 +493,7 @@ int main(int argc, char *argv[]){
   replacementCatMap["RECO_VBFTOPO_JET3_Tag0"]          = "RECO_VBFTOPO_JET3_Tag0";
   replacementCatMap["RECO_VBFTOPO_JET3_Tag1"]          = "RECO_VBFTOPO_JET3_Tag1";
   replacementCatMap["RECO_VBFTOPO_JET3_Tag2"]          = "RECO_VBFTOPO_JET3_Tag2";
+  replacementCatMap["RECO_VBFTOPO_REST"]               = "RECO_VBFTOPO_REST";
   replacementCatMap["RECO_VHHAD"]                      = "RECO_VHHAD";
   replacementCatMap["RECO_VHLEPLOOSE"]                 = "RECO_VHLEPLOOSE";
   replacementCatMap["RECO_VHMET"]                      = "RECO_VHMET";
@@ -525,34 +527,22 @@ int main(int argc, char *argv[]){
 	//TFile *inFile = TFile::Open(filename_[0].c_str());
 
   // extract nEvents per proc/tag etc...
-  // FIXME: no need for this...
-  /*if (checkYields_){
-	  
+  if (checkYields_){
     WSTFileWrapper * inWS0 = new WSTFileWrapper(filenameStr_,"tagsDumper/cms_hgg_13TeV");
-		std::list<RooAbsData*> data =  (inWS0->allData()) ;
-		for (std::list<RooAbsData*>::const_iterator iterator = data.begin(), end = data.end();
-      iterator != end;
-      ++iterator) {
-        RooDataSet *dataset = dynamic_cast<RooDataSet *>( *iterator );
-        if (dataset) {
-	        std::cout <<  dataset->GetName() << "," << dataset->sumEntries() << std::endl;
-        }
+    for (int iTag=0; iTag < flashggCats_.size(); iTag++){
+        RooAbsData *dataset = inWS0->data( Form("%s_%d_13TeV_%s",split_[0].c_str(),125,flashggCats_[iTag].c_str()) );
+        //if (dataset) {
+	      //  std::cout <<  dataset->GetName() << "," << dataset->sumEntries() << std::endl;
+        //}
+	      std::cout <<  dataset->GetName() << "," << dataset->sumEntries() << std::endl;
 		}
 		return 1;
-	}*/
+	}
 
   //time to open the signal file for the main script!
 	WSTFileWrapper *inWS;
 	if (isFlashgg_){
     inWS = new WSTFileWrapper(filenameStr_,"tagsDumper/cms_hgg_13TeV");
-                //FIXME not needed
-		/*std::list<RooAbsData*> test =  (inWS->allData()) ;
-		if (verbose_) {
-			std::cout << " [INFO] WS contains " << std::endl;
-			for (std::list<RooAbsData*>::const_iterator iterator = test.begin(), end = test.end(); iterator != end; ++iterator) {
-		//		std::cout << **iterator << std::endl;
-			}
-		}*/
 	} else {
     std::cout << "[ERROR] script is only compatible with flashgg! exit(1)." << std::endl;
     exit(1);

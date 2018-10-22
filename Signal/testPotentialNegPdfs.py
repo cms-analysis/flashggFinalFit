@@ -1,25 +1,19 @@
 #!/usr/bin/env python
 
-# Usual reasons to love python imports
 import os
 import sys
 import shlex
 from array import array
 import ROOT as r
 
-ext='xgboostDiphoBDT'
-#ext='xgboostDiphoBDT2017'
+ext='fullNewTest2016'
+#ext='fullNewTest2017'
 
 r.gSystem.Load("libHiggsAnalysisCombinedLimit")
 r.gSystem.Load("libHiggsAnalysisGBRLikelihood")
 
-##procs=['ggh','vbf','zh','wh','tth']
-#procs=['GG2H','VBF','TTH','QQ2HLNU','QQ2HLL','WH2HQQ','ZH2HQQ','testBBH','testTHQ','testTHW']
-#cats=['UntaggedTag_0','UntaggedTag_1','UntaggedTag_2','UntaggedTag_3','VBFTag_0','VBFTag_1','VBFTag_2','TTHLeptonicTag','TTHHadronicTag','ZHLeptonicTag','WHLeptonicTag','VHLeptonicLooseTag','VHHadronicTag','VHMetTag']
-
 #setup files 
 baseFilePath  = '/vols/cms/es811/FinalFits/ws_%s/'%ext
-#baseFilePath  = '/vols/cms/es811/FinalFits/ws_reCategorised/'
 fileNames     = []
 for root,dirs,files in os.walk(baseFilePath):
   for fileName in files: 

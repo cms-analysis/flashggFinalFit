@@ -23,7 +23,7 @@ procs    = opts.procs.split(',')
 cats     = opts.cats.split(',')
 yi = YieldInfo(procs, cats)
 
-if not (opts.workspaces =='') and not path.isfile(opts.input):
+if not (opts.workspaces ==''):
   for ws in opts.workspaces.split(','):
     if 'M125' not in ws: continue
     proc = ws.split('pythia8_')[1].split('.root')[0]

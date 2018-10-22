@@ -1,7 +1,7 @@
 from os import system
 
-ext = 'xgboostDiphoBDT'
-#ext = 'xgboostDiphoBDT2017'
+ext='fullNewTest2016'
+#ext='fullNewTest2017'
 
 fileName = 'potentialNegPdfs_%s.txt'%ext
 with open(fileName, 'r') as f:
@@ -29,8 +29,8 @@ for line in theInput:
     else: issueCats[cat] = 1
     errorState = True
 
-#searchDir = '$PWD/outdir_%s/sigfit/SignalFitJobs'%ext
-searchDir = '/vols/build/cms/es811/FreshStart/STXSstage1/CMSSW_7_4_7/src/flashggFinalFit/Signal/outdir_%s/sigfit/SignalFitJobs'%ext
+searchDir = '$PWD/outdir_%s/sigfit/SignalFitJobs'%ext
+#searchDir = '/vols/build/cms/es811/FreshStart/STXSstage1/CMSSW_7_4_7/src/flashggFinalFit/Signal/outdir_%s/sigfit/SignalFitJobs'%ext
 for issue in issueCombs: 
   grepCmd = 'grep -rl "proc:%s - cat:%s" %s'%(issue[0], issue[1], searchDir)
   print '%s %s %s'%(issue[0], issue[1], issue[2])
