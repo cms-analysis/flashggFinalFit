@@ -937,8 +937,13 @@ def writeMultiDimFit(method=None,wsOnly=False):
           #exec_line += ' --verbose -1 --saveSpecifiedIndex pdfindex_UntaggedTag_0_13TeV,pdfindex_UntaggedTag_1_13TeV,pdfindex_UntaggedTag_2_13TeV,pdfindex_UntaggedTag_3_13TeV,pdfindex_VBFTag_0_13TeV,pdfindex_VBFTag_1_13TeV,pdfindex_TTHLeptonicTag_13TeV,pdfindex_TTHHadronicTag_13TeV' 
           if opts.expectSignal: exec_line += ' --expectSignal %4.2f'%opts.expectSignal
           if opts.expectSignalMass: exec_line += ' --expectSignalMass %6.2f'%opts.expectSignalMass
-          if method == 'PerProcessMu' and opts.doSTXS: exec_line += ' --freezeParameters %s'%opts.stxsFreezeNuisances
-          if opts.additionalOptions: exec_line += ' %s'%opts.additionalOptions
+          if method == 'PerProcessMu' and opts.doSTXS and not 'freezeParameters' in opts.additionalOptions: exec_line += ' --freezeParameters %s'%opts.stxsFreezeNuisances
+          if opts.additionalOptions: 
+            if 'freezeParameters' in opts.additionalOptions and opts.doSTXS and method == 'PerProcessMu':
+              if not 'freezeParameters all' in opts.additionalOptions: 
+                exec_line += ' %s'%opts.additionalOptions.replace('freezeParameters ','freezeParameters %s,'%opts.stxsFreezeNuisances)
+              else: exec_line += ' %s'%opts.additionalOptions
+            else: exec_line += ' %s'%opts.additionalOptions
           if opts.toysFile: exec_line += ' --toysFile %s'%opts.toysFile
           if opts.verbose: print '\t', exec_line
           writePostamble(file,exec_line)
@@ -1068,9 +1073,9 @@ def configure(config_line):
       opts.additionalOptions = opts.additionalOptions.replace("<"," ")
     if option.startswith('catsMap='):
       for mp in option.split('=')[1].split(';'):
-        if not "[" in mp.split(':')[-1]:
-          mp += "[1,0,20]"
-        opts.catsMap += " --PO map=%s" % mp
+        if not '[' in mp.split(':')[-1]:
+          mp += '[1,0,20]'
+        opts.catsMap += ' --PO "map=%s"' % mp
     if option.startswith('catRanges='):
       catRanges = strtodict(opts.catRanges)
     if option == "skipWorkspace": opts.skipWorkspace = True

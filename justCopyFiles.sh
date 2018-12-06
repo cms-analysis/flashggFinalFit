@@ -1,5 +1,4 @@
-#EXT="xgboostDiphoBDT"
-EXT="xgboostDiphoBDT2017"
+EXT="fullNewTest2016"
 OUTDIR="outdir_${EXT}"
 
 if [ ! -d "Signal/$OUTDIR" ]; then

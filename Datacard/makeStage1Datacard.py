@@ -793,6 +793,12 @@ flashggSysts['metUncUncertainty'] = 'MET_Unclustered'
 flashggSysts['metJecUncertainty'] = 'MET_JEC'
 flashggSysts['metJerUncertainty'] = 'MET_JER'
 
+#FIXME try putting JEC here
+oneLineJEC = True
+if oneLineJEC:
+  flashggSysts['JEC'] = 'scale_j'
+  flashggSysts['JER'] = 'res_j'
+
 #new ggH uncert prescription (replaces theory, JetVeto)
 if options.newGghScheme:
   flashggSysts['THU_ggH_Mu'] = 'THU_ggH_Mu'
@@ -809,7 +815,7 @@ if options.newGghScheme:
 tthSysts={}
 tthSysts['JEC'] = 'JEC_TTH' #FIXME: want both of these to apply to VH Hadronic too
 tthSysts['JER'] = 'JER_TTH'
-tthSysts['JetBTagReshapeWeight'] = 'BTagReshape_TTH'
+tthSysts['JetBTagReshapeWeight'] = 'BTagReshape_TTH' #FIXME this is not being propagated correctly
 btagReshapeSyst = 1.042 #ad hoc from Saranya for Moriond17, combination of various sources
 #flashggSysts['regSig'] = 'n_sigmae'
 #flashggSysts['idEff'] = 'n_id_eff'
@@ -820,15 +826,16 @@ puJetIdEff = []
 
 # naming is important to correlate with combination
 vbfSysts={}
-vbfSysts['JEC'] = [] 
+if not oneLineJEC:
+  vbfSysts['JEC'] = [] 
+  vbfSysts['JER'] = [] 
+  for dijetCat in dijetCats: #each entry will represent a different migration
+     vbfSysts['JER'].append([1.,1.,1.])  #value of 1 given gor both ggh and qqh, since vairations are taken from histograms directly
+     vbfSysts['JEC'].append([1.,1.,1.]) #value of 1 given gor both ggh and qqh, since vairations are taken from histograms directly
 #vbfSysts['UnmatchedPUWeight'] = [] #removed for Moriond17
-vbfSysts['JER'] = [] 
 #vbfSysts['UEPS'] =[] #superseded by new method, no longer a bin migration
 #vbfSysts['RMSShift'] =[]
 vbfSysts['PUJIDShift'] =[]
-for dijetCat in dijetCats: #each entry will represent a different migration
-   vbfSysts['JER'].append([1.,1.,1.])  #value of 1 given gor both ggh and qqh, since vairations are taken from histograms directly
-   vbfSysts['JEC'].append([1.,1.,1.]) #value of 1 given gor both ggh and qqh, since vairations are taken from histograms directly
 #vbfSysts['UnmatchedPUWeight'].append([1.,1.]) #should only apply to ggh<->vbf
 #vbfSysts['RMSShift'].append([1.,1.]) #should only apply to ggh<->vbf
 vbfSysts['PUJIDShift'].append([1.,1.]) #should only apply to ggh<->vbf

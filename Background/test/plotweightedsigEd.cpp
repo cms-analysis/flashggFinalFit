@@ -58,6 +58,7 @@ namespace po = boost::program_options;
 
 
 string filenameStr_;
+string sigfilename_;
 vector<string> filename_;
 vector<string> filelabels_;
 string name_="default";
@@ -72,6 +73,7 @@ void OptionParser(int argc, char *argv[]){
 	desc1.add_options()
 		("help,h",                                                                                			"Show help")
 		("infilename,i", po::value<string>(&filenameStr_),                                           			"Input file name")
+		("sigfilename,s", po::value<string>(&sigfilename_),                                           			"Signal file name")
 		("name", po::value<string>(&name_)->default_value("CMS-HGG_hgg_"), 			"Prefix for plots")
 		("labels", po::value<string>(&filelabelsStr_)->default_value("file0,file1,file2"), 			"Labels for the individual files for the legend")
 		("lumi", po::value<float>(&intLumi_)->default_value(12.9), 			"IntLumi")
@@ -716,8 +718,7 @@ int main(int argc, char *argv[]) {
 
 
   //get MC datasets 
-  //TFile *hggFile = TFile::Open("../../Signal/outdir_EdWeightTest/CMS-HGG_sigfit_EdWeightTest.root");
-  TFile *hggFile = TFile::Open("/vols/build/cms/es811/FreshStart/Pass6/CMSSW_7_4_7/src/flashggFinalFit/Signal/outdir_ws919/CMS-HGG_sigfit_ws919.root");
+  TFile *hggFile = TFile::Open(sigfilename_.c_str());
   RooWorkspace *hggWS;
   int sqrts_ = 13;
   hggWS = (RooWorkspace*)hggFile->Get(Form("wsig_%dTeV",sqrts_));

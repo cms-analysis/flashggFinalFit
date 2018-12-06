@@ -105,7 +105,8 @@ for proc in stage0procs:
 line = line[:-2] + '}'
 print line
 print '\\hline'
-print '\\multirow{2}{*}{Event Categories} &\multicolumn{%d}{|c|}{SM 125 GeV Higgs boson expected signal} & Bkg & S/(S+B) \\\\ \\cline{2-%d}'%(nStage0procs+3,nStage0procs+4)
+#print '\\multirow{2}{*}{Event Categories} &\multicolumn{%d}{|c|}{SM 125 GeV Higgs boson expected signal} & Bkg & S/(S+B) \\\\ \\cline{2-%d}'%(nStage0procs+3,nStage0procs+4)
+print '\\multirow{2}{*}{Event Categories} &\multicolumn{%d}{|c|}{SM 125 GeV Higgs boson expected signal} & Bkg & Signif \\\\ \\cline{2-%d}'%(nStage0procs+3,nStage0procs+4)
 line = '  &  '
 line = line + 'Total & '
 for proc in stage0procs:
@@ -126,7 +127,8 @@ for cat in cats:
       line = line + ' &  ' + str('$<$0.05 %s '%pc)
   allLine  = ' ' + str('%.1f'%yi.getSigYield(cat))
   niceCat = prettyCat(cat)
-  dataLines.append( niceCat + ' & ' + allLine + ' ' + line + ' & %.2f & %.2f & %.1f & %.2f \\\\'%(yi.getEffSigma(cat), yi.getFWHM(cat), yi.getBkgYield(cat), yi.getPurity(cat)) )
+  #dataLines.append( niceCat + ' & ' + allLine + ' ' + line + ' & %.2f & %.2f & %.1f & %.2f \\\\'%(yi.getEffSigma(cat), yi.getFWHM(cat), yi.getBkgYield(cat), yi.getPurity(cat)) )
+  dataLines.append( niceCat + ' & ' + allLine + ' ' + line + ' & %.2f & %.2f & %.1f & %.2f \\\\'%(yi.getEffSigma(cat), yi.getFWHM(cat), yi.getBkgYield(cat), yi.getAMS(cat)) )
 
 # now do total line
 cat = 'Total' 
@@ -140,7 +142,8 @@ for proc in stage0procs:
     line = line + ' &  ' + str('$<$0.05 %s '%pc)
 
 allLine = ' ' + str('%.1f'%yi.getSigYield(cat))
-dataLines.append( lineCat + allLine + ' ' + line + ' & %.2f & %.2f & %.1f & %.2f \\\\'%(yi.getTotEffSigma(), yi.getTotFWHM(), yi.getBkgYield(cat), yi.getTotPurity()) )
+#dataLines.append( lineCat + allLine + ' ' + line + ' & %.2f & %.2f & %.1f & %.2f \\\\'%(yi.getTotEffSigma(), yi.getTotFWHM(), yi.getBkgYield(cat), yi.getTotPurity()) )
+dataLines.append( lineCat + allLine + ' ' + line + ' & %.2f & %.2f & %.1f & %.2f \\\\'%(yi.getTotEffSigma(), yi.getTotFWHM(), yi.getBkgYield(cat), yi.getTotAMS()) )
 
 for l in dataLines :
   print l

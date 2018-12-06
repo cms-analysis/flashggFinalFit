@@ -1,4 +1,5 @@
 #various helpers for the stage 1 results scripts
+import numpy as np
 
 def prettyCat( cat ):
   cat = cat.replace('RECO','')
@@ -84,6 +85,24 @@ class YieldInfo():
     s = 0.68 * self.getSigYield('Total')
     b = 2. * self.getTotEffSigma() * self.getBkgYield('Total')
     return s/(s+b)
+
+  def getAMS(self, cat, breg = 3.):
+    s = 0.68 * self.getSigYield(cat)
+    b = 2. * self.getEffSigma(cat) * self.getBkgYield(cat)
+    b += breg
+    val = (s + b)*np.log(1. + (s/b))
+    val = 2*(val - s)
+    val = np.sqrt(val)
+    return val
+
+  def getTotAMS(self, breg = 3.):
+    s = 0.68 * self.getSigYield('Total')
+    b = 2. * self.getTotEffSigma() * self.getBkgYield('Total')
+    b += breg
+    val = (s + b)*np.log(1. + (s/b))
+    val = 2*(val - s)
+    val = np.sqrt(val)
+    return val
 
   def getTotEffSigma(self):
     theSum = 0.

@@ -14,10 +14,7 @@ from collections import OrderedDict as od
 r.gROOT.SetBatch(True)
 
 #setup files 
-#ext          = 'fullStage1Test'
-#ext          = 'fullerStage1Test'
-#ext          = 'reCategorised'
-ext          = 'xgboostDiphoBDT2017'
+ext          = 'fullNewTest2016'
 print 'ext = %s'%ext
 baseFilePath  = '/vols/cms/es811/FinalFits/ws_%s/'%ext
 fileNames     = []

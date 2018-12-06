@@ -1330,6 +1330,7 @@ def plotMPdfChComp(plottype="perTag"):
            if "QQ2HLNU"  in catName: catName ="#scale[1.5]{WH leptonic}"
            if "QQ2HLL"  in catName: catName ="#scale[1.5]{QQ2HLL}"
            if "QQ2HLL"  in catName: catName ="#scale[1.5]{ZH leptonic}"
+           if "VH_lep"  in catName: catName ="#scale[1.5]{VH leptonic}"
            print "DEBUG LC b CATBAME ", catName
 
          else:
@@ -1665,13 +1666,8 @@ def plotMPdfChComp(plottype="perTag"):
       smBoxes[proc] = r.TBox(1.-uncertVal[1],index,1.+uncertVal[0],index+1)
       smBoxes[proc].SetFillStyle(1001)
       #smBoxes[proc].SetFillColor(r.kGreen-3) #default darkish green
-      #smBoxes[proc].SetFillColor(r.kGray+1)
       smBoxes[proc].SetFillColor(9) #blue chosen for LHCP17 PAS
       #smBoxes[proc].SetFillColor(r.kOrange+6)
-      #if proc=="GG2H":
-      #  smBoxes[proc].SetLineStyle(1)
-      #  smBoxes[proc].SetLineWidth(1)
-      #  smBoxes[proc].SetLineColor(r.kBlack)
       smBoxes[proc].Draw("same")
     leg.AddEntry(smBoxes["GG2H"],"SM Prediction","F")
   line.Draw("same")
@@ -1716,7 +1712,7 @@ def plotMPdfChComp(plottype="perTag"):
   for tmp in nofitlines: tmp.Draw()
   #if options.groups>1 or not options.noComb: leg.Draw("same")
   leg.Draw("same")
-  if doStxs: legendLine.Draw("same")
+  if doStxs: pass #legendLine.Draw("same") #FIXME
 
   drawGlobals(canv,"True") # shift the CMS text etc at the top 
   canv.SetFillColor(0)

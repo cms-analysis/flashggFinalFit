@@ -23,7 +23,7 @@ int Normalization_13TeV::Init(int sqrtS){
     }
     TPython::Eval(Form("buildSMHiggsSignalXSBR.Init%dTeV()", sqrtS));
     
-    for (double mH=120;mH<=130.0;mH+=0.1){ // breaks when extended beyond 130
+    for (double mH=120;mH<130.05;mH+=0.1){ // breaks when extended beyond 130
 	double valBR           = (double)TPython::Eval(Form("buildSMHiggsSignalXSBR.getBR(%f)",mH));
 	double valXSggH        = (double)TPython::Eval(Form("buildSMHiggsSignalXSBR.getXS(%f,'%s')",mH,"ggH"));
 	double valXSqqH        = (double)TPython::Eval(Form("buildSMHiggsSignalXSBR.getXS(%f,'%s')",mH,"qqH"));
@@ -234,7 +234,8 @@ TGraph * Normalization_13TeV::GetBrGraph()
 double Normalization_13TeV::GetBR(double mass) {
 
 	for (std::map<double, double>::const_iterator iter = BranchingRatioMap.begin();  iter != BranchingRatioMap.end(); ++iter) {
-		if (mass==iter->first) return iter->second;
+		//if (mass==iter->first) return iter->second;
+		if (abs(mass-iter->first)<0.001) return iter->second; //FIXME
 		if (mass>iter->first) {
 			double lowmass = iter->first;
 			double lowbr = iter->second;
@@ -367,7 +368,8 @@ double Normalization_13TeV::GetXsection(double mass, TString HistName) {
 	}
 
 	for (std::map<double, double>::const_iterator iter = XSectionMap->begin();  iter != XSectionMap->end(); ++iter) {
-		if (mass==iter->first) return iter->second;
+		//if (mass==iter->first) return iter->second;
+		if (abs(mass-iter->first)<0.001) return iter->second; //FIXME
 		if (mass>iter->first) {
 			double lowmass = iter->first;
 			double lowxsec = iter->second;
