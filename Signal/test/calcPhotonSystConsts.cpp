@@ -303,6 +303,7 @@ double getMeanVar(TH1F* nom, TH1F *up, TH1F* down){
 	}
 	double val = (TMath::Abs(u)+TMath::Abs(d))/2.;
 	if (val!=val) val=0.;
+	val = min(val,0.05);
 	return val;
 }
 
@@ -318,6 +319,7 @@ double getSigmaVar(TH1F* nom, TH1F *up, TH1F* down){
 	}
 	double val = (TMath::Abs(u)+TMath::Abs(d))/2.;
 	if (val!=val) val=0.;
+	val = min(val,0.5);
 	return val;
 }
 
@@ -333,6 +335,7 @@ double getRateVar(TH1F* nom, TH1F *up, TH1F* down){
 	}
 	double val = (TMath::Abs(u)+TMath::Abs(d))/2.;
 	if (val!=val) val=0.;
+	val = min(val,0.05);
 	return val;
 }
 

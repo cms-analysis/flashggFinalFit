@@ -61,8 +61,8 @@ with open(opts.outfilename,'w') as outFile:
       for i,effect in enumerate(vals[2:]):
         proc = procs[int( i % len(procs) )]
         cat =  cats[int( i / len(procs) )]
-        print 'proc = %s'%proc
-        print 'cat  = %s'%cat
+        #print 'proc = %s'%proc
+        #print 'cat  = %s'%cat
         if opts.removeNonDiagonal and not isDiag(proc,cat):
           line += '- '
           continue

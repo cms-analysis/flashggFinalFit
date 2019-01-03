@@ -6,6 +6,7 @@ import sys
 import shlex
 import array 
 from math import sqrt
+from collections import OrderedDict as od
 
 from optparse import OptionParser
 parser = OptionParser()
@@ -70,6 +71,7 @@ parser.add_option("-b","--batch",dest="batch",default=False,action="store_true")
 parser.add_option("--it",dest="it",type="string",help="if using superloop, index of iteration")
 parser.add_option("--itLedger",dest="itLedger",type="string",help="ledger to keep track of values of each iteration if using superloop")
 parser.add_option("--specifyX",dest="specifyX",type="string",help="use a specific variable name in mu plots (eg r_Untagged_Tag_0)")
+parser.add_option("--removeNegative",dest="removeNegative",default=False,action="store_true",help="Remove negative NLL values")
 parser.add_option("--paperStyle",dest="paperStyle",default=False,action="store_true",help="Make plots in paper style (without preliminary etc)")
 #parser.add_option("--paperStyle",dest="paperStyle",default=True,action="store_false",help="Make plots in paper style (without preliminary etc)")
 (options,args)=parser.parse_args()
@@ -678,9 +680,7 @@ def plot1DNLL(returnErrors=False,xvar="", ext=""):
       # tree.quantileExpected==1: continue
       if tree.deltaNLL<0 and options.verbose: print "Warning, found -ve deltaNLL = ",  tree.deltaNLL, " at ", xv 
       if xv in [re[0] for re in res]: continue
-      #if 2*tree.deltaNLL < 100:
-      #FIXME
-      if 2*tree.deltaNLL < 100 and tree.deltaNLL>0.:
+      if 2*tree.deltaNLL < 100 and not (tree.deltaNLL<0. and options.removeNegative):
         res.append([xv,2*tree.deltaNLL,lcMH])
     res.sort()
 
@@ -1313,12 +1313,20 @@ def plotMPdfChComp(plottype="perTag"):
            elif "ggH_1J_low" in catName: catName ="#scale[1.5]{ggH 1J low}"
            elif "ggH_1J_med" in catName: catName ="#scale[1.5]{ggH 1J med}"
            elif "ggH_1J_high" in catName: catName ="#scale[1.5]{ggH 1J high}"
+           elif "ggH_1J_BSM" in catName: catName ="#scale[1.5]{ggH 1J BSM}"
+           elif "ggH_GE2J_low" in catName: catName ="#scale[1.5]{ggH 2J low}"
+           elif "ggH_GE2J_med" in catName: catName ="#scale[1.5]{ggH 2J med}"
+           elif "ggH_GE2J_high" in catName: catName ="#scale[1.5]{ggH 2J high}"
+           elif "ggH_2J_BSM" in catName: catName ="#scale[1.5]{ggH 2J BSM}"
            elif "ggH_1J" in catName: catName ="#scale[1.5]{ggH 1J}"
            elif "ggH_GE2J" in catName: catName ="#scale[1.5]{ggH GE2J}"
            elif "ggH_BSM" in catName: catName ="#scale[1.5]{ggH BSM}"
            elif "ggH" in catName: catName ="#scale[1.5]{ggH}"
            #elif "GG2H" in catName: catName ="#scale[1.5]{ggH}"
-           if "qqH" in catName: catName ="#scale[1.5]{VBF}"
+           if "qqH_Rest" in catName: catName ="#scale[1.5]{VBF rest}"
+           elif "qqH_2J" in catName: catName ="#scale[1.5]{VBF 2J-like}"
+           elif "qqH_3J" in catName: catName ="#scale[1.5]{VBF 3J-like}"
+           elif "qqH" in catName: catName ="#scale[1.5]{VBF}"
            #if "ttH" in catName: catName ="#scale[1.5]{#sigma_{ttH}/#sigma_{theo}}"
            if "ttH" in catName: catName ="#scale[1.5]{TTH}"
            if "TTH" in catName: catName ="#scale[1.5]{ttH}"
@@ -1623,7 +1631,8 @@ def plotMPdfChComp(plottype="perTag"):
   #doHatching = True
   doHatching = False
   if doStxs or options.percatchcomp:
-    doHatching = True
+    pass #FIXME
+    #doHatching = True
   if doHatching:
     hatchBox = r.TBox(-0.2,0.,0.,len(catFits))
     hatchBox.SetFillStyle(3004)
@@ -1659,6 +1668,43 @@ def plotMPdfChComp(plottype="perTag"):
     procUncertMap["VH2HQQ"] =  [sqrt(procUncertMap["QQ2HLNU"][0]*procUncertMap["QQ2HLNU"][0]+procUncertMap["QQ2HLL"][0]*procUncertMap["QQ2HLL"][0]),
                                 sqrt(procUncertMap["QQ2HLNU"][1]*procUncertMap["QQ2HLNU"][1]+procUncertMap["QQ2HLL"][1]*procUncertMap["QQ2HLL"][1])]
     boxIndexMap = {"GG2H":5,"VBF":4,"TTH":3,"QQ2HLNU":2,"QQ2HLL":1,"VH2HQQ":0} #order of processes
+    if 'Stage0Coarse' in options.outname:
+      procUncertMap = {"GG2H"   :[sqrt(0.046*0.046+0.021*0.021), sqrt(0.046*0.046+0.021*0.021)], #sum in quadrature of uncerts removed, plus then minus
+                       "VBF"    :[sqrt(0.004*0.004+0.021*0.021), sqrt(0.003*0.003+0.021*0.021)]}
+      boxIndexMap = {"GG2H":1,"VBF":0} #order of processes
+    elif 'Stage0' in options.outname:
+      procUncertMap = {"GG2H"   :[sqrt(0.046*0.046+0.021*0.021), sqrt(0.046*0.046+0.021*0.021)], #sum in quadrature of uncerts removed, plus then minus
+                       "VBF"    :[sqrt(0.004*0.004+0.021*0.021), sqrt(0.003*0.003+0.021*0.021)]}
+      boxIndexMap = {"GG2H":1,"VBF":0} #order of processes
+    elif 'Stage1Minimal' in options.outname:
+      procUncertMap = od([ 
+                       ("GG2H_0J"       ,[sqrt(0.038*0.038+0.001*0.001), sqrt(0.038*0.038+0.001*0.001)]), #sum in quadrature of uncerts removed, plus then minus
+                       ("GG2H_1J_low"   ,[sqrt(0.052*0.052+0.045*0.045), sqrt(0.052*0.052+0.045*0.045)]), #ggH values taken from 2017 scheme
+                       ("GG2H_1J_med"   ,[sqrt(0.052*0.052+0.045*0.045), sqrt(0.052*0.052+0.045*0.045)]),
+                       ("GG2H_1J_high"  ,[sqrt(0.052*0.052+0.045*0.045), sqrt(0.052*0.052+0.045*0.045)]),
+                       ("GG2H_1J_BSM"   ,[sqrt(0.052*0.052+0.045*0.045), sqrt(0.052*0.052+0.045*0.045)]),
+                       ("GG2H_GE2J_low" ,[sqrt(0.089*0.089+0.089*0.089), sqrt(0.089*0.089+0.089*0.089)]),
+                       ("GG2H_GE2J_med" ,[sqrt(0.089*0.089+0.089*0.089), sqrt(0.089*0.089+0.089*0.089)]),
+                       ("GG2H_GE2J_high",[sqrt(0.089*0.089+0.089*0.089), sqrt(0.089*0.089+0.089*0.089)]),
+                       ("GG2H_2J_BSM"   ,[sqrt(0.089*0.089+0.089*0.089), sqrt(0.089*0.089+0.089*0.089)]),
+                       ("GG2H_VBFTOPO"   ,[0.                           , 0.                          ]),
+                       ("VBF_2J"        ,[sqrt(0.004*0.004+0.021*0.021), sqrt(0.003*0.003+0.021*0.021)]),
+                       ("VBF_3J"        ,[sqrt(0.004*0.004+0.021*0.021), sqrt(0.003*0.003+0.021*0.021)]),
+                       ("VBF_Rest"      ,[sqrt(0.004*0.004+0.021*0.021), sqrt(0.003*0.003+0.021*0.021)])
+                       ])
+      print 'ED DEBUG proc uncert map is'
+      print procUncertMap
+      print procUncertMap.keys()
+      boxIndexMap = { name:i for i,name in enumerate(reversed(procUncertMap.keys())) }
+    elif 'Stage1' in options.outname:
+      procUncertMap = {"GG2H_0J"        :[sqrt(0.038*0.038+0.001*0.001), sqrt(0.038*0.038+0.001*0.001)], #sum in quadrature of uncerts removed, plus then minus
+                       "GG2H_1J_low"    :[sqrt(0.052*0.052+0.045*0.045), sqrt(0.052*0.052+0.045*0.045)], #ggH values taken from 2017 scheme
+                       "GG2H_1J_med"    :[sqrt(0.052*0.052+0.045*0.045), sqrt(0.052*0.052+0.045*0.045)],
+                       "GG2H_1J_high"   :[sqrt(0.052*0.052+0.045*0.045), sqrt(0.052*0.052+0.045*0.045)],
+                       "GG2H_BSM"       :[sqrt(0.079*0.079+0.077*0.077), sqrt(0.079*0.079+0.077*0.077)],
+                       "GG2H_GE2J"      :[sqrt(0.078*0.078+0.078*0.078), sqrt(0.078*0.078+0.078*0.078)],
+                       "VBF"            :[sqrt(0.004*0.004+0.021*0.021), sqrt(0.003*0.003+0.021*0.021)]}
+      boxIndexMap = {"GG2H_0J":6,"GG2H_1J_low":5, "GG2H_1J_med":4, "GG2H_1J_high":3, "GG2H_BSM":2, "GG2H_GE2J":1, "VBF":0}
     smBoxes = {}
     for proc in procUncertMap.keys():
       uncertVal =  procUncertMap[proc]
@@ -1669,7 +1715,8 @@ def plotMPdfChComp(plottype="perTag"):
       smBoxes[proc].SetFillColor(9) #blue chosen for LHCP17 PAS
       #smBoxes[proc].SetFillColor(r.kOrange+6)
       smBoxes[proc].Draw("same")
-    leg.AddEntry(smBoxes["GG2H"],"SM Prediction","F")
+    if   "GG2H" in smBoxes.keys(): leg.AddEntry(smBoxes["GG2H"],"SM Prediction","F")
+    elif "GG2H_0J" in smBoxes.keys(): leg.AddEntry(smBoxes["GG2H_0J"],"SM Prediction","F")
   line.Draw("same")
 
   # draw fit value
@@ -1684,10 +1731,11 @@ def plotMPdfChComp(plottype="perTag"):
     lat2.DrawLatex(0.57,0.50,"m_{H} = 125.09 GeV")
   else:
     if (is_float_try(options.mhval)): 
-      lat2.DrawLatex(0.57,0.50,"m_{H} = %s GeV"%options.mhval)
+      #lat2.DrawLatex(0.57,0.50,"m_{H} = %s GeV"%options.mhval) #FIXME
+      lat2.DrawLatex(0.57,0.40,"m_{H} = %s GeV"%options.mhval)
     else:
       if not doStxs: lat2.DrawLatex(0.57,0.50,"m_{H} %s"%options.mhval)
-      else: lat2.DrawLatex(0.57,0.64,"m_{H} %s"%options.mhval)
+      else: lat2.DrawLatex(0.57,0.6,"m_{H} %s"%options.mhval)
 
   for gr in range(options.groups):
     #print gr

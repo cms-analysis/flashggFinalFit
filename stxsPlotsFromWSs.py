@@ -4,17 +4,49 @@
 from os import walk
 import ROOT as r
 from collections import OrderedDict as od
+from usefulStyle import setCanvas, drawCMS, drawEnPu, formatHisto
+from shanePalette import set_color_palette
 
-#from optparse import OptionParser
-#parser = OptionParser()
-#parser.add_option('-k', '--key', default='GluGluHToGG', help='choose the sample to run on')
-#parser.add_option('-d', '--doLoose', default=False, action='store_true', help='use loose photons (default false, ie use only tight photons)')
-#(opts,args) = parser.parse_args()
+from optparse import OptionParser
+parser = OptionParser()
+parser.add_option('-l', '--lumi', default=35.9, help='set lumi')
+parser.add_option('-e', '--ext', default='test', help='set extension')
+(opts,args) = parser.parse_args()
 
 r.gROOT.SetBatch(True)
+r.gStyle.SetNumberContours(500)
+r.gStyle.SetPaintTextFormat('2.0f')
+
+def prettyProc( proc ):
+  if proc.startswith('GG2H_'):
+    name = 'ggH '
+    proc = proc.split('GG2H_')[1]
+    proc = proc.replace('VBFTOPO_JET3VETO','VBF-like 2J')
+    proc = proc.replace('VBFTOPO_JET3','VBF-like 3J')
+    proc = proc.replace('PTH_0_60','low')
+    proc = proc.replace('PTH_0_60','low')
+    proc = proc.replace('PTH_60_120','med')
+    proc = proc.replace('PTH_120_200','high')
+    proc = proc.replace('PTH_GT200','BSM')
+    proc = proc.replace('GE2J','2J')
+    proc = proc.replace('_',' ')
+    name = name + proc
+  elif proc.startswith('VBF_'):
+    name = 'VBF '
+    proc = proc.split('VBF_')[1]
+    proc = proc.replace('PTJET1_GT200','BSM')
+    proc = proc.replace('VBFTOPO','')
+    proc = proc.replace('JET3VETO','2J-like')
+    proc = proc.replace('JET3','3J-like')
+    proc = proc.replace('VH2JET','VH-like')
+    proc = proc.replace('REST','rest')
+    proc = proc.replace('_',' ')
+    name = name + proc
+  return name
 
 #setup files 
-ext          = 'fullNewTest2016'
+ext          = opts.ext
+lumi = opts.lumi
 print 'ext = %s'%ext
 baseFilePath  = '/vols/cms/es811/FinalFits/ws_%s/'%ext
 fileNames     = []
@@ -34,16 +66,19 @@ for fileName in fileNames:
   if 'M125' not in fileName: continue
   procs.append( fileName.split('pythia8_')[1].split('.root')[0] )
 #procsOfInterest = procs
-procsOfInterest = ['GG2H_0J','GG2H_1J_PTH_0_60','GG2H_1J_PTH_60_120','GG2H_1J_PTH_120_200','GG2H_1J_PTH_GT200','GG2H_GE2J_PTH_0_60','GG2H_GE2J_PTH_60_120','GG2H_GE2J_PTH_120_200','GG2H_GE2J_PTH_GT200']
-#cats          = 'NOTAG,RECO_0J,RECO_1J_PTH_0_60,RECO_1J_PTH_60_120,RECO_1J_PTH_120_200,RECO_1J_PTH_GT200,RECO_GE2J_PTH_0_60,RECO_GE2J_PTH_60_120,RECO_GE2J_PTH_120_200,RECO_GE2J_PTH_GT200,RECO_VBFTOPO_JET3VETO,RECO_VBFTOPO_JET3,RECO_VH2JET,RECO_0LEP_PTV_0_150,RECO_0LEP_PTV_150_250_0J,RECO_0LEP_PTV_150_250_GE1J,RECO_0LEP_PTV_GT250,RECO_1LEP_PTV_0_150,RECO_1LEP_PTV_150_250_0J,RECO_1LEP_PTV_150_250_GE1J,RECO_1LEP_PTV_GT250,RECO_2LEP_PTV_0_150,RECO_2LEP_PTV_150_250_0J,RECO_2LEP_PTV_150_250_GE1J,RECO_2LEP_PTV_GT250,RECO_TTH_LEP,RECO_TTH_HAD'
-#cats          = 'RECO_0J,RECO_1J_PTH_0_60,RECO_1J_PTH_60_120,RECO_1J_PTH_120_200,RECO_1J_PTH_GT200,RECO_GE2J_PTH_0_60,RECO_GE2J_PTH_60_120,RECO_GE2J_PTH_120_200,RECO_GE2J_PTH_GT200'
+#procs.sort()
+#procsOfInterest = [proc for proc in procs if 'GG2H' in proc or proc.startswith('VBF_')]
+
+procsOfInterest  = ['GG2H_0J', 'GG2H_1J_PTH_0_60', 'GG2H_1J_PTH_60_120', 'GG2H_1J_PTH_120_200', 'GG2H_1J_PTH_GT200', 
+                    'GG2H_GE2J_PTH_0_60', 'GG2H_GE2J_PTH_60_120', 'GG2H_GE2J_PTH_120_200', 'GG2H_GE2J_PTH_GT200', 'GG2H_VBFTOPO_JET3VETO', 'GG2H_VBFTOPO_JET3',
+                    'VBF_VBFTOPO_JET3VETO', 'VBF_VBFTOPO_JET3', 'VBF_REST', 'VBF_PTJET1_GT200', 'VBF_VH2JET']
+
 cats  = 'RECO_0J_Tag0,RECO_0J_Tag1,RECO_1J_PTH_0_60_Tag0,RECO_1J_PTH_0_60_Tag1,RECO_1J_PTH_60_120_Tag0,RECO_1J_PTH_60_120_Tag1,RECO_1J_PTH_120_200_Tag0,RECO_1J_PTH_120_200_Tag1,RECO_1J_PTH_GT200,'
-cats += 'RECO_GE2J_PTH_0_60_Tag0,RECO_GE2J_PTH_0_60_Tag1,RECO_GE2J_PTH_60_120_Tag1,RECO_GE2J_PTH_120_200_Tag0,RECO_GE2J_PTH_120_200_Tag1,RECO_GE2J_PTH_GT200_Tag0,RECO_GE2J_PTH_GT200_Tag1'
-#cats += 'RECO_VBFTOPO_JET3VETO_Tag0,RECO_VBFTOPO_JET3VETO_Tag1,RECO_VBFTOPO_JET3_Tag0,RECO_VBFTOPO_JET3_Tag1,'
-#cats += 'RECO_WHLEP,RECO_ZHLEP,RECO_VHLEPLOOSE,RECO_VHMET,RECO_VHHAD,'
-#cats += 'RECO_TTH_LEP,RECO_TTH_HAD'
+cats += 'RECO_GE2J_PTH_0_60_Tag0,RECO_GE2J_PTH_0_60_Tag1,RECO_GE2J_PTH_60_120_Tag0,RECO_GE2J_PTH_60_120_Tag1,RECO_GE2J_PTH_120_200_Tag0,RECO_GE2J_PTH_120_200_Tag1,RECO_GE2J_PTH_GT200_Tag0,RECO_GE2J_PTH_GT200_Tag1,'
+cats += 'RECO_VBFTOPO_JET3VETO_Tag0,RECO_VBFTOPO_JET3VETO_Tag1,RECO_VBFTOPO_JET3_Tag0,RECO_VBFTOPO_JET3_Tag1,RECO_VBFTOPO_REST'
 cats = cats.split(',')
-print procs 
+
+print procsOfInterest
 print cats
 
 nameMap  = {}
@@ -53,8 +88,6 @@ nameMap['WH2HQQ']  = 'wh'
 nameMap['ZH2HQQ']  = 'zh'
 nameMap['QQ2HLL']  = 'zh'
 nameMap['QQ2HLNU'] = 'wh'
-
-procLabelMap = {'GG2H_0J':'0j','GG2H_1J_PTH_0_60':'1j low','GG2H_1J_PTH_60_120':'1j med','GG2H_1J_PTH_120_200':'1j high','GG2H_1J_PTH_GT200':'1j BSM','GG2H_GE2J_PTH_0_60':'2j low','GG2H_GE2J_PTH_60_120':'2j med','GG2H_GE2J_PTH_120_200':'2j high','GG2H_GE2J_PTH_GT200':'2j BSM'}
 
 sumwProcCatMap = {}
 sumwProcMap = {}
@@ -91,10 +124,12 @@ def main():
   catHist  = r.TH2F('catHist','catHist', nBinsX, -0.5, nBinsX-0.5, nBinsY, -0.5, nBinsY-0.5)
   catHist.SetTitle('')
   for iProc,proc in enumerate(procsOfInterest):
-    print 'iProc,proc',iProc,proc
+    #print 'iProc,proc',iProc,proc
     for iCat,cat in enumerate(cats):
       procWeight = 100. * sumwProcCatMap[(proc,cat)] / sumwProcMap[proc]
+      if procWeight < 0.5: procWeight=-1
       catWeight  = 100. * sumwProcCatMap[(proc,cat)] / sumwCatMap[cat]
+      if catWeight < 0.5: catWeight=-1
 
       catLabel = cat.split('ECO_')[1]
       catLabel = catLabel.replace('PTH_0_60','low')
@@ -102,38 +137,58 @@ def main():
       catLabel = catLabel.replace('PTH_120_200','high')
       catLabel = catLabel.replace('PTH_GT200','BSM')
       catLabel = catLabel.replace('GE2J','2J')
+      catLabel = catLabel.replace('PTJET1_GT200','BSM')
+      catLabel = catLabel.replace('VBFTOPO','VBF')
+      catLabel = catLabel.replace('JET3VETO','2J-like')
+      catLabel = catLabel.replace('JET3','3J-like')
+      catLabel = catLabel.replace('VH2JET','VH-like')
+      catLabel = catLabel.replace('REST','rest')
       catLabel = catLabel.replace('_',' ')
 
       procHist.Fill( iProc, iCat, procWeight )
-      procHist.GetXaxis().SetBinLabel( iProc+1, procLabelMap[proc] )
+      procHist.GetXaxis().SetBinLabel( iProc+1, prettyProc(proc) )
       procHist.GetYaxis().SetBinLabel( iCat+1, catLabel )
 
       catHist.Fill( iProc, iCat, catWeight )
-      catHist.GetXaxis().SetBinLabel( iProc+1, procLabelMap[proc] )
+      catHist.GetXaxis().SetBinLabel( iProc+1, prettyProc(proc) )
       catHist.GetYaxis().SetBinLabel( iCat+1, catLabel )
   
-  canv = r.TCanvas('canv','canv')
-  r.gStyle.SetPaintTextFormat('2.0f')
+  #canv = r.TCanvas('canv','canv')
+  #set_color_palette('positive_pulls')
+  set_color_palette('ed_noice')
+  canv = setCanvas()
+  formatHisto(procHist)
   procHist.SetStats(0)
   procHist.GetXaxis().SetTitle('Process')
+  procHist.GetXaxis().SetTitleOffset(3)
   procHist.GetXaxis().SetTickLength(0.)
+  procHist.GetXaxis().LabelsOption('v')
   procHist.GetYaxis().SetTitle('Category')
-  procHist.GetYaxis().SetTitleOffset(1.5)
+  procHist.GetYaxis().SetTitleOffset(2.7)
   procHist.GetYaxis().SetTickLength(0.)
+  procHist.GetZaxis().SetTitle('Migration (%)')
   procHist.SetMinimum(-0.00001)
   procHist.SetMaximum(100.)
   procHist.Draw('colz,text')
+  drawCMS(True)
+  drawEnPu(lumi='%.1f fb^{-1}'%lumi)
   canv.Print('procHist.pdf')
   canv.Print('procHist.png')
+  formatHisto(catHist)
   catHist.SetStats(0)
   catHist.GetXaxis().SetTitle('Process')
+  catHist.GetXaxis().SetTitleOffset(3)
   catHist.GetXaxis().SetTickLength(0.)
+  catHist.GetXaxis().LabelsOption('v')
   catHist.GetYaxis().SetTitle('Category')
-  catHist.GetYaxis().SetTitleOffset(1.5)
+  catHist.GetYaxis().SetTitleOffset(2.7)
   catHist.GetYaxis().SetTickLength(0.)
+  catHist.GetZaxis().SetTitle('Purity (%)')
   catHist.SetMinimum(-0.00001)
   catHist.SetMaximum(100.)
   catHist.Draw('colz,text')
+  drawCMS(True)
+  drawEnPu(lumi='%.1f fb^{-1}'%lumi)
   canv.Print('catHist.pdf')
   canv.Print('catHist.png')
   #save hists
