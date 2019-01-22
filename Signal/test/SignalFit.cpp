@@ -460,6 +460,7 @@ int main(int argc, char *argv[]){
   replacementProcMap["RECO_VBFTOPO_JET3_Tag1"]          = "VBF_VBFTOPO_JET3";
   replacementProcMap["RECO_VBFTOPO_JET3_Tag2"]          = "VBF_VBFTOPO_JET3";
   replacementProcMap["RECO_VBFTOPO_REST"]               = "VBF_REST";
+  replacementProcMap["RECO_VBFTOPO_BSM"]                = "VBF_PTJET1_GT200";
   replacementProcMap["RECO_VHHAD"]                      = "ZH2HQQ_VH2JET";
   replacementProcMap["RECO_VHLEPLOOSE"]                 = "QQ2HLNU_PTV_0_150";
   replacementProcMap["RECO_VHMET"]                      = "QQ2HLNU_PTV_0_150";
@@ -494,6 +495,7 @@ int main(int argc, char *argv[]){
   replacementCatMap["RECO_VBFTOPO_JET3_Tag1"]          = "RECO_VBFTOPO_JET3_Tag1";
   replacementCatMap["RECO_VBFTOPO_JET3_Tag2"]          = "RECO_VBFTOPO_JET3_Tag2";
   replacementCatMap["RECO_VBFTOPO_REST"]               = "RECO_VBFTOPO_REST";
+  replacementCatMap["RECO_VBFTOPO_BSM"]                = "RECO_VBFTOPO_BSM";
   replacementCatMap["RECO_VHHAD"]                      = "RECO_VHHAD";
   replacementCatMap["RECO_VHLEPLOOSE"]                 = "RECO_VHLEPLOOSE";
   replacementCatMap["RECO_VHMET"]                      = "RECO_VHMET";

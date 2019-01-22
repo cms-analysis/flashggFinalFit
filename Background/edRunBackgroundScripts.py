@@ -17,8 +17,7 @@ print 'About to run background scripts'
 print 'fTestOnly = %s, bkgPlotsOnly = %s'%(str(fTestOnly), str(bkgPlotsOnly))
 
 #setup files 
-ext          = 'fullNewTest2016'
-#ext          = 'fullNewTest2017'
+ext = 'preappFinal2016'
 print 'ext = %s'%ext
 
 baseFilePath  = '/vols/cms/es811/FinalFits/ws_%s/'%ext
@@ -40,9 +39,10 @@ for fileName in fileNames:
   procs += fileName.split('pythia8_')[1].split('.root')[0]
   procs += ','
 procs = procs[:-1]
-cats  = 'RECO_0J_Tag0,RECO_0J_Tag1,RECO_1J_PTH_0_60_Tag0,RECO_1J_PTH_0_60_Tag1,RECO_1J_PTH_60_120_Tag0,RECO_1J_PTH_60_120_Tag1,RECO_1J_PTH_120_200_Tag0,RECO_1J_PTH_120_200_Tag1,RECO_1J_PTH_GT200,'
+cats  = 'RECO_0J_Tag0,RECO_0J_Tag1,RECO_0J_Tag2,'
+cats += 'RECO_1J_PTH_0_60_Tag0,RECO_1J_PTH_0_60_Tag1,RECO_1J_PTH_60_120_Tag0,RECO_1J_PTH_60_120_Tag1,RECO_1J_PTH_120_200_Tag0,RECO_1J_PTH_120_200_Tag1,RECO_1J_PTH_GT200,'
 cats += 'RECO_GE2J_PTH_0_60_Tag0,RECO_GE2J_PTH_0_60_Tag1,RECO_GE2J_PTH_60_120_Tag0,RECO_GE2J_PTH_60_120_Tag1,RECO_GE2J_PTH_120_200_Tag0,RECO_GE2J_PTH_120_200_Tag1,RECO_GE2J_PTH_GT200_Tag0,RECO_GE2J_PTH_GT200_Tag1,'
-cats += 'RECO_VBFTOPO_JET3VETO_Tag0,RECO_VBFTOPO_JET3VETO_Tag1,RECO_VBFTOPO_JET3_Tag0,RECO_VBFTOPO_JET3_Tag1,RECO_VBFTOPO_REST'
+cats += 'RECO_VBFTOPO_JET3VETO_Tag0,RECO_VBFTOPO_JET3VETO_Tag1,RECO_VBFTOPO_JET3_Tag0,RECO_VBFTOPO_JET3_Tag1,RECO_VBFTOPO_REST,RECO_VBFTOPO_BSM'
 print 'with processes: %s'%procs
 print 'and categories: %s'%cats
 

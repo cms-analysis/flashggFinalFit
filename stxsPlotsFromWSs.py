@@ -46,7 +46,7 @@ def prettyProc( proc ):
 
 #setup files 
 ext          = opts.ext
-lumi = opts.lumi
+lumi = float(opts.lumi)
 print 'ext = %s'%ext
 baseFilePath  = '/vols/cms/es811/FinalFits/ws_%s/'%ext
 fileNames     = []
@@ -65,17 +65,15 @@ procs         = []
 for fileName in fileNames: 
   if 'M125' not in fileName: continue
   procs.append( fileName.split('pythia8_')[1].split('.root')[0] )
-#procsOfInterest = procs
-#procs.sort()
-#procsOfInterest = [proc for proc in procs if 'GG2H' in proc or proc.startswith('VBF_')]
 
 procsOfInterest  = ['GG2H_0J', 'GG2H_1J_PTH_0_60', 'GG2H_1J_PTH_60_120', 'GG2H_1J_PTH_120_200', 'GG2H_1J_PTH_GT200', 
                     'GG2H_GE2J_PTH_0_60', 'GG2H_GE2J_PTH_60_120', 'GG2H_GE2J_PTH_120_200', 'GG2H_GE2J_PTH_GT200', 'GG2H_VBFTOPO_JET3VETO', 'GG2H_VBFTOPO_JET3',
                     'VBF_VBFTOPO_JET3VETO', 'VBF_VBFTOPO_JET3', 'VBF_REST', 'VBF_PTJET1_GT200', 'VBF_VH2JET']
 
-cats  = 'RECO_0J_Tag0,RECO_0J_Tag1,RECO_1J_PTH_0_60_Tag0,RECO_1J_PTH_0_60_Tag1,RECO_1J_PTH_60_120_Tag0,RECO_1J_PTH_60_120_Tag1,RECO_1J_PTH_120_200_Tag0,RECO_1J_PTH_120_200_Tag1,RECO_1J_PTH_GT200,'
+cats  = 'RECO_0J_Tag0,RECO_0J_Tag1,RECO_0J_Tag2,'
+cats += 'RECO_1J_PTH_0_60_Tag0,RECO_1J_PTH_0_60_Tag1,RECO_1J_PTH_60_120_Tag0,RECO_1J_PTH_60_120_Tag1,RECO_1J_PTH_120_200_Tag0,RECO_1J_PTH_120_200_Tag1,RECO_1J_PTH_GT200,'
 cats += 'RECO_GE2J_PTH_0_60_Tag0,RECO_GE2J_PTH_0_60_Tag1,RECO_GE2J_PTH_60_120_Tag0,RECO_GE2J_PTH_60_120_Tag1,RECO_GE2J_PTH_120_200_Tag0,RECO_GE2J_PTH_120_200_Tag1,RECO_GE2J_PTH_GT200_Tag0,RECO_GE2J_PTH_GT200_Tag1,'
-cats += 'RECO_VBFTOPO_JET3VETO_Tag0,RECO_VBFTOPO_JET3VETO_Tag1,RECO_VBFTOPO_JET3_Tag0,RECO_VBFTOPO_JET3_Tag1,RECO_VBFTOPO_REST'
+cats += 'RECO_VBFTOPO_JET3VETO_Tag0,RECO_VBFTOPO_JET3VETO_Tag1,RECO_VBFTOPO_JET3_Tag0,RECO_VBFTOPO_JET3_Tag1,RECO_VBFTOPO_REST,RECO_VBFTOPO_BSM'
 cats = cats.split(',')
 
 print procsOfInterest
@@ -154,39 +152,67 @@ def main():
       catHist.GetYaxis().SetBinLabel( iCat+1, catLabel )
   
   #canv = r.TCanvas('canv','canv')
-  #set_color_palette('positive_pulls')
   set_color_palette('ed_noice')
   canv = setCanvas()
   formatHisto(procHist)
   procHist.SetStats(0)
-  procHist.GetXaxis().SetTitle('Process')
+  procHist.GetXaxis().SetTitle('STXS process')
   procHist.GetXaxis().SetTitleOffset(3)
   procHist.GetXaxis().SetTickLength(0.)
   procHist.GetXaxis().LabelsOption('v')
-  procHist.GetYaxis().SetTitle('Category')
+  procHist.GetYaxis().SetTitle('Event category')
   procHist.GetYaxis().SetTitleOffset(2.7)
   procHist.GetYaxis().SetTickLength(0.)
-  procHist.GetZaxis().SetTitle('Migration (%)')
+  procHist.GetZaxis().SetTitle('Signal category destination (%)')
   procHist.SetMinimum(-0.00001)
   procHist.SetMaximum(100.)
   procHist.Draw('colz,text')
+  lines = []
+  for iProc,proc in enumerate(procsOfInterest):
+    lines.append(r.TLine(iProc+0.5, -0.5, iProc+0.5, len(cats)-0.5))
+    lines[-1].SetLineColorAlpha(r.kGray, 0.5)
+    lines[-1].SetLineWidth(1)
+  lines.append(r.TLine(-0.5, 16.5, len(procsOfInterest)-0.5, 16.5)) #horiontal ggH VBF divider
+  lines[-1].SetLineColorAlpha(r.kBlack, 0.5)
+  lines[-1].SetLineWidth(1)
+  lines.append(r.TLine(10.5, -0.5, 10.5, len(cats)-0.5)) #vertical ggH VBF divider
+  lines[-1].SetLineColorAlpha(r.kBlack, 0.5)
+  lines[-1].SetLineWidth(1)
+  for line in lines: line.Draw()
   drawCMS(True)
   drawEnPu(lumi='%.1f fb^{-1}'%lumi)
   canv.Print('procHist.pdf')
   canv.Print('procHist.png')
   formatHisto(catHist)
   catHist.SetStats(0)
-  catHist.GetXaxis().SetTitle('Process')
+  catHist.GetXaxis().SetTitle('STXS process')
   catHist.GetXaxis().SetTitleOffset(3)
   catHist.GetXaxis().SetTickLength(0.)
   catHist.GetXaxis().LabelsOption('v')
-  catHist.GetYaxis().SetTitle('Category')
+  catHist.GetYaxis().SetTitle('Event category')
   catHist.GetYaxis().SetTitleOffset(2.7)
   catHist.GetYaxis().SetTickLength(0.)
-  catHist.GetZaxis().SetTitle('Purity (%)')
+  catHist.GetZaxis().SetTitle('Category signal composition (%)')
   catHist.SetMinimum(-0.00001)
   catHist.SetMaximum(100.)
   catHist.Draw('colz,text')
+  lines = []
+  for iCat,cat in enumerate(cats):
+    if cat.count('Tag1') or cat.count('RECO_1J_PTH_GT200') or cat.count('RECO_VBFTOPO_REST'):
+      lines.append(r.TLine(-0.5, iCat+0.5, len(procsOfInterest)-0.5, iCat+0.5))
+      lines[-1].SetLineColorAlpha(r.kGray, 0.5)
+      lines[-1].SetLineWidth(1)
+    else:
+      lines.append(r.TLine(-0.5, iCat+0.5, len(procsOfInterest)-0.5, iCat+0.5))
+      lines[-1].SetLineColorAlpha(r.kGray, 0.25)
+      lines[-1].SetLineWidth(1)
+  lines.append(r.TLine(-0.5, 16.5, len(procsOfInterest)-0.5, 16.5)) #horiontal ggH VBF divider
+  lines[-1].SetLineColorAlpha(r.kBlack, 0.5)
+  lines[-1].SetLineWidth(1)
+  lines.append(r.TLine(10.5, -0.5, 10.5, len(cats)-0.5)) #vertical ggH VBF divider
+  lines[-1].SetLineColorAlpha(r.kBlack, 0.5)
+  lines[-1].SetLineWidth(1)
+  for line in lines: line.Draw()
   drawCMS(True)
   drawEnPu(lumi='%.1f fb^{-1}'%lumi)
   canv.Print('catHist.pdf')
