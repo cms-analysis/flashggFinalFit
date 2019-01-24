@@ -62,6 +62,9 @@ vector<string> flashggCats_;
 vector<string> procs_;
 string procStr_;
 string basePathStr_;
+int sqrts_=13;
+int year_=2016;
+//int year_=2017;
 
 vector<int> getAllMH(){
   vector<int> result;
@@ -184,10 +187,9 @@ int main (int argc, char *argv[]){
     cout << "[INFO] Starting to combine fits..." << endl;
     // this guy packages everything up
 	  RooWorkspace *mergeWS = 0;
-    //Packager packager(mergedWS, saveWS ,procs_,ncats_,mhLow_,mhHigh_,skipMasses_,/*sqrts*/13,/*skipPlots_*/false,plotDir_,mergeWS,cats_,flashggCats_);
-    Packager packager(mergedWS, saveWS ,procs_,ncats_,mhLow_,mhHigh_,skipMasses_,/*sqrts*/13,/*skipPlots_*/true,plotDir_,mergeWS,cats_,flashggCats_); //FIXME hoping this speeds things up...
+    Packager packager(mergedWS, saveWS ,procs_,ncats_,mhLow_,mhHigh_,skipMasses_,/*sqrts*/sqrts_,/*year*/year_,/*skipPlots_*/true,plotDir_,mergeWS,cats_,flashggCats_);
     cout << "[INFO] Finished initalising packager." << endl;
-    packager.packageOutput(/*split*/ false); //FIXME testing out the below
+    packager.packageOutput(/*split*/ false);
     cout << "[INFO] Combination complete." << endl;
     cout << "[INFO] cd to output file" << endl;
     outFile->cd();

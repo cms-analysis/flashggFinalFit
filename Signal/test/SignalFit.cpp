@@ -84,6 +84,8 @@ string lowR9cats_;
 int verbose_=0;
 int ncpu_=1;
 int sqrts_=13;
+int year_=2016;
+//int year_=2017;
 int pdfWeights_=26;
 vector<int> cats_;
 string catsStr_;
@@ -1084,7 +1086,7 @@ int main(int argc, char *argv[]){
     if (isFlashgg_){
         
       outWS->import(*intLumi_);
-      FinalModelConstruction finalModel(massList_, mass_,MH,intLumi_,mhLow_,mhHigh_,proc,cat,doSecondaryModels_,systfilename_,skipMasses_,verbose_,procs_, flashggCats_,plotDir_, isProblemCategory,isCutBased_,sqrts_,doQuadraticSigmaSum_);
+      FinalModelConstruction finalModel(massList_, mass_,MH,intLumi_,mhLow_,mhHigh_,proc,cat,doSecondaryModels_,systfilename_,skipMasses_,verbose_,procs_, flashggCats_,plotDir_, isProblemCategory,isCutBased_,sqrts_,year_,doQuadraticSigmaSum_);
     
       finalModel.setSecondaryModelVars(MH_SM,DeltaM,MH_2,higgsDecayWidth);
       finalModel.setRVsplines(splinesRV);
@@ -1098,7 +1100,9 @@ int main(int argc, char *argv[]){
       finalModel.makeFITdatasets();
       if( isFlashgg_){
         if (verbose_>1) std::cout << "[INFO] About to do Final Model Construction with useDCBplusGaus_=" << useDCBplusGaus_ << std::endl;
-        finalModel.buildRvWvPdf("hggpdfsmrel_13TeV",nGaussiansRV,nGaussiansWV,recursive_,useDCBplusGaus_);
+        //finalModel.buildRvWvPdf("hggpdfsmrel_13TeV",nGaussiansRV,nGaussiansWV,recursive_,useDCBplusGaus_);
+        //FIXME
+        finalModel.buildRvWvPdf(Form("hggpdfsmrel_13TeV_%d",year_),nGaussiansRV,nGaussiansWV,recursive_,useDCBplusGaus_);
       }
       finalModel.getNormalization();
       //if (!skipPlots_) finalModel.plotPdf(plotDir_);
@@ -1117,7 +1121,7 @@ int main(int argc, char *argv[]){
     cout << "[INFO] Starting to combine fits..." << endl;
     // this guy packages everything up
     WSTFileWrapper *outWSWrapper = new WSTFileWrapper(outFile, outWS);
-    Packager packager(outWSWrapper, outWS,procs_,nCats_,mhLow_,mhHigh_,skipMasses_,sqrts_,skipPlots_,plotDir_,mergeWS,cats_,flashggCats_);
+    Packager packager(outWSWrapper, outWS,procs_,nCats_,mhLow_,mhHigh_,skipMasses_,sqrts_,year_,skipPlots_,plotDir_,mergeWS,cats_,flashggCats_);
     
     // if we are doing jobs for each proc/tag, want to do the split.
     bool split =0;

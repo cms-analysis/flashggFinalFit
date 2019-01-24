@@ -28,7 +28,7 @@ class FinalModelConstruction {
 
   public:
     
-    FinalModelConstruction( std::vector<int> massList, RooRealVar *massVar, RooRealVar *MHvar, RooRealVar *intL, int mhLow, int mhHigh, std::string proc, std::string cat, bool doSecMods, std::string systematicsFileName, std::vector<int> skipMasses, int verbosity, std::vector<std::string> procsList, std::vector<std::string> flashggCats , string outDir,bool isProblemCategory,bool isCB=false, int sqrts=13, bool quadraticSigmaSum=false);
+    FinalModelConstruction( std::vector<int> massList, RooRealVar *massVar, RooRealVar *MHvar, RooRealVar *intL, int mhLow, int mhHigh, std::string proc, std::string cat, bool doSecMods, std::string systematicsFileName, std::vector<int> skipMasses, int verbosity, std::vector<std::string> procsList, std::vector<std::string> flashggCats , string outDir,bool isProblemCategory,bool isCB=false, int sqrts=13, int year=2016, bool quadraticSigmaSum=false);
     ~FinalModelConstruction();
 
 		void loadSignalSystematics(std::string filename);
@@ -87,6 +87,7 @@ class FinalModelConstruction {
 		bool is2012_;
 		bool isFlashgg_;
 		int sqrts_;
+		int year_;
 		bool quadraticSigmaSum_;
 		std::vector<int> skipMasses_;
     std::vector<int> allMH_;
