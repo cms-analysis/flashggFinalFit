@@ -181,8 +181,8 @@ def main():
   for line in lines: line.Draw()
   drawCMS(True)
   drawEnPu(lumi='%.1f fb^{-1}'%lumi)
-  canv.Print('procHist.pdf')
-  canv.Print('procHist.png')
+  canv.Print('procHist_%s.pdf'%ext)
+  canv.Print('procHist_%s.png'%ext)
   formatHisto(catHist)
   catHist.SetStats(0)
   catHist.GetXaxis().SetTitle('STXS process')
@@ -206,7 +206,7 @@ def main():
       lines.append(r.TLine(-0.5, iCat+0.5, len(procsOfInterest)-0.5, iCat+0.5))
       lines[-1].SetLineColorAlpha(r.kGray, 0.25)
       lines[-1].SetLineWidth(1)
-  lines.append(r.TLine(-0.5, 16.5, len(procsOfInterest)-0.5, 16.5)) #horiontal ggH VBF divider
+  lines.append(r.TLine(-0.5, 17.5, len(procsOfInterest)-0.5, 17.5)) #horiontal ggH VBF divider
   lines[-1].SetLineColorAlpha(r.kBlack, 0.5)
   lines[-1].SetLineWidth(1)
   lines.append(r.TLine(10.5, -0.5, 10.5, len(cats)-0.5)) #vertical ggH VBF divider
@@ -215,10 +215,10 @@ def main():
   for line in lines: line.Draw()
   drawCMS(True)
   drawEnPu(lumi='%.1f fb^{-1}'%lumi)
-  canv.Print('catHist.pdf')
-  canv.Print('catHist.png')
+  canv.Print('catHist_%s.pdf'%ext)
+  canv.Print('catHist_%s.png'%ext)
   #save hists
-  outFile = r.TFile('stxsStage1Hists.root','RECREATE')
+  outFile = r.TFile('stxsStage1Hists_%s.root'%ext,'RECREATE')
   procHist.Write()
   catHist.Write()
   outFile.Close()
