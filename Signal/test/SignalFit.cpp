@@ -438,6 +438,7 @@ int main(int argc, char *argv[]){
   std::map<string,string> replacementProcMap;
   replacementProcMap["RECO_0J_Tag0"]                    = "GG2H_0J";
   replacementProcMap["RECO_0J_Tag1"]                    = "GG2H_0J";
+  replacementProcMap["RECO_0J_Tag2"]                    = "GG2H_0J";
   replacementProcMap["RECO_1J_PTH_0_60_Tag0"]           = "GG2H_1J_PTH_0_60";
   replacementProcMap["RECO_1J_PTH_0_60_Tag1"]           = "GG2H_1J_PTH_0_60";
   replacementProcMap["RECO_1J_PTH_60_120_Tag0"]         = "GG2H_1J_PTH_60_120";
@@ -473,6 +474,7 @@ int main(int argc, char *argv[]){
   std::map<string,string> replacementCatMap;
   replacementCatMap["RECO_0J_Tag0"]                    = "RECO_0J_Tag0";
   replacementCatMap["RECO_0J_Tag1"]                    = "RECO_0J_Tag1";
+  replacementCatMap["RECO_0J_Tag2"]                    = "RECO_0J_Tag2";
   replacementCatMap["RECO_1J_PTH_0_60_Tag0"]           = "RECO_1J_PTH_0_60_Tag0";
   replacementCatMap["RECO_1J_PTH_0_60_Tag1"]           = "RECO_1J_PTH_0_60_Tag1";
   replacementCatMap["RECO_1J_PTH_60_120_Tag0"]         = "RECO_1J_PTH_60_120_Tag0";
