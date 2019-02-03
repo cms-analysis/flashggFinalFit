@@ -170,11 +170,11 @@ TGraph * Normalization_13TeV::GetSigmaGraph(TString process)
           XSectionMap = &XSectionMap_ZH2HQQ_VBFTOPO_JET3;
   } else if ( process == "ZH2HQQ_REST" ) {
           XSectionMap = &XSectionMap_ZH2HQQ_REST;
-  } else if ( process == "BBH" ) {
+  } else if ( process == "BBH" || process == "testBBH" ) {
           XSectionMap = &XSectionMap_BBH;
-  } else if ( process == "THQ" ) {
+  } else if ( process == "THQ" || process == "testTHQ" ) {
           XSectionMap = &XSectionMap_THQ;
-  } else if ( process == "THW" ) {
+  } else if ( process == "THW" || process == "testTHW" ) {
           XSectionMap = &XSectionMap_THW;
   } else if ( process == "ggh" || process=="GG2H" ) {
     XSectionMap = &XSectionMap_ggh;
@@ -196,12 +196,6 @@ TGraph * Normalization_13TeV::GetSigmaGraph(TString process)
     XSectionMap = &XSectionMap_WH2HQQ;
   } else if ( process=="ZH2HQQ" ) {
     XSectionMap = &XSectionMap_ZH2HQQ;
-  } else if ( process=="BBH" ) {
-    XSectionMap = &XSectionMap_BBH;
-  } else if ( process=="THQ" ) {
-    XSectionMap = &XSectionMap_THQ;
-  } else if ( process=="THW" ) {
-    XSectionMap = &XSectionMap_THW;
   } else {
     std::cout << "[WARNING] Normalization_13TeV: No known process found in the name!!" << std::endl;
     //exit(1);

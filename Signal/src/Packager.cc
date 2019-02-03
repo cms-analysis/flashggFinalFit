@@ -66,6 +66,7 @@ void Packager::packageOutput(bool split, string process , string tag){
                                 if( split_ ) { // no need for all this if only considering one proc,cat...
                                         if( process!=(*proc) || tag!=catname ) { continue; }
                                 }
+        if( (mh!=125) && (*proc=="testBBH" || *proc=="testTHQ" || *proc=="testTHW") ) continue; //FIXME
 				RooDataSet *tempData = 0;
 				if( merge ) { 
 					tempData = (RooDataSet*)mergeWS->data(Form("sig_%s_mass_m%d_%s",proc->c_str(),mh,catname.c_str()));

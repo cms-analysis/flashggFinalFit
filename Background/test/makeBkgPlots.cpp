@@ -711,6 +711,8 @@ int main(int argc, char* argv[]){
 	int mhLow;
 	int mhHigh;
 	int sqrts;
+	int year_=2016;
+	//int year_=2017;
 	float intLumi;
 	double mhvalue_;
 	int isFlashgg_ =1;
@@ -789,20 +791,20 @@ int main(int argc, char* argv[]){
 	RooMultiPdf *mpdf = 0; 
 	RooCategory *mcat = 0;
 	if (isMultiPdf) {
-		mpdf = (RooMultiPdf*)inWS->pdf(Form("CMS_hgg_%s_%dTeV_bkgshape",catname.c_str(),sqrts));
-		mcat = (RooCategory*)inWS->cat(Form("pdfindex_%s_%dTeV",catname.c_str(),sqrts));
+		mpdf = (RooMultiPdf*)inWS->pdf(Form("CMS_hgg_%s_%dTeV_%d_bkgshape",catname.c_str(),sqrts,year_));
+		mcat = (RooCategory*)inWS->cat(Form("pdfindex_%s_%dTeV_%d",catname.c_str(),sqrts,year_));
 		if (!mpdf || !mcat){
-			cout << "[ERROR] "<< "Can't find multipdfs (" << Form("CMS_hgg_%s_%dTeV_bkgshape",catname.c_str(),sqrts) << ") or multicat ("<< Form("pdfindex_%s_%dTeV",catname.c_str(),sqrts) <<")" << endl;
+			cout << "[ERROR] "<< "Can't find multipdfs (" << Form("CMS_hgg_%s_%dTeV_%d_bkgshape",catname.c_str(),sqrts,year_) << ") or multicat ("<< Form("pdfindex_%s_%dTeV_%d",catname.c_str(),sqrts,year_) <<")" << endl;
 			exit(0);
 		}
 	}
 	else {
-		bpdf = (RooAbsPdf*)inWS->pdf(Form("pdf_data_pol_model_%dTeV_%s",sqrts,catname.c_str()));
+		bpdf = (RooAbsPdf*)inWS->pdf(Form("pdf_data_pol_model_%dTeV_%d_%s",sqrts,year_,catname.c_str()));
 		if (!bpdf){
-			cout << "[ERROR] "<< "Cant't find background pdf " << Form("pdf_data_pol_model_%dTeV_%s",sqrts,catname.c_str()) << endl;
+			cout << "[ERROR] "<< "Cant't find background pdf " << Form("pdf_data_pol_model_%dTeV_%d_%s",sqrts,year_,catname.c_str()) << endl;
 			exit(0);
 		}
-		mcat = new RooCategory(Form("pdfindex_%s_%dTeV",catname.c_str(),sqrts),"c");
+		mcat = new RooCategory(Form("pdfindex_%s_%dTeV_%d",catname.c_str(),sqrts,year_),"c");
 		RooArgList temp;
 		temp.add(*bpdf);
 		mpdf = new RooMultiPdf(Form("tempmpdf_%s",catname.c_str()),"",*mcat,temp);

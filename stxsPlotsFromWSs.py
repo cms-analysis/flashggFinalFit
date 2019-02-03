@@ -18,6 +18,7 @@ r.gStyle.SetNumberContours(500)
 r.gStyle.SetPaintTextFormat('2.0f')
 
 def prettyProc( proc ):
+  name = proc
   if proc.startswith('GG2H_'):
     name = 'ggH '
     proc = proc.split('GG2H_')[1]
@@ -42,6 +43,8 @@ def prettyProc( proc ):
     proc = proc.replace('REST','rest')
     proc = proc.replace('_',' ')
     name = name + proc
+  elif proc.startswith('OTHER'):
+    name = proc.replace('OTHER','Other')
   return name
 
 #setup files 
@@ -68,7 +71,7 @@ for fileName in fileNames:
 
 procsOfInterest  = ['GG2H_0J', 'GG2H_1J_PTH_0_60', 'GG2H_1J_PTH_60_120', 'GG2H_1J_PTH_120_200', 'GG2H_1J_PTH_GT200', 
                     'GG2H_GE2J_PTH_0_60', 'GG2H_GE2J_PTH_60_120', 'GG2H_GE2J_PTH_120_200', 'GG2H_GE2J_PTH_GT200', 'GG2H_VBFTOPO_JET3VETO', 'GG2H_VBFTOPO_JET3',
-                    'VBF_VBFTOPO_JET3VETO', 'VBF_VBFTOPO_JET3', 'VBF_REST', 'VBF_PTJET1_GT200', 'VBF_VH2JET']
+                    'VBF_VBFTOPO_JET3VETO', 'VBF_VBFTOPO_JET3', 'VBF_REST', 'VBF_PTJET1_GT200', 'VBF_VH2JET','OTHER']
 
 cats  = 'RECO_0J_Tag0,RECO_0J_Tag1,RECO_0J_Tag2,'
 cats += 'RECO_1J_PTH_0_60_Tag0,RECO_1J_PTH_0_60_Tag1,RECO_1J_PTH_60_120_Tag0,RECO_1J_PTH_60_120_Tag1,RECO_1J_PTH_120_200_Tag0,RECO_1J_PTH_120_200_Tag1,RECO_1J_PTH_GT200,'
@@ -82,10 +85,14 @@ print cats
 nameMap  = {}
 nameMap['GG2H']    = 'ggh'
 nameMap['VBF']     = 'vbf'
+nameMap['TTH']     = 'tth'
 nameMap['WH2HQQ']  = 'wh'
 nameMap['ZH2HQQ']  = 'zh'
 nameMap['QQ2HLL']  = 'zh'
 nameMap['QQ2HLNU'] = 'wh'
+nameMap['testBBH'] = 'bbh'
+nameMap['testTHQ'] = 'th'
+nameMap['testTHW'] = 'th'
 
 sumwProcCatMap = {}
 sumwProcMap = {}
@@ -102,7 +109,7 @@ def main():
     if 'M125' not in fileName: continue
     theProc = fileName.split('pythia8_')[1].split('.root')[0]
     theProc0 = theProc.split('_')[0]
-    if theProc not in procsOfInterest: continue
+    #if theProc not in procsOfInterest: continue
     print 'processing %s'%theProc
     theFile = r.TFile(fileName, 'READ')
     theWS = theFile.Get('tagsDumper/cms_hgg_13TeV')
@@ -110,6 +117,8 @@ def main():
       dataName = '%s_125_13TeV_%s'%(nameMap[theProc0], cat)
       sumEntries = theWS.data(dataName).sumEntries()
       if sumEntries < 0.: sumEntries = 0.
+      if theProc not in procsOfInterest: 
+        theProc = 'OTHER'
       sumwProcCatMap[ (theProc,cat) ] += sumEntries
       sumwProcMap[ theProc ] += sumEntries
       sumwCatMap[ cat ] += sumEntries
@@ -172,7 +181,7 @@ def main():
     lines.append(r.TLine(iProc+0.5, -0.5, iProc+0.5, len(cats)-0.5))
     lines[-1].SetLineColorAlpha(r.kGray, 0.5)
     lines[-1].SetLineWidth(1)
-  lines.append(r.TLine(-0.5, 16.5, len(procsOfInterest)-0.5, 16.5)) #horiontal ggH VBF divider
+  lines.append(r.TLine(-0.5, 17.5, len(procsOfInterest)-0.5, 17.5)) #horiontal ggH VBF divider
   lines[-1].SetLineColorAlpha(r.kBlack, 0.5)
   lines[-1].SetLineWidth(1)
   lines.append(r.TLine(10.5, -0.5, 10.5, len(cats)-0.5)) #vertical ggH VBF divider

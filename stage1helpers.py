@@ -21,6 +21,7 @@ def prettyCat( cat ):
   cat = cat.replace('TTH_HAD','ttH Hadronic')
   cat = cat.replace('Tag0','Tag 0')
   cat = cat.replace('Tag1','Tag 1')
+  cat = cat.replace('Tag2','Tag 2')
   cat = cat.replace('_',' ')
   return cat
 
@@ -136,7 +137,7 @@ class YieldInfo():
       raise Exception
   
   def getAbbrevList(self):
-    return ['ggh', 'vbf', 'tth', 'wh', 'zh']
+    return ['ggh', 'vbf', 'tth', 'th', 'bbh', 'wh', 'zh']
   
   def getProcStage0(self, theProc):
     if   'ZH2HQQ'  in theProc: return 'ZH2HQQ'
@@ -154,7 +155,7 @@ class YieldInfo():
       raise Exception
   
   def getStage0list(self):
-    return ['GG2H', 'VBF', 'TTH', 'QQ2HLNU', 'WH2HQQ', 'QQ2HLL', 'ZH2HQQ']
+    return ['GG2H', 'VBF', 'TTH', 'testTHQ', 'testTHW', 'testBBH', 'QQ2HLNU', 'WH2HQQ', 'QQ2HLL', 'ZH2HQQ']
 
   def getStage0dict(self):
-    return {'GG2H':'ggH', 'VBF':'VBF', 'TTH':'ttH', 'QQ2HLNU':'WH lep', 'WH2HQQ':'WH had', 'QQ2HLL':'ZH lep', 'ZH2HQQ':'ZH had'}
+    return {'GG2H':'ggH', 'VBF':'VBF', 'TTH':'ttH', 'testTHQ':'tHq', 'testTHW':'tHW', 'testBBH':'bbH', 'QQ2HLNU':'WH lep', 'WH2HQQ':'WH had', 'QQ2HLL':'ZH lep', 'ZH2HQQ':'ZH had'}

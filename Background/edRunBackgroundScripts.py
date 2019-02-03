@@ -48,7 +48,7 @@ print 'and categories: %s'%cats
 
 #misc config
 lumi          = '35.9'
-if '2017' in ext: lumi = '41.3'
+if '2017' in ext: lumi = '41.5'
 batch         = 'IC'
 queue         = 'hep.q'
 print 'lumi %s'%lumi
