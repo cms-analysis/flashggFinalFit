@@ -5,6 +5,7 @@ from os import system, walk
 
 justPrint = False
 datacardOnly = False
+doUEPS = False
 combineOnly = False
 combinePlotsOnly = False
 effAccOnly = False
@@ -12,6 +13,7 @@ yieldsOnly = False
 
 #justPrint = True
 datacardOnly = True
+#doUEPS = True
 #combineOnly = True
 #combinePlotsOnly = True
 #effAccOnly = True
@@ -48,6 +50,18 @@ for fileName in fileNames:
 files125 = files125[:-1]
 filesEffAcc = filesEffAcc[:-1]
 #print 'fileNames = %s'%fullFileNames
+
+if doUEPS:
+  uepsFilePath  = baseFilePath.replace(ext,'%s_ueps'%ext)
+  uepsNames     = []
+  for root,dirs,files in walk(uepsFilePath):
+    for fileName in files: 
+      if not fileName.startswith('output_'): continue
+      if not fileName.endswith('.root'):     continue
+      uepsNames.append(fileName)
+  uepsFileNames = '' 
+  for fileName in uepsNames: uepsFileNames += uepsFilePath+fileName+','
+  uepsFileNames = uepsFileNames[:-1]
 
 #define processes and categories
 procs         = ''
@@ -89,5 +103,6 @@ elif combineOnly:      theCommand += '--combineOnly '
 elif combinePlotsOnly: theCommand += '--combinePlotsOnly'
 elif effAccOnly:       theCommand = './makeStage1EffAcc.py -i '+filesEffAcc+' -s Signal/outdir_'+ext+'/sigfit/effAccCheck_all.root -p '+procs+' -c '+cats #FIXME this doesn't exist yet!
 elif yieldsOnly:       theCommand = './stage1yields.py -w '+files125+' -p '+procs+' -s Signal/signumbers_'+ext+'.txt -u Background/CMS-HGG_multipdf_'+ext+'.root --intLumi '+lumi+' -c '+cats
+if datacardOnly and doUEPS: theCommand += ' --uepsFile '+uepsFileNames
 if justPrint: print theCommand
 else: system(theCommand)

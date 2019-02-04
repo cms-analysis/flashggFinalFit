@@ -699,23 +699,34 @@ def printUEPSSyst():
       outFile.write(line)
   else:
     uepsOutFile = open('ueps_lines.dat','w')
-    uncertainties = ['UE','PS']
+    uepsFileNames = options.uepsfilename.split(',')
+    uncertainties  = ['UE','PS']
     uepsFiles = {}
-    uepsFiles['UE'] = options.uepsfilename.split(',UEPS,')[0].split(',')
+    for unc in uncertainties: uepsFiles[unc] = []
+    for fName in uepsFileNames:
+      if fName.count('CUETP8M1Up') or fName.count('CUETP8M1Down') or fName.count('CP5Up') or fName.count('CP5Down'):
+        uepsFiles['UE'].append(fName)
+      elif fName.count('PSWeights') or fName.count('UpPS') or fName.count('DownPS'):
+        uepsFiles['PS'].append(fName)
+    print 'UE files are: '
     print uepsFiles['UE']
-    uepsFiles['PS'] = options.uepsfilename.split(',UEPS,')[1].split(',')
+    print 'PS files are: '
     print uepsFiles['PS']
     
-    tpMap = {'GG2H':'ggh','VBF':'vbf','TTH':'tth','QQ2HLNU':'wh','QQ2HLL':'zh','WH2HQQ':'wh','ZH2HQQ':'zh','bkg_mass':'bkg_mass'}
-    
     lines = {}
+    tpMap = {"GG2H":"ggh","VBF":"vbf","TTH":"tth","QQ2HLNU":"wh","QQ2HLL":"zh","WH2HQQ":"wh","ZH2HQQ":"zh","testBBH":"bbh","testTHQ":"th","testTHW":"th"}
 
     for uncertainty in uncertainties:
       lines[uncertainty] = ''
       allValues = {}
       for proc in options.procs:
         proc = flashggProcs[proc]
+        abbrev = ''
+        for longP,shortP in tpMap.iteritems():
+          if proc.startswith(longP): abbrev = shortP
         procValues = {}
+        wsUp = None
+        wsDown = None
         for filename in uepsFiles[uncertainty]:
           if proc in filename and 'Up' in filename: 
             wsUp = (r.TFile(filename)).Get("tagsDumper/cms_hgg_13TeV")
@@ -729,14 +740,34 @@ def printUEPSSyst():
             continue
           elif not (cat in incCats or cat in dijetCats): 
             continue
-          dataUp = "%s_%sUp_13TeV_%s" % (tpMap[proc],uncertainty,cat) 
-          dataDown = "%s_%sDown_13TeV_%s" % (tpMap[proc],uncertainty,cat) 
-          weightUp = wsUp.data(dataUp).sumEntries()
-          weightDown = wsDown.data(dataDown).sumEntries()
-          delta = weightUp - weightDown
-          sumBoth = weightUp + weightDown
-          value = 1. + (delta / sumBoth)
-          procValues[cat] = value
+          if wsUp and wsDown:
+            dataUp = "%s_%sUp_13TeV_%s" % (abbrev,uncertainty,cat) 
+            dataDown = "%s_%sDown_13TeV_%s" % (abbrev,uncertainty,cat) 
+            weightUp = wsUp.data(dataUp).sumEntries()
+            weightDown = wsDown.data(dataDown).sumEntries()
+            delta = weightUp - weightDown
+            sumBoth = weightUp + weightDown
+            if sumBoth > 0.: value = 1. + (delta / sumBoth)
+            else: value = 1.
+            procValues[cat] = value
+          elif wsUp and not wsDown: #one variation missing so compare to central
+            dataUp = "%s_%sUp_13TeV_%s" % (abbrev,uncertainty,cat) 
+            weightUp = wsUp.data(dataUp).sumEntries()
+            weightNom = inWS.data("%s_%d_13TeV_%s"%(proc,options.mass,cat)).sumEntries()
+            delta = weightUp - weightNom
+            if weightNom > 0.: value = 1. + (delta / weightNom)
+            else: value = 1.
+            procValues[cat] = value
+          elif wsDown and not wsUp: #one variation missing so compare to central
+            dataDown = "%s_%sDown_13TeV_%s" % (abbrev,uncertainty,cat) 
+            weightDown = wsUp.data(dataDown).sumEntries()
+            weightNom = inWS.data("%s_%d_13TeV_%s"%(proc,options.mass,cat)).sumEntries()
+            delta = weightNom - weightDown
+            if weightNom > 0.: value = 1. + (delta / weightNom )
+            else: value = 1.
+            procValues[cat] = value
+          else:
+            procValues[cat] = 1.
         allValues[proc] = procValues
       for cat in options.cats:
         for proc in options.procs:
