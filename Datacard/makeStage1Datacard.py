@@ -41,7 +41,7 @@ class WSTFileWrapper:
   def convertTemplatedName(self, dataName):
     theProcName = ""
     theDataName = ""
-    tpMap = {"GG2H":"ggh","VBF":"vbf","TTH":"tth","QQ2HLNU":"wh","QQ2HLL":"zh","WH2HQQ":"wh","ZH2HQQ":"zh","testBBH":"bbh","testTHQ":"th","testTHW":"th"}
+    tpMap = {"GG2H":"ggh","VBF":"vbf","TTH":"tth","QQ2HLNU":"wh","QQ2HLL":"zh","WH2HQQ":"wh","ZH2HQQ":"zh","testBBH":"bbh","testTHQ":"th","testTHW":"th","GGZH":"ggzh"}
     for stxsProc in tpMap:
       if dataName.startswith(stxsProc):
         theProcName = dataName.split('_%d_13TeV_'%options.mass)[0]
@@ -113,7 +113,7 @@ outFile = open(options.outfilename,'w')
 # convert flashgg style to combine style process
 tempProcs = options.procs.split(',')
 combProcs = odict()
-baseCombProcs = {'GG2H':'ggH_hgg','VBF':'qqH_hgg','TTH':'ttH_hgg','QQ2HLNU':'WH_lep_hgg','QQ2HLL':'ZH_lep_hgg','WH2HQQ':'WH_had_hgg','ZH2HQQ':'ZH_had_hgg','testBBH':'bbH_hgg','testTHQ':'tHq_hgg','testTHW':'tHW_hgg','bkg_mass':'bkg_mass'}
+baseCombProcs = {'GG2H':'ggH_hgg','VBF':'qqH_hgg','TTH':'ttH_hgg','QQ2HLNU':'WH_lep_hgg','QQ2HLL':'ZH_lep_hgg','WH2HQQ':'WH_had_hgg','ZH2HQQ':'ZH_had_hgg','testBBH':'bbH_hgg','testTHQ':'tHq_hgg','testTHW':'tHW_hgg','GGZH':'ggZH_hgg','bkg_mass':'bkg_mass'}
 for proc in tempProcs:
   combProc = ''
   for baseProc in baseCombProcs.keys():
@@ -131,7 +131,7 @@ for key,proc in combProcs.iteritems():
   if proc == 'bkg_mass': continue
   procId[proc] = procCounter
   procCounter += -1
-bkgProcs = ['bkg_mass','bbH_hgg','tHq_hgg','tHW_hgg'] #what to treat as background
+bkgProcs = ['bkg_mass','bbH_hgg','tHq_hgg','tHW_hgg','ggZH_hgg'] #what to treat as background
 #split procs vector
 options.procs += ',bkg_mass'
 options.procs = [combProcs[p] for p in options.procs.split(',')]
@@ -241,7 +241,16 @@ theorySyst = {}
 #theorySyst['scaleWeight'] = [1,2,3,4,6,8,"replicas"] #5,7 unphysical
 theorySyst['scaleWeight'] = [[1,2],[3,6],[4,8],"asym"] #5,7 unphysical
 theorySyst['alphaSWeight'] = [[0,1],"asym"]
-theorySyst['pdfWeight'] = [[0,60],"sym"]
+theorySyst['pdfWeight'] = [range(0,60),"sym"]
+theorySyst['THU_ggH_Mu']    = [ 'THU_ggH_Mu', 'asym' ]
+theorySyst['THU_ggH_Res']   = [ 'THU_ggH_Res', 'asym' ]
+theorySyst['THU_ggH_Mig01'] = [ 'THU_ggH_Mig01', 'asym' ]
+theorySyst['THU_ggH_Mig12'] = [ 'THU_ggH_Mig12', 'asym' ]
+theorySyst['THU_ggH_VBF2j'] = [ 'THU_ggH_VBF2j', 'asym' ]
+theorySyst['THU_ggH_VBF3j'] = [ 'THU_ggH_VBF3j', 'asym' ]
+theorySyst['THU_ggH_PT60' ] = [ 'THU_ggH_PT60', 'asym' ]
+theorySyst['THU_ggH_PT120'] = [ 'THU_ggH_PT120', 'asym' ]
+theorySyst['THU_ggH_qmtop'] = [ 'THU_ggH_qmtop', 'asym' ]
 
 theorySystAbsScale={}
 #theorySystAbsScale['names'] = ["QCDscale_qqbar_up","QCDscale_gg_up","QCDscale_qqbar_down","QCDscale_gg_down","pdf_alphaS_qqbar","pdf_alphaS_gg"] #QCD scale up, QCD scale down, PDF+alpha S, PDF, alpha S
@@ -249,18 +258,43 @@ theorySystAbsScale={}
 #theorySystAbsScale['names'] = ["QCDscale_qqbar_up","QCDscale_gg_up","QCDscale_qqbar_down","QCDscale_gg_down","pdf_alphaS_qqbar","pdf_alphaS_gg"] 
 #theorySystAbsScale['names_to_consider'] =   ["QCDscale_ggH_up",  "QCDscale_qqH_up",  "QCDscale_VH_up",  "QCDscale_ttH_up",  "QCDscale_ggH_down",  "QCDscale_qqH_down",  "QCDscale_VH_down",  "QCDscale_ttH_down",  "pdf_Higgs_qqbar",  "pdf_alphaS_gg",  "pdf_alphaS_ttH"] #QCD scale up, QCD scale down, PDF+alpha S, PDF, alpha S 
 
-theorySystAbsScale['names'] =   ["QCDscale_ggH_up",  "QCDscale_qqH_up",  "QCDscale_VH_up",  "QCDscale_ttH_up",  "QCDscale_ggH_down",  "QCDscale_qqH_down",  "QCDscale_VH_down",  "QCDscale_ttH_down",  "pdf_Higgs_qqbar",  "pdf_Higgs_gg",  "pdf_Higgs_ttH"] #QCD scale up, QCD scale down, PDF+alpha S, PDF, alpha S 
+theorySystAbsScale['names'] = ["QCDscale_ggH_up",    "QCDscale_qqH_up",    "QCDscale_VH_up",    "QCDscale_ttH_up",   "QCDscale_bbH_up",   "QCDscale_tHq_up",   "QCDscale_tHW_up",   "QCDscale_ggZH_up", 
+                               "QCDscale_ggH_down",  "QCDscale_qqH_down",  "QCDscale_VH_down",  "QCDscale_ttH_down", "QCDscale_bbH_down", "QCDscale_tHq_down", "QCDscale_tHW_down", "QCDscale_ggZH_down", 
+                               "pdf_Higgs_ggH",      "pdf_Higgs_qqH",      "pdf_Higgs_VH",      "pdf_Higgs_ttH",     "pdf_Higgs_bbH",     "pdf_Higgs_tHq",     "pdf_Higgs_tHW",     "pdf_Higgs_ggZH"]
 
-theorySystAbsScale['ttH_hgg'] =     [0.0,                 0.0,                0.0,               0.058,              0.0,                   0.0,                 0.0,                 -0.092,               0.0,                0.0,             0.036] # ttH is a _qqbar process
-theorySystAbsScale['ZH_lep_hgg'] =  [0.0,                 0.0,                0.038,             0.0,                0.0,                   0.0,                 -0.03,               0.0,                  0.016,              0.0,             0.0] # WH is a _qqbar process
-theorySystAbsScale['ZH_had_hgg'] =  [0.0,                 0.0,                0.038,             0.0,                0.0,                   0.0,                 -0.03,               0.0,                  0.016,              0.0,             0.0] # WH is a _qqbar process
-theorySystAbsScale['WH_lep_hgg'] =  [0.0,                 0.0,                0.005,             0.0,                0.0,                   0.0,                 -0.007,              0.0,                  0.019,              0.0,             0.0] # ZH is a _qqbar process
-theorySystAbsScale['WH_had_hgg'] =  [0.0,                 0.0,                0.005,             0.0,                0.0,                   0.0,                 -0.007,              0.0,                  0.019,              0.0,             0.0] # ZH is a _qqbar process
-theorySystAbsScale['qqH_hgg'] =     [0.0,                 0.004,              0.0,               0.0,                0.0,                   -0.003,              0.0,                 0.0,                  0.021,              0.0,             0.0] # qqH is a _qqbar process
-theorySystAbsScale['bbH_hgg'] =     [0.0,                 0.0,                0.0,               0.202,              0.0,                   0.0,                 0.0,                 -0.239,               0.0,                0.0,             0.036] # ttH is a _qqbar process
-theorySystAbsScale['tHq_hgg'] =     [0.0,                 0.0,                0.0,               0.065,              0.0,                   0.0,                 0.0,                 -0.149,               0.0,                0.0,             0.036] # ttH is a _qqbar process
-theorySystAbsScale['tHW_hgg'] =     [0.0,                 0.0,                0.0,               0.049,              0.0,                   0.0,                 0.0,                 -0.067,               0.0,                0.0,             0.036] # ttH is a _qqbar process
-theorySystAbsScale['ggH_hgg'] =     [0.039,               0.0,                0.0,               0.0,                -0.039,               0.0,                  0.0,                 0.0,                  0.0,                0.032,           0.0] # GGH is a _gg process
+theorySystAbsScale['ggH_hgg'] =        [0.039,                0.0,                  0.0,                  0.0,                0.0,                 0.0,                 0.0,                 0.0, 
+                                       -0.039,                0.0,                  0.0,                  0.0,                0.0,                 0.0,                 0.0,                 0.0, 
+                                        0.032,                0.0,                  0.0,                  0.0,                0.0,                 0.0,                 0.0,                 0.0]
+theorySystAbsScale['qqH_hgg'] =        [0.0,                  0.004,                0.0,                  0.0,                0.0,                 0.0,                 0.0,                 0.0, 
+                                        0.0,                 -0.003,                0.0,                  0.0,                0.0,                 0.0,                 0.0,                 0.0, 
+                                        0.0,                  0.021,                0.0,                  0.0,                0.0,                 0.0,                 0.0,                 0.0]
+theorySystAbsScale['WH_lep_hgg'] =     [0.0,                  0.0,                  0.005,                0.0,                0.0,                 0.0,                 0.0,                 0.0, 
+                                        0.0,                  0.0,                 -0.007,                0.0,                0.0,                 0.0,                 0.0,                 0.0, 
+                                        0.0,                  0.0,                  0.018,                0.0,                0.0,                 0.0,                 0.0,                 0.0]
+theorySystAbsScale['WH_had_hgg'] =     [0.0,                  0.0,                  0.005,                0.0,                0.0,                 0.0,                 0.0,                 0.0, 
+                                        0.0,                  0.0,                 -0.007,                0.0,                0.0,                 0.0,                 0.0,                 0.0, 
+                                        0.0,                  0.0,                  0.018,                0.0,                0.0,                 0.0,                 0.0,                 0.0]
+theorySystAbsScale['ZH_lep_hgg'] =     [0.0,                  0.0,                  0.038,                0.0,                0.0,                 0.0,                 0.0,                 0.0, 
+                                        0.0,                  0.0,                 -0.031,                0.0,                0.0,                 0.0,                 0.0,                 0.0, 
+                                        0.0,                  0.0,                  0.016,                0.0,                0.0,                 0.0,                 0.0,                 0.0]
+theorySystAbsScale['ZH_had_hgg'] =     [0.0,                  0.0,                  0.038,                0.0,                0.0,                 0.0,                 0.0,                 0.0, 
+                                        0.0,                  0.0,                 -0.031,                0.0,                0.0,                 0.0,                 0.0,                 0.0, 
+                                        0.0,                  0.0,                  0.016,                0.0,                0.0,                 0.0,                 0.0,                 0.0]
+theorySystAbsScale['ttH_hgg'] =        [0.0,                  0.0,                  0.0,                  0.058,              0.0,                 0.0,                 0.0,                 0.0,  
+                                        0.0,                  0.0,                  0.0,                 -0.092,              0.0,                 0.0,                 0.0,                 0.0,  
+                                        0.0,                  0.0,                  0.0,                  0.036,              0.0,                 0.0,                 0.0,                 0.0, ]
+theorySystAbsScale['bbH_hgg'] =        [0.0,                  0.0,                  0.0,                  0.0,                0.202,               0.0,                 0.0,                 0.0,  
+                                        0.0,                  0.0,                  0.0,                  0.0,               -0.239,               0.0,                 0.0,                 0.0,  
+                                        0.0,                  0.0,                  0.0,                  0.0,                0.0,                 0.0,                 0.0,                 0.0, ]
+theorySystAbsScale['tHq_hgg'] =        [0.0,                  0.0,                  0.0,                  0.0,                0.0,                 0.065,               0.0,                 0.0,  
+                                        0.0,                  0.0,                  0.0,                  0.0,                0.0,                -0.149,               0.0,                 0.0,  
+                                        0.0,                  0.0,                  0.0,                  0.0,                0.0,                 0.037,               0.0,                 0.0, ]
+theorySystAbsScale['tHW_hgg'] =        [0.0,                  0.0,                  0.0,                  0.0,                0.0,                 0.0,                 0.049,               0.0,  
+                                        0.0,                  0.0,                  0.0,                  0.0,                0.0,                 0.0,                -0.067,               0.0,  
+                                        0.0,                  0.0,                  0.0,                  0.0,                0.0,                 0.0,                 0.063,               0.0, ]
+theorySystAbsScale['ggZH_hgg'] =       [0.0,                  0.0,                  0.0,                  0.0,                0.0,                 0.0,                 0.0,                 0.251, 
+                                        0.0,                  0.0,                  0.0,                  0.0,                0.0,                 0.0,                 0.0,                -0.189, 
+                                        0.0,                  0.0,                  0.0,                  0.0,                0.0,                 0.0,                 0.0,                 0.024, ]
 
 ##############################################################################
 ## Calculate overall effect of theory systematics
@@ -270,65 +304,121 @@ mass = inWS.var("CMS_hgg_mass")
 norm_factors_file = open('norm_factors_new.py','w')
 for proc in options.procs:
   if proc in bkgProcs: continue
-  for name in theorySyst.keys(): #wh_130_13TeV_UntaggedTag_1_pdfWeights
+  for name,details in theorySyst.iteritems(): #wh_130_13TeV_UntaggedTag_1_pdfWeights
     norm_factors_file.write("%s_%s = ["%(proc,name.replace("Weight",""))) 
-    result["%s_%s"%(proc,name)] = []
-    n=-1
-    while (n>=-1): 
-      n=n+1
-      runningTotal_nom=0
-      runningTotal_up=0
-      weight = r.RooRealVar("weight","weight",0)
-      weight_up = inWS.var("%s_%d"%(name,n)) # eg pdfWeight_1
-      if (weight_up==None) : 
-        n=-999
-        continue # this will break the while loop, so we just stop when we are out of pdfWeights, scaleWeights or alphaSWeights 
-      weight_central = inWS.var("centralObjectWeight") 
-      weight_sumW = inWS.var("sumW")
-      for cat in inclusiveCats:
-        data_nominal = inWS.data("%s_%d_13TeV_%s_pdfWeights"%(flashggProcs[proc],options.mass,cat))
-        print 'on proc %s, cat %s, looking for dataset %s'%(proc, cat, "%s_%d_13TeV_%s_pdfWeights"%(flashggProcs[proc],options.mass,cat))
-        data_nominal_sum = data_nominal.sumEntries()
-        data_up = data_nominal.emptyClone();
-        data_nominal_new = data_nominal.emptyClone();
-        zeroWeightEvents=0.
-        for i in range(0,int(data_nominal.numEntries())):
-           mass.setVal(data_nominal.get(i).getRealValue("CMS_hgg_mass"))
-           w_nominal =data_nominal.weight()
-           w_up = data_nominal.get(i).getRealValue("%s_%d"%(name,n))
-           #w_central = data_nominal.get(i).getRealValue("centralObjectWeight") #FIXME ed testing
-           w_central = data_nominal.get(i).getRealValue("scaleWeight_0") #sneaky fix as it doesn't look like central weight is beign propagated correctly in these cases.
-           sumW = data_nominal.get(i).getRealValue("sumW")
-           if (w_central) : print name, n, proc, cat, "entry ", i, " w_nominal ", w_nominal, " w_central " , w_central, " w_up ", w_up , " w_nominal*(w_up/w_central) ", w_nominal*(w_up/w_central)
-           #FIXME ed testing
-           #if (abs(w_central)<1E-4 or abs(w_nominal)<1E-4 or w_nominal<=0. or math.isnan(w_up) or w_central<=0. or w_up<=0. or w_up>10.0): continue
-           if (abs(w_central)<1E-4 or abs(w_nominal)<1E-4 or w_nominal<=0. or math.isnan(w_central) or math.isnan(w_up) or w_central<=0. or w_up<=0. or w_up>10.0): 
-             w_up = 1.
-             w_central = 1.
-           #FIXME ed testing
-           if abs(w_up/w_central - 1.) > 0.5: 
-             w_up = 1.
-             w_central = 1.
-           weight_up.setVal(w_nominal*(w_up/w_central))
-           data_up.add(r.RooArgSet(mass,weight_up),weight_up.getVal())
-           data_nominal_new.add(r.RooArgSet(mass,weight),w_nominal)
-        runningTotal_nom_old = runningTotal_nom
-        runningTotal_up_old = runningTotal_up
-        runningTotal_nom =runningTotal_nom + data_nominal.sumEntries() 
-        runningTotal_up =runningTotal_up + data_up.sumEntries()
-        if (runningTotal_nom): effect =runningTotal_up/runningTotal_nom
-        else: effect =-1
-        print name, n, proc, cat, " runningTotal_up ", runningTotal_up, " runningTotal_up_old ", runningTotal_up_old, " data_up.sumEntries() ", data_up.sumEntries() , "runningTotal_nom", runningTotal_nom, " runningTotal_nom_old ", runningTotal_nom_old , " data_nominal.sumEntries() ",  data_nominal.sumEntries(), " effect ", effect
-      effect=-1
-      if (runningTotal_nom==runningTotal_up): effect=1
-      else: effect = runningTotal_up/runningTotal_nom
-      if (effect <0.5 or effect > 2.0) : 
-        #exit ("effect is greater than a factor of two - shouldn't happen, exiting...")
-        print "effect is greater than a factor of two - shouldn't happen, exiting...\n"
-        #exit ("effect is greater than a factor of two for proc %s name %s - shouldn't happen, exiting..."%(proc,name))
-      if (n==0) :norm_factors_file.write(" %.3f"%effect)
-      else: norm_factors_file.write(", %.3f"%effect)
-      result["%s_%s"%(proc,name)].append(effect)
+    result["%s_%s"%(proc,name)] = {}
+    for iDeet, deet in enumerate(details):
+      if isinstance(deet,list):
+        for n in deet:
+          runningTotal_nom=0
+          runningTotal_up=0
+          weight = r.RooRealVar("weight","weight",0)
+          weight_up = inWS.var("%s_%d"%(name,n)) # eg pdfWeight_1
+          if (weight_up==None) : 
+            n=-999
+            continue # this will break the while loop, so we just stop when we are out of pdfWeights, scaleWeights or alphaSWeights 
+          weight_central = inWS.var("centralObjectWeight") 
+          weight_sumW = inWS.var("sumW")
+          for cat in inclusiveCats:
+            data_nominal = inWS.data("%s_%d_13TeV_%s_pdfWeights"%(flashggProcs[proc],options.mass,cat))
+            print 'on proc %s, cat %s, looking for dataset %s'%(proc, cat, "%s_%d_13TeV_%s_pdfWeights"%(flashggProcs[proc],options.mass,cat))
+            data_nominal_sum = data_nominal.sumEntries()
+            data_up = data_nominal.emptyClone();
+            data_nominal_new = data_nominal.emptyClone();
+            zeroWeightEvents=0.
+            for i in range(0,int(data_nominal.numEntries())):
+               mass.setVal(data_nominal.get(i).getRealValue("CMS_hgg_mass"))
+               w_nominal =data_nominal.weight()
+               w_up = data_nominal.get(i).getRealValue("%s_%d"%(name,n))
+               #w_central = data_nominal.get(i).getRealValue("centralObjectWeight") #FIXME ed testing
+               w_central = data_nominal.get(i).getRealValue("scaleWeight_0") #sneaky fix as it doesn't look like central weight is beign propagated correctly in these cases.
+               sumW = data_nominal.get(i).getRealValue("sumW")
+               if (w_central) : print name, n, proc, cat, "entry ", i, " w_nominal ", w_nominal, " w_central " , w_central, " w_up ", w_up , " w_nominal*(w_up/w_central) ", w_nominal*(w_up/w_central)
+               #FIXME ed testing
+               #if (abs(w_central)<1E-4 or abs(w_nominal)<1E-4 or w_nominal<=0. or math.isnan(w_up) or w_central<=0. or w_up<=0. or w_up>10.0): continue
+               if (abs(w_central)<1E-4 or abs(w_nominal)<1E-4 or w_nominal<=0. or math.isnan(w_central) or math.isnan(w_up) or w_central<=0. or w_up<=0. or w_up>10.0): 
+                 w_up = 1.
+                 w_central = 1.
+               #FIXME ed testing
+               if abs(w_up/w_central - 1.) > 0.5: 
+                 w_up = 1.
+                 w_central = 1.
+               weight_up.setVal(w_nominal*(w_up/w_central))
+               data_up.add(r.RooArgSet(mass,weight_up),weight_up.getVal())
+               data_nominal_new.add(r.RooArgSet(mass,weight),w_nominal)
+            runningTotal_nom_old = runningTotal_nom
+            runningTotal_up_old = runningTotal_up
+            runningTotal_nom =runningTotal_nom + data_nominal.sumEntries() 
+            runningTotal_up =runningTotal_up + data_up.sumEntries()
+            if (runningTotal_nom): effect =runningTotal_up/runningTotal_nom
+            else: effect =-1
+            print name, n, proc, cat, " runningTotal_up ", runningTotal_up, " runningTotal_up_old ", runningTotal_up_old, " data_up.sumEntries() ", data_up.sumEntries() , "runningTotal_nom", runningTotal_nom, " runningTotal_nom_old ", runningTotal_nom_old , " data_nominal.sumEntries() ",  data_nominal.sumEntries(), " effect ", effect
+          effect=-1
+          if (runningTotal_nom==runningTotal_up): effect=1
+          else: effect = runningTotal_up/runningTotal_nom
+          if (effect <0.5 or effect > 2.0) : 
+            #exit ("effect is greater than a factor of two - shouldn't happen, exiting...")
+            print "effect is greater than a factor of two - shouldn't happen, exiting...\n"
+            #exit ("effect is greater than a factor of two for proc %s name %s - shouldn't happen, exiting..."%(proc,name))
+          if (iDeet==0) :norm_factors_file.write(" %.3f"%effect)
+          else: norm_factors_file.write(", %.3f"%effect)
+          result["%s_%s"%(proc,name)][n] = effect
+      elif isinstance(deet,str):
+        if deet.count('THU'):
+          runningTotal_nom=0
+          runningTotal_up=0
+          runningTotal_down=0
+          weight = r.RooRealVar("weight","weight",0)
+          weight_up = inWS.var("%sUp01sigma"%(name))
+          weight_down = inWS.var("%sDown01sigma"%(name))
+          weight_central = inWS.var("centralObjectWeight") 
+          weight_sumW = inWS.var("sumW")
+          for cat in inclusiveCats:
+            data_nominal = inWS.data("%s_%d_13TeV_%s"%(flashggProcs[proc],options.mass,cat))
+            print 'on proc %s, cat %s, looking for dataset %s'%(proc, cat, "%s_%d_13TeV_%s"%(flashggProcs[proc],options.mass,cat))
+            data_nominal_sum = data_nominal.sumEntries()
+            data_up = data_nominal.emptyClone();
+            data_down = data_nominal.emptyClone();
+            data_nominal_new = data_nominal.emptyClone();
+            zeroWeightEvents=0.
+            for i in range(0,int(data_nominal.numEntries())):
+               mass.setVal(data_nominal.get(i).getRealValue("CMS_hgg_mass"))
+               w_nominal =data_nominal.weight()
+               w_up = data_nominal.get(i).getRealValue("%sUp01sigma"%(name))
+               w_down = data_nominal.get(i).getRealValue("%sDown01sigma"%(name))
+               w_central = data_nominal.get(i).getRealValue("centralObjectWeight")
+               sumW = data_nominal.get(i).getRealValue("sumW")
+               if (abs(w_central)<1E-4 or abs(w_nominal)<1E-4 or w_nominal<=0. or math.isnan(w_central) or math.isnan(w_up) or math.isnan(w_down) or w_central<=0. or w_up<=0. or w_up>10.0 or w_down<=0. or w_down>10.0): 
+                 w_up = 1.
+                 w_down = 1.
+                 w_central = 1.
+               if abs(w_up/w_central - 1.) > 0.5: 
+                 w_up = 1.
+                 w_central = 1.
+               if abs(w_down/w_central - 1.) > 0.5: 
+                 w_down = 1.
+                 w_central = 1.
+               weight_up.setVal(w_nominal*(w_up/w_central))
+               weight_down.setVal(w_nominal*(w_down/w_central))
+               data_up.add(r.RooArgSet(mass,weight_up),weight_up.getVal())
+               data_down.add(r.RooArgSet(mass,weight_down),weight_down.getVal())
+               data_nominal_new.add(r.RooArgSet(mass,weight),w_nominal)
+            runningTotal_nom_old = runningTotal_nom
+            runningTotal_up_old = runningTotal_up
+            runningTotal_down_old = runningTotal_down
+            runningTotal_nom =runningTotal_nom + data_nominal.sumEntries() 
+            runningTotal_up =runningTotal_up + data_up.sumEntries()
+            runningTotal_down =runningTotal_down + data_down.sumEntries()
+          effectUp=-1
+          effectDown=-1
+          if (runningTotal_nom==runningTotal_up): effectUp=1
+          else: effectUp = runningTotal_up/runningTotal_nom
+          if (runningTotal_nom==runningTotal_down): effectDown=1
+          else: effectDown = runningTotal_down/runningTotal_nom
+          norm_factors_file.write("%.3f"%effectUp)
+          norm_factors_file.write(", %.3f"%effectDown)
+          result["%s_%s"%(proc,name)]['Up'] = effectUp
+          result["%s_%s"%(proc,name)]['Down'] = effectDown
     norm_factors_file.write("]\n")
     #print result
 #exit(1)
@@ -349,12 +439,25 @@ def printTheorySysts():
         outFile.write('%-35s  lnN   '%(name))
         for c in options.cats:
           for p in options.procs:
-            if "bkg" in flashggProcs[p] or "BBH" in flashggProcs[p] or "THQ" in flashggProcs[p] or "THW" in flashggProcs[p] or (('QCDscale' in systName or 'scaleWeight' in systName) and options.newGghScheme):
+            if "bkg" in flashggProcs[p] or "BBH" in flashggProcs[p] or "THQ" in flashggProcs[p] or "THW" in flashggProcs[p] or "GGZH" in flashggProcs[p] or (('QCDscale' in systName or 'scaleWeight' in systName) and options.newGghScheme):
               outFile.write('- ')
               continue
             else:
               outFile.write(getFlashggLineTheoryEnvelope(flashggProcs[p],c,systName,systDetails))
         outFile.write('\n')
+    elif systName.count('THU'): # special ggH theory weights
+      name="CMS_hgg_"+systName
+      outFile.write('%-35s  lnN   '%(name))
+      for c in options.cats:
+        for p in options.procs:
+          #with new WG1 prescription, specific other nuisances deal with ggH theory uncerts
+          if not "GG2H" in flashggProcs[p]:
+            outFile.write('- ')
+            continue
+          else:
+            outFile.write(getFlashggTHUWeights(flashggProcs[p],c,systName,))
+      if '%s:%s'%(p,c) in options.toSkip: continue
+      outFile.write('\n')
     else: #sym or asym uncertainties
       #print "consider ", systName
       asymmetric=("asym" in systDetails[-1])
@@ -362,7 +465,8 @@ def printTheorySysts():
         iteration_list=systDetails[:-1]
       else:
         iteration_list=[]
-        for a in range(systDetails[0][0],systDetails[0][1]):
+        #for a in range(systDetails[0][0],systDetails[0][1]):
+        for a in systDetails[0]:
           iteration_list.append([a,0])
 
       #print "THIS SYST: ", systName ," is assymetric ? ", asymmetric, " and we will iterate over ", iteration_list 
@@ -380,7 +484,7 @@ def printTheorySysts():
         for c in options.cats:
           for p in options.procs:
             #with new WG1 prescription, specific other nuisances deal with ggH theory uncerts
-            if "bkg" in flashggProcs[p] or "BBH" in flashggProcs[p] or "THQ" in flashggProcs[p] or "THW" in flashggProcs[p] or ('scaleWeight' in systName and options.newGghScheme and 'ggH' in p):
+            if "bkg" in flashggProcs[p] or "BBH" in flashggProcs[p] or "THQ" in flashggProcs[p] or "THW" in flashggProcs[p] or "GGZH" in flashggProcs[p] or ('scaleWeight' in systName and options.newGghScheme and 'ggH' in p):
               outFile.write('- ')
               continue
             else:
@@ -550,6 +654,62 @@ def getFlashggLineTheoryWeights(proc,cat,name,i,asymmetric,j=0,factor=1):
   #print " summary tag " , cat , "  proc ", proc, " value ", line 
   return line
 
+## get effect of THU weights
+def getFlashggTHUWeights(proc,cat,name):
+  print 'ED DEBUG running THU weights for proc %s cat %s'%(proc,cat)
+  theoryNormFactor_n= 1./theoryNormFactors["%s_%s"%(combProcs[proc],name)]['Up']
+  theoryNormFactor_m= 1./theoryNormFactors["%s_%s"%(combProcs[proc],name)]['Down']
+  print 'ED DEBUG got up norm factor %.3f'%theoryNormFactor_n
+  print 'ED DEBUG got down norm factor %.3f'%theoryNormFactor_m
+  
+  mass = inWS.var("CMS_hgg_mass")
+  weight = r.RooRealVar("weight","weight",0)
+  weight_up = inWS.var("%sUp01sigma"%(name))
+  weight_down = inWS.var("%sDown01sigma"%(name))
+  weight_central = inWS.var("centralObjectWeight") 
+  weight_sumW = inWS.var("sumW") 
+  data_nominal = inWS.data("%s_%d_13TeV_%s"%(proc,options.mass,cat))
+  data_nominal_sum = data_nominal.sumEntries()
+  if (data_nominal_sum <= 0.):
+      print "[WARNING] This dataset has 0 or negative sum of weight. Systematic calulcxation meaningless, so list as '- '"
+      line = '- '
+      return line
+  data_up = data_nominal.emptyClone();
+  data_down = data_nominal.emptyClone();
+  data_nominal_new = data_nominal.emptyClone();
+  zeroWeightEvents=0.
+  for i in range(0,int(data_nominal.numEntries())):
+    
+    mass.setVal(data_nominal.get(i).getRealValue("CMS_hgg_mass"))
+    w_nominal =data_nominal.weight()
+    w_up = theoryNormFactor_n*data_nominal.get(i).getRealValue("%sUp01sigma"%(name))
+    w_down = theoryNormFactor_m*data_nominal.get(i).getRealValue("%sDown01sigma"%(name))
+    w_central = data_nominal.get(i).getRealValue("centralObjectWeight") #sneaky fix as it doesn't look like central weight is beign propagated correctly in these cases.
+    sumW = data_nominal.get(i).getRealValue("sumW")
+    if (w_central<=0. or w_nominal<=0. or math.isnan(w_down) or math.isnan(w_central) or math.isnan(w_up) or w_down<=0. or w_up<=0.): 
+      w_central = 1.
+      w_up = 1.
+      w_down = 1.
+    if abs(w_up/w_central - 1.) > 0.5 or abs(w_central/w_down - 1.) > 0.5:
+      w_central = 1.
+      w_up = 1.
+      w_down = 1.
+    weight_down.setVal(w_nominal*(w_down/w_central))
+    weight_up.setVal(w_nominal*(w_up/w_central))
+    data_up.add(r.RooArgSet(mass,weight_up),weight_up.getVal())
+    data_down.add(r.RooArgSet(mass,weight_down),weight_down.getVal())
+    data_nominal_new.add(r.RooArgSet(mass,weight),w_nominal)
+  if (data_up.sumEntries() <= 0. or data_down.sumEntries() <= 0. ):
+      print "[WARNING] This dataset has 0 or negative sum of weight. Systematic calulcxation meaningless, so list as '- '"
+      line = '- '
+      return line
+  systVals = interp1SigmaDataset(data_nominal_new,data_down,data_up)
+  if systVals[0]==1 and systVals[1]==1:
+      line = '- '
+  else:
+      line = '%5.3f/%5.3f '%(systVals[0],systVals[1])
+  return line
+
 ## envelope computation, for Theory scale weights
 def getFlashggLineTheoryEnvelope(proc,cat,name,details):
   
@@ -714,7 +874,7 @@ def printUEPSSyst():
     print uepsFiles['PS']
     
     lines = {}
-    tpMap = {"GG2H":"ggh","VBF":"vbf","TTH":"tth","QQ2HLNU":"wh","QQ2HLL":"zh","WH2HQQ":"wh","ZH2HQQ":"zh","testBBH":"bbh","testTHQ":"th","testTHW":"th"}
+    tpMap = {"GG2H":"ggh","VBF":"vbf","TTH":"tth","QQ2HLNU":"wh","QQ2HLL":"zh","WH2HQQ":"wh","ZH2HQQ":"zh","testBBH":"bbh","testTHQ":"th","testTHW":"th","GGZH":"ggzh"}
 
     for uncertainty in uncertainties:
       lines[uncertainty] = ''
@@ -832,15 +992,16 @@ if oneLineJEC:
 
 #new ggH uncert prescription (replaces theory, JetVeto)
 if options.newGghScheme:
-  flashggSysts['THU_ggH_Mu'] = 'THU_ggH_Mu'
-  flashggSysts['THU_ggH_Res'] = 'THU_ggH_Res'
-  flashggSysts['THU_ggH_Mig01'] = 'THU_ggH_Mig01'
-  flashggSysts['THU_ggH_Mig12'] = 'THU_ggH_Mig12'
-  flashggSysts['THU_ggH_VBF2j'] = 'THU_ggH_VBF2j'
-  flashggSysts['THU_ggH_VBF3j'] = 'THU_ggH_VBF3j'
-  flashggSysts['THU_ggH_PT60'] = 'THU_ggH_PT60'
-  flashggSysts['THU_ggH_PT120'] = 'THU_ggH_PT120'
-  flashggSysts['THU_ggH_qmtop'] = 'THU_ggH_qmtop'
+  pass
+  #flashggSysts['THU_ggH_Mu'] = 'THU_ggH_Mu'
+  #flashggSysts['THU_ggH_Res'] = 'THU_ggH_Res'
+  #flashggSysts['THU_ggH_Mig01'] = 'THU_ggH_Mig01'
+  #flashggSysts['THU_ggH_Mig12'] = 'THU_ggH_Mig12'
+  #flashggSysts['THU_ggH_VBF2j'] = 'THU_ggH_VBF2j'
+  #flashggSysts['THU_ggH_VBF3j'] = 'THU_ggH_VBF3j'
+  #flashggSysts['THU_ggH_PT60'] = 'THU_ggH_PT60'
+  #flashggSysts['THU_ggH_PT120'] = 'THU_ggH_PT120'
+  #flashggSysts['THU_ggH_qmtop'] = 'THU_ggH_qmtop'
 
 #tth Tags
 tthSysts={}

@@ -354,6 +354,7 @@ std::pair<std::string,std::string> convertTemplatedName(std::string dataName) {
   tpMap["testBBH"] = "bbh";
   tpMap["testTHW"] = "th";
   tpMap["testTHQ"] = "th";
+  tpMap["GGZH"] = "ggzh";
   for( std::map<std::string,std::string>::iterator it = tpMap.begin(); it != tpMap.end(); it++ ) {
     if( theDataName.BeginsWith(it->first) ) { 
       TString theDataNameCopy = theDataName;
