@@ -736,7 +736,7 @@ def printUEPSSyst():
             continue
           else: continue
         for cat in options.cats:
-          if not ('GG2H' in proc or 'VBF' in proc): 
+          if not (proc.startswith('GG2H') or proc.startswith('VBF')): 
             continue
           elif not (cat in incCats or cat in dijetCats): 
             continue
@@ -760,7 +760,7 @@ def printUEPSSyst():
             procValues[cat] = value
           elif wsDown and not wsUp: #one variation missing so compare to central
             dataDown = "%s_%sDown_13TeV_%s" % (abbrev,uncertainty,cat) 
-            weightDown = wsUp.data(dataDown).sumEntries()
+            weightDown = wsDown.data(dataDown).sumEntries()
             weightNom = inWS.data("%s_%d_13TeV_%s"%(proc,options.mass,cat)).sumEntries()
             delta = weightNom - weightDown
             if weightNom > 0.: value = 1. + (delta / weightNom )
@@ -772,7 +772,7 @@ def printUEPSSyst():
       for cat in options.cats:
         for proc in options.procs:
           proc = flashggProcs[proc]
-          if not ('GG2H' in proc or 'VBF' in proc): 
+          if not (proc.startswith('GG2H') or proc.startswith('VBF')): 
             lines[uncertainty] += '- '
             continue
           elif not (cat in incCats or cat in dijetCats): 

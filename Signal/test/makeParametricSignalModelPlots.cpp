@@ -529,6 +529,7 @@ void Plot(RooRealVar *mass, RooDataSet *data, RooAbsPdf *pdf, pair<double,double
   lat1.SetTextSize(0.047);
 
   TString catLabel_humanReadable  = title;
+  catLabel_humanReadable.ReplaceAll("RECO_","");
   catLabel_humanReadable.ReplaceAll("_"," ");
   catLabel_humanReadable.ReplaceAll("UntaggedTag","Untagged");
   catLabel_humanReadable.ReplaceAll("VBFTag","VBF Tag");
@@ -569,8 +570,9 @@ void Plot(RooRealVar *mass, RooDataSet *data, RooAbsPdf *pdf, pair<double,double
     negBinsArrow->Draw("same <>");
 
   }
+  string sim="";
   //string sim="Simulation Preliminary";
-  string sim="Simulation"; //for the paper
+  //string sim="Simulation"; //for the paper
   CMS_lumi( canv, 0,0,sim);
   canv->Print(Form("%s.pdf",savename.c_str()));
   canv->Print(Form("%s.png",savename.c_str()));
@@ -591,11 +593,12 @@ int main(int argc, char *argv[]){
   system("mkdir -p plots/SignalPlots/");
   setTDRStyle();
   writeExtraText = true;       // if extra text
-  extraText  = "";  // default extra text is "Preliminary"
+  //extraText  = "";  // default extra text is "Preliminary"
   lumi_13TeV  = "2.7 fb^{-1}"; // default is "19.7 fb^{-1}"
   lumi_8TeV  = "19.1 fb^{-1}"; // default is "19.7 fb^{-1}"
   lumi_7TeV  = "4.9 fb^{-1}";  // default is "5.1 fb^{-1}"
-  lumi_sqrtS = "13 TeV";       // used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
+  //lumi_sqrtS = "13 TeV";       // used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
+  lumi_sqrtS = Form("13 TeV (%d)",year_);
 
   split(procs_,procString_,boost::is_any_of(","));
   split(flashggCats_,flashggCatsStr_,boost::is_any_of(","));
@@ -690,4 +693,4 @@ int main(int argc, char *argv[]){
   hggFile->Close();
 
 }
-
+       

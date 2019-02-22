@@ -130,7 +130,8 @@ def formatRatio(h):
     h.GetYaxis().SetRangeUser(0.4, 1.6)
 
 def drawCMS(onTop=False):
-    text='#bf{CMS} #it{Preliminary}  H#rightarrow#gamma#gamma'
+    #text='#bf{CMS} #it{Preliminary}  H#rightarrow#gamma#gamma'
+    text='#bf{CMS} #it{Simulation Preliminary}  H#rightarrow#gamma#gamma'
     latex = TLatex()
     latex.SetNDC()
     latex.SetTextFont(42)
@@ -147,4 +148,16 @@ def drawEnPu(pileup=None, lumi=None):
     tex = '(13 TeV)'
     if pileup: tex += ', {0} PU'.format(pileup)
     if lumi: tex = '{0} '.format(lumi) + tex
+    latex.DrawLatex(0.95, 0.93, tex)
+
+def drawEnYear(pileup=None, year=None):
+    latex = TLatex()
+    latex.SetNDC()
+    latex.SetTextSize(0.046)
+    latex.SetTextColor(1)
+    latex.SetTextFont(42)
+    latex.SetTextAlign(31)
+    tex = '13 TeV'
+    if pileup: tex += ', {0} PU'.format(pileup)
+    if year: tex = tex + ' ({0})'.format(year) 
     latex.DrawLatex(0.95, 0.93, tex)

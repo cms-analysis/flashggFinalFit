@@ -142,8 +142,8 @@ for proc in stage0procs:
     line = line + ' &  ' + str('$<$0.05 %s '%pc)
 
 allLine = ' ' + str('%.1f'%yi.getSigYield(cat))
-#dataLines.append( lineCat + allLine + ' ' + line + ' & %.2f & %.2f & %.1f & %.2f \\\\'%(yi.getTotEffSigma(), yi.getTotFWHM(), yi.getBkgYield(cat), yi.getTotPurity()) )
-dataLines.append( lineCat + allLine + ' ' + line + ' & %.2f & %.2f & %.1f & %.2f \\\\'%(yi.getTotEffSigma(), yi.getTotFWHM(), yi.getBkgYield(cat), yi.getTotAMS()) )
+dataLines.append( lineCat + allLine + ' ' + line + ' & %.2f & %.2f & %.1f & %.2f \\\\'%(yi.getTotEffSigma(), yi.getTotFWHM(), yi.getBkgYield(cat), yi.getTotPurity()) )
+#dataLines.append( lineCat + allLine + ' ' + line + ' & %.2f & %.2f & %.1f & %.2f \\\\'%(yi.getTotEffSigma(), yi.getTotFWHM(), yi.getBkgYield(cat), yi.getTotAMS()) )
 
 for l in dataLines :
   print l

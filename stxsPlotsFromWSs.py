@@ -4,12 +4,13 @@
 from os import walk
 import ROOT as r
 from collections import OrderedDict as od
-from usefulStyle import setCanvas, drawCMS, drawEnPu, formatHisto
+from usefulStyle import setCanvas, drawCMS, drawEnPu, drawEnYear, formatHisto
 from shanePalette import set_color_palette
 
 from optparse import OptionParser
 parser = OptionParser()
 parser.add_option('-l', '--lumi', default=35.9, help='set lumi')
+parser.add_option('-y', '--year', default='2016', help='data-taking year')
 parser.add_option('-e', '--ext', default='test', help='set extension')
 (opts,args) = parser.parse_args()
 
@@ -189,7 +190,8 @@ def main():
   lines[-1].SetLineWidth(1)
   for line in lines: line.Draw()
   drawCMS(True)
-  drawEnPu(lumi='%.1f fb^{-1}'%lumi)
+  #drawEnPu(lumi='%.1f fb^{-1}'%lumi)
+  drawEnYear(year=opts.year)
   canv.Print('procHist_%s.pdf'%ext)
   canv.Print('procHist_%s.png'%ext)
   formatHisto(catHist)
@@ -223,7 +225,8 @@ def main():
   lines[-1].SetLineWidth(1)
   for line in lines: line.Draw()
   drawCMS(True)
-  drawEnPu(lumi='%.1f fb^{-1}'%lumi)
+  #drawEnPu(lumi='%.1f fb^{-1}'%lumi)
+  drawEnYear(year=opts.year)
   canv.Print('catHist_%s.pdf'%ext)
   canv.Print('catHist_%s.png'%ext)
   #save hists
