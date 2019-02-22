@@ -17,7 +17,8 @@ print 'About to run background scripts'
 print 'fTestOnly = %s, bkgPlotsOnly = %s'%(str(fTestOnly), str(bkgPlotsOnly))
 
 #setup files 
-ext = 'preappFinal2016'
+#ext = 'preappFinal2016'
+ext = 'approvalFinal2016'
 print 'ext = %s'%ext
 
 baseFilePath  = '/vols/cms/es811/FinalFits/ws_%s/'%ext

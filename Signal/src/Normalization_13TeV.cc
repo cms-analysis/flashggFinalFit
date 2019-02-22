@@ -28,6 +28,7 @@ int Normalization_13TeV::Init(int sqrtS){
         double valXSbbH        = (double)TPython::Eval(Form("buildSMHiggsSignalXSBR.getXS(%f,'%s')",mH,"bbH"));
         double valXStHq        = (double)TPython::Eval(Form("buildSMHiggsSignalXSBR.getXS(%f,'%s')",mH,"tHq"));
         double valXStHW        = (double)TPython::Eval(Form("buildSMHiggsSignalXSBR.getXS(%f,'%s')",mH,"tHW"));
+        double valXSggZH       = (double)TPython::Eval(Form("buildSMHiggsSignalXSBR.getXS(%f,'%s')",mH,"ggZH"));
         double valXSQQ2HLNU    = valXSWH*(3.*10.86*0.01)/*3xBR(W to lv)*/;  
         double valXSQQ2HLL     = valXSZH*(3*3.3658*0.01 + 20.00*0.01)/*BR(Z to ll) + BR(Z to invisible)*/;  
         double valXSVH2HQQ     = valXSWH*(67.41*0.01)/*BR(W to hadrons)*/ + valXSZH*(69.91*0.01)/*BR(Z to hadrons)*/; 
@@ -93,6 +94,7 @@ int Normalization_13TeV::Init(int sqrtS){
         XSectionMap_BBH[mH]                      = valXSbbH;
         XSectionMap_THQ[mH]                      = valXStHq;
         XSectionMap_THW[mH]                      = valXStHW;
+        XSectionMap_GGZH[mH]                     = valXSggZH;
     }
 }
 
@@ -176,6 +178,8 @@ TGraph * Normalization_13TeV::GetSigmaGraph(TString process)
           XSectionMap = &XSectionMap_THQ;
   } else if ( process == "THW" || process == "testTHW" ) {
           XSectionMap = &XSectionMap_THW;
+  } else if ( process == "GGZH" ) {
+          XSectionMap = &XSectionMap_GGZH;
   } else if ( process == "ggh" || process=="GG2H" ) {
     XSectionMap = &XSectionMap_ggh;
   } else if ( process == "vbf" || process=="VBF" ) {
@@ -320,6 +324,8 @@ double Normalization_13TeV::GetXsection(double mass, TString HistName) {
           XSectionMap = &XSectionMap_THQ;
   } else if ( HistName.Contains("THW") ) {
           XSectionMap = &XSectionMap_THW;
+  } else if ( HistName.Contains("GGZH") ) {
+          XSectionMap = &XSectionMap_GGZH;
   } else if ( HistName.Contains("ggh") || HistName.Contains("GG2H") ) {
     XSectionMap = &XSectionMap_ggh;
   } else if ( HistName.Contains("vbf") || HistName.Contains("VBF") ) {
@@ -346,6 +352,8 @@ double Normalization_13TeV::GetXsection(double mass, TString HistName) {
     XSectionMap = &XSectionMap_THQ;
   } else if ( HistName.Contains("THW") ) {
     XSectionMap = &XSectionMap_THW;
+  } else if ( HistName.Contains("GGZH") ) {
+    XSectionMap = &XSectionMap_GGZH;
   } else {
     std::cout << "[WARNING] Normalization_13TeV: No known process found in the name!!" << HistName << std::endl;
     //exit(1);
