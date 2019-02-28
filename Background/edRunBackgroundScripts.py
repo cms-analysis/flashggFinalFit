@@ -10,8 +10,8 @@ bkgPlotsOnly = False
 
 #justPrint=True
 #unblind = True
-fTestOnly = True
-#bkgPlotsOnly = True
+#fTestOnly = True
+bkgPlotsOnly = True
 
 print 'About to run background scripts'
 print 'fTestOnly = %s, bkgPlotsOnly = %s'%(str(fTestOnly), str(bkgPlotsOnly))

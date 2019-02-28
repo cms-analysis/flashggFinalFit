@@ -12,12 +12,12 @@ effAccOnly = False
 yieldsOnly = False
 
 #justPrint = True
-datacardOnly = True
-doUEPS = True
+#datacardOnly = True
+#doUEPS = True
 #combineOnly = True
 #combinePlotsOnly = True
 #effAccOnly = True
-#yieldsOnly = True
+yieldsOnly = True
 
 print 'About to run combine scripts'
 print 'datacardOnly = %s, combineOnly = %s, combinePlotsOnly = %s, effAccOnly = %s, yieldsOnly = %s'%(str(datacardOnly), str(combineOnly), str(combinePlotsOnly), str(effAccOnly), str(yieldsOnly) )

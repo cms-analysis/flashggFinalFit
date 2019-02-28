@@ -291,8 +291,8 @@ if [ $COMBINEPLOTSONLY == 0 ]; then
 #mv higgsCombine_bonlyForLoading_$EXT.MultiDimFit.mH125.root STXSExpPerProcessMuFinerProfileMH_BonlyForLoading_$EXT.root
 
 echo "./combineHarvester.py -d combineHarvesterOptions13TeV_$EXT.dat -q $DEFAULTQUEUE --batch $BATCH --verbose"
-./combineHarvester.py -d combineHarvesterOptions13TeV_${EXT}${FAKE}.dat -q $DEFAULTQUEUE --batch $BATCH --verbose #--S0
-#./combineHarvester.py -d combineHarvesterOptions13TeV_${EXT}${FAKE}.dat -q $DEFAULTQUEUE --batch $BATCH --verbose --dryRun
+#./combineHarvester.py -d combineHarvesterOptions13TeV_${EXT}${FAKE}.dat -q $DEFAULTQUEUE --batch $BATCH --verbose #--S0
+./combineHarvester.py -d combineHarvesterOptions13TeV_${EXT}${FAKE}.dat -q $DEFAULTQUEUE --batch $BATCH --verbose --dryRun
 
 JOBS=999
 RUN=999

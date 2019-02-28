@@ -80,6 +80,14 @@ void Packager::packageOutput(bool split, string process , string tag){
 					expectedObjectsNotFound.push_back(Form("sig_%s_mass_m%d_%s",proc->c_str(),mh,catname.c_str()));
 					continue;
 				}
+         std::cout << "ED DEBUG printing tempData" << std::endl;
+         tempData->Print();
+         //std::cout << "ED DEBUG allDataThisMass" << std::endl;
+         //allDataThisMass->Print();
+         std::cout << "ED DEBUG proc " << *proc << std::endl;
+         std::cout << "ED DEBUG cat " << cat << std::endl;
+         std::cout << "ED DEBUG procs_.begin() " << *procs_.begin() << std::endl;
+         //allDataThisMass->Print();
          if (!split_){
 				if ( cat==0 && proc==procs_.begin()) allDataThisMass = (RooDataSet*)tempData->Clone(Form("sig_mass_m%d_AllCats",mh));
 				else allDataThisMass->append(*tempData);

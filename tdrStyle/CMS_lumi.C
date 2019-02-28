@@ -132,6 +132,7 @@ CMS_lumi( TPad* pad, int iPeriod, int iPosX , TString extraExtraText)
       //CMS_logo->Draw("X");
       pad_logo->Modified();
       pad->cd();
+      delete pad_logo;
     }
     else
     {

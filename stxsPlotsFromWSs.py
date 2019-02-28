@@ -94,6 +94,7 @@ nameMap['QQ2HLNU'] = 'wh'
 nameMap['testBBH'] = 'bbh'
 nameMap['testTHQ'] = 'th'
 nameMap['testTHW'] = 'th'
+nameMap['GGZH']    = 'ggzh'
 
 sumwProcCatMap = {}
 sumwProcMap = {}

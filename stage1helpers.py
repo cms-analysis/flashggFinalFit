@@ -130,6 +130,7 @@ class YieldInfo():
     elif 'GG2H'    in theProc: return 'ggh'
     elif 'VBF'     in theProc: return 'vbf'
     elif 'BBH'     in theProc: return 'bbh'
+    elif 'GGZH'    in theProc: return 'ggzh'
     elif 'THQ'     in theProc: return 'th'
     elif 'THW'     in theProc: return 'th'
     else:
@@ -148,6 +149,7 @@ class YieldInfo():
     elif 'GG2H'    in theProc: return 'GG2H'
     elif 'VBF'     in theProc: return 'VBF'
     elif 'BBH'     in theProc: return 'BBH'
+    elif 'GGZH'    in theProc: return 'GGZH'
     elif 'THQ'     in theProc: return 'THQ'
     elif 'THW'     in theProc: return 'THW'
     else:
@@ -155,7 +157,7 @@ class YieldInfo():
       raise Exception
   
   def getStage0list(self):
-    return ['GG2H', 'VBF', 'TTH', 'testTHQ', 'testTHW', 'testBBH', 'QQ2HLNU', 'WH2HQQ', 'QQ2HLL', 'ZH2HQQ']
+    return ['GG2H', 'VBF', 'TTH', 'testTHQ', 'testTHW', 'testBBH', 'GGZH', 'QQ2HLNU', 'WH2HQQ', 'QQ2HLL', 'ZH2HQQ']
 
   def getStage0dict(self):
-    return {'GG2H':'ggH', 'VBF':'VBF', 'TTH':'ttH', 'testTHQ':'tHq', 'testTHW':'tHW', 'testBBH':'bbH', 'QQ2HLNU':'WH lep', 'WH2HQQ':'WH had', 'QQ2HLL':'ZH lep', 'ZH2HQQ':'ZH had'}
+    return {'GG2H':'ggH', 'VBF':'VBF', 'TTH':'ttH', 'testTHQ':'tHq', 'testTHW':'tHW', 'testBBH':'bbH', 'GGZH':'ggZH', 'QQ2HLNU':'WH lep', 'WH2HQQ':'WH had', 'QQ2HLL':'ZH lep', 'ZH2HQQ':'ZH had'}

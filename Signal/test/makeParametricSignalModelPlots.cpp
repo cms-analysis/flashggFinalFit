@@ -570,8 +570,7 @@ void Plot(RooRealVar *mass, RooDataSet *data, RooAbsPdf *pdf, pair<double,double
     negBinsArrow->Draw("same <>");
 
   }
-  string sim="";
-  //string sim="Simulation Preliminary";
+  string sim="Simulation Preliminary";
   //string sim="Simulation"; //for the paper
   CMS_lumi( canv, 0,0,sim);
   canv->Print(Form("%s.pdf",savename.c_str()));
@@ -593,7 +592,7 @@ int main(int argc, char *argv[]){
   system("mkdir -p plots/SignalPlots/");
   setTDRStyle();
   writeExtraText = true;       // if extra text
-  //extraText  = "";  // default extra text is "Preliminary"
+  extraText  = "";  // default extra text is "Preliminary"
   lumi_13TeV  = "2.7 fb^{-1}"; // default is "19.7 fb^{-1}"
   lumi_8TeV  = "19.1 fb^{-1}"; // default is "19.7 fb^{-1}"
   lumi_7TeV  = "4.9 fb^{-1}";  // default is "5.1 fb^{-1}"
