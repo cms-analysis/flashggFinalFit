@@ -647,6 +647,7 @@ void plotAllPdfs(RooRealVar *mgg, RooAbsData *data, RooMultiPdf *mpdf, RooCatego
 	RooPlot *plot = mgg->frame();
 	plot->SetTitle(Form("Background functions profiled for category %s",catname.c_str()));
 	plot->GetXaxis()->SetTitle("m_{#gamma#gamma} (GeV)");
+	plot->GetYaxis()->SetTitle("Events");
 	if (!unblind) {
 		mgg->setRange("unblind_up",135,180);
 		mgg->setRange("unblind_down",100,115);
@@ -656,9 +657,10 @@ void plotAllPdfs(RooRealVar *mgg, RooAbsData *data, RooMultiPdf *mpdf, RooCatego
 		data->plotOn(plot,Binning(80));
 	}
 
-	TLegend *leg = new TLegend(0.6,0.4,0.92,0.92);
+	TLegend *leg = new TLegend(0.6,0.4,0.9,0.9);
 	leg->SetFillColor(0);
 	leg->SetLineColor(0);
+	leg->SetBorderSize(0);
 
 	int color[10] = {kBlue,kOrange,kGreen,kRed,kMagenta,kPink,kViolet,kCyan,kYellow,kBlack};
 	for (int pInd=0; pInd<mpdf->getNumPdfs(); pInd++){
@@ -667,7 +669,16 @@ void plotAllPdfs(RooRealVar *mgg, RooAbsData *data, RooMultiPdf *mpdf, RooCatego
 		mpdf->getCurrentPdf()->fitTo(*data);
 		mpdf->getCurrentPdf()->plotOn(plot,LineColor(color[pInd]),LineWidth(2));
 		TObject *legObj = plot->getObject(plot->numItems()-1);
-		leg->AddEntry(legObj,mpdf->getCurrentPdf()->GetName(),"L");
+    TString tempPdfName = TString(mpdf->getCurrentPdf()->GetName());
+    std::string prettyName = "";
+    if(int(tempPdfName.Contains("pow"))>0) prettyName = "Sum of power laws";
+    if(int(tempPdfName.Contains("exp"))>0) prettyName = "Sum of exponentials";
+    if(int(tempPdfName.Contains("bern"))>0) prettyName = "Bernstein polynomial";
+    if(int(tempPdfName.Contains("lau"))>0) prettyName = "Laurent series";
+    prettyName += ", order ";
+    prettyName += tempPdfName[tempPdfName.Length()-1];
+		//leg->AddEntry(legObj,mpdf->getCurrentPdf()->GetName(),"L");
+		leg->AddEntry(legObj,prettyName.c_str(),"L");
 	}
 
 	TCanvas *canv = new TCanvas();

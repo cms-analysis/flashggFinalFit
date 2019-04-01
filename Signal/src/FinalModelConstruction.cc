@@ -1295,7 +1295,8 @@ void FinalModelConstruction::plotPdf(string outDir){
   canv->Print(Form("%s/%s_%s_fmc_fits.png",outDir.c_str(),proc_.c_str(),catname.c_str()));
   
   RooPlot *pdfPlot = mass->frame(Title(Form("%s_%s",proc_.c_str(),catname.c_str())),Range(100,160));
-	pdfPlot->GetYaxis()->SetTitle(Form("Pdf projection per %2.1f GeV",(mass->getMax()-mass->getMin())/160.));
+	//pdfPlot->GetYaxis()->SetTitle(Form("Pdf projection per %2.1f GeV",(mass->getMax()-mass->getMin())/160.));
+	pdfPlot->GetYaxis()->SetTitle("Pdf projection");
   for (int mh=mhLow_; mh<=mhHigh_; mh++){
     MH->setVal(mh);
 		// to get correct normlization need to manipulate with bins and range
@@ -1303,11 +1304,12 @@ void FinalModelConstruction::plotPdf(string outDir){
   }
   string sim="Simulation Preliminary";
   pdfPlot->Draw();
+  lumi_sqrtS = Form("13 TeV (%d)",year_);
   CMS_lumi( canv, 0,0, sim );
   TLatex *latex = new TLatex();	
   latex->SetTextSize(0.045);
   latex->SetNDC();
-  latex->DrawLatex(0.6,0.78,Form("#splitline{%s}{%s}",proc_.c_str(),catname.c_str()));
+  latex->DrawLatex(0.6,0.78,Form("#splitline{%s}{%s}",TString(proc_).ReplaceAll("_"," ").Data(),TString(catname).ReplaceAll("_"," ").Data()));
   canv->Print(Form("%s/%s_%s_fmc_interp.pdf",outDir.c_str(),proc_.c_str(),catname.c_str()));
   canv->Print(Form("%s/%s_%s_fmc_interp.png",outDir.c_str(),proc_.c_str(),catname.c_str()));
   delete canv;

@@ -528,7 +528,11 @@ void Plot(RooRealVar *mass, RooDataSet *data, RooAbsPdf *pdf, pair<double,double
   lat1.SetNDC(1);
   lat1.SetTextSize(0.047);
 
-  TString catLabel_humanReadable  = title;
+  TString procLabel_humanReadable  = TString(title);
+  procLabel_humanReadable.Resize(TString(title).Index("RECO")); //FIXME not universal
+  procLabel_humanReadable.ReplaceAll("_"," ");
+  TString catLabel_humanReadable  = TString(title);
+  catLabel_humanReadable.Remove(0,TString(title).Index("RECO")); //FIXME not universal
   catLabel_humanReadable.ReplaceAll("RECO_","");
   catLabel_humanReadable.ReplaceAll("_"," ");
   catLabel_humanReadable.ReplaceAll("UntaggedTag","Untagged");
@@ -537,7 +541,8 @@ void Plot(RooRealVar *mass, RooDataSet *data, RooAbsPdf *pdf, pair<double,double
   catLabel_humanReadable.ReplaceAll("TTHHadronicTag","TTH Hadronic Tag");
   catLabel_humanReadable.ReplaceAll("all","All Categories");
 
-  TLatex lat2(0.93,0.88,catLabel_humanReadable);
+  //TLatex lat2(0.93,0.88,catLabel_humanReadable);
+  TLatex lat2(0.93,0.88,Form("#splitline{%s}{%s}",procLabel_humanReadable.Data(),catLabel_humanReadable.Data())); //FIXME
   lat2.SetTextAlign(33);
   lat2.SetNDC(1);
   lat2.SetTextSize(0.045);
