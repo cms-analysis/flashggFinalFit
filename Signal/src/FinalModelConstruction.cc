@@ -1309,7 +1309,7 @@ void FinalModelConstruction::plotPdf(string outDir){
   TLatex *latex = new TLatex();	
   latex->SetTextSize(0.045);
   latex->SetNDC();
-  latex->DrawLatex(0.6,0.78,Form("#splitline{%s}{%s}",TString(proc_).ReplaceAll("_"," ").Data(),TString(catname).ReplaceAll("_"," ").Data()));
+  latex->DrawLatex(0.6,0.78,Form("#splitline{%s}{%s}",TString(proc_).ReplaceAll("RECO_","").ReplaceAll("_"," ").Data(),TString(catname).ReplaceAll("RECO_","").ReplaceAll("_"," ").Data()));
   canv->Print(Form("%s/%s_%s_fmc_interp.pdf",outDir.c_str(),proc_.c_str(),catname.c_str()));
   canv->Print(Form("%s/%s_%s_fmc_interp.png",outDir.c_str(),proc_.c_str(),catname.c_str()));
   delete canv;

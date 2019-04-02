@@ -637,7 +637,7 @@ void profileExtendTerm(RooRealVar *mgg, RooAbsData *data, RooMultiPdf *mpdf, Roo
 	}
 }
 
-void plotAllPdfs(RooRealVar *mgg, RooAbsData *data, RooMultiPdf *mpdf, RooCategory *mcat, string name, int cat, bool unblind, int isFlashgg, std::vector<string> flashggCats){
+void plotAllPdfs(RooRealVar *mgg, RooAbsData *data, RooMultiPdf *mpdf, RooCategory *mcat, string name, int cat, bool unblind, int isFlashgg, std::vector<string> flashggCats, int year=2016){
 	string catname;
 	if (isFlashgg){
 		catname = Form("%s",flashggCats[cat].c_str());
@@ -685,8 +685,25 @@ void plotAllPdfs(RooRealVar *mgg, RooAbsData *data, RooMultiPdf *mpdf, RooCatego
 	plot->Draw();
 	if (!unblind) plot->SetMinimum(0.0001);
 	leg->Draw();
+  TString catLabel_humanReadable = TString(catname);
+  catLabel_humanReadable.ReplaceAll("RECO_","");
+  catLabel_humanReadable.ReplaceAll("PTH_120_200","high");
+  catLabel_humanReadable.ReplaceAll("_"," ");
+  catLabel_humanReadable.ReplaceAll("UntaggedTag","Untagged");
+  catLabel_humanReadable.ReplaceAll("VBFTag","VBF Tag");
+  catLabel_humanReadable.ReplaceAll("TTHLeptonicTag","TTH Leptonic Tag");
+  catLabel_humanReadable.ReplaceAll("TTHHadronicTag","TTH Hadronic Tag");
+  catLabel_humanReadable.ReplaceAll("all","All Categories");
+  TLatex lat2(0.5,0.88,Form("%s",catLabel_humanReadable.Data())); //FIXME
+  lat2.SetTextAlign(33);
+  lat2.SetNDC(1);
+  lat2.SetTextSize(0.04);
+  lat2.Draw("same");
 	canv->Modified();
 	canv->Update();
+  lumi_sqrtS = Form("%s (13 TeV, %d)",lumi_13TeV.Data(),year);
+  std::string txt="";
+  CMS_lumi( canv, 0,0,txt);
 	canv->Print(Form("%s.pdf",name.c_str()));
 	canv->Print(Form("%s.png",name.c_str()));
 	canv->Print(Form("%s.C",name.c_str()));
@@ -826,7 +843,7 @@ int main(int argc, char* argv[]){
 	cout << "[INFO] "<< "\t"; data->Print();
 
 	// plot all the pdfs for reference
-	if (isMultiPdf || verbose_) plotAllPdfs(mgg,data,mpdf,mcat,Form("%s/allPdfs_%s",outDir.c_str(),catname.c_str()),cat,unblind, isFlashgg_, flashggCats_);
+	if (isMultiPdf || verbose_) plotAllPdfs(mgg,data,mpdf,mcat,Form("%s/allPdfs_%s",outDir.c_str(),catname.c_str()),cat,unblind, isFlashgg_, flashggCats_, year_);
 
 	// include normalization hack RooBernsteinFast;
 	/*
