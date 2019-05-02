@@ -661,6 +661,7 @@ void plotAllPdfs(RooRealVar *mgg, RooAbsData *data, RooMultiPdf *mpdf, RooCatego
 	leg->SetFillColor(0);
 	leg->SetLineColor(0);
 	leg->SetBorderSize(0);
+	leg->SetTextSize(0.03);
 
 	int color[10] = {kBlue,kOrange,kGreen,kRed,kMagenta,kPink,kViolet,kCyan,kYellow,kBlack};
 	for (int pInd=0; pInd<mpdf->getNumPdfs(); pInd++){
@@ -671,12 +672,13 @@ void plotAllPdfs(RooRealVar *mgg, RooAbsData *data, RooMultiPdf *mpdf, RooCatego
 		TObject *legObj = plot->getObject(plot->numItems()-1);
     TString tempPdfName = TString(mpdf->getCurrentPdf()->GetName());
     std::string prettyName = "";
-    if(int(tempPdfName.Contains("pow"))>0) prettyName = "Sum of power laws";
-    if(int(tempPdfName.Contains("exp"))>0) prettyName = "Sum of exponentials";
-    if(int(tempPdfName.Contains("bern"))>0) prettyName = "Bernstein polynomial";
-    if(int(tempPdfName.Contains("lau"))>0) prettyName = "Laurent series";
-    prettyName += ", order ";
+    if(int(tempPdfName.Contains("pow"))>0) prettyName = "#splitline{Sum of power laws";
+    if(int(tempPdfName.Contains("exp"))>0) prettyName = "#splitline{Sum of exponentials";
+    if(int(tempPdfName.Contains("bern"))>0) prettyName = "#splitline{Bernstein polynomial";
+    if(int(tempPdfName.Contains("lau"))>0) prettyName = "#splitline{Laurent series";
+    prettyName += ",}{order ";
     prettyName += tempPdfName[tempPdfName.Length()-1];
+    prettyName += "}";
 		//leg->AddEntry(legObj,mpdf->getCurrentPdf()->GetName(),"L");
 		leg->AddEntry(legObj,prettyName.c_str(),"L");
 	}
