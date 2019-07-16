@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+# CHECK
+
 #commands to send to the monolithic runFinalFits.sh script
 from os import system, walk
 
