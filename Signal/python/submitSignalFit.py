@@ -80,6 +80,7 @@ parser.add_option("-p","--outDir",default="./")
 parser.add_option("--procs",default=None)
 parser.add_option("--useDCB_1G",default="0")
 parser.add_option("--useSSF",default="0")
+parser.add_option("--analysis",default="hig-16-040")
 parser.add_option("--massList",default="120,125,130")
 parser.add_option("-f","--flashggCats",default=None)
 parser.add_option("--bs",default=5.14)
@@ -152,7 +153,7 @@ for proc in  opts.procs.split(","):
       bsRW=0
     else:
       bsRW=1
-    exec_line = "%s/bin/SignalFit --verbose 0 -i %s -d %s/%s  --mhLow=%s --mhHigh=%s -s %s/%s --procs %s -o  %s/%s -p %s/%s -f %s --changeIntLumi %s --binnedFit 1 --nBins 320 --split %s,%s --beamSpotReweigh %d --dataBeamSpotWidth %f --massList %s --useDCBplusGaus %s --useSSF %s -C -1" %(os.getcwd(), opts.infile,os.getcwd(),opts.datfile,opts.mhLow, opts.mhHigh, os.getcwd(),opts.systdatfile, opts.procs,os.getcwd(),opts.outfilename.replace(".root","_%s_%s.root"%(proc,cat)), os.getcwd(),opts.outDir, opts.flashggCats ,opts.changeIntLumi, proc,cat,bsRW,float(opts.bs), opts.massList, opts.useDCB_1G, opts.useSSF)
+    exec_line = "%s/bin/SignalFit --verbose 0 -i %s -d %s/%s  --mhLow=%s --mhHigh=%s -s %s/%s --procs %s -o  %s/%s -p %s/%s -f %s --changeIntLumi %s --binnedFit 1 --nBins 320 --split %s,%s --beamSpotReweigh %d --dataBeamSpotWidth %f --massList %s --useDCBplusGaus %s --useSSF %s --analysis %s -C -1" %(os.getcwd(), opts.infile,os.getcwd(),opts.datfile,opts.mhLow, opts.mhHigh, os.getcwd(),opts.systdatfile, opts.procs,os.getcwd(),opts.outfilename.replace(".root","_%s_%s.root"%(proc,cat)), os.getcwd(),opts.outDir, opts.flashggCats ,opts.changeIntLumi, proc,cat,bsRW,float(opts.bs), opts.massList, opts.useDCB_1G, opts.useSSF, opts.analysis)
     #print exec_line
     writePostamble(file,exec_line)
 

@@ -12,6 +12,7 @@ SCALESCORR="MaterialCentral,MaterialForward"
 SCALESGLOBAL="NonLinearity,Geant4,LightYield,Absolute"
 SMEARS="HighR9EE,LowR9EE,HighR9EB,LowR9EB" #DRY RUN
 MASSLIST="120,125,130"
+ANALYSIS="hig-16-040"
 FTESTONLY=0
 CALCPHOSYSTONLY=0
 SIMULATENOUSMASSPOINTFITTING=0
@@ -35,6 +36,7 @@ usage(){
 		echo "-i|--inputFile) "
 		echo "-p|--procs) "
 		echo "-f|--flashggCats) (default UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,UntaggedTag_4,VBFTag_0,VBFTag_1,VBFTag_2,TTHHadronicTag,TTHLeptonicTag,VHHadronicTag,VHTightTag,VHLooseTag,VHEtTag)"
+		echo "--analysis) Specifies the replacement dataset to use"
     echo "--useDCB_1G) Use the functional form ofi a Double Crystal Ball + one Gaussian (same mean) (default $USEDCBP1G)"
     echo "--useSSF) SSF = Simultaneous Signal Fitting. Do a fit where the mass points are all fitted at once where the parameters have MH dependence (default $SIMULATENOUSMASSPOINTFITTING)"
 		echo "--ext)  (default auto)"
@@ -53,7 +55,7 @@ usage(){
 
 
 # options may be followed by one colon to indicate they have a required argument
-if ! options=$(getopt -u -o hi:p:f: -l help,inputFile:,procs:,bs:,smears:,massList:,scales:,scalesCorr:,useSSF:,useDCB_1G:,scalesGlobal:,flashggCats:,ext:,fTestOnly,calcPhoSystOnly,sigFitOnly,dontPackage,packageOnly,sigPlotsOnly,intLumi:,batch: -- "$@")
+if ! options=$(getopt -u -o hi:p:f: -l help,inputFile:,procs:,bs:,smears:,massList:,scales:,scalesCorr:,useSSF:,useDCB_1G:,scalesGlobal:,flashggCats:,analysis:,ext:,fTestOnly,calcPhoSystOnly,sigFitOnly,dontPackage,packageOnly,sigPlotsOnly,intLumi:,batch: -- "$@")
 then
 # something went wrong, getopt will put out an error message for us
 exit 1
@@ -73,6 +75,7 @@ case $1 in
 --scalesGlobal) SCALESGLOBAL=$2; shift ;;
 --bs) BS=$2; shift ;;
 -f|--flashggCats) CATS=$2; shift ;;
+--analysis) ANALYSIS=$2; shift ;;
 --ext) EXT=$2 ; shift ;;
 --useSSF) SIMULATENOUSMASSPOINTFITTING=$2 ; shift;;
 --useDCB_1G) USEDCBP1G=$2 ; shift;;
@@ -223,11 +226,11 @@ if [ $SIGFITONLY == 1 ]; then
   if [[ $BATCH == "" ]]; then
   
   
-    echo "./bin/SignalFit -i $FILE -d dat/newConfig_$EXT.dat  --mhLow=120 --mhHigh=130 -s dat/photonCatSyst_$EXT.dat --procs $PROCS -o $OUTDIR/CMS-HGG_mva_13TeV_sigfit.root -p $OUTDIR/sigfit -f $CATS --changeIntLumi $INTLUMI  --useDCBplusGaus $USEDCBP1G --useSSF $SIMULATENOUSMASSPOINTFITTING --massList $MASSLIST"
-    ./bin/SignalFit -i $FILE -d dat/newConfig_$EXT.dat  --mhLow=120 --mhHigh=130 -s dat/photonCatSyst_$EXT.dat --procs $PROCS -o $OUTDIR/CMS-HGG_mva_13TeV_sigfit.root -p $OUTDIR/sigfit -f $CATS --changeIntLumi $INTLUMI  --useDCBplusGaus $USEDCBP1G --useSSF $SIMULATENOUSMASSPOINTFITTING --massList $MASSLIST  
+    echo "./bin/SignalFit -i $FILE -d dat/newConfig_$EXT.dat  --mhLow=120 --mhHigh=130 -s dat/photonCatSyst_$EXT.dat --procs $PROCS -o $OUTDIR/CMS-HGG_mva_13TeV_sigfit.root -p $OUTDIR/sigfit -f $CATS --changeIntLumi $INTLUMI  --useDCBplusGaus $USEDCBP1G --useSSF $SIMULATENOUSMASSPOINTFITTING --massList $MASSLIST --analysis $ANALYSIS"
+    ./bin/SignalFit -i $FILE -d dat/newConfig_$EXT.dat  --mhLow=120 --mhHigh=130 -s dat/photonCatSyst_$EXT.dat --procs $PROCS -o $OUTDIR/CMS-HGG_mva_13TeV_sigfit.root -p $OUTDIR/sigfit -f $CATS --changeIntLumi $INTLUMI  --useDCBplusGaus $USEDCBP1G --useSSF $SIMULATENOUSMASSPOINTFITTING --massList $MASSLIST --analysis $ANALYSIS  
   else
-    echo "./python/submitSignalFit.py -i $FILE -d dat/newConfig_$EXT.dat  --mhLow=120 --mhHigh=130 -s dat/photonCatSyst_$EXT.dat --procs $PROCS -o $OUTDIR/CMS-HGG_sigfit_$EXT.root -p $OUTDIR/sigfit -f $CATS --changeIntLumi $INTLUMI --batch $BATCH --massList $MASSLIST -q $DEFAULTQUEUE $BSOPT --useSSF $SIMULATENOUSMASSPOINTFITTING --useDCB_1G $USEDCBP1G "
-    ./python/submitSignalFit.py -i $FILE -d dat/newConfig_$EXT.dat  --mhLow=120 --mhHigh=130 -s dat/photonCatSyst_$EXT.dat --procs $PROCS -o $OUTDIR/CMS-HGG_sigfit_$EXT.root -p $OUTDIR/sigfit -f $CATS --changeIntLumi $INTLUMI --batch $BATCH --massList $MASSLIST -q $DEFAULTQUEUE $BSOPT --useSSF $SIMULATENOUSMASSPOINTFITTING --useDCB_1G $USEDCBP1G 
+    echo "./python/submitSignalFit.py -i $FILE -d dat/newConfig_$EXT.dat  --mhLow=120 --mhHigh=130 -s dat/photonCatSyst_$EXT.dat --procs $PROCS -o $OUTDIR/CMS-HGG_sigfit_$EXT.root -p $OUTDIR/sigfit -f $CATS --changeIntLumi $INTLUMI --batch $BATCH --massList $MASSLIST -q $DEFAULTQUEUE $BSOPT --useSSF $SIMULATENOUSMASSPOINTFITTING --useDCB_1G $USEDCBP1G --analysis $ANALYSIS"
+    ./python/submitSignalFit.py -i $FILE -d dat/newConfig_$EXT.dat  --mhLow=120 --mhHigh=130 -s dat/photonCatSyst_$EXT.dat --procs $PROCS -o $OUTDIR/CMS-HGG_sigfit_$EXT.root -p $OUTDIR/sigfit -f $CATS --changeIntLumi $INTLUMI --batch $BATCH --massList $MASSLIST -q $DEFAULTQUEUE $BSOPT --useSSF $SIMULATENOUSMASSPOINTFITTING --useDCB_1G $USEDCBP1G --analysis $ANALYSIS 
 
     PEND=`ls -l $OUTDIR/sigfit/SignalFitJobs/sub*| grep -v "\.run" | grep -v "\.done" | grep -v "\.fail" | grep -v "\.err" |grep -v "\.log"  |wc -l`
     echo "PEND $PEND"

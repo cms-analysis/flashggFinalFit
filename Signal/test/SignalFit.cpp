@@ -27,6 +27,7 @@
 #include "../interface/FinalModelConstruction.h"
 #include "../interface/Packager.h"
 #include "../interface/WSTFileWrapper.h"
+#include "../interface/ReplacementMap.h"
 
 #include "boost/program_options.hpp"
 #include "boost/algorithm/string/split.hpp"
@@ -116,6 +117,7 @@ RooRealVar *dZ_;
 RooRealVar *intLumi_;
 bool beamSpotReweigh_ = false;
 bool useDCBplusGaus_ = false;
+string analysis_ = "hig-16-040"; // Option to define which replacement mapping to use, default is hig-16-040
 
 void OptionParser(int argc, char *argv[]){
 	po::options_description desc1("Allowed options");
@@ -152,10 +154,14 @@ void OptionParser(int argc, char *argv[]){
 		("checkYields",	po::value<bool>(&checkYields_)->default_value(false),														"Use flashgg format (default false)")
 		("beamSpotReweigh",	po::value<bool>(&beamSpotReweigh_)->default_value(false),														"Reweight events to  discrepancy in width of beamspot between data and MC")
 		("useDCBplusGaus",	po::value<bool>(&useDCBplusGaus_)->default_value(false),														"Use Double Crystal Ball plus 1 Gaussian to do fits instead of a sum of Gaussians")
+		("analysis",	po::value<string>(&analysis_)->default_value("hig-16-040"),  	"Configure replacement dataset mapping for given analysis (Mapping defined in python/replacementMap.py")
       ("split", po::value<string>(&splitStr_)->default_value(""), "do just one tag,proc ")
 		("changeIntLumi",	po::value<float>(&newIntLumi_)->default_value(0),														"If you want to specify an intLumi other than the one in the file. The event weights and rooRealVar IntLumi are both changed accordingly. (Specify new intlumi in fb^{-1})")
 		("flashggCats,f", po::value<string>(&flashggCatsStr_)->default_value("UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,UntaggedTag_4,VBFTag_0,VBFTag_1,VBFTag_2,TTHHadronicTag,TTHLeptonicTag,VHHadronicTag,VHTightTag,VHLooseTag,VHEtTag"),       "Flashgg categories if used")
 		;                                                                                             		
+
+        std::cout << "[INFO] Replacement dataset mapping based on analysis: " << analysis_ << std::endl;
+
 	po::options_description desc("Allowed options");
 	desc.add(desc1);
 
@@ -230,7 +236,7 @@ unsigned int getIndexOfReferenceDataset(string proc, string cat){
   }
   
   if (iLine==-1 ) {
-    std::cout << "[ERROR] could not find the index of the category " << proc << ", " << cat << " you wished to look up. Exit!" << std::endl;
+    std::cout << "[ERROR] could not find the index of the category " << proc << ", " << cat << " you wished to look up. Are you sure you want to be using analysis = " << analysis_ << ".Exit!" << std::endl;
      exit(1);
   }
   return iLine;
@@ -436,79 +442,14 @@ int main(int argc, char *argv[]){
 	sw.Start();
 
   // reference details for low stats cats
-  // now updated to a map which gives the "most diagonal" proc for each cat
-  std::map<string,string> replacementProcMap;
-  replacementProcMap["RECO_0J_Tag0"]                    = "GG2H_0J";
-  replacementProcMap["RECO_0J_Tag1"]                    = "GG2H_0J";
-  replacementProcMap["RECO_0J_Tag2"]                    = "GG2H_0J";
-  replacementProcMap["RECO_1J_PTH_0_60_Tag0"]           = "GG2H_1J_PTH_0_60";
-  replacementProcMap["RECO_1J_PTH_0_60_Tag1"]           = "GG2H_1J_PTH_0_60";
-  replacementProcMap["RECO_1J_PTH_60_120_Tag0"]         = "GG2H_1J_PTH_60_120";
-  replacementProcMap["RECO_1J_PTH_60_120_Tag1"]         = "GG2H_1J_PTH_60_120";
-  replacementProcMap["RECO_1J_PTH_120_200_Tag0"]        = "GG2H_1J_PTH_120_200";
-  replacementProcMap["RECO_1J_PTH_120_200_Tag1"]        = "GG2H_1J_PTH_120_200";
-  replacementProcMap["RECO_1J_PTH_GT200"]               = "GG2H_1J_PTH_GT200";
-  replacementProcMap["RECO_GE2J_PTH_0_60_Tag0"]         = "GG2H_GE2J_PTH_0_60";
-  replacementProcMap["RECO_GE2J_PTH_0_60_Tag1"]         = "GG2H_GE2J_PTH_0_60";
-  replacementProcMap["RECO_GE2J_PTH_60_120_Tag0"]       = "GG2H_GE2J_PTH_60_120";
-  replacementProcMap["RECO_GE2J_PTH_60_120_Tag1"]       = "GG2H_GE2J_PTH_60_120";
-  replacementProcMap["RECO_GE2J_PTH_120_200_Tag0"]      = "GG2H_GE2J_PTH_120_200";
-  replacementProcMap["RECO_GE2J_PTH_120_200_Tag1"]      = "GG2H_GE2J_PTH_120_200";
-  replacementProcMap["RECO_GE2J_PTH_GT200_Tag0"]        = "GG2H_GE2J_PTH_GT200";
-  replacementProcMap["RECO_GE2J_PTH_GT200_Tag1"]        = "GG2H_GE2J_PTH_GT200";
-  replacementProcMap["RECO_VBFTOPO_JET3VETO_Tag0"]      = "VBF_VBFTOPO_JET3VETO";
-  replacementProcMap["RECO_VBFTOPO_JET3VETO_Tag1"]      = "VBF_VBFTOPO_JET3VETO";
-  replacementProcMap["RECO_VBFTOPO_JET3VETO_Tag2"]      = "VBF_VBFTOPO_JET3VETO";
-  replacementProcMap["RECO_VBFTOPO_JET3_Tag0"]          = "VBF_VBFTOPO_JET3";
-  replacementProcMap["RECO_VBFTOPO_JET3_Tag1"]          = "VBF_VBFTOPO_JET3";
-  replacementProcMap["RECO_VBFTOPO_JET3_Tag2"]          = "VBF_VBFTOPO_JET3";
-  replacementProcMap["RECO_VBFTOPO_REST"]               = "VBF_REST";
-  replacementProcMap["RECO_VBFTOPO_BSM"]                = "VBF_PTJET1_GT200";
-  replacementProcMap["RECO_VHHAD"]                      = "ZH2HQQ_VH2JET";
-  replacementProcMap["RECO_VHLEPLOOSE"]                 = "QQ2HLNU_PTV_0_150";
-  replacementProcMap["RECO_VHMET"]                      = "QQ2HLNU_PTV_0_150";
-  replacementProcMap["RECO_WHLEP"]                      = "QQ2HLNU_PTV_0_150";
-  //replacementProcMap["RECO_ZHLEP"]                      = "QQ2HLL_PTV_0_150";
-  replacementProcMap["RECO_ZHLEP"]                      = "QQ2HLNU_PTV_0_150";
-  replacementProcMap["RECO_TTH_LEP"]                    = "TTH";
-  replacementProcMap["RECO_TTH_HAD"]                    = "TTH";
+  // updated: uses replacementMap class to read mapping from Signal/python/replacementMap.py
+  //          takes analysis as input, which is a new option for SignalFit.cpp
+  ReplacementMap replacementMap( analysis_ );
+  std::map<string,string> replacementCatRVMap = replacementMap.getReplacementCatRVMap();
+  std::map<string,string> replacementProcRVMap = replacementMap.getReplacementProcRVMap();
+  string replacementCatWV = replacementMap.getReplacementCatWV();
+  string replacementProcWV = replacementMap.getReplacementProcWV();
 
-  std::map<string,string> replacementCatMap;
-  replacementCatMap["RECO_0J_Tag0"]                    = "RECO_0J_Tag0";
-  replacementCatMap["RECO_0J_Tag1"]                    = "RECO_0J_Tag1";
-  replacementCatMap["RECO_0J_Tag2"]                    = "RECO_0J_Tag2";
-  replacementCatMap["RECO_1J_PTH_0_60_Tag0"]           = "RECO_1J_PTH_0_60_Tag0";
-  replacementCatMap["RECO_1J_PTH_0_60_Tag1"]           = "RECO_1J_PTH_0_60_Tag1";
-  replacementCatMap["RECO_1J_PTH_60_120_Tag0"]         = "RECO_1J_PTH_60_120_Tag0";
-  replacementCatMap["RECO_1J_PTH_60_120_Tag1"]         = "RECO_1J_PTH_60_120_Tag1";
-  replacementCatMap["RECO_1J_PTH_120_200_Tag0"]        = "RECO_1J_PTH_120_200_Tag0";
-  replacementCatMap["RECO_1J_PTH_120_200_Tag1"]        = "RECO_1J_PTH_120_200_Tag1";
-  replacementCatMap["RECO_1J_PTH_GT200"]               = "RECO_1J_PTH_GT200";
-  replacementCatMap["RECO_GE2J_PTH_0_60_Tag0"]         = "RECO_GE2J_PTH_0_60_Tag0";
-  replacementCatMap["RECO_GE2J_PTH_0_60_Tag1"]         = "RECO_GE2J_PTH_0_60_Tag1";
-  replacementCatMap["RECO_GE2J_PTH_60_120_Tag0"]       = "RECO_GE2J_PTH_60_120_Tag0";
-  replacementCatMap["RECO_GE2J_PTH_60_120_Tag1"]       = "RECO_GE2J_PTH_60_120_Tag1";
-  replacementCatMap["RECO_GE2J_PTH_120_200_Tag0"]      = "RECO_GE2J_PTH_120_200_Tag0";
-  replacementCatMap["RECO_GE2J_PTH_120_200_Tag1"]      = "RECO_GE2J_PTH_120_200_Tag1";
-  replacementCatMap["RECO_GE2J_PTH_GT200_Tag0"]        = "RECO_GE2J_PTH_GT200_Tag0";
-  replacementCatMap["RECO_GE2J_PTH_GT200_Tag1"]        = "RECO_GE2J_PTH_GT200_Tag1";
-  replacementCatMap["RECO_VBFTOPO_JET3VETO_Tag0"]      = "RECO_VBFTOPO_JET3VETO_Tag0";
-  replacementCatMap["RECO_VBFTOPO_JET3VETO_Tag1"]      = "RECO_VBFTOPO_JET3VETO_Tag1";
-  replacementCatMap["RECO_VBFTOPO_JET3VETO_Tag2"]      = "RECO_VBFTOPO_JET3VETO_Tag2";
-  replacementCatMap["RECO_VBFTOPO_JET3_Tag0"]          = "RECO_VBFTOPO_JET3_Tag0";
-  replacementCatMap["RECO_VBFTOPO_JET3_Tag1"]          = "RECO_VBFTOPO_JET3_Tag1";
-  replacementCatMap["RECO_VBFTOPO_JET3_Tag2"]          = "RECO_VBFTOPO_JET3_Tag2";
-  replacementCatMap["RECO_VBFTOPO_REST"]               = "RECO_VBFTOPO_REST";
-  replacementCatMap["RECO_VBFTOPO_BSM"]                = "RECO_VBFTOPO_BSM";
-  replacementCatMap["RECO_VHHAD"]                      = "RECO_VHHAD";
-  replacementCatMap["RECO_VHLEPLOOSE"]                 = "RECO_VHLEPLOOSE";
-  replacementCatMap["RECO_VHMET"]                      = "RECO_VHMET";
-  replacementCatMap["RECO_WHLEP"]                      = "RECO_WHLEP";
-  //replacementCatMap["RECO_ZHLEP"]                      = "RECO_ZHLEP";
-  replacementCatMap["RECO_ZHLEP"]                      = "RECO_WHLEP";
-  replacementCatMap["RECO_TTH_LEP"]                    = "RECO_TTH_LEP";
-  replacementCatMap["RECO_TTH_HAD"]                    = "RECO_TTH_HAD";
-  
   // isFlashgg should now be the only option.
 	if (isFlashgg_){ 
     nCats_= flashggCats_.size();
@@ -665,47 +606,30 @@ int main(int argc, char *argv[]){
 		  int nGaussiansRV = boost::lexical_cast<int>(els[2]);
 		  int nGaussiansWV = boost::lexical_cast<int>(els[3]);
 
-      // have a different appraoch now but could re-use machinery.
-      //std::cout << " LC DEBUG here is your line " << line << " els.size()==6 " << (els.size()==6) <<  std::endl;
-		  if( els.size()==6 ) { // in this case you have specified a replacement tag for RV!
-			  //replaceWith_RV_ = make_pair(els[4],els[5]); // proc, cat
-        map_replacement_proc_RV_.push_back(els[4]);
-        map_replacement_cat_RV_.push_back(els[5]);
-        //FIXME
-        //map_replacement_proc_WV_.push_back(replacementProcMap[cat]); //use defaults for replacement WV if they are needed
-        //map_replacement_cat_WV_.push_back( replacementCatMap[cat] );//use defaults for replacement WV if they are needed
-        map_replacement_proc_WV_.push_back("GG2H_0J"); //use defaults for replacement WV if they are needed
-        map_replacement_cat_WV_.push_back("RECO_0J_Tag1");//use defaults for replacement WV if they are needed
-		  } else if( els.size()==8 ) { // in this case you have specified a replacement tag for RV and WV!
-			  //replaceWithRV_ = make_pair(els[4],els[5]); // proc, cat
-			  //replaceWithWV_ = make_pair(els[6],els[7]); // proc, cat
-		   	//replace_ = true;
-        map_replacement_proc_RV_.push_back(els[4]);
-        map_replacement_cat_RV_.push_back(els[5]);
-        map_replacement_proc_WV_.push_back(els[6]);
-        map_replacement_cat_WV_.push_back(els[7]);
-      } else {
-        // if no replacement is speficied, use defaults
-        // FIXME no longer needed?
-        if (cat.compare(0,3,"TTH") ==0){ //FIXME this won't work with new tag names
-          // if the cat starts with TTH, use TTH reference process.
-          // howwver this is over-riden later if the WV needs to be replaced
-          // as even teh TTH tags in WV has limited stats
-          map_replacement_proc_RV_.push_back(replacementProcMap[cat]);
-          map_replacement_cat_RV_.push_back( replacementCatMap[cat] );
-          map_replacement_proc_WV_.push_back(replacementProcMap[cat]); //use defaults for replacement WV if they are needed
-          map_replacement_cat_WV_.push_back( replacementCatMap[cat] );//use defaults for replacement WV if they are needed
-        } else {
-         // else use the ggh
-         map_replacement_proc_RV_.push_back(replacementProcMap[cat]);
-         map_replacement_cat_RV_.push_back( replacementCatMap[cat] ); //deflaut is ggh UntaggedTag3
-         //FIXME this is changing the scheme somewhat
-         //map_replacement_proc_WV_.push_back(replacementProcMap[cat]); //use defaults for replacement WV if they are needed
-         //map_replacement_cat_WV_.push_back( replacementCatMap[cat] );//use defaults for replacement WV if they are needed
-         map_replacement_proc_WV_.push_back("GG2H_0J"); //use defaults for replacement WV if they are needed
-         map_replacement_cat_WV_.push_back("RECO_0J_Tag1");//use defaults for replacement WV if they are needed
-        }
-      }
+        
+                  // Add replacement datasets to map...
+                  // If replacement tag for RV is specified in .dat (Ngaussians) config file
+		  if( els.size()==6 ) { 
+        	  	map_replacement_proc_RV_.push_back(els[4]);
+        		map_replacement_cat_RV_.push_back(els[5]);
+        		map_replacement_proc_WV_.push_back( replacementProcWV ); //specified in Signal/python/replacementMap.py for given analysis
+        		map_replacement_cat_WV_.push_back( replacementCatWV );   //specified in Signal/python/replacementMap.py for given analysis
+
+                  // If replacement tags for RV and WV are specified in .dat (Ngaussians) config file
+		  } else if( els.size()==8 ) { 
+        		map_replacement_proc_RV_.push_back(els[4]);
+        		map_replacement_cat_RV_.push_back(els[5]);
+        		map_replacement_proc_WV_.push_back(els[6]);
+        		map_replacement_cat_WV_.push_back(els[7]);
+          
+                  // If no replacement specified: use those in Signal/python/replacementMap.py for given analysis
+      		  } else {
+        		map_replacement_proc_RV_.push_back( replacementProcRVMap[cat] );
+        		map_replacement_cat_RV_.push_back( replacementCatRVMap[cat] );
+       			map_replacement_proc_WV_.push_back( replacementProcWV );
+        		map_replacement_cat_WV_.push_back( replacementCatWV );
+      		  }
+
       if (verbose_) std::cout << "[INFO] dat file listing: "<< proc << " " << cat << " " << nGaussiansRV << " " << nGaussiansWV <<  " " << std::endl;
       if (verbose_) std::cout << "[INFO] dat file listing: ----> selected replacements (RV) if needed " <<  map_replacement_proc_RV_[map_replacement_proc_RV_.size() -1] << " " <<  map_replacement_cat_RV_[map_replacement_cat_RV_.size() -1] << std::endl;
       if (verbose_) std::cout << "[INFO] dat file listing: ----> selected replacements (WV) if needed " <<  map_replacement_proc_WV_[map_replacement_proc_WV_.size() -1] << " " <<  map_replacement_cat_WV_[map_replacement_cat_WV_.size() -1] << std::endl;
