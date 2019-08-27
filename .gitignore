@@ -33,3 +33,7 @@ AutoDict_*
 *.tmp
 *.pcm
 *.o
+
+# Output dirs in signal and bkg
+Signal/outdir_*
+Background/outdir_*

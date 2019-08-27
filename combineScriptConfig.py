@@ -1,20 +1,18 @@
-# Config file: options for signal fitting
+# Config file: options for combine fitting
 
-signalScriptCfg = {
+combineScriptCfg = {
   
   # Setup
+  'mode':'combine',
   'inputWSDir':'/vols/cms/es811/FinalFits/ws_ReweighAndNewggHweights', 
   #Procs will be inferred automatically from filenames
   'cats':'UntaggedTag_0,VBFTag_0',
   'ext':'test_hig16040',
-  'analysis':'test', # To specify which replacement dataset mapping i.e. when too few entries in proc x cat
   'year':'2016', 
-  'beamspot':'3.4',
-  'numberOfBins':'320',
-  'massPoints':'120,125,130',
+  'signalProcs':'all',
 
-  # Use DCB in fit
-  'useDCB':0,
+  # Add UE/PS systematics to datacard (only relevant if mode == datacard)
+  'doUEPS':0,
 
   #Photon shape systematics  
   'scales':'HighR9EB,HighR9EE,LowR9EB,LowR9EE,Gain1EB,Gain6EB',
@@ -26,8 +24,6 @@ signalScriptCfg = {
   'batch':'IC',
   'queue':'hep.q',
 
-  # Mode allows script to carry out single function
-  'mode':'std', # Options: [std,phoSystOnly,sigFitOnly,packageOnly,sigPlotsOnly]
   'printOnly':0 # For dry-run: print command only
   
 }
