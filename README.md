@@ -4,15 +4,16 @@ The Final Fits package is a series of scripts which are used to run the final st
 ## Download and setup instructions
 
 ```
-cmsrel CMSSW_8_1_0
-cd CMSSW_8_1_0/src
+export SCRAM_ARCH=slc7_amd64_gcc700
+cmsrel CMSSW_10_2_13
+cd CMSSW_10_2_13/src
 cmsenv
 git cms-init
-# Install Combine as per the documentation here cms-hcomb.gitbooks.io/combine/content/part1
-# This now uses the latest version of combine
-git clone git@github.com:cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit
+
 # Install the GBRLikelihood package which contains the RooDoubleCBFast implementation
-git clone git@github.com:bendavid/GBRLikelihood.git HiggsAnalysis/GBRLikelihood
+git clone git@github.com:jonathon-langford/HiggsAnalysis.git
+# Install Combine as per the documentation here: cms-analysis.github.io/HiggsAnalysis-CombinedLimit/
+git clone git@github.com:cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit
 # Compile external libraries
 cd HiggsAnalysis
 cmsenv
