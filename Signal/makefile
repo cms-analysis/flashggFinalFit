@@ -48,7 +48,7 @@ USERLIBS += -L$(ROOFITSYS)/lib -lRooFit -lRooFitCore
 endif
 
 USERLIBS += $(shell root-config --glibs) -lTMVA -lMinuit -lFoam -lRooFit -lRooFitCore -lPyROOT 
-CXXFLAGS = -Wall -g -Wl,-rpath=$(BASEDIR)/lib:$(BASEDIR)/../ -std=c++11 
+CXXFLAGS = -Wall -g -Wl,-rpath=$(BASEDIR)/lib:$(BASEDIR)/../ -std=c++17 
 LDFLAGS = -shared -W 
 
 CXX=g++

@@ -3,7 +3,7 @@
 import os, sys
 from optparse import OptionParser
 
-lumi = {'2016':'35.9', '2017':'41.5', '2018':'XYZ'}
+lumi = {'2016':'35.9', '2017':'41.5', '2018':'63.7'}
 
 def get_options():
   parser = OptionParser()
@@ -12,7 +12,7 @@ def get_options():
   parser.add_option('--inputConfig', dest='inputConfig', default='', help="Name of input config file (if specified will ignore other options)")
 
   # Setup
-  parser.add_option('--inputWSDir', dest='inputWSDir', default='/vols/cms/es811/FinalFits/ws_ReweighAndNewggHweights', help="Directory storing flashgg workspaces" )
+  parser.add_option('--inputWSDir', dest='inputWSDir', default='/eos/home-j/jlangfor/hgg/ws/test_legacy_runII_102x', help="Directory storing flashgg workspaces" )
   parser.add_option('--cats', dest='cats', default='UntaggedTag_0,VBFTag_0', help="Define categories")
   parser.add_option('--ext', dest='ext', default='test', help="Extension: defines output dir where signal models are saved")
   parser.add_option('--analysis', dest='analysis', default='test', help="Analysis handle: used in Signal/python/replacementMap.py to specify replacement dataset mapping when too few entries")
@@ -33,8 +33,8 @@ def get_options():
   parser.add_option('--smears', dest='smears', default='HighR9EBPhi,HighR9EBRho,HighR9EEPhi,HighR9EERho,LowR9EBPhi,LowR9EBRho,LowR9EEPhi,LowR9EERho', help="Photon shape systematics: smears")
 
   # Options for running on the batch
-  parser.add_option('--batch', dest='batch', default='IC', help="Batch")
-  parser.add_option('--queue', dest='queue', default='hep.q', help="Queue")
+  parser.add_option('--batch', dest='batch', default='HTCONDOR', help="Batch")
+  parser.add_option('--queue', dest='queue', default='espresso', help="Queue")
 
   # Miscellaneous options: only performing a single function
   parser.add_option('--mode', dest='mode', default='std', help="Allows single function [std,phoSystOnly,sigFitOnly,packageOnly,sigPlotsOnly]")
@@ -72,7 +72,7 @@ if opt.inputConfig != '':
     batch        = _cfg['batch']
     queue        = _cfg['queue']
     mode         = _cfg['mode']
-    printOnly    = _cfg['printOnly']
+    printOnly    = opt.printOnly # Still take printOnly from options
   
     #Delete copy of file
     os.system("rm config.py")
@@ -163,7 +163,7 @@ print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 print " --> Constructing the input command..."
 
 cmdLine = ''
-cmdLine += './runSignalScripts.sh -i %s -p %s -f %s --ext %s --intLumi %s --batch %s --massList %s --bs %s --analysis %s --scales %s --scalesCorr %s --scalesGlobal %s --smears %s --useSSF 1'%(ws_fullFileNames,procs,cats,ext,lumi[year],batch,massPoints,beamspot,analysis,scales,scalesCorr,scalesGlobal,smears)
+cmdLine += './runSignalScripts.sh -i %s -p %s -f %s --ext %s --intLumi %s --batch %s --queue %s --massList %s --bs %s --analysis %s --scales %s --scalesCorr %s --scalesGlobal %s --smears %s --useSSF 1'%(ws_fullFileNames,procs,cats,ext,lumi[year],batch,queue,massPoints,beamspot,analysis,scales,scalesCorr,scalesGlobal,smears)
 if useDCB: cmdLine += ' --useDCB_1G 1'
 else: cmdLine += ' --useDCB_1G 0'
 if mode == "phoSystCalc": cmdLine += ' --calcPhoSystOnly' 

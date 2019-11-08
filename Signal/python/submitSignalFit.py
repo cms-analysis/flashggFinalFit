@@ -15,6 +15,7 @@ from Queue import Queue
 
 from threading import Thread, Semaphore
 from multiprocessing import cpu_count
+import subprocess
 
 class Wrap:
     def __init__(self, func, args, queue):
@@ -71,9 +72,9 @@ parser.add_option("-d","--datfile",help="dat file")
 parser.add_option("-s","--systdatfile",help="systematics dat file")
 parser.add_option("--mhLow",default="120",help="mh Low")
 parser.add_option("--mhHigh",default="130",help="mh High")
-parser.add_option("-q","--queue",help="Which batch queue")
+parser.add_option("-q","--queue",default="espresso",help="Which batch queue")
 parser.add_option("--runLocal",default=False,action="store_true",help="Run locally")
-parser.add_option("--batch",default="LSF",help="Which batch system to use (LSF,IC)")
+parser.add_option("--batch",default="HTCONDOR",help="Which batch system to use (HTCONDOR,IC)")
 parser.add_option("--changeIntLumi",default="1.")
 parser.add_option("-o","--outfilename",default=None)
 parser.add_option("-p","--outDir",default="./")
@@ -128,10 +129,26 @@ def writePostamble(sub_file, exec_line):
     system('rm -f %s.fail'%os.path.abspath(sub_file.name))
     system('rm -f %s.log'%os.path.abspath(sub_file.name))
     system('rm -f %s.err'%os.path.abspath(sub_file.name))
-    if (opts.batch == "LSF") : system('bsub -q %s -o %s.log %s'%(opts.queue,os.path.abspath(sub_file.name),os.path.abspath(sub_file.name)))
     if (opts.batch == "IC") : 
       system('qsub -q %s -l h_rt=0:20:0 -o %s.log -e %s.err %s'%(opts.queue,os.path.abspath(sub_file.name),os.path.abspath(sub_file.name),os.path.abspath(sub_file.name)))
-      #print "system(",'qsub -q %s -o %s.log -e %s.err %s '%(opts.queue,os.path.abspath(sub_file.name),os.path.abspath(sub_file.name),os.path.abspath(sub_file.name)),")"
+    elif( opts.batch == "HTCONDOR" ):
+      sub_file_name = re.sub("\.sh","",os.path.abspath(sub_file.name))
+      HTCondorSubfile = open("%s.sub"%sub_file_name,'w')
+      HTCondorSubfile.write('+JobFlavour = "%s"\n'%(opts.queue))
+      HTCondorSubfile.write('\n')
+      HTCondorSubfile.write('executable  = %s.sh\n'%sub_file_name)
+      HTCondorSubfile.write('output  = %s.out\n'%sub_file_name)
+      HTCondorSubfile.write('error  = %s.err\n'%sub_file_name)
+      HTCondorSubfile.write('log  = %s.log\n'%sub_file_name)
+      HTCondorSubfile.write('\n')
+      HTCondorSubfile.write('max_retries = 1\n')
+      HTCondorSubfile.write('queue 1\n')
+      subprocess.Popen("condor_submit "+HTCondorSubfile.name,
+                             shell=True, # bufsize=bufsize,
+                             stdin=subprocess.PIPE,
+                             stdout=subprocess.PIPE,
+                             stderr=subprocess.PIPE,
+                             close_fds=True)
   if opts.runLocal:
      system('bash %s'%os.path.abspath(sub_file.name))
 
@@ -155,7 +172,7 @@ for proc in  opts.procs.split(","):
       bsRW=1
     exec_line = "%s/bin/SignalFit --verbose 0 -i %s -d %s/%s  --mhLow=%s --mhHigh=%s -s %s/%s --procs %s -o  %s/%s -p %s/%s -f %s --changeIntLumi %s --binnedFit 1 --nBins 320 --split %s,%s --beamSpotReweigh %d --dataBeamSpotWidth %f --massList %s --useDCBplusGaus %s --useSSF %s --analysis %s -C -1" %(os.getcwd(), opts.infile,os.getcwd(),opts.datfile,opts.mhLow, opts.mhHigh, os.getcwd(),opts.systdatfile, opts.procs,os.getcwd(),opts.outfilename.replace(".root","_%s_%s.root"%(proc,cat)), os.getcwd(),opts.outDir, opts.flashggCats ,opts.changeIntLumi, proc,cat,bsRW,float(opts.bs), opts.massList, opts.useDCB_1G, opts.useSSF, opts.analysis)
     #print exec_line
-    writePostamble(file,exec_line)
+    writePostamble(file,exec_line) #includes submission
 
 
 

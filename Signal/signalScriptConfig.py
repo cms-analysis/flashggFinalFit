@@ -3,11 +3,11 @@
 signalScriptCfg = {
   
   # Setup
-  'inputWSDir':'/vols/cms/es811/FinalFits/ws_ReweighAndNewggHweights', 
+  'inputWSDir':'/eos/home-j/jlangfor/hgg/ws/test_legacy_runII_102x', 
   #Procs will be inferred automatically from filenames
-  'cats':'UntaggedTag_0,VBFTag_0',
-  'ext':'test_hig16040',
-  'analysis':'test', # To specify which replacement dataset mapping i.e. when too few entries in proc x cat
+  'cats':'UntaggedTag_0,UntaggedTag_2,VBFTag_0',
+  'ext':'test',
+  'analysis':'hig-16-040', # To specify which replacement dataset mapping i.e. when too few entries in proc x cat
   'year':'2016', 
   'beamspot':'3.4',
   'numberOfBins':'320',
@@ -23,11 +23,9 @@ signalScriptCfg = {
   'smears':'HighR9EBPhi,HighR9EBRho,HighR9EEPhi,HighR9EERho,LowR9EBPhi,LowR9EBRho,LowR9EEPhi,LowR9EERho',
 
   # Job submission options
-  'batch':'IC',
-  'queue':'hep.q',
+  'batch':'HTCONDOR',
+  'queue':'espresso',
 
   # Mode allows script to carry out single function
   'mode':'std', # Options: [std,phoSystOnly,sigFitOnly,packageOnly,sigPlotsOnly]
-  'printOnly':0 # For dry-run: print command only
-  
 }
