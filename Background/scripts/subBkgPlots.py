@@ -10,6 +10,7 @@ parser.add_option("-f","--flashggCats",help="flashggCats : UntaggedTag_0,Untagge
 parser.add_option("-l","--catLabels",default="mk_default",help="Category labels (comma separated) default will use Category %cat")
 parser.add_option("-S","--sqrts",type='int',default=8,help="Sqrt(S) COM energy for finding strings etc")
 parser.add_option("--intLumi",type='float',default=0.,help="integrated lumi")
+parser.add_option("--year",default='2016',help="Dataset year")
 parser.add_option("-H","--high",type='int',default=100,help="Sqrt(S) COM energy for finding strings etc")
 parser.add_option("-L","--low",type='int',default=180,help="Sqrt(S) COM energy for finding strings etc")
 parser.add_option("--isMultiPdf",default=False,action="store_true",help="Use for multipdf workspaces")
@@ -22,12 +23,13 @@ parser.add_option("--higgsResolution",type='float',default=1.,help="Resolution o
 parser.add_option("--unblind",default=False,action="store_true",help="Blind the mass spectrum in the range [115,135]")
 parser.add_option("--runLocal",default=False,action="store_true",help="Run locally")
 parser.add_option("--dryRun",default=False,action="store_true",help="Dont submit jobs")
-parser.add_option("-q","--queue",default="hepshort.q")
-parser.add_option("--batch",default="IC")
+parser.add_option("-q","--queue",default="espresso",help="Which batch queue")
+parser.add_option("--batch",default="HTCONDOR",help="Which batch system to use (HTCONDOR,IC)")
 parser.add_option("-v","--verbose",default=False,action="store_true",help="Print more output")
 (options,args) = parser.parse_args()
 
 import os
+import subprocess
 
 os.system('mkdir -p %s'%options.outDir)
 
@@ -61,6 +63,7 @@ for cat in range(ncats):
 #  execLine = '$PWD -b %s -s %s -o %s/BkgPlots_cat%d.root -d %s -c %d -l \"%s\"'%(options.bkgfilename,options.sigfilename,options.outDir,cat,options.outDir,cat,options.catLabels[cat])
   execLine += " --sqrts %d "%options.sqrts
   execLine += " --intLumi %f "%options.intLumi
+  execLine += " --year %s "%options.year
   print "LC DEBUG echo intlumi ",options.intLumi
   if options.doBands:
     execLine += ' --doBands --massStep %5.3f --nllTolerance %5.3f -L %d -H %d'%(options.massStep,options.nllTolerance,options.low,options.high)
@@ -83,14 +86,25 @@ for cat in range(ncats):
   print execLine
   
   os.system('chmod +x %s'%f.name)
-  if options.dryRun:
-    if (options.batch == "IC") : print 'qsub -q %s -o %s.log %s'%(options.queue,os.path.abspath(f.name),os.path.abspath(f.name))
-    else: print 'bsub -q %s -o %s.log %s'%(options.queue,os.path.abspath(f.name),os.path.abspath(f.name))
-
-  elif options.runLocal:
-    os.system('./%s'%f.name)
+  if options.runLocal: os.system('./%s'%f.name)
   else:
-     if (options.batch == "IC") : os.system('qsub -q %s -o %s.log %s'%(options.queue,os.path.abspath(f.name),os.path.abspath(f.name)))
-     else : os.system('bsub -q %s -o %s.log %s'%(options.queue,os.path.abspath(f.name),os.path.abspath(f.name)))
-  
-  
+    if (options.batch == "IC") : os.system('qsub -q %s -o %s.log %s'%(options.queue,os.path.abspath(f.name),os.path.abspath(f.name)))
+    elif( options.batch == "HTCONDOR" ):
+      sub_file_name = re.sub("\.sh","",os.path.abspath(f.name))
+      HTCondorSubfile = open("%s.sub"%sub_file_name,'w')
+      HTCondorSubfile.write('+JobFlavour = "%s"\n'%(options.queue))
+      HTCondorSubfile.write('\n')
+      HTCondorSubfile.write('executable  = %s.sh\n'%sub_file_name)
+      HTCondorSubfile.write('output  = %s.out\n'%sub_file_name)
+      HTCondorSubfile.write('error  = %s.err\n'%sub_file_name)
+      HTCondorSubfile.write('log  = %s.log\n'%sub_file_name)
+      HTCondorSubfile.write('\n')
+      HTCondorSubfile.write('max_retries = 1\n')
+      HTCondorSubfile.write('queue 1\n')
+      subprocess.Popen("condor_submit "+HTCondorSubfile.name,
+                             shell=True, # bufsize=bufsize,
+                             stdin=subprocess.PIPE,
+                             stdout=subprocess.PIPE,
+                             stderr=subprocess.PIPE,
+                             close_fds=True)
+    else: print "Batch %s is not supported. Exiting..."%options.batch

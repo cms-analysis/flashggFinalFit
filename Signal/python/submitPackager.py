@@ -75,6 +75,7 @@ parser.add_option("-q","--queue",default="espresso",help="Which batch queue")
 parser.add_option("--batch",default="HTCONDOR",help="Which batch system to use (HTCONDOR,IC)")
 parser.add_option("--runLocal",default=False,action="store_true",help="Run locally")
 parser.add_option("-l","--lumi",default="1.")
+parser.add_option("-y","--year",default="2016")
 parser.add_option("-o","--outfilename",default=None)
 parser.add_option("-p","--outDir",default="./")
 parser.add_option("-W","--workspace",default="wsig_13TeV")
@@ -123,6 +124,8 @@ def writePostamble(sub_file, exec_line):
     system('rm -f %s.fail'%os.path.abspath(sub_file.name))
     system('rm -f %s.log'%os.path.abspath(sub_file.name))
     system('rm -f %s.err'%os.path.abspath(sub_file.name))
+    system('rm -f %s.out'%os.path.abspath(sub_file.name))
+    system('rm -f %s.sub'%os.path.abspath(sub_file.name))
     if (opts.batch == "IC") : 
       system('qsub -q %s -l h_rt=3:0:0 -o %s.log -e %s.err %s'%(opts.queue,os.path.abspath(sub_file.name),os.path.abspath(sub_file.name),os.path.abspath(sub_file.name)))
     elif( opts.batch == "HTCONDOR" ):
@@ -164,7 +167,7 @@ for cat in opts.flashggCats.split(","):
   file = open('%s/PackagerJobs/sub%d.sh'%(opts.outDir,counter),'w')
   writePreamble(file)
   counter =  counter+1
-  exec_line = "%s/bin/PackageOutput -i %s --basepath %s --procs %s -l %s -p %s/%s -W %s -f %s -L %s -H %s -o %s/%s"%(os.getcwd(), specificFiles, opts.basepath, opts.procs, opts.lumi, os.getcwd(), opts.outDir, opts.workspace, cat, opts.mhLow, opts.mhHigh, os.getcwd(), opts.outfilename.replace(".root","_%s.root"%(cat)))
+  exec_line = "%s/bin/PackageOutput -i %s --basepath %s --procs %s -l %s -p %s/%s -W %s -f %s -L %s -H %s -o %s/%s --year %s"%(os.getcwd(), specificFiles, opts.basepath, opts.procs, opts.lumi, os.getcwd(), opts.outDir, opts.workspace, cat, opts.mhLow, opts.mhHigh, os.getcwd(), opts.outfilename.replace(".root","_%s.root"%(cat)),opts.year)
   #print exec_line
   writePostamble(file,exec_line)
 

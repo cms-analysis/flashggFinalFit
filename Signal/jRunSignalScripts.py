@@ -163,7 +163,7 @@ print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 print " --> Constructing the input command..."
 
 cmdLine = ''
-cmdLine += './runSignalScripts.sh -i %s -p %s -f %s --ext %s --intLumi %s --batch %s --queue %s --massList %s --bs %s --analysis %s --scales %s --scalesCorr %s --scalesGlobal %s --smears %s --useSSF 1'%(ws_fullFileNames,procs,cats,ext,lumi[year],batch,queue,massPoints,beamspot,analysis,scales,scalesCorr,scalesGlobal,smears)
+cmdLine += './runSignalScripts.sh -i %s -p %s -f %s --ext %s --intLumi %s --year %s --batch %s --queue %s --massList %s --bs %s --analysis %s --scales %s --scalesCorr %s --scalesGlobal %s --smears %s --useSSF 1'%(ws_fullFileNames,procs,cats,ext,year,lumi[year],batch,queue,massPoints,beamspot,analysis,scales,scalesCorr,scalesGlobal,smears)
 if useDCB: cmdLine += ' --useDCB_1G 1'
 else: cmdLine += ' --useDCB_1G 0'
 if mode == "phoSystCalc": cmdLine += ' --calcPhoSystOnly' 

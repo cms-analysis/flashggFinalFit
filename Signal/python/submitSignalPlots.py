@@ -74,6 +74,7 @@ parser.add_option("--runLocal",default=False,action="store_true",help="Run local
 parser.add_option("-o","--outDir",default="./")
 parser.add_option("-p","--procs",default=None)
 parser.add_option("-f","--flashggCats",default=None)
+parser.add_option("-y","--year",default="2016")
 (opts,args) = parser.parse_args()
 
 defaults = copy(opts)
@@ -117,6 +118,8 @@ def writePostamble(sub_file, exec_line):
     system('rm -f %s.fail'%os.path.abspath(sub_file.name))
     system('rm -f %s.log'%os.path.abspath(sub_file.name))
     system('rm -f %s.err'%os.path.abspath(sub_file.name))
+    system('rm -f %s.out'%os.path.abspath(sub_file.name))
+    system('rm -f %s.sub'%os.path.abspath(sub_file.name))
     if (opts.batch == "IC") : 
       system('qsub -q %s -l h_rt=3:0:0 -o %s.log -e %s.err %s'%(opts.queue,os.path.abspath(sub_file.name),os.path.abspath(sub_file.name),os.path.abspath(sub_file.name)))
     elif( opts.batch == "HTCONDOR" ):
@@ -152,6 +155,6 @@ for cat in opts.flashggCats.split(","):
   file = open('%s/PlottingJobs/sub%d.sh'%(opts.outDir,counter),'w')
   writePreamble(file)
   counter =  counter+1
-  exec_line = "%s/bin/makeParametricSignalModelPlots -i %s/%s -o %s/%s -p %s -f %s "%(os.getcwd(), os.getcwd(), opts.infile.replace(".root","_%s.root"%(cat)), os.getcwd(), opts.outDir, opts.procs, cat)
+  exec_line = "%s/bin/makeParametricSignalModelPlots -i %s/%s -o %s/%s -p %s -f %s --year %s"%(os.getcwd(), os.getcwd(), opts.infile.replace(".root","_%s.root"%(cat)), os.getcwd(), opts.outDir, opts.procs, cat, opts.year)
   #print exec_line
   writePostamble(file,exec_line)

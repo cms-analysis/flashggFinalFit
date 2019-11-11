@@ -77,6 +77,7 @@ void OptionParser(int argc, char *argv[]){
     ("outfilename,o", po::value<string>(&outfilename_),                                           "Output file name")
     ("mass,m", po::value<int>(&m_hyp_)->default_value(125),                                    "Mass to run at")
     ("sqrts", po::value<int>(&sqrts_)->default_value(13),                                    "CoM energy")
+    ("year", po::value<int>(&year_)->default_value(2016),                                    "Dataset year")
     ("binning", po::value<int>(&binning_)->default_value(70),                                    "CoM energy")
     ("procs,p", po::value<string>(&procString_)->default_value("ggh,vbf,wh,zh,tth"),          "Processes")
     ("isFlashgg",  po::value<bool>(&isFlashgg_)->default_value(true),                          "Use flashgg format")

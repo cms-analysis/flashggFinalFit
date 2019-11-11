@@ -128,6 +128,8 @@ def writePostamble(sub_file, exec_line):
     system('rm -f %s.fail'%os.path.abspath(sub_file.name))
     system('rm -f %s.log'%os.path.abspath(sub_file.name))
     system('rm -f %s.err'%os.path.abspath(sub_file.name))
+    system('rm -f %s.out'%os.path.abspath(sub_file.name))
+    system('rm -f %s.sub'%os.path.abspath(sub_file.name))
     if (opts.batch == "IC") : system('qsub -q %s -o %s.log -e %s.err %s > out.txt'%(opts.queue,os.path.abspath(sub_file.name),os.path.abspath(sub_file.name),os.path.abspath(sub_file.name)))
     elif( opts.batch == "HTCONDOR" ):
       sub_file_name = re.sub("\.sh","",os.path.abspath(sub_file.name))

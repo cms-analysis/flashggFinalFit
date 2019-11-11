@@ -202,6 +202,7 @@ TGraph * Normalization_13TeV::GetSigmaGraph(TString process)
     XSectionMap = &XSectionMap_ZH2HQQ;
   } else {
     std::cout << "[WARNING] Normalization_13TeV: No known process found in the name!!" << std::endl;
+    std::cout << "[DEBUG] Normalization_13TeV failed for process = " << process << std::endl;
     //exit(1);
   }
 

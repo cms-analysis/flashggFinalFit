@@ -16,6 +16,9 @@ SEED=0
 INTLUMI=1
 ISDATA=0
 UNBLIND=0
+BATCH=""
+QUEUE=""
+YEAR="2016"
 
 usage(){
 	echo "The script runs background scripts:"
@@ -33,9 +36,11 @@ echo "--sigFile) "
 echo "--bkgPlotsOnly)"
 echo "--seed) for pseudodata random number gen seed (default $SEED)"
 echo "--intLumi) specified in fb^-{1} (default $INTLUMI)) "
+echo "--year) dataset year (default $YEAR)) "
 echo "--isData) specified in fb^-{1} (default $DATA)) "
 echo "--unblind) specified in fb^-{1} (default $UNBLIND)) "
-		echo "--batch) which batch system to use (None (''),LSF,IC) (default '$BATCH')) "
+echo "--batch) which batch system to use (None (''),HTCONDOR,IC) (default '$BATCH')) "
+echo "--queue) queue to submit jobs to (specific to batch))"
 }
 
 
@@ -43,7 +48,7 @@ echo "--unblind) specified in fb^-{1} (default $UNBLIND)) "
 
 
 # options may be followed by one colon to indicate they have a required argument
-if ! options=$(getopt -u -o hi:p:f: -l help,inputFile:,procs:,flashggCats:,ext:,fTestOnly,pseudoDataOnly,bkgPlotsOnly,pseudoDataDat:,sigFile:,seed:,intLumi:,unblind,isData,batch: -- "$@")
+if ! options=$(getopt -u -o hi:p:f: -l help,inputFile:,procs:,flashggCats:,ext:,fTestOnly,pseudoDataOnly,bkgPlotsOnly,pseudoDataDat:,sigFile:,seed:,intLumi:,year:,unblind,isData,batch:,queue: -- "$@")
 then
 # something went wrong, getopt will put out an error message for us
 exit 1
@@ -65,9 +70,11 @@ case $1 in
 --bkgPlotsOnly) BKGPLOTSONLY=1;;
 --seed) SEED=$2; shift;;
 --intLumi) INTLUMI=$2; shift;;
+--year) YEAR=$2; shift;;
 --isData) ISDATA=1;;
 --unblind) UNBLIND=1;;
 --batch) BATCH=$2; shift;;
+--queue) QUEUE=$2; shift;;
 
 (--) shift; break;;
 (-*) usage; echo "$0: error - unrecognized option $1" 1>&2; usage >> /dev/stderr; exit 1;;
@@ -83,7 +90,7 @@ echo "[INFO] outdir is $OUTDIR, INTLUMI $INTLUMI"
 if [ $ISDATA == 1 ]; then
 DATAEXT="-Data"
 fi
-echo "INTLUMI is $intLumi"
+echo "INTLUMI is $INTLUMI, YEAR is $YEAR"
 OUTDIR="outdir_${EXT}"
 
 mkdir -p $OUTDIR
@@ -96,13 +103,18 @@ BKGPLOTSONLY=1
 fi
 
 if [[ $BATCH == "IC" ]]; then
-#DEFAULTQUEUE="hep.q -l h_rt=0:20:0"
-DEFAULTQUEUE="hep.q"
 BATCHQUERY=qstat
+QUEUE="hep.q"
+echo "[INFO] Batch = $BATCH, using QUEUE = $QUEUE"
 fi
-if [[ $BATCH == "LSF" ]]; then
-DEFAULTQUEUE=1nh
-BATCHQUERY=bjobs
+if [[ $BATCH == "HTCONDOR" ]]; then
+  BATCHQUERY=condor_q
+  if [[ $QUEUE == "" ]]; then
+    QUEUE=espresso
+    echo "[INFO] Batch = $BATCH, QUEUE not specified. Using QUEUE = $QUEUE"
+  fi
+  else
+    echo "[INFO] Batch = $BATCH, Using QUEUE = $QUEUE"
 fi
 
 ####################################################
@@ -165,53 +177,22 @@ fi
 if [ $UNBLIND == 1 ]; then
 OPT=" --unblind"
 fi
-echo "./scripts/subBkgPlots.py -b CMS-HGG_multipdf_$EXT.root -d $OUTDIR/bkgPlots$DATAEXT -S 13 --isMultiPdf --useBinnedData  --doBands --massStep 1 $SIG -L 100 -H 180 -f $CATS -l $CATS --intLumi $INTLUMI $OPT --batch $BATCH -q $DEFAULTQUEUE "
-./scripts/subBkgPlots.py -b CMS-HGG_multipdf_$EXT.root -d $OUTDIR/bkgPlots$DATAEXT -S 13 --isMultiPdf --useBinnedData  --doBands  --massStep 1 $SIG -L 100 -H 180 -f $CATS -l $CATS --intLumi $INTLUMI $OPT --batch $BATCH -q $DEFAULTQUEUE
-continueLoop=1
-while (($continueLoop==1))
-do
- sleep 10
- $BATCHQUERY
- $BATCHQUERY >qstat_out.txt
- ((number=`cat qstat_out.txt | wc -l `))
- echo $number
-  if (($number==0)) ; then
-     ((continueLoop=0))
-  fi
-done 
+echo "./scripts/subBkgPlots.py -b CMS-HGG_multipdf_$EXT.root -d $OUTDIR/bkgPlots$DATAEXT -S 13 --isMultiPdf --useBinnedData  --doBands --massStep 1 $SIG -L 100 -H 180 -f $CATS -l $CATS --intLumi $INTLUMI $OPT --batch $BATCH -q $QUEUE --year $YEAR"
+./scripts/subBkgPlots.py -b CMS-HGG_multipdf_$EXT.root -d $OUTDIR/bkgPlots$DATAEXT -S 13 --isMultiPdf --useBinnedData  --doBands  --massStep 1 $SIG -L 100 -H 180 -f $CATS -l $CATS --intLumi $INTLUMI $OPT --batch $BATCH -q $QUEUE --year $YEAR
+
+# FIX THIS FOR CONDOR: 
+#continueLoop=1
+#while (($continueLoop==1))
+#do
+# sleep 10
+# $BATCHQUERY
+# $BATCHQUERY >qstat_out.txt
+# ((number=`cat qstat_out.txt | wc -l `))
+# echo $number
+#  if (($number==0)) ; then
+#     ((continueLoop=0))
+#  fi
+#done 
 
 OPT=""
-fi
-
-
-if [ $USER == "lcorpe" ]; then
-cp -r ${OUTDIR} ~/www/${OUTDIR}_${SEED}
-cp -r $OUTDIR ~/www/.
-cp ~lcorpe/public/index.php ~/www/$OUTDIR/pseudoData/.
-cp ~lcorpe/public/index.php ~/www/$OUTDIR/bkgPlots/.
-cp ~lcorpe/public/index.php ~/www/$OUTDIR/bkgPlot$DATAEXT/.
-cp ~lcorpe/public/index.php ~/www/$OUTDIR/bkgfTest$DATAEXT/.
-cp ~lcorpe/public/index.php ~/www/$OUTDIR/bkgfTest/.
-cp ~lcorpe/public/index.php ~/www/${OUTDIR}_${SEED}/pseudoData/.
-cp ~lcorpe/public/index.php ~/www/${OUTDIR}_${SEED}/bkgPlots/.
-cp ~lcorpe/public/index.php ~/www/${OUTDIR}_${SEED}/bkgfTest/.
-
-echo "plots available at: "
-echo "https://lcorpe.web.cern.ch/lcorpe/$OUTDIR_${SEED}"
-
-fi
-
-if [ $USER == "lc1113" ]; then
-cp -r ${OUTDIR} ~lc1113/public_html/${OUTDIR}_${SEED}
-cp ~lc1113/index.php ~lc1113/public_html/${OUTDIR}_${SEED}/pseudoData/.
-cp ~lc1113/index.php ~lc1113/public_html/${OUTDIR}_${SEED}/bkgPlots/.
-cp ~lc1113/index.php ~lc1113/public_html/${OUTDIR}_${SEED}/bkgfTest/.
-cp -r $OUTDIR ~lc1113/public_html/.
-cp ~lc1113/index.php ~lc1113/public_html/$OUTDIR/pseudoData/.
-cp ~lc1113/index.php ~lc1113/public_html/$OUTDIR/bkgPlots/.
-cp ~lc1113/index.php ~lc1113/public_html/$OUTDIR/bkgfTest/.
-cp ~lc1113/index.php ~lc1113/public_html/$OUTDIR/bkgPlots$DATAEXT/.
-cp ~lc1113/index.php ~lc1113/public_html/$OUTDIR/bkgfTest$DATAEXT/
-echo "plots available at: "
-echo "http://www.hep.ph.imperial.ac.uk/~lc1113/${OUTDIR}_${SEED}"
 fi

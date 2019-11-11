@@ -3,7 +3,7 @@
 import os, sys
 from optparse import OptionParser
 
-lumi = {'2016':'35.9', '2017':'41.5', '2018':'XYZ'}
+lumi = {'2016':'35.9', '2017':'41.5', '2018':'63.7'}
 
 def get_options():
   parser = OptionParser()
@@ -51,7 +51,7 @@ if opt.inputConfig != '':
     batch        = _cfg['batch']
     queue        = _cfg['queue']
     mode         = _cfg['mode']
-    printOnly    = _cfg['printOnly']
+    printOnly    = opt.printOnly
 
     # Delete copy of file
     os.system("rm config.py")
@@ -124,7 +124,7 @@ print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 # Construct input command
 print " --> Constructing input command..."
 
-cmdLine = "./runBackgroundScripts.sh -i %s -p %s -f %s --ext %s --intLumi %s --batch %s --sigFile %s --isData "%(dataFile,procs,cats,ext,lumi[year],batch,signalFitWSFile)
+cmdLine = "./runBackgroundScripts.sh -i %s -p %s -f %s --ext %s --intLumi %s --year %s --batch %s --queue %s --sigFile %s --isData "%(dataFile,procs,cats,ext,lumi[year],year,batch,queue,signalFitWSFile)
 if mode == "fTestOnly": cmdLine += '--fTestOnly '
 elif mode == "bkgPlotsOnly": cmdLine += '--bkgPlotsOnly '
 if unblind and not fTestOnly: cmdLine += '--undblind '

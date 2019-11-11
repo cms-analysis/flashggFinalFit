@@ -3,19 +3,18 @@
 backgroundScriptCfg = {
   
   # Setup
-  'inputWSDir':'/vols/cms/es811/FinalFits/ws_ReweighAndNewggHweights', 
+  'inputWSDir':'/eos/home-j/jlangfor/hgg/ws/test_stage1_legacy', 
   #Procs will be inferred automatically from filenames
-  'cats':'UntaggedTag_0,VBFTag_0',
-  'ext':'test_hig16040',
-  'year':'2016', 
+  'cats':'RECO_0J_Tag0,RECO_0J_Tag1,RECO_0J_Tag2,RECO_VBFTOPO_JET3VETO_Tag0',
+  'ext':'test_stage1_2017',
+  'year':'2017', 
   'unblind':0,
 
   # Job submission options
-  'batch':'IC',
-  'queue':'hep.q',
+  'batch':'HTCONDOR',
+  'queue':'espresso',
 
   # Mode allows script to carry out single function
   'mode':'std', # Options: [std,fTestOnly,bkgPlotsOnly]
-  'printOnly':0 # For dry-run: print command only
   
 }
