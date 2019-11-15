@@ -86,6 +86,7 @@ parser.add_option("--prefix",default="./")
 parser.add_option("--freezeAll",default=False,action="store_true",help="Freeze all nuisances")
 parser.add_option("--float",default="",action="store",help="Freeze all nuisances")
 parser.add_option("--postFitAll",default=False,action="store_true",help="Use post-fit nuisances for all methods")
+parser.add_option("--minimizerStrategyFix",default=1,type="int",help="Fix for new version of combine (102x). Issues calculating Hessian when using discrete params. --cminDefaultMinimizerStrategy 0 suppresses Hessian calculation")
 #parser.add_option("--blindStd",default=False,action="store_true",help="Run standard suite of blind plots")
 #parser.add_option("--unblindSimple",default=False,action="store_true",help="Run simple set of unblind plots (limit, pval, best fit mu)")
 #parser.add_option("--unblindFull",default=False,action="store_true",help="Run full suite of unblind plots")
@@ -420,6 +421,7 @@ def writeAsymptotic():
       if opts.S0: exec_line += ' --S0 '
       if opts.additionalOptions: exec_line += ' %s'%opts.additionalOptions
       if opts.expected: exec_line += ' --run=expected'
+      if opts.minimizerStrategyFix: exec_line += ' --cminDefaultMinimizerStrategy=0'
       if mass!=mass_set[-1]: exec_line += ' && '
     writePostamble(file,exec_line)
 
@@ -493,6 +495,7 @@ def writeProfileLikelhood():
       if opts.expectSignal: exec_line += ' --expectSignal=%3.1f'%opts.expectSignal
       if opts.expectSignalMass: exec_line += ' --expectSignalMass=%6.2f'%opts.expectSignalMass
       if opts.toysFile: exec_line += ' --toysFile %s'%toysfilestore.replace('${m}',str(mass)).replace('.0','')
+      if opts.minimizerStrategyFix: exec_line += ' --cminDefaultMinimizerStrategy=0'
       if mass!=mass_set[-1]: exec_line += ' && '
     
     writePostamble(file,exec_line)
@@ -511,6 +514,7 @@ def writeChannelCompatibility():
   file = open('%s/sub_m%6.2f.sh'%(opts.outDir,opts.mh),'w')
   writePreamble(file)
   exec_line = 'combine %s -M ChannelCompatibilityCheck -m %6.2f --rMin=-25. --saveFitResult -L $CMSSW_BASE/lib/$SCRAM_ARCH/libHiggsAnalysisGBRLikelihood.so'%(opts.datacard,opts.mh)
+  if opts.minimizerStrategyFix: exec_line += ' --cminDefaultMinimizerStrategy=0'
   writePostamble(file,exec_line)
 
 def writeSingleGenerateOnly():
@@ -521,6 +525,7 @@ def writeSingleGenerateOnly():
   if opts.expected: exec_line += ' -t -1'
   if opts.expectSignal: exec_line += ' --expectSignal=%3.1f'%opts.expectSignal
   if opts.expectSignalMass: exec_line += ' --expectSignalMass=%6.2f'%opts.expectSignalMass
+  if opts.minimizerStrategyFix: exec_line += ' --cminDefaultMinimizerStrategy=0'
   writePostamble(file,exec_line)
 
 def writeGenerateOnly():
@@ -870,6 +875,7 @@ def writeMultiDimFit(method=None,wsOnly=False):
           if opts.postFit:
                           exec_line += ' && combine -m %.2f -M MultiDimFit --saveWorkspace -n %s_postFit %s -L $CMSSW_BASE/lib/$SCRAM_ARCH/libHiggsAnalysisGBRLikelihood.so' % ( opts.mh, datacardname+method, os.path.abspath(opts.datacard).replace('.txt',method+'.root') )
                           exec_line += ' && cp higgsCombine%s_postFit.MultiDimFit.mH%.2f.root %s' % ( datacardname+method, opts.mh, os.path.abspath(opts.datacard).replace('.txt',method+'_postFit.root') )
+                          if opts.minimizerStrategyFix: exec_line += ' --cminDefaultMinimizerStrategy=0'
           if opts.parallel and opts.dryRun:
                           parallel.run(system,(exec_line,))
           else:
@@ -937,6 +943,7 @@ def writeMultiDimFit(method=None,wsOnly=False):
           #exec_line += ' --verbose -1 --saveSpecifiedIndex pdfindex_UntaggedTag_0_13TeV,pdfindex_UntaggedTag_1_13TeV,pdfindex_UntaggedTag_2_13TeV,pdfindex_UntaggedTag_3_13TeV,pdfindex_VBFTag_0_13TeV,pdfindex_VBFTag_1_13TeV,pdfindex_TTHLeptonicTag_13TeV,pdfindex_TTHHadronicTag_13TeV' 
           if opts.expectSignal: exec_line += ' --expectSignal %4.2f'%opts.expectSignal
           if opts.expectSignalMass: exec_line += ' --expectSignalMass %6.2f'%opts.expectSignalMass
+          if opts.minimizerStrategyFix: exec_line += ' --cminDefaultMinimizerStrategy=0'
           if method == 'PerProcessMu' and opts.doSTXS and not 'freezeParameters' in opts.additionalOptions: exec_line += ' --freezeParameters %s'%opts.stxsFreezeNuisances
           if opts.additionalOptions: 
             if 'freezeParameters' in opts.additionalOptions and opts.doSTXS and method == 'PerProcessMu':

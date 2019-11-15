@@ -628,8 +628,9 @@ def plot1DNLL(returnErrors=False,xvar="", ext=""):
       #x = options.specifyX[0]
       #xtitle = '#mu_{%s}'%options.specifyX[0]
       print "setting variable name in tree to",options.specifyX
-      x = options.specifyX
-      xtitle = '#mu_{%s}'%options.specifyX
+      x = options.specifyX[0]
+      print " [DEBUG] x =", x
+      xtitle = '#mu_{%s}'%("_".join(options.specifyX[0].split("_")[1:]))
   elif options.method=='muProc':
     x = xvar
     #xtitle = '#sigma / #sigma_{SM}'

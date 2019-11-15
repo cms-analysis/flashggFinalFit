@@ -41,16 +41,12 @@ with open(opts.outfilename,'w') as outFile:
       if len(vals) < 2:
         outFile.write('%s'%line)
         continue
-      if vals[0] == 'process' and len(procs)==0:
-        for proc in vals[1:]:
-          if not proc in procs: procs.append(proc)
-          else: break
+      if vals[0] == 'process':
+        procs = vals[1:]
         outFile.write('%s'%line)
         continue
-      if vals[0] == 'bin' and len(cats)==0:
-        for cat in vals[1:]:
-          if not cat in cats: cats.append(cat)
-          else: break
+      if vals[0] == 'bin':
+        cats  = vals[1:]
         outFile.write('%s'%line)
         continue
       if vals[1]!='lnN': 
@@ -63,8 +59,8 @@ with open(opts.outfilename,'w') as outFile:
       print 'Processing line %s'%vals[0]
       line = line.split('lnN')[0] + 'lnN   '
       for i,effect in enumerate(vals[2:]):
-        proc = procs[int( i % len(procs) )]
-        cat =  cats[int( i / len(procs) )]
+        proc = procs[i]
+        cat =  cats[i]
         #print 'proc = %s'%proc
         #print 'cat  = %s'%cat
         if opts.removeNonDiagonal and not isDiag(proc,cat):

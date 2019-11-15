@@ -90,6 +90,7 @@ parser.add_option("--scaleFactors",help="Scale factor for spin model pass as e.g
 parser.add_option("--quadInterpolate",type="int",default=0,help="Do a quadratic interpolation of flashgg templates back to 1 sigma from this sigma. 0 means off (default: %default)")
 parser.add_option("--mass",type="int",default=125,help="Mass at which to calculate the systematic variations (default: %default)")
 parser.add_option("--intLumi",type="float",default=3.71,help="Integrated Lumi (default: %default)")
+parser.add_option("--year",type="string",default=2016,help="Dataset year (default: %default)")
 parser.add_option("--newGghScheme",default=False,action="store_true",help="Use new WG1 scheme for ggH theory uncertainties" )
 parser.add_option("--doSTXS",default=False,action="store_true",help="Use STXS Stage 0 processes" )
 (options,args)=parser.parse_args()
@@ -117,7 +118,8 @@ baseCombProcs = {'GG2H':'ggH_hgg','VBF':'qqH_hgg','TTH':'ttH_hgg','QQ2HLNU':'WH_
 for proc in tempProcs:
   combProc = ''
   for baseProc in baseCombProcs.keys():
-    if proc.startswith(baseProc): combProc = proc.replace(baseProc,baseCombProcs[baseProc],1)
+    #if proc.startswith(baseProc): combProc = proc.replace(baseProc,baseCombProcs[baseProc],1)
+    if proc.startswith(baseProc): combProc = '%s_hgg'%proc.replace(baseProc,baseCombProcs[baseProc],1).replace('_hgg','')
   combProcs[proc] = combProc
 combProcs['bkg_mass'] = 'bkg_mass' 
 flashggProcs = odict()
@@ -209,6 +211,23 @@ intL = 1000* options.intLumi
 print "[INFO] Get Intlumi from file, value : ", intL," pb^{-1}", " sqrts ", sqrts
 ###############################################################################
 
+###############################################################################
+#Set up veto for unneeded proc, cat combinations
+toVeto = []
+for cat in options.cats:
+  catTot = 0.
+  for proc in options.procs:
+    if proc.count('bkg'): continue
+    catTot += inWS.data("%s_%d_13TeV_%s"%(flashggProcs[proc],options.mass,cat)).sumEntries()
+  for proc in options.procs:
+    if proc.count('bkg'): continue
+    procTot = inWS.data("%s_%d_13TeV_%s"%(flashggProcs[proc],options.mass,cat)).sumEntries()
+    if 1000. * procTot < catTot:
+      print 'Adding the combination %s,%s to the veto list'%(proc,cat)
+      toVeto.append( (proc,cat) )
+print 'the veto list is:'
+print toVeto
+###############################################################################
 
 ###############################################################################
 ## SHAPE SYSTEMATIC SETUP  ####################################################
@@ -225,10 +244,10 @@ sigWS = 'wsig_%dTeV'%(sqrts)
 # file detaisl: for FLashgg always use unbinned signal and multipdf
 fileDetails = {}
 fileDetails['data_obs'] = [dataFile,dataWS,'roohist_data_mass_$CHANNEL']
-fileDetails['bkg_mass']  = [bkgFile,bkgWS,'CMS_hgg_$CHANNEL_%dTeV_bkgshape'%sqrts]
+fileDetails['bkg_mass']  = [bkgFile,bkgWS,'CMS_hgg_$CHANNEL_%dTeV_%s_bkgshape'%(sqrts,options.year)]
 for proc,combProc in combProcs.iteritems():
   if 'bkg_mass'in combProc: continue
-  fileDetails[combProc] = [sigFile.replace('$PROC',proc), sigWS, 'hggpdfsmrel_%dTeV_%s_$CHANNEL'%(sqrts,proc)]
+  fileDetails[combProc] = [sigFile.replace('$PROC',proc), sigWS, 'hggpdfsmrel_%dTeV_%s_%s_$CHANNEL'%(sqrts,options.year,proc)]
 ###############################################################################
 
 ###############################################################################
@@ -439,6 +458,7 @@ def printTheorySysts():
         outFile.write('%-35s  lnN   '%(name))
         for c in options.cats:
           for p in options.procs:
+            if toVeto.count( (p,c) ): continue
             if "bkg" in flashggProcs[p] or "BBH" in flashggProcs[p] or "THQ" in flashggProcs[p] or "THW" in flashggProcs[p] or "GGZH" in flashggProcs[p] or (('QCDscale' in systName or 'scaleWeight' in systName) and options.newGghScheme):
               outFile.write('- ')
               continue
@@ -450,6 +470,7 @@ def printTheorySysts():
       outFile.write('%-35s  lnN   '%(name))
       for c in options.cats:
         for p in options.procs:
+          if toVeto.count( (p,c) ): continue
           #with new WG1 prescription, specific other nuisances deal with ggH theory uncerts
           if not "GG2H" in flashggProcs[p]:
             outFile.write('- ')
@@ -483,6 +504,7 @@ def printTheorySysts():
         outFile.write('%-35s  lnN   '%(name))
         for c in options.cats:
           for p in options.procs:
+            if toVeto.count( (p,c) ): continue
             #with new WG1 prescription, specific other nuisances deal with ggH theory uncerts
             if "bkg" in flashggProcs[p] or "BBH" in flashggProcs[p] or "THQ" in flashggProcs[p] or "THW" in flashggProcs[p] or "GGZH" in flashggProcs[p] or ('scaleWeight' in systName and options.newGghScheme and 'ggH' in p):
               outFile.write('- ')
@@ -507,13 +529,15 @@ def printTheorySysts():
     outFile.write('%-35s  lnN   '%(syst.replace("_up",""))) # if it doesn;t contain "_up", the replace has no effect anyway 
     for c in options.cats:
       for p in options.procs:
+            if toVeto.count( (p,c) ): continue
             #if "bkg" in flashggProcs[p] or "BBH" in flashggProcs[p] or "THQ" in flashggProcs[p] or "THW" in flashggProcs[p]:
             if "bkg" in flashggProcs[p]:
               outFile.write('- ')
               continue
             else:
               #FIXME hack to return to stage 0 style procs
-              p = p.split('_hgg')[0] + '_hgg'
+              if p.split("_")[0] in ['WH','ZH']: p = '%s_%s'%(p.split("_")[0],p.split("_")[1]) + '_hgg'
+              else: p = p.split('_')[0] + '_hgg'
               value = 1+theorySystAbsScale[p][theorySystAbsScale['names'].index(syst)] 
               if asymmetric :
                 valueDown = 1+theorySystAbsScale[p][theorySystAbsScale['names'].index(syst.replace("_up","_down"))]
@@ -816,6 +840,7 @@ def printBRSyst():
   outFile.write('%-35s   lnN   '%('BR_hgg'))
   for c in options.cats:
     for p in options.procs:
+      if toVeto.count( (p,c) ): continue
       if '%s:%s'%(p,c) in options.toSkip: continue
       if p in bkgProcs:
         outFile.write('- ')
@@ -829,6 +854,7 @@ def printLumiSyst():
   outFile.write('%-35s   lnN   '%('lumi_%dTeV'%sqrts))
   for c in options.cats:
     for p in options.procs:
+      if toVeto.count( (p,c) ): continue
       if '%s:%s'%(p,c) in options.toSkip: continue
       if p in bkgProcs:
         outFile.write('- ')
@@ -842,6 +868,7 @@ def printTrigSyst():
   outFile.write('%-35s   lnN   '%'CMS_hgg_n_trig_eff')
   for c in options.cats:
     for p in options.procs:
+      if toVeto.count( (p,c) ): continue
       if '%s:%s'%(p,c) in options.toSkip: continue
       if p in bkgProcs:
         outFile.write('- ')
@@ -961,34 +988,40 @@ flashggSysts={}
 #vtxSyst = 0.015 
 vtxSyst = 0.02 #updated for Moriond17
 
-#photon ID
-flashggSysts['MvaShift'] =  'phoIdMva'
+# FIXME: separate into systematics added in flashgg and ones missed (commented out)
+# New for legacy
+flashggSysts['UnmatchedPUWeight'] = 'UnmatchedPUWeight'
+flashggSysts['FracRVWeight'] = 'FracRVWeight'
+flashggSysts['FracRVNvtxWeight'] = 'FracRVNvtxWeight'
+# As before...
+flashggSysts['MvaLinearSyst'] = 'MvaLinearSyst'
 flashggSysts['LooseMvaSF'] =  'LooseMvaSF'
 flashggSysts['PreselSF']    =  'PreselSF'
-flashggSysts['SigmaEOverEShift'] = 'SigmaEOverEShift'
-flashggSysts['ElectronWeight'] = 'eff_e'
 flashggSysts['electronVetoSF'] = 'electronVetoSF'
-#FIXME: add option for 2016 or 2017
-flashggSysts['MuonWeight'] = 'eff_m' #2016 name
-#flashggSysts['MuonIDWeight'] = 'eff_m' #2017 name
-flashggSysts['MuonMiniIsoWeight'] = 'eff_m_MiniIso' #2016 name
-#flashggSysts['MuonIsoWeight'] = 'eff_m_MiniIso' #2017 name
 flashggSysts['TriggerWeight'] = 'TriggerWeight'
-#flashggSysts['JetBTagWeight'] = 'eff_b'
+flashggSysts['ElectronWeight'] = 'eff_e'
 flashggSysts['JetBTagCutWeight'] = 'eff_b'
-#flashggSysts['MvaLinearSyst'] = 'MvaLinearSyst'
-#flashggSysts[''] =  ''
-#FIXME: should really only apply to MET categories
-flashggSysts['metPhoUncertainty'] = 'MET_PhotonScale'
-flashggSysts['metUncUncertainty'] = 'MET_Unclustered'
-flashggSysts['metJecUncertainty'] = 'MET_JEC'
-flashggSysts['metJerUncertainty'] = 'MET_JER'
 
-#FIXME try putting JEC here
+# Missing in current workspaces
+#flashggSysts['MvaShift'] =  'phoIdMva'
+#flashggSysts['SigmaEOverEShift'] = 'SigmaEOverEShift'
+#if options.year == "2016":
+#  flashggSysts['MuonWeight'] = 'eff_m' #2016 name
+#  flashggSysts['MuonMiniIsoWeight'] = 'eff_m_MiniIso' #2016 name
+#else:
+#  flashggSysts['MuonIDWeight'] = 'eff_m' #2017 name
+#  flashggSysts['MuonIsoWeight'] = 'eff_m_MiniIso' #2017 name
+##FIXME: should really only apply to MET categories
+#flashggSysts['metPhoUncertainty'] = 'MET_PhotonScale'
+#flashggSysts['metUncUncertainty'] = 'MET_Unclustered'
+#flashggSysts['metJecUncertainty'] = 'MET_JEC'
+#flashggSysts['metJerUncertainty'] = 'MET_JER'
+##FIXME try putting JEC here
 oneLineJEC = True
-if oneLineJEC:
-  flashggSysts['JEC'] = 'scale_j'
-  flashggSysts['JER'] = 'res_j'
+#if oneLineJEC:
+#  flashggSysts['JEC'] = 'scale_j'
+#  flashggSysts['JER'] = 'res_j'
+#flashggSysts['PUJIDShift'] = 'PUJIDShift'
 
 #new ggH uncert prescription (replaces theory, JetVeto)
 if options.newGghScheme:
@@ -1125,6 +1158,9 @@ def printFileOptions():
   print '[INFO] File opts...'
   for typ, info in fileDetails.items():
     for c in options.cats:
+      if toVeto.count( (typ,c) ):
+        print "Explicitly vetoing %s,%s combination"%(typ,c)
+        continue
       file = info[0].replace('$CAT','%s'%c)
       wsname = info[1]
       pdfname = info[2].replace('$CHANNEL','%s'%c)
@@ -1152,6 +1188,7 @@ def printObsProcBinLines():
   outFile.write('%-15s '%'bin')
   for c in options.cats:
     for p in options.procs:
+      if toVeto.count( (p,c) ): continue
       if '%s:%s'%(p,c) in options.toSkip: continue
       outFile.write('%s_%dTeV '%(c,sqrts))
   outFile.write('\n')
@@ -1159,6 +1196,7 @@ def printObsProcBinLines():
   outFile.write('%-15s '%'process')
   for c in options.cats:
     for p in options.procs:
+      if toVeto.count( (p,c) ): continue
       if '%s:%s'%(p,c) in options.toSkip: continue
       outFile.write('%s '%p)
   outFile.write('\n')
@@ -1166,13 +1204,16 @@ def printObsProcBinLines():
   outFile.write('%-15s '%'process')
   for c in options.cats:
     for p in options.procs:
+      if toVeto.count( (p,c) ): continue
       if '%s:%s'%(p,c) in options.toSkip: continue
       outFile.write('%d '%procId[p])
   outFile.write('\n')
 
+
   outFile.write('%-15s '%'rate')
   for c in options.cats:
     for p in options.procs:
+      if toVeto.count( (p,c) ): continue
       if '%s:%s'%(p,c) in options.toSkip: continue
       #if p in bkgProcs:
       if p == 'bkg_mass': #even if not doing systematics, eg bbH, still want to scale by lumi...
@@ -1363,9 +1404,10 @@ def printFlashggSysts():
       outFile.write('%-35s   lnN   '%(name))
       for c in options.cats:
         for p in options.procs:
+          if toVeto.count( (p,c) ): continue
           if '%s:%s'%(p,c) in options.toSkip: continue
           #print "p,c is",p,c
-          if p in bkgProcs or ('pdfWeight' in flashggSyst and ('ggH_hgg' not in p and 'qqH_hgg' not in p)) or ('THU_ggH' in flashggSyst and 'ggH_hgg' not in p):
+          if p in bkgProcs or ('pdfWeight' in flashggSyst and ('ggH' not in p and 'qqH' not in p)) or ('THU_ggH' in flashggSyst and 'ggH' not in p):
             outFile.write('- ')
           else:
             outFile.write(getFlashggLine(p,c,flashggSyst))
@@ -1542,10 +1584,11 @@ def printVbfSysts():
       outFile.write('%-35s   lnN   '%name)
       for c in options.cats:
         for p in options.procs:
+          if toVeto.count( (p,c) ): continue
           if '%s:%s'%(p,c) in options.toSkip: continue
-          if 'ggH_hgg' in p: thisUncert = vbfSystVal[0]
-          elif 'qqH_hgg' in p: thisUncert = vbfSystVal[1]
-          elif ('ttH_hgg' in p and affectsTTH): thisUncert = vbfSystVal[2]
+          if 'ggH' in p: thisUncert = vbfSystVal[0]
+          elif 'qqH' in p: thisUncert = vbfSystVal[1]
+          elif ('ttH' in p and affectsTTH): thisUncert = vbfSystVal[2]
           else:
             outFile.write('- ')
             continue
@@ -1601,10 +1644,11 @@ def printLepSysts():
   outFile.write('%-35s   lnN   '%('CMS_scale_met_old'))
   for c in options.cats:
     for p in options.procs:
+      if toVeto.count( (p,c) ): continue
       if '%s:%s'%(p,c) in options.toSkip: 
         outFile.write('- ')
         continue
-      if p in bkgProcs or 'ggH_hgg' in p or 'qqH_hgg' in p: 
+      if p in bkgProcs or 'ggH' in p or 'qqH' in p: 
         outFile.write('- ')
         continue
       else:
@@ -1632,9 +1676,10 @@ def printTTHSysts():
       outFile.write('%-35s   lnN   '%(name))
       for c in options.cats:
         for p in options.procs:
+          if toVeto.count( (p,c) ): continue
           #gc.collect()
           if '%s:%s'%(p,c) in options.toSkip: continue
-          if p in bkgProcs or ('pdfWeight' in tthSyst and ('ggH_hgg' not in p and 'qqH_hgg' not in p)):
+          if p in bkgProcs or ('pdfWeight' in tthSyst and ('ggH' not in p and 'qqH' not in p)):
             outFile.write('- ')
           elif ('JEC' in tthSyst or 'JER' in tthSyst) and (c in vhHadCat or c in tthCats): #also want this to apply to VH Hadronic, WHLeptonic and VHLeptonicLoose
             outFile.write(getFlashggLine(p,c,tthSyst))
@@ -1655,10 +1700,11 @@ def printSimpleTTHSysts():
     outFile.write('%-35s   lnN   '%systName)
     for c in options.cats:
       for p in options.procs:
+        if toVeto.count( (p,c) ): continue
         if '%s:%s'%(p,c) in options.toSkip: 
           outFile.write('- ')
           continue
-        if 'ggH_hgg' in p and c in tthCats:
+        if 'ggH' in p and c in tthCats:
           outFile.write('%6.4f/%6.4f '%(1.-systVal,1.+systVal))
         else:
           outFile.write('- ')
@@ -1672,7 +1718,7 @@ def printSimpleTTHSysts():
 def printMultiPdf():
   if options.isMultiPdf:
     for c in options.cats:
-      outFile.write('pdfindex_%s_%dTeV  discrete\n'%(c,sqrts))
+      outFile.write('pdfindex_%s_%dTeV_%s  discrete\n'%(c,sqrts,options.year))
 ###############################################################################
 
 ###############################################################################
@@ -1700,7 +1746,7 @@ if (len(tthCats) > 0 ):  printTTHSysts()
 printTheorySysts()
 # lnN systematics
 printFlashggSysts()
-printUEPSSyst()
+#printUEPSSyst()
 #catgeory migrations
 #if (len(dijetCats) > 0 and len(tthCats)>0):  printVbfSysts()
 if (len(dijetCats) > 0 ):  printVbfSysts()

@@ -1369,7 +1369,10 @@ void FinalModelConstruction::getNormalization(){
 		  std::cout << "[ERROR] IntLumi rooRealVar is not in this workspace. exit." << std::endl;
 		return ;
 		}
-    if( (proc_=="testBBH" || proc_=="testTHQ" || proc_=="testTHW") ) temp->SetPoint(0,mh,effAcc);
+    if( (proc_=="testBBH" || proc_=="testTHQ" || proc_=="testTHW") ){
+      temp->SetPoint(0,mh,effAcc);
+      fitToConstant=1;
+    }
     else temp->SetPoint(i,mh,effAcc);
   }
   //if( (proc_=="testBBH" || proc_=="testTHQ" || proc_=="testTHW") ) temp->RemovePoint(0);

@@ -3,7 +3,7 @@
 import os, sys
 from optparse import OptionParser
 
-lumi = {'2016':'35.9', '2017':'41.5', '2018':'XYZ'}
+lumi = {'2016':'35.9', '2017':'41.5', '2018':'63.7'}
 
 def get_options():
   parser = OptionParser()
@@ -64,7 +64,7 @@ if opt.inputConfig != '':
     smears       = _cfg['smears']
     batch        = _cfg['batch']
     queue        = _cfg['queue']
-    printOnly    = _cfg['printOnly']
+    printOnly    = opt.printOnly
 
     #Delete copy of file
     os.system("rm config.py")
@@ -177,7 +177,7 @@ elif mode == "yields": print " --> Making yields table..."
 
 # Construct input command
 if mode not in ['effAcc','yields']:
-  cmdLine = './runFinalFitsScripts.sh -i %s -p %s -f %s --ext %s --intLumi %s --batch %s --dataFile %s --isData '%(ws_fullFileNames_125,procs,cats,ext,lumi[year],batch,dataFile)
+  cmdLine = './runCombineScripts.sh -i %s -p %s -f %s --ext %s --intLumi %s --year %s --batch %s --dataFile %s --isData '%(ws_fullFileNames_125,procs,cats,ext,lumi[year],year,batch,dataFile)
   if mode == 'datacard': 
     cmdLine += '--datacardOnly --smears %s --scales %s --scalesCorr %s --scalesGlobal %s --doStage1 '%(smears,scales,scalesCorr,scalesGlobal)
     if doUEPS:
