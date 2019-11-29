@@ -7,7 +7,7 @@ parser.add_option("-o","--outfilename",default=None,help="Output datacard file")
 parser.add_option("-f","--factor",default=5.,help="Factor beyond which uncertainty is considered incorrect and is removed")
 parser.add_option("--removeDoubleSided",default=False,action="store_true",help="Remove any nuisances which are listed as antisymmetric but both values point the same way")
 parser.add_option("--removeNonDiagonal",default=False,action="store_true",help="Remove any nuisances which are affect processes unimportant in that category")
-parser.add_option("--addYear",default=True,action="store_true",help="Add the year to names to facilitate combination")
+#parser.add_option("--addYear",default=True,action="store_true",help="Add the year to names to facilitate combination")
 parser.add_option("--verbose",default=False,action="store_true",help="Spit out all the cleaning being done")
 (opts,args)=parser.parse_args()
 
@@ -50,9 +50,9 @@ with open(opts.outfilename,'w') as outFile:
         outFile.write('%s'%line)
         continue
       if vals[1]!='lnN': 
-        if not line.count('hggpdfsmrel_13TeV_2016_'): line = line.replace('hggpdfsmrel_13TeV_','hggpdfsmrel_13TeV_2016_')
-        if not line.count('13TeV_2016_bkgshape'): line = line.replace('13TeV_bkgshape','13TeV_2016_bkgshape')
-        if line.count('pdfindex') and not line.count('_13TeV_2016'): line = line.replace('_13TeV','_13TeV_2016')
+        #if not line.count('hggpdfsmrel_13TeV_2016_'): line = line.replace('hggpdfsmrel_13TeV_','hggpdfsmrel_13TeV_2016_')
+        #if not line.count('13TeV_2016_bkgshape'): line = line.replace('13TeV_bkgshape','13TeV_2016_bkgshape')
+        #if line.count('pdfindex') and not line.count('_13TeV_2016'): line = line.replace('_13TeV','_13TeV_2016')
         outFile.write('%s'%line)
         continue
       print

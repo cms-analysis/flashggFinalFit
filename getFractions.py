@@ -13,11 +13,7 @@ from collections import OrderedDict as od
 
 r.gROOT.SetBatch(True)
 
-#setup files 
-ext          = 'preappFinal2016'
-#ext          = 'preappFinal2016_powheg'
-print 'ext = %s'%ext
-baseFilePath  = '/vols/cms/es811/FinalFits/ws_%s/'%ext
+baseFilePath  = '/vols/cms/jl2117/hgg/ws/test_stage1_1_2018/'
 fileNames     = []
 for root,dirs,files in walk(baseFilePath):
   for fileName in files: 
@@ -36,10 +32,12 @@ for fileName in fileNames:
   if 'M125' not in fileName: continue
   procs[ fileName.split('pythia8_')[1].split('.root')[0] ] = 0.
   procsNoTag[ fileName.split('pythia8_')[1].split('.root')[0] ] = 0.
-cats  = 'RECO_0J_Tag0,RECO_0J_Tag1,RECO_0J_Tag2,'
-cats += 'RECO_1J_PTH_0_60_Tag0,RECO_1J_PTH_0_60_Tag1,RECO_1J_PTH_60_120_Tag0,RECO_1J_PTH_60_120_Tag1,RECO_1J_PTH_120_200_Tag0,RECO_1J_PTH_120_200_Tag1,RECO_1J_PTH_GT200,'
-cats += 'RECO_GE2J_PTH_0_60_Tag0,RECO_GE2J_PTH_0_60_Tag1,RECO_GE2J_PTH_60_120_Tag0,RECO_GE2J_PTH_60_120_Tag1,RECO_GE2J_PTH_120_200_Tag0,RECO_GE2J_PTH_120_200_Tag1,RECO_GE2J_PTH_GT200_Tag0,RECO_GE2J_PTH_GT200_Tag1,'
-cats += 'RECO_VBFTOPO_JET3VETO_Tag0,RECO_VBFTOPO_JET3VETO_Tag1,RECO_VBFTOPO_JET3_Tag0,RECO_VBFTOPO_JET3_Tag1,RECO_VBFTOPO_REST,RECO_VBFTOPO_BSM'
+cats = 'RECO_0J_PTH_GT10_Tag0,RECO_0J_PTH_GT10_Tag1,RECO_0J_PTH_0_10_Tag0,RECO_0J_PTH_0_10_Tag1,RECO_PTH_GT200_Tag0,RECO_PTH_GT200_Tag1,RECO_1J_PTH_120_200_Tag0,RECO_1J_PTH_120_200_Tag1,RECO_1J_PTH_60_120_Tag0,RECO_1J_PTH_60_120_Tag1,RECO_1J_PTH_0_60_Tag0,RECO_1J_PTH_0_60_Tag1,RECO_VBFTOPO_BSM,RECO_VBFTOPO_JET3VETO_Tag0,RECO_VBFTOPO_JET3VETO_Tag1,RECO_VBFTOPO_JET3_Tag0,RECO_VBFTOPO_JET3_Tag1,RECO_VBFTOPO_VHHAD,RECO_GE2J_PTH_120_200_Tag0,RECO_GE2J_PTH_120_200_Tag1,RECO_GE2J_PTH_60_120_Tag0,RECO_GE2J_PTH_60_120_Tag1,RECO_GE2J_PTH_0_60_Tag0,RECO_GE2J_PTH_0_60_Tag1'
+# Stage 1 tags
+#cats  = 'RECO_0J_Tag0,RECO_0J_Tag1,RECO_0J_Tag2,'
+#cats += 'RECO_1J_PTH_0_60_Tag0,RECO_1J_PTH_0_60_Tag1,RECO_1J_PTH_60_120_Tag0,RECO_1J_PTH_60_120_Tag1,RECO_1J_PTH_120_200_Tag0,RECO_1J_PTH_120_200_Tag1,RECO_1J_PTH_GT200,'
+#cats += 'RECO_GE2J_PTH_0_60_Tag0,RECO_GE2J_PTH_0_60_Tag1,RECO_GE2J_PTH_60_120_Tag0,RECO_GE2J_PTH_60_120_Tag1,RECO_GE2J_PTH_120_200_Tag0,RECO_GE2J_PTH_120_200_Tag1,RECO_GE2J_PTH_GT200_Tag0,RECO_GE2J_PTH_GT200_Tag1,'
+#cats += 'RECO_VBFTOPO_JET3VETO_Tag0,RECO_VBFTOPO_JET3VETO_Tag1,RECO_VBFTOPO_JET3_Tag0,RECO_VBFTOPO_JET3_Tag1,RECO_VBFTOPO_REST,RECO_VBFTOPO_BSM'
 cats = cats.split(',')
 stage0procs = {}
 stage0procs['GG2H']    = 0.
@@ -58,8 +56,8 @@ stage0noTag['ZH2HQQ']  = 0.
 stage0noTag['QQ2HLL']  = 0.
 stage0noTag['QQ2HLNU'] = 0.
 stage0noTag['TTH'] = 0.
-print procs 
-print cats
+print " --> [DEBUG] PROCS: ", procs.keys
+print " --> [DEBUG] CATS: ", cats
 
 nameMap  = {}
 nameMap['GG2H']    = 'ggh'
@@ -94,16 +92,15 @@ def main():
     procsNoTag[theProc] += sumEntries
     totEffAccDenom += sumEntries
 
-  print '\n\n\nStage 1 fractions:'
+  print '\n\n\nStage 1.1 fractions:'
   for proc,val in procs.iteritems():
-    procTot = stage0procs[ proc.split('_')[0] ]
-    theFrac = val / procTot
+    procTot = stage0procs[ proc.split('_')[0] ]+stage0noTag[proc.split('_')[0]]
+    theFrac = (val+procsNoTag[proc]) / procTot
     effAcc  = val / (val + procsNoTag[proc]) 
-    print 'total     for process %s is %1.4f'%(proc,35.9*val)
+    print 'total     for process %s is %1.4f [1fb-1]'%(proc,(val+procsNoTag[proc]))
     print 'fraction  for process %s is %1.4f'%(proc,theFrac)
     print 'eff x acc for process %s is %1.4f'%(proc,effAcc)
-    print
-  print '\n'
+    print '\n'
   totEffAcc = totEffAccNumer / (totEffAccNumer + totEffAccDenom)
   print 'total eff x acc is %1.4f'%(totEffAcc)
 

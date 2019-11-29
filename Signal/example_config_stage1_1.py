@@ -3,12 +3,12 @@
 signalScriptCfg = {
   
   # Setup
-  'inputWSDir':'/eos/home-j/jlangfor/hgg/ws/test_legacy_runII_102x', 
+  'inputWSDir':'/vols/cms/jl2117/hgg/ws/test_stage1_1_2018', 
   #Procs will be inferred automatically from filenames
-  'cats':'UntaggedTag_0,UntaggedTag_2,VBFTag_0',
-  'ext':'test',
-  'analysis':'hig-16-040', # To specify which replacement dataset mapping i.e. when too few entries in proc x cat
-  'year':'2016', 
+  'cats':'RECO_0J_PTH_GT10_Tag0,RECO_0J_PTH_GT10_Tag1,RECO_0J_PTH_0_10_Tag0,RECO_0J_PTH_0_10_Tag1,RECO_PTH_GT200_Tag0,RECO_PTH_GT200_Tag1,RECO_1J_PTH_120_200_Tag0,RECO_1J_PTH_120_200_Tag1,RECO_1J_PTH_60_120_Tag0,RECO_1J_PTH_60_120_Tag1,RECO_1J_PTH_0_60_Tag0,RECO_1J_PTH_0_60_Tag1,RECO_VBFTOPO_BSM,RECO_VBFTOPO_JET3VETO_Tag0,RECO_VBFTOPO_JET3VETO_Tag1,RECO_VBFTOPO_JET3_Tag0,RECO_VBFTOPO_JET3_Tag1,RECO_GE2J_PTH_120_200_Tag0,RECO_GE2J_PTH_120_200_Tag1,RECO_GE2J_PTH_60_120_Tag0,RECO_GE2J_PTH_60_120_Tag1,RECO_GE2J_PTH_0_60_Tag0,RECO_GE2J_PTH_0_60_Tag1',
+  'ext':'stage1_1_2018',
+  'analysis':'stage1_1', # To specify which replacement dataset mapping (defined in ./python/replacementMap.py)
+  'year':'2018', 
   'beamspot':'3.4',
   'numberOfBins':'320',
   'massPoints':'120,125,130',
@@ -24,7 +24,7 @@ signalScriptCfg = {
 
   # Job submission options
   'batch':'HTCONDOR',
-  'queue':'espresso',
+  'queue':'microcentury',
 
   # Mode allows script to carry out single function
   'mode':'std', # Options: [std,phoSystOnly,sigFitOnly,packageOnly,sigPlotsOnly]

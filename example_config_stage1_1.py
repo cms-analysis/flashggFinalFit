@@ -4,11 +4,11 @@ combineScriptCfg = {
   
   # Setup
   'mode':'combine',
-  'inputWSDir':'/vols/cms/es811/FinalFits/ws_ReweighAndNewggHweights', 
+  'inputWSDir':'/vols/cms/jl2117/hgg/ws/test_stage1_1_2018', 
   #Procs will be inferred automatically from filenames
-  'cats':'UntaggedTag_0,VBFTag_0',
-  'ext':'test_hig16040',
-  'year':'2016', 
+  'cats':'RECO_0J_PTH_GT10_Tag0,RECO_0J_PTH_GT10_Tag1,RECO_0J_PTH_0_10_Tag0,RECO_0J_PTH_0_10_Tag1,RECO_PTH_GT200_Tag0,RECO_PTH_GT200_Tag1,RECO_1J_PTH_120_200_Tag0,RECO_1J_PTH_120_200_Tag1,RECO_1J_PTH_60_120_Tag0,RECO_1J_PTH_60_120_Tag1,RECO_1J_PTH_0_60_Tag0,RECO_1J_PTH_0_60_Tag1,RECO_VBFTOPO_BSM,RECO_VBFTOPO_JET3VETO_Tag0,RECO_VBFTOPO_JET3VETO_Tag1,RECO_VBFTOPO_JET3_Tag0,RECO_VBFTOPO_JET3_Tag1,RECO_GE2J_PTH_120_200_Tag0,RECO_GE2J_PTH_120_200_Tag1,RECO_GE2J_PTH_60_120_Tag0,RECO_GE2J_PTH_60_120_Tag1,RECO_GE2J_PTH_0_60_Tag0,RECO_GE2J_PTH_0_60_Tag1',
+  'ext':'stage1_1_2018',
+  'year':'2018', 
   'signalProcs':'all',
 
   # Add UE/PS systematics to datacard (only relevant if mode == datacard)
@@ -21,8 +21,8 @@ combineScriptCfg = {
   'smears':'HighR9EBPhi,HighR9EBRho,HighR9EEPhi,HighR9EERho,LowR9EBPhi,LowR9EBRho,LowR9EEPhi,LowR9EERho',
 
   # Job submission options
-  'batch':'IC',
-  'queue':'hep.q',
+  'batch':'HTCONDOR',
+  'queue':'workday',
 
   'printOnly':0 # For dry-run: print command only
   

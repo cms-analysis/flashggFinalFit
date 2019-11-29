@@ -46,6 +46,7 @@ class Normalization_13TeV {
 	std::map<double,double> XSectionMap_WH2HQQ;
 	std::map<double,double> XSectionMap_ZH2HQQ;
 
+  /*
   // Stage 1 STXS
   std::map<double,double> XSectionMap_GG2H_0J;
   std::map<double,double> XSectionMap_GG2H_1J_PTH_0_60;
@@ -86,5 +87,67 @@ class Normalization_13TeV {
   std::map<double,double> XSectionMap_THQ;
   std::map<double,double> XSectionMap_THW;
   std::map<double,double> XSectionMap_GGZH;
+  */
+
+  // Stage 1.1 STXS
+  std::map<double,double> XSectionMap_GG2H_PTH_GT200;
+  std::map<double,double> XSectionMap_GG2H_0J_PTH_0_10;
+  std::map<double,double> XSectionMap_GG2H_0J_PTH_GT10;
+  std::map<double,double> XSectionMap_GG2H_1J_PTH_0_60;
+  std::map<double,double> XSectionMap_GG2H_1J_PTH_60_120;
+  std::map<double,double> XSectionMap_GG2H_1J_PTH_120_200;
+  std::map<double,double> XSectionMap_GG2H_GE2J_MJJ_0_350_PTH_0_60;
+  std::map<double,double> XSectionMap_GG2H_GE2J_MJJ_0_350_PTH_60_120;
+  std::map<double,double> XSectionMap_GG2H_GE2J_MJJ_0_350_PTH_120_200;
+  std::map<double,double> XSectionMap_GG2H_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25;
+  std::map<double,double> XSectionMap_GG2H_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25;
+  std::map<double,double> XSectionMap_GG2H_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25;
+  std::map<double,double> XSectionMap_GG2H_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25;
+  std::map<double,double> XSectionMap_VBF_0J;
+  std::map<double,double> XSectionMap_VBF_1J;
+  std::map<double,double> XSectionMap_VBF_GE2J_MJJ_0_60;
+  std::map<double,double> XSectionMap_VBF_GE2J_MJJ_60_120;
+  std::map<double,double> XSectionMap_VBF_GE2J_MJJ_120_350;
+  std::map<double,double> XSectionMap_VBF_GE2J_MJJ_GT350_PTH_GT200;
+  std::map<double,double> XSectionMap_VBF_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25;
+  std::map<double,double> XSectionMap_VBF_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25;
+  std::map<double,double> XSectionMap_VBF_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25;
+  std::map<double,double> XSectionMap_VBF_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25;
+  std::map<double,double> XSectionMap_WH2HQQ_0J;
+  std::map<double,double> XSectionMap_WH2HQQ_1J;
+  std::map<double,double> XSectionMap_WH2HQQ_GE2J_MJJ_0_60;
+  std::map<double,double> XSectionMap_WH2HQQ_GE2J_MJJ_60_120;
+  std::map<double,double> XSectionMap_WH2HQQ_GE2J_MJJ_120_350;
+  std::map<double,double> XSectionMap_WH2HQQ_GE2J_MJJ_GT350_PTH_GT200;
+  std::map<double,double> XSectionMap_WH2HQQ_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25;
+  std::map<double,double> XSectionMap_WH2HQQ_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25;
+  std::map<double,double> XSectionMap_WH2HQQ_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25;
+  std::map<double,double> XSectionMap_WH2HQQ_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25;
+  std::map<double,double> XSectionMap_ZH2HQQ_0J;
+  std::map<double,double> XSectionMap_ZH2HQQ_1J;
+  std::map<double,double> XSectionMap_ZH2HQQ_GE2J_MJJ_0_60;
+  std::map<double,double> XSectionMap_ZH2HQQ_GE2J_MJJ_60_120;
+  std::map<double,double> XSectionMap_ZH2HQQ_GE2J_MJJ_120_350;
+  std::map<double,double> XSectionMap_ZH2HQQ_GE2J_MJJ_GT350_PTH_GT200;
+  std::map<double,double> XSectionMap_ZH2HQQ_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25;
+  std::map<double,double> XSectionMap_ZH2HQQ_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25;
+  std::map<double,double> XSectionMap_ZH2HQQ_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25;
+  std::map<double,double> XSectionMap_ZH2HQQ_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25;
+  std::map<double,double> XSectionMap_QQ2HLNU_PTV_0_75;
+  std::map<double,double> XSectionMap_QQ2HLNU_PTV_75_150;
+  std::map<double,double> XSectionMap_QQ2HLNU_PTV_150_250_0J;
+  std::map<double,double> XSectionMap_QQ2HLNU_PTV_150_250_GE1J;
+  std::map<double,double> XSectionMap_QQ2HLNU_PTV_GT250;
+  std::map<double,double> XSectionMap_QQ2HLL_PTV_0_75;
+  std::map<double,double> XSectionMap_QQ2HLL_PTV_75_150;
+  std::map<double,double> XSectionMap_QQ2HLL_PTV_150_250_0J;
+  std::map<double,double> XSectionMap_QQ2HLL_PTV_150_250_GE1J;
+  std::map<double,double> XSectionMap_QQ2HLL_PTV_GT250;
+  std::map<double,double> XSectionMap_BBH;
+  std::map<double,double> XSectionMap_TTH;
+  std::map<double,double> XSectionMap_THQ;
+  std::map<double,double> XSectionMap_THW;
+  std::map<double,double> XSectionMap_GGZH;
+
 };
 #endif

@@ -158,8 +158,8 @@ echo "------------------------------------------------"
 
 cd Datacard
 if [ $DOSTAGE1 == 1 ]; then
-  echo "./makeStage1Datacard.py -i $FILE  -o Datacard_13TeV_${EXT}.txt -p $PROCS -c $CATS --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --intLumi $INTLUMI --year $YEAR --uepsfilename $UEPS --newGghScheme --doSTXS"
-  ./makeStage1Datacard.py -i $FILE  -o Datacard_13TeV_${EXT}.txt -p $PROCS -c $CATS --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --intLumi $INTLUMI --year $YEAR --uepsfilename $UEPS --newGghScheme --doSTXS
+  echo "./makeDatacard.py -i $FILE  -o Datacard_13TeV_${EXT}.txt -p $PROCS -c $CATS --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --intLumi $INTLUMI --year $YEAR --uepsfilename $UEPS --newGghScheme --doSTXS"
+  ./makeDatacard.py -i $FILE  -o Datacard_13TeV_${EXT}.txt -p $PROCS -c $CATS --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --intLumi $INTLUMI --year $YEAR --uepsfilename $UEPS --newGghScheme --doSTXS
 else
   if [ $NEWGGHSCHEME == 1 ] && [ $DOSTXS == 1 ]; then
   echo "./makeParametricModelDatacardFLASHgg.py -i $FILE  -o Datacard_13TeV_${EXT}.txt -p $PROCS -c $CATS --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --intLumi $INTLUMI --uepsfilename $UEPS --newGghScheme --doSTXS"
@@ -202,16 +202,18 @@ if [ ! -d "Signal/$OUTDIR" ]; then
 fi
 
 cd Plots/FinalResults
-#ls ../../Signal/$OUTDIR/CMS-HGG_*sigfit*oot  > tmp.txt
-#while read p;
-#do
-#q=$(basename $p)
-#cp $p ${q/$EXT/mva} 
-#echo " cp $p ${q/$EXT/mva} "
-#done < tmp.txt
-#cp ../../Signal/$OUTDIR/CMS-HGG_sigfit_${EXT}.root CMS-HGG_mva_13TeV_sigfit.root
-#cp ../../Background/CMS-HGG_multipdf_${EXT}${FAKE}.root CMS-HGG_mva_13TeV_multipdf${FAKE}.root
-#cp ../../Datacard/Datacard_13TeV_$EXT.txt CMS-HGG_mva_13TeV_datacard.txt
+ls ../../Signal/$OUTDIR/CMS-HGG_*sigfit*oot  > tmp.txt
+while read p;
+do
+q=$(basename $p)
+cp $p ./Inputs/${EXT}/${q/$EXT/mva} 
+#echo " cp $p ./Inputs/${EXT}/${q/$EXT/mva} "
+done < tmp.txt
+#cp ../../Signal/$OUTDIR/CMS-HGG_sigfit_${EXT}.root ./Inputs/${EXT}/CMS-HGG_mva_13TeV_sigfit.root
+cp ../../Background/CMS-HGG_multipdf_${EXT}${FAKE}.root ./Inputs/${EXT}/CMS-HGG_mva_13TeV_multipdf${FAKE}.root
+cp ../../Datacard/Datacard_13TeV_${EXT}_cleaned.txt CMS-HGG_mva_13TeV_datacard_${EXT}.txt
+
+exit 1
 
 cp combineHarvesterOptions_Template${FAKE}.dat combineHarvesterOptions_${EXT}${FAKE}.dat
 sed -i -e "s/\!EXT\!/$EXT/g" combineHarvesterOptions_${EXT}${FAKE}.dat 

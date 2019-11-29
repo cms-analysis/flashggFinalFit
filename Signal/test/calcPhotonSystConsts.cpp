@@ -225,7 +225,7 @@ Double_t effSigma(TH1 * hist)
 		}  
 	}
 	if(ismin == nrms || ismin == -nrms) ierr=3;
-	if(ierr != 0) cout << "effsigma: Error of type " << ierr << endl;
+	//if(ierr != 0) cout << "effsigma: Error of type " << ierr << endl;
 
 	if(verbosity_)	std::cout<< "[INFO] " << (hist->GetName()) << " has effSigma " << widmin << std::endl;
   

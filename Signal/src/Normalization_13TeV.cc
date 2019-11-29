@@ -49,6 +49,7 @@ int Normalization_13TeV::Init(int sqrtS){
         XSectionMap_WH2HQQ[mH]  = valXSWH2HQQ;
         XSectionMap_ZH2HQQ[mH]  = valXSZH2HQQ;
 
+        /*
         //Stage 1 
         XSectionMap_GG2H_0J[mH]                  = 0.91 * 0.6236 * valXSggH; // frac(central) * frac(of central) * totXS
         XSectionMap_GG2H_1J_PTH_0_60[mH]         = 0.91 * 0.1508 * valXSggH;
@@ -95,6 +96,73 @@ int Normalization_13TeV::Init(int sqrtS){
         XSectionMap_THQ[mH]                      = valXStHq;
         XSectionMap_THW[mH]                      = valXStHW;
         XSectionMap_GGZH[mH]                     = valXSggZH;
+        */
+
+        //Stage 1.1
+        XSectionMap_GG2H_PTH_GT200[mH] = 0.91 * 0.0286 * valXSggH;
+        XSectionMap_GG2H_0J_PTH_0_10[mH] = 0.91 * 0.1576 * valXSggH;
+        XSectionMap_GG2H_0J_PTH_GT10[mH] = 0.91 * 0.4334 * valXSggH;
+        XSectionMap_GG2H_1J_PTH_0_60[mH] = 0.91 * 0.1460 * valXSggH;
+        XSectionMap_GG2H_1J_PTH_60_120[mH] = 0.91 * 0.1039 * valXSggH;
+        XSectionMap_GG2H_1J_PTH_120_200[mH] = 0.91 * 0.0215 * valXSggH;
+        XSectionMap_GG2H_GE2J_MJJ_0_350_PTH_0_60[mH] = 0.91 * 0.0247 * valXSggH;
+        XSectionMap_GG2H_GE2J_MJJ_0_350_PTH_60_120[mH] = 0.91 * 0.0378 * valXSggH;
+        XSectionMap_GG2H_GE2J_MJJ_0_350_PTH_120_200[mH] = 0.91 * 0.0246 * valXSggH;
+        XSectionMap_GG2H_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25[mH] = 0.91 * 0.0073 * valXSggH;
+        XSectionMap_GG2H_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25[mH] = 0.91 * 0.0078 * valXSggH;
+        XSectionMap_GG2H_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25[mH] = 0.91 * 0.0029 * valXSggH;
+        XSectionMap_GG2H_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25[mH] = 0.91 * 0.0038 * valXSggH;       
+
+        XSectionMap_VBF_0J[mH] = 0.93 * 0.0686 * valXSqqH;
+        XSectionMap_VBF_1J[mH] = 0.93 * 0.3475 * valXSqqH;
+        XSectionMap_VBF_GE2J_MJJ_0_60[mH] = 0.93 * 0.0108 * valXSqqH;
+        XSectionMap_VBF_GE2J_MJJ_60_120[mH] = 0.93 * 0.0181 * valXSqqH;
+        XSectionMap_VBF_GE2J_MJJ_120_350[mH] = 0.93 * 0.1065 * valXSqqH;
+        XSectionMap_VBF_GE2J_MJJ_GT350_PTH_GT200[mH] = 0.93 * 0.0590 * valXSqqH;
+        XSectionMap_VBF_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25[mH] = 0.93 * 0.1276 * valXSqqH;
+        XSectionMap_VBF_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25[mH] = 0.93 * 0.0250 * valXSqqH;
+        XSectionMap_VBF_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25[mH] = 0.93 * 0.1878 * valXSqqH;
+        XSectionMap_VBF_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25[mH] = 0.93 * 0.0029 * valXSqqH;
+
+        XSectionMap_WH2HQQ_0J[mH] = 0.001 * valXSWH2HQQ;
+        XSectionMap_WH2HQQ_1J[mH] = 0.001 * valXSWH2HQQ;
+        XSectionMap_WH2HQQ_GE2J_MJJ_0_60[mH] = 0.001 * valXSWH2HQQ;
+        XSectionMap_WH2HQQ_GE2J_MJJ_60_120[mH] = 0.99 * valXSWH2HQQ;
+        XSectionMap_WH2HQQ_GE2J_MJJ_120_350[mH] = 0.001 * valXSWH2HQQ;
+        XSectionMap_WH2HQQ_GE2J_MJJ_GT350_PTH_GT200[mH] = 0.001 * valXSWH2HQQ;
+        XSectionMap_WH2HQQ_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25[mH] = 0.001 * valXSWH2HQQ;
+        XSectionMap_WH2HQQ_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25[mH] = 0.001 * valXSWH2HQQ;
+        XSectionMap_WH2HQQ_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25[mH] = 0.001 * valXSWH2HQQ;
+        XSectionMap_WH2HQQ_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25[mH] = 0.001 * valXSWH2HQQ;
+
+        XSectionMap_ZH2HQQ_0J[mH] = 0.001 * valXSZH2HQQ;
+        XSectionMap_ZH2HQQ_1J[mH] = 0.001 * valXSZH2HQQ;
+        XSectionMap_ZH2HQQ_GE2J_MJJ_0_60[mH] = 0.001 * valXSZH2HQQ;
+        XSectionMap_ZH2HQQ_GE2J_MJJ_60_120[mH] = 0.99 * valXSZH2HQQ;
+        XSectionMap_ZH2HQQ_GE2J_MJJ_120_350[mH] = 0.001 * valXSZH2HQQ;
+        XSectionMap_ZH2HQQ_GE2J_MJJ_GT350_PTH_GT200[mH] = 0.001 * valXSZH2HQQ;
+        XSectionMap_ZH2HQQ_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25[mH] = 0.001 * valXSZH2HQQ;
+        XSectionMap_ZH2HQQ_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25[mH] = 0.001 * valXSZH2HQQ;
+        XSectionMap_ZH2HQQ_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25[mH] = 0.001 * valXSZH2HQQ;
+        XSectionMap_ZH2HQQ_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25[mH] = 0.001 * valXSZH2HQQ;
+
+        XSectionMap_QQ2HLNU_PTV_0_75[mH] = 0.5 * valXSQQ2HLNU;
+        XSectionMap_QQ2HLNU_PTV_75_150[mH] = 0.4467 * valXSQQ2HLNU;
+        XSectionMap_QQ2HLNU_PTV_150_250_0J[mH] = 0.0203 * valXSQQ2HLNU;
+        XSectionMap_QQ2HLNU_PTV_150_250_GE1J[mH] = 0.0260 * valXSQQ2HLNU;
+        XSectionMap_QQ2HLNU_PTV_GT250[mH] = 0.0070 * valXSQQ2HLNU;
+
+        XSectionMap_QQ2HLL_PTV_0_75[mH] = 0.5 * valXSQQ2HLL;
+        XSectionMap_QQ2HLL_PTV_75_150[mH] = 0.4413 * valXSQQ2HLL;
+        XSectionMap_QQ2HLL_PTV_150_250_0J[mH] = 0.0242 * valXSQQ2HLL;
+        XSectionMap_QQ2HLL_PTV_150_250_GE1J[mH] = 0.0260 * valXSQQ2HLL;
+        XSectionMap_QQ2HLL_PTV_GT250[mH] = 0.0068 * valXSQQ2HLL;
+
+        XSectionMap_TTH[mH]                      = valXSttH;
+        XSectionMap_BBH[mH]                      = valXSbbH;
+        XSectionMap_THQ[mH]                      = valXStHq;
+        XSectionMap_THW[mH]                      = valXStHW;
+        XSectionMap_GGZH[mH]                     = valXSggZH;
     }
 }
 
@@ -102,84 +170,123 @@ TGraph * Normalization_13TeV::GetSigmaGraph(TString process)
 {
   TGraph * gr = new TGraph();
   std::map<double, double> * XSectionMap = 0;
-  if ( process == "GG2H_0J" ) {
-          XSectionMap = &XSectionMap_GG2H_0J;
-  } else if ( process == "GG2H_1J_PTH_0_60" ) {
+  // Stage 1.1
+  if ( process == "GG2H_PTH_GT200" ){
+          XSectionMap = &XSectionMap_GG2H_PTH_GT200;
+  } else if ( process == "GG2H_0J_PTH_0_10" ){
+          XSectionMap = &XSectionMap_GG2H_0J_PTH_0_10;
+  } else if ( process == "GG2H_0J_PTH_GT10" ){
+          XSectionMap = &XSectionMap_GG2H_0J_PTH_GT10;
+  } else if ( process == "GG2H_1J_PTH_0_60" ){
           XSectionMap = &XSectionMap_GG2H_1J_PTH_0_60;
-  } else if ( process == "GG2H_1J_PTH_60_120" ) {
+  } else if ( process == "GG2H_1J_PTH_60_120" ){
           XSectionMap = &XSectionMap_GG2H_1J_PTH_60_120;
-  } else if ( process == "GG2H_1J_PTH_120_200" ) {
+  } else if ( process == "GG2H_1J_PTH_120_200" ){
           XSectionMap = &XSectionMap_GG2H_1J_PTH_120_200;
-  } else if ( process == "GG2H_1J_PTH_GT200" ) {
-          XSectionMap = &XSectionMap_GG2H_1J_PTH_GT200;
-  } else if ( process == "GG2H_GE2J_PTH_0_60" ) {
-          XSectionMap = &XSectionMap_GG2H_GE2J_PTH_0_60;
-  } else if ( process == "GG2H_GE2J_PTH_60_120" ) {
-          XSectionMap = &XSectionMap_GG2H_GE2J_PTH_60_120;
-  } else if ( process == "GG2H_GE2J_PTH_120_200" ) {
-          XSectionMap = &XSectionMap_GG2H_GE2J_PTH_120_200;
-  } else if ( process == "GG2H_GE2J_PTH_GT200" ) {
-          XSectionMap = &XSectionMap_GG2H_GE2J_PTH_GT200;
-  } else if ( process == "GG2H_VBFTOPO_JET3VETO" ) {
-          XSectionMap = &XSectionMap_GG2H_VBFTOPO_JET3VETO;
-  } else if ( process == "GG2H_VBFTOPO_JET3" ) {
-          XSectionMap = &XSectionMap_GG2H_VBFTOPO_JET3;
-  } else if ( process == "VBF_PTJET1_GT200" ) {
-          XSectionMap = &XSectionMap_VBF_PTJET1_GT200;
-  } else if ( process == "VBF_VH2JET" ) {
-          XSectionMap = &XSectionMap_VBF_VH2JET;
-  } else if ( process == "VBF_VBFTOPO_JET3VETO" ) {
-          XSectionMap = &XSectionMap_VBF_VBFTOPO_JET3VETO;
-  } else if ( process == "VBF_VBFTOPO_JET3" ) {
-          XSectionMap = &XSectionMap_VBF_VBFTOPO_JET3;
-  } else if ( process == "VBF_REST" ) {
-          XSectionMap = &XSectionMap_VBF_REST;
-  } else if ( process == "TTH" ) {
-          XSectionMap = &XSectionMap_TTH;
-  } else if ( process == "QQ2HLNU_PTV_GT250" ) {
-          XSectionMap = &XSectionMap_QQ2HLNU_PTV_GT250;
-  } else if ( process == "QQ2HLNU_PTV_150_250_GE1J" ) {
-          XSectionMap = &XSectionMap_QQ2HLNU_PTV_150_250_GE1J;
-  } else if ( process == "QQ2HLNU_PTV_150_250_0J" ) {
+  } else if ( process == "GG2H_GE2J_MJJ_0_350_PTH_0_60" ){
+          XSectionMap = &XSectionMap_GG2H_GE2J_MJJ_0_350_PTH_0_60;
+  } else if ( process == "GG2H_GE2J_MJJ_0_350_PTH_60_120" ){
+          XSectionMap = &XSectionMap_GG2H_GE2J_MJJ_0_350_PTH_60_120;
+  } else if ( process == "GG2H_GE2J_MJJ_0_350_PTH_120_200" ){
+          XSectionMap = &XSectionMap_GG2H_GE2J_MJJ_0_350_PTH_120_200;
+  } else if ( process == "GG2H_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25" ){
+          XSectionMap = &XSectionMap_GG2H_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25;
+  } else if ( process == "GG2H_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25" ){
+          XSectionMap = &XSectionMap_GG2H_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25;
+  } else if ( process == "GG2H_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25" ){
+          XSectionMap = &XSectionMap_GG2H_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25;
+  } else if ( process == "GG2H_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25" ){
+          XSectionMap = &XSectionMap_GG2H_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25;
+  } else if ( process == "VBF_0J" ){
+          XSectionMap = &XSectionMap_VBF_0J;
+  } else if ( process == "VBF_1J" ){
+          XSectionMap = &XSectionMap_VBF_1J;
+  } else if ( process == "VBF_GE2J_MJJ_0_60" ){
+          XSectionMap = &XSectionMap_VBF_GE2J_MJJ_0_60;
+  } else if ( process == "VBF_GE2J_MJJ_60_120" ){
+          XSectionMap = &XSectionMap_VBF_GE2J_MJJ_60_120;
+  } else if ( process == "VBF_GE2J_MJJ_120_350" ){
+          XSectionMap = &XSectionMap_VBF_GE2J_MJJ_120_350;
+  } else if ( process == "VBF_GE2J_MJJ_GT350_PTH_GT200" ){
+          XSectionMap = &XSectionMap_VBF_GE2J_MJJ_GT350_PTH_GT200;
+  } else if ( process == "VBF_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25" ){
+          XSectionMap = &XSectionMap_VBF_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25;
+  } else if ( process == "VBF_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25" ){
+          XSectionMap = &XSectionMap_VBF_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25;
+  } else if ( process == "VBF_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25" ){
+          XSectionMap = &XSectionMap_VBF_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25;
+  } else if ( process == "VBF_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25" ){
+          XSectionMap = &XSectionMap_VBF_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25;
+  } else if ( process == "WH2HQQ_0J" ){
+          XSectionMap = &XSectionMap_WH2HQQ_0J;
+  } else if ( process == "WH2HQQ_1J" ){
+          XSectionMap = &XSectionMap_WH2HQQ_1J;
+  } else if ( process == "WH2HQQ_GE2J_MJJ_0_60" ){
+          XSectionMap = &XSectionMap_WH2HQQ_GE2J_MJJ_0_60;
+  } else if ( process == "WH2HQQ_GE2J_MJJ_60_120" ){
+          XSectionMap = &XSectionMap_WH2HQQ_GE2J_MJJ_60_120;
+  } else if ( process == "WH2HQQ_GE2J_MJJ_120_350" ){
+          XSectionMap = &XSectionMap_WH2HQQ_GE2J_MJJ_120_350;
+  } else if ( process == "WH2HQQ_GE2J_MJJ_GT350_PTH_GT200" ){
+          XSectionMap = &XSectionMap_WH2HQQ_GE2J_MJJ_GT350_PTH_GT200;
+  } else if ( process == "WH2HQQ_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25" ){
+          XSectionMap = &XSectionMap_WH2HQQ_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25;
+  } else if ( process == "WH2HQQ_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25" ){
+          XSectionMap = &XSectionMap_WH2HQQ_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25;
+  } else if ( process == "WH2HQQ_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25" ){
+          XSectionMap = &XSectionMap_WH2HQQ_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25;
+  } else if ( process == "WH2HQQ_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25" ){
+          XSectionMap = &XSectionMap_WH2HQQ_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25;
+  } else if ( process == "ZH2HQQ_0J" ){
+          XSectionMap = &XSectionMap_ZH2HQQ_0J;
+  } else if ( process == "ZH2HQQ_1J" ){
+          XSectionMap = &XSectionMap_ZH2HQQ_1J;
+  } else if ( process == "ZH2HQQ_GE2J_MJJ_0_60" ){
+          XSectionMap = &XSectionMap_ZH2HQQ_GE2J_MJJ_0_60;
+  } else if ( process == "ZH2HQQ_GE2J_MJJ_60_120" ){
+          XSectionMap = &XSectionMap_ZH2HQQ_GE2J_MJJ_60_120;
+  } else if ( process == "ZH2HQQ_GE2J_MJJ_120_350" ){
+          XSectionMap = &XSectionMap_ZH2HQQ_GE2J_MJJ_120_350;
+  } else if ( process == "ZH2HQQ_GE2J_MJJ_GT350_PTH_GT200" ){
+          XSectionMap = &XSectionMap_ZH2HQQ_GE2J_MJJ_GT350_PTH_GT200;
+  } else if ( process == "ZH2HQQ_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25" ){
+          XSectionMap = &XSectionMap_ZH2HQQ_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25;
+  } else if ( process == "ZH2HQQ_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25" ){
+          XSectionMap = &XSectionMap_ZH2HQQ_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25;
+  } else if ( process == "ZH2HQQ_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25" ){
+          XSectionMap = &XSectionMap_ZH2HQQ_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25;
+  } else if ( process == "ZH2HQQ_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25" ){
+          XSectionMap = &XSectionMap_ZH2HQQ_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25;
+  } else if ( process == "QQ2HLNU_PTV_0_75" ){
+          XSectionMap = &XSectionMap_QQ2HLNU_PTV_0_75;
+  } else if ( process == "QQ2HLNU_PTV_75_150" ){
+          XSectionMap = &XSectionMap_QQ2HLNU_PTV_75_150;
+  } else if ( process == "QQ2HLNU_PTV_150_250_0J" ){
           XSectionMap = &XSectionMap_QQ2HLNU_PTV_150_250_0J;
-  } else if ( process == "QQ2HLNU_PTV_0_150" ) {
-          XSectionMap = &XSectionMap_QQ2HLNU_PTV_0_150;
-  } else if ( process == "WH2HQQ_PTJET1_GT200" ) {
-          XSectionMap = &XSectionMap_WH2HQQ_PTJET1_GT200;
-  } else if ( process == "WH2HQQ_VH2JET" ) {
-          XSectionMap = &XSectionMap_WH2HQQ_VH2JET;
-  } else if ( process == "WH2HQQ_VBFTOPO_JET3VETO" ) {
-          XSectionMap = &XSectionMap_WH2HQQ_VBFTOPO_JET3VETO;
-  } else if ( process == "WH2HQQ_VBFTOPO_JET3" ) {
-          XSectionMap = &XSectionMap_WH2HQQ_VBFTOPO_JET3;
-  } else if ( process == "WH2HQQ_REST" ) {
-          XSectionMap = &XSectionMap_WH2HQQ_REST;
-  } else if ( process == "QQ2HLL_PTV_GT250" ) {
-          XSectionMap = &XSectionMap_QQ2HLL_PTV_GT250;
-  } else if ( process == "QQ2HLL_PTV_150_250_GE1J" ) {
-          XSectionMap = &XSectionMap_QQ2HLL_PTV_150_250_GE1J;
-  } else if ( process == "QQ2HLL_PTV_150_250_0J" ) {
+  } else if ( process == "QQ2HLNU_PTV_150_250_GE1J" ){
+          XSectionMap = &XSectionMap_QQ2HLNU_PTV_150_250_GE1J;
+  } else if ( process == "QQ2HLNU_PTV_GT250" ){
+          XSectionMap = &XSectionMap_QQ2HLNU_PTV_GT250;
+  } else if ( process == "QQ2HLL_PTV_0_75" ){
+          XSectionMap = &XSectionMap_QQ2HLL_PTV_0_75;
+  } else if ( process == "QQ2HLL_PTV_75_150" ){
+          XSectionMap = &XSectionMap_QQ2HLL_PTV_75_150;
+  } else if ( process == "QQ2HLL_PTV_150_250_0J" ){
           XSectionMap = &XSectionMap_QQ2HLL_PTV_150_250_0J;
-  } else if ( process == "QQ2HLL_PTV_0_150" ) {
-          XSectionMap = &XSectionMap_QQ2HLL_PTV_0_150;
-  } else if ( process == "ZH2HQQ_PTJET1_GT200" ) {
-          XSectionMap = &XSectionMap_ZH2HQQ_PTJET1_GT200;
-  } else if ( process == "ZH2HQQ_VH2JET" ) {
-          XSectionMap = &XSectionMap_ZH2HQQ_VH2JET;
-  } else if ( process == "ZH2HQQ_VBFTOPO_JET3VETO" ) {
-          XSectionMap = &XSectionMap_ZH2HQQ_VBFTOPO_JET3VETO;
-  } else if ( process == "ZH2HQQ_VBFTOPO_JET3" ) {
-          XSectionMap = &XSectionMap_ZH2HQQ_VBFTOPO_JET3;
-  } else if ( process == "ZH2HQQ_REST" ) {
-          XSectionMap = &XSectionMap_ZH2HQQ_REST;
-  } else if ( process == "BBH" || process == "testBBH" ) {
+  } else if ( process == "QQ2HLL_PTV_150_250_GE1J" ){
+          XSectionMap = &XSectionMap_QQ2HLL_PTV_150_250_GE1J;
+  } else if ( process == "QQ2HLL_PTV_GT250" ){
+          XSectionMap = &XSectionMap_QQ2HLL_PTV_GT250;
+  } else if ( process == "BBH" ){
           XSectionMap = &XSectionMap_BBH;
-  } else if ( process == "THQ" || process == "testTHQ" ) {
-          XSectionMap = &XSectionMap_THQ;
-  } else if ( process == "THW" || process == "testTHW" ) {
+  } else if ( process == "TTH" ){
+          XSectionMap = &XSectionMap_TTH;
+  } else if ( process == "THW" ){
           XSectionMap = &XSectionMap_THW;
-  } else if ( process == "GGZH" ) {
-          XSectionMap = &XSectionMap_GGZH;
+  } else if ( process == "THQ" ){
+          XSectionMap = &XSectionMap_THQ;
+  } else if ( process == "GGZH" ){
+          XSectionMap = &XSectionMap_GGZH;  
   } else if ( process == "ggh" || process=="GG2H" ) {
     XSectionMap = &XSectionMap_ggh;
   } else if ( process == "vbf" || process=="VBF" ) {
@@ -248,84 +355,122 @@ double Normalization_13TeV::GetBR(double mass) {
 double Normalization_13TeV::GetXsection(double mass, TString HistName) {
 
   std::map<double,double> *XSectionMap;
-
-  if ( HistName.Contains("GG2H_0J") ) {
-          XSectionMap = &XSectionMap_GG2H_0J;
-  } else if ( HistName.Contains("GG2H_1J_PTH_0_60") ) {
+  // Stage 1.1
+  if ( HistName.Contains("GG2H_PTH_GT200") ){
+          XSectionMap = &XSectionMap_GG2H_PTH_GT200;
+  } else if ( HistName.Contains("GG2H_0J_PTH_0_10") ){
+          XSectionMap = &XSectionMap_GG2H_0J_PTH_0_10;
+  } else if ( HistName.Contains("GG2H_0J_PTH_GT10") ){
+          XSectionMap = &XSectionMap_GG2H_0J_PTH_GT10;
+  } else if ( HistName.Contains("GG2H_1J_PTH_0_60") ){
           XSectionMap = &XSectionMap_GG2H_1J_PTH_0_60;
-  } else if ( HistName.Contains("GG2H_1J_PTH_60_120") ) {
+  } else if ( HistName.Contains("GG2H_1J_PTH_60_120") ){
           XSectionMap = &XSectionMap_GG2H_1J_PTH_60_120;
-  } else if ( HistName.Contains("GG2H_1J_PTH_120_200") ) {
+  } else if ( HistName.Contains("GG2H_1J_PTH_120_200") ){
           XSectionMap = &XSectionMap_GG2H_1J_PTH_120_200;
-  } else if ( HistName.Contains("GG2H_1J_PTH_GT200") ) {
-          XSectionMap = &XSectionMap_GG2H_1J_PTH_GT200;
-  } else if ( HistName.Contains("GG2H_GE2J_PTH_0_60") ) {
-          XSectionMap = &XSectionMap_GG2H_GE2J_PTH_0_60;
-  } else if ( HistName.Contains("GG2H_GE2J_PTH_60_120") ) {
-          XSectionMap = &XSectionMap_GG2H_GE2J_PTH_60_120;
-  } else if ( HistName.Contains("GG2H_GE2J_PTH_120_200") ) {
-          XSectionMap = &XSectionMap_GG2H_GE2J_PTH_120_200;
-  } else if ( HistName.Contains("GG2H_GE2J_PTH_GT200") ) {
-          XSectionMap = &XSectionMap_GG2H_GE2J_PTH_GT200;
-  } else if ( HistName.Contains("GG2H_VBFTOPO_JET3VETO") ) {
-          XSectionMap = &XSectionMap_GG2H_VBFTOPO_JET3VETO;
-  } else if ( HistName.Contains("GG2H_VBFTOPO_JET3") ) {
-          XSectionMap = &XSectionMap_GG2H_VBFTOPO_JET3;
-  } else if ( HistName.Contains("VBF_PTJET1_GT200") ) {
-          XSectionMap = &XSectionMap_VBF_PTJET1_GT200;
-  } else if ( HistName.Contains("VBF_VH2JET") ) {
-          XSectionMap = &XSectionMap_VBF_VH2JET;
-  } else if ( HistName.Contains("VBF_VBFTOPO_JET3VETO") ) {
-          XSectionMap = &XSectionMap_VBF_VBFTOPO_JET3VETO;
-  } else if ( HistName.Contains("VBF_VBFTOPO_JET3") ) {
-          XSectionMap = &XSectionMap_VBF_VBFTOPO_JET3;
-  } else if ( HistName.Contains("VBF_REST") ) {
-          XSectionMap = &XSectionMap_VBF_REST;
-  } else if ( HistName.Contains("TTH") ) {
-          XSectionMap = &XSectionMap_TTH;
-  } else if ( HistName.Contains("QQ2HLNU_PTV_GT250") ) {
-          XSectionMap = &XSectionMap_QQ2HLNU_PTV_GT250;
-  } else if ( HistName.Contains("QQ2HLNU_PTV_150_250_GE1J") ) {
-          XSectionMap = &XSectionMap_QQ2HLNU_PTV_150_250_GE1J;
-  } else if ( HistName.Contains("QQ2HLNU_PTV_150_250_0J") ) {
+  } else if ( HistName.Contains("GG2H_GE2J_MJJ_0_350_PTH_0_60") ){
+          XSectionMap = &XSectionMap_GG2H_GE2J_MJJ_0_350_PTH_0_60;
+  } else if ( HistName.Contains("GG2H_GE2J_MJJ_0_350_PTH_60_120") ){
+          XSectionMap = &XSectionMap_GG2H_GE2J_MJJ_0_350_PTH_60_120;
+  } else if ( HistName.Contains("GG2H_GE2J_MJJ_0_350_PTH_120_200") ){
+          XSectionMap = &XSectionMap_GG2H_GE2J_MJJ_0_350_PTH_120_200;
+  } else if ( HistName.Contains("GG2H_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25") ){
+          XSectionMap = &XSectionMap_GG2H_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25;
+  } else if ( HistName.Contains("GG2H_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25") ){
+          XSectionMap = &XSectionMap_GG2H_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25;
+  } else if ( HistName.Contains("GG2H_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25") ){
+          XSectionMap = &XSectionMap_GG2H_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25;
+  } else if ( HistName.Contains("GG2H_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25") ){
+          XSectionMap = &XSectionMap_GG2H_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25;
+  } else if ( HistName.Contains("VBF_0J") ){
+          XSectionMap = &XSectionMap_VBF_0J;
+  } else if ( HistName.Contains("VBF_1J") ){
+          XSectionMap = &XSectionMap_VBF_1J;
+  } else if ( HistName.Contains("VBF_GE2J_MJJ_0_60") ){
+          XSectionMap = &XSectionMap_VBF_GE2J_MJJ_0_60;
+  } else if ( HistName.Contains("VBF_GE2J_MJJ_60_120") ){
+          XSectionMap = &XSectionMap_VBF_GE2J_MJJ_60_120;
+  } else if ( HistName.Contains("VBF_GE2J_MJJ_120_350") ){
+          XSectionMap = &XSectionMap_VBF_GE2J_MJJ_120_350;
+  } else if ( HistName.Contains("VBF_GE2J_MJJ_GT350_PTH_GT200") ){
+          XSectionMap = &XSectionMap_VBF_GE2J_MJJ_GT350_PTH_GT200;
+  } else if ( HistName.Contains("VBF_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25") ){
+          XSectionMap = &XSectionMap_VBF_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25;
+  } else if ( HistName.Contains("VBF_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25") ){
+          XSectionMap = &XSectionMap_VBF_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25;
+  } else if ( HistName.Contains("VBF_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25") ){
+          XSectionMap = &XSectionMap_VBF_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25;
+  } else if ( HistName.Contains("VBF_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25") ){
+          XSectionMap = &XSectionMap_VBF_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25;
+  } else if ( HistName.Contains("WH2HQQ_0J") ){
+          XSectionMap = &XSectionMap_WH2HQQ_0J;
+  } else if ( HistName.Contains("WH2HQQ_1J") ){
+          XSectionMap = &XSectionMap_WH2HQQ_1J;
+  } else if ( HistName.Contains("WH2HQQ_GE2J_MJJ_0_60") ){
+          XSectionMap = &XSectionMap_WH2HQQ_GE2J_MJJ_0_60;
+  } else if ( HistName.Contains("WH2HQQ_GE2J_MJJ_60_120") ){
+          XSectionMap = &XSectionMap_WH2HQQ_GE2J_MJJ_60_120;
+  } else if ( HistName.Contains("WH2HQQ_GE2J_MJJ_120_350") ){
+          XSectionMap = &XSectionMap_WH2HQQ_GE2J_MJJ_120_350;
+  } else if ( HistName.Contains("WH2HQQ_GE2J_MJJ_GT350_PTH_GT200") ){
+          XSectionMap = &XSectionMap_WH2HQQ_GE2J_MJJ_GT350_PTH_GT200;
+  } else if ( HistName.Contains("WH2HQQ_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25") ){
+          XSectionMap = &XSectionMap_WH2HQQ_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25;
+  } else if ( HistName.Contains("WH2HQQ_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25") ){
+          XSectionMap = &XSectionMap_WH2HQQ_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25;
+  } else if ( HistName.Contains("WH2HQQ_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25") ){
+          XSectionMap = &XSectionMap_WH2HQQ_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25;
+  } else if ( HistName.Contains("WH2HQQ_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25") ){
+          XSectionMap = &XSectionMap_WH2HQQ_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25;
+  } else if ( HistName.Contains("ZH2HQQ_0J") ){
+          XSectionMap = &XSectionMap_ZH2HQQ_0J;
+  } else if ( HistName.Contains("ZH2HQQ_1J") ){
+          XSectionMap = &XSectionMap_ZH2HQQ_1J;
+  } else if ( HistName.Contains("ZH2HQQ_GE2J_MJJ_0_60") ){
+          XSectionMap = &XSectionMap_ZH2HQQ_GE2J_MJJ_0_60;
+  } else if ( HistName.Contains("ZH2HQQ_GE2J_MJJ_60_120") ){
+          XSectionMap = &XSectionMap_ZH2HQQ_GE2J_MJJ_60_120;
+  } else if ( HistName.Contains("ZH2HQQ_GE2J_MJJ_120_350") ){
+          XSectionMap = &XSectionMap_ZH2HQQ_GE2J_MJJ_120_350;
+  } else if ( HistName.Contains("ZH2HQQ_GE2J_MJJ_GT350_PTH_GT200") ){
+          XSectionMap = &XSectionMap_ZH2HQQ_GE2J_MJJ_GT350_PTH_GT200;
+  } else if ( HistName.Contains("ZH2HQQ_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25") ){
+          XSectionMap = &XSectionMap_ZH2HQQ_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25;
+  } else if ( HistName.Contains("ZH2HQQ_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25") ){
+          XSectionMap = &XSectionMap_ZH2HQQ_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25;
+  } else if ( HistName.Contains("ZH2HQQ_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25") ){
+          XSectionMap = &XSectionMap_ZH2HQQ_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25;
+  } else if ( HistName.Contains("ZH2HQQ_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25") ){
+          XSectionMap = &XSectionMap_ZH2HQQ_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25;
+  } else if ( HistName.Contains("QQ2HLNU_PTV_0_75") ){
+          XSectionMap = &XSectionMap_QQ2HLNU_PTV_0_75;
+  } else if ( HistName.Contains("QQ2HLNU_PTV_75_150") ){
+          XSectionMap = &XSectionMap_QQ2HLNU_PTV_75_150;
+  } else if ( HistName.Contains("QQ2HLNU_PTV_150_250_0J") ){
           XSectionMap = &XSectionMap_QQ2HLNU_PTV_150_250_0J;
-  } else if ( HistName.Contains("QQ2HLNU_PTV_0_150") ) {
-          XSectionMap = &XSectionMap_QQ2HLNU_PTV_0_150;
-  } else if ( HistName.Contains("WH2HQQ_PTJET1_GT200") ) {
-          XSectionMap = &XSectionMap_WH2HQQ_PTJET1_GT200;
-  } else if ( HistName.Contains("WH2HQQ_VH2JET") ) {
-          XSectionMap = &XSectionMap_WH2HQQ_VH2JET;
-  } else if ( HistName.Contains("WH2HQQ_VBFTOPO_JET3VETO") ) {
-          XSectionMap = &XSectionMap_WH2HQQ_VBFTOPO_JET3VETO;
-  } else if ( HistName.Contains("WH2HQQ_VBFTOPO_JET3") ) {
-          XSectionMap = &XSectionMap_WH2HQQ_VBFTOPO_JET3;
-  } else if ( HistName.Contains("WH2HQQ_REST") ) {
-          XSectionMap = &XSectionMap_WH2HQQ_REST;
-  } else if ( HistName.Contains("QQ2HLL_PTV_GT250") ) {
-          XSectionMap = &XSectionMap_QQ2HLL_PTV_GT250;
-  } else if ( HistName.Contains("QQ2HLL_PTV_150_250_GE1J") ) {
-          XSectionMap = &XSectionMap_QQ2HLL_PTV_150_250_GE1J;
-  } else if ( HistName.Contains("QQ2HLL_PTV_150_250_0J") ) {
+  } else if ( HistName.Contains("QQ2HLNU_PTV_150_250_GE1J") ){
+          XSectionMap = &XSectionMap_QQ2HLNU_PTV_150_250_GE1J;
+  } else if ( HistName.Contains("QQ2HLNU_PTV_GT250") ){
+          XSectionMap = &XSectionMap_QQ2HLNU_PTV_GT250;
+  } else if ( HistName.Contains("QQ2HLL_PTV_0_75") ){
+          XSectionMap = &XSectionMap_QQ2HLL_PTV_0_75;
+  } else if ( HistName.Contains("QQ2HLL_PTV_75_150") ){
+          XSectionMap = &XSectionMap_QQ2HLL_PTV_75_150;
+  } else if ( HistName.Contains("QQ2HLL_PTV_150_250_0J") ){
           XSectionMap = &XSectionMap_QQ2HLL_PTV_150_250_0J;
-  } else if ( HistName.Contains("QQ2HLL_PTV_0_150") ) {
-          XSectionMap = &XSectionMap_QQ2HLL_PTV_0_150;
-  } else if ( HistName.Contains("ZH2HQQ_PTJET1_GT200") ) {
-          XSectionMap = &XSectionMap_ZH2HQQ_PTJET1_GT200;
-  } else if ( HistName.Contains("ZH2HQQ_VH2JET") ) {
-          XSectionMap = &XSectionMap_ZH2HQQ_VH2JET;
-  } else if ( HistName.Contains("ZH2HQQ_VBFTOPO_JET3VETO") ) {
-          XSectionMap = &XSectionMap_ZH2HQQ_VBFTOPO_JET3VETO;
-  } else if ( HistName.Contains("ZH2HQQ_VBFTOPO_JET3") ) {
-          XSectionMap = &XSectionMap_ZH2HQQ_VBFTOPO_JET3;
-  } else if ( HistName.Contains("ZH2HQQ_REST") ) {
-          XSectionMap = &XSectionMap_ZH2HQQ_REST;
-  } else if ( HistName.Contains("BBH") ) {
+  } else if ( HistName.Contains("QQ2HLL_PTV_150_250_GE1J") ){
+          XSectionMap = &XSectionMap_QQ2HLL_PTV_150_250_GE1J;
+  } else if ( HistName.Contains("QQ2HLL_PTV_GT250") ){
+          XSectionMap = &XSectionMap_QQ2HLL_PTV_GT250;
+  } else if ( HistName.Contains("BBH") ){
           XSectionMap = &XSectionMap_BBH;
-  } else if ( HistName.Contains("THQ") ) {
-          XSectionMap = &XSectionMap_THQ;
-  } else if ( HistName.Contains("THW") ) {
+  } else if ( HistName.Contains("TTH") ){
+          XSectionMap = &XSectionMap_TTH;
+  } else if ( HistName.Contains("THW") ){
           XSectionMap = &XSectionMap_THW;
-  } else if ( HistName.Contains("GGZH") ) {
+  } else if ( HistName.Contains("THQ") ){
+          XSectionMap = &XSectionMap_THQ;
+  } else if ( HistName.Contains("GGZH") ){
           XSectionMap = &XSectionMap_GGZH;
   } else if ( HistName.Contains("ggh") || HistName.Contains("GG2H") ) {
     XSectionMap = &XSectionMap_ggh;
