@@ -3,7 +3,7 @@
 import os, sys
 from optparse import OptionParser
 
-lumi = {'2016':'35.9', '2017':'41.5', '2018':'59.8'}
+lumi = {'2016':'35.9', '2017':'41.5', '2018':'59.8', 'all':'137.2'}
 
 def get_options():
   parser = OptionParser()
