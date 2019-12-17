@@ -61,4 +61,5 @@ Still some remaining updates to come in next months:
 * New datacard making script
 * Transition to combineTools package rather than having analysis specific script (./Plots/FinalResults/combineHarvester.py)
 * Option for skipping the RV/WV split in Signal modelling
+* Full functionality for merging categories across years. Currently run through each year separately
 

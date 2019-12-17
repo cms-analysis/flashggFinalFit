@@ -53,7 +53,9 @@ signalScriptCfg = {
 }
 ```
 
-Running with `'mode':"std"` will first run the signal f-Test, and then will prompt you to use the output of this f-Test to manually fill out the required configuration file which determines how many gaussians to use for each tag/process/RightVertex-WrongVertex-Scenario. Once you have filled in the file, simply re-run the same command to proceed with the signal model building. In practise this method of determining the number of Gaussians to use is not particularly efficient. Another suggestion is to start from the exampke nGaussians file `dat/newConfig_HggAnalysis_ICHEP2016_example.dat` and modify your nGaussians until you are happy with them. If the relevant config file already exists, the code will skip the f-Test by default.
+Running with `'mode':"std"` will first run the signal f-Test, and then will prompt you to use the output of this f-Test to manually fill out the required configuration file which determines how many gaussians to use for each tag/process/RightVertex-WrongVertex-Scenario. Once you have filled in the file, simply re-run the same command to proceed with the signal model building. In practise this method of determining the number of Gaussians to use is not particularly efficient. 
+
+Another suggestion is to start from the exampke nGaussians file `dat/newConfig_HggAnalysis_ICHEP2016_example.dat` and modify your nGaussians until you are happy with them. If the relevant config file already exists, the code will skip the f-Test by default.
 
 This example takes all processes and tags into account, and therefore will be lengthy to run, so to practice you may consider restricting to only ggh and vbf for example.
 

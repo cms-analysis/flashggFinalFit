@@ -8,25 +8,48 @@ The workflow looks like this:
 * Generate the background model from the data or pseudodata using `./bin/fTest`
 * Make validation plots using `./bin/makeParametricSignalModelPlots`
 
-Thankfully this whole process can be run in one command using the signal pilot script `runBackgroundScripts.sh`
+## Submission script
 
-## Quickstart
+Akin to in the signal package, you can use the RunBackgroundScripts.py script to run the full Background model workflow.
 
-To run a basic version of the background workflow you can use the `./runBackgroundScripts.sh` script.
-All plots using data and pseudodata are blinded by default.
+The options for the background fit are specified in a config file e.g. `example_config_stage1_1.py` or directly in the command line. Note, you need to specify the year option. We hope to include functionality for merging categories across years in the near future.
 
+To run the script:
 ```
 cmsenv
-./runBackgroundScripts.sh -p <comma separated processes> -f <comma separated tag names> --ext <extension to keep track of this processign run> --sigFile <the sigfit output fiel (to plot sig and bkg together in final validation plots>  --intLumi <in fb^{-1}> (--unblind) --isData -i <data file> --batch <LSF (CERN or IC> 
-```
-eg
-```
-./runBackgroundScripts.sh -p ggh,vbf,wh,zh,tth -f UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,VBFTag_0,VBFTag_1,TTHHadronicTag,TTHLeptonicTag --ext HggAnalysis_ICHEP2016_example --sigFile /afs/cern.ch/user/l/lcorpe/work/private/FinalFits_ICHEP_Clearup/CMSSW_7_4_7/src/flashggFinalFit/Signal/outdir_HggAnalysis_ICHEP2016_example/CMS-HGG_sigfit_HggAnalysis_ICHEP2016_example.root --seed 0 --intLumi 12.9    --isData  -i root://eoscms.cern.ch//eos/cms/store/group/phys_higgs/cmshgg/analyzed/ichep2016/flashgg-workspaces//allData.root  --batch SF
+python RunBackgroundScripts.py --inputConfig example_config_stage1_1.py
 ```
 
-The available options can be seen by doing `runSignalScripts.sh -h`. They are all self-explanatory, aside from 
+The config file will look as follows:
+```
+backgroundScriptCfg = {
+  
+  # Setup
+  'inputWSDir':'/vols/cms/jl2117/hgg/ws/test_stage1_1_2018', # directory of input data workspaces
+  #Procs will be inferred automatically from filenames
+  'cats':'RECO_0J_PTH_GT10_Tag0,RECO_0J_PTH_GT10_Tag1', # analysis categories
+  'ext':'stage1_1_2018', #extension to be added to output directory (match with signal model!)
+  'year':'2018', 
+  'unblind':0,
+
+  # Job submission options
+  'batch':'HTCONDOR',
+  'queue':'microcentury',
+
+  # Mode allows script to carry out single function
+  'mode':'std', # Options: [std,fTestOnly,bkgPlotsOnly]
+}
+```
+
+Running with `'mode':"std"` will run the background fTest and then will make the validation plots sequentially. You can separate these steps if necessary.
+
+The output of the fTest will be the RooWorkspace containing the multipdf for each analysis category.
+
+All plots using data and pseudodata are blinded by default.
+
+## To do list
+There are some available options which have not yet been configured, concering running on MC PseudoData. To make the fTest with PseudoData please use the master branch of FinalFits (for now).
 * `--intLumi`: This can be used to set how much pseudodata is to be generated.
-* `--sigFile`: Optional argument to provide a previously-produced signal model to make the validation plots with (so you can see relative size of signal and background on one plot)
 * `--pseudoDataDat`: Specify the list of available samples using the format: <type>,<filepath> where type can be `sig` or `bkg`.
 
 ## Script-by-script guide
@@ -72,7 +95,6 @@ Example output can be found here:
 # for data:
 https://twiki.cern.ch/twiki/bin/view/CMS/FLASHggFramework#Background #(Under Bkg Validation Plots, Data)
 ```
-
 
 ## Notes
 
