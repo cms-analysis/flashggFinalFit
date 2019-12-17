@@ -10,7 +10,7 @@ The workflow looks like this:
 
 ## Submission script
 
-Akin to in the signal package, you can use the RunBackgroundScripts.py script to run the full Background model workflow.
+Akin to in the signal package, you can use the `RunBackgroundScripts.py` script to run the full Background model workflow.
 
 The options for the background fit are specified in a config file e.g. `example_config_stage1_1.py` or directly in the command line. Note, you need to specify the year option. We hope to include functionality for merging categories across years in the near future.
 

@@ -63,3 +63,44 @@ Still some remaining updates to come in next months:
 * Option for skipping the RV/WV split in Signal modelling
 * Full functionality for merging categories across years. Currently run through each year separately
 
+### Temporary: extracting datacards + results
+The above updates will be propagated to the `Datacard` and `Results` folders soon. For now you can make the Datacards and do the fit using the `RunCombineScripts.py` submission script:
+```
+cmsenv
+python RunCombineScripts.py --inputConfig example_config_stage1_1.py
+```
+The script requires an input config file of the following format (change options where necessary):
+```
+combineScriptCfg = {
+  
+  # Setup
+  'mode':'datacard', # Options are datacard,combine,combinePlots
+  'inputWSDir':'/vols/cms/jl2117/hgg/ws/test_stage1_1_2018', #directory of input workspaces
+  #Procs will be inferred automatically from filenames
+  'cats':'RECO_0J_PTH_GT10_Tag0,RECO_0J_PTH_GT10_Tag1,' #analysis categories
+  'ext':'stage1_1_2018', #extension to be added to output directory. Must match that of S & B modelling
+  'year':'2018', 
+  'signalProcs':'all',
+
+  # Add UE/PS systematics to datacard (only relevant if mode == datacard)
+  'doUEPS':0,
+
+  #Photon shape systematics  
+  'scales':'HighR9EB,HighR9EE,LowR9EB,LowR9EE,Gain1EB,Gain6EB',
+  'scalesCorr':'MaterialCentralBarrel,MaterialOuterBarrel,MaterialForward,FNUFEE,FNUFEB,ShowerShapeHighR9EE,ShowerShapeHighR9EB,ShowerShapeLowR9EE,ShowerShapeLowR9EB',
+  'scalesGlobal':'NonLinearity:UntaggedTag_0:2,Geant4',
+  'smears':'HighR9EBPhi,HighR9EBRho,HighR9EEPhi,HighR9EERho,LowR9EBPhi,LowR9EBRho,LowR9EEPhi,LowR9EERho',
+
+  # Job submission options
+  'batch':'HTCONDOR',
+  'queue':'workday',
+
+  'printOnly':0 # For dry-run: print command only
+  
+}
+```
+The modes are used for the following (run in sequential order):
+  * `datacard` - build the .txt datacard using the S & B models. The yield variations from systematics are also calculated and specified in the datacard. To merge datacards for different years then use the `combineCards.py` script (in combine).
+  * `combine`  - compile the RooWorkspace from the .txt datacard. Run the fit in combine. Input options are specified in `Plots/FinalResults/combineHarvesterOptions_Template.dat`
+  * `combinePlots` - create plots from finished combine jobs. Options are specified in `Plots/FinalResults/combinePlotsOptions_Template.dat`
+
