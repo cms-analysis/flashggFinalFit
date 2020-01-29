@@ -6,23 +6,29 @@ print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG DATACARD MAKER RUN II ~~~~~~~~~~~~
 import os, sys
 import re
 from optparse import OptionParser
+import ROOT
 import pandas as pd
+import glob
 
 def leave():
   print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG DATACARD MAKER RUN II (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ "
   sys.exit(1)
 
-merged_cats = ['RECO_0J_PTH_GT10_Tag0', 'RECO_0J_PTH_GT10_Tag1', 'RECO_0J_PTH_0_10_Tag0', 'RECO_0J_PTH_0_10_Tag1', 'RECO_PTH_GT200_Tag0', 'RECO_PTH_GT200_Tag1', 'RECO_1J_PTH_120_200_Tag0', 'RECO_1J_PTH_120_200_Tag1', 'RECO_1J_PTH_60_120_Tag0', 'RECO_1J_PTH_60_120_Tag1', 'RECO_1J_PTH_0_60_Tag0', 'RECO_1J_PTH_0_60_Tag1', 'RECO_VBFTOPO_BSM', 'RECO_VBFTOPO_JET3VETO_Tag0', 'RECO_VBFTOPO_JET3VETO_Tag1', 'RECO_VBFTOPO_JET3_Tag0', 'RECO_VBFTOPO_JET3_Tag1', 'RECO_GE2J_PTH_120_200_Tag0', 'RECO_GE2J_PTH_120_200_Tag1', 'RECO_GE2J_PTH_60_120_Tag0', 'RECO_GE2J_PTH_60_120_Tag1', 'RECO_GE2J_PTH_0_60_Tag0', 'RECO_GE2J_PTH_0_60_Tag1'] #full merging
+#merged_cats = ['RECO_0J_PTH_GT10_Tag0', 'RECO_0J_PTH_GT10_Tag1', 'RECO_0J_PTH_0_10_Tag0', 'RECO_0J_PTH_0_10_Tag1', 'RECO_PTH_GT200_Tag0', 'RECO_PTH_GT200_Tag1', 'RECO_1J_PTH_120_200_Tag0', 'RECO_1J_PTH_120_200_Tag1', 'RECO_1J_PTH_60_120_Tag0', 'RECO_1J_PTH_60_120_Tag1', 'RECO_1J_PTH_0_60_Tag0', 'RECO_1J_PTH_0_60_Tag1', 'RECO_VBFTOPO_BSM', 'RECO_VBFTOPO_JET3VETO_Tag0', 'RECO_VBFTOPO_JET3VETO_Tag1', 'RECO_VBFTOPO_JET3_Tag0', 'RECO_VBFTOPO_JET3_Tag1', 'RECO_GE2J_PTH_120_200_Tag0', 'RECO_GE2J_PTH_120_200_Tag1', 'RECO_GE2J_PTH_60_120_Tag0', 'RECO_GE2J_PTH_60_120_Tag1', 'RECO_GE2J_PTH_0_60_Tag0', 'RECO_GE2J_PTH_0_60_Tag1'] #full merging
 #merged_cats = ['RECO_PTH_GT200_Tag0','RECO_PTH_GT200_Tag1','RECO_VBFTOPO_BSM']
+merged_cats = ['RECO_0J_PTH_GT10_Tag1']
 lumi = {'2016':'35.9', '2017':'41.5', '2018':'59.8'}
 decay = "hgg"
 
 def get_options():
   parser = OptionParser()
   parser.add_option('--merge', dest='merge', default=False, action="store_true", help="Merge specified categories across years")
+  parser.add_option('--prune', dest='prune', default=False, action="store_true", help="Prune proc x cat which make up less than 0.1% of given total category")
+  parser.add_option('--removeNoTag', dest='removeNoTag', default=False, action="store_true", help="Remove processing of NoTag")
   parser.add_option('--years', dest='years', default='2016', help="Comma separated list of years")
   parser.add_option('--procs', dest='procs', default='', help='Comma separated list of signal processes')
   parser.add_option('--cats', dest='cats', default='', help='Comma separated list of analysis categories (no year tags)')
+  parser.add_option('--xobs', dest='xobs', default='CMS_hgg_mass', help='Observable (default for hgg)')
   parser.add_option('--modelWSDir', dest='modelWSDir', default='Models', help='Input model WS directory') 
   parser.add_option('--inputWSDir', dest='inputWSDir', default='/vols/cms/jl2117/hgg/ws/test_stage1_1', help='Input WS directory (without year tag _201X)') 
   return parser.parse_args()
@@ -60,37 +66,46 @@ if opt.procs == '':
       procsByYear[year].append( fileName.split("pythia8_")[1].split(".root")[0] )  
 
     # Check equal and save as comma separated string
-    if len(procsByYear) == 1: continue
-    else:
+    if len(procsByYear) != 1:
       for year2 in procsByYear:
         if year2 == year: continue
         if set(procsByYear[year2]) != set(procsByYear[year]):
           print " --> [ERROR] Mis-match in process for %s and %s. Intersection = %s"%(year,year2,(set(procsByYear[year2]).symmetric_difference(set(procsByYear[year]))))
           leave()
-  
+
     #Save as comma separated string
     opt.procs = ",".join(procsByYear[year])
 
 # Initiate pandas dataframe
-columns_data = ['year','proc','cat','modelWSFile','model','rate']
+columns_data = ['year','type','proc','proc_s0','cat','inputWS','sumEntries','modelWSFile','model','rate','prune']
 data = pd.DataFrame( columns=columns_data )
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Mapping to STXS process name
-#def procToSTXS( _proc ):
-#  #Do mapping
-#  return _proc
+def procToSTXS( _proc ):
+  #Do mapping
+  proc_map = {"GG2H":"ggH","VBF":"qqH","WH2HQQ":"WH_had","ZH2HQQ":"ZH_had","QQ2HLNU":"WH_lep","QQ2HLL":"ZH_lep","TTH":"ttH","BBH":"bbH"}
+  for key in proc_map: _proc = re.sub( key, proc_map[key], _proc )
+  return _proc
+
+def procToData( _proc ):
+  proc_map = {"GG2H":"ggh","VBF":"vbf"}
+  for key in proc_map: _proc = re.sub( key, proc_map[key], _proc )
+  return _proc
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # FILL DATAFRAME: all processes
 
+# Add NOTAG to categories for signal: prune = 1
+cats_sig = opt.cats if opt.removeNoTag else "%s,NOTAG"%opt.cats
+
 # Signal processes
 for year in opt.years.split(","):
-  for cat in opt.cats.split(","):
+  for cat in cats_sig.split(","):
     for proc in opt.procs.split(","):
-      # FIXME: add mapping to STXS definition here
-      #_proc = "%s_%s"%(procToSTXS[proc],year)
-      _proc = "%s_%s_%s"%(proc,decay,year)
+      # Mapping to STXS definition here
+      _proc = "%s_%s"%(procToSTXS(proc),year)
+      _proc_s0 = procToData(proc.split("_")[0])
 
       # If want to merge some categories
       if opt.merge:
@@ -98,18 +113,28 @@ for year in opt.years.split(","):
         else: _cat = "%s_%s"%(cat,year)
       else: _cat = "%s_%s"%(cat,year)
 
+      # Input flashgg ws
+      _inputWSFile = glob.glob("%s_%s/*%s*"%(opt.inputWSDir,year,proc))[0]
+      f = ROOT.TFile(_inputWSFile)
+      _inputWS = f.Get("tagsDumper/cms_hgg_13TeV")
+      # Extract number of entries
+      _sumEntries = _inputWS.data("%s_125_13TeV_%s"%(procToData(proc.split("_")[0]),cat)).sumEntries()
+      f.Close()
+
       # Input model ws 
-      _modelWSFile = "./%s/signal_%s/CMS-HGG_sigfit_mva_%s_%s.root"%(opt.modelWSDir,year,proc,cat)
-      _model = "wsig_13TeV:hggpdfsmrel_%s_13TeV_%s_%s"%(year,proc,cat)
+      if cat == "NOTAG": _modelWSFile, _model = '-', '-'
+      else:
+	_modelWSFile = "./%s/signal_%s/CMS-HGG_sigfit_mva_%s_%s.root"%(opt.modelWSDir,year,proc,cat)
+	_model = "wsig_13TeV:hggpdfsmrel_%s_13TeV_%s_%s"%(year,proc,cat)
 
       # Extract rate from lumi
       _rate = float(lumi[year])*1000
 
-      # FIXME: add column to dataFrame for pruning: check entries
-      # true/false options in X
+      # Prune NOTAG
+      _prune = 1 if cat == "NOTAG" else 0
 
       # Add signal process to dataFrame:
-      data.loc[len(data)] = [year,_proc,_cat,_modelWSFile,_model,_rate]
+      data.loc[len(data)] = [year,'sig',_proc,_proc_s0,_cat,_inputWS,_sumEntries,_modelWSFile,_model,_rate,_prune]
 
 # Background and data processes
 # Merged...
@@ -118,21 +143,22 @@ if opt.merge:
     _proc_bkg = "bkg_mass"
     _proc_data = "data_obs"
     _modelWSFile = "./%s/background_merged/CMS-HGG_mva_13TeV_multipdf.root"%opt.modelWSDir  
+    _inputWS = '-' #not needed for data
 
     if cat in merged_cats:
       _cat = cat
       _model_bkg = "multipdf:CMS_hgg_%s_13TeV"%_cat
       _model_data = "multipdf:roohist_data_mass_%s"%_cat
-      data.loc[len(data)] = ["merged",_proc_bkg,_cat,_modelWSFile,_model_bkg,1.]
-      data.loc[len(data)] = ["merged",_proc_data,_cat,_modelWSFile,_model_data,-1]
+      data.loc[len(data)] = ["merged",'bkg',_proc_bkg,'-',_cat,_inputWS,-1,_modelWSFile,_model_bkg,1.,0]
+      data.loc[len(data)] = ["merged",'data',_proc_data,'-',_cat,_inputWS,-1,_modelWSFile,_model_data,-1,0]
     else:
       # Loop over years and fill entry per year
       for year in opt.years.split(","):
         _cat = "%s_%s"%(cat,year)
         _model_bkg = "multipdf:CMS_hgg_%s_13TeV"%_cat
         _model_data = "multipdf:roohist_data_mass_%s"%_cat
-        data.loc[len(data)] = [year,_proc_bkg,_cat,_modelWSFile,_model_bkg,1.]
-        data.loc[len(data)] = [year,_proc_data,_cat,_modelWSFile,_model_data,-1] 
+        data.loc[len(data)] = [year,'bkg',_proc_bkg,'-',_cat,_inputWS,-1,_modelWSFile,_model_bkg,1.,0]
+        data.loc[len(data)] = [year,'data',_proc_data,'-',_cat,_inputWS,-1,_modelWSFile,_model_data,-1,0] 
 # Fully separate...
 else:
   for cat in opt.cats.split(","):
@@ -142,14 +168,44 @@ else:
     for year in opt.years.split(","):
       _cat = "%s_%s"%(cat,year)
       _modelWSFile = "./%s/background_%s/CMS-HGG_mva_13TeV_multipdf.root"%(opt.modelWSDir,year)
+      _inputWS = '-' #not needed for data
       _model_bkg = "multipdf:CMS_hgg_%s_13TeV"%_cat
       _model_data = "multipdf:roohist_data_mass_%s"%_cat
-      data.loc[len(data)] = [year,_proc_bkg,_cat,_modelWSFile,_model_bkg,1.]
-      data.loc[len(data)] = [year,_proc_data,_cat,_modelWSFile,_model_data,-1]
+      data.loc[len(data)] = [year,'bkg',_proc_bkg,'-',_cat,_inputWS,-1,_modelWSFile,_model_bkg,1.,0]
+      data.loc[len(data)] = [year,'type',_proc_data,'-',_cat,_inputWS,-1,_modelWSFile,_model_data,-1,0]
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Extract category yields and process yields
+catYields, procYields = {}, {}
+for cat in data.cat.unique(): catYields[cat] = data[(data['cat']==cat)&(data['type']=='sig')].sumEntries.sum()
+for proc in data[data['type']=='sig'].proc.unique(): procYields[proc] = data[(data['proc']==proc)&(data['type']=='sig')].sumEntries.sum()
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# PRUNING: if process contributes less than 0.1% of yield in analysis category then ignore
+if opt.prune:
+  # Set prune = 1 if < 0.1% of total category yield (signal only)
+  data.loc[(data['sumEntries']<0.001*data.apply(lambda row: catYields[row['cat']], axis=1))&(data['type']=='sig'),'prune'] = 1
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # CALCULATE SYSTEMATICS AND ADD TO DATAFRAME
 
+#FIXME: create copy of existing dataframe for systematics. When final can just use normal dataFrame
+data_syst = data.copy()
+
+# List of dicts to store info about uncertainty sources
+systematics = [ {'name':'BR_hgg','title':'BR_hgg','type':'constant','prior':'lnN','merge':1,'value':'0.98/1.021'},
+                {'name':'lumi_13TeV','title':'lumi_13TeV','type':'constant','prior':'lnN','merge':0,'value':{'2016':'1.025','2017':'1.023'}},
+                {'name':'LooseMvaSF','title':'LooseMvaSF','type':'factory','prior':'lnN','merge':0},
+                {'name':'PreselSF','title':'PreselSF','type':'factory','prior':'lnN','merge':1},
+                {'name':'JER','title':'res_j','type':'factory','prior':'lnN','merge':0},
+                {'name':'metJecUncertainty','title':'MET_JEC','type':'factory','prior':'lnN','merge':1}
+              ]
+
+from calcSystematics import calcSyst_constant, calcSyst_factory
+for syst in systematics:
+  if syst['type'] == 'constant': data_syst = calcSyst_constant(data_syst, syst, opt)
+  elif syst['type'] == 'factory': data_syst = calcSyst_factory(data_syst, syst, opt)
+  else: print " --> Systematic type %s is not supported. Skipping %s"%(syst['type'],syst['name'])
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # WRITE TO .TXT FILE

@@ -14,6 +14,8 @@ def writePreamble(f,options):
 
 def writeProcesses(f,d,options):
   f.write("\n")
+  # If opt.prune then remove all rows from dataFrame with prune=1
+  d = d[d['prune']==0]
   # d = Pandas DataFrame
   # Shapes
   # Loop over categories in dataframe
