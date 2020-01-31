@@ -53,7 +53,72 @@ def writeProcesses(f,d,options):
     l = l[:-1]
     f.write("%s\n"%l)
     
+  f.write("\n")
   return True
+
+def writeSystematic(f,d,s,options):
+  # Remove all rows from dataFrame with prune=1 (includes NoTag)
+  d = d[d['prune']==0]
+  # Construct syst line/lines if separate by year
+  if s['merge'] == 1:
+    lsyst = '%-40s    lnN    '%s['title']
+    # Loop over categories and then iterate over rows in category
+    for cat in d.cat.unique():
+      for ir,r in d[d['cat']==cat].iterrows():
+        if r['proc'] == "data_obs": continue
+        # Extract value and add to line (with checks)
+        sval = r[s['name']]
+        lsyst = addSyst(lsyst,sval,s['title'],r['proc'],cat)
+    # Remove final space from line and add to file
+    f.write("%s\n"%lsyst[:-1])
+  else:
+    for year in options.years.split(","):
+      stitle = "%s_%s"%(s['title'],year)
+      sname = "%s_%s"%(s['name'],year)
+      lsyst = '%-40s    lnN    '%stitle
+      # Loop over categories and then iterate over rows in category
+      for cat in d.cat.unique():
+        for ir,r in d[d['cat']==cat].iterrows():
+          if r['proc'] == "data_obs": continue
+          # Extract value and add to line (with checks)
+          sval = r[sname]
+          lsyst = addSyst(lsyst,sval,stitle,r['proc'],cat)
+      # Remove final space from line and add to file
+      f.write("%s\n"%lsyst[:-1])
+  return True
+          
+
+def addSyst(l,v,s,p,c):
+  #l-systematic line, v-value, s-systematic title, p-proc, c-cat
+  if type(v) is str: 
+    l += "%s "%v
+    return l
+  elif type(v) is list: 
+    # Symmetric:
+    if len(v) == 1: 
+      # Check 1: variation is non-negligible. If not then skip
+      if abs(v[0]-1)<0.0005: l += "- "
+      # Check 2: variation is not negative. Print message but add to datacard (cleaned later)
+      elif v[0] < 0.: 
+        print " --> [WARNING] systematic %s: negative variation for (%s,%s)"%(s,p,c)
+        l += "%.3f "%v[0]
+      else:
+        l += "%.3f "%v[0]
+    # Anti-symmetirc
+    if len(v) == 2:
+      # Check 1: variation is non-negligible. If not then skip
+      if(abs(v[0]-1)<0.0005)&(abs(v[1]-1)<0.0005): l += '- '
+      # Check 2: neither variation is negative. Print message but still add to datacard (cleaned later)
+      elif(v[0]<0.)|(v[1]<0.):
+        print " --> [WARNING] systematic %s: negative variation for (%s,%s)"%(s,p,c)
+        l += "%.3f/%.3f "%(v[0],v[1])
+      # Check 3: effect is approximately symmetric: then just add single up variation
+      elif( abs((v[0]*v[1])-1)<0.0005 ): l += "%.3f "%v[1]
+      else: l += "%.3f/%.3f "%(v[0],v[1])
+    return l
+  else:
+    print " --> [ERROR] systematic %s: value does not have type string or list for (%s,%s). Leaving..."%(s['title'],p,c)
+    sys.exit(1)
 
 def writePdfIndex(f,d,options):
   f.write("\n")

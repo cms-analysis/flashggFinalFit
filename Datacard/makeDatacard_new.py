@@ -104,8 +104,10 @@ for year in opt.years.split(","):
   for cat in cats_sig.split(","):
     for proc in opt.procs.split(","):
       # Mapping to STXS definition here
-      _proc = "%s_%s"%(procToSTXS(proc),year)
+      _proc = "%s_%s_hgg"%(procToSTXS(proc),year)
       _proc_s0 = procToData(proc.split("_")[0])
+
+      print " --> [DEBUG] (proc,cat) = (%s,%s)"%(proc,cat)
 
       # If want to merge some categories
       if opt.merge:
@@ -114,7 +116,7 @@ for year in opt.years.split(","):
       else: _cat = "%s_%s"%(cat,year)
 
       # Input flashgg ws
-      _inputWSFile = glob.glob("%s_%s/*%s*"%(opt.inputWSDir,year,proc))[0]
+      _inputWSFile = glob.glob("%s_%s/*M125*%s*"%(opt.inputWSDir,year,proc))[0]
       f = ROOT.TFile(_inputWSFile)
       _inputWS = f.Get("tagsDumper/cms_hgg_13TeV")
       # Extract number of entries
@@ -193,24 +195,28 @@ if opt.prune:
 data_syst = data.copy()
 
 # List of dicts to store info about uncertainty sources
-systematics = [ {'name':'BR_hgg','title':'BR_hgg','type':'constant','prior':'lnN','merge':1,'value':'0.98/1.021'},
+systematics = [ {'name':'BR_hgg','title':'BR_hgg','type':'constant','prior':'lnN','merge':1,'value':"0.98/1.021"},
                 {'name':'lumi_13TeV','title':'lumi_13TeV','type':'constant','prior':'lnN','merge':0,'value':{'2016':'1.025','2017':'1.023'}},
-                {'name':'LooseMvaSF','title':'LooseMvaSF','type':'factory','prior':'lnN','merge':0},
-                {'name':'PreselSF','title':'PreselSF','type':'factory','prior':'lnN','merge':1},
-                {'name':'JER','title':'res_j','type':'factory','prior':'lnN','merge':0},
-                {'name':'metJecUncertainty','title':'MET_JEC','type':'factory','prior':'lnN','merge':1}
+                {'name':'LooseMvaSF','title':'CMS_hgg_LooseMvaSF','type':'factory','prior':'lnN','merge':0},
+                {'name':'PreselSF','title':'CMS_hgg_PreselSF','type':'factory','prior':'lnN','merge':1},
+                {'name':'JER','title':'CMS_hgg_res_j','type':'factory','prior':'lnN','merge':0},
+                {'name':'metJecUncertainty','title':'CMS_hgg_MET_JEC','type':'factory','prior':'lnN','merge':1},
+                # Theory uncertainties
+                #{'name':'THU_ggH_Mu','title':'CMS_hgg_THU_ggH_Mu','type':'theory_inclusive','prior':'lnN','merge':1}#,
+                #{'name':'THU_ggH_Mu','title':'CMS_hgg_THU_ggH_Mu','type':'theory_migration','prior':'lnN','merge':1}
               ]
 
 from calcSystematics import calcSyst_constant, calcSyst_factory
 for syst in systematics:
   if syst['type'] == 'constant': data_syst = calcSyst_constant(data_syst, syst, opt)
   elif syst['type'] == 'factory': data_syst = calcSyst_factory(data_syst, syst, opt)
+  #elif syst['type'] == 'theory_inclusive': data_syst = calcSyst_theory(data_syst, syst, opt, mode="inclusive")
   else: print " --> Systematic type %s is not supported. Skipping %s"%(syst['type'],syst['name'])
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # WRITE TO .TXT FILE
-#from writeToDatacard import writePreamble, writeProcesses, writeSystematic, writePdfIndex
-from writeToDatacard import writePreamble, writeProcesses, writePdfIndex
+from writeToDatacard import writePreamble, writeProcesses, writeSystematic, writePdfIndex
+#from writeToDatacard import writePreamble, writeProcesses, writePdfIndex
 fdata = open("Datacard_dummy.txt","w")
 if not writePreamble(fdata,opt): 
   print " --> [ERROR] in writing preamble. Leaving..."
@@ -218,6 +224,10 @@ if not writePreamble(fdata,opt):
 if not writeProcesses(fdata,data,opt):
   print " --> [ERROR] in writing processes. Leaving..."
   leave()
+for syst in systematics:
+  if not writeSystematic(fdata,data_syst,syst,opt):
+    print " --> [ERROR] in writing systematic %s. Leaving"%syst['name']
+    leave()
 if not writePdfIndex(fdata,data,opt):
   print " --> [ERROR] in writing pdf indices. Leaving..."
   leave()

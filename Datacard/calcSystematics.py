@@ -88,23 +88,15 @@ def systFactory(d,s,factoryType,options,year=None):
       # Extract nominal RooDataSet: includes weights as args
       cat_dropYearTag = re.sub("_%s"%r['year'],"",r['cat'])
       rdata_nominal = r['inputWS'].data("%s_125_13TeV_%s"%(r['proc_s0'],cat_dropYearTag)) # RooDataSet
-
-      # FIXME: is there a function for re-weighting RooDataSet based on function without looping over events
-      # Extract observable (default for hgg = CMS_hgg_mass") from options, and nominal event weight
-      xobs = r['inputWS'].var( options.xobs )
-      w_nominal = ROOT.RooRealVar("weight","weight",0)
-      # Make empty clones of datasets and define up/down weights
-      rdata_up = rdata_nominal.emptyClone()
-      rdata_down = rdata_nominal.emptyClone()
-      weight = {}
-      for wkey in ['up','down']: weight[wkey] = ROOT.RooRealVar( w_str[wkey], w_str[wkey], 0 )
-
-      # Loop over points in dataset and fill new datasets with updated weights
+      # Extract nominal sum of entries
+      yield_nominal = rdata_nominal.sumEntries()
+      
+      # Loop over events and calculate sum of reweighted events
+      yield_up, yield_down = 0, 0
       for i in range(0,rdata_nominal.numEntries()):
         p = rdata_nominal.get(i)
-        xobs.setVal(p.getRealValue(options.xobs))
-        w_nominal = rdata_nominal.weight()
-        # Get central/up/down weight factors for multiplying nominal weights
+        w = rdata_nominal.weight()
+        # Extract up/down weight
         wfactor = {}
         for wkey in w_str: wfactor[wkey] = p.getRealValue(w_str[wkey])
         # Catch 1: if central weight = 0 --> math error. Skip event
@@ -113,26 +105,62 @@ def systFactory(d,s,factoryType,options,year=None):
           continue
         # Catch 2: if up/down weight are equal --> Set up/down to nominal
         elif wfactor['up']==wfactor['down']: 
-          weight['up'].setVal(w_nominal)
-          weight['down'].setVal(w_nominal)
+          wup = w
+          wdown = w
         else:
           # Calculate up and down weights
-          weight['up'].setVal(w_nominal*(wfactor['up']/wfactor['central']))
-          weight['down'].setVal(w_nominal*(wfactor['down']/wfactor['central']))
+          wup  = w*(wfactor['up']/wfactor['central'])
+          wdown  = w*(wfactor['down']/wfactor['central'])
 
-        #Add datapoint to empty clones
-        rdata_up.add(ROOT.RooArgSet(xobs),weight['up'].getVal())
-        rdata_down.add(ROOT.RooArgSet(xobs),weight['down'].getVal())
+        # Add up/down weights
+        yield_up += wup
+        yield_down += wdown
+
+      # Calculate yield variations
+      frac_up, frac_down = yield_up/r['sumEntries'], yield_down/r['sumEntries']
+
+      # FIXME: is there a function for re-weighting RooDataSet based on function without looping over events
+      # Extract observable (default for hgg = CMS_hgg_mass") from options, and nominal event weight
+      #xobs = r['inputWS'].var( options.xobs )
+      #w_nominal = ROOT.RooRealVar("weight","weight",0)
+      # Make empty clones of datasets and define up/down weights
+      #rdata_up = rdata_nominal.emptyClone()
+      #rdata_down = rdata_nominal.emptyClone()
+      #weight = {}
+      #for wkey in ['up','down']: weight[wkey] = ROOT.RooRealVar( w_str[wkey], w_str[wkey], 0 )
+
+      # Loop over points in dataset and fill new datasets with updated weights
+      #for i in range(0,rdata_nominal.numEntries()):
+      #  p = rdata_nominal.get(i)
+      #  xobs.setVal(p.getRealValue(options.xobs))
+      #  w_nominal = rdata_nominal.weight()
+      #  # Get central/up/down weight factors for multiplying nominal weights
+      #  wfactor = {}
+      #  for wkey in w_str: wfactor[wkey] = p.getRealValue(w_str[wkey])
+      #  # Catch 1: if central weight = 0 --> math error. Skip event
+      #  if wfactor['central'] == 0: 
+      #    print " --> [WARNING] systematic %s: event in (%s,%s) with identically 0 central weight. Skipping event..."%(s['name'],r['proc'],r['cat'])
+      #    continue
+      #  # Catch 2: if up/down weight are equal --> Set up/down to nominal
+      #  elif wfactor['up']==wfactor['down']: 
+      #    weight['up'].setVal(w_nominal)
+      #    weight['down'].setVal(w_nominal)
+      #  else:
+      #    # Calculate up and down weights
+      #    weight['up'].setVal(w_nominal*(wfactor['up']/wfactor['central']))
+      #    weight['down'].setVal(w_nominal*(wfactor['down']/wfactor['central']))
+
+      #  #Add datapoint to empty clones
+      #  rdata_up.add(ROOT.RooArgSet(xobs),weight['up'].getVal())
+      #  rdata_down.add(ROOT.RooArgSet(xobs),weight['down'].getVal())
 
       # Extract up and down fluctions in yield for current proc x cat (row)
-      yield_up, yield_down = rdata_up.sumEntries(), rdata_down.sumEntries()
-      frac_up, frac_down = yield_up/r['sumEntries'], yield_down/r['sumEntries']
-      # FIXME: function to check if values are okay
-      print " --> [DEBUG]: (%s,%s,%s,%s) = %.8f/%.8f"%(r['proc'],r['cat'],s['name'],year,frac_up,frac_down)
+      #yield_up, yield_down = rdata_up.sumEntries(), rdata_down.sumEntries()
+      #frac_up, frac_down = yield_up/r['sumEntries'], yield_down/r['sumEntries']
 
       # Update relevant cells in dataFrame
-      if year == None: d.at[ir,s['name']] = "%.3f/%.3f"%(frac_up,frac_down)
-      else: d.at[ir,"%s_%s"%(s['name'],year)] = "%.3f/%.3f"%(frac_up,frac_down)
+      if year == None: d.at[ir,s['name']] = [frac_down,frac_up] #"%.3f/%.3f"%(frac_down,frac_up)
+      else: d.at[ir,"%s_%s"%(s['name'],year)] = [frac_down,frac_up] #]"%.3f/%.3f"%(frac_down,frac_up)
 
   # For symmetric weights
   
@@ -147,12 +175,10 @@ def systFactory(d,s,factoryType,options,year=None):
       # Calculate up and down fluctuations for current proc x cat (row)
       yield_up, yield_down = rdatahist_up.sumEntries(), rdatahist_down.sumEntries()
       frac_up, frac_down = yield_up/r['sumEntries'], yield_down/r['sumEntries']
-      # FIXME: function to check if values are okay
-      print " --> [DEBUG]: (%s,%s,%s,%s) = %.8f/%.8f"%(r['proc'],r['cat'],s['name'],year,frac_up,frac_down)
 
       # Update relevant cells in dataFrame
-      if year == None: d.at[ir,s['name']] = "%.3f/%.3f"%(frac_up,frac_down)
-      else: d.at[ir,"%s_%s"%(s['name'],year)] = "%.3f/%.3f"%(frac_up,frac_down)
+      if year == None: d.at[ir,s['name']] = [frac_down,frac_up] #"%.3f/%.3f"%(frac_up,frac_down)
+      else: d.at[ir,"%s_%s"%(s['name'],year)] = [frac_down,frac_up] #"%.3f/%.3f"%(frac_up,frac_down)
       
 
   # Return dataframe with updated systematic values
