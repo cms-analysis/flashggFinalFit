@@ -61,9 +61,9 @@ for proc in procs:
      nGaussian=-1
      coeffs=[]
      #dynamiccaly get nGaussians
-     print 'ED DEBUG about to get pdf with name hggpdfsmrel_13TeV_2016_%s_%s_%s_13TeV_2016'%(proc,cat,v)
-     pdf= w.pdf("hggpdfsmrel_13TeV_2016_%s_%s_%s_13TeV_2016"%(proc,cat,v));
-     print 'ED DEBUG printing pdf with name hggpdfsmrel_13TeV_2016_%s_%s_%s_13TeV_2016'%(proc,cat,v)
+     print 'ED DEBUG about to get pdf with name hggpdfsmrel_2016_13TeV_%s_%s_%s_13TeV_2016'%(proc,cat,v)
+     pdf= w.pdf("hggpdfsmrel_2016_13TeV_%s_%s_%s_13TeV_2016"%(proc,cat,v));
+     print 'ED DEBUG printing pdf with name hggpdfsmrel_2016_13TeV_%s_%s_%s_13TeV_2016'%(proc,cat,v)
      #pdf= r.RooDoubleCBFast(w.pdf("dcb_%s_%s_%s_13TeV"%(proc,cat,v)),"test");
      pdf.Print()
      #exit (1)

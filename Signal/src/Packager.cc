@@ -133,10 +133,10 @@ void Packager::packageOutput(bool split, string process , string tag){
 
 			// sum eA
       //WS->Print();
-			RooSpline1D *norm = (RooSpline1D*)/*in*/WS->function(Form("hggpdfsmrel_%dTeV_%d_%s_%s_norm",sqrts_,year_,proc->c_str(),catname.c_str()));
+			RooSpline1D *norm = (RooSpline1D*)/*in*/WS->function(Form("hggpdfsmrel_%d_%dTeV_%s_%s_norm",year_,sqrts_,proc->c_str(),catname.c_str()));
 
 			if (!norm) {
-			if (!split_)	cerr << "[WARNING] -- ea: " << Form("hggpdfsmrel_%dTeV_%d_%s_%s_norm",sqrts_,year_,proc->c_str(),catname.c_str()) << " not found. It will be skipped (ignore this warning if just running one tag/proc)" << endl;
+			if (!split_)	cerr << "[WARNING] -- ea: " << Form("hggpdfsmrel_%d_%dTeV_%s_%s_norm",year_,sqrts_,proc->c_str(),catname.c_str()) << " not found. It will be skipped (ignore this warning if just running one tag/proc)" << endl;
 			}
 			else {
         for (int m =120; m<131; m=m+5){
@@ -149,10 +149,10 @@ void Packager::packageOutput(bool split, string process , string tag){
 			}
 
 			// sum pdf
-			RooExtendPdf *tempPdf = (RooExtendPdf*)/*in*/WS->pdf(Form("extendhggpdfsmrel_%dTeV_%d_%s_%sThisLumi",sqrts_,year_,proc->c_str(),catname.c_str()));
+			RooExtendPdf *tempPdf = (RooExtendPdf*)/*in*/WS->pdf(Form("extendhggpdfsmrel_%d_%dTeV_%s_%sThisLumi",year_,sqrts_,proc->c_str(),catname.c_str()));
 			if (!tempPdf) {
-			if (!split_)	cerr << "[WARNING] -- pdf: " << Form("extendhggpdfsmrel_%dTeV_%d_%s_%s",sqrts_,year_,proc->c_str(),catname.c_str()) << " not found. It will be skipped (ignore this warning if just running one tag/proc)" << endl;
-				expectedObjectsNotFound.push_back(Form("extendhggpdfsmrel_%dTeV_%d_%s_%s",sqrts_,year_,proc->c_str(),catname.c_str()));
+			if (!split_)	cerr << "[WARNING] -- pdf: " << Form("extendhggpdfsmrel_%d_%dTeV_%s_%s",year_,sqrts_,proc->c_str(),catname.c_str()) << " not found. It will be skipped (ignore this warning if just running one tag/proc)" << endl;
+				expectedObjectsNotFound.push_back(Form("extendhggpdfsmrel_%d_%dTeV_%s_%s",year_,sqrts_,proc->c_str(),catname.c_str()));
 				continue;
 			}
 			if( merge ) {
