@@ -192,6 +192,8 @@ for proc in data[data['type']=='sig'].proc.unique(): procYields[proc] = data[(da
 if opt.prune:
   # Set prune = 1 if < 0.1% of total category yield (signal only)
   data.loc[(data['sumEntries']<0.001*data.apply(lambda row: catYields[row['cat']], axis=1))&(data['type']=='sig'),'prune'] = 1
+  # Set prune =1 if FWDH in process name
+  data.loc[data['proc'].str.contains("FWDH"),'prune'] = 1
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # CALCULATE SYSTEMATICS AND ADD TO DATAFRAME
@@ -208,30 +210,44 @@ experimental_systematics = [
                 {'name':'metJecUncertainty','title':'CMS_hgg_MET_JEC','type':'experiment','prior':'lnN','merge':1},
               ]
 
+# THEORY SYSTEMATICS:
+
+# For type:factory
+# Tier system: adds different uncertainties to dataFrame
+#   1) shape: only tier used for STXS measurement. Integral of each STXS bin remains constant, looking for shape variations within one bin
+#   2) ishape: (CHECK) inclusive shifts in each STXS bin x analysis category
+#   3) norm: used for interpretation. Shifts in cross section of each STXS bin but inclusive cross-section for production mode remains constant.
+#   4) inorm: (CHECK) inclusive shifts in each STXS bin
+#   5) inc: (CHECK) inclusive shifts in each production mode
+
+# Relations: shape = ishape/inorm
+#            norm  = inorm/inc
+# Specify as list in dict: e.g. 'tiers'=['inc','inorm','norm','ishape','shape']
 theory_systematics = [ 
                 {'name':'BR_hgg','title':'BR_hgg','type':'constant','prior':'lnN','merge':1,'value':"0.98/1.021"},
-                {'name':'THU_ggH_Mu','title':'CMS_hgg_THU_ggH_Mu','type':'theory','prior':'lnN','merge':1},
-                {'name':'THU_ggH_Res','title':'CMS_hgg_THU_ggH_Res','type':'theory','prior':'lnN','merge':1},
-                {'name':'THU_ggH_Mig01','title':'CMS_hgg_THU_ggH_Mig01','type':'theory','prior':'lnN','merge':1},
-                {'name':'THU_ggH_Mig12','title':'CMS_hgg_THU_ggH_Mig12','type':'theory','prior':'lnN','merge':1},
-                {'name':'THU_ggH_VBF2j','title':'CMS_hgg_THU_ggH_VBF2j','type':'theory','prior':'lnN','merge':1},
-                {'name':'THU_ggH_VBF3j','title':'CMS_hgg_THU_ggH_VBF3j','type':'theory','prior':'lnN','merge':1},
-                {'name':'THU_ggH_PT60','title':'CMS_hgg_THU_ggH_PT60','type':'theory','prior':'lnN','merge':1},
-                {'name':'THU_ggH_PT120','title':'CMS_hgg_THU_ggH_PT120','type':'theory','prior':'lnN','merge':1},
-                {'name':'THU_ggH_qmtop','title':'CMS_hgg_THU_ggH_qmtop','type':'theory','prior':'lnN','merge':1},
-                {'name':'scaleWeight_0','title':'CMS_hgg_scaleWeight_0','type':'theory','prior':'lnN','merge':1},
-                {'name':'scaleWeight_1','title':'CMS_hgg_scaleWeight_1','type':'theory','prior':'lnN','merge':1},
-                {'name':'scaleWeight_2','title':'CMS_hgg_scaleWeight_2','type':'theory','prior':'lnN','merge':1},
-                {'name':'scaleWeight_3','title':'CMS_hgg_scaleWeight_3','type':'theory','prior':'lnN','merge':1},
-                {'name':'scaleWeight_4','title':'CMS_hgg_scaleWeight_4','type':'theory','prior':'lnN','merge':1},
-                {'name':'scaleWeight_5','title':'CMS_hgg_scaleWeight_5','type':'theory','prior':'lnN','merge':1},
-                {'name':'scaleWeight_6','title':'CMS_hgg_scaleWeight_6','type':'theory','prior':'lnN','merge':1},
-                {'name':'scaleWeight_7','title':'CMS_hgg_scaleWeight_7','type':'theory','prior':'lnN','merge':1},
-                {'name':'scaleWeight_8','title':'CMS_hgg_scaleWeight_8','type':'theory','prior':'lnN','merge':1}#,
+                #{'name':'THU_ggH_Mu','title':'CMS_hgg_THU_ggH_Mu','type':'theory','prior':'lnN','merge':1,'tiers':['inorm']},
+                #{'name':'THU_ggH_Res','title':'CMS_hgg_THU_ggH_Res','type':'theory','prior':'lnN','merge':1,'tiers':['inorm']},
+                #{'name':'THU_ggH_Mig01','title':'CMS_hgg_THU_ggH_Mig01','type':'theory','prior':'lnN','merge':1,'tiers':['inorm']},
+                #{'name':'THU_ggH_Mig12','title':'CMS_hgg_THU_ggH_Mig12','type':'theory','prior':'lnN','merge':1,'tiers':['inorm']},
+                #{'name':'THU_ggH_VBF2j','title':'CMS_hgg_THU_ggH_VBF2j','type':'theory','prior':'lnN','merge':1,'tiers':['inorm']},
+                #{'name':'THU_ggH_VBF3j','title':'CMS_hgg_THU_ggH_VBF3j','type':'theory','prior':'lnN','merge':1,'tiers':['inorm']},
+                #{'name':'THU_ggH_PT60','title':'CMS_hgg_THU_ggH_PT60','type':'theory','prior':'lnN','merge':1,'tiers':['inorm']},
+                #{'name':'THU_ggH_PT120','title':'CMS_hgg_THU_ggH_PT120','type':'theory','prior':'lnN','merge':1,'tiers':['inorm']},
+                #{'name':'THU_ggH_qmtop','title':'CMS_hgg_THU_ggH_qmtop','type':'theory','prior':'lnN','merge':1,'tiers':['inorm']},
+                # Scale weights are grouped: [1,2], [3,6], [4,8]
+                #{'name':'scaleWeight_0','title':'CMS_hgg_scaleWeight_0','type':'theory','prior':'lnN','merge':1}, # nominal weight
+                {'name':'scaleWeight_1','title':'CMS_hgg_scaleWeight_1','type':'theory','prior':'lnN','merge':1,'tiers':['shape']},
+                {'name':'scaleWeight_2','title':'CMS_hgg_scaleWeight_2','type':'theory','prior':'lnN','merge':1,'tiers':['shape']},
+                {'name':'scaleWeight_3','title':'CMS_hgg_scaleWeight_3','type':'theory','prior':'lnN','merge':1,'tiers':['shape']},
+                {'name':'scaleWeight_4','title':'CMS_hgg_scaleWeight_4','type':'theory','prior':'lnN','merge':1,'tiers':['shape']},
+                #{'name':'scaleWeight_5','title':'CMS_hgg_scaleWeight_5','type':'theory','prior':'lnN','merge':1,'tiers':['norm','shape']}, #Unphysical
+                {'name':'scaleWeight_6','title':'CMS_hgg_scaleWeight_6','type':'theory','prior':'lnN','merge':1,'tiers':['shape']},
+                #{'name':'scaleWeight_7','title':'CMS_hgg_scaleWeight_7','type':'theory','prior':'lnN','merge':1,'tiers':['norm','shape']}, #Unphysical
+                {'name':'scaleWeight_8','title':'CMS_hgg_scaleWeight_8','type':'theory','prior':'lnN','merge':1,'tiers':['shape']}#,
               ]
 theoryFactory_inputs = [] # list to store systematics for theory factory
 
-from calcSystematics import calcSyst_constant, calcSyst_experiment, calcSyst_theory
+from calcSystematics import calcSyst_constant, calcSyst_experiment, calcSyst_theory, groupSyst
 
 for syst in experimental_systematics:
   if syst['type'] == 'constant': data_syst = calcSyst_constant(data_syst, syst, opt)
@@ -243,7 +259,9 @@ for syst in theory_systematics:
   elif syst['type'] == 'theory': theoryFactory_inputs.append(syst)
   else: print " --> Systematic type %s is not supported. Skipping %s"%(syst['type'],syst['name'])
 # Run theory systematic factory
-data_syst, tmp_procYields = calcSyst_theory(data_syst,theoryFactory_inputs,opt)
+data_syst, _productionModeYields, _stxsBinYields, _stxsShapeYields = calcSyst_theory(data_syst,theoryFactory_inputs,opt)
+# Run function to group systematics: scaleWeight
+data_syst, theory_systematics = groupSyst( data_syst, theory_systematics, prefix="scaleWeight", suffix="shape", groupings=[[1,2],[3,6],[4,8]] )
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # WRITE TO .TXT FILE
@@ -258,8 +276,12 @@ if not writeProcesses(fdata,data,opt):
   leave()
 for syst in experimental_systematics:
   if not writeSystematic(fdata,data_syst,syst,opt):
-    print " --> [ERROR] in writing systematic %s. Leaving"%syst['name']
+    print " --> [ERROR] in writing systematic %s (experiment). Leaving"%syst['name']
     leave()
+#for syst in theoretical_systematics:
+#  if not writeSystematic(fdata,data_syst,syst,opt):
+#    print " --> [ERROR] in writing systematic %s (theory). Leaving"%syst['name']
+#    leave()
 if not writePdfIndex(fdata,data,opt):
   print " --> [ERROR] in writing pdf indices. Leaving..."
   leave()
