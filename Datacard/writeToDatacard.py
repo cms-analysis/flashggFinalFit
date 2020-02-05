@@ -58,11 +58,12 @@ def writeProcesses(f,d,options):
 
 def writeSystematic(f,d,s,options):
   # Remove all rows from dataFrame with prune=1 (includes NoTag)
-  d = d[d['prune']==0]
+  mask = (d['prune']==0)
+  d = d[mask]
 
   # If theory: loop over tiers else run over once
   tiers = []
-  if s['type']=='theory': tiers = s['tiers']
+  if 'tiers' in s: tiers = s['tiers']
   else: tiers = ['']
   for tier in tiers:
     if tier != '': tierStr = "_%s"%tier

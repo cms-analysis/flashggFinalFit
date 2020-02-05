@@ -25,6 +25,7 @@ def get_options():
   parser = OptionParser()
   parser.add_option('--merge', dest='merge', default=False, action="store_true", help="Merge specified categories across years")
   parser.add_option('--prune', dest='prune', default=False, action="store_true", help="Prune proc x cat which make up less than 0.1% of given total category")
+  parser.add_option('--doSystematics', dest='doSystematics', default=False, action="store_true", help="Include systematics calculations and add to datacard")
   parser.add_option('--removeNoTag', dest='removeNoTag', default=False, action="store_true", help="Remove processing of NoTag")
   parser.add_option('--years', dest='years', default='2016', help="Comma separated list of years")
   parser.add_option('--procs', dest='procs', default='', help='Comma separated list of signal processes')
@@ -78,7 +79,7 @@ if opt.procs == '':
     opt.procs = ",".join(procsByYear[year])
 
 # Initiate pandas dataframe
-columns_data = ['year','type','proc','proc_s0','cat','inputWS','sumEntries','modelWSFile','model','rate','prune']
+columns_data = ['year','type','proc','proc_s0','cat','inputWSFile','nominalDataName','modelWSFile','model','rate','prune']
 data = pd.DataFrame( columns=columns_data )
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -96,6 +97,7 @@ def procToData( _proc ):
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # FILL DATAFRAME: all processes
+print " .........................................................................................."
 
 # Add NOTAG to categories for signal: prune = 1
 cats_sig = opt.cats if opt.removeNoTag else "%s,NOTAG"%opt.cats
@@ -114,32 +116,26 @@ for year in opt.years.split(","):
         else: _cat = "%s_%s"%(cat,year)
       else: _cat = "%s_%s"%(cat,year)
 
-      print " --> [VERBOSE] Adding to dataFrame: (proc,cat) = (%s,%s)"%(_proc,_cat)
-
       # Input flashgg ws
       _inputWSFile = glob.glob("%s_%s/*M125*%s*"%(opt.inputWSDir,year,proc))[0]
-      f = ROOT.TFile(_inputWSFile)
-      _inputWS = f.Get("tagsDumper/cms_hgg_13TeV")
-      # Extract number of entries
-      _sumEntries = _inputWS.data("%s_125_13TeV_%s"%(procToData(proc.split("_")[0]),cat)).sumEntries()
-      f.Close()
+      _nominalDataName = "%s_125_13TeV_%s"%(_proc_s0,cat)
 
       # Input model ws 
       if cat == "NOTAG": _modelWSFile, _model = '-', '-'
       else:
 	_modelWSFile = "./%s/signal_%s/CMS-HGG_sigfit_mva_%s_%s.root"%(opt.modelWSDir,year,proc,cat)
 	_model = "wsig_13TeV:hggpdfsmrel_%s_13TeV_%s_%s"%(year,proc,cat)
-        # FIXME: changed year tag to after sqrts to suit current models
-	#_model = "wsig_13TeV:hggpdfsmrel_13TeV_%s_%s_%s"%(year,proc,cat)
 
       # Extract rate from lumi
       _rate = float(lumi[year])*1000
 
-      # Prune NOTAG
-      _prune = 1 if cat == "NOTAG" else 0
+      # Prune NOTAG and if FWDH in process name
+      if( cat == "NOTAG" )|( "FWDH" in proc ): _prune = 1
+      else: _prune = 0
 
       # Add signal process to dataFrame:
-      data.loc[len(data)] = [year,'sig',_proc,_proc_s0,_cat,_inputWS,_sumEntries,_modelWSFile,_model,_rate,_prune]
+      print " --> [VERBOSE] Adding to dataFrame: (proc,cat) = (%s,%s)"%(_proc,_cat)
+      data.loc[len(data)] = [year,'sig',_proc,_proc_s0,_cat,_inputWSFile,_nominalDataName,_modelWSFile,_model,_rate,_prune]
 
 # Background and data processes
 # Merged...
@@ -148,22 +144,27 @@ if opt.merge:
     _proc_bkg = "bkg_mass"
     _proc_data = "data_obs"
     _modelWSFile = "./%s/background_merged/CMS-HGG_mva_13TeV_multipdf.root"%opt.modelWSDir  
-    _inputWS = '-' #not needed for data
+    _inputWSFile = '-' #not needed for data/bkg
+    _nominalDataName = '-' #not needed for data/bkg
 
     if cat in merged_cats:
       _cat = cat
       _model_bkg = "multipdf:CMS_hgg_%s_13TeV_bkgshape"%_cat
       _model_data = "multipdf:roohist_data_mass_%s"%_cat
-      data.loc[len(data)] = ["merged",'bkg',_proc_bkg,'-',_cat,_inputWS,-1,_modelWSFile,_model_bkg,1.,0]
-      data.loc[len(data)] = ["merged",'data',_proc_data,'-',_cat,_inputWS,-1,_modelWSFile,_model_data,-1,0]
+      print " --> [VERBOSE] Adding to dataFrame: (proc,cat) = (%s,%s)"%(_proc_bkg,_cat)
+      print " --> [VERBOSE] Adding to dataFrame: (proc,cat) = (%s,%s)"%(_proc_data,_cat)
+      data.loc[len(data)] = ["merged",'bkg',_proc_bkg,'-',_cat,_inputWSFile,_nominalDataName,_modelWSFile,_model_bkg,1.,0]
+      data.loc[len(data)] = ["merged",'data',_proc_data,'-',_cat,_inputWSFile,_nominalDataName,_modelWSFile,_model_data,-1,0]
     else:
       # Loop over years and fill entry per year
       for year in opt.years.split(","):
         _cat = "%s_%s"%(cat,year)
         _model_bkg = "multipdf:CMS_hgg_%s_13TeV_bkgshape"%_cat
         _model_data = "multipdf:roohist_data_mass_%s"%_cat
-        data.loc[len(data)] = [year,'bkg',_proc_bkg,'-',_cat,_inputWS,-1,_modelWSFile,_model_bkg,1.,0]
-        data.loc[len(data)] = [year,'data',_proc_data,'-',_cat,_inputWS,-1,_modelWSFile,_model_data,-1,0] 
+        print " --> [VERBOSE] Adding to dataFrame: (proc,cat) = (%s,%s)"%(_proc_bkg,_cat)
+        print " --> [VERBOSE] Adding to dataFrame: (proc,cat) = (%s,%s)"%(_proc_data,_cat)
+        data.loc[len(data)] = [year,'bkg',_proc_bkg,'-',_cat,_inputWSFile,_nominalDataName,_modelWSFile,_model_bkg,1.,0]
+        data.loc[len(data)] = [year,'data',_proc_data,'-',_cat,_inputWSFile,_nominalDataName,_modelWSFile,_model_data,-1,0] 
 # Fully separate: i.e. processed separately in FinalFits
 else:
   for cat in opt.cats.split(","):
@@ -175,40 +176,25 @@ else:
       _cat = "%s_%s"%(cat,year)
       _catStripYear = cat
       _modelWSFile = "./%s/background_%s/CMS-HGG_mva_13TeV_multipdf.root"%(opt.modelWSDir,year)
-      _inputWS = '-' #not needed for data
+      _inputWSFile = '-' #not needed for data/bk
+      _nominalDataName = '-' #not needed for data/bkg
       _model_bkg = "multipdf:CMS_hgg_%s_13TeV_bkgshape"%_cat
       #_model_bkg = "multipdf:CMS_hgg_%s_13TeV_%s_bkgshape"%(_catStripYear,year)
       _model_data = "multipdf:roohist_data_mass_%s"%_catStripYear
-      data.loc[len(data)] = [year,'bkg',_proc_bkg,'-',_cat,_inputWS,-1,_modelWSFile,_model_bkg,1.,0]
-      data.loc[len(data)] = [year,'type',_proc_data,'-',_cat,_inputWS,-1,_modelWSFile,_model_data,-1,0]
+      print " --> [VERBOSE] Adding to dataFrame: (proc,cat) = (%s,%s)"%(_proc_bkg,_cat)
+      print " --> [VERBOSE] Adding to dataFrame: (proc,cat) = (%s,%s)"%(_proc_data,_cat)
+      data.loc[len(data)] = [year,'bkg',_proc_bkg,'-',_cat,_inputWSFile,_nominalDataName,_modelWSFile,_model_bkg,1.,0]
+      data.loc[len(data)] = [year,'data',_proc_data,'-',_cat,_inputWSFile,_nominalDataName,_modelWSFile,_model_data,-1,0]
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Extract category yields and process yields
-catYields, procYields = {}, {}
-for cat in data.cat.unique(): catYields[cat] = data[(data['cat']==cat)&(data['type']=='sig')].sumEntries.sum()
-for proc in data[data['type']=='sig'].proc.unique(): procYields[proc] = data[(data['proc']==proc)&(data['type']=='sig')].sumEntries.sum()
-
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# PRUNING: if process contributes less than 0.1% of yield in analysis category then ignore
-if opt.prune:
-  # Set prune = 1 if < 0.1% of total category yield (signal only)
-  data.loc[(data['sumEntries']<0.001*data.apply(lambda row: catYields[row['cat']], axis=1))&(data['type']=='sig'),'prune'] = 1
-  # Set prune =1 if FWDH in process name
-  data.loc[data['proc'].str.contains("FWDH"),'prune'] = 1
-
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# CALCULATE SYSTEMATICS AND ADD TO DATAFRAME
-
-#FIXME: create copy of existing dataframe for systematics. When final can just use normal dataFrame
-data_syst = data.copy()
-
+# Systematics uncertainty sources: FIXME input as a json file instead
 # List of dicts to store info about uncertainty sources
 experimental_systematics = [ 
                 {'name':'lumi_13TeV','title':'lumi_13TeV','type':'constant','prior':'lnN','merge':0,'value':{'2016':'1.025','2017':'1.023'}},
-                {'name':'LooseMvaSF','title':'CMS_hgg_LooseMvaSF','type':'experiment','prior':'lnN','merge':0},
-                {'name':'PreselSF','title':'CMS_hgg_PreselSF','type':'experiment','prior':'lnN','merge':1},
-                {'name':'JER','title':'CMS_hgg_res_j','type':'experiment','prior':'lnN','merge':0},
-                {'name':'metJecUncertainty','title':'CMS_hgg_MET_JEC','type':'experiment','prior':'lnN','merge':1},
+                {'name':'LooseMvaSF','title':'CMS_hgg_LooseMvaSF','type':'factory','prior':'lnN','merge':0},
+                {'name':'PreselSF','title':'CMS_hgg_PreselSF','type':'factory','prior':'lnN','merge':1},
+                {'name':'JER','title':'CMS_hgg_res_j','type':'factory','prior':'lnN','merge':0},
+                {'name':'metJecUncertainty','title':'CMS_hgg_MET_JEC','type':'factory','prior':'lnN','merge':1},
               ]
 
 # THEORY SYSTEMATICS:
@@ -226,49 +212,135 @@ experimental_systematics = [
 # Specify as list in dict: e.g. 'tiers'=['inc','inorm','norm','ishape','shape']
 theory_systematics = [ 
                 {'name':'BR_hgg','title':'BR_hgg','type':'constant','prior':'lnN','merge':1,'value':"0.98/1.021"},
-                #{'name':'THU_ggH_Mu','title':'CMS_hgg_THU_ggH_Mu','type':'theory','prior':'lnN','merge':1,'tiers':['inorm']},
-                #{'name':'THU_ggH_Res','title':'CMS_hgg_THU_ggH_Res','type':'theory','prior':'lnN','merge':1,'tiers':['inorm']},
-                #{'name':'THU_ggH_Mig01','title':'CMS_hgg_THU_ggH_Mig01','type':'theory','prior':'lnN','merge':1,'tiers':['inorm']},
-                #{'name':'THU_ggH_Mig12','title':'CMS_hgg_THU_ggH_Mig12','type':'theory','prior':'lnN','merge':1,'tiers':['inorm']},
-                #{'name':'THU_ggH_VBF2j','title':'CMS_hgg_THU_ggH_VBF2j','type':'theory','prior':'lnN','merge':1,'tiers':['inorm']},
-                #{'name':'THU_ggH_VBF3j','title':'CMS_hgg_THU_ggH_VBF3j','type':'theory','prior':'lnN','merge':1,'tiers':['inorm']},
-                #{'name':'THU_ggH_PT60','title':'CMS_hgg_THU_ggH_PT60','type':'theory','prior':'lnN','merge':1,'tiers':['inorm']},
-                #{'name':'THU_ggH_PT120','title':'CMS_hgg_THU_ggH_PT120','type':'theory','prior':'lnN','merge':1,'tiers':['inorm']},
-                #{'name':'THU_ggH_qmtop','title':'CMS_hgg_THU_ggH_qmtop','type':'theory','prior':'lnN','merge':1,'tiers':['inorm']},
+                #{'name':'THU_ggH_Mu','title':'CMS_hgg_THU_ggH_Mu','type':'factory','prior':'lnN','merge':1,'tiers':['inorm']},
+                #{'name':'THU_ggH_Res','title':'CMS_hgg_THU_ggH_Res','type':'factory','prior':'lnN','merge':1,'tiers':['inorm']},
+                #{'name':'THU_ggH_Mig01','title':'CMS_hgg_THU_ggH_Mig01','type':'factory','prior':'lnN','merge':1,'tiers':['inorm']},
+                #{'name':'THU_ggH_Mig12','title':'CMS_hgg_THU_ggH_Mig12','type':'factory','prior':'lnN','merge':1,'tiers':['inorm']},
+                #{'name':'THU_ggH_VBF2j','title':'CMS_hgg_THU_ggH_VBF2j','type':'factory','prior':'lnN','merge':1,'tiers':['inorm']},
+                #{'name':'THU_ggH_VBF3j','title':'CMS_hgg_THU_ggH_VBF3j','type':'factory','prior':'lnN','merge':1,'tiers':['inorm']},
+                #{'name':'THU_ggH_PT60','title':'CMS_hgg_THU_ggH_PT60','type':'factory','prior':'lnN','merge':1,'tiers':['inorm']},
+                #{'name':'THU_ggH_PT120','title':'CMS_hgg_THU_ggH_PT120','type':'factory','prior':'lnN','merge':1,'tiers':['inorm']},
+                #{'name':'THU_ggH_qmtop','title':'CMS_hgg_THU_ggH_qmtop','type':'factory','prior':'lnN','merge':1,'tiers':['inorm']},
                 # Scale weights are grouped: [1,2], [3,6], [4,8]
-                #{'name':'scaleWeight_0','title':'CMS_hgg_scaleWeight_0','type':'theory','prior':'lnN','merge':1}, # nominal weight
-                {'name':'scaleWeight_1','title':'CMS_hgg_scaleWeight_1','type':'theory','prior':'lnN','merge':1,'tiers':['shape']},
-                {'name':'scaleWeight_2','title':'CMS_hgg_scaleWeight_2','type':'theory','prior':'lnN','merge':1,'tiers':['shape']},
-                {'name':'scaleWeight_3','title':'CMS_hgg_scaleWeight_3','type':'theory','prior':'lnN','merge':1,'tiers':['shape']},
-                {'name':'scaleWeight_4','title':'CMS_hgg_scaleWeight_4','type':'theory','prior':'lnN','merge':1,'tiers':['shape']},
-                #{'name':'scaleWeight_5','title':'CMS_hgg_scaleWeight_5','type':'theory','prior':'lnN','merge':1,'tiers':['norm','shape']}, #Unphysical
-                {'name':'scaleWeight_6','title':'CMS_hgg_scaleWeight_6','type':'theory','prior':'lnN','merge':1,'tiers':['shape']},
-                #{'name':'scaleWeight_7','title':'CMS_hgg_scaleWeight_7','type':'theory','prior':'lnN','merge':1,'tiers':['norm','shape']}, #Unphysical
-                {'name':'scaleWeight_8','title':'CMS_hgg_scaleWeight_8','type':'theory','prior':'lnN','merge':1,'tiers':['shape']}#,
+                #{'name':'scaleWeight_0','title':'CMS_hgg_scaleWeight_0','type':'factory','prior':'lnN','merge':1}, # nominal weight
+                {'name':'scaleWeight_1','title':'CMS_hgg_scaleWeight_1','type':'factory','prior':'lnN','merge':1,'tiers':['shape']},
+                {'name':'scaleWeight_2','title':'CMS_hgg_scaleWeight_2','type':'factory','prior':'lnN','merge':1,'tiers':['shape']},
+                {'name':'scaleWeight_3','title':'CMS_hgg_scaleWeight_3','type':'factory','prior':'lnN','merge':1,'tiers':['shape']},
+                {'name':'scaleWeight_4','title':'CMS_hgg_scaleWeight_4','type':'factory','prior':'lnN','merge':1,'tiers':['shape']},
+                #{'name':'scaleWeight_5','title':'CMS_hgg_scaleWeight_5','type':'factory','prior':'lnN','merge':1,'tiers':['norm','shape']}, #Unphysical
+                {'name':'scaleWeight_6','title':'CMS_hgg_scaleWeight_6','type':'factory','prior':'lnN','merge':1,'tiers':['shape']},
+                #{'name':'scaleWeight_7','title':'CMS_hgg_scaleWeight_7','type':'factory','prior':'lnN','merge':1,'tiers':['norm','shape']}, #Unphysical
+                {'name':'scaleWeight_8','title':'CMS_hgg_scaleWeight_8','type':'factory','prior':'lnN','merge':1,'tiers':['shape']}#,
               ]
-theoryFactory_inputs = [] # list to store systematics for theory factory
 
-from calcSystematics import calcSyst_constant, calcSyst_experiment, calcSyst_theory, groupSyst
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Yields: for each signal row in dataFrame extract the yield
+print " .........................................................................................."
+#   * if systematics=True: also extract reweighted yields for each uncertainty source
+from calcSystematics import factoryType, calcSystYields
 
-for syst in experimental_systematics:
-  if syst['type'] == 'constant': data_syst = calcSyst_constant(data_syst, syst, opt)
-  elif syst['type'] == 'experiment': data_syst = calcSyst_experiment(data_syst, syst, opt)
-  else: print " --> Systematic type %s is not supported. Skipping %s"%(syst['type'],syst['name'])
+# Create columns in dataFrame to store yields
+data['nominal_yield'] = '-'
 
-for syst in theory_systematics:
-  if syst['type'] == 'constant': data_syst = calcSyst_constant(data_syst, syst, opt)
-  elif syst['type'] == 'theory': theoryFactory_inputs.append(syst)
-  else: print " --> Systematic type %s is not supported. Skipping %s"%(syst['type'],syst['name'])
-# Run theory systematic factory
-data_syst, _productionModeYields, _stxsBinYields, _stxsShapeYields = calcSyst_theory(data_syst,theoryFactory_inputs,opt)
-# Run function to group systematics: scaleWeight
-data_syst, theory_systematics = groupSyst( data_syst, theory_systematics, prefix="scaleWeight", suffix="shape", groupings=[[1,2],[3,6],[4,8]] )
+# Depending on type of systematic: anti-symmetric = 2 (up/down) columns, symmetric = 1 column
+#   * store factoryType of systematic in dictionary
+experimentalFactoryType = {}
+theoryFactoryType = {}
+if opt.doSystematics:
+  # Extract first row of signal dataframe and use factoryType function to extract type of systematic
+  for s in experimental_systematics: 
+    if s['type'] == 'factory': 
+      experimentalFactoryType[s['name']] = factoryType(data,s)
+      if experimentalFactoryType[s['name']] in ["a_w","a_h"]:
+        data['%s_up_yield'%s['name']] = '-'
+        data['%s_down_yield'%s['name']] = '-'
+      else: data['%s_yield'%s['name']] = '-'
+  for s in theory_systematics: 
+    if s['type'] == 'factory': 
+      theoryFactoryType[s['name']] = factoryType(data,s)
+      if theoryFactoryType[s['name']] in ["a_w","a_h"]:
+        data['%s_up_yield'%s['name']] = '-'
+        data['%s_down_yield'%s['name']] = '-'
+      else: data['%s_yield'%s['name']] = '-'
+
+# Loop over signal rows in dataFrame: extract yields (nominal & systematic variations)
+for ir,r in data[data['type']=='sig'].iterrows():
+
+  print " --> [VERBOSE] Extracting yields: (%s,%s)"%(r['proc'],r['cat'])
+
+  # Open input WS file and extract workspace
+  f_in = ROOT.TFile(r.inputWSFile)
+  inputWS = f_in.Get("tagsDumper/cms_hgg_13TeV")
+  # Extract nominal RooDataSet and yield
+  rdata_nominal = inputWS.data(r.nominalDataName)
+  data.at[ir,'nominal_yield'] = rdata_nominal.sumEntries()
+  
+  # Systematics: loop over systematics and use function to extract yield variations
+  if opt.doSystematics:
+    # For experimental systematics: skip NOTAG (as incorrect weights)
+    if "NOTAG" not in r['cat']:
+      experimentalSystYields = calcSystYields(r['nominalDataName'],inputWS,experimentalFactoryType)
+      for s,f in experimentalFactoryType.iteritems():
+        if f in ['a_w','a_h']: 
+          for direction in ['up','down']: 
+            data.at[ir,"%s_%s_yield"%(s,direction)] = experimentalSystYields["%s_%s"%(s,direction)]
+        else:
+          data.at[ir,"%s_yield"%s] = experimentalSystYields[s]
+    # For theoretical systematics:
+    theorySystYields = calcSystYields(r['nominalDataName'],inputWS,theoryFactoryType)
+    for s,f in theoryFactoryType.iteritems():
+      if f in ['a_w','a_h']: 
+	for direction in ['up','down']: 
+	  data.at[ir,"%s_%s_yield"%(s,direction)] = theorySystYields["%s_%s"%(s,direction)]
+      else:
+	data.at[ir,"%s_yield"%s] = theorySystYields[s]
+
+  # Remove the workspace and file from heap
+  inputWS.Delete()
+  f_in.Delete()
+  f_in.Close()
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Systematics: use factory function to calculate yield variations
+print " .........................................................................................."
+from calcSystematics import addConstantSyst, experimentalSystFactory, theorySystFactory, groupSystematics
+
+if opt.doSystematics:
+
+  # Experimental:
+  print " --> [VERBOSE] Adding experimental systematics to datacard"
+  # Add constant systematics to dataFrame
+  for s in experimental_systematics:
+    if s['type'] == 'constant': data = addConstantSyst(data,s,opt)
+  data = experimentalSystFactory(data, experimental_systematics, experimentalFactoryType, opt )
+
+  # Theory:
+  print " --> [VERBOSE] Adding theory systematics to datacard"
+  # Add constant systematics to dataFrame
+  for s in theory_systematics:
+    if s['type'] == 'constant': data = addConstantSyst(data,s,opt)
+  data = theorySystFactory(data, theory_systematics, theoryFactoryType, opt )
+  # For scale weights: use function to group uncertainties in relevant scheme
+  data, theory_systematics = groupSystematics(data, theory_systematics, prefix="scaleWeight", suffix="shape", groupings=[[1,2],[3,6],[4,8]])
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Pruning: if process contributes less than 0.1% of yield in analysis category then ignore
+print " .........................................................................................."
+if opt.prune:
+  print " --> [VERBOSE] Pruning processes which contribute < 0.1% of RECO category yield"
+  # Extract per category yields
+  catYields = {}
+  for cat in data.cat.unique(): catYields[cat] = data[(data['cat']==cat)&(data['type']=='sig')].nominal_yield.sum()
+  # Set prune = 1 if < 0.1% of total cat yield
+  mask = (data['nominal_yield']<0.001*data.apply(lambda x: catYields[x['cat']], axis=1))&(data['type']=='sig')
+  data.loc[mask,'prune'] = 1
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # WRITE TO .TXT FILE
+print " .........................................................................................."
+fdataName = "Datacard_dummy.txt"
+print " --> [VERBOSE] Writing to datacard file: %s"%fdataName
 from writeToDatacard import writePreamble, writeProcesses, writeSystematic, writePdfIndex
-#from writeToDatacard import writePreamble, writeProcesses, writePdfIndex
-fdata = open("Datacard_dummy.txt","w")
+fdata = open(fdataName,"w")
 if not writePreamble(fdata,opt): 
   print " --> [ERROR] in writing preamble. Leaving..."
   leave()
@@ -276,11 +348,11 @@ if not writeProcesses(fdata,data,opt):
   print " --> [ERROR] in writing processes. Leaving..."
   leave()
 for syst in experimental_systematics:
-  if not writeSystematic(fdata,data_syst,syst,opt):
+  if not writeSystematic(fdata,data,syst,opt):
     print " --> [ERROR] in writing systematic %s (experiment). Leaving"%syst['name']
     leave()
 for syst in theory_systematics:
-  if not writeSystematic(fdata,data_syst,syst,opt):
+  if not writeSystematic(fdata,data,syst,opt):
     print " --> [ERROR] in writing systematic %s (theory). Leaving"%syst['name']
     leave()
 if not writePdfIndex(fdata,data,opt):

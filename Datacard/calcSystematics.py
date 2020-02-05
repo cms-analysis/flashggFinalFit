@@ -4,8 +4,8 @@ import ROOT
 
 # sd = "systematics dataframe"
 
-# CONSTANT: for all signal processes
-def calcSyst_constant(sd,_syst,options):
+# For constant systematics: FIXME add functionality to choose only some procs
+def addConstantSyst(sd,_syst,options):
 
   # Add column to dataFrame with default value
   if _syst['merge']: 
@@ -20,41 +20,21 @@ def calcSyst_constant(sd,_syst,options):
       sd.loc[(sd['type']=='sig')&(sd['year']==year)&(~sd['cat'].str.contains("NOTAG")), "%s_%s"%(_syst['name'],year)] = _syst['value'][year]
   return sd
 
-# EXPERIMENTAL
-def calcSyst_experiment(sd,_syst,_options):
-
-  # Extract type of systematic: specified by string
-  _factoryType = factoryType(sd,_syst)
-  print " --> [DEBUG] %s (experiment): will treat as %s"%(_syst['name'],_factoryType)
-
-  # Add columns to dataFrame with default value: if unmerged one for each year
-  if _syst['merge']:
-    sd[_syst['name']] = '-'
-    sd = experimentalSystFactory(sd,_syst,_factoryType,_options)
-  else:
-    for _year in _options.years.split(","):
-      sd["%s_%s"%(_syst['name'],_year)] = '-'
-      sd = experimentalSystFactory(sd, _syst, _factoryType,_options,year=_year)
-
-  return sd    
-
-# THEORY
-def calcSyst_theory(sd,_systs,_options):
-  # Uses list of systematics as input
-  sd, pmy, stxsbiny, stxsshapey = theoreticalSystFactory(sd,_systs,_options)
-  return sd, pmy, stxsbiny, stxsshapey
-
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Function to return type of systematic: to be used by factory function
+# Function to return type of systematic: to be used by factory functions
 # a) Anti-symmetric weight in nominal RooDataSet: "a_w"
 # b) Symmetric weight in nominal RooDataSet: "s_w"
 # c) Anti-symmetric shifts in RooDataHist: "a_h"
 def factoryType(d,s):
-  # Look at first entry in signal
-  ws0 = d[d['type']=='sig'].iloc[0].inputWS
+  # Extract first signal entry of dataFrame
+  r0 = d[d['type']=='sig'].iloc[0]
+  # Extract workspace
+  f = ROOT.TFile(r0.inputWSFile)
+  ws = f.Get("tagsDumper/cms_hgg_13TeV")
+  f.Close()
   # Check if syst is var (weight) in workspace
-  if ws0.allVars().selectByName("%s*"%(s['name'])).getSize():
-    nWeights = ws0.allVars().selectByName("%s*"%(s['name'])).getSize()
+  if ws.allVars().selectByName("%s*"%(s['name'])).getSize():
+    nWeights = ws.allVars().selectByName("%s*"%(s['name'])).getSize()
     if nWeights == 2: return "a_w"
     elif nWeights == 1: return "s_w"
     else:
@@ -62,362 +42,252 @@ def factoryType(d,s):
       sys.exit(1)
   
   # Else: check if RooDataHist exist
-  # First drop year tag on category if present
-  cat0_dropYearTag = re.sub( "_%s"%d[d['type']=='sig'].iloc[0]['year'], "", d[d['type']=='sig'].iloc[0]['cat'] )
-  dataHistUp = "%s_125_13TeV_%s_%sUp01sigma"%(d[d['type']=='sig'].iloc[0].proc_s0,cat0_dropYearTag,s['name'])
-  dataHistDown = "%s_125_13TeV_%s_%sDown01sigma"%(d[d['type']=='sig'].iloc[0].proc_s0,cat0_dropYearTag,s['name'])
-  if(ws0.data(dataHistUp)!=None)&(ws0.data(dataHistDown)!=None): return "a_h"
-
+  dataHistUp = "%s_%sUp01sigma"%(r0.nominalDataName,s['name'])
+  dataHistDown = "%s_%sDown01sigma"%(r0.nominalDataName,s['name'])
+  if(ws.data(dataHistUp)!=None)&(ws.data(dataHistDown)!=None): return "a_h"
+  
   print " --> [ERROR] systematic %s: cannot extract type in factoryType function. Doesn't match requirement for (anti)-symmetric weights or anti-symmetric histograms. Leaving..."
   sys.exit(1)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# EXPERIMENTAL SYSTEMATICS FACTORY: use input workspace to calculate shifts from systematic variations
-# d - dataFrame, s - systematic (entry in dict in makeDatacard.py LX) 
+# Function to extract yield variations for signal row in dataFrame
+def calcSystYields(_nominalDataName,_inputWS,_systFactoryTypes):
 
+  # Define dictionary to store systematic yield counters
+  systYields = {}
+  # Loop over systematics and create counter in dict
+  for s, f in _systFactoryTypes.iteritems():
+    if f in ["a_h","a_w"]:
+      for direction in ['up','down']: systYields["%s_%s"%(s,direction)] = 0
+    else: systYields[s] = 0
 
-# Function to calculate shifts from systematics
-def experimentalSystFactory(d,s,factoryType,options,year=None):
+  # For systematics stored as weights (a_w,s_w)...
+  # Extract nominal dataset
+  rdata_nominal = _inputWS.data(_nominalDataName)
+  # Loop over events and extract reweighted yields
+  for i in range(0,rdata_nominal.numEntries()):
+    p = rdata_nominal.get(i)
+    w = rdata_nominal.weight()
+    # Loop over systematics:
+    for s, f in _systFactoryTypes.iteritems():
+      if f == "a_h": continue
 
-  # Systematics: ony signal elements in dataFrame (not NOTAG) and split by year (if required)
-  d_slice = d[(d['type']=='sig')&(d['year']==year)&(~d['cat'].str.contains("NOTAG"))] if year!=None else d[(d['type']=='sig')&(~d['cat'].str.contains("NOTAG"))]
-
-  # For asymmetric weights...
-  if factoryType == "a_w":
-
-    # Define weight strings for central and up/down fluctuation
-    w_str = {}
-    w_str['central'] = "centralObjectWeight"
-    w_str['up'] = "%sUp01sigma"%s['name']
-    w_str['down'] = "%sDown01sigma"%s['name']
-
-    # Iterate over proc x cat combinations in dataFrame
-    for ir,r in d_slice.iterrows():
-
-      # If nominal yield is empty then skip
-      if r['sumEntries'] == 0: continue
-
-      # Extract nominal RooDataSet: includes weights as args
-      cat_dropYearTag = re.sub("_%s"%r['year'],"",r['cat'])
-      rdata_nominal = r['inputWS'].data("%s_125_13TeV_%s"%(r['proc_s0'],cat_dropYearTag)) # RooDataSet
- 
-      # Loop over events and calculate sum of reweighted events
-      yield_up, yield_down = 0, 0
-      for i in range(0,rdata_nominal.numEntries()):
-        p = rdata_nominal.get(i)
-        w = rdata_nominal.weight()
-        # Extract up/down weight
-        wfactor = {}
-        for wkey in w_str: wfactor[wkey] = p.getRealValue(w_str[wkey])
-        # Catch 1: if central weight = 0 --> math error. Skip event
-        if wfactor['central'] == 0: 
-          print " --> [WARNING] systematic %s: event in (%s,%s) with identically 0 central weight. Skipping event..."%(s['name'],r['proc'],r['cat'])
-          continue
-        # Catch 2: if up/down weight are equal --> Set up/down to nominal
-        elif wfactor['up']==wfactor['down']: 
-          wup = w
-          wdown = w
+      # If asymmetric weights:
+      elif f == "a_w":
+        centralWeightStr = "scaleWeight_0" if "scaleWeight" in s else "centralObjectWeight"
+        f_central = p.getRealValue(centralWeightStr)
+        f_up, f_down = p.getRealValue("%sUp01sigma"%s), p.getRealValue("%sDown01sigma"%s)
+        # Checks:
+        # 1) if central weights are zero then skip event
+        if f_central == 0: continue
+        # 2) if up weight is equal to down weight then set to nominal
+        elif f_up == f_down: w_up, w_down = w, w
         else:
-          # Calculate up and down weights
-          wup  = w*(wfactor['up']/wfactor['central'])
-          wdown  = w*(wfactor['down']/wfactor['central'])
+          w_up, w_down = w*(f_up/f_central), w*(f_down/f_central)
+        # Add weights to counters
+        systYields["%s_up"%s] += w_up        
+        systYields["%s_down"%s] += w_down
 
-        # Add up/down weights
-        yield_up += wup
-        yield_down += wdown
+      # If symmetric weights
+      else:
+        centralWeightStr = "scaleWeight_0" if "scaleWeight" in s else "centralObjectWeight"
+        f_central = p.getRealValue(centralWeightStr)
+        f = p.getRealValue(s)
+        # Check: if central weight is zero then skip event
+        if f_central == 0: continue
+        else:
+          # Add weights to counter
+          systYields[s] += w*(f/f_central)
 
-      # Calculate yield variations
-      frac_up, frac_down = yield_up/r['sumEntries'], yield_down/r['sumEntries']
+  # For systematics stored as RooDataHist
+  for s, f in _systFactoryTypes.iteritems():
+    if f == "a_h":
+      systYields["%s_up"%s] = _inputWS.data("%s_%sUp01sigma"%(_nominalDataName,s)).sumEntries()
+      systYields["%s_down"%s] = _inputWS.data("%s_%sDown01sigma"%(_nominalDataName,s)).sumEntries()
 
-      # Update relevant cells in dataFrame
-      if year == None: d.at[ir,s['name']] = [frac_down,frac_up] #"%.3f/%.3f"%(frac_down,frac_up)
-      else: d.at[ir,"%s_%s"%(s['name'],year)] = [frac_down,frac_up] #]"%.3f/%.3f"%(frac_down,frac_up)
-
-  # For symmetric weights
+  # Add variations to dataFrame
+  return systYields
   
-  # For asymmetric hists
-  elif factoryType == "a_h":
-    # Iterate over rows in dataFrame: extract RooDataHist for up/down fluctuations and extract yields
-    for ir,r in d_slice.iterrows():
 
-      # if nominal yield is zero then skip
-      if r['sumEntries'] == 0: continue
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# EXPERIMENTAL SYSTEMATICS FACTORY:
+# d - dataFrame, systs - dict of systematics, ftype - dict of factoryTypes
+def experimentalSystFactory(d,systs,ftype,options):
 
-      cat_dropYearTag = re.sub("_%s"%r['year'],"",r['cat'])
-      rdatahist_up = r['inputWS'].data("%s_125_13TeV_%s_%sUp01sigma"%(r['proc_s0'],cat_dropYearTag,s['name']))
-      rdatahist_down = r['inputWS'].data("%s_125_13TeV_%s_%sDown01sigma"%(r['proc_s0'],cat_dropYearTag,s['name']))
-      
-      # Calculate up and down fluctuations for current proc x cat (row)
-      yield_up, yield_down = rdatahist_up.sumEntries(), rdatahist_down.sumEntries()
-      frac_up, frac_down = yield_up/r['sumEntries'], yield_down/r['sumEntries']
+  # Loop over systematics and add new column in dataFrame
+  for s in systs:
+    if s['type'] == 'constant': continue
+    if s['merge']: d[s['name']] = '-'
+    else:
+      for year in options.years.split(","): d['%s_%s'%(s['name'],year)] = '-'
 
-      # Update relevant cells in dataFrame
-      if year == None: d.at[ir,s['name']] = [frac_down,frac_up] #"%.3f/%.3f"%(frac_up,frac_down)
-      else: d.at[ir,"%s_%s"%(s['name'],year)] = [frac_down,frac_up] #"%.3f/%.3f"%(frac_up,frac_down)
-      
-  # Return dataframe with updated systematic values
+  # Loop over systematics and fill entries for rows which satisfy mask
+  for s in systs:
+    if s['type'] == 'constant': continue
+    # Extract factory type
+    f = ftype[s['name']]
+    if s['merge']:
+      mask = (d['type']=='sig')&(~d['cat'].str.contains("NOTAG"))
+      d.loc[mask,s['name']] = d[mask].apply(lambda x: compareYield(x,f,s['name']), axis=1)
+    else:
+      for year in options.years.split(","):
+        mask = (d['type']=='sig')&(~d['cat'].str.contains("NOTAG"))&(d['year']==year)
+        d.loc[mask,'%s_%s'%(s['name'],year)] = d[mask].apply(lambda x: compareYield(x,f,s['name']), axis=1)
+
+    # Remove yield columns from dataFrame
+    if f in ['a_h','a_w']: 
+      for direction in ['up','down']: d.drop(['%s_%s_yield'%(s['name'],direction)], axis=1, inplace=True)
+    else: d.drop(['%s_yield'%s['name']], axis=1, inplace=True)
+
   return d
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# THEORETICAL SYSTEMATICS FACTORY
-def theoreticalSystFactory(d,ts,options):
-
-  # Takes list of systematics (ts) as input (unlike experimental systematics)
-  # For each systematic fill a dictionary with name and type from factoryType function
-  ts_factoryType = {}
-  for s in ts: 
-    ts_factoryType[s['name']] = factoryType(d,s)
-    print " --> [DEBUG] %s (theory): will treat as %s"%(s['name'],factoryType(d,s))
-
-  # Step 1: extract inclusive per-production mode yield and set up counters for each systematic variation
-  productionModeYields = {}
+# THEORY SYSTEMATICS FACTORY:
+def theorySystFactory(d,systs,ftype,options):
+   
+  # Calculate the per-production mode (per-year) yield variation: add as column in dataFrame
   for proc_s0 in d[d['type']=='sig'].proc_s0.unique():
-    productionModeYields[proc_s0] = {}
-    productionModeYields[proc_s0]['nominal'] = d[(d['type']=='sig')&(d['proc_s0']==proc_s0)]['sumEntries'].sum()
-    for s in ts:
-      if ts_factoryType[s['name']] == "a_w":
-        for var in ['up','down']: productionModeYields[proc_s0]['%s_%s'%(s['name'],var)] = 0
-      elif ts_factoryType[s['name']] == "s_w": productionModeYields[proc_s0][s['name']] = 0
-      else:
-        print " --> [ERROR] type %s not supported for theory systematic %s. Leaving..."%(ts_factoryType[s['name']],s['name'])
-        sys.exit(1)
-
-  # Step 2: extract STXS normalization yields and per-prod mode yields for each systematic source
-  stxsBinYields = {}
-  # Loop over unique processes in dataframe
+    for year in options.years.split(","):
+      key = "%s_%s"%(proc_s0,year)
+      mask = (d['proc_s0']==proc_s0)&(d['year']==year)
+      d.loc[mask,'proc_s0_nominal_yield'] = d[mask]['nominal_yield'].sum()
+      for s in systs:
+	if s['type'] == 'constant': continue
+	f = ftype[s['name']]
+	if f in ['a_w','a_h']: 
+	  for direction in ['up','down']: 
+            d.loc[mask,'proc_s0_%s_%s_yield'%(s['name'],direction)] = d[mask]['%s_%s_yield'%(s['name'],direction)].sum()
+	else: 
+          d.loc[mask,'proc_s0_%s_yield'%s['name']] = d[mask]['%s_yield'%s['name']].sum()
+  # Calculate the per-STXS bin (per-year already in proc name) yield variations: add as column in dataFrame
   for proc in d[d['type']=='sig'].proc.unique():
-    print "    --> [VERBOSE] Calculating the norm variations for STXS bin: %s"%proc
-    stxsBinYields[proc] = {}
-    # Create a counter for each systematic variation and nominal
-    stxsBinYields[proc]['nominal'] = 0
-    for s in ts:
-      if ts_factoryType[s['name']] == "a_w":
-        for var in ['up','down']: stxsBinYields[proc]['%s_%s'%(s['name'],var)] = 0
-      elif ts_factoryType[s['name']] == "s_w": stxsBinYields[proc][s['name']] = 0
+    key = proc
+    mask = (d['proc']==proc)
+    d.loc[mask,'proc_nominal_yield'] = d[mask]['nominal_yield'].sum() 
+    for s in systs:
+      if s['type'] == 'constant': continue
+      f = ftype[s['name']]
+      if f in ['a_w','a_h']: 
+        for direction in ['up','down']: 
+          d.loc[mask,'proc_%s_%s_yield'%(s['name'],direction)] = d[mask]['%s_%s_yield'%(s['name'],direction)].sum()
       else: 
-        print " --> [ERROR] type %s not supported for theory systematic %s. Leaving..."%(ts_factoryType[s['name']],s['name'])
-        sys.exit(1)
-          
-    # Iterate over rows for given proc
-    for ir,r in d[d['proc']==proc].iterrows():
-      # Extract nominal RooDataset: includes weights as args
-      cat_dropYearTag = re.sub("_%s"%r['year'],"",r['cat'])
-      rdata_nominal = r['inputWS'].data("%s_125_13TeV_%s"%(r['proc_s0'],cat_dropYearTag))
-      # Add nominal yield to yields container
-      stxsBinYields[proc]['nominal'] += rdata_nominal.sumEntries()
+	d.loc[mask,'proc_%s_yield'%s['name']] = d[mask]['%s_yield'%s['name']].sum()
 
-      # Loop over events in dataset and sum weights for different syst variations
-      for i in range(0,rdata_nominal.numEntries()):
-        p = rdata_nominal.get(i)
-        w = rdata_nominal.weight()
-        # For each systematic: extract new weight(s) and add to yields container
-        for s in ts:
-          # For asymmetric weights:
-          if ts_factoryType[s['name']] == "a_w":
-            f_central = p.getRealValue("centralObjectWeight")
-            f_up, f_down = p.getRealValue("%sUp01sigma"%s['name']), p.getRealValue("%sDown01sigma"%s['name'])
-            # Checks:
-            # 1) if central weights are zero then skip event
-            if f_central == 0:
-              print " --> [WARNING] theory systematic %s: event %g in (%s,%s) with identically 0 central weight. Skipping event..."%(s['name'],i,r['proc'],r['cat'])
-              continue
-            # 2) if up weight is equal to down weight: set equal to nominal weight
-            elif f_up == f_down: w_up, w_down = w, w
-            # Calculate up and down weights
-            else:
-              w_up, w_down = w*(f_up/f_central), w*(f_down/f_central)
-            
-            # Add to yields containers: per production mode and per STXS bin
-            productionModeYields[r['proc_s0']]["%s_up"%s['name']] += w_up
-            productionModeYields[r['proc_s0']]["%s_down"%s['name']] += w_down
-            stxsBinYields[proc]["%s_up"%s['name']] += w_up
-            stxsBinYields[proc]["%s_down"%s['name']] += w_down
+  # Loop over systematics and add new column in dataFrame for each tier
+  for s in systs:
+    if s['type'] == 'constant': continue
+    for tier in s['tiers']: d["%s_%s"%(s['name'],tier)] = '-'
 
-          # For symmetric weights
-          if ts_factoryType[s['name']] == "s_w":
-            if "scaleWeight" in s['name']: f_central = p.getRealValue("scaleWeight_0")
-            else: f_central = p.getRealValue("centralObjectWeight")
-            f = p.getRealValue("%s"%s['name'])
-            # Check: if centra weight is zero then skip event
-            if f_central == 0:
-              print " --> [WARNING] theory systematic %s: event %g in (%s,%s) with identically 0 central weight. Skipping event..."%(s['name'],i,r['proc'],r['cat'])
-              continue
-            else:
-              # Add to yields containers: per production mode and per STXS bin
-              productionModeYields[r['proc_s0']][s['name']] += w*(f/f_central)
-              stxsBinYields[proc][s['name']] += w*(f/f_central)
+  # Loop over systematics and fill entries for rows which satisfy mask
+  for s in systs:
+    if s['type'] == 'constant': continue
+    # Extract factory type
+    f = ftype[s['name']]
+    mask = (d['type']=='sig')
+    # Loop over tiers and use appropriate mode for compareYield function
+    for tier in s['tiers']: 
+      d.loc[mask,"%s_%s"%(s['name'],tier)] = d[mask].apply(lambda x: compareYield(x,f,s['name'],mode=tier), axis=1)
 
-  # Step 3: calculate STXS shape variations i.e. change of shape within STXS bin
-  #         > normalize integral for each STXS bin to the same value (stxsBinYields)
-  #         > extract relative yield changes in given proc x cat
+    # Remove yield columns from dataFrame
+    if f in ['a_h','a_w']: 
+      for direction in ['up','down']: 
+        for id_ in ['','proc_','proc_s0_']:
+          d.drop(['%s%s_%s_yield'%(id_,s['name'],direction)], axis=1, inplace=True)
+    else: 
+      for id_ in ['','proc_','proc_s0_']: 
+        d.drop(['%s%s_yield'%(id_,s['name'])], axis=1, inplace=True)
 
-  # i) add column to dataFrame to store shape uncertainties (if require shape uncertainties)
-  for s in ts: 
-    if 'shape' in s['tiers']: d["%s_shape"%s['name']] = '-'
-    if 'ishape' in s['tiers']: d["%s_ishape"%s['name']] = '-' # Inclusive shift at proc x cat level
+  # Remove nominal proc and proc_s0 yield columns
+  for id_ in ['proc_','proc_s0_']: d.drop(['%snominal_yield'%id_], axis=1, inplace=True)
 
-  # ii) loop over signal rows in dataframe (i.e each proc x cat combination, including NoTag)
-  for ir,r in d[d['type']=='sig'].iterrows():
+  return d
+  
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Function for comparing yields:
+#   * mode == treatment of theory systematic  
+def compareYield(row,factoryType,sname,mode='default'):
 
-    # If nominal yield for a proc x cat is zero then skip
-    if r['sumEntries'] == 0: continue
+  # if nominal yield is zero: return 1
+  if row['nominal_yield']==0:
+    if factoryType in ["a_w","a_h"]: return [1.,1.]
+    else: return [1.]
 
-    print "    --> [VERBOSE] Calculating the shape variations for (STXS bin,RECO category) = (%s,%s)"%(r['proc'],r['cat'])
+  if( mode == 'default' )|( mode == 'ishape' ):
+    if factoryType in ["a_w","a_h"]: return [(row["%s_down_yield"%sname]/row['nominal_yield']),(row["%s_up_yield"%sname]/row['nominal_yield'])]
+    else: return [row["%s_yield"%sname]/row['nominal_yield']]
 
-    # Store yields for given proc x cat in tmp container
-    stxsShapeYields = {}
-    stxsShapeYields['nominal'] = r['sumEntries']
-    for s in ts:
-      if('shape' not in s['tiers'])&('ishape' not in s['tiers']): continue
-      if ts_factoryType[s['name']] == "a_w":
-        for var in ['up','down']: stxsShapeYields['%s_%s'%(s['name'],var)] = 0
-      elif ts_factoryType[s['name']] == "s_w": stxsShapeYields[s['name']] = 0
-      else: 
-        print " --> [ERROR] type %s not supported for theory systematic %s. Leaving..."%(ts_factoryType[s['name']],s['name'])
+  elif mode=='shape':
+    if factoryType in ["a_w","a_h"]: 
+      shape_up = (row["%s_up_yield"%sname]/row['nominal_yield'])/(row["proc_%s_up_yield"%sname]/row["proc_nominal_yield"])
+      shape_down = (row["%s_down_yield"%sname]/row['nominal_yield'])/(row["proc_%s_down_yield"%sname]/row["proc_nominal_yield"])
+      return [shape_down,shape_up]
+    else:
+      shape = (row["%s_yield"%sname]/row['nominal_yield'])/(row["proc_%s_yield"%sname]/row["proc_nominal_yield"])
+      return [shape]
 
-    # Extract nominal RooDataSet
-    cat_dropYearTag = re.sub("_%s"%r['year'],"",r['cat'])
-    rdata_nominal = r['inputWS'].data("%s_125_13TeV_%s"%(r['proc_s0'],cat_dropYearTag))
-    # Loop over events and calculate effect of systematics: sum yields
-    for i in range(0,rdata_nominal.numEntries()):
-      p = rdata_nominal.get(i)
-      w = rdata_nominal.weight()
-      # Loop over systematics
-      for s in ts:
-        # If do not require shape uncertainties then skip...
-        if('shape' not in s['tiers'])&('ishape' not in s['tiers']): continue
-        # If asymmetric weights
-        if ts_factoryType[s['name']] == "a_w":
-	  f_central = p.getRealValue("centralObjectWeight")
-	  f_up, f_down = p.getRealValue("%sUp01sigma"%s['name']), p.getRealValue("%sDown01sigma"%s['name'])
-	  # Checks:
-	  # 1) if central weights are zero then skip event
-	  if f_central == 0:
-	    print " --> [WARNING] theory systematic %s: event %g in (%s,%s) with identically 0 central weight. Skipping event..."%(s['name'],i,r['proc'],r['cat'])
-	    continue
-	  # 2) if up weight is equal to down weight: set equal to nominal weight
-	  elif f_up == f_down: w_up, w_down = w, w
-	  # Calculate up and down weights
-	  else:
-	    w_up, w_down = w*(f_up/f_central), w*(f_down/f_central)
-	  
-	  # Add to tmp yields container
-	  stxsShapeYields["%s_up"%s['name']] += w_up
-	  stxsShapeYields["%s_down"%s['name']] += w_down
+  elif mode == 'norm':
+    if factoryType in ["a_w","a_h"]:
+      norm_up = (row["proc_%s_up_yield"%sname]/row["proc_nominal_yield"])/(row["proc_s0_%s_up_yield"%sname]/row["proc_s0_nominal_yield"])
+      norm_down = (row["proc_%s_down_yield"%sname]/row["proc_nominal_yield"])/(row["proc_s0_%s_down_yield"%sname]/row["proc_s0_nominal_yield"])
+      return [norm_down,norm_up]
+    else:
+      norm = (row["proc_%s_yield"%sname]/row["proc_nominal_yield"])/(row["proc_s0_%s_yield"%sname]/row["proc_s0_nominal_yield"])
+      return [norm]
+ 
+  elif mode == 'inorm':
+    if factoryType in ["a_w","a_h"]:
+      inorm_up = (row["proc_%s_up_yield"%sname]/row["proc_nominal_yield"])
+      inorm_down = (row["proc_%s_down_yield"%sname]/row["proc_nominal_yield"])
+      return [inorm_down,inorm_up]
+    else:
+      inorm = (row["proc_%s_yield"%sname]/row["proc_nominal_yield"])
+      return [inorm]  
 
-	# For symmetric weights
-	if ts_factoryType[s['name']] == "s_w":
-          if "scaleWeight" in s['name']: f_central = p.getRealValue("scaleWeight_0")
-          else: f_central = p.getRealValue("centralObjectWeight")
-	  f = p.getRealValue(s['name'])
-	  # Check: if central weight is zero then skip event
-	  if f_central == 0:
-	    print " --> [WARNING] theory systematic %s: event %g in (%s,%s) with identically 0 central weight. Skipping event..."%(s['name'],i,r['proc'],r['cat'])
-	    continue
-	  else:
-	    # Add to tmp yields container
-	    stxsShapeYields[s['name']] += w*(f/f_central)
+  elif mode == 'inc':
+    if factoryType in ["a_w","a_h"]:
+      inc_up = (row["proc_s0_%s_up_yield"%sname]/row["proc_s0_nominal_yield"])
+      inc_down = (row["proc_s0_%s_down_yield"%sname]/row["proc_s0_nominal_yield"])
+      return [inc_down,inc_up]
+    else:
+      inc = (row["proc_s0_%s_yield"%sname]/row["proc_s0_nominal_yield"])
+      return [inc]  
 
-    # Calculate the STXS shape variation by dividing out the STXS bin variation and add to dataFrame
-    for s in ts:
-      # If do not require shape uncertainties then skip...
-      if('shape' not in s['tiers'])&('ishape' not in s['tiers']): continue
-      # If ggH systematic for non ggH process
-      if ("ggH" in s['name'])&("ggH" not in r['proc']): continue 
-      else:
-	if ts_factoryType[s['name']] == "a_w":
-	  shape_frac_up = (stxsShapeYields["%s_up"%s['name']]/stxsShapeYields["nominal"])/(stxsBinYields[r['proc']]["%s_up"%s['name']]/stxsBinYields[r['proc']]['nominal'])
-	  shape_frac_down = (stxsShapeYields["%s_down"%s['name']]/stxsShapeYields["nominal"])/(stxsBinYields[r['proc']]["%s_down"%s['name']]/stxsBinYields[r['proc']]['nominal'])
-          ishape_frac_up = stxsShapeYields["%s_up"%s['name']]/stxsShapeYields["nominal"]
-          ishape_frac_down = stxsShapeYields["%s_down"%s['name']]/stxsShapeYields["nominal"]
-	  if 'shape' in s['tiers']: d.at[ir,"%s_shape"%s['name']] = [shape_frac_down,shape_frac_up] 
-          if 'ishape' in s['tiers']: d.at[ir,"%s_ishape"%s['name']] = [ishape_frac_down,ishape_frac_up]
-	elif ts_factoryType[s['name']] == "s_w":
-	  shape_frac = (stxsShapeYields[s['name']]/stxsShapeYields["nominal"])/(stxsBinYields[r['proc']][s['name']]/stxsBinYields[r['proc']]['nominal'])
-          ishape_frac = stxsShapeYields[s['name']]/stxsShapeYields["nominal"]
-	  if 'shape' in s['tiers']: d.at[ir,"%s_shape"%s['name']] = [shape_frac]
-	  if 'ishape' in s['tiers']: d.at[ir,"%s_ishape"%s['name']] = [ishape_frac]
-
-  # Step 4: add STXS bin normalisation uncertainties to dataFrame
-  for s in ts:
-    if('norm' not in s['tiers'])&('inorm' not in s['tiers'])&('inc' not in s['tiers']): continue
-    if 'norm' in s['tiers']: d["%s_norm"%s['name']] = '-' 
-    if 'inorm' in s['tiers']: d["%s_inorm"%s['name']] = '-' # check: inclusive shifts in STXS bin
-    if 'inc' in s['tiers']: d["%s_inc"%s['name']] = '-' # check: inclusive shift in production mode
-
-  # Loop over rows in dataFrame and add relevant uncertainties
-  for ir,r in d[d['type']=='sig'].iterrows():
-    # If nominal yield for process is 0 then skip
-    if r['sumEntries'] == 0: continue
-
-    # Loop over systematics
-    for s in ts:
-
-      # Skip ggH systematics for non ggH processes
-      if("ggH" in s['name'])&("ggH" not in r['proc']): continue
-
-      # For asymmetric weights:
-      if ts_factoryType[s['name']] == "a_w":
-	norm_frac_up = (stxsBinYields[r['proc']]["%s_up"%s['name']]/stxsBinYields[r['proc']]['nominal'])/(productionModeYields[r['proc_s0']]["%s_up"%s['name']]/productionModeYields[r['proc_s0']]['nominal'])
-	norm_frac_down = (stxsBinYields[r['proc']]["%s_down"%s['name']]/stxsBinYields[r['proc']]['nominal'])/(productionModeYields[r['proc_s0']]["%s_down"%s['name']]/productionModeYields[r['proc_s0']]['nominal'])
-	inorm_frac_up = stxsBinYields[r['proc']]["%s_up"%s['name']]/stxsBinYields[r['proc']]['nominal']
-	inorm_frac_down = stxsBinYields[r['proc']]["%s_down"%s['name']]/stxsBinYields[r['proc']]['nominal']
-	inc_frac_up = productionModeYields[r['proc_s0']]["%s_up"%s['name']]/productionModeYields[r['proc_s0']]['nominal']
-	inc_frac_down = productionModeYields[r['proc_s0']]["%s_down"%s['name']]/productionModeYields[r['proc_s0']]['nominal']
-	if 'norm' in s['tiers']: d.at[ir,"%s_norm"%s['name']] = [norm_frac_down,norm_frac_up]
-	if 'inorm' in s['tiers']: d.at[ir,"%s_inorm"%s['name']] = [inorm_frac_down,inorm_frac_up]
-	if 'inc' in s['tiers']: d.at[ir,"%s_inc"%s['name']] = [inc_frac_down,inc_frac_up]
-      # For symmetric weights
-      elif ts_factoryType[s['name']] == "s_w":
-	norm_frac = (stxsBinYields[r['proc']][s['name']]/stxsBinYields[r['proc']]['nominal'])/(productionModeYields[r['proc_s0']][s['name']]/productionModeYields[r['proc_s0']]['nominal'])
-	inorm_frac = stxsBinYields[r['proc']][s['name']]/stxsBinYields[r['proc']]['nominal']
-	inc_frac = productionModeYields[r['proc_s0']][s['name']]/productionModeYields[r['proc_s0']]['nominal']
-	if 'norm' in s['tiers']: d.at[ir,"%s_norm"%s['name']] = [norm_frac]
-	if 'inorm' in s['tiers']: d.at[ir,"%s_inorm"%s['name']] = [inorm_frac]
-	if 'inc' in s['tiers']: d.at[ir,"%s_inc"%s['name']] = [inc_frac]
-
-  # Return dataFrame with added components
-  return d, productionModeYields, stxsBinYields, stxsShapeYields
+  else: 
+    print " --> [ERROR] theory systematic tier %s is not supported. Leaving"%mode
+    sys.exit(1) 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Function to group systematics: e.g. for scaleWeight where up/down = [1,2],[3,6] etc
-def groupSyst(d,ts,prefix="scaleWeight",suffix="shape",groupings=[]):
+def groupSystematics(d,systs,prefix="scaleWeight",suffix="shape",groupings=[]):
   
-  # Run over groupings and add new columns to dataFrame 
-  for group_idx in range(len(groupings)):
-    grouping = groupings[group_idx]
-    # Add column to dataFrame
-    d['%s_group%g_%s'%(prefix,group_idx,suffix)] = '-'
-    # Loop over rows in dataFrame
-    for ir,r in d[d['type']=='sig'].iterrows():
-      # Check if they are lists of len(1)
-      if type(r['%s_%g_%s'%(prefix,grouping[0],suffix)]) is not list:
-        print " --> [ERROR] in grouping systematic %s_%g_%s. Not saved as symmetric uncertainty (list length 0). Leaving"%(prefix,grouping[0],suffix)
-      if type(r['%s_%g_%s'%(prefix,grouping[1],suffix)]) is not list:
-        print " --> [ERROR] in grouping systematic %s_%g_%s. Not saved as symmetric uncertainty (list length 0). Leaving"%(prefix,grouping[1],suffix)
+  # Define mask: i.e. only signal rows
+  mask = (d['type']=='sig')
 
-      # Extract up/down variations from group
-      frac_up = r['%s_%g_%s'%(prefix,grouping[0],suffix)][0]
-      frac_down = r['%s_%g_%s'%(prefix,grouping[1],suffix)][0]
+  # Loop over groupings
+  for group_idx in range(len(groupings)): 
+    # Extract names of weights to be grouped
+    gr = groupings[group_idx]
+    w0_name = '%s_%g_%s'%(prefix,gr[0],suffix)
+    w1_name = '%s_%g_%s'%(prefix,gr[1],suffix)
 
-      # Add as new columns in dataFrame
-      d.at[ir,'%s_group%g_%s'%(prefix,group_idx,suffix)] = [frac_down,frac_up]
+    # Add new column to dataframe
+    grname = '%s_gr%g_%s'%(prefix,group_idx,suffix)
+    d[grname] = '-'
+
+    # For rows which satisfy mask: set grouped value
+    d.loc[mask,grname] = d[mask].apply(lambda x: [x[w1_name][0],x[w0_name][0]], axis=1)
 
     # Drop original columns from dataFrame 
-    for g in grouping: d.drop( ['%s_%g_%s'%(prefix,g,suffix)], axis=1, inplace=True )
+    for i in gr: d.drop( ['%s_%g_%s'%(prefix,i,suffix)], axis=1, inplace=True )
 
-  # Replace individual systematics from dict and add grouping
-  for group_idx in range(len(groupings)):
-    grouping = groupings[group_idx]
-    for s in ts:
-      # Change 1st to group and delete 2nd
-      if s['name'] == "%s_%g"%(prefix,grouping[0]):
-        s['name'] = re.sub("%s_%g"%(prefix,grouping[0]),"%s_group%g"%(prefix,group_idx),s['name'])
-        s['title'] = re.sub("%s_%g"%(prefix,grouping[0]),"%s_group%g"%(prefix,group_idx),s['title']) 
-      elif s['name'] == "%s_%g"%(prefix,grouping[1]): ts.remove(s)
+    # Replace individual systs in dict with grouped syst
+    for s in systs:
+      # Change w0_name and remove w1_name
+      if s['name'] == "%s_%g"%(prefix,gr[0]):
+        s['name'] = re.sub("%s_%g"%(prefix,gr[0]),"%s_gr%g"%(prefix,group_idx),s['name'])
+        s['title'] = re.sub("%s_%g"%(prefix,gr[0]),"%s_gr%g"%(prefix,group_idx),s['title'])
+      elif s['name'] == "%s_%g"%(prefix,gr[1]): systs.remove(s)
 
-  return d,ts
+  return d,systs
       
-    
-    
-
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
