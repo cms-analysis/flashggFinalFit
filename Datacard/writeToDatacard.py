@@ -59,32 +59,41 @@ def writeProcesses(f,d,options):
 def writeSystematic(f,d,s,options):
   # Remove all rows from dataFrame with prune=1 (includes NoTag)
   d = d[d['prune']==0]
-  # Construct syst line/lines if separate by year
-  if s['merge'] == 1:
-    lsyst = '%-40s    lnN    '%s['title']
-    # Loop over categories and then iterate over rows in category
-    for cat in d.cat.unique():
-      for ir,r in d[d['cat']==cat].iterrows():
-        if r['proc'] == "data_obs": continue
-        # Extract value and add to line (with checks)
-        sval = r[s['name']]
-        lsyst = addSyst(lsyst,sval,s['title'],r['proc'],cat)
-    # Remove final space from line and add to file
-    f.write("%s\n"%lsyst[:-1])
-  else:
-    for year in options.years.split(","):
-      stitle = "%s_%s"%(s['title'],year)
-      sname = "%s_%s"%(s['name'],year)
+
+  # If theory: loop over tiers else run over once
+  tiers = []
+  if s['type']=='theory': tiers = s['tiers']
+  else: tiers = ['']
+  for tier in tiers:
+    if tier != '': tierStr = "_%s"%tier
+    else: tierStr = ''
+    # Construct syst line/lines if separate by year
+    if s['merge'] == 1:
+      stitle = "%s%s"%(s['title'],tierStr)
       lsyst = '%-40s    lnN    '%stitle
       # Loop over categories and then iterate over rows in category
       for cat in d.cat.unique():
-        for ir,r in d[d['cat']==cat].iterrows():
-          if r['proc'] == "data_obs": continue
-          # Extract value and add to line (with checks)
-          sval = r[sname]
-          lsyst = addSyst(lsyst,sval,stitle,r['proc'],cat)
+	for ir,r in d[d['cat']==cat].iterrows():
+	  if r['proc'] == "data_obs": continue
+	  # Extract value and add to line (with checks)
+	  sval = r["%s%s"%(s['name'],tierStr)]
+	  lsyst = addSyst(lsyst,sval,stitle,r['proc'],cat)
       # Remove final space from line and add to file
       f.write("%s\n"%lsyst[:-1])
+    else:
+      for year in options.years.split(","):
+	stitle = "%s%s_%s"%(s['title'],tierStr,year)
+	sname = "%s%s_%s"%(s['name'],tierStr,year)
+	lsyst = '%-40s    lnN    '%stitle
+	# Loop over categories and then iterate over rows in category
+	for cat in d.cat.unique():
+	  for ir,r in d[d['cat']==cat].iterrows():
+	    if r['proc'] == "data_obs": continue
+	    # Extract value and add to line (with checks)
+	    sval = r[sname]
+	    lsyst = addSyst(lsyst,sval,stitle,r['proc'],cat)
+	# Remove final space from line and add to file
+	f.write("%s\n"%lsyst[:-1])
   return True
           
 
@@ -122,5 +131,5 @@ def addSyst(l,v,s,p,c):
 
 def writePdfIndex(f,d,options):
   f.write("\n")
-  for cat in d.cat.unique(): f.write("pdfindex_%s_13TeV  discrete\n"%cat)
+  for cat in d[~d['cat'].str.contains("NOTAG")].cat.unique(): f.write("pdfindex_%s_13TeV  discrete\n"%cat)
   return True

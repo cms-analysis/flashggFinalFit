@@ -186,6 +186,7 @@ def theoreticalSystFactory(d,ts,options):
   stxsBinYields = {}
   # Loop over unique processes in dataframe
   for proc in d[d['type']=='sig'].proc.unique():
+    print "    --> [VERBOSE] Calculating the norm variations for STXS bin: %s"%proc
     stxsBinYields[proc] = {}
     # Create a counter for each systematic variation and nominal
     stxsBinYields[proc]['nominal'] = 0
@@ -260,6 +261,8 @@ def theoreticalSystFactory(d,ts,options):
 
     # If nominal yield for a proc x cat is zero then skip
     if r['sumEntries'] == 0: continue
+
+    print "    --> [VERBOSE] Calculating the shape variations for (STXS bin,RECO category) = (%s,%s)"%(r['proc'],r['cat'])
 
     # Store yields for given proc x cat in tmp container
     stxsShapeYields = {}
@@ -349,6 +352,7 @@ def theoreticalSystFactory(d,ts,options):
 
     # Loop over systematics
     for s in ts:
+
       # Skip ggH systematics for non ggH processes
       if("ggH" in s['name'])&("ggH" not in r['proc']): continue
 
@@ -402,11 +406,15 @@ def groupSyst(d,ts,prefix="scaleWeight",suffix="shape",groupings=[]):
     # Drop original columns from dataFrame 
     for g in grouping: d.drop( ['%s_%g_%s'%(prefix,g,suffix)], axis=1, inplace=True )
 
-  # FIXME: tomorrows job
-  # Remove systematic from dictionary and add group
-  #for s in ts:
-  #if s['name'] == "%s_%g_%s
-    
+  # Replace individual systematics from dict and add grouping
+  for group_idx in range(len(groupings)):
+    grouping = groupings[group_idx]
+    for s in ts:
+      # Change 1st to group and delete 2nd
+      if s['name'] == "%s_%g"%(prefix,grouping[0]):
+        s['name'] = re.sub("%s_%g"%(prefix,grouping[0]),"%s_group%g"%(prefix,group_idx),s['name'])
+        s['title'] = re.sub("%s_%g"%(prefix,grouping[0]),"%s_group%g"%(prefix,group_idx),s['title']) 
+      elif s['name'] == "%s_%g"%(prefix,grouping[1]): ts.remove(s)
 
   return d,ts
       

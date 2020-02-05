@@ -14,6 +14,7 @@ def leave():
   print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG DATACARD MAKER RUN II (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ "
   sys.exit(1)
 
+#cats = 'RECO_0J_PTH_GT10_Tag0,RECO_VBFTOPO_JET3_HIGHMJJ,RECO_VBFLIKEGGH,RECO_1J_PTH_120_200_Tag0,RECO_PTH_GT200_Tag0,RECO_GE2J_PTH_0_60_Tag1,RECO_GE2J_PTH_60_120_Tag1,RECO_GE2J_PTH_60_120_Tag0,RECO_VBFTOPO_VHHAD,RECO_1J_PTH_120_200_Tag1,RECO_GE2J_PTH_120_200_Tag1,RECO_GE2J_PTH_120_200_Tag0,RECO_1J_PTH_0_60_Tag1,RECO_VBFTOPO_BSM,RECO_VBFTOPO_JET3VETO_HIGHMJJ,RECO_0J_PTH_0_10_Tag0,RECO_PTH_GT200_Tag1,RECO_VBFTOPO_JET3VETO_LOWMJJ,RECO_1J_PTH_0_60_Tag0,RECO_1J_PTH_60_120_Tag1,RECO_0J_PTH_0_10_Tag1,RECO_0J_PTH_GT10_Tag1,RECO_GE2J_PTH_0_60_Tag0,RECO_1J_PTH_60_120_Tag0,RECO_VBFTOPO_JET3_LOWMJJ'
 #merged_cats = ['RECO_0J_PTH_GT10_Tag0', 'RECO_0J_PTH_GT10_Tag1', 'RECO_0J_PTH_0_10_Tag0', 'RECO_0J_PTH_0_10_Tag1', 'RECO_PTH_GT200_Tag0', 'RECO_PTH_GT200_Tag1', 'RECO_1J_PTH_120_200_Tag0', 'RECO_1J_PTH_120_200_Tag1', 'RECO_1J_PTH_60_120_Tag0', 'RECO_1J_PTH_60_120_Tag1', 'RECO_1J_PTH_0_60_Tag0', 'RECO_1J_PTH_0_60_Tag1', 'RECO_VBFTOPO_BSM', 'RECO_VBFTOPO_JET3VETO_Tag0', 'RECO_VBFTOPO_JET3VETO_Tag1', 'RECO_VBFTOPO_JET3_Tag0', 'RECO_VBFTOPO_JET3_Tag1', 'RECO_GE2J_PTH_120_200_Tag0', 'RECO_GE2J_PTH_120_200_Tag1', 'RECO_GE2J_PTH_60_120_Tag0', 'RECO_GE2J_PTH_60_120_Tag1', 'RECO_GE2J_PTH_0_60_Tag0', 'RECO_GE2J_PTH_0_60_Tag1'] #full merging
 #merged_cats = ['RECO_PTH_GT200_Tag0','RECO_PTH_GT200_Tag1','RECO_VBFTOPO_BSM']
 merged_cats = ['RECO_0J_PTH_GT10_Tag1']
@@ -278,10 +279,10 @@ for syst in experimental_systematics:
   if not writeSystematic(fdata,data_syst,syst,opt):
     print " --> [ERROR] in writing systematic %s (experiment). Leaving"%syst['name']
     leave()
-#for syst in theoretical_systematics:
-#  if not writeSystematic(fdata,data_syst,syst,opt):
-#    print " --> [ERROR] in writing systematic %s (theory). Leaving"%syst['name']
-#    leave()
+for syst in theory_systematics:
+  if not writeSystematic(fdata,data_syst,syst,opt):
+    print " --> [ERROR] in writing systematic %s (theory). Leaving"%syst['name']
+    leave()
 if not writePdfIndex(fdata,data,opt):
   print " --> [ERROR] in writing pdf indices. Leaving..."
   leave()
