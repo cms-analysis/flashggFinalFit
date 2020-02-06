@@ -8,12 +8,12 @@ import ROOT
 def addConstantSyst(sd,_syst,options):
 
   # Add column to dataFrame with default value
-  if _syst['merge']: 
+  if _syst['correlateAcrossYears']: 
     sd[_syst['name']] = '-'
     # If signal and not NOTAG then set value
     sd.loc[(sd['type']=='sig')&(~sd['cat'].str.contains("NOTAG")), _syst['name']] = _syst['value']
 
-  # If not merged across years then create separate columns for each year and fill separately
+  # If not correlate across years then create separate columns for each year and fill separately
   else:
     for year in options.years.split(","):
       sd["%s_%s"%(_syst['name'],year)] = '-'
@@ -112,12 +112,12 @@ def calcSystYields(_nominalDataName,_inputWS,_systFactoryTypes):
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # EXPERIMENTAL SYSTEMATICS FACTORY:
 # d - dataFrame, systs - dict of systematics, ftype - dict of factoryTypes
-def experimentalSystFactory(d,systs,ftype,options):
+def experimentalSystFactory(d,systs,ftype,options,_removal=True):
 
   # Loop over systematics and add new column in dataFrame
   for s in systs:
     if s['type'] == 'constant': continue
-    if s['merge']: d[s['name']] = '-'
+    if s['correlateAcrossYears']: d[s['name']] = '-'
     else:
       for year in options.years.split(","): d['%s_%s'%(s['name'],year)] = '-'
 
@@ -126,7 +126,7 @@ def experimentalSystFactory(d,systs,ftype,options):
     if s['type'] == 'constant': continue
     # Extract factory type
     f = ftype[s['name']]
-    if s['merge']:
+    if s['correlateAcrossYears']:
       mask = (d['type']=='sig')&(~d['cat'].str.contains("NOTAG"))
       d.loc[mask,s['name']] = d[mask].apply(lambda x: compareYield(x,f,s['name']), axis=1)
     else:
@@ -135,20 +135,20 @@ def experimentalSystFactory(d,systs,ftype,options):
         d.loc[mask,'%s_%s'%(s['name'],year)] = d[mask].apply(lambda x: compareYield(x,f,s['name']), axis=1)
 
     # Remove yield columns from dataFrame
-    if f in ['a_h','a_w']: 
-      for direction in ['up','down']: d.drop(['%s_%s_yield'%(s['name'],direction)], axis=1, inplace=True)
-    else: d.drop(['%s_yield'%s['name']], axis=1, inplace=True)
+    if _removal:
+      if f in ['a_h','a_w']: 
+	for direction in ['up','down']: d.drop(['%s_%s_yield'%(s['name'],direction)], axis=1, inplace=True)
+      else: d.drop(['%s_yield'%s['name']], axis=1, inplace=True)
 
   return d
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # THEORY SYSTEMATICS FACTORY:
-def theorySystFactory(d,systs,ftype,options):
+def theorySystFactory(d,systs,ftype,options,stxsMergeScheme=None,_removal=True):
    
   # Calculate the per-production mode (per-year) yield variation: add as column in dataFrame
   for proc_s0 in d[d['type']=='sig'].proc_s0.unique():
     for year in options.years.split(","):
-      key = "%s_%s"%(proc_s0,year)
       mask = (d['proc_s0']==proc_s0)&(d['year']==year)
       d.loc[mask,'proc_s0_nominal_yield'] = d[mask]['nominal_yield'].sum()
       for s in systs:
@@ -161,7 +161,6 @@ def theorySystFactory(d,systs,ftype,options):
           d.loc[mask,'proc_s0_%s_yield'%s['name']] = d[mask]['%s_yield'%s['name']].sum()
   # Calculate the per-STXS bin (per-year already in proc name) yield variations: add as column in dataFrame
   for proc in d[d['type']=='sig'].proc.unique():
-    key = proc
     mask = (d['proc']==proc)
     d.loc[mask,'proc_nominal_yield'] = d[mask]['nominal_yield'].sum() 
     for s in systs:
@@ -173,10 +172,32 @@ def theorySystFactory(d,systs,ftype,options):
       else: 
 	d.loc[mask,'proc_%s_yield'%s['name']] = d[mask]['%s_yield'%s['name']].sum()
 
+  # For merging STXS bins in parameter scheme:
+  if options.doSTXSBinMerging:
+    for mergeName, mergeBins in stxsMergeScheme.iteritems():
+      for year in options.years.split(","):
+        mBins = [] # add full name (inc year and and decay)
+        for mb in mergeBins: mBins.append("%s_%s_hgg"%(mb,year)) 
+	mask = (d['type']=='sig')&(d.apply(lambda x: x['proc'] in mBins, axis=1))
+        d.loc[mask,'merge_%s_nominal_yield'%mergeName] = d[mask]['nominal_yield'].sum()
+        # Loop over systematics
+        for s in systs:
+          if s['type'] == 'constant': continue
+          f = ftype[s['name']]
+          if f in ['a_w','a_h']:
+            for direction in ['up','down']:
+              d.loc[mask,'merge_%s_%s_%s_yield'%(mergeName,s['name'],direction)] = d[mask]['%s_%s_yield'%(s['name'],direction)].sum()
+          else:
+            d.loc[mask,'merge_%s_%s_yield'%(mergeName,s['name'])] = d[mask]['%s_yield'%s['name']].sum()
+
   # Loop over systematics and add new column in dataFrame for each tier
   for s in systs:
     if s['type'] == 'constant': continue
-    for tier in s['tiers']: d["%s_%s"%(s['name'],tier)] = '-'
+    for tier in s['tiers']: 
+      if tier == 'mnorm': 
+        if options.doSTXSBinMerging:
+          for mergeName in stxsMergeScheme: d["%s_%s_mnorm"%(s['name'],mergeName)] = '-'
+      else: d["%s_%s"%(s['name'],tier)] = '-'
 
   # Loop over systematics and fill entries for rows which satisfy mask
   for s in systs:
@@ -184,28 +205,50 @@ def theorySystFactory(d,systs,ftype,options):
     # Extract factory type
     f = ftype[s['name']]
     mask = (d['type']=='sig')
-    # Loop over tiers and use appropriate mode for compareYield function
+    # Loop over tiers and use appropriate mode for compareYield function: skip mnorm as treated separately below
     for tier in s['tiers']: 
+      if tier == 'mnorm': continue
       d.loc[mask,"%s_%s"%(s['name'],tier)] = d[mask].apply(lambda x: compareYield(x,f,s['name'],mode=tier), axis=1)
 
-    # Remove yield columns from dataFrame
-    if f in ['a_h','a_w']: 
-      for direction in ['up','down']: 
-        for id_ in ['','proc_','proc_s0_']:
-          d.drop(['%s%s_%s_yield'%(id_,s['name'],direction)], axis=1, inplace=True)
-    else: 
-      for id_ in ['','proc_','proc_s0_']: 
-        d.drop(['%s%s_yield'%(id_,s['name'])], axis=1, inplace=True)
+  # For merging STXS bins in parameter scheme: calculate mnorm systematics (merged-STXS-normalisation)
+  # One nuisance per merge
+  if options.doSTXSBinMerging:
+    for mergeName in stxsMergeScheme:
+      for s in systs:
+	if s['type'] == 'constant': continue
+	for year in options.years.split(","):
+	  # Remove NaN entries and require specific year
+	  mask = (d['merge_%s_nominal_yield'%mergeName]==d['merge_%s_nominal_yield'%mergeName])&(d['year']==year)
+	  d.loc[mask,"%s_%s_mnorm"%(s['name'],mergeName)] = d[mask].apply(lambda x: compareYield(x,f,s['name'],mode='mnorm',mname=mergeName), axis=1)
 
-  # Remove nominal proc and proc_s0 yield columns
-  for id_ in ['proc_','proc_s0_']: d.drop(['%snominal_yield'%id_], axis=1, inplace=True)
+  # Removal: remove yield columns from dataFrame
+  if _removal:
+    ids_ = ['','proc_','proc_s0_']
+    if options.doSTXSBinMerging:
+      for mergeName in stxsMergeScheme: ids_.append("merge_%s_"%mergeName)
+    # Loop over systematics
+    for s in systs:
+      if s['type'] == 'constant': continue
+      # Extract factory type
+      f = ftype[s['name']]
+      if f in ['a_h','a_w']: 
+	for direction in ['up','down']: 
+	  for id_ in ids_:
+	    d.drop(['%s%s_%s_yield'%(id_,s['name'],direction)], axis=1, inplace=True)
+      else: 
+	for id_ in ids_: 
+	  d.drop(['%s%s_yield'%(id_,s['name'])], axis=1, inplace=True)
+
+    # Remove also nominal yields for all combinations
+    ids_.remove('')
+    for id_ in ids_: d.drop(['%snominal_yield'%id_], axis=1, inplace=True)
 
   return d
   
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Function for comparing yields:
 #   * mode == treatment of theory systematic  
-def compareYield(row,factoryType,sname,mode='default'):
+def compareYield(row,factoryType,sname,mode='default',mname=None):
 
   # if nominal yield is zero: return 1
   if row['nominal_yield']==0:
@@ -233,6 +276,15 @@ def compareYield(row,factoryType,sname,mode='default'):
     else:
       norm = (row["proc_%s_yield"%sname]/row["proc_nominal_yield"])/(row["proc_s0_%s_yield"%sname]/row["proc_s0_nominal_yield"])
       return [norm]
+
+  elif mode == 'mnorm':
+    if factoryType in ["a_w","a_h"]:
+      mnorm_up = (row["proc_%s_up_yield"%sname]/row["proc_nominal_yield"])/(row["merge_%s_%s_up_yield"%(mname,sname)]/row["merge_%s_nominal_yield"%mname])
+      mnorm_down = (row["proc_%s_down_yield"%sname]/row["proc_nominal_yield"])/(row["merge_%s_%s_down_yield"%(mname,sname)]/row["merge_%s_nominal_yield"%mname])
+      return [mnorm_down,mnorm_up]
+    else:
+      mnorm = (row["proc_%s_yield"%sname]/row["proc_nominal_yield"])/(row["merge_%s_%s_yield"%(mname,sname)]/row["merge_%s_nominal_yield"%mname])
+      return [mnorm]
  
   elif mode == 'inorm':
     if factoryType in ["a_w","a_h"]:
@@ -258,27 +310,45 @@ def compareYield(row,factoryType,sname,mode='default'):
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Function to group systematics: e.g. for scaleWeight where up/down = [1,2],[3,6] etc
-def groupSystematics(d,systs,prefix="scaleWeight",suffix="shape",groupings=[]):
+def groupSystematics(d,systs,options,prefix="scaleWeight",groupings=[],stxsMergeScheme=None,_removal=True):
   
-  # Define mask: i.e. only signal rows
-  mask = (d['type']=='sig')
-
   # Loop over groupings
   for group_idx in range(len(groupings)): 
-    # Extract names of weights to be grouped
     gr = groupings[group_idx]
-    w0_name = '%s_%g_%s'%(prefix,gr[0],suffix)
-    w1_name = '%s_%g_%s'%(prefix,gr[1],suffix)
 
-    # Add new column to dataframe
-    grname = '%s_gr%g_%s'%(prefix,group_idx,suffix)
-    d[grname] = '-'
+    # Extract systematic from systs
+    for s in systs:
+      if s['name'] == "%s_%g"%(prefix,gr[0]): s0 = s
+      elif s['name'] == "%s_%g"%(prefix,gr[1]): s1 = s
 
-    # For rows which satisfy mask: set grouped value
-    d.loc[mask,grname] = d[mask].apply(lambda x: [x[w1_name][0],x[w0_name][0]], axis=1)
-
-    # Drop original columns from dataFrame 
-    for i in gr: d.drop( ['%s_%g_%s'%(prefix,i,suffix)], axis=1, inplace=True )
+    # Loop over systematic tiers
+    for tier in s0['tiers']:
+      if tier == 'mnorm':
+        if options.doSTXSBinMerging:
+          # Loop over merging schemes
+          for mergeName in stxsMergeScheme:
+            s0_name = "%s_%s_%s"%(s0['name'],mergeName,tier)
+            s1_name = "%s_%s_%s"%(s1['name'],mergeName,tier)
+            gr_name = "%s_gr%g_%s_%s"%(prefix,group_idx,mergeName,tier)
+            d[gr_name] = '-'
+            # Define mask as all entries where d[s0_name]!='-'
+            mask = (d[s0_name]!='-')&(d[s1_name]!='-')
+            d.loc[mask,gr_name] = d[mask].apply(lambda x: [x[s0_name][0],x[s1_name][0]],axis=1)
+            # Remove original columns from dataFrame
+            if _removal:
+              for i in gr: d.drop( ['%s_%g_%s_%s'%(prefix,i,mergeName,tier)], axis=1, inplace=True )
+        else: continue
+      else:
+        s0_name = "%s_%s"%(s0['name'],tier)
+        s1_name = "%s_%s"%(s1['name'],tier)
+        gr_name = "%s_gr%g_%s"%(prefix,group_idx,tier)
+        d[gr_name] = '-'
+        # Define mask as all entries where d[s0_name]!='-' and d[s1_name]!='-'
+        mask = (d[s0_name]!='-')&(d[s1_name]!='-')
+        d.loc[mask,gr_name] = d[mask].apply(lambda x: [x[s0_name][0],x[s1_name][0]],axis=1)
+        # Remove columns from dataFrame
+        if _removal:
+          for i in gr: d.drop( ['%s_%g_%s'%(prefix,i,tier)], axis=1, inplace=True )
 
     # Replace individual systs in dict with grouped syst
     for s in systs:

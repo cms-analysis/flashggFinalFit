@@ -23,40 +23,50 @@ def writeProcesses(f,d,options):
     # Loop over rows for respective category
     for ir,r in d[d['cat']==cat].iterrows():
       # Write to datacard
-      f.write("shapes %s %s %s %s\n"%(r['proc'],r['cat'],r['modelWSFile'],r['model']))
+      f.write("shapes      %-55s %-40s %s %s\n"%(r['proc'],r['cat'],r['modelWSFile'],r['model']))
 
   # Bin, observation and rate lines
-  lbin_cat = 'bin             '
-  lbin_procXcat = 'bin             '
-  lobs_cat = 'observation     '
-  lproc = 'process         '
-  lprocid = 'process         '
-  lrate = 'rate            '         
+  lbreak = '----------------------------------------------------------------------------------------------------------------------------------'
+  lbin_cat = '%-30s'%"bin"
+  lobs_cat = '%-30s'%"observation"
+  lbin_procXcat = '%-30s'%"bin"
+  lproc = '%-30s'%"process"
+  lprocid = '%-30s'%"process"
+  lrate = '%-30s'%"rate"        
   # Loop over categories
   for cat in d.cat.unique():
-    lbin_cat += "%s "%cat
-    lobs_cat += "-1 "
+    lbin_cat += "%-55s "%cat
+    lobs_cat += "%-55s "%"-1"
     sigID = 0
     # Loop over rows for respective category
     for ir,r in d[d['cat']==cat].iterrows():
       if r['proc'] == "data_obs": continue
-      lbin_procXcat += "%s "%cat
-      lproc += "%s "%r['proc']
-      if r['proc'] == "bkg_mass": lprocid += "1 "
+      lbin_procXcat += "%-55s "%cat
+      lproc += "%-55s "%r['proc']
+      if r['proc'] == "bkg_mass": lprocid += "%-55s "%"1"
       else:
-        lprocid += "%g "%sigID
+        lprocid += "%-55s "%sigID
         sigID -= 1
-      lrate += "%.1f "%r['rate']
+      lrate += "%-55.1f "%r['rate']
   #Remove final space from lines and add to file
   f.write("\n")
-  for l in [lbin_cat,lbin_procXcat,lobs_cat,lproc,lprocid,lrate]: 
+  for l in [lbreak,lbin_cat,lobs_cat,lbreak,lbin_procXcat,lproc,lprocid,lrate,lbreak]: 
     l = l[:-1]
     f.write("%s\n"%l)
     
   f.write("\n")
   return True
 
-def writeSystematic(f,d,s,options):
+
+def writeSystematic(f,d,s,options,stxsMergeScheme=None):
+
+  # For signal shape systematics add simple line
+  if s['type'] == 'signal_shape':
+    lsyst = "%-50s  param    %-6s %-6s"%(s['title'],s['mean'],s['sigma'])
+    f.write("%s\n"%lsyst)
+    return True
+ 
+  # Else: for yield variation uncertainties...
   # Remove all rows from dataFrame with prune=1 (includes NoTag)
   mask = (d['prune']==0)
   d = d[mask]
@@ -68,63 +78,76 @@ def writeSystematic(f,d,s,options):
   for tier in tiers:
     if tier != '': tierStr = "_%s"%tier
     else: tierStr = ''
-    # Construct syst line/lines if separate by year
-    if s['merge'] == 1:
-      stitle = "%s%s"%(s['title'],tierStr)
-      lsyst = '%-40s    lnN    '%stitle
-      # Loop over categories and then iterate over rows in category
-      for cat in d.cat.unique():
-	for ir,r in d[d['cat']==cat].iterrows():
-	  if r['proc'] == "data_obs": continue
-	  # Extract value and add to line (with checks)
-	  sval = r["%s%s"%(s['name'],tierStr)]
-	  lsyst = addSyst(lsyst,sval,stitle,r['proc'],cat)
-      # Remove final space from line and add to file
-      f.write("%s\n"%lsyst[:-1])
-    else:
-      for year in options.years.split(","):
-	stitle = "%s%s_%s"%(s['title'],tierStr,year)
-	sname = "%s%s_%s"%(s['name'],tierStr,year)
-	lsyst = '%-40s    lnN    '%stitle
+    
+    # If calculating merged bin: loop over mergings else run over once
+    mns = []
+    if tier == 'mnorm':
+      for mergeName in stxsMergeScheme: mns.append(mergeName)
+    if len(mns) == 0: mns.append('')
+    for mn in mns:
+      if mn != '': mergeStr = "_%s"%mn
+      else: mergeStr = ''
+    
+      # Construct syst line/lines if separate by year
+      if s['correlateAcrossYears'] == 1:
+	stitle = "%s%s%s"%(s['title'],mergeStr,tierStr)
+	lsyst = '%-50s  %-10s    '%(stitle,s['prior'])
 	# Loop over categories and then iterate over rows in category
 	for cat in d.cat.unique():
 	  for ir,r in d[d['cat']==cat].iterrows():
 	    if r['proc'] == "data_obs": continue
 	    # Extract value and add to line (with checks)
-	    sval = r[sname]
+	    sval = r["%s%s%s"%(s['name'],mergeStr,tierStr)]
 	    lsyst = addSyst(lsyst,sval,stitle,r['proc'],cat)
 	# Remove final space from line and add to file
 	f.write("%s\n"%lsyst[:-1])
+      else:
+	for year in options.years.split(","):
+	  stitle = "%s%s%s_%s"%(s['title'],mergeStr,tierStr,year)
+	  sname = "%s%s%s_%s"%(s['name'],mergeStr,tierStr,year)
+	  lsyst = '%-50s  %-10s    '%(stitle,s['prior'])
+	  # Loop over categories and then iterate over rows in category
+	  for cat in d.cat.unique():
+	    for ir,r in d[d['cat']==cat].iterrows():
+	      if r['proc'] == "data_obs": continue
+	      # Extract value and add to line (with checks)
+	      sval = r[sname]
+	      lsyst = addSyst(lsyst,sval,stitle,r['proc'],cat)
+	  # Remove final space from line and add to file
+	  f.write("%s\n"%lsyst[:-1])
   return True
           
 
 def addSyst(l,v,s,p,c):
   #l-systematic line, v-value, s-systematic title, p-proc, c-cat
   if type(v) is str: 
-    l += "%s "%v
+    l += "%-15s "%v
     return l
   elif type(v) is list: 
     # Symmetric:
     if len(v) == 1: 
       # Check 1: variation is non-negligible. If not then skip
-      if abs(v[0]-1)<0.0005: l += "- "
+      if abs(v[0]-1)<0.0005: l += "%-15s "%"-"
       # Check 2: variation is not negative. Print message but add to datacard (cleaned later)
       elif v[0] < 0.: 
         print " --> [WARNING] systematic %s: negative variation for (%s,%s)"%(s,p,c)
-        l += "%.3f "%v[0]
+        l += "%-15.3f "%v[0]
       else:
-        l += "%.3f "%v[0]
+        l += "%-15.3f "%v[0]
     # Anti-symmetirc
     if len(v) == 2:
       # Check 1: variation is non-negligible. If not then skip
-      if(abs(v[0]-1)<0.0005)&(abs(v[1]-1)<0.0005): l += '- '
+      if(abs(v[0]-1)<0.0005)&(abs(v[1]-1)<0.0005): l += "%-15s "%"-"
       # Check 2: neither variation is negative. Print message but still add to datacard (cleaned later)
       elif(v[0]<0.)|(v[1]<0.):
         print " --> [WARNING] systematic %s: negative variation for (%s,%s)"%(s,p,c)
-        l += "%.3f/%.3f "%(v[0],v[1])
+        vstr = "%.3f/%.3f"%(v[0],v[1])
+        l += "%-15s "%vstr
       # Check 3: effect is approximately symmetric: then just add single up variation
-      elif( abs((v[0]*v[1])-1)<0.0005 ): l += "%.3f "%v[1]
-      else: l += "%.3f/%.3f "%(v[0],v[1])
+      elif( abs((v[0]*v[1])-1)<0.0005 ): l += "%-15.3f "%v[1]
+      else: 
+        vstr = "%.3f/%.3f"%(v[0],v[1])
+        l += "%-15s "%vstr
     return l
   else:
     print " --> [ERROR] systematic %s: value does not have type string or list for (%s,%s). Leaving..."%(s['title'],p,c)
@@ -132,5 +155,12 @@ def addSyst(l,v,s,p,c):
 
 def writePdfIndex(f,d,options):
   f.write("\n")
-  for cat in d[~d['cat'].str.contains("NOTAG")].cat.unique(): f.write("pdfindex_%s_13TeV  discrete\n"%cat)
+  for cat in d[~d['cat'].str.contains("NOTAG")].cat.unique(): 
+    indexStr = "pdfindex_%s_13TeV"%cat
+    f.write("%-55s  discrete\n"%indexStr)
   return True
+
+def writeBreak(f):
+  lbreak = '----------------------------------------------------------------------------------------------------------------------------------'
+  f.write("%s\n"%lbreak)
+
