@@ -54,6 +54,7 @@ int Normalization_13TeV::Init(int sqrtS){
         XSectionMap_GG2H_PTH_200_300[mH] = 0.0286 * valXSggH;
         XSectionMap_GG2H_PTH_300_450[mH] = 0.0286 * valXSggH;
         XSectionMap_GG2H_PTH_450_650[mH] = 0.0286 * valXSggH;
+        XSectionMap_GG2H_PTH_GT650[mH] = 0.1576 * valXSggH;
         XSectionMap_GG2H_0J_PTH_0_10[mH] = 0.1576 * valXSggH;
         XSectionMap_GG2H_0J_PTH_GT10[mH] = 0.4334 * valXSggH;
         XSectionMap_GG2H_1J_PTH_0_60[mH] = 0.1460 * valXSggH;
@@ -149,8 +150,16 @@ TGraph * Normalization_13TeV::GetSigmaGraph(TString process)
   TGraph * gr = new TGraph();
   std::map<double, double> * XSectionMap = 0;
   // Stage 1.2
-  if ( process == "GG2H_PTH_GT200" ){
-          XSectionMap = &XSectionMap_GG2H_PTH_GT200;
+  if ( process == "GG2H_FWDH" ){
+          XSectionMap = &XSectionMap_GG2H_FWDH;
+  } else if ( process == "GG2H_PTH_200_300" ){
+          XSectionMap = &XSectionMap_GG2H_PTH_200_300;
+  } else if ( process == "GG2H_PTH_300_450" ){
+          XSectionMap = &XSectionMap_GG2H_PTH_300_450;
+  } else if ( process == "GG2H_PTH_450_600" ){
+          XSectionMap = &XSectionMap_GG2H_PTH_450_600;
+  } else if ( process == "GG2H_PTH_GT650" ){
+          XSectionMap = &XSectionMap_GG2H_PTH_GT650;
   } else if ( process == "GG2H_0J_PTH_0_10" ){
           XSectionMap = &XSectionMap_GG2H_0J_PTH_0_10;
   } else if ( process == "GG2H_0J_PTH_GT10" ){
@@ -175,6 +184,8 @@ TGraph * Normalization_13TeV::GetSigmaGraph(TString process)
           XSectionMap = &XSectionMap_GG2H_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25;
   } else if ( process == "GG2H_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25" ){
           XSectionMap = &XSectionMap_GG2H_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25;
+  } else if ( process == "VBF_FWDH" ){
+          XSectionMap = &XSectionMap_VBF_FWDH;
   } else if ( process == "VBF_0J" ){
           XSectionMap = &XSectionMap_VBF_0J;
   } else if ( process == "VBF_1J" ){
@@ -195,6 +206,8 @@ TGraph * Normalization_13TeV::GetSigmaGraph(TString process)
           XSectionMap = &XSectionMap_VBF_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25;
   } else if ( process == "VBF_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25" ){
           XSectionMap = &XSectionMap_VBF_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25;
+  } else if ( process == "WH2HQQ_FWDH" ){
+          XSectionMap = &XSectionMap_WH2HQQ_FWDH;
   } else if ( process == "WH2HQQ_0J" ){
           XSectionMap = &XSectionMap_WH2HQQ_0J;
   } else if ( process == "WH2HQQ_1J" ){
@@ -215,6 +228,8 @@ TGraph * Normalization_13TeV::GetSigmaGraph(TString process)
           XSectionMap = &XSectionMap_WH2HQQ_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25;
   } else if ( process == "WH2HQQ_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25" ){
           XSectionMap = &XSectionMap_WH2HQQ_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25;
+  } else if ( process == "ZH2HQQ_FWDH" ){
+          XSectionMap = &XSectionMap_ZH2HQQ_FWDH;
   } else if ( process == "ZH2HQQ_0J" ){
           XSectionMap = &XSectionMap_ZH2HQQ_0J;
   } else if ( process == "ZH2HQQ_1J" ){
@@ -235,6 +250,8 @@ TGraph * Normalization_13TeV::GetSigmaGraph(TString process)
           XSectionMap = &XSectionMap_ZH2HQQ_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25;
   } else if ( process == "ZH2HQQ_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25" ){
           XSectionMap = &XSectionMap_ZH2HQQ_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25;
+  } else if ( process == "QQ2HLNU_FWDH" ){
+          XSectionMap = &XSectionMap_QQ2HLNU_FWDH;
   } else if ( process == "QQ2HLNU_PTV_0_75" ){
           XSectionMap = &XSectionMap_QQ2HLNU_PTV_0_75;
   } else if ( process == "QQ2HLNU_PTV_75_150" ){
@@ -245,6 +262,8 @@ TGraph * Normalization_13TeV::GetSigmaGraph(TString process)
           XSectionMap = &XSectionMap_QQ2HLNU_PTV_150_250_GE1J;
   } else if ( process == "QQ2HLNU_PTV_GT250" ){
           XSectionMap = &XSectionMap_QQ2HLNU_PTV_GT250;
+  } else if ( process == "QQ2HLL_FWDH" ){
+          XSectionMap = &XSectionMap_QQ2HLL_FWDH;
   } else if ( process == "QQ2HLL_PTV_0_75" ){
           XSectionMap = &XSectionMap_QQ2HLL_PTV_0_75;
   } else if ( process == "QQ2HLL_PTV_75_150" ){
@@ -255,16 +274,42 @@ TGraph * Normalization_13TeV::GetSigmaGraph(TString process)
           XSectionMap = &XSectionMap_QQ2HLL_PTV_150_250_GE1J;
   } else if ( process == "QQ2HLL_PTV_GT250" ){
           XSectionMap = &XSectionMap_QQ2HLL_PTV_GT250;
+  } else if ( process == "GG2HLL_FWDH" ){
+          XSectionMap = &XSectionMap_GG2HLL_FWDH;
+  } else if ( process == "GG2HLL_PTV_0_75" ){
+          XSectionMap = &XSectionMap_GG2HLL_PTV_0_75;
+  } else if ( process == "GG2HLL_PTV_75_150" ){
+          XSectionMap = &XSectionMap_GG2HLL_PTV_75_150;
+  } else if ( process == "GG2HLL_PTV_150_250_0J" ){
+          XSectionMap = &XSectionMap_GG2HLL_PTV_150_250_0J;
+  } else if ( process == "GG2HLL_PTV_150_250_GE1J" ){
+          XSectionMap = &XSectionMap_GG2HLL_PTV_150_250_GE1J;
+  } else if ( process == "GG2HLL_PTV_GT250" ){
+          XSectionMap = &XSectionMap_GG2HLL_PTV_GT250;
+  } else if ( process == "TTH_FWDH" ){
+          XSectionMap = &XSectionMap_TTH_FWDH;
+  } else if ( process == "TTH_PTH_0_60" ){
+          XSectionMap = &XSectionMap_TTH_PTH_0_60;
+  } else if ( process == "TTH_PTH_60_120" ){
+          XSectionMap = &XSectionMap_TTH_PTH_60_120;
+  } else if ( process == "TTH_PTH_120_200" ){
+          XSectionMap = &XSectionMap_TTH_PTH_120_200;
+  } else if ( process == "TTH_PTH_200_300" ){
+          XSectionMap = &XSectionMap_TTH_PTH_200_300;
+  } else if ( process == "TTH_PTH_GT350" ){
+          XSectionMap = &XSectionMap_TTH_PTH_GT350;
+  } else if ( process == "BBH_FWDH" ){
+          XSectionMap = &XSectionMap_BBH_FWDH;
   } else if ( process == "BBH" ){
           XSectionMap = &XSectionMap_BBH;
-  } else if ( process == "TTH" ){
-          XSectionMap = &XSectionMap_TTH;
-  } else if ( process == "THW" ){
-          XSectionMap = &XSectionMap_THW;
+  } else if ( process == "THQ_FWDH" ){
+          XSectionMap = &XSectionMap_THQ_FWDH;
   } else if ( process == "THQ" ){
           XSectionMap = &XSectionMap_THQ;
-  } else if ( process == "GGZH" ){
-          XSectionMap = &XSectionMap_GGZH;  
+  } else if ( process == "THW_FWDH" ){
+          XSectionMap = &XSectionMap_THW_FWDH;
+  } else if ( process == "THW" ){
+          XSectionMap = &XSectionMap_THW;
   // Stage 0
   } else if ( process == "ggh" || process=="GG2H" ) {
     XSectionMap = &XSectionMap_ggh;
@@ -334,9 +379,17 @@ double Normalization_13TeV::GetBR(double mass) {
 double Normalization_13TeV::GetXsection(double mass, TString HistName) {
 
   std::map<double,double> *XSectionMap;
-  // Stage 1.1
-  if ( HistName.Contains("GG2H_PTH_GT200") ){
-          XSectionMap = &XSectionMap_GG2H_PTH_GT200;
+  // Stage 1.2
+  if ( HistName.Contains("GG2H_FWDH") ){
+          XSectionMap = &XSectionMap_GG2H_FWDH;
+  } else if ( HistName.Contains("GG2H_PTH_200_300") ){
+          XSectionMap = &XSectionMap_GG2H_PTH_200_300;
+  } else if ( HistName.Contains("GG2H_PTH_300_450") ){
+          XSectionMap = &XSectionMap_GG2H_PTH_300_450;
+  } else if ( HistName.Contains("GG2H_PTH_450_600") ){
+          XSectionMap = &XSectionMap_GG2H_PTH_450_600;
+  } else if ( HistName.Contains("GG2H_PTH_GT650") ){
+          XSectionMap = &XSectionMap_GG2H_PTH_GT650;
   } else if ( HistName.Contains("GG2H_0J_PTH_0_10") ){
           XSectionMap = &XSectionMap_GG2H_0J_PTH_0_10;
   } else if ( HistName.Contains("GG2H_0J_PTH_GT10") ){
@@ -361,6 +414,8 @@ double Normalization_13TeV::GetXsection(double mass, TString HistName) {
           XSectionMap = &XSectionMap_GG2H_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25;
   } else if ( HistName.Contains("GG2H_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25") ){
           XSectionMap = &XSectionMap_GG2H_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25;
+  } else if ( HistName.Contains("VBF_FWDH") ){
+          XSectionMap = &XSectionMap_VBF_FWDH;
   } else if ( HistName.Contains("VBF_0J") ){
           XSectionMap = &XSectionMap_VBF_0J;
   } else if ( HistName.Contains("VBF_1J") ){
@@ -381,6 +436,8 @@ double Normalization_13TeV::GetXsection(double mass, TString HistName) {
           XSectionMap = &XSectionMap_VBF_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25;
   } else if ( HistName.Contains("VBF_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25") ){
           XSectionMap = &XSectionMap_VBF_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25;
+  } else if ( HistName.Contains("WH2HQQ_FWDH") ){
+          XSectionMap = &XSectionMap_WH2HQQ_FWDH;
   } else if ( HistName.Contains("WH2HQQ_0J") ){
           XSectionMap = &XSectionMap_WH2HQQ_0J;
   } else if ( HistName.Contains("WH2HQQ_1J") ){
@@ -401,6 +458,8 @@ double Normalization_13TeV::GetXsection(double mass, TString HistName) {
           XSectionMap = &XSectionMap_WH2HQQ_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25;
   } else if ( HistName.Contains("WH2HQQ_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25") ){
           XSectionMap = &XSectionMap_WH2HQQ_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25;
+  } else if ( HistName.Contains("ZH2HQQ_FWDH") ){
+          XSectionMap = &XSectionMap_ZH2HQQ_FWDH;
   } else if ( HistName.Contains("ZH2HQQ_0J") ){
           XSectionMap = &XSectionMap_ZH2HQQ_0J;
   } else if ( HistName.Contains("ZH2HQQ_1J") ){
@@ -421,6 +480,8 @@ double Normalization_13TeV::GetXsection(double mass, TString HistName) {
           XSectionMap = &XSectionMap_ZH2HQQ_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25;
   } else if ( HistName.Contains("ZH2HQQ_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25") ){
           XSectionMap = &XSectionMap_ZH2HQQ_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25;
+  } else if ( HistName.Contains("QQ2HLNU_FWDH") ){
+          XSectionMap = &XSectionMap_QQ2HLNU_FWDH;
   } else if ( HistName.Contains("QQ2HLNU_PTV_0_75") ){
           XSectionMap = &XSectionMap_QQ2HLNU_PTV_0_75;
   } else if ( HistName.Contains("QQ2HLNU_PTV_75_150") ){
@@ -431,6 +492,8 @@ double Normalization_13TeV::GetXsection(double mass, TString HistName) {
           XSectionMap = &XSectionMap_QQ2HLNU_PTV_150_250_GE1J;
   } else if ( HistName.Contains("QQ2HLNU_PTV_GT250") ){
           XSectionMap = &XSectionMap_QQ2HLNU_PTV_GT250;
+  } else if ( HistName.Contains("QQ2HLL_FWDH") ){
+          XSectionMap = &XSectionMap_QQ2HLL_FWDH;
   } else if ( HistName.Contains("QQ2HLL_PTV_0_75") ){
           XSectionMap = &XSectionMap_QQ2HLL_PTV_0_75;
   } else if ( HistName.Contains("QQ2HLL_PTV_75_150") ){
@@ -441,16 +504,43 @@ double Normalization_13TeV::GetXsection(double mass, TString HistName) {
           XSectionMap = &XSectionMap_QQ2HLL_PTV_150_250_GE1J;
   } else if ( HistName.Contains("QQ2HLL_PTV_GT250") ){
           XSectionMap = &XSectionMap_QQ2HLL_PTV_GT250;
+  } else if ( HistName.Contains("GG2HLL_FWDH") ){
+          XSectionMap = &XSectionMap_GG2HLL_FWDH;
+  } else if ( HistName.Contains("GG2HLL_PTV_0_75") ){
+          XSectionMap = &XSectionMap_GG2HLL_PTV_0_75;
+  } else if ( HistName.Contains("GG2HLL_PTV_75_150") ){
+          XSectionMap = &XSectionMap_GG2HLL_PTV_75_150;
+  } else if ( HistName.Contains("GG2HLL_PTV_150_250_0J") ){
+          XSectionMap = &XSectionMap_GG2HLL_PTV_150_250_0J;
+  } else if ( HistName.Contains("GG2HLL_PTV_150_250_GE1J") ){
+          XSectionMap = &XSectionMap_GG2HLL_PTV_150_250_GE1J;
+  } else if ( HistName.Contains("GG2HLL_PTV_GT250") ){
+          XSectionMap = &XSectionMap_GG2HLL_PTV_GT250;
+  } else if ( HistName.Contains("TTH_FWDH") ){
+          XSectionMap = &XSectionMap_TTH_FWDH;
+  } else if ( HistName.Contains("TTH_PTH_0_60") ){
+          XSectionMap = &XSectionMap_TTH_PTH_0_60;
+  } else if ( HistName.Contains("TTH_PTH_60_120") ){
+          XSectionMap = &XSectionMap_TTH_PTH_60_120;
+  } else if ( HistName.Contains("TTH_PTH_120_200") ){
+          XSectionMap = &XSectionMap_TTH_PTH_120_200;
+  } else if ( HistName.Contains("TTH_PTH_200_300") ){
+          XSectionMap = &XSectionMap_TTH_PTH_200_300;
+  } else if ( HistName.Contains("TTH_PTH_GT350") ){
+          XSectionMap = &XSectionMap_TTH_PTH_GT350;
+  } else if ( HistName.Contains("BBH_FWDH") ){
+          XSectionMap = &XSectionMap_BBH_FWDH;
   } else if ( HistName.Contains("BBH") ){
           XSectionMap = &XSectionMap_BBH;
-  } else if ( HistName.Contains("TTH") ){
-          XSectionMap = &XSectionMap_TTH;
-  } else if ( HistName.Contains("THW") ){
-          XSectionMap = &XSectionMap_THW;
+  } else if ( HistName.Contains("THQ_FWDH") ){
+          XSectionMap = &XSectionMap_THQ_FWDH;
   } else if ( HistName.Contains("THQ") ){
           XSectionMap = &XSectionMap_THQ;
-  } else if ( HistName.Contains("GGZH") ){
-          XSectionMap = &XSectionMap_GGZH;
+  } else if ( HistName.Contains("THW_FWDH") ){
+          XSectionMap = &XSectionMap_THW_FWDH;
+  } else if ( HistName.Contains("THW") ){
+          XSectionMap = &XSectionMap_THW;
+  // Stage 0
   } else if ( HistName.Contains("ggh") || HistName.Contains("GG2H") ) {
     XSectionMap = &XSectionMap_ggh;
   } else if ( HistName.Contains("vbf") || HistName.Contains("VBF") ) {
@@ -461,24 +551,22 @@ double Normalization_13TeV::GetXsection(double mass, TString HistName) {
     XSectionMap = &XSectionMap_wh;
   } else if ( HistName.Contains("zh") ) {
     XSectionMap = &XSectionMap_zh;
-  } else if ( HistName.Contains("QQ2HLNU") ) {
-    XSectionMap = &XSectionMap_QQ2HLNU;
-  } else if ( HistName.Contains("QQ2HLL") ) {
-    XSectionMap = &XSectionMap_QQ2HLL;
-  } else if ( HistName.Contains("VH2HQQ") ) {
-    XSectionMap = &XSectionMap_VH2HQQ;
   } else if ( HistName.Contains("WH2HQQ") ) {
     XSectionMap = &XSectionMap_WH2HQQ;
   } else if ( HistName.Contains("ZH2HQQ") ) {
     XSectionMap = &XSectionMap_ZH2HQQ;
+  } else if ( HistName.Contains("QQ2HLNU") ) {
+    XSectionMap = &XSectionMap_QQ2HLNU;
+  } else if ( HistName.Contains("QQ2HLL") ) {
+    XSectionMap = &XSectionMap_QQ2HLL;
+  } else if ( HistName.Contains("GG2HLL") ) {
+    XSectionMap = &XSectionMap_GG2HLL;
   } else if ( HistName.Contains("BBH") ) {
     XSectionMap = &XSectionMap_BBH;
   } else if ( HistName.Contains("THQ") ) {
     XSectionMap = &XSectionMap_THQ;
   } else if ( HistName.Contains("THW") ) {
     XSectionMap = &XSectionMap_THW;
-  } else if ( HistName.Contains("GGZH") ) {
-    XSectionMap = &XSectionMap_GGZH;
   } else {
     std::cout << "[WARNING] Normalization_13TeV: No known process found in the name!!" << HistName << std::endl;
     //exit(1);
