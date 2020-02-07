@@ -599,7 +599,7 @@ int main(int argc, char* argv[]){
   lumi_8TeV  = "19.1 fb^{-1}"; // default is "19.7 fb^{-1}"
   lumi_7TeV  = "4.9 fb^{-1}";  // default is "5.1 fb^{-1}"
   lumi_sqrtS = "13 TeV";       // used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
-  int year_ = 2016;
+  string year_ = "2016";
   //int year_ = 2017;
 
   string fileName;
@@ -611,9 +611,9 @@ int main(int argc, char* argv[]){
   bool is2011=false;
   bool verbose=false;
   bool saveMultiPdf=false;
-	int isFlashgg_ =1;
-string flashggCatsStr_;
-vector<string> flashggCats_;
+  int isFlashgg_ =1;
+  string flashggCatsStr_;
+  vector<string> flashggCats_;
  bool isData_ =0;
 
   po::options_description desc("Allowed options");
@@ -632,7 +632,7 @@ vector<string> flashggCats_;
     ("isFlashgg",  po::value<int>(&isFlashgg_)->default_value(1),  								    	        "Use Flashgg output ")
     ("isData",  po::value<bool>(&isData_)->default_value(0),  								    	        "Use Data not MC ")
 		("flashggCats,f", po::value<string>(&flashggCatsStr_)->default_value("UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,UntaggedTag_4,VBFTag_0,VBFTag_1,VBFTag_2,TTHHadronicTag,TTHLeptonicTag,VHHadronicTag,VHTightTag,VHLooseTag,VHEtTag"),       "Flashgg category names to consider")
-    ("year", po::value<int>(&year_)->default_value(2016),       "Dataset year")
+    ("year", po::value<string>(&year_)->default_value("2016"),       "Dataset year")
     ("verbose,v",                                                                               "Run with more output")
   ;
   po::variables_map vm;
@@ -740,9 +740,13 @@ vector<string> flashggCats_;
 	fprintf(resFile,"\\hline\n");
 
 	std::string ext = is2011 ? "7TeV" : "8TeV";
+        if( isFlashgg_ ){
+          if( year_ == "all" ){ ext = "13TeV"; }
+          else{ ext = Form("%s_13TeV",year_); }
+        }
 	//if (isFlashgg_) ext = "13TeV";
-  //FIXME trying to remove duplicated names for 2016+2017 combination
-	if (isFlashgg_) ext = Form("13TeV_%d",year_);
+        //FIXME trying to remove duplicated names for 2016+2017 combination
+	//if (isFlashgg_) ext = Form("13TeV_%d",year_);
 	for (int cat=startingCategory; cat<ncats; cat++){
 
 		map<string,int> choices;

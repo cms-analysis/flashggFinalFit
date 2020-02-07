@@ -177,8 +177,8 @@ map<string,RooAddPdf*> getFlashggPdfsGranular(RooWorkspace *work, int ncats){
   map<string,RooAddPdf*> result;
   for (int cat=0; cat<ncats; cat++){
     for (int proc=0; proc< procs_.size() ; proc++){
-      result.insert(pair<string,RooAddPdf*>(Form("%s_%s",procs_[proc].c_str(),flashggCats_[cat].c_str()),(RooAddPdf*)work->pdf((Form("extendhggpdfsmrel_13TeV_%d_%s_%sThisLumi",year_,procs_[proc].c_str(),flashggCats_[cat].c_str())))));
-      assert(work->pdf((Form("extendhggpdfsmrel_13TeV_%d_%s_%sThisLumi",year_,procs_[proc].c_str(),flashggCats_[cat].c_str()))));
+      result.insert(pair<string,RooAddPdf*>(Form("%s_%s",procs_[proc].c_str(),flashggCats_[cat].c_str()),(RooAddPdf*)work->pdf((Form("extendhggpdfsmrel_%d_13TeV_%s_%sThisLumi",year_,procs_[proc].c_str(),flashggCats_[cat].c_str())))));
+      assert(work->pdf((Form("extendhggpdfsmrel_%d_13TeV_%s_%sThisLumi",year_,procs_[proc].c_str(),flashggCats_[cat].c_str()))));
   }
   }
 

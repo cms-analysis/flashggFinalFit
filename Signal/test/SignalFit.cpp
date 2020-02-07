@@ -1027,7 +1027,7 @@ int main(int argc, char *argv[]){
         if (verbose_>1) std::cout << "[INFO] About to do Final Model Construction with useDCBplusGaus_=" << useDCBplusGaus_ << std::endl;
         //finalModel.buildRvWvPdf("hggpdfsmrel_13TeV",nGaussiansRV,nGaussiansWV,recursive_,useDCBplusGaus_);
         //FIXME
-        finalModel.buildRvWvPdf(Form("hggpdfsmrel_13TeV_%d",year_),nGaussiansRV,nGaussiansWV,recursive_,useDCBplusGaus_);
+        finalModel.buildRvWvPdf(Form("hggpdfsmrel_%d_13TeV",year_),nGaussiansRV,nGaussiansWV,recursive_,useDCBplusGaus_);
       }
       finalModel.getNormalization();
       //if (!skipPlots_) finalModel.plotPdf(plotDir_);
