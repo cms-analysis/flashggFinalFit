@@ -156,8 +156,8 @@ TGraph * Normalization_13TeV::GetSigmaGraph(TString process)
           XSectionMap = &XSectionMap_GG2H_PTH_200_300;
   } else if ( process == "GG2H_PTH_300_450" ){
           XSectionMap = &XSectionMap_GG2H_PTH_300_450;
-  } else if ( process == "GG2H_PTH_450_600" ){
-          XSectionMap = &XSectionMap_GG2H_PTH_450_600;
+  } else if ( process == "GG2H_PTH_450_650" ){
+          XSectionMap = &XSectionMap_GG2H_PTH_450_650;
   } else if ( process == "GG2H_PTH_GT650" ){
           XSectionMap = &XSectionMap_GG2H_PTH_GT650;
   } else if ( process == "GG2H_0J_PTH_0_10" ){
@@ -296,8 +296,8 @@ TGraph * Normalization_13TeV::GetSigmaGraph(TString process)
           XSectionMap = &XSectionMap_TTH_PTH_120_200;
   } else if ( process == "TTH_PTH_200_300" ){
           XSectionMap = &XSectionMap_TTH_PTH_200_300;
-  } else if ( process == "TTH_PTH_GT350" ){
-          XSectionMap = &XSectionMap_TTH_PTH_GT350;
+  } else if ( process == "TTH_PTH_GT300" ){
+          XSectionMap = &XSectionMap_TTH_PTH_GT300;
   } else if ( process == "BBH_FWDH" ){
           XSectionMap = &XSectionMap_BBH_FWDH;
   } else if ( process == "BBH" ){
@@ -386,8 +386,8 @@ double Normalization_13TeV::GetXsection(double mass, TString HistName) {
           XSectionMap = &XSectionMap_GG2H_PTH_200_300;
   } else if ( HistName.Contains("GG2H_PTH_300_450") ){
           XSectionMap = &XSectionMap_GG2H_PTH_300_450;
-  } else if ( HistName.Contains("GG2H_PTH_450_600") ){
-          XSectionMap = &XSectionMap_GG2H_PTH_450_600;
+  } else if ( HistName.Contains("GG2H_PTH_450_650") ){
+          XSectionMap = &XSectionMap_GG2H_PTH_450_650;
   } else if ( HistName.Contains("GG2H_PTH_GT650") ){
           XSectionMap = &XSectionMap_GG2H_PTH_GT650;
   } else if ( HistName.Contains("GG2H_0J_PTH_0_10") ){
@@ -526,8 +526,8 @@ double Normalization_13TeV::GetXsection(double mass, TString HistName) {
           XSectionMap = &XSectionMap_TTH_PTH_120_200;
   } else if ( HistName.Contains("TTH_PTH_200_300") ){
           XSectionMap = &XSectionMap_TTH_PTH_200_300;
-  } else if ( HistName.Contains("TTH_PTH_GT350") ){
-          XSectionMap = &XSectionMap_TTH_PTH_GT350;
+  } else if ( HistName.Contains("TTH_PTH_GT300") ){
+          XSectionMap = &XSectionMap_TTH_PTH_GT300;
   } else if ( HistName.Contains("BBH_FWDH") ){
           XSectionMap = &XSectionMap_BBH_FWDH;
   } else if ( HistName.Contains("BBH") ){
