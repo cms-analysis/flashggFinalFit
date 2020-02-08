@@ -74,6 +74,7 @@ def writeSystematic(f,d,s,options,stxsMergeScheme=None):
   # If theory: loop over tiers else run over once
   tiers = []
   if 'tiers' in s: tiers = s['tiers']
+  if(not options.doSTXSBinMerging)&('mnorm' in tiers): tiers.remove("mnorm")
   else: tiers = ['']
   for tier in tiers:
     if tier != '': tierStr = "_%s"%tier
@@ -82,7 +83,8 @@ def writeSystematic(f,d,s,options,stxsMergeScheme=None):
     # If calculating merged bin: loop over mergings else run over once
     mns = []
     if tier == 'mnorm':
-      for mergeName in stxsMergeScheme: mns.append(mergeName)
+      if options.doSTXSBinMerging:
+        for mergeName in stxsMergeScheme: mns.append(mergeName)
     if len(mns) == 0: mns.append('')
     for mn in mns:
       if mn != '': mergeStr = "_%s"%mn

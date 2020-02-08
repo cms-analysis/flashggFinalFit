@@ -428,25 +428,26 @@ if not writePreamble(fdata,opt):
 if not writeProcesses(fdata,data,opt):
   print " --> [ERROR] in writing processes. Leaving..."
   leave()
-for syst in experimental_systematics:
-  if not writeSystematic(fdata,data,syst,opt):
-    print " --> [ERROR] in writing systematic %s (experiment). Leaving"%syst['name']
-    leave()
-writeBreak(fdata)
-for syst in theory_systematics:
-  if opt.doSTXSBinMerging:
-    if not writeSystematic(fdata,data,syst,opt,stxsMergeScheme=stxsBinMergingScheme):
-      print " --> [ERROR] in writing systematic %s (theory). Leaving"%syst['name']
-      leave()
-  else:
+if opt.doSystematics:
+  for syst in experimental_systematics:
     if not writeSystematic(fdata,data,syst,opt):
-      print " --> [ERROR] in writing systematic %s (theory). Leaving"%syst['name']
+      print " --> [ERROR] in writing systematic %s (experiment). Leaving"%syst['name']
       leave()
-writeBreak(fdata)
-for syst in signal_shape_systematics:
-  if not writeSystematic(fdata,data,syst,opt):
-    print " --> [ERROR] in writing systematic %s (signal shape). Leaving"%syst['name']
-    leave()
+  writeBreak(fdata)
+  for syst in theory_systematics:
+    if opt.doSTXSBinMerging:
+      if not writeSystematic(fdata,data,syst,opt,stxsMergeScheme=stxsBinMergingScheme):
+	print " --> [ERROR] in writing systematic %s (theory). Leaving"%syst['name']
+	leave()
+    else:
+      if not writeSystematic(fdata,data,syst,opt):
+	print " --> [ERROR] in writing systematic %s (theory). Leaving"%syst['name']
+	leave()
+  writeBreak(fdata)
+  for syst in signal_shape_systematics:
+    if not writeSystematic(fdata,data,syst,opt):
+      print " --> [ERROR] in writing systematic %s (signal shape). Leaving"%syst['name']
+      leave()
 if not writePdfIndex(fdata,data,opt):
   print " --> [ERROR] in writing pdf indices. Leaving..."
   leave()
