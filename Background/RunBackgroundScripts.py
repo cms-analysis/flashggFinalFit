@@ -98,6 +98,7 @@ for fileName in ws_fileNames:
   if 'M125' not in fileName: continue
   procs += "%s,"%fileName.split('pythia8_')[1].split('.root')[0]
 procs = procs[:-1]
+if len(procs)==0: procs = 'arbitrary'
 
 # Extract data file name and signal fit workspace filename
 dataFile = "%s/allData.root"%inputWSDir

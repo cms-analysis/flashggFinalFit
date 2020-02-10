@@ -742,6 +742,7 @@ int main(int argc, char* argv[]){
 	std::string ext = is2011 ? "7TeV" : "8TeV";
         if( isFlashgg_ ){
           if( year_ == "all" ){ ext = "13TeV"; }
+          //else{ ext = "13TeV"; } //FIXME 
           else{ ext = Form("%s_13TeV",year_); }
         }
 	//if (isFlashgg_) ext = "13TeV";

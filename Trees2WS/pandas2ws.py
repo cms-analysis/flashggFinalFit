@@ -6,23 +6,13 @@ import re
 from optparse import OptionParser
 import ROOT
 import pandas
-import uproot
 from root_numpy import array2tree
+import pickle
 
-# Split into N files
-nSplit = 5
-
-# List of main variables to be stored in dataFrame: #FIXME add dZ and centralObjectWeight when in tree
-main_var = ["CMS_hgg_mass*","weight","stage1p2bin","*sigma"]
-# Array columns to be treated separately
 array_columns = {'alphaSWeights':2,'scaleWeights':9,'pdfWeights':60}
-columns = {}
-for ac,nWeights in array_columns.iteritems(): columns[ac] = ["%s_%g"%(ac[:-1],i) for i in range(0,nWeights)] 
 
 # List of shape systs to add as RooDataHists output workspace
 shapeSysts = ['metJecUncertainty', 'SigmaEOverEShift', 'ShowerShapeHighR9EB', 'MCScaleLowR9EB', 'JEC', 'MCSmearLowR9EBRho', 'MCSmearHighR9EEPhi', 'MCScaleGain6EB', 'MCSmearLowR9EERho', 'FNUFEE', 'MCScaleLowR9EE', 'MaterialOuterBarrel', 'metJerUncertainty', 'MCSmearLowR9EEPhi', 'ShowerShapeLowR9EE', 'MCSmearHighR9EBRho', 'MCSmearLowR9EBPhi', 'MCSmearHighR9EERho', 'FNUFEB', 'JER', 'metUncUncertainty', 'MCScaleGain1EB', 'MCScaleHighR9EE', 'MCScaleHighR9EB', 'MCSmearHighR9EBPhi', 'MaterialCentralBarrel', 'MaterialForward', 'MvaShift', 'PUJIDShift', 'ShowerShapeHighR9EE', 'ShowerShapeLowR9EB', 'metPhoUncertainty']
-# Variable to add to dataframe from systematic trees
-syst_var = ["CMS_hgg_mass","weight","stage1p2bin"]
 
 cats = ['RECO_0J_PTH_0_10_Tag0', 'RECO_0J_PTH_0_10_Tag1', 'RECO_0J_PTH_GT10_Tag0', 'RECO_0J_PTH_GT10_Tag1', 'RECO_1J_PTH_0_60_Tag0', 'RECO_1J_PTH_0_60_Tag1', 'RECO_1J_PTH_120_200_Tag0', 'RECO_1J_PTH_120_200_Tag1', 'RECO_1J_PTH_60_120_Tag0', 'RECO_1J_PTH_60_120_Tag1', 'RECO_GE2J_PTH_0_60_Tag0', 'RECO_GE2J_PTH_0_60_Tag1', 'RECO_GE2J_PTH_120_200_Tag0', 'RECO_GE2J_PTH_120_200_Tag1', 'RECO_GE2J_PTH_60_120_Tag0', 'RECO_GE2J_PTH_60_120_Tag1', 'RECO_PTH_200_300', 'RECO_PTH_300_450', 'RECO_PTH_450_650', 'RECO_PTH_GT650', 'RECO_THQ_LEP', 'RECO_TTH_HAD_HIGH_Tag0', 'RECO_TTH_HAD_HIGH_Tag1', 'RECO_TTH_HAD_HIGH_Tag2', 'RECO_TTH_HAD_HIGH_Tag3', 'RECO_TTH_HAD_LOW_Tag0', 'RECO_TTH_HAD_LOW_Tag1', 'RECO_TTH_HAD_LOW_Tag2', 'RECO_TTH_HAD_LOW_Tag3', 'RECO_TTH_LEP_HIGH_Tag0', 'RECO_TTH_LEP_HIGH_Tag1', 'RECO_TTH_LEP_HIGH_Tag2', 'RECO_TTH_LEP_HIGH_Tag3', 'RECO_TTH_LEP_LOW_Tag0', 'RECO_TTH_LEP_LOW_Tag1', 'RECO_TTH_LEP_LOW_Tag2', 'RECO_TTH_LEP_LOW_Tag3', 'RECO_VBFLIKEGGH_Tag0', 'RECO_VBFLIKEGGH_Tag1', 'RECO_VBFTOPO_BSM_Tag0', 'RECO_VBFTOPO_BSM_Tag1', 'RECO_VBFTOPO_JET3VETO_HIGHMJJ_Tag0', 'RECO_VBFTOPO_JET3VETO_HIGHMJJ_Tag1', 'RECO_VBFTOPO_JET3VETO_LOWMJJ_Tag0', 'RECO_VBFTOPO_JET3VETO_LOWMJJ_Tag1', 'RECO_VBFTOPO_JET3_HIGHMJJ_Tag0', 'RECO_VBFTOPO_JET3_HIGHMJJ_Tag1', 'RECO_VBFTOPO_JET3_LOWMJJ_Tag0', 'RECO_VBFTOPO_JET3_LOWMJJ_Tag1', 'RECO_VBFTOPO_VHHAD_Tag0', 'RECO_VBFTOPO_VHHAD_Tag1', 'RECO_WH_LEP_HIGH_Tag0', 'RECO_WH_LEP_HIGH_Tag1', 'RECO_WH_LEP_HIGH_Tag2', 'RECO_WH_LEP_LOW_Tag0', 'RECO_WH_LEP_LOW_Tag1', 'RECO_WH_LEP_LOW_Tag2', 'RECO_ZH_LEP','NOTAG']
 
@@ -181,130 +171,76 @@ def make_argSet( _ws, _argSets, _type ):
     
 def get_options():
   parser = OptionParser()
-  parser.add_option('--inputTreeFile',dest='inputTreeFile', default="/vols/cms/jl2117/hgg/ws/Feb20/trees/output_1.root", help='Input tree file')
-  parser.add_option('--inputTreeDir',dest='inputTreeDir', default="tagsDumper/trees", help='Input tree file')
-  parser.add_option('--proc',dest='proc', default="ggh", help='Production mode [ggh,vbf,wh,zh,tth,thq]')
-  parser.add_option('--nSplit',dest='nSplit', default=1, help='NUmber of output files to split into')
+  parser.add_option('--inputPandasFile',dest='inputPandasFile', default="", help='Input pandas dataFrame file')
+  parser.add_option('--productionMode',dest='productionMode', default="ggh", help='Production mode [ggh,vbf,wh,zh,tth,th]')
   return parser.parse_args()
 (opt,args) = get_options()
 
+# Check if input pandas file exists: if so load dataFrame
+if os.path.exists( opt.inputPandasFile ):
+  print " --> [VERBOSE] Loading pandas dataFrame: %s"%opt.inputPandasFile
+  with open( opt.inputPandasFile, "rb") as f_in: data = pickle.load(f_in)
 
-# Uproot file:
-f = uproot.open(opt.inputTreeFile)
-# Extract id from input file
-f_id = re.sub(".root","",opt.inputTreeFile.split("_")[-1])
-proc_s0 = opt.proc
+# Extract STXS bin
+stxsBin = stxs_stage1p2_dict[int(data.stage1p2bin.unique()[0])]
 
-# Dataframe to store all events in file
-data = pandas.DataFrame()
+# Define output WS
+outputWSDir = "/".join(opt.inputPandasFile.split("/")[:-2])+"/ws_%s_%s"%(opt.productionMode,stxsBin)
+if not os.path.exists(outputWSDir): os.system("mkdir %s"%outputWSDir)
+f_id = re.sub(".pkl","",opt.inputPandasFile.split("_")[-1])
+outputWSFile = "%s/output_%s_M125_13TeV_amcatnloFXFX_pythia8_%s_%s.root"%(outputWSDir,procToWSFileName[opt.productionMode],stxsBin,f_id)
+fout = ROOT.TFile(outputWSFile,"RECREATE")
+foutdir = fout.mkdir("tagsDumper")
+foutdir.cd()
 
-# Extract events
-# Loop over categories:
+
+# Initiate output workspace to store RooDataSet and RooDataHist
+ws = ROOT.RooWorkspace("cms_hgg_13TeV","cms_hgg_13TeV")
+# Add variables to workspace
+add_vars_to_workspace(ws) 
+  
+# Loop over cats
 for cat in cats:
-  print " --> [VERBOSE] Extracting events from category: %s"%cat
-  treeName = "%s/%s_125_13TeV_%s"%(opt.inputTreeDir,proc_s0,cat)
-  # Extract tree from uproot
-  t = f[treeName]
-  if len(t) == 0: continue
-  # Convert tree to pandas dataFrame: do array columns separately
-  dfs_tomerge = {}
-  for ac, acNames in columns.iteritems(): 
-    dfs_tomerge[ac] = t.pandas.df(ac)
-    dfs_tomerge[ac].columns = acNames
-  dfs_tomerge['main'] = t.pandas.df(main_var)
-  # Merge
-  df = pandas.concat( dfs_tomerge.values(), axis=1)
-  # Add column to specify "nominal"
-  df['type'] = 'nominal' if cat!='NOTAG' else 'notag'
-  # Add columns for dZ = 0 and central object weight (mean of LooseMVAShiftUp
-  df['dZ'] = 0.
-  df['centralObjectWeight'] = df.apply(lambda x: 0.5*(x['LooseMvaSFUp01sigma']+x['LooseMvaSFDown01sigma']), axis=1) if cat!='NOTAG' else 'notag'
+  # Create mask for nominal/notag dataset:
+  mask = ((data['type']=='nominal')|(data['type']=='notag'))&(data['cat']==cat)
+  # Convert dataframe to structured array and then to ROOT tree
+  sa = data[mask].to_records()
+  t = array2tree(sa)
+  # Define RooDataSet
+  dname = "%s_125_13TeV_%s"%(opt.productionMode,cat)
+  # Extract ArgSet
+  if cat == 'NOTAG': argset = make_argSet( ws, argSets, 'notag') 
+  else: argset = make_argSet( ws, argSets, 'nominal')
+  # Convert tree to RooDataSet and add to workspace
+  d = ROOT.RooDataSet(dname,dname,t,argset,'','weight')
+  getattr(ws,'import')(d)
 
-  # Loop over shape systematic variations: extract dataframe with reduced var
-  if cat != "NOTAG": # NOTAG does not include syst shifts
-    print " --> [VERBOSE] Systematics from category: %s"%cat
+  # Loop over shapeSysts and add RooDataHists
+  if cat != 'NOTAG':
     for s in shapeSysts:
       for direction in ['Up','Down']:
-	sTreeName = "%s_%s%s01sigma"%(treeName,s,direction)
-	st = f[sTreeName]
-	sdf = st.pandas.df(syst_var)
-	sdf['type'] = "%s%s"%(s,direction)
-	# Add dataFrame to total dataFrame
-	df = pandas.concat([df,sdf], ignore_index=True, axis=0, sort=False)
+	# Create mask for systematic variation
+	mask = (data['type']=='%s%s'%(s,direction))&(data['cat']==cat)
+	# Convert dataFrame to structured array and then to ROOT tree
+	sa = data[mask].to_records()
+	t = array2tree(sa)
+	# Name of RooDataHist
+	hname = "%s_125_13TeV_%s_%s%s01sigma"%(opt.productionMode,cat,s,direction)
+	argset = make_argSet( ws, argSets, 'shapeSyst')
+	h = ROOT.RooDataHist(hname,hname,argset)
+        # Loop over events and add to workspace
+	for ev in t:
+	  ws.var("CMS_hgg_mass").setVal(ev.CMS_hgg_mass)
+	  h.add(argset,ev.weight)
+	# Add to workspace
+	getattr(ws,'import')(h)
 
-  # Add column to dataframe specifying category
-  df['cat'] = cat
+# Export ws to file
+ws.Write()
 
-  # Add to overall dataFrame
-  data = pandas.concat([data,df], ignore_index=True, axis=0, sort=False)
-
-sys.exit(1)
-
-# Loop over unique values of STXS stage 1.2 bin: b
-for b in data.stage1p2bin.unique():
-
-  print " --> [VERBOSE] Writing out stxs bin %s to file"%stxs_stage1p2_dict[int(b)]
-
-  # FIXME@ check for PTH_GT10 to work
-  if int(b) != 6: continue
-
-  # Split dataframe into equal size chunks depending on size
-  for i in range(0,opt.nSplit):
-    
-    # Open file to write to
-    outputWSDir = "/".join(opt.inputTreeFile.split("/")[:-1])+"/outputWS_proc_%s_stxs_%s"%(proc_s0,stxs_stage1p2_dict[int(b)])
-    if not os.path.exists(outputWSDir): os.system("mkdir %s"%outputWSDir)
-    outputWSFile = "%s/output_%s_M125_13TeV_amcatnloFXFX_pythia8_%s_%s_%g.root"%(outputWSDir,procToWSFileName[proc_s0],stxs_stage1p2_dict[int(b)],f_id,i) 
-    fout = ROOT.TFile(outputWSFile,"RECREATE")
-    foutdir = fout.mkdir("tagsDumper")
-    foutdir.cd()
-
-    # Define output workspace to store RooDataSet and RooDataHist
-    ws = ROOT.RooWorkspace("cms_hgg_13TeV","cms_hgg_13TeV")
-    # Add variables to workspace
-    add_vars_to_workspace(ws) 
-      
-    # Loop over cats
-    for cat in cats:
-      # Create mask for nominal dataset: splitting into nSplit components
-      mask = (data['stage1p2bin']==b)&((data['type']=='nominal')|(data['type']=='notag'))&(data['cat']==cat)&((data.index%nSplit-i)==0)
-      # Convert dataframe to structured array --> ROOT tree
-      sa = data[mask].to_records()
-      t = array2tree(sa)
-      # Generate RooDataSet
-      dname = "%s_125_13TeV_%s"%(proc_s0,cat)
-      # Extract ArgSet
-      if cat == 'NOTAG': argset = make_argSet( ws, argSets, 'notag') 
-      else: argset = make_argSet( ws, argSets, 'nominal')
-      # Convert tree to RooDataSet and add to workspace
-      d = ROOT.RooDataSet(dname,dname,t,argset,'','weight')
-      getattr(ws,'import')(d)
-
-      # Loop over shapeSysts and add RooDataHists
-      if cat != 'NOTAG':
-	for s in shapeSysts:
-	  for direction in ['Up','Down']:
-	    # Create mask for systematic variation
-	    mask = (data['stage1p2bin']==b)&(data['type']=='%s%s'%(s,direction))&(data['cat']==cat)
-	    # Convert dataFrame to structured array --> ROOT tree
-	    sa = data[mask].to_records()
-	    t = array2tree(sa)
-	    # Name of RooDataHist
-	    hname = "%s_125_13TeV_%s_%s%s01sigma"%(proc_s0,cat,s,direction)
-	    argset = make_argSet( ws, argSets, 'shapeSyst')
-	    h = ROOT.RooDataHist(hname,hname,argset)
-	    for ev in t:
-	      ws.var("CMS_hgg_mass").setVal(ev.CMS_hgg_mass)
-	      h.add(argset,ev.weight)
-	    # Add to workspace
-	    getattr(ws,'import')(h)
-
-    # Export ws to file
-    ws.Write()
-
-    # Delete workspace and file from heap
-    fout.Close()
-    ws.Delete()
-    fout.Delete()
+# Delete workspace and file from heap
+fout.Close()
+ws.Delete()
+fout.Delete()
   
   
