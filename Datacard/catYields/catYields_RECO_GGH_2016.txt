@@ -1,0 +1,210 @@
+ --> Category: RECO_0J_PTH_0_10_Tag0_2016
+    * ggH_0J_PTH_GT10_2016_hgg = 9.03%
+    * ggH_0J_PTH_0_10_2016_hgg = 88.65%
+    * ggH_1J_PTH_0_60_2016_hgg = 1.38%
+
+ --> Category: RECO_0J_PTH_0_10_Tag1_2016
+    * ggH_0J_PTH_GT10_2016_hgg = 6.71%
+    * ggH_0J_PTH_0_10_2016_hgg = 91.12%
+    * ggH_1J_PTH_0_60_2016_hgg = 1.28%
+
+ --> Category: RECO_0J_PTH_GT10_Tag0_2016
+    * ggH_0J_PTH_GT10_2016_hgg = 67.62%
+    * ggH_GE2J_MJJ_0_350_PTH_60_120_2016_hgg = 1.35%
+    * qqH_1J_2016_hgg = 2.47%
+    * ggH_1J_PTH_0_60_2016_hgg = 13.12%
+    * ggH_1J_PTH_60_120_2016_hgg = 7.60%
+
+ --> Category: RECO_0J_PTH_GT10_Tag1_2016
+    * ggH_0J_PTH_GT10_2016_hgg = 81.91%
+    * ggH_0J_PTH_0_10_2016_hgg = 2.99%
+    * ggH_1J_PTH_0_60_2016_hgg = 8.91%
+    * ggH_1J_PTH_60_120_2016_hgg = 1.59%
+
+ --> Category: RECO_1J_PTH_0_60_Tag0_2016
+    * ggH_0J_PTH_GT10_2016_hgg = 14.30%
+    * qqH_1J_2016_hgg = 4.38%
+    * ggH_1J_PTH_0_60_2016_hgg = 66.04%
+    * ggH_GE2J_MJJ_0_350_PTH_0_60_2016_hgg = 4.94%
+    * ggH_1J_PTH_60_120_2016_hgg = 2.59%
+    * WH_had_1J_2016_hgg = 1.32%
+
+ --> Category: RECO_1J_PTH_0_60_Tag1_2016
+    * ggH_0J_PTH_GT10_2016_hgg = 23.15%
+    * qqH_1J_2016_hgg = 3.63%
+    * ggH_0J_PTH_0_10_2016_hgg = 2.34%
+    * ggH_1J_PTH_0_60_2016_hgg = 55.90%
+    * ggH_GE2J_MJJ_0_350_PTH_0_60_2016_hgg = 5.92%
+    * ggH_1J_PTH_60_120_2016_hgg = 1.12%
+    * WH_had_1J_2016_hgg = 1.32%
+
+ --> Category: RECO_1J_PTH_120_200_Tag0_2016
+    * ggH_GE2J_MJJ_0_350_PTH_120_200_2016_hgg = 21.12%
+    * qqH_GE2J_MJJ_120_350_2016_hgg = 1.74%
+    * qqH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25_2016_hgg = 2.04%
+    * qqH_1J_2016_hgg = 10.07%
+    * qqH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25_2016_hgg = 1.80%
+    * ggH_1J_PTH_120_200_2016_hgg = 47.52%
+    * ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25_2016_hgg = 1.25%
+    * WH_had_GE2J_MJJ_60_120_2016_hgg = 1.41%
+    * qqH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25_2016_hgg = 2.72%
+    * WH_had_1J_2016_hgg = 1.73%
+    * ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25_2016_hgg = 1.02%
+
+ --> Category: RECO_1J_PTH_120_200_Tag1_2016
+    * ggH_GE2J_MJJ_0_350_PTH_120_200_2016_hgg = 18.34%
+    * qqH_GE2J_MJJ_120_350_2016_hgg = 1.72%
+    * qqH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25_2016_hgg = 1.42%
+    * qqH_1J_2016_hgg = 9.62%
+    * qqH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25_2016_hgg = 2.05%
+    * ggH_1J_PTH_120_200_2016_hgg = 50.40%
+    * ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25_2016_hgg = 2.17%
+    * WH_had_GE2J_MJJ_60_120_2016_hgg = 1.19%
+    * qqH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25_2016_hgg = 2.38%
+    * WH_had_1J_2016_hgg = 1.33%
+
+ --> Category: RECO_1J_PTH_60_120_Tag0_2016
+    * ggH_0J_PTH_GT10_2016_hgg = 1.16%
+    * ggH_GE2J_MJJ_0_350_PTH_60_120_2016_hgg = 15.04%
+    * qqH_GE2J_MJJ_120_350_2016_hgg = 1.32%
+    * qqH_1J_2016_hgg = 7.20%
+    * qqH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25_2016_hgg = 1.18%
+    * ggH_1J_PTH_60_120_2016_hgg = 62.49%
+    * qqH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25_2016_hgg = 1.34%
+    * WH_had_1J_2016_hgg = 1.64%
+
+ --> Category: RECO_1J_PTH_60_120_Tag1_2016
+    * ggH_0J_PTH_GT10_2016_hgg = 2.38%
+    * ggH_GE2J_MJJ_0_350_PTH_60_120_2016_hgg = 12.82%
+    * qqH_GE2J_MJJ_120_350_2016_hgg = 1.16%
+    * qqH_1J_2016_hgg = 7.06%
+    * qqH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25_2016_hgg = 1.03%
+    * ggH_1J_PTH_0_60_2016_hgg = 1.50%
+    * ggH_1J_PTH_60_120_2016_hgg = 64.29%
+    * WH_had_1J_2016_hgg = 1.69%
+
+ --> Category: RECO_GE2J_PTH_0_60_Tag0_2016
+    * ggH_0J_PTH_GT10_2016_hgg = 10.71%
+    * ggH_GE2J_MJJ_0_350_PTH_60_120_2016_hgg = 1.01%
+    * qqH_GE2J_MJJ_120_350_2016_hgg = 4.97%
+    * WH_had_GE2J_MJJ_120_350_2016_hgg = 1.81%
+    * ZH_had_GE2J_MJJ_120_350_2016_hgg = 1.05%
+    * qqH_1J_2016_hgg = 1.87%
+    * ggH_0J_PTH_0_10_2016_hgg = 1.96%
+    * ggH_1J_PTH_0_60_2016_hgg = 20.46%
+    * ggH_GE2J_MJJ_0_350_PTH_0_60_2016_hgg = 42.96%
+    * ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25_2016_hgg = 1.53%
+    * WH_had_GE2J_MJJ_60_120_2016_hgg = 2.39%
+    * WH_had_1J_2016_hgg = 1.08%
+    * ZH_had_GE2J_MJJ_60_120_2016_hgg = 1.77%
+
+ --> Category: RECO_GE2J_PTH_0_60_Tag1_2016
+    * ggH_0J_PTH_GT10_2016_hgg = 12.36%
+    * qqH_GE2J_MJJ_120_350_2016_hgg = 3.30%
+    * WH_had_GE2J_MJJ_120_350_2016_hgg = 1.76%
+    * qqH_1J_2016_hgg = 1.61%
+    * ggH_0J_PTH_0_10_2016_hgg = 10.94%
+    * ggH_1J_PTH_0_60_2016_hgg = 15.45%
+    * ggH_GE2J_MJJ_0_350_PTH_0_60_2016_hgg = 37.66%
+    * ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25_2016_hgg = 2.57%
+    * WH_had_GE2J_MJJ_60_120_2016_hgg = 1.99%
+    * ggH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25_2016_hgg = 1.69%
+    * ZH_had_GE2J_MJJ_60_120_2016_hgg = 1.44%
+    * ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25_2016_hgg = 1.21%
+
+ --> Category: RECO_GE2J_PTH_120_200_Tag0_2016
+    * ggH_GE2J_MJJ_0_350_PTH_120_200_2016_hgg = 66.07%
+    * qqH_GE2J_MJJ_120_350_2016_hgg = 5.76%
+    * ggH_PTH_200_300_2016_hgg = 1.32%
+    * qqH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25_2016_hgg = 1.38%
+    * WH_had_GE2J_MJJ_120_350_2016_hgg = 2.19%
+    * ZH_had_GE2J_MJJ_120_350_2016_hgg = 1.21%
+    * ggH_1J_PTH_120_200_2016_hgg = 7.98%
+    * qqH_GE2J_MJJ_60_120_2016_hgg = 1.09%
+    * ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25_2016_hgg = 2.89%
+    * WH_had_GE2J_MJJ_60_120_2016_hgg = 1.21%
+    * qqH_GE2J_MJJ_0_60_2016_hgg = 1.13%
+
+ --> Category: RECO_GE2J_PTH_120_200_Tag1_2016
+    * ggH_GE2J_MJJ_0_350_PTH_120_200_2016_hgg = 66.40%
+    * qqH_GE2J_MJJ_120_350_2016_hgg = 5.96%
+    * WH_had_GE2J_MJJ_120_350_2016_hgg = 2.31%
+    * ZH_had_GE2J_MJJ_120_350_2016_hgg = 1.01%
+    * ggH_1J_PTH_120_200_2016_hgg = 7.16%
+    * qqH_GE2J_MJJ_60_120_2016_hgg = 1.31%
+    * ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25_2016_hgg = 1.79%
+    * WH_had_GE2J_MJJ_60_120_2016_hgg = 2.27%
+    * qqH_GE2J_MJJ_0_60_2016_hgg = 1.08%
+    * ZH_had_GE2J_MJJ_60_120_2016_hgg = 1.06%
+
+ --> Category: RECO_GE2J_PTH_60_120_Tag0_2016
+    * ggH_GE2J_MJJ_0_350_PTH_120_200_2016_hgg = 1.31%
+    * ggH_GE2J_MJJ_0_350_PTH_60_120_2016_hgg = 60.89%
+    * qqH_GE2J_MJJ_120_350_2016_hgg = 6.39%
+    * WH_had_GE2J_MJJ_120_350_2016_hgg = 2.05%
+    * ZH_had_GE2J_MJJ_120_350_2016_hgg = 1.26%
+    * qqH_1J_2016_hgg = 1.37%
+    * WH_had_GE2J_MJJ_60_120_2016_hgg = 1.74%
+    * ggH_1J_PTH_60_120_2016_hgg = 13.84%
+    * ZH_had_GE2J_MJJ_60_120_2016_hgg = 1.14%
+
+ --> Category: RECO_GE2J_PTH_60_120_Tag1_2016
+    * ggH_GE2J_MJJ_0_350_PTH_60_120_2016_hgg = 53.96%
+    * qqH_GE2J_MJJ_120_350_2016_hgg = 5.78%
+    * WH_had_GE2J_MJJ_120_350_2016_hgg = 1.90%
+    * qqH_1J_2016_hgg = 1.76%
+    * ggH_GE2J_MJJ_0_350_PTH_0_60_2016_hgg = 1.11%
+    * ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25_2016_hgg = 1.99%
+    * WH_had_GE2J_MJJ_60_120_2016_hgg = 2.92%
+    * ggH_1J_PTH_60_120_2016_hgg = 17.48%
+    * ZH_had_GE2J_MJJ_60_120_2016_hgg = 1.76%
+
+ --> Category: RECO_PTH_200_300_2016
+    * qqH_GE2J_MJJ_120_350_2016_hgg = 2.75%
+    * ggH_PTH_200_300_2016_hgg = 70.21%
+    * WH_had_GE2J_MJJ_120_350_2016_hgg = 1.29%
+    * qqH_1J_2016_hgg = 6.23%
+    * qqH_GE2J_MJJ_GT350_PTH_GT200_2016_hgg = 6.89%
+    * WH_had_GE2J_MJJ_60_120_2016_hgg = 1.61%
+
+ --> Category: RECO_PTH_300_450_2016
+    * qqH_GE2J_MJJ_120_350_2016_hgg = 3.32%
+    * WH_had_GE2J_MJJ_120_350_2016_hgg = 1.54%
+    * ggH_PTH_300_450_2016_hgg = 70.84%
+    * qqH_1J_2016_hgg = 5.78%
+    * qqH_GE2J_MJJ_GT350_PTH_GT200_2016_hgg = 5.48%
+    * qqH_GE2J_MJJ_60_120_2016_hgg = 1.20%
+    * WH_had_GE2J_MJJ_60_120_2016_hgg = 1.58%
+    * WH_had_1J_2016_hgg = 1.43%
+    * ZH_had_GE2J_MJJ_60_120_2016_hgg = 1.03%
+    * WH_lep_PTV_GT250_2016_hgg = 1.70%
+    * ZH_lep_PTV_GT250_2016_hgg = 1.58%
+
+ --> Category: RECO_PTH_450_650_2016
+    * qqH_GE2J_MJJ_120_350_2016_hgg = 3.46%
+    * ggH_PTH_450_650_2016_hgg = 53.62%
+    * WH_had_GE2J_MJJ_120_350_2016_hgg = 6.60%
+    * ZH_had_GE2J_MJJ_120_350_2016_hgg = 1.97%
+    * ggH_PTH_300_450_2016_hgg = 2.42%
+    * qqH_1J_2016_hgg = 3.00%
+    * qqH_GE2J_MJJ_GT350_PTH_GT200_2016_hgg = 7.66%
+    * WH_had_GE2J_MJJ_GT350_PTH_GT200_2016_hgg = 1.85%
+    * ZH_had_1J_2016_hgg = 4.16%
+    * ZH_had_GE2J_MJJ_GT350_PTH_GT200_2016_hgg = 1.25%
+    * WH_had_1J_2016_hgg = 6.76%
+    * WH_lep_PTV_GT250_2016_hgg = 3.11%
+    * ZH_lep_PTV_GT250_2016_hgg = 2.01%
+
+ --> Category: RECO_PTH_GT650_2016
+    * ZH_lep_PTV_150_250_GE1J_2016_hgg = 1.35%
+    * qqH_GE2J_MJJ_120_350_2016_hgg = 11.31%
+    * WH_had_GE2J_MJJ_120_350_2016_hgg = 4.28%
+    * ZH_had_GE2J_MJJ_120_350_2016_hgg = 5.57%
+    * WH_had_GE2J_MJJ_GT350_PTH_GT200_2016_hgg = 2.63%
+    * ZH_had_1J_2016_hgg = 5.65%
+    * ggH_PTH_GT650_2016_hgg = 64.39%
+    * WH_had_1J_2016_hgg = 16.71%
+    * ZH_had_GE2J_MJJ_60_120_2016_hgg = 1.39%
+    * WH_lep_PTV_GT250_2016_hgg = 2.72%
+    * ZH_lep_PTV_GT250_2016_hgg = 9.69%
+
