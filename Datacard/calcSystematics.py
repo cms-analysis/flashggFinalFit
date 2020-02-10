@@ -26,6 +26,10 @@ def addConstantSyst(sd,_syst,options):
 # b) Symmetric weight in nominal RooDataSet: "s_w"
 # c) Anti-symmetric shifts in RooDataHist: "a_h"
 def factoryType(d,s):
+
+  #FIXME: fix for pdfWeight (as > 10)
+  if('pdfWeight' in s['name'])|('alphaSWeight' in s['name']): return "s_w"
+
   # Extract first signal entry of dataFrame
   r0 = d[d['type']=='sig'].iloc[0]
   # Extract workspace
@@ -74,7 +78,10 @@ def calcSystYields(_nominalDataName,_inputWS,_systFactoryTypes):
 
       # If asymmetric weights:
       elif f == "a_w":
-        centralWeightStr = "scaleWeight_0" if "scaleWeight" in s else "centralObjectWeight"
+        if "scaleWeight" in s: centralWeightStr = "scaleWeight_0"
+        elif("pdfWeight" in s)|("alphaSWeight" in s): centralWeightStr = "pdfWeight_0"
+        else: centralWeightStr = "centralObjectWeight"
+        #centralWeightStr = "scaleWeight_0" if "scaleWeight" in s else "centralObjectWeight"
         f_central = p.getRealValue(centralWeightStr)
         f_up, f_down = p.getRealValue("%sUp01sigma"%s), p.getRealValue("%sDown01sigma"%s)
         # Checks:
@@ -90,7 +97,10 @@ def calcSystYields(_nominalDataName,_inputWS,_systFactoryTypes):
 
       # If symmetric weights
       else:
-        centralWeightStr = "scaleWeight_0" if "scaleWeight" in s else "centralObjectWeight"
+        if "scaleWeight" in s: centralWeightStr = "scaleWeight_0"
+        elif("pdfWeight" in s)|("alphaSWeight" in s): centralWeightStr = "pdfWeight_0"
+        else: centralWeightStr = "centralObjectWeight"
+        #centralWeightStr = "scaleWeight_0" if "scaleWeight" in s else "centralObjectWeight"
         f_central = p.getRealValue(centralWeightStr)
         f = p.getRealValue(s)
         # Check: if central weight is zero then skip event
@@ -204,7 +214,7 @@ def theorySystFactory(d,systs,ftype,options,stxsMergeScheme=None,_removal=True):
     if s['type'] == 'constant': continue
     # Extract factory type
     f = ftype[s['name']]
-    mask = (d['type']=='sig')
+    mask = (d['type']=='sig')&(d['nominal_yield']!=0)&(d['proc_nominal_yield']!=0)&(d['proc_%s_yield'%s['name']]!=0)
     # Loop over tiers and use appropriate mode for compareYield function: skip mnorm as treated separately below
     for tier in s['tiers']: 
       if tier == 'mnorm': continue
@@ -218,7 +228,7 @@ def theorySystFactory(d,systs,ftype,options,stxsMergeScheme=None,_removal=True):
 	if s['type'] == 'constant': continue
 	for year in options.years.split(","):
 	  # Remove NaN entries and require specific year
-	  mask = (d['merge_%s_nominal_yield'%mergeName]==d['merge_%s_nominal_yield'%mergeName])&(d['year']==year)
+	  mask = (d['merge_%s_nominal_yield'%mergeName]==d['merge_%s_nominal_yield'%mergeName])&(d['year']==year)&(d['nominal_yield']!=0)
 	  d.loc[mask,"%s_%s_mnorm"%(s['name'],mergeName)] = d[mask].apply(lambda x: compareYield(x,f,s['name'],mode='mnorm',mname=mergeName), axis=1)
 
   # Removal: remove yield columns from dataFrame

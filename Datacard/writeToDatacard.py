@@ -75,7 +75,7 @@ def writeSystematic(f,d,s,options,stxsMergeScheme=None):
   tiers = []
   if 'tiers' in s: tiers = s['tiers']
   if(not options.doSTXSBinMerging)&('mnorm' in tiers): tiers.remove("mnorm")
-  else: tiers = ['']
+  if len(tiers)==0: tiers = ['']
   for tier in tiers:
     if tier != '': tierStr = "_%s"%tier
     else: tierStr = ''

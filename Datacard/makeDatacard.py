@@ -27,7 +27,7 @@ stxsBinMergingScheme = {'ggH_VBFlike':['ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_2
                         'WH_lep':['WH_lep_PTV_0_75','WH_lep_PTV_75_150','WH_lep_PTV_150_250_0J','WH_lep_PTV_150_250_GE1J','WH_lep_PTV_GT250'],
                         'WH_lep_high':['WH_lep_PTV_75_150','WH_lep_PTV_150_250_0J','WH_lep_PTV_150_250_GE1J','WH_lep_PTV_GT250'],
                         'ZH_lep':['ZH_lep_PTV_0_75','ZH_lep_PTV_75_150','ZH_lep_PTV_150_250_0J','ZH_lep_PTV_150_250_GE1J','ZH_lep_PTV_GT250'],
-                        'top':['ttH_PTH_0_60','ttH_PTH_60_120','ttH_PTH_120_200','ttH_PTH_200_300','ttH_PTH_GT300','tHq'], 
+                        #'top':['ttH_PTH_0_60','ttH_PTH_60_120','ttH_PTH_120_200','ttH_PTH_200_300','ttH_PTH_GT300','tHq'], 
                         'ttH':['ttH_PTH_0_60','ttH_PTH_60_120','ttH_PTH_120_200','ttH_PTH_200_300','ttH_PTH_GT300'], 
                         'ttH_low':['ttH_PTH_0_60','ttH_PTH_60_120'], 
                         'ttH_high':['ttH_PTH_120_200','ttH_PTH_200_300','ttH_PTH_GT300']
@@ -132,6 +132,8 @@ theory_systematics = [
 		{'name':'scaleWeight_6','title':'CMS_hgg_THU_scaleWeight_6','type':'factory','prior':'lnN','correlateAcrossYears':1,'tiers':['shape','mnorm']},
 		#{'name':'scaleWeight_7','title':'CMS_hgg_scaleWeight_7','type':'factory','prior':'lnN','correlateAcrossYears':1,'tiers':['norm','shape']}, #Unphysical
 		{'name':'scaleWeight_8','title':'CMS_hgg_THU_scaleWeight_8','type':'factory','prior':'lnN','correlateAcrossYears':1,'tiers':['shape','mnorm']}#,
+		#{'name':'pdfWeight_1','title':'CMS_hgg_pdfWeight_1','type':'factory','prior':'lnN','correlateAcrossYears':1,'tiers':['shape']},
+		#{'name':'alphaSWeight_0','title':'CMS_hgg_alphaSWeight','type':'factory','prior':'lnN','correlateAcrossYears':1,'tiers':['shape']}#,
 	      ]
 
 
@@ -340,10 +342,10 @@ if not skipData:
 	else: data['%s_yield'%s['name']] = '-'
 
   # Loop over signal rows in dataFrame: extract yields (nominal & systematic variations)
-  totalRows = float(data.shape[0])
+  totalSignalRows = float(data[data['type']=='sig'].shape[0])
   for ir,r in data[data['type']=='sig'].iterrows():
 
-    print " --> [VERBOSE] Extracting yields: (%s,%s) [%.1f%%]"%(r['proc'],r['cat'],100*(float(ir)/totalRows))
+    print " --> [VERBOSE] Extracting yields: (%s,%s) [%.1f%%]"%(r['proc'],r['cat'],100*(float(ir)/totalSignalRows))
 
     # Open input WS file and extract workspace
     f_in = ROOT.TFile(r.inputWSFile)
@@ -412,7 +414,9 @@ if not skipData:
     catYields = {}
     for cat in data.cat.unique(): catYields[cat] = data[(data['cat']==cat)&(data['type']=='sig')].nominal_yield.sum()
     # Set prune = 1 if < 0.1% of total cat yield
-    mask = (data['nominal_yield']<opt.pruneThreshold*data.apply(lambda x: catYields[x['cat']], axis=1))&(data['type']=='sig')
+    # FIXME: never prune ttH as limited set of samples
+    #mask = (data['nominal_yield']<opt.pruneThreshold*data.apply(lambda x: catYields[x['cat']], axis=1))&(data['type']=='sig')
+    mask = (data['nominal_yield']<opt.pruneThreshold*data.apply(lambda x: catYields[x['cat']], axis=1))&(data['type']=='sig')&(~data['proc'].str.contains("ttH"))
     data.loc[mask,'prune'] = 1
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
