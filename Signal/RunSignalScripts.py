@@ -103,76 +103,105 @@ else:
   printOnly    = opt.printOnly
 
 # Check if mode in allowed options
-if mode not in ['std','phoSystOnly','sigFitOnly','packageOnly','sigPlotsOnly']:
-  print " --> [ERROR] mode %s not allowed. Please use one of the following: [std,phoSystOnly,sigFitOnly,packageOnly,sigPlotsOnly]. Leaving..."
+if mode not in ['std','calcPhotonSyst','writePhotonSyst','sigFitOnly','packageOnly','sigPlotsOnly']:
+  print " --> [ERROR] mode %s not allowed. Please use one of the following: [std,phoSystOnly,sigFitOnly,packageOnly,sigPlotsOnly]. Leaving..."%mode
   print "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ RUNNING SIGNAL SCRIPTS (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
   sys.exit(1)  
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Extract list of input ws filenames
-ws_fileNames = []
-for root, dirs, files in os.walk( inputWSDir ):
-  for fileName in files:
-    if not fileName.startswith('output_'): continue
-    if not fileName.endswith('.root'): continue
-    ws_fileNames.append( fileName )
-# concatenate with input dir to get full list of complete file names
-ws_fullFileNames = ''
-for fileName in ws_fileNames: ws_fullFileNames+="%s/%s,"%(inputWSDir,fileName)
-ws_fullFileNames = ws_fullFileNames[:-1]
+# FIXME: configure also for CONDOR
+# If mode == calcPhotonSyst: submit a job to the batch for each category
+if mode == "calcPhotonSyst":
+  print " --> Calculating photon systematics: %s"%ext
+  if not os.path.isdir("./outdir_%s"%ext): os.system("mkdir ./outdir_%s"%ext)
+  if not os.path.isdir("./outdir_%s/calcPhotonSyst"%ext): os.system("mkdir ./outdir_%s/calcPhotonSyst"%ext)
+  if not os.path.isdir("./outdir_%s/calcPhotonSyst/jobs"%ext): os.system("mkdir ./outdir_%s/calcPhotonSyst/jobs"%ext)
+  # Write submission scripts
+  for cat_idx in range(len(cats.split(","))):
+    cat = cats.split(",")[cat_idx]
+    f = open("./outdir_%s/calcPhotonSyst/jobs/sub%g.sh"%(ext,cat_idx),"w")
+    f.write("#!/bin/bash\n\n")
+    f.write("cd %s/src/flashggFinalFit/Signal\n\n"%os.environ['CMSSW_BASE']) 
+    f.write("eval `scramv1 runtime -sh`\n\n")
+    f.write("python python/calcPhotonSyst.py --cat %s --ext %s --inputWSDir %s --scales %s --scalesCorr %s --scalesGlobal %s --smears %s"%(cat,ext,inputWSDir,scales,scalesCorr,scalesGlobal,smears))
+    f.close()
+  # If not printOnly: submit submission scripts to batch
+  if not printOnly:
+    for cat_idx in range(len(cats.split(","))):
+      cat = cats.split(",")[cat_idx]
+      print " --> Category: %s (sub%g.sh)"%(cat,cat_idx)
+      os.system("qsub -q hep.q -l h_rt=0:20:0 ./outdir_%s/calcPhotonSyst/jobs/sub%g.sh"%(ext,cat_idx))
 
-# Extract list of procs
-procs = ''
-for fileName in ws_fileNames:
-  if 'M125' not in fileName: continue
-  procs += "%s,"%fileName.split('pythia8_')[1].split('.root')[0]
-procs = procs[:-1]
+elif mode == "writePhotonSyst":
+  print " --> Write photon systematics to .dat file compatible with SignalFit.cpp: %s"%ext
+  os.system("eval `scramv1 runtime -sh`; python python/writePhotonSyst.py --cats %s --ext %s --scales %s --scalesCorr %s --scalesGlobal %s --smears %s"%(cats,ext,scales,scalesCorr,scalesGlobal,smears)) 
 
-# Extract low and high MH values
-mps = []
-for mp in massPoints.split(","): mps.append(int(mp))
-mass_low, mass_high = '%s'%min(mps), '%s'%max(mps)
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+else:
+  # Extract list of input ws filenames
+  ws_fileNames = []
+  for root, dirs, files in os.walk( inputWSDir ):
+    for fileName in files:
+      if not fileName.startswith('output_'): continue
+      if not fileName.endswith('.root'): continue
+      ws_fileNames.append( fileName )
+  # concatenate with input dir to get full list of complete file names
+  ws_fullFileNames = ''
+  for fileName in ws_fileNames: ws_fullFileNames+="%s/%s,"%(inputWSDir,fileName)
+  ws_fullFileNames = ws_fullFileNames[:-1]
 
-# print info to user
-print " --> Input flashgg ws dir: %s"%inputWSDir
-print " --> Processes: %s"%procs
-print " --> Categories: %s"%cats
-print " --> Mass points: %s --> Low = %s, High = %s"%(massPoints,mass_low,mass_high)
-print " --> Extension: %s"%ext
-print " --> Analysis: %s"%analysis
-print " --> Year: %s ::: Corresponds to intLumi = %s fb^-1"%(year,lumi[year])
-if useDCB: print " --> Using DCB in signal model"
-print ""
-print " --> Photon shape systematics:"
-print "     * scales       = %s"%scales
-print "     * scalesCorr   = %s"%scalesCorr
-print "     * scalesGlobal = %s"%scalesGlobal
-print "     * smears       = %s"%smears
-print ""
-print " --> Job information:"
-print "     * Batch: %s"%batch
-print "     * Queue: %s"%queue
-print ""
-if mode == "phoSystCalc": print " --> Calculating photon systematics only..."
-elif mode == "sigFitOnly": print " --> Running signal fit only..."
-elif mode == "packageOnly": print " --> Packaging only..."
-elif mode == "sigPlotsOnly": print " --> Running the signal plotting scripts only..."
-print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+  # Extract list of procs
+  procs = ''
+  for fileName in ws_fileNames:
+    if 'M125' not in fileName: continue
+    procs += "%s,"%fileName.split('pythia8_')[1].split('.root')[0]
+  procs = procs[:-1]
 
-# Construct input command
-print " --> Constructing the input command..."
+  # Extract low and high MH values
+  mps = []
+  for mp in massPoints.split(","): mps.append(int(mp))
+  mass_low, mass_high = '%s'%min(mps), '%s'%max(mps)
 
-cmdLine = ''
-cmdLine += './runSignalScripts.sh -i %s -p %s -f %s --ext %s --intLumi %s --year %s --batch %s --queue %s --massList %s --bs %s --analysis %s --scales %s --scalesCorr %s --scalesGlobal %s --smears %s --useSSF 1'%(ws_fullFileNames,procs,cats,ext,lumi[year],year,batch,queue,massPoints,beamspot,analysis,scales,scalesCorr,scalesGlobal,smears)
-if useDCB: cmdLine += ' --useDCB_1G 1'
-else: cmdLine += ' --useDCB_1G 0'
-if mode == "phoSystCalc": cmdLine += ' --calcPhoSystOnly' 
-elif mode == "sigFitOnly": cmdLine += ' --sigFitOnly --dontPackage' 
-elif mode == "packageOnly": cmdLine += ' --packageOnly'
-elif mode == "sigPlotsOnly": cmdLine += ' --sigPlotsOnly'
+  # print info to user
+  print " --> Input flashgg ws dir: %s"%inputWSDir
+  print " --> Processes: %s"%procs
+  print " --> Categories: %s"%cats
+  print " --> Mass points: %s --> Low = %s, High = %s"%(massPoints,mass_low,mass_high)
+  print " --> Extension: %s"%ext
+  print " --> Analysis: %s"%analysis
+  print " --> Year: %s ::: Corresponds to intLumi = %s fb^-1"%(year,lumi[year])
+  if useDCB: print " --> Using DCB in signal model"
+  print ""
+  print " --> Photon shape systematics:"
+  print "     * scales       = %s"%scales
+  print "     * scalesCorr   = %s"%scalesCorr
+  print "     * scalesGlobal = %s"%scalesGlobal
+  print "     * smears       = %s"%smears
+  print ""
+  print " --> Job information:"
+  print "     * Batch: %s"%batch
+  print "     * Queue: %s"%queue
+  print ""
+  if mode == "phoSystCalc": print " --> Calculating photon systematics only..."
+  elif mode == "sigFitOnly": print " --> Running signal fit only..."
+  elif mode == "packageOnly": print " --> Packaging only..."
+  elif mode == "sigPlotsOnly": print " --> Running the signal plotting scripts only..."
+  print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 
-# Either print command to screen or run
-if printOnly: print "\n%s"%cmdLine
-else: os.system( cmdLine )
+  # Construct input command
+  print " --> Constructing the input command..."
+
+  cmdLine = ''
+  cmdLine += './runSignalScripts.sh -i %s -p %s -f %s --ext %s --intLumi %s --year %s --batch %s --queue %s --massList %s --bs %s --analysis %s --scales %s --scalesCorr %s --scalesGlobal %s --smears %s --useSSF 1'%(ws_fullFileNames,procs,cats,ext,lumi[year],year,batch,queue,massPoints,beamspot,analysis,scales,scalesCorr,scalesGlobal,smears)
+  if useDCB: cmdLine += ' --useDCB_1G 1'
+  else: cmdLine += ' --useDCB_1G 0'
+  if mode == "phoSystCalc": cmdLine += ' --calcPhoSystOnly' 
+  elif mode == "sigFitOnly": cmdLine += ' --sigFitOnly --dontPackage' 
+  elif mode == "packageOnly": cmdLine += ' --packageOnly'
+  elif mode == "sigPlotsOnly": cmdLine += ' --sigPlotsOnly'
+
+  # Either print command to screen or run
+  if printOnly: print "\n%s"%cmdLine
+  else: os.system( cmdLine )
 
 print "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ RUNNING SIGNAL SCRIPTS (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
