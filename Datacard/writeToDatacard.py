@@ -130,20 +130,23 @@ def addSyst(l,v,s,p,c):
     if len(v) == 1: 
       # Check 1: variation is non-negligible. If not then skip
       if abs(v[0]-1)<0.0005: l += "%-15s "%"-"
-      # Check 2: variation is not negative. Print message but add to datacard (cleaned later)
+      # Check 2: variation is not negative. Print message and add - to datacard (cleaned later)
       elif v[0] < 0.: 
         print " --> [WARNING] systematic %s: negative variation for (%s,%s)"%(s,p,c)
-        l += "%-15.3f "%v[0]
+        #vstr = "%s"%v[0]
+        vstr = "-"
+        l += "%-15s "%v[0]
       else:
         l += "%-15.3f "%v[0]
     # Anti-symmetirc
     if len(v) == 2:
       # Check 1: variation is non-negligible. If not then skip
       if(abs(v[0]-1)<0.0005)&(abs(v[1]-1)<0.0005): l += "%-15s "%"-"
-      # Check 2: neither variation is negative. Print message but still add to datacard (cleaned later)
+      # Check 2: neither variation is negative. Print message and add - to datacard (cleaned later)
       elif(v[0]<0.)|(v[1]<0.):
         print " --> [WARNING] systematic %s: negative variation for (%s,%s)"%(s,p,c)
-        vstr = "%.3f/%.3f"%(v[0],v[1])
+        #vstr = "%.3f/%.3f"%(v[0],v[1])
+        vstr = "-"
         l += "%-15s "%vstr
       # Check 3: effect is approximately symmetric: then just add single up variation
       elif( abs((v[0]*v[1])-1)<0.0005 ): l += "%-15.3f "%v[1]
