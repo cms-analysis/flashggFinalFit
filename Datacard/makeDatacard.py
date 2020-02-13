@@ -15,13 +15,22 @@ def leave():
   print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG DATACARD MAKER RUN II (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ "
   sys.exit(1)
 
-#cats = 'RECO_0J_PTH_GT10_Tag0,RECO_VBFTOPO_JET3_HIGHMJJ,RECO_VBFLIKEGGH,RECO_1J_PTH_120_200_Tag0,RECO_PTH_GT200_Tag0,RECO_GE2J_PTH_0_60_Tag1,RECO_GE2J_PTH_60_120_Tag1,RECO_GE2J_PTH_60_120_Tag0,RECO_VBFTOPO_VHHAD,RECO_1J_PTH_120_200_Tag1,RECO_GE2J_PTH_120_200_Tag1,RECO_GE2J_PTH_120_200_Tag0,RECO_1J_PTH_0_60_Tag1,RECO_VBFTOPO_BSM,RECO_VBFTOPO_JET3VETO_HIGHMJJ,RECO_0J_PTH_0_10_Tag0,RECO_PTH_GT200_Tag1,RECO_VBFTOPO_JET3VETO_LOWMJJ,RECO_1J_PTH_0_60_Tag0,RECO_1J_PTH_60_120_Tag1,RECO_0J_PTH_0_10_Tag1,RECO_0J_PTH_GT10_Tag1,RECO_GE2J_PTH_0_60_Tag0,RECO_1J_PTH_60_120_Tag0,RECO_VBFTOPO_JET3_LOWMJJ'
-mergedYear_cats = ['RECO_0J_PTH_GT10_Tag0', 'RECO_VBFTOPO_JET3_HIGHMJJ', 'RECO_VBFLIKEGGH', 'RECO_1J_PTH_120_200_Tag0', 'RECO_PTH_GT200_Tag0', 'RECO_GE2J_PTH_0_60_Tag1', 'RECO_GE2J_PTH_60_120_Tag1', 'RECO_GE2J_PTH_60_120_Tag0', 'RECO_VBFTOPO_VHHAD', 'RECO_1J_PTH_120_200_Tag1', 'RECO_GE2J_PTH_120_200_Tag1', 'RECO_GE2J_PTH_120_200_Tag0', 'RECO_1J_PTH_0_60_Tag1', 'RECO_VBFTOPO_BSM', 'RECO_VBFTOPO_JET3VETO_HIGHMJJ', 'RECO_0J_PTH_0_10_Tag0', 'RECO_PTH_GT200_Tag1', 'RECO_VBFTOPO_JET3VETO_LOWMJJ', 'RECO_1J_PTH_0_60_Tag0', 'RECO_1J_PTH_60_120_Tag1', 'RECO_0J_PTH_0_10_Tag1', 'RECO_0J_PTH_GT10_Tag1', 'RECO_GE2J_PTH_0_60_Tag0', 'RECO_1J_PTH_60_120_Tag0', 'RECO_VBFTOPO_JET3_LOWMJJ']
-#mergedYear_cats = ['RECO_PTH_GT200_Tag0','RECO_PTH_GT200_Tag1','RECO_VBFTOPO_BSM']
-#mergedYear_cats = ['RECO_VBFTOPO_BSM']
+# cats = ''RECO_0J_PTH_0_10_Tag0,RECO_0J_PTH_0_10_Tag1,RECO_0J_PTH_GT10_Tag0,RECO_0J_PTH_GT10_Tag1,RECO_1J_PTH_0_60_Tag0,RECO_1J_PTH_0_60_Tag1,RECO_1J_PTH_120_200_Tag0,RECO_1J_PTH_120_200_Tag1,RECO_1J_PTH_60_120_Tag0,RECO_1J_PTH_60_120_Tag1,RECO_GE2J_PTH_0_60_Tag0,RECO_GE2J_PTH_0_60_Tag1,RECO_GE2J_PTH_120_200_Tag0,RECO_GE2J_PTH_120_200_Tag1,RECO_GE2J_PTH_60_120_Tag0,RECO_GE2J_PTH_60_120_Tag1,RECO_PTH_200_300,RECO_PTH_300_450,RECO_PTH_450_650,RECO_PTH_GT650,RECO_THQ_LEP,RECO_TTH_HAD_HIGH_Tag0,RECO_TTH_HAD_HIGH_Tag1,RECO_TTH_HAD_HIGH_Tag2,RECO_TTH_HAD_HIGH_Tag3,RECO_TTH_HAD_LOW_Tag0,RECO_TTH_HAD_LOW_Tag1,RECO_TTH_HAD_LOW_Tag2,RECO_TTH_HAD_LOW_Tag3,RECO_TTH_LEP_HIGH_Tag0,RECO_TTH_LEP_HIGH_Tag1,RECO_TTH_LEP_HIGH_Tag2,RECO_TTH_LEP_HIGH_Tag3,RECO_TTH_LEP_LOW_Tag0,RECO_TTH_LEP_LOW_Tag1,RECO_TTH_LEP_LOW_Tag2,RECO_TTH_LEP_LOW_Tag3,RECO_VBFLIKEGGH_Tag0,RECO_VBFLIKEGGH_Tag1,RECO_VBFTOPO_BSM_Tag0,RECO_VBFTOPO_BSM_Tag1,RECO_VBFTOPO_JET3VETO_HIGHMJJ_Tag0,RECO_VBFTOPO_JET3VETO_HIGHMJJ_Tag1,RECO_VBFTOPO_JET3VETO_LOWMJJ_Tag0,RECO_VBFTOPO_JET3VETO_LOWMJJ_Tag1,RECO_VBFTOPO_JET3_HIGHMJJ_Tag0,RECO_VBFTOPO_JET3_HIGHMJJ_Tag1,RECO_VBFTOPO_JET3_LOWMJJ_Tag0,RECO_VBFTOPO_JET3_LOWMJJ_Tag1,RECO_VBFTOPO_VHHAD_Tag0,RECO_VBFTOPO_VHHAD_Tag1,RECO_WH_LEP_HIGH_Tag0,RECO_WH_LEP_HIGH_Tag1,RECO_WH_LEP_HIGH_Tag2,RECO_WH_LEP_LOW_Tag0,RECO_WH_LEP_LOW_Tag1,RECO_WH_LEP_LOW_Tag2,RECO_ZH_LEP'
+
+mergedYear_cats = ['RECO_TTH_HAD_HIGH_Tag0', 'RECO_TTH_HAD_HIGH_Tag1', 'RECO_TTH_HAD_HIGH_Tag2', 'RECO_TTH_HAD_HIGH_Tag3', 'RECO_TTH_HAD_LOW_Tag0', 'RECO_TTH_HAD_LOW_Tag1', 'RECO_TTH_HAD_LOW_Tag2', 'RECO_TTH_HAD_LOW_Tag3', 'RECO_TTH_LEP_HIGH_Tag0', 'RECO_TTH_LEP_HIGH_Tag1', 'RECO_TTH_LEP_HIGH_Tag2', 'RECO_TTH_LEP_HIGH_Tag3', 'RECO_TTH_LEP_LOW_Tag0', 'RECO_TTH_LEP_LOW_Tag1', 'RECO_TTH_LEP_LOW_Tag2', 'RECO_TTH_LEP_LOW_Tag3', 'RECO_VBFLIKEGGH_Tag0', 'RECO_VBFLIKEGGH_Tag1', 'RECO_VBFTOPO_BSM_Tag0', 'RECO_VBFTOPO_BSM_Tag1', 'RECO_VBFTOPO_JET3VETO_HIGHMJJ_Tag0', 'RECO_VBFTOPO_JET3VETO_HIGHMJJ_Tag1', 'RECO_VBFTOPO_JET3VETO_LOWMJJ_Tag0', 'RECO_VBFTOPO_JET3VETO_LOWMJJ_Tag1', 'RECO_VBFTOPO_JET3_HIGHMJJ_Tag0', 'RECO_VBFTOPO_JET3_HIGHMJJ_Tag1', 'RECO_VBFTOPO_JET3_LOWMJJ_Tag0', 'RECO_VBFTOPO_JET3_LOWMJJ_Tag1', 'RECO_VBFTOPO_VHHAD_Tag0', 'RECO_VBFTOPO_VHHAD_Tag1', 'RECO_WH_LEP_HIGH_Tag0', 'RECO_WH_LEP_HIGH_Tag1', 'RECO_WH_LEP_HIGH_Tag2', 'RECO_WH_LEP_LOW_Tag0', 'RECO_WH_LEP_LOW_Tag1', 'RECO_WH_LEP_LOW_Tag2', 'RECO_ZH_LEP']
+
 stxsBinMergingScheme = {'ggH_VBFlike':['ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','ggH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','ggH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25'],
+                        'ggH_BSM':['ggH_PTH_200_300','ggH_PTH_300_450','ggH_PTH_450_650','PTH_GT650'],
+                        'ggH_BSM_high':['ggH_PTH_300_450','ggH_PTH_450_650','PTH_GT650'],
                         'VBF_2j':['qqH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','qqH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25'],
-                        'VBF_3j':['qqH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','qqH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25']
+                        'VBF_3j':['qqH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','qqH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25'],
+                        'WH_lep':['WH_lep_PTV_0_75','WH_lep_PTV_75_150','WH_lep_PTV_150_250_0J','WH_lep_PTV_150_250_GE1J','WH_lep_PTV_GT250'],
+                        'WH_lep_high':['WH_lep_PTV_75_150','WH_lep_PTV_150_250_0J','WH_lep_PTV_150_250_GE1J','WH_lep_PTV_GT250'],
+                        'ZH_lep':['ZH_lep_PTV_0_75','ZH_lep_PTV_75_150','ZH_lep_PTV_150_250_0J','ZH_lep_PTV_150_250_GE1J','ZH_lep_PTV_GT250'],
+                        #'top':['ttH_PTH_0_60','ttH_PTH_60_120','ttH_PTH_120_200','ttH_PTH_200_300','ttH_PTH_GT300','tHq'], 
+                        'ttH':['ttH_PTH_0_60','ttH_PTH_60_120','ttH_PTH_120_200','ttH_PTH_200_300','ttH_PTH_GT300'], 
+                        'ttH_low':['ttH_PTH_0_60','ttH_PTH_60_120'], 
+                        'ttH_high':['ttH_PTH_120_200','ttH_PTH_200_300','ttH_PTH_GT300']
                        }
 lumi = {'2016':'35.9', '2017':'41.5', '2018':'59.8'}
 decay = "hgg"
@@ -123,6 +132,8 @@ theory_systematics = [
 		{'name':'scaleWeight_6','title':'CMS_hgg_THU_scaleWeight_6','type':'factory','prior':'lnN','correlateAcrossYears':1,'tiers':['shape','mnorm']},
 		#{'name':'scaleWeight_7','title':'CMS_hgg_scaleWeight_7','type':'factory','prior':'lnN','correlateAcrossYears':1,'tiers':['norm','shape']}, #Unphysical
 		{'name':'scaleWeight_8','title':'CMS_hgg_THU_scaleWeight_8','type':'factory','prior':'lnN','correlateAcrossYears':1,'tiers':['shape','mnorm']}#,
+		#{'name':'pdfWeight_1','title':'CMS_hgg_pdfWeight_1','type':'factory','prior':'lnN','correlateAcrossYears':1,'tiers':['shape']},
+		#{'name':'alphaSWeight_0','title':'CMS_hgg_alphaSWeight','type':'factory','prior':'lnN','correlateAcrossYears':1,'tiers':['shape']}#,
 	      ]
 
 
@@ -331,10 +342,10 @@ if not skipData:
 	else: data['%s_yield'%s['name']] = '-'
 
   # Loop over signal rows in dataFrame: extract yields (nominal & systematic variations)
-  totalRows = float(data.shape[0])
+  totalSignalRows = float(data[data['type']=='sig'].shape[0])
   for ir,r in data[data['type']=='sig'].iterrows():
 
-    print " --> [VERBOSE] Extracting yields: (%s,%s) [%.1f%%]"%(r['proc'],r['cat'],100*(float(ir)/totalRows))
+    print " --> [VERBOSE] Extracting yields: (%s,%s) [%.1f%%]"%(r['proc'],r['cat'],100*(float(ir)/totalSignalRows))
 
     # Open input WS file and extract workspace
     f_in = ROOT.TFile(r.inputWSFile)
@@ -403,7 +414,9 @@ if not skipData:
     catYields = {}
     for cat in data.cat.unique(): catYields[cat] = data[(data['cat']==cat)&(data['type']=='sig')].nominal_yield.sum()
     # Set prune = 1 if < 0.1% of total cat yield
-    mask = (data['nominal_yield']<opt.pruneThreshold*data.apply(lambda x: catYields[x['cat']], axis=1))&(data['type']=='sig')
+    # FIXME: never prune ttH as limited set of samples
+    #mask = (data['nominal_yield']<opt.pruneThreshold*data.apply(lambda x: catYields[x['cat']], axis=1))&(data['type']=='sig')
+    mask = (data['nominal_yield']<opt.pruneThreshold*data.apply(lambda x: catYields[x['cat']], axis=1))&(data['type']=='sig')&(~data['proc'].str.contains("ttH"))
     data.loc[mask,'prune'] = 1
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -419,25 +432,26 @@ if not writePreamble(fdata,opt):
 if not writeProcesses(fdata,data,opt):
   print " --> [ERROR] in writing processes. Leaving..."
   leave()
-for syst in experimental_systematics:
-  if not writeSystematic(fdata,data,syst,opt):
-    print " --> [ERROR] in writing systematic %s (experiment). Leaving"%syst['name']
-    leave()
-writeBreak(fdata)
-for syst in theory_systematics:
-  if opt.doSTXSBinMerging:
-    if not writeSystematic(fdata,data,syst,opt,stxsMergeScheme=stxsBinMergingScheme):
-      print " --> [ERROR] in writing systematic %s (theory). Leaving"%syst['name']
-      leave()
-  else:
+if opt.doSystematics:
+  for syst in experimental_systematics:
     if not writeSystematic(fdata,data,syst,opt):
-      print " --> [ERROR] in writing systematic %s (theory). Leaving"%syst['name']
+      print " --> [ERROR] in writing systematic %s (experiment). Leaving"%syst['name']
       leave()
-writeBreak(fdata)
-for syst in signal_shape_systematics:
-  if not writeSystematic(fdata,data,syst,opt):
-    print " --> [ERROR] in writing systematic %s (signal shape). Leaving"%syst['name']
-    leave()
+  writeBreak(fdata)
+  for syst in theory_systematics:
+    if opt.doSTXSBinMerging:
+      if not writeSystematic(fdata,data,syst,opt,stxsMergeScheme=stxsBinMergingScheme):
+	print " --> [ERROR] in writing systematic %s (theory). Leaving"%syst['name']
+	leave()
+    else:
+      if not writeSystematic(fdata,data,syst,opt):
+	print " --> [ERROR] in writing systematic %s (theory). Leaving"%syst['name']
+	leave()
+  writeBreak(fdata)
+  for syst in signal_shape_systematics:
+    if not writeSystematic(fdata,data,syst,opt):
+      print " --> [ERROR] in writing systematic %s (signal shape). Leaving"%syst['name']
+      leave()
 if not writePdfIndex(fdata,data,opt):
   print " --> [ERROR] in writing pdf indices. Leaving..."
   leave()

@@ -49,98 +49,100 @@ int Normalization_13TeV::Init(int sqrtS){
         XSectionMap_WH2HQQ[mH]  = valXSWH2HQQ;
         XSectionMap_ZH2HQQ[mH]  = valXSZH2HQQ;
 
-        // Stage 1.2: now include forward as separate process
-        XSectionMap_GG2H_FWDH[mH] = 0.09 * valXSggH;
-        XSectionMap_GG2H_PTH_200_300[mH] = 0.0286 * valXSggH;
-        XSectionMap_GG2H_PTH_300_450[mH] = 0.0286 * valXSggH;
-        XSectionMap_GG2H_PTH_450_650[mH] = 0.0286 * valXSggH;
-        XSectionMap_GG2H_PTH_GT650[mH] = 0.1576 * valXSggH;
-        XSectionMap_GG2H_0J_PTH_0_10[mH] = 0.1576 * valXSggH;
-        XSectionMap_GG2H_0J_PTH_GT10[mH] = 0.4334 * valXSggH;
-        XSectionMap_GG2H_1J_PTH_0_60[mH] = 0.1460 * valXSggH;
-        XSectionMap_GG2H_1J_PTH_60_120[mH] = 0.1039 * valXSggH;
-        XSectionMap_GG2H_1J_PTH_120_200[mH] = 0.0215 * valXSggH;
-        XSectionMap_GG2H_GE2J_MJJ_0_350_PTH_0_60[mH] = 0.0247 * valXSggH;
-        XSectionMap_GG2H_GE2J_MJJ_0_350_PTH_60_120[mH] = 0.0378 * valXSggH;
-        XSectionMap_GG2H_GE2J_MJJ_0_350_PTH_120_200[mH] = 0.0246 * valXSggH;
-        XSectionMap_GG2H_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25[mH] = 0.0073 * valXSggH;
-        XSectionMap_GG2H_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25[mH] = 0.0078 * valXSggH;
-        XSectionMap_GG2H_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25[mH] = 0.0029 * valXSggH;
-        XSectionMap_GG2H_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25[mH] = 0.0038 * valXSggH;       
+        // Stage 1.2: now include forward as separate process (taken from 2018 only: need to compare)
+        XSectionMap_GG2H_FWDH[mH] = 0.0810 * valXSggH;
+        XSectionMap_GG2H_PTH_200_300[mH] = 0.0118 * valXSggH;
+        XSectionMap_GG2H_PTH_300_450[mH] = 0.0032 * valXSggH;
+        XSectionMap_GG2H_PTH_450_650[mH] = 0.0006 * valXSggH;
+        XSectionMap_GG2H_PTH_GT650[mH] = 0.0001 * valXSggH;
+        XSectionMap_GG2H_0J_PTH_0_10[mH] = 0.1348 * valXSggH;
+        XSectionMap_GG2H_0J_PTH_GT10[mH] = 0.3919 * valXSggH;
+        XSectionMap_GG2H_1J_PTH_0_60[mH] = 0.1469 * valXSggH;
+        XSectionMap_GG2H_1J_PTH_60_120[mH] = 0.1021 * valXSggH;
+        XSectionMap_GG2H_1J_PTH_120_200[mH] = 0.0193 * valXSggH;
+        XSectionMap_GG2H_GE2J_MJJ_0_350_PTH_0_60[mH] = 0.0260 * valXSggH;
+        XSectionMap_GG2H_GE2J_MJJ_0_350_PTH_60_120[mH] = 0.0403 * valXSggH;
+        XSectionMap_GG2H_GE2J_MJJ_0_350_PTH_120_200[mH] = 0.0209 * valXSggH;
+        XSectionMap_GG2H_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25[mH] = 0.0064 * valXSggH;
+        XSectionMap_GG2H_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25[mH] = 0.0081 * valXSggH;
+        XSectionMap_GG2H_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25[mH] = 0.0030 * valXSggH;
+        XSectionMap_GG2H_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25[mH] = 0.0033 * valXSggH;       
 
-        XSectionMap_VBF_FWDH[mH] = 0.07 * valXSqqH;
-        XSectionMap_VBF_0J[mH] = 0.0686 * valXSqqH;
-        XSectionMap_VBF_1J[mH] = 0.3475 * valXSqqH;
-        XSectionMap_VBF_GE2J_MJJ_0_60[mH] = 0.0108 * valXSqqH;
-        XSectionMap_VBF_GE2J_MJJ_60_120[mH] = 0.0181 * valXSqqH;
-        XSectionMap_VBF_GE2J_MJJ_120_350[mH] = 0.1065 * valXSqqH;
-        XSectionMap_VBF_GE2J_MJJ_GT350_PTH_GT200[mH] = 0.0590 * valXSqqH;
-        XSectionMap_VBF_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25[mH] = 0.1276 * valXSqqH;
-        XSectionMap_VBF_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25[mH] = 0.0250 * valXSqqH;
-        XSectionMap_VBF_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25[mH] = 0.1878 * valXSqqH;
-        XSectionMap_VBF_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25[mH] = 0.0029 * valXSqqH;
+        XSectionMap_VBF_FWDH[mH] = 0.0698 * valXSqqH;
+        XSectionMap_VBF_0J[mH] = 0.0653 * valXSqqH;
+        XSectionMap_VBF_1J[mH] = 0.3274 * valXSqqH;
+        XSectionMap_VBF_GE2J_MJJ_0_60[mH] = 0.0103 * valXSqqH;
+        XSectionMap_VBF_GE2J_MJJ_60_120[mH] = 0.0182 * valXSqqH;
+        XSectionMap_VBF_GE2J_MJJ_120_350[mH] = 0.1100 * valXSqqH;
+        XSectionMap_VBF_GE2J_MJJ_GT350_PTH_GT200[mH] = 0.0411 * valXSqqH;
+        XSectionMap_VBF_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25[mH] = 0.1202 * valXSqqH;
+        XSectionMap_VBF_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25[mH] = 0.0248 * valXSqqH;
+        XSectionMap_VBF_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25[mH] = 0.1681 * valXSqqH;
+        XSectionMap_VBF_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25[mH] = 0.0446 * valXSqqH;
 
-        XSectionMap_WH2HQQ_FWDH[mH] = 0.001 * valXSWH2HQQ;
-        XSectionMap_WH2HQQ_0J[mH] = 0.001 * valXSWH2HQQ;
-        XSectionMap_WH2HQQ_1J[mH] = 0.001 * valXSWH2HQQ;
-        XSectionMap_WH2HQQ_GE2J_MJJ_0_60[mH] = 0.001 * valXSWH2HQQ;
-        XSectionMap_WH2HQQ_GE2J_MJJ_60_120[mH] = 0.99 * valXSWH2HQQ;
-        XSectionMap_WH2HQQ_GE2J_MJJ_120_350[mH] = 0.001 * valXSWH2HQQ;
-        XSectionMap_WH2HQQ_GE2J_MJJ_GT350_PTH_GT200[mH] = 0.001 * valXSWH2HQQ;
-        XSectionMap_WH2HQQ_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25[mH] = 0.001 * valXSWH2HQQ;
-        XSectionMap_WH2HQQ_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25[mH] = 0.001 * valXSWH2HQQ;
-        XSectionMap_WH2HQQ_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25[mH] = 0.001 * valXSWH2HQQ;
-        XSectionMap_WH2HQQ_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25[mH] = 0.001 * valXSWH2HQQ;
+        XSectionMap_WH2HQQ_FWDH[mH] = 0.1257 * valXSWH2HQQ;
+        XSectionMap_WH2HQQ_0J[mH] = 0.0570 * valXSWH2HQQ;
+        XSectionMap_WH2HQQ_1J[mH] = 0.3113 * valXSWH2HQQ;
+        XSectionMap_WH2HQQ_GE2J_MJJ_0_60[mH] = 0.0358 * valXSWH2HQQ;
+        XSectionMap_WH2HQQ_GE2J_MJJ_60_120[mH] = 0.2943 * valXSWH2HQQ;
+        XSectionMap_WH2HQQ_GE2J_MJJ_120_350[mH] = 0.1392 * valXSWH2HQQ;
+        XSectionMap_WH2HQQ_GE2J_MJJ_GT350_PTH_GT200[mH] = 0.0088 * valXSWH2HQQ;
+        XSectionMap_WH2HQQ_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25[mH] = 0.0044 * valXSWH2HQQ;
+        XSectionMap_WH2HQQ_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25[mH] = 0.0186 * valXSWH2HQQ;
+        XSectionMap_WH2HQQ_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25[mH] = 0.0009 * valXSWH2HQQ;
+        XSectionMap_WH2HQQ_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25[mH] = 0.0040 * valXSWH2HQQ;
 
-        XSectionMap_ZH2HQQ_FWDH[mH] = 0.001 * valXSZH2HQQ;
-        XSectionMap_ZH2HQQ_0J[mH] = 0.001 * valXSZH2HQQ;
-        XSectionMap_ZH2HQQ_1J[mH] = 0.001 * valXSZH2HQQ;
-        XSectionMap_ZH2HQQ_GE2J_MJJ_0_60[mH] = 0.001 * valXSZH2HQQ;
-        XSectionMap_ZH2HQQ_GE2J_MJJ_60_120[mH] = 0.99 * valXSZH2HQQ;
-        XSectionMap_ZH2HQQ_GE2J_MJJ_120_350[mH] = 0.001 * valXSZH2HQQ;
-        XSectionMap_ZH2HQQ_GE2J_MJJ_GT350_PTH_GT200[mH] = 0.001 * valXSZH2HQQ;
-        XSectionMap_ZH2HQQ_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25[mH] = 0.001 * valXSZH2HQQ;
-        XSectionMap_ZH2HQQ_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25[mH] = 0.001 * valXSZH2HQQ;
-        XSectionMap_ZH2HQQ_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25[mH] = 0.001 * valXSZH2HQQ;
-        XSectionMap_ZH2HQQ_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25[mH] = 0.001 * valXSZH2HQQ;
+        XSectionMap_ZH2HQQ_FWDH[mH] = 0.1143 * valXSZH2HQQ;
+        XSectionMap_ZH2HQQ_0J[mH] = 0.0433 * valXSZH2HQQ;
+        XSectionMap_ZH2HQQ_1J[mH] = 0.2906 * valXSZH2HQQ;
+        XSectionMap_ZH2HQQ_GE2J_MJJ_0_60[mH] = 0.0316 * valXSZH2HQQ;
+        XSectionMap_ZH2HQQ_GE2J_MJJ_60_120[mH] = 0.3360 * valXSZH2HQQ;
+        XSectionMap_ZH2HQQ_GE2J_MJJ_120_350[mH] = 0.1462 * valXSZH2HQQ;
+        XSectionMap_ZH2HQQ_GE2J_MJJ_GT350_PTH_GT200[mH] = 0.0083 * valXSZH2HQQ;
+        XSectionMap_ZH2HQQ_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25[mH] = 0.0041 * valXSZH2HQQ;
+        XSectionMap_ZH2HQQ_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25[mH] = 0.0202 * valXSZH2HQQ;
+        XSectionMap_ZH2HQQ_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25[mH] = 0.0009 * valXSZH2HQQ;
+        XSectionMap_ZH2HQQ_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25[mH] = 0.0045 * valXSZH2HQQ;
 
-        XSectionMap_QQ2HLNU_FWDH[mH] = 0.5 * valXSQQ2HLNU;
-        XSectionMap_QQ2HLNU_PTV_0_75[mH] = 0.5 * valXSQQ2HLNU;
-        XSectionMap_QQ2HLNU_PTV_75_150[mH] = 0.4467 * valXSQQ2HLNU;
-        XSectionMap_QQ2HLNU_PTV_150_250_0J[mH] = 0.0203 * valXSQQ2HLNU;
-        XSectionMap_QQ2HLNU_PTV_150_250_GE1J[mH] = 0.0260 * valXSQQ2HLNU;
-        XSectionMap_QQ2HLNU_PTV_GT250[mH] = 0.0070 * valXSQQ2HLNU;
+        XSectionMap_QQ2HLNU_FWDH[mH] = 0.1238 * valXSQQ2HLNU;
+        XSectionMap_QQ2HLNU_PTV_0_75[mH] = 0.4642 * valXSQQ2HLNU;
+        XSectionMap_QQ2HLNU_PTV_75_150[mH] = 0.2922 * valXSQQ2HLNU;
+        XSectionMap_QQ2HLNU_PTV_150_250_0J[mH] = 0.0509 * valXSQQ2HLNU;
+        XSectionMap_QQ2HLNU_PTV_150_250_GE1J[mH] = 0.0395 * valXSQQ2HLNU;
+        XSectionMap_QQ2HLNU_PTV_GT250[mH] = 0.0294 * valXSQQ2HLNU;
 
-        XSectionMap_QQ2HLL_FWDH[mH] = 0.5 * valXSQQ2HLL;
-        XSectionMap_QQ2HLL_PTV_0_75[mH] = 0.5 * valXSQQ2HLL;
-        XSectionMap_QQ2HLL_PTV_75_150[mH] = 0.4413 * valXSQQ2HLL;
-        XSectionMap_QQ2HLL_PTV_150_250_0J[mH] = 0.0242 * valXSQQ2HLL;
-        XSectionMap_QQ2HLL_PTV_150_250_GE1J[mH] = 0.0260 * valXSQQ2HLL;
-        XSectionMap_QQ2HLL_PTV_GT250[mH] = 0.0068 * valXSQQ2HLL;
+        XSectionMap_QQ2HLL_FWDH[mH] = 0.1131 * valXSQQ2HLL;
+        XSectionMap_QQ2HLL_PTV_0_75[mH] = 0.4556 * valXSQQ2HLL;
+        XSectionMap_QQ2HLL_PTV_75_150[mH] = 0.3076 * valXSQQ2HLL;
+        XSectionMap_QQ2HLL_PTV_150_250_0J[mH] = 0.0516 * valXSQQ2HLL;
+        XSectionMap_QQ2HLL_PTV_150_250_GE1J[mH] = 0.0421 * valXSQQ2HLL;
+        XSectionMap_QQ2HLL_PTV_GT250[mH] = 0.0299 * valXSQQ2HLL;
 
         // FIXME: add correct cross section breakdwon for ggZH(Z->ll)
         XSectionMap_GG2HLL_FWDH[mH] = 0.01 * valXSGG2HLL;
-        XSectionMap_GG2HLL_PTV_0_75[mH] = 0. * valXSGG2HLL;
+        XSectionMap_GG2HLL_PTV_0_75[mH] = 0.4917 * valXSGG2HLL;
         XSectionMap_GG2HLL_PTV_75_150[mH] = 0.4413 * valXSGG2HLL;
         XSectionMap_GG2HLL_PTV_150_250_0J[mH] = 0.0242 * valXSGG2HLL;
         XSectionMap_GG2HLL_PTV_150_250_GE1J[mH] = 0.0260 * valXSGG2HLL;
         XSectionMap_GG2HLL_PTV_GT250[mH] = 0.0068 * valXSGG2HLL;
 
-        XSectionMap_TTH_FWDH[mH]                 = 0.01 * valXSttH;
-        XSectionMap_TTH_PTH_0_60[mH]             = 0.01 * valXSttH;
-        XSectionMap_TTH_PTH_60_120[mH]           = 0.01 * valXSttH;
-        XSectionMap_TTH_PTH_120_200[mH]          = 0.01 * valXSttH;
-        XSectionMap_TTH_PTH_200_300[mH]          = 0.01 * valXSttH;
-        XSectionMap_TTH_PTH_GT300[mH]            = 0.01 * valXSttH;
+        // Taken from limited sample after jobs failed: re-do numbers
+        XSectionMap_TTH_FWDH[mH]                 = 0.0156 * valXSttH;
+        XSectionMap_TTH_PTH_0_60[mH]             = 0.2185 * valXSttH;
+        XSectionMap_TTH_PTH_60_120[mH]           = 0.3493 * valXSttH;
+        XSectionMap_TTH_PTH_120_200[mH]          = 0.2512 * valXSttH;
+        XSectionMap_TTH_PTH_200_300[mH]          = 0.1110 * valXSttH;
+        XSectionMap_TTH_PTH_GT300[mH]            = 0.0544 * valXSttH;
 
-        XSectionMap_BBH_FWDH[mH]                 = 0.01* valXSbbH;
-        XSectionMap_BBH[mH]                      = 0.99* valXSbbH;
+        // Add correct FWDH split...
+        XSectionMap_BBH_FWDH[mH]                 = 0.02* valXSbbH;
+        XSectionMap_BBH[mH]                      = 0.98* valXSbbH;
 
-        XSectionMap_THQ_FWDH[mH]                 = 0.01 * valXStHq;
-        XSectionMap_THQ[mH]                      = 0.99 * valXStHq;
+        XSectionMap_THQ_FWDH[mH]                 = 0.02 * valXStHq;
+        XSectionMap_THQ[mH]                      = 0.98 * valXStHq;
 
-        XSectionMap_THW_FWDH[mH]                 = 0.01 * valXStHW;
-        XSectionMap_THW[mH]                      = 0.99 * valXStHW;
+        XSectionMap_THW_FWDH[mH]                 = 0.02 * valXStHW;
+        XSectionMap_THW[mH]                      = 0.98 * valXStHW;
 
     }
 }
@@ -156,8 +158,8 @@ TGraph * Normalization_13TeV::GetSigmaGraph(TString process)
           XSectionMap = &XSectionMap_GG2H_PTH_200_300;
   } else if ( process == "GG2H_PTH_300_450" ){
           XSectionMap = &XSectionMap_GG2H_PTH_300_450;
-  } else if ( process == "GG2H_PTH_450_600" ){
-          XSectionMap = &XSectionMap_GG2H_PTH_450_600;
+  } else if ( process == "GG2H_PTH_450_650" ){
+          XSectionMap = &XSectionMap_GG2H_PTH_450_650;
   } else if ( process == "GG2H_PTH_GT650" ){
           XSectionMap = &XSectionMap_GG2H_PTH_GT650;
   } else if ( process == "GG2H_0J_PTH_0_10" ){
@@ -296,8 +298,8 @@ TGraph * Normalization_13TeV::GetSigmaGraph(TString process)
           XSectionMap = &XSectionMap_TTH_PTH_120_200;
   } else if ( process == "TTH_PTH_200_300" ){
           XSectionMap = &XSectionMap_TTH_PTH_200_300;
-  } else if ( process == "TTH_PTH_GT350" ){
-          XSectionMap = &XSectionMap_TTH_PTH_GT350;
+  } else if ( process == "TTH_PTH_GT300" ){
+          XSectionMap = &XSectionMap_TTH_PTH_GT300;
   } else if ( process == "BBH_FWDH" ){
           XSectionMap = &XSectionMap_BBH_FWDH;
   } else if ( process == "BBH" ){
@@ -386,8 +388,8 @@ double Normalization_13TeV::GetXsection(double mass, TString HistName) {
           XSectionMap = &XSectionMap_GG2H_PTH_200_300;
   } else if ( HistName.Contains("GG2H_PTH_300_450") ){
           XSectionMap = &XSectionMap_GG2H_PTH_300_450;
-  } else if ( HistName.Contains("GG2H_PTH_450_600") ){
-          XSectionMap = &XSectionMap_GG2H_PTH_450_600;
+  } else if ( HistName.Contains("GG2H_PTH_450_650") ){
+          XSectionMap = &XSectionMap_GG2H_PTH_450_650;
   } else if ( HistName.Contains("GG2H_PTH_GT650") ){
           XSectionMap = &XSectionMap_GG2H_PTH_GT650;
   } else if ( HistName.Contains("GG2H_0J_PTH_0_10") ){
@@ -526,8 +528,8 @@ double Normalization_13TeV::GetXsection(double mass, TString HistName) {
           XSectionMap = &XSectionMap_TTH_PTH_120_200;
   } else if ( HistName.Contains("TTH_PTH_200_300") ){
           XSectionMap = &XSectionMap_TTH_PTH_200_300;
-  } else if ( HistName.Contains("TTH_PTH_GT350") ){
-          XSectionMap = &XSectionMap_TTH_PTH_GT350;
+  } else if ( HistName.Contains("TTH_PTH_GT300") ){
+          XSectionMap = &XSectionMap_TTH_PTH_GT300;
   } else if ( HistName.Contains("BBH_FWDH") ){
           XSectionMap = &XSectionMap_BBH_FWDH;
   } else if ( HistName.Contains("BBH") ){
