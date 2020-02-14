@@ -24,6 +24,7 @@
 #include "RooMsgService.h"
 #include "RooDataHist.h"
 #include "RooExtendPdf.h"
+#include "RooCurve.h"
 #include "TRandom3.h"
 #include "TLatex.h"
 #include "TMacro.h"
@@ -595,6 +596,28 @@ int getBestFitFunction(RooMultiPdf *bkg, RooDataSet *data, RooCategory *cat, boo
 	return best_index;
 }
 
+double extractBackgroundNormalization( RooRealVar *mass, RooMultiPdf *pdfs, RooDataSet *data, TString fRange="", int bestFitPdf=-1){
+  // Extract Best-fit PDF
+  RooAbsPdf *bf_pdf = pdfs->getPdf(bestFitPdf);
+  RooPlot *plot = mass->frame();
+  // Add data to plot
+  data->plotOn(plot);
+  // Fit pdf to data using sidebands range
+  bf_pdf->fitTo(*data,RooFit::Range(fRange),RooFit::Minos(0),RooFit::Minimizer("Minuit2","minimize"),RooFit::SumW2Error(kTRUE));
+  // Add pdf to plot
+  bf_pdf->plotOn(plot,RooFit::NormRange(fRange),RooFit::Range("full"));
+  // Extract RooCurve from plot
+  RooCurve *bf_curve = dynamic_cast<RooCurve*>(plot->getObject(1));
+  // Loop over bins in mass: interpolate curve and sum to total
+  double yield = 0;
+  double x_centre = 0;
+  for( int i=0; i<nBinsForMass; i++ ){
+    x_centre = mgg_low+((float(mgg_high-mgg_low))/nBinsForMass)*i;
+    yield += bf_curve->interpolate(x_centre);
+  }
+  return yield; 
+}
+
 int main(int argc, char* argv[]){
  
   setTDRStyle();
@@ -978,7 +1001,7 @@ int main(int argc, char* argv[]){
 			RooCategory catIndex(catindexname.c_str(),"c");
 			RooMultiPdf *pdf = new RooMultiPdf(Form("CMS_hgg_%s_%s_bkgshape",catname.c_str(),ext.c_str()),"all pdfs",catIndex,storedPdfs);
 			//RooRealVar nBackground(Form("CMS_hgg_%s_%s_bkgshape_norm",catname.c_str(),ext.c_str()),"nbkg",data->sumEntries(),0,10E8);
-			RooRealVar nBackground(Form("CMS_hgg_%s_%s_bkgshape_norm",catname.c_str(),ext.c_str()),"nbkg",data->sumEntries(),0,3*data->sumEntries());
+			//RooRealVar nBackground(Form("CMS_hgg_%s_%s_bkgshape_norm",catname.c_str(),ext.c_str()),"nbkg",data->sumEntries(),0,3*data->sumEntries());
 			//nBackground.removeRange(); // bug in roofit will break combine until dev branch brought in
 			//double check the best pdf!
 			int bestFitPdfIndex = getBestFitFunction(pdf,data,&catIndex,!verbose);
@@ -992,6 +1015,12 @@ int main(int argc, char* argv[]){
 
 			mass->setBins(nBinsForMass);
 			RooDataHist dataBinned(Form("roohist_data_mass_%s",catname.c_str()),"data",*mass,*dataFull);
+
+                        // Extract nBackground as integral of pdf from 
+                        double nBkg = extractBackgroundNormalization(mass,pdf,data,fitRange,bestFitPdfIndex);
+                        RooRealVar nBackground(Form("CMS_hgg_%s_%s_bkgshape_norm",catname.c_str(),ext.c_str()),"nbkg",nBkg,0,3*nBkg);
+                        std::cout << "[JONNO DEBUG] Nbkg = " << nBkg << std::endl;
+                        std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" <<std::endl;
 
 			// Save it (also a binned version of the dataset
 			outputws->import(*pdf);
