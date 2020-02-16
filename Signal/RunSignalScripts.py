@@ -103,7 +103,7 @@ else:
   printOnly    = opt.printOnly
 
 # Check if mode in allowed options
-if mode not in ['std','calcPhotonSyst','writePhotonSyst','sigFitOnly','packageOnly','sigPlotsOnly']:
+if mode not in ['std','getFractions','calcPhotonSyst','writePhotonSyst','sigFitOnly','packageOnly','sigPlotsOnly']:
   print " --> [ERROR] mode %s not allowed. Please use one of the following: [std,phoSystOnly,sigFitOnly,packageOnly,sigPlotsOnly]. Leaving..."%mode
   print "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ RUNNING SIGNAL SCRIPTS (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
   sys.exit(1)  
@@ -111,7 +111,11 @@ if mode not in ['std','calcPhotonSyst','writePhotonSyst','sigFitOnly','packageOn
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # FIXME: configure also for CONDOR
 # If mode == calcPhotonSyst: submit a job to the batch for each category
-if mode == "calcPhotonSyst":
+if mode == "getFractions":
+  if not os.path.isdir("./jsons"): os.system("mkdir ./jsons")
+  os.system("./getFractions.py -e %s -f %s -c %s"%(ext,inputWSDir,cats))
+
+elif mode == "calcPhotonSyst":
   print " --> Calculating photon systematics: %s"%ext
   if not os.path.isdir("./outdir_%s"%ext): os.system("mkdir ./outdir_%s"%ext)
   if not os.path.isdir("./outdir_%s/calcPhotonSyst"%ext): os.system("mkdir ./outdir_%s/calcPhotonSyst"%ext)

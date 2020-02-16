@@ -1,25 +1,26 @@
 #!/usr/bin/env python
 # code to make first-pass stxs transfer matrix plots
 
-from os import walk
+from os import listdir
 import ROOT as r
+r.gROOT.SetBatch(True)
 from collections import OrderedDict as od
 
-#from optparse import OptionParser
-#parser = OptionParser()
-#parser.add_option('-k', '--key', default='GluGluHToGG', help='choose the sample to run on')
-#parser.add_option('-d', '--doLoose', default=False, action='store_true', help='use loose photons (default false, ie use only tight photons)')
-#(opts,args) = parser.parse_args()
+from optparse import OptionParser
+parser = OptionParser()
+parser.add_option('-e', '--ext', default='test', help='name of analysis')
+parser.add_option('-f', '--filePath', default='test', help='directory of files')
+parser.add_option('-c', '--cats', default='test', help='analysis categories')
+(opts,args) = parser.parse_args()
 
-r.gROOT.SetBatch(True)
+baseFilePath  = opts.filePath
+if not baseFilePath.endswith('/'): baseFilePath += '/'
 
-baseFilePath  = '/vols/cms/jl2117/hgg/ws/test_stage1_1_2018/'
 fileNames     = []
-for root,dirs,files in walk(baseFilePath):
-  for fileName in files: 
-    if not fileName.startswith('output_'): continue
-    if not fileName.endswith('.root'):     continue
-    fileNames.append(fileName)
+for fileName in listdir(baseFilePath): 
+  if not fileName.startswith('output_'): continue
+  if not fileName.endswith('.root'):     continue
+  fileNames.append(fileName)
 fullFileNames = '' 
 for fileName in fileNames: fullFileNames += baseFilePath+fileName+','
 fullFileNames = fullFileNames[:-1]
@@ -32,12 +33,8 @@ for fileName in fileNames:
   if 'M125' not in fileName: continue
   procs[ fileName.split('pythia8_')[1].split('.root')[0] ] = 0.
   procsNoTag[ fileName.split('pythia8_')[1].split('.root')[0] ] = 0.
-cats = 'RECO_0J_PTH_GT10_Tag0,RECO_0J_PTH_GT10_Tag1,RECO_0J_PTH_0_10_Tag0,RECO_0J_PTH_0_10_Tag1,RECO_PTH_GT200_Tag0,RECO_PTH_GT200_Tag1,RECO_1J_PTH_120_200_Tag0,RECO_1J_PTH_120_200_Tag1,RECO_1J_PTH_60_120_Tag0,RECO_1J_PTH_60_120_Tag1,RECO_1J_PTH_0_60_Tag0,RECO_1J_PTH_0_60_Tag1,RECO_VBFTOPO_BSM,RECO_VBFTOPO_JET3VETO_Tag0,RECO_VBFTOPO_JET3VETO_Tag1,RECO_VBFTOPO_JET3_Tag0,RECO_VBFTOPO_JET3_Tag1,RECO_VBFTOPO_VHHAD,RECO_GE2J_PTH_120_200_Tag0,RECO_GE2J_PTH_120_200_Tag1,RECO_GE2J_PTH_60_120_Tag0,RECO_GE2J_PTH_60_120_Tag1,RECO_GE2J_PTH_0_60_Tag0,RECO_GE2J_PTH_0_60_Tag1'
-# Stage 1 tags
-#cats  = 'RECO_0J_Tag0,RECO_0J_Tag1,RECO_0J_Tag2,'
-#cats += 'RECO_1J_PTH_0_60_Tag0,RECO_1J_PTH_0_60_Tag1,RECO_1J_PTH_60_120_Tag0,RECO_1J_PTH_60_120_Tag1,RECO_1J_PTH_120_200_Tag0,RECO_1J_PTH_120_200_Tag1,RECO_1J_PTH_GT200,'
-#cats += 'RECO_GE2J_PTH_0_60_Tag0,RECO_GE2J_PTH_0_60_Tag1,RECO_GE2J_PTH_60_120_Tag0,RECO_GE2J_PTH_60_120_Tag1,RECO_GE2J_PTH_120_200_Tag0,RECO_GE2J_PTH_120_200_Tag1,RECO_GE2J_PTH_GT200_Tag0,RECO_GE2J_PTH_GT200_Tag1,'
-#cats += 'RECO_VBFTOPO_JET3VETO_Tag0,RECO_VBFTOPO_JET3VETO_Tag1,RECO_VBFTOPO_JET3_Tag0,RECO_VBFTOPO_JET3_Tag1,RECO_VBFTOPO_REST,RECO_VBFTOPO_BSM'
+
+cats = opts.cats
 cats = cats.split(',')
 stage0procs = {}
 stage0procs['GG2H']    = 0.
@@ -68,6 +65,8 @@ nameMap['QQ2HLL']  = 'zh'
 nameMap['QQ2HLNU'] = 'wh'
 nameMap['TTH'] = 'tth'
 
+granularMap = {}
+
 def main():
   #checkZeros()
   #exit(0)
@@ -83,6 +82,9 @@ def main():
     for cat in cats:
       dataName = '%s_125_13TeV_%s'%(nameMap[theProc0], cat)
       sumEntries = theWS.data(dataName).sumEntries()
+      granularKey = '%s__%s'%(theProc,cat)
+      if not granularKey in granularMap: granularMap[granularKey] = sumEntries
+      else: exit('DO NOT expect a given proc x cat to appear more than once!!!')
       stage0procs[theProc0] += sumEntries
       procs[theProc] += sumEntries
       totEffAccNumer += sumEntries
@@ -103,6 +105,15 @@ def main():
     print '\n'
   totEffAcc = totEffAccNumer / (totEffAccNumer + totEffAccDenom)
   print 'total eff x acc is %1.4f'%(totEffAcc)
+
+  with open('jsons/granularEffAcc_%s.json'%(opts.ext), 'w') as outFile:
+    for proc,val in procs.iteritems():
+      for cat in cats:
+        granularKey = '%s__%s'%(theProc,cat)
+        granularEffAcc = granularMap[granularKey] / ( stage0procs[proc.split('_')[0]] + stage0noTag[proc.split('_')[0]] )
+        if granularEffAcc < 0.: granularEffAcc = 0.
+        outFile.write(" '%s' : %.6f , \n"%(granularKey, granularEffAcc) )
+    outFile.write(" 'fino' : 'alla fine' ")
 
 def checkZeros():
   print 'About to check for low sumEntries'
