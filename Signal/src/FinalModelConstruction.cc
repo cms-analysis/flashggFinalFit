@@ -1360,15 +1360,19 @@ void FinalModelConstruction::getNormalization(){
 	double effAcc =0.;
 	if (intLumi) {
     // calcu eA as sumEntries / totalxs * totalbr * intL
-    float sumEntries = data->sumEntries(); 
-    if (sumEntries <0 ) {
-    sumEntries =0; //negative eff*acc makes no sense...
-    fitToConstant=1;
-    }
-    effAcc = (sumEntries/(intLumi->getVal()*norm->GetXsection(mh,procLowerCase_)*norm->GetBR(mh)));
-		if(verbosity_)std::cout << "[INFO] (FinalModelConstruction) intLumi " << intLumi->getVal() <<", effAcc " << effAcc << std::endl;
-		if(verbosity_)std::cout << "[INFO] (FinalModelConstruction) data " << *data << std::endl;
-		if(verbosity_)std::cout << "[INFO] (FinalModelConstruction) sumEntries " << sumEntries <<", norm->GetXsection(mh,procLowerCase_) " << norm->GetXsection(mh,procLowerCase_) << " norm->GetBR(mh) " << norm->GetBR(mh)<< std::endl;
+    //float sumEntries = data->sumEntries(); 
+    //if (sumEntries <0 ) {
+    //sumEntries =0; //negative eff*acc makes no sense...
+    //fitToConstant=1;
+    //}
+    //effAcc = (sumEntries/(intLumi->getVal()*norm->GetXsection(mh,procLowerCase_)*norm->GetBR(mh)));
+		//if(verbosity_)std::cout << "[INFO] (FinalModelConstruction) intLumi " << intLumi->getVal() <<", effAcc " << effAcc << std::endl;
+		//if(verbosity_)std::cout << "[INFO] (FinalModelConstruction) data " << *data << std::endl;
+		//if(verbosity_)std::cout << "[INFO] (FinalModelConstruction) sumEntries " << sumEntries <<", norm->GetXsection(mh,procLowerCase_) " << norm->GetXsection(mh,procLowerCase_) << " norm->GetBR(mh) " << norm->GetBR(mh)<< std::endl;
+    
+    // replace treatment above with pre-calculated eff * acc calculated using NoTag info (allows subset of MC to be used)
+    effAcc = effAccValue_;
+    if (effAcc < 0.) effAcc = 0.;
 		} else {
 		  std::cout << "[ERROR] IntLumi rooRealVar is not in this workspace. exit." << std::endl;
 		return ;
