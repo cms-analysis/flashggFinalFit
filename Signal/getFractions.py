@@ -110,10 +110,10 @@ def main():
     for proc,val in procs.iteritems():
       for cat in cats:
         granularKey = '%s__%s'%(theProc,cat)
-        granularEffAcc = granularMap[granularKey] / ( stage0procs[proc.split('_')[0]] + stage0noTag[proc.split('_')[0]] )
+        #granularEffAcc = granularMap[granularKey] / ( stage0procs[proc.split('_')[0]] + stage0noTag[proc.split('_')[0]] )
+        granularEffAcc = granularMap[granularKey] / (val + procsNoTag[proc])
         if granularEffAcc < 0.: granularEffAcc = 0.
-        outFile.write(" '%s' : %.6f , \n"%(granularKey, granularEffAcc) )
-    outFile.write(" 'fino' : 'alla fine' ")
+        outFile.write("%s %.6f \n"%(granularKey, granularEffAcc) )
 
 def checkZeros():
   print 'About to check for low sumEntries'

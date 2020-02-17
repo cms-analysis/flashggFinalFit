@@ -1338,6 +1338,10 @@ RooSpline1D* FinalModelConstruction::graphToSpline(string name, TGraph *graph, R
   return res;
 }
 
+void FinalModelConstruction::setEffAccValues(float effAccVal) {
+  effAccValue_ = effAccVal;
+}
+
 //here is how the normalisation is set
 void FinalModelConstruction::getNormalization(){
 	string catname;

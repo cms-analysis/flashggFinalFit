@@ -52,6 +52,8 @@ class FinalModelConstruction {
     void setWVsplines(std::map<std::string,RooSpline1D*> splines);
     void setSTDsplines(std::map<std::string,RooSpline1D*> splines);
 
+    void setEffAccValues( float effAccVal );
+
     void setRVdatasets(std::map<int,RooDataSet*> data);
     void setWVdatasets(std::map<int,RooDataSet*> data);
     void setFITRVdatasets(std::map<int,RooDataSet*> data);
@@ -98,6 +100,9 @@ class FinalModelConstruction {
     //Normalization_8TeV *norm;
     Normalization_13TeV *norm;
     ofstream paramDump_;
+
+    //pre-defined eff acc value(s)
+    float effAccValue_; //FIXME move to vector for different mH values
 
     std::map<std::string,RooSpline1D*> stdSplines;
     std::map<std::string,RooSpline1D*> rvSplines;
