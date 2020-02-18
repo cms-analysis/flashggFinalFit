@@ -55,7 +55,9 @@ def factoryType(d,s):
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Function to extract yield variations for signal row in dataFrame
-def calcSystYields(_nominalDataName,_inputWS,_systFactoryTypes):
+def calcSystYields(_nominalDataName,_inputWS,_systFactoryTypes,ggHFix=False):
+
+  # FIXME: ggH central object weights is currently wrong due to NNLOPS. Added fix
 
   # Define dictionary to store systematic yield counters
   systYields = {}
@@ -74,15 +76,18 @@ def calcSystYields(_nominalDataName,_inputWS,_systFactoryTypes):
     w = rdata_nominal.weight()
     # Loop over systematics:
     for s, f in _systFactoryTypes.iteritems():
+
       if f == "a_h": continue
+      if("pdfWeight" in s)|("alphaSWeight" in s): continue # treated separately, see below
 
       # If asymmetric weights:
       elif f == "a_w":
         if "scaleWeight" in s: centralWeightStr = "scaleWeight_0"
-        elif("pdfWeight" in s)|("alphaSWeight" in s): centralWeightStr = "pdfWeight_0"
         else: centralWeightStr = "centralObjectWeight"
-        #centralWeightStr = "scaleWeight_0" if "scaleWeight" in s else "centralObjectWeight"
-        f_central = p.getRealValue(centralWeightStr)
+
+        # FIXME: ggH fix
+        if ggHFix: f_central = 0.5*(p.getRealValue("LooseMvaSFUp01sigma")+p.getRealValue("LooseMvaSFDown01sigma"))
+        else: f_central = p.getRealValue(centralWeightStr)
         f_up, f_down = p.getRealValue("%sUp01sigma"%s), p.getRealValue("%sDown01sigma"%s)
         # Checks:
         # 1) if central weights are zero then skip event
@@ -98,9 +103,7 @@ def calcSystYields(_nominalDataName,_inputWS,_systFactoryTypes):
       # If symmetric weights
       else:
         if "scaleWeight" in s: centralWeightStr = "scaleWeight_0"
-        elif("pdfWeight" in s)|("alphaSWeight" in s): centralWeightStr = "pdfWeight_0"
         else: centralWeightStr = "centralObjectWeight"
-        #centralWeightStr = "scaleWeight_0" if "scaleWeight" in s else "centralObjectWeight"
         f_central = p.getRealValue(centralWeightStr)
         f = p.getRealValue(s)
         # Check: if central weight is zero then skip event
@@ -114,6 +117,26 @@ def calcSystYields(_nominalDataName,_inputWS,_systFactoryTypes):
     if f == "a_h":
       systYields["%s_up"%s] = _inputWS.data("%s_%sUp01sigma"%(_nominalDataName,s)).sumEntries()
       systYields["%s_down"%s] = _inputWS.data("%s_%sDown01sigma"%(_nominalDataName,s)).sumEntries()
+
+  # PdfWeights and alphaS: values in separate RooDataSet with different structure (treat separately)
+  rdata_pdf = _inputWS.data("%s_pdfWeights"%_nominalDataName)
+  # Loop over pdf events and extract reweighted yields
+  for i in range(0,rdata_pdf.numEntries()):
+    p = rdata_pdf.get(i)
+    w = rdata_pdf.weight()
+    # Loop over systematics: skip all but pdf and alphaS
+    for s, f in _systFactoryTypes.iteritems():
+      if( "pdfWeight" not in s )&( "alphaSWeight" not in s): continue
+      # Only symmetric:
+      if(f == "a_w")|(f == "a_h"): continue
+      centralWeightStr = "pdfWeight_0"
+      f_central = p.getRealValue(centralWeightStr)
+      f = p.getRealValue(s)
+      # Check: if central weight is zero then skip event
+      if f_central == 0: continue
+      else:
+        # Add weights to counter
+        systYields[s] += w*(f/f_central)
 
   # Add variations to dataFrame
   return systYields
