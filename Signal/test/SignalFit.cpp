@@ -1039,7 +1039,7 @@ int main(int argc, char *argv[]){
       outWS->import(*intLumi_);
       FinalModelConstruction finalModel(massList_, mass_,MH,intLumi_,mhLow_,mhHigh_,proc,cat,doSecondaryModels_,systfilename_,skipMasses_,verbose_,procs_, flashggCats_,plotDir_, isProblemCategory,isCutBased_,sqrts_,year_,doQuadraticSigmaSum_);
     
-      finalModel.setEffAccValues( effAccMap_[Form("%s__%s",split_[0],split_[1])] );
+      finalModel.setEffAccValues( effAccMap_[Form("%s__%s",split_[0].c_str(),split_[1].c_str())] );
       finalModel.setSecondaryModelVars(MH_SM,DeltaM,MH_2,higgsDecayWidth);
       finalModel.setRVsplines(splinesRV);
       finalModel.setWVsplines(splinesWV);
