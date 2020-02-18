@@ -70,6 +70,7 @@ parser = OptionParser()
 parser.add_option("-i","--infile",help="Signal Workspace")
 parser.add_option("-d","--datfile",help="dat file")
 parser.add_option("-s","--systdatfile",help="systematics dat file")
+parser.add_option("-j","--jsonfile",help="eff acc json file")
 parser.add_option("--mhLow",default="120",help="mh Low")
 parser.add_option("--mhHigh",default="130",help="mh High")
 parser.add_option("-q","--queue",default="espresso",help="Which batch queue")
@@ -133,7 +134,8 @@ def writePostamble(sub_file, exec_line):
     system('rm -f %s.out'%os.path.abspath(sub_file.name))
     system('rm -f %s.sub'%os.path.abspath(sub_file.name))
     if (opts.batch == "IC") : 
-      system('qsub -q %s -l h_rt=0:20:0 -o %s.log -e %s.err %s'%(opts.queue,os.path.abspath(sub_file.name),os.path.abspath(sub_file.name),os.path.abspath(sub_file.name)))
+      pass #ED FIXME
+      #system('qsub -q %s -l h_rt=0:20:0 -o %s.log -e %s.err %s'%(opts.queue,os.path.abspath(sub_file.name),os.path.abspath(sub_file.name),os.path.abspath(sub_file.name)))
     elif( opts.batch == "HTCONDOR" ):
       sub_file_name = re.sub("\.sh","",os.path.abspath(sub_file.name))
       HTCondorSubfile = open("%s.sub"%sub_file_name,'w')
@@ -173,7 +175,7 @@ for proc in  opts.procs.split(","):
       bsRW=0
     else:
       bsRW=1
-    exec_line = "%s/bin/SignalFit --verbose 0 -i %s -d %s/%s  --mhLow=%s --mhHigh=%s -s %s/%s --procs %s -o  %s/%s -p %s/%s -f %s --changeIntLumi %s --binnedFit 1 --nBins 320 --split %s,%s --beamSpotReweigh %d --dataBeamSpotWidth %f --massList %s --useDCBplusGaus %s --useSSF %s --analysis %s --year %s -C -1" %(os.getcwd(), opts.infile,os.getcwd(),opts.datfile,opts.mhLow, opts.mhHigh, os.getcwd(),opts.systdatfile, opts.procs,os.getcwd(),opts.outfilename.replace(".root","_%s_%s.root"%(proc,cat)), os.getcwd(),opts.outDir, opts.flashggCats ,opts.changeIntLumi, proc,cat,bsRW,float(opts.bs), opts.massList, opts.useDCB_1G, opts.useSSF, opts.analysis, opts.year)
+    exec_line = "%s/bin/SignalFit --verbose 0 -i %s -d %s/%s  --mhLow=%s --mhHigh=%s -s %s/%s --procs %s -o  %s/%s -p %s/%s -f %s --changeIntLumi %s --binnedFit 1 --nBins 320 --split %s,%s --beamSpotReweigh %d --dataBeamSpotWidth %f --massList %s --useDCBplusGaus %s --useSSF %s --analysis %s --year %s -C -1 -j %s/%s" %(os.getcwd(), opts.infile,os.getcwd(),opts.datfile,opts.mhLow, opts.mhHigh, os.getcwd(),opts.systdatfile, opts.procs,os.getcwd(),opts.outfilename.replace(".root","_%s_%s.root"%(proc,cat)), os.getcwd(),opts.outDir, opts.flashggCats ,opts.changeIntLumi, proc,cat,bsRW,float(opts.bs), opts.massList, opts.useDCB_1G, opts.useSSF, opts.analysis, opts.year, opts.getcwd(), opts.jsonfile)
     #print exec_line
     writePostamble(file,exec_line) #includes submission
 

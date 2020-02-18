@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 # Script for submitting signal fitting jobs for flashggFinalFit
 
 import os, sys
@@ -200,7 +202,7 @@ else:
   if useDCB: cmdLine += ' --useDCB_1G 1'
   else: cmdLine += ' --useDCB_1G 0'
   if mode == "phoSystCalc": cmdLine += ' --calcPhoSystOnly' 
-  elif mode == "sigFitOnly": cmdLine += ' --sigFitOnly --dontPackage' 
+  elif mode == "sigFitOnly": cmdLine += ' --sigFitOnly --dontPackage'
   elif mode == "packageOnly": cmdLine += ' --packageOnly'
   elif mode == "sigPlotsOnly": cmdLine += ' --sigPlotsOnly'
 

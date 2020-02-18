@@ -109,7 +109,7 @@ def main():
   with open('jsons/granularEffAcc_%s.json'%(opts.ext), 'w') as outFile:
     for proc,val in procs.iteritems():
       for cat in cats:
-        granularKey = '%s__%s'%(theProc,cat)
+        granularKey = '%s__%s'%(proc,cat)
         #granularEffAcc = granularMap[granularKey] / ( stage0procs[proc.split('_')[0]] + stage0noTag[proc.split('_')[0]] )
         granularEffAcc = granularMap[granularKey] / (val + procsNoTag[proc])
         if granularEffAcc < 0.: granularEffAcc = 0.

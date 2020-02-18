@@ -130,7 +130,7 @@ void OptionParser(int argc, char *argv[]){
 		("merge,m", po::value<string>(&mergefilename_)->default_value(""),                               	        "Merge the output with the given workspace")
 		("datfilename,d", po::value<string>(&datfilename_)->default_value("dat/newConfig.dat"),      			"Configuration file")
 		("systfilename,s", po::value<string>(&systfilename_)->default_value("dat/photonCatSyst.dat"),		"Systematic model numbers")
-		("jsonfilename,d", po::value<string>(&jsonfilename_)->default_value("dat/newConfig.dat"),      			"Configuration file")
+		("jsonfilename,j", po::value<string>(&jsonfilename_)->default_value("jsons/testjson.json"),      			"Efficiency times acceptance file")
 		("plotDir,p", po::value<string>(&plotDir_)->default_value("plots"),						"Put plots in this directory")
 		("skipPlots", 																																									"Do not make any plots")
 		("mhLow,L", po::value<int>(&mhLow_)->default_value(115),                                  			"Low mass point")
