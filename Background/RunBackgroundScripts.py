@@ -15,6 +15,7 @@ def get_options():
   parser.add_option('--inputWSDir', dest='inputWSDir', default='/vols/cms/es811/FinalFits/ws_ReweighAndNewggHweights', help="Directory storing flashgg workspaces" )
   parser.add_option('--cats', dest='cats', default='UntaggedTag_0,VBFTag_0', help="Define categories")
   parser.add_option('--ext', dest='ext', default='test', help="Extension: defines output dir which must matche xtension used for signal model building")
+  parser.add_option('--catOffset', dest='catOffset', default=0, type='int', help="Dataset year")
   parser.add_option('--year', dest='year', default='2016', help="Dataset year")
   parser.add_option('--unblind', dest='unblind', default=0, type='int', help="Unblind")
   
@@ -46,6 +47,7 @@ if opt.inputConfig != '':
     inputWSDir   = _cfg['inputWSDir']
     cats         = _cfg['cats']
     ext          = _cfg['ext']
+    catOffset    = _cfg['catOffset']
     year         = _cfg['year']
     unblind      = _cfg['unblind']
     batch        = _cfg['batch']
@@ -66,6 +68,7 @@ else:
   inputWSDir   = opt.inputWSDir
   cats         = opt.cats
   ext          = opt.ext
+  catOffset    = opt.catOffset
   year         = opt.year
   unblind      = opt.unblind
   batch        = opt.batch
@@ -112,6 +115,7 @@ print " --> Input flashgg ws dir: %s"%inputWSDir
 print " --> Processes: %s"%procs
 print " --> Categories: %s"%cats
 print " --> Extension: %s"%ext
+print " --> Category offset: %g"%catOffset
 print " --> Year: %s ::: Corresponds to intLumi = %s fb^-1"%(year,lumi[year])
 print ""
 print " --> Job information:"
@@ -125,7 +129,7 @@ print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 # Construct input command
 print " --> Constructing input command..."
 
-cmdLine = "./runBackgroundScripts.sh -i %s -p %s -f %s --ext %s --intLumi %s --year %s --batch %s --queue %s --sigFile %s --isData "%(dataFile,procs,cats,ext,lumi[year],year,batch,queue,signalFitWSFile)
+cmdLine = "./runBackgroundScripts.sh -i %s -p %s -f %s --ext %s --catOffset %g --intLumi %s --year %s --batch %s --queue %s --sigFile %s --isData "%(dataFile,procs,cats,ext,catOffset,lumi[year],year,batch,queue,signalFitWSFile)
 if mode == "fTestOnly": cmdLine += '--fTestOnly '
 elif mode == "bkgPlotsOnly": cmdLine += '--bkgPlotsOnly '
 if unblind and not fTestOnly: cmdLine += '--undblind '
