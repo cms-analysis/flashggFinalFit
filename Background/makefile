@@ -56,11 +56,11 @@ OBJ_EXT=o
 TEST_EXT=cpp
 
 ROOT_DICT=RootDict.cxx
-ROOT_OBJ=$(subst cxx,$(OBJ_EXT),$(ROOT_DICT))
+ROOT_OBJ=$(subst .cxx,.$(OBJ_EXT),$(ROOT_DICT))
 SRCS=$(wildcard $(BASEDIR)/src/*.cc)
 EXES=$(wildcard $(BASEDIR)/test/*.cpp)
 HEADERS=$(wildcard $(BASEDIR)/interface/*.h)
-OBJS=$(subst $(SRCDIR), $(OBJDIR),$(subst cc,$(OBJ_EXT),$(SRCS)))
+OBJS=$(subst $(SRCDIR), $(OBJDIR),$(subst .cc,.$(OBJ_EXT),$(SRCS)))
 BINS=$(subst $(TESTDIR), $(EXEDIR),$(subst .$(TEST_EXT),,$(EXES)))
 
 all:  $(BINS)
