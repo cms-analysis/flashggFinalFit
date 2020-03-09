@@ -138,8 +138,8 @@ int Normalization_13TeV::Init(int sqrtS){
         XSectionMap_BBH_FWDH[mH]                 = 0.02* valXSbbH;
         XSectionMap_BBH[mH]                      = 0.98* valXSbbH;
 
-        XSectionMap_THQ_FWDH[mH]                 = 0.02 * valXStHq;
-        XSectionMap_THQ[mH]                      = 0.98 * valXStHq;
+        XSectionMap_THQ_FWDH[mH]                 = 0.00005 * valXStHq;
+        XSectionMap_THQ[mH]                      = 0.99995 * valXStHq;
 
         XSectionMap_THW_FWDH[mH]                 = 0.02 * valXStHW;
         XSectionMap_THW[mH]                      = 0.98 * valXStHW;
@@ -307,6 +307,10 @@ TGraph * Normalization_13TeV::GetSigmaGraph(TString process)
   } else if ( process == "THQ_FWDH" ){
           XSectionMap = &XSectionMap_THQ_FWDH;
   } else if ( process == "THQ" ){
+          XSectionMap = &XSectionMap_THQ;
+  } else if ( process == "TH_FWDH" ){
+          XSectionMap = &XSectionMap_THQ_FWDH;
+  } else if ( process == "TH" ){
           XSectionMap = &XSectionMap_THQ;
   } else if ( process == "THW_FWDH" ){
           XSectionMap = &XSectionMap_THW_FWDH;
@@ -537,6 +541,10 @@ double Normalization_13TeV::GetXsection(double mass, TString HistName) {
   } else if ( HistName.Contains("THQ_FWDH") ){
           XSectionMap = &XSectionMap_THQ_FWDH;
   } else if ( HistName.Contains("THQ") ){
+          XSectionMap = &XSectionMap_THQ;
+  } else if ( HistName.Contains("TH_FWDH") ){
+          XSectionMap = &XSectionMap_THQ_FWDH;
+  } else if ( HistName.Contains("TH") ){
           XSectionMap = &XSectionMap_THQ;
   } else if ( HistName.Contains("THW_FWDH") ){
           XSectionMap = &XSectionMap_THW_FWDH;

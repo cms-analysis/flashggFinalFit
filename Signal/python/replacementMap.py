@@ -189,7 +189,7 @@ replacementProcRVMap = {
     "RECO_TTH_LEP_HIGH_Tag1:TTH_PTH_120_200",
     "RECO_TTH_LEP_HIGH_Tag2:TTH_PTH_120_200",
     "RECO_TTH_LEP_HIGH_Tag3:TTH_PTH_120_200",
-    "RECO_THQ_LEP:TTH_PTH_60_120"
+    "RECO_THQ_LEP:TH"
   ],
 
   "stage1_2_ts1":[
@@ -263,7 +263,7 @@ replacementProcRVMap = {
     "RECO_TTH_LEP_HIGH_Tag1:TTH_PTH_120_200",
     "RECO_TTH_LEP_HIGH_Tag2:TTH_PTH_120_200",
     "RECO_TTH_LEP_HIGH_Tag3:TTH_PTH_120_200",
-    "RECO_THQ_LEP:TTH_PTH_60_120"
+    "RECO_THQ_LEP:TH"
   ],
 
   "stage1_2_ts2":[
@@ -337,7 +337,7 @@ replacementProcRVMap = {
     "RECO_TTH_LEP_HIGH_Tag1:TTH_PTH_120_200",
     "RECO_TTH_LEP_HIGH_Tag2:TTH_PTH_120_200",
     "RECO_TTH_LEP_HIGH_Tag3:TTH_PTH_120_200",
-    "RECO_THQ_LEP:TTH_PTH_60_120"
+    "RECO_THQ_LEP:TH"
   ],
 
   "stage1_2_ts3":[
@@ -411,7 +411,7 @@ replacementProcRVMap = {
     "RECO_TTH_LEP_HIGH_Tag1:TTH_PTH_120_200",
     "RECO_TTH_LEP_HIGH_Tag2:TTH_PTH_120_200",
     "RECO_TTH_LEP_HIGH_Tag3:TTH_PTH_120_200",
-    "RECO_THQ_LEP:TTH_PTH_60_120"
+    "RECO_THQ_LEP:TH"
   ]
 }
 
