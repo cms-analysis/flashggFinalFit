@@ -588,7 +588,7 @@ int main(int argc, char *argv[]){
       }
     }
   } else {
-    if (verbose_) std::cout << "[INFO] openign dat file " << datfilename_ << std::endl;
+    if (verbose_) std::cout << "[INFO] opening dat file " << datfilename_ << std::endl;
     //loop over it 
 	  while (datfile.good()){
 		  string line;

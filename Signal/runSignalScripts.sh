@@ -25,6 +25,7 @@ SIGPLOTSONLY=0
 INTLUMI=1
 BATCH=""
 QUEUE=""
+VERBOSITY=""
 BS=""
 
 usage(){
@@ -58,7 +59,7 @@ usage(){
 
 
 # options may be followed by one colon to indicate they have a required argument
-if ! options=$(getopt -u -o hi:p:f: -l help,inputFile:,procs:,bs:,smears:,massList:,scales:,scalesCorr:,useSSF:,useDCB_1G:,scalesGlobal:,flashggCats:,analysis:,ext:,fTestOnly,calcPhoSystOnly,sigFitOnly,dontPackage,packageOnly,sigPlotsOnly,intLumi:,year:,batch:,queue: -- "$@")
+if ! options=$(getopt -u -o hi:p:f: -l help,inputFile:,procs:,bs:,smears:,massList:,scales:,scalesCorr:,useSSF:,useDCB_1G:,scalesGlobal:,flashggCats:,analysis:,ext:,fTestOnly,calcPhoSystOnly,sigFitOnly,dontPackage,packageOnly,sigPlotsOnly,intLumi:,year:,batch:,queue:,verbosity:, -- "$@")
 then
 # something went wrong, getopt will put out an error message for us
 exit 1
@@ -92,6 +93,7 @@ case $1 in
 --year) YEAR=$2; shift ;;
 --batch) BATCH=$2; shift;;
 --queue) QUEUE=$2; shift;;
+--verbosity) VERBOSITY=$2; shift;;
 
 (--) shift; break;;
 (-*) usage; echo "$0: [ERROR] - unrecognized option $1" 1>&2; usage >> /dev/stderr; exit 1;;
@@ -126,6 +128,9 @@ echo "CALCPHOSYSTONLY = $CALCPHOSYSTONLY"
 echo "SIGFITONLY      = $SIGFITONLY"
 echo "SIGPLOTSONLY    =  $SIGPLOTSONLY"
 echo "PACKAGEONLY     =  $PACKAGEONLY"
+
+echo "BATCH           =  $BATCH"
+echo "VERBOSITY       =  $VERBOSITY"
 
 if [[ $BATCH == "IC" ]]; then
 QUEUE=hep.q
@@ -164,12 +169,15 @@ else
     echo "Running Signal F-Test"
     echo "-->Determine Number of gaussians"
     echo "=============================="
+    
+    # If it's HHWWgg need to run signalFTest for each file 
+
     if [ -z $BATCH ]; then
-      echo "./bin/signalFTest -i $FILE -d dat/newConfig_$EXT.dat -p $PROCS -f $CATS -o $OUTDIR"
-      ./bin/signalFTest -i $FILE -d dat/newConfig_$EXT.dat -p $PROCS -f $CATS -o $OUTDIR
+      echo "./bin/signalFTest -i $FILE -d dat/newConfig_$EXT.dat -p $PROCS -f $CATS -o $OUTDIR --analysis $ANALYSIS --verbose $VERBOSITY"
+      ./bin/signalFTest -i $FILE -d dat/newConfig_$EXT.dat -p $PROCS -f $CATS -o $OUTDIR --analysis $ANALYSIS --verbose $VERBOSITY
     else
-      echo "./python/submitSignalFTest.py --procs $PROCS --flashggCats $CATS --outDir $OUTDIR --i $FILE --batch $BATCH -q $QUEUE"
-      ./python/submitSignalFTest.py --procs $PROCS --flashggCats $CATS --outDir $OUTDIR --i $FILE --batch $BATCH -q $QUEUE
+      echo "./python/submitSignalFTest.py --procs $PROCS --flashggCats $CATS --outDir $OUTDIR --i $FILE --batch $BATCH -q $QUEUE --analysis $ANALYSIS --verbose $VERBOSITY"
+      ./python/submitSignalFTest.py --procs $PROCS --flashggCats $CATS --outDir $OUTDIR --i $FILE --batch $BATCH -q $QUEUE --analysis $ANALYSIS --verbose $VERBOSITY
       PEND=`ls -l $OUTDIR/fTestJobs/sub*| grep -v "\.run" | grep -v "\.done" | grep -v "\.fail" | grep -v "\.err" |grep -v "\.log" | grep -v "\.out" | grep -v "\.sub" | wc -l`
       echo "PEND $PEND"
       while (( $PEND > 0 )) ; do

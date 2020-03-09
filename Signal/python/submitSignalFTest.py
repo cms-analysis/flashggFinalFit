@@ -75,6 +75,9 @@ parser.add_option("--outDir",default=None)
 parser.add_option("--procs",default=None)
 parser.add_option("--flashggCats",default=None)
 parser.add_option("--expected",type="int",default=None)
+parser.add_option("--analysis",type="str",default="")
+parser.add_option("--verbose",type="int",default="0")
+
 (opts,args) = parser.parse_args()
 
 defaults = copy(opts)
@@ -163,5 +166,5 @@ for proc in  opts.procs.split(","):
     file = open('%s/fTestJobs/sub%d.sh'%(opts.outDir,counter),'w')
     writePreamble(file)
     counter =  counter+1
-    exec_line = "%s/bin/signalFTest -i %s  -p %s -f %s --considerOnly %s -o %s/%s --datfilename %s/%s/fTestJobs/outputs/config_%d.dat" %(os.getcwd(), opts.infile,proc,opts.flashggCats,cat,os.getcwd(),opts.outDir,os.getcwd(),opts.outDir, counter)
+    exec_line = "%s/bin/signalFTest -i %s  -p %s -f %s --considerOnly %s -o %s/%s --datfilename %s/%s/fTestJobs/outputs/config_%d.dat --analysis %s --verbose %s" %(os.getcwd(), opts.infile,proc,opts.flashggCats,cat,os.getcwd(),opts.outDir,os.getcwd(),opts.outDir, counter, opts.analysis, opts.verbose)
     writePostamble(file,exec_line) #includes submission

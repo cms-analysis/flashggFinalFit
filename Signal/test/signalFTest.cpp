@@ -39,6 +39,7 @@ namespace po = boost::program_options;
 
 string filename_;
 string datfilename_;
+string datfilename_Original;
 string json_dict_;
 string outdir_;
 int mass_;
@@ -52,6 +53,7 @@ vector<string> considerOnly_;
 bool forceFracUnity_=false;
 bool isFlashgg_;
 bool verbose_;
+string analysis_ = "";
 
 void OptionParser(int argc, char *argv[]){
 	po::options_description desc1("Allowed options");
@@ -70,6 +72,7 @@ void OptionParser(int argc, char *argv[]){
 		("flashggCats,f", po::value<string>(&flashggCatsStr_)->default_value("UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,UntaggedTag_4,VBFTag_0,VBFTag_1,VBFTag_2,TTHHadronicTag,TTHLeptonicTag,VHHadronicTag,VHTightTag,VHLooseTag,VHEtTag"),       "Flashgg category names to consider")
 		("considerOnly", po::value<string>(&considerOnlyStr_)->default_value("All"), 
     "If you wish to only consider a subset cat in the list, list them as separated by commas. ")
+		("analysis",	po::value<string>(&analysis_)->default_value(""),  	"analysis")
 		;
 
 	po::options_description desc("Allowed options");
@@ -148,79 +151,41 @@ double getMyNLL(RooRealVar *var, RooAbsPdf *pdf, RooDataHist *data){
 	return -1.*sum;
 }
 
+void fTest(string analysis_, string filename, string outdir_, vector<string> procs, string procString_, int nBins, float rangeLow, float rangeHigh, string website){
 
-int main(int argc, char *argv[]){
-
-	OptionParser(argc,argv);
-	
-	if (verbose_) {
-    std::cout << "[INFO] datfilename_	" << datfilename_ << std::endl;
-  }
-	if (verbose_) {
-    std::cout << "[INFO] filename_	" << filename_ << std::endl;
-  }
-
-	TStopwatch sw;
-	sw.Start();
- 
-  //make nice plots in ~correct style.
-  setTDRStyle();
-  writeExtraText = true;       // if extra text
-  extraText  = "";  // default extra text is "Preliminary"
-  lumi_8TeV  = "19.1 fb^{-1}"; // default is "19.7 fb^{-1}"
-  lumi_7TeV  = "4.9 fb^{-1}";  // default is "5.1 fb^{-1}"
-  lumi_sqrtS = "13 TeV";       // used with iPeriod = 0
-                               //, e.g. for simulation-only plots
-                               //(default is an empty string)
-
-  // set range to be the same as SigfitPlots
-  // want quite a large range otherwise don't
-  // see crazy bins on the sides
-  float rangeLow = 115;
-  float rangeHigh = 135;
-
-  //want binning of \0.5GeV
-  //int   nBins    = 2* int(rangeHigh -rangeLow); 
-  int   nBins    = 2* int(rangeHigh -rangeLow); 
-
-  // silence roofit
-	RooMsgService::instance().setGlobalKillBelow(RooFit::ERROR);
-	RooMsgService::instance().setSilentMode(true);
-
-  // make output dir
-	system(Form("mkdir -p %s/fTest",outdir_.c_str()));
-
-  // split procs, cats
-	vector<string> procs;
-	split(procs,procString_,boost::is_any_of(","));
-	split(flashggCats_,flashggCatsStr_,boost::is_any_of(","));
-	split(considerOnly_,considerOnlyStr_,boost::is_any_of(","));
-  
-  // automatically determine nCats from flashggCats input
-	if (isFlashgg_){
-		ncats_ =flashggCats_.size();
-		// Ensure that the loop over the categories does not go out of scope. 
-	} else {
-    std::cout 
-    << "[ERROR] Sorry, script not compatible with non-flashgg input! Exit." 
-    << std::endl;
-    exit (1);
-  }
-
-  // job splitting: can get this script to only consider specified tags
-	for (unsigned int j =0; j <considerOnly_.size() ; j++){
-			std::cout << " [INFO] considering only " << considerOnly_[j]<<std::endl;
-	}
-  
-  // open input files using WS wrapper.
 	WSTFileWrapper *inWS 
-    = new WSTFileWrapper(filename_,"tagsDumper/cms_hgg_13TeV");
+    = new WSTFileWrapper(filename,"tagsDumper/cms_hgg_13TeV");
   if(verbose_) std::cout << "[INFO] Opened files OK!" << std::endl;
 	RooRealVar *mass = (RooRealVar*)inWS->var("CMS_hgg_mass");
   if(verbose_) std::cout << "[INFO] Got mass variable " << mass << std::endl;
-	//mass->setBins(80);
+
+	string HHWWgg_Label = ""; // ex: X250_WWgg_qqlnugg
+
+  	string outdir_Original = outdir_;
+
+	// if HHWWgg, customize outdir for each mass point 
+	if(analysis_ == "HHWWgg"){
+
+		// Get HHWWgg label from file name 
+		vector<string> tmpV;
+		split(tmpV,filename,boost::is_any_of("/"));	
+		unsigned int N = tmpV.size();  
+		string endPath = tmpV[N-1];
+		vector<string> tmpV2;
+		split(tmpV2,endPath,boost::is_any_of("_"));	 
+		string mass_str = tmpV2[0];
+		HHWWgg_Label = Form("%s_WWgg_qqlnugg",mass_str.c_str());
+
+		outdir_ = outdir_Original;
+		outdir_.append("_");
+		outdir_.append(HHWWgg_Label);
+	}
+
+	system(Form("mkdir -p %s/fTest",outdir_.c_str()));
+
 	mass->setBins(nBins);
 	mass->setRange(rangeLow,rangeHigh);
+	//mass->setBins(80);
 	//mass->setBins(20);
 
   // duplicate MH variable ? need to remove this ?? LC
@@ -312,9 +277,43 @@ int main(int argc, char *argv[]){
       
       // access dataset and immediately reduce it!
 			if (isFlashgg_){
-				RooDataSet *data0   = (RooDataSet*)inWS->data( Form("%d%s",mass_,proc.c_str()),
-          Form("%s_%d_13TeV_%s",proc.c_str(),mass_,flashggCats_[cat].c_str()));
-        if(verbose_) {
+				RooDataSet *data0;
+				if(analysis_ == "HHWWgg"){
+
+					// // Get HHWWgg label from file name 
+					// vector<string> tmpV;
+					// split(tmpV,filename,boost::is_any_of("/"));	
+					// unsigned int N = tmpV.size();  
+					// string endPath = tmpV[N-1];
+					// vector<string> tmpV2;
+					// split(tmpV2,endPath,boost::is_any_of("_"));	 
+					// string mass = tmpV2[0];
+					// HHWWgg_Label = Form("%s_WWgg_qqlnugg",mass.c_str());
+
+					if(verbose_) {
+						std::cout << "HHWWgg label: " << HHWWgg_Label << endl;
+						std::cout << "dataset to look for: " << Form("%s_%s_13TeV_%s",proc.c_str(),HHWWgg_Label.c_str(),flashggCats_[cat].c_str()) << endl;				
+					}
+
+					RooDataSet *data00   = (RooDataSet*)inWS->data(Form("%s_%s_13TeV_%s",proc.c_str(),HHWWgg_Label.c_str(),flashggCats_[cat].c_str())); // HHWWgg
+					data0 = data00;
+					// std::cout << "dset: " << data0 << endl;
+
+					// data0   = (RooDataSet*)inWS->data( Form("%d%s",mass_,proc.c_str()),
+						// Form("%s_%s_13TeV_%s",proc.c_str(),HHWWgg_Label.c_str(),flashggCats_[cat].c_str())); // HHWWgg
+					// std::cout << "thing: " << (RooDataSet*)inWS->data( Form("%d%s",mass_,proc.c_str()),
+						// Form("%s_%s_13TeV_%s",proc.c_str(),HHWWgg_Label.c_str(),flashggCats_[cat].c_str())) << endl;
+					// delete tmpV;
+					// delete tmpV2; ggF_SM_WWgg_qqlnugg_13TeV_HHWWggTag_0
+				}
+
+				else{
+					RooDataSet *data00   = (RooDataSet*)inWS->data(Form("%s_%d_13TeV_%s",proc.c_str(),mass_,flashggCats_[cat].c_str()));
+					data0 = data00;
+				}
+
+        // RooDataSet *data0 = data00;
+		if(verbose_) {
           std::cout << "[INFO] got dataset data0 ? " << data0 << "now make empty clones " << std::endl;
           if (data0) {
             std::cout << "[INFO] and it looks like this : " << *data0 << std::endl;
@@ -609,6 +608,10 @@ int main(int argc, char *argv[]){
 			canv->Print(Form("%s/fTest/rv_%s_%s.png",
         outdir_.c_str(),proc.c_str(),
         flashggCats_[cat].c_str()));
+		canv->Print(Form("%s/rv_%s_%s_%s.png",website.c_str(),proc.c_str(),
+        flashggCats_[cat].c_str(),HHWWgg_Label.c_str()));
+		canv->Print(Form("%s/rv_%s_%s_%s.pdf",website.c_str(),proc.c_str(),
+        flashggCats_[cat].c_str(),HHWWgg_Label.c_str()));
 		}
 	}
 
@@ -651,6 +654,10 @@ int main(int argc, char *argv[]){
             outdir_.c_str(),proc.c_str(),flashggCats_[cat].c_str()));
 			    canv->Print(Form("%s/fTest/wv_%s_%s.png",
             outdir_.c_str(),proc.c_str(),flashggCats_[cat].c_str()));
+			canv->Print(Form("%s/wv_%s_%s_%s.png",website.c_str(),proc.c_str(),
+        	flashggCats_[cat].c_str(),HHWWgg_Label.c_str()));
+			canv->Print(Form("%s/wv_%s_%s_%s.pdf",website.c_str(),proc.c_str(),
+        	flashggCats_[cat].c_str(),HHWWgg_Label.c_str()));			
 		 }
 	}
   
@@ -713,6 +720,16 @@ int main(int argc, char *argv[]){
 	ofstream output_datfile;
 
   //write them to a file, I guess..
+
+	// if HHWWgg, customize datfilename for mass point 
+	if(analysis_ == "HHWWgg"){
+		datfilename_ = datfilename_Original;
+		datfilename_.erase(datfilename_.end()-4,datfilename_.end());
+		datfilename_.append("_");
+		datfilename_.append(HHWWgg_Label);
+		datfilename_.append(".dat");
+	}
+	
 	output_datfile.open ((datfilename_).c_str());
 	if (verbose_) std::cout << "[INFO] Writing to datfilename_ " 
     << datfilename_ << std::endl;
@@ -737,5 +754,108 @@ int main(int argc, char *argv[]){
 
 	output_datfile.close();
 	inWS->Close();
+}
+
+int main(int argc, char *argv[]){
+
+	string website = "/eos/user/a/atishelm/www/HHWWgg_Analysis/fggfinalfit"; // in addition to local direc, put output pngs here 
+
+	OptionParser(argc,argv);
+	datfilename_Original = datfilename_;
+	
+	if (verbose_) {
+    std::cout << "[INFO] datfilename_	" << datfilename_ << std::endl;
+  }
+	if (verbose_) {
+    std::cout << "[INFO] filename_	" << filename_ << std::endl;
+  }
+	if (verbose_) {
+	std::cout << "[INFO] analysis_ " << analysis_ << std::endl;
+  }
+ 	TStopwatch sw;
+	sw.Start();
+ 
+  //make nice plots in ~correct style.
+  setTDRStyle();
+  writeExtraText = true;       // if extra text
+  extraText  = "";  // default extra text is "Preliminary"
+  lumi_8TeV  = "19.1 fb^{-1}"; // default is "19.7 fb^{-1}"
+  lumi_7TeV  = "4.9 fb^{-1}";  // default is "5.1 fb^{-1}"
+  lumi_sqrtS = "13 TeV";       // used with iPeriod = 0
+                               //, e.g. for simulation-only plots
+                               //(default is an empty string)
+
+  // set range to be the same as SigfitPlots
+  // want quite a large range otherwise don't
+  // see crazy bins on the sides
+  float rangeLow = 115;
+  float rangeHigh = 135;
+
+  //want binning of \0.5GeV
+  //int   nBins    = 2* int(rangeHigh -rangeLow); 
+  int   nBins    = 2* int(rangeHigh -rangeLow); 
+
+  // silence roofit
+	RooMsgService::instance().setGlobalKillBelow(RooFit::ERROR);
+	RooMsgService::instance().setSilentMode(true);
+
+
+  // split procs, cats
+	vector<string> procs;
+	split(procs,procString_,boost::is_any_of(","));
+	split(flashggCats_,flashggCatsStr_,boost::is_any_of(","));
+	split(considerOnly_,considerOnlyStr_,boost::is_any_of(","));
+  
+  // automatically determine nCats from flashggCats input
+	if (isFlashgg_){
+		ncats_ =flashggCats_.size();
+		// Ensure that the loop over the categories does not go out of scope. 
+	} else {
+    std::cout 
+    << "[ERROR] Sorry, script not compatible with non-flashgg input! Exit." 
+    << std::endl;
+    exit (1);
+  }
+
+  // job splitting: can get this script to only consider specified tags
+	for (unsigned int j =0; j <considerOnly_.size() ; j++){
+			std::cout << " [INFO] considering only " << considerOnly_[j]<<std::endl;
+	}
+  
+	fTest(analysis_,filename_,outdir_,procs,procString_,nBins,rangeLow,rangeHigh,website);
+
+  // open input files using WS wrapper.
+
+  // If running HHWWgg analysis, need to do this once per file because each mass point has a different datasetName 
+
+	// if(analysis_ == "HHWWgg"){
+
+	// 	vector<string> files;
+	// 	split(files,filename_,boost::is_any_of(","));	
+
+	// 	for (unsigned int fi = 0; fi < files.size(); fi++){
+	// 		string filePath = files[fi];
+	// 		std::cout << "on file: " << filePath << endl;
+
+	// 		// // Get HHWWgg label from file name 
+	// 		// vector<string> tmpV;
+	// 		// split(tmpV,filePath,boost::is_any_of("/"));	
+	// 		// unsigned int N = tmpV.size();  
+	// 		// string endPath = tmpV[N-1];
+	// 		// vector<string> tmpV2;
+	// 		// split(tmpV2,endPath,boost::is_any_of("_"));	 
+	// 		// HHWWgg_Label = tmpV2[0];
+	// 		// std::cout << "HHWWgg label: " << HHWWgg_Label << endl;
+			
+	// 		fTest(analysis_,filePath,outdir_,procs,procString_,nBins,rangeLow,rangeHigh,website);
+	// 	}
+
+	// }
+
+	// // Add all files to WST wrapper
+	// else{
+	// 	fTest(analysis_,filename_,outdir_,procs,procString_,nBins,rangeLow,rangeHigh,website);
+	// }
+
 	return 0;
 }
