@@ -266,9 +266,11 @@ sigFile = 'CMS-HGG_sigfit_%s_$PROC_$CAT.root'%(file_ext)
 # Customize HHWWgg naming for radion mass points 
 if analysis == "HHWWgg":
   HHWWggMass_ = options.infilename.split('/')[-1].split('_')[0]
-  sigFile = 'CMS-HGG_sigfit_HHWWgg_v2-3_2017_%s_HHWWgg_qqlnu.root'%(HHWWggMass_)
-  dataFile = ''
-  bkgFile = dataFile 
+  # sigFile = 'CMS-HGG_sigfit_HHWWgg_v2-3_2017_%s_HHWWgg_qqlnu.root'%(HHWWggMass_)
+  # sigFile = 'CMS-HGG_sigfit.root'%(HHWWggMass_)
+  sigFile = 'CMS-HGG_sigfit_data_ggF_HHWWggTag_0_13TeV.root'
+  dataFile = 'CMS-HGG_mva_13TeV_multipdf.root' # for datacard 
+  bkgFile = dataFile # for datacard 
 
 #print "making sigfile " ,sigFile
 sigWS = 'wsig_%dTeV'%(sqrts)
@@ -278,7 +280,9 @@ fileDetails['data_obs'] = [dataFile,dataWS,'roohist_data_mass_$CHANNEL']
 fileDetails['bkg_mass']  = [bkgFile,bkgWS,'CMS_hgg_$CHANNEL_%dTeV_bkgshape'%sqrts]
 
 if analysis == "HHWWgg":
-  fileDetails['ggF']       = [sigFile.replace('$PROC',"ggF"),sigWS,'hggpdfsmrel_%dTeV_ggF_$CHANNEL'%sqrts]
+  fileDetails['ggF']       = [sigFile,sigWS,'hggpdfsmrel_2017_%dTeV_ggF_$CHANNEL'%sqrts] # 2017 unique rn 
+  # fileDetails['ggF']       = [sigFile,sigWS,'hggpdfsmrel_%dTeV_ggF_$CHANNEL'%sqrts]
+  # fileDetails['ggF']       = [sigFile.replace('$PROC',"ggF"),sigWS,'hggpdfsmrel_%dTeV_ggF_$CHANNEL'%sqrts]
 
 if options.doSTXS:
   fileDetails['ggH_hgg']       = [sigFile.replace('$PROC',"GG2H"),sigWS,'hggpdfsmrel_%dTeV_GG2H_$CHANNEL'%sqrts]
@@ -1000,7 +1004,9 @@ def printFileOptions():
       pdfname = info[2].replace('$CHANNEL','%s'%c)
       if typ not in options.procs and typ!='data_obs': continue
       #outFile.write('shapes %-10s %-15s %-30s %-30s\n'%(typ,'%s_%dTeV'%(c,sqrts),file.replace(".root","_%s_%s.root"%(typ,c)),wsname+':'+pdfname))
-      outFile.write('shapes %-10s %-15s %-30s %-30s\n'%(typ,'%s_%dTeV'%(c,sqrts),file,wsname+':'+pdfname))
+      if analysis == "HHWWgg": outFile.write('shapes %-10s %-15s %-30s %-30s\n'%(typ,'%s_%dTeV'%(c,sqrts),file,wsname+':'+pdfname))
+      else: outFile.write('shapes %-10s %-15s %-30s %-30s\n'%(typ,'%s_%dTeV'%(c,sqrts),file,wsname+':'+pdfname))
+      
   outFile.write('\n')
 ###############################################################################
 
@@ -1591,6 +1597,7 @@ if (len(tthCats) > 0 ):  printTTHSysts()
 printTheorySysts()
 # lnN systematics
 printFlashggSysts()
+# if analysis != "HHWWgg": printUEPSSyst()
 printUEPSSyst()
 #catgeory migrations
 #if (len(dijetCats) > 0 and len(tthCats)>0):  printVbfSysts()

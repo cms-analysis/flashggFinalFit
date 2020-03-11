@@ -215,17 +215,51 @@ if [ ! -d "Signal/$OUTDIR" ]; then
   exit 1
 fi
 
+if [ $ANALYSIS == "HHWWgg" ]; then 
+  fileDir="${FILE%/*}" # get directory 
+  fileEnd="${FILE##*/}"
+  fileID=${fileEnd::-5} # remove .root     
+  mass="$(cut -d'_' -f1 <<<$fileID)" # get text before first '_'. ex: SM, X250, X260, ...
+  # HHWWggLabel1="${mass}_WWgg_qqlnugg" 
+  HHWWggLabel="${mass}_HHWWgg_qqlnu" 
+fi 
+
 cd Plots/FinalResults
+if [ $ANALYSIS == "HHWWgg" ]; then 
+  OUTDIR+="_${HHWWggLabel}"
+fi 
+
 ls ../../Signal/$OUTDIR/CMS-HGG_*sigfit*oot  > tmp.txt
+
 while read p;
 do
 q=$(basename $p)
+mkdir -p ./Inputs
+mkdir -p ./Inputs/${EXT}
+mkdir -p ./Inputs/${EXT}/${q}
+mkdir -p ./Inputs/${EXT}/${q}/${EXT}
+mkdir -p ./Inputs/${EXT}/${q}/${EXT}/mva 
 cp $p ./Inputs/${EXT}/${q/$EXT/mva} 
 #echo " cp $p ./Inputs/${EXT}/${q/$EXT/mva} "
 done < tmp.txt
+
+
+echo "EXT: $EXT" ## hggpdfsmrel_13TeV_ggF_HHWWggTag_0
 #cp ../../Signal/$OUTDIR/CMS-HGG_sigfit_${EXT}.root ./Inputs/${EXT}/CMS-HGG_mva_13TeV_sigfit.root
-cp ../../Background/CMS-HGG_multipdf_${EXT}${FAKE}.root ./Inputs/${EXT}/CMS-HGG_mva_13TeV_multipdf${FAKE}.root
-cp ../../Datacard/Datacard_13TeV_${EXT}_cleaned.txt CMS-HGG_mva_13TeV_datacard_${EXT}.txt
+if [ $ANALYSIS == "HHWWgg" ]; then 
+  # cp ../../Signal/$OUTDIR/CMS-HGG_sigfit_${EXT}_${HHWWggLabel}.root CMS-HGG_sigfit_data_ggF_HHWWggTag_0_13TeV.root
+  cp ../../Signal/$OUTDIR/CMS-HGG_mva_13TeV_sigfit.root CMS-HGG_sigfit_data_ggF_HHWWggTag_0_13TeV.root
+  # CMS-HGG_sigfit_HHWWgg_v2-3_2017_SM_HHWWgg_qqlnu.root # bigger for some reason 
+  # CMS-HGG_mva_13TeV_sigfit.root
+  cp ../../Background/CMS-HGG_multipdf_${EXT}.root CMS-HGG_mva_13TeV_multipdf.root 
+  cp ../../Datacard/Datacard_13TeV_${EXT}_${HHWWggLabel}.txt CMS-HGG_mva_13TeV_datacard.txt
+  combine CMS-HGG_mva_13TeV_datacard.txt -m 125 -M AsymptoticLimits --run=blind -v 2
+  cp higgsCombineTest.AsymptoticLimits.mH125.root ${EXT}_${HHWWggLabel}.root 
+  # cp higgsCombineTest.AsymptoticLimits.mH125.root $outName
+else 
+  cp ../../Background/CMS-HGG_multipdf_${EXT}${FAKE}.root ./Inputs/${EXT}/CMS-HGG_mva_13TeV_multipdf${FAKE}.root
+  cp ../../Datacard/Datacard_13TeV_${EXT}_cleaned.txt CMS-HGG_mva_13TeV_datacard_${EXT}.txt
+fi 
 
 exit 1
 

@@ -219,7 +219,22 @@ if mode not in ['effAcc','yields']:
       cmdLine += '--datacardOnly --smears %s --scales %s --scalesCorr %s --scalesGlobal %s --doStage1 '%(smears,scales,scalesCorr,scalesGlobal)
     if doUEPS:
       cmdLine += ' --uepsFile '+uepsFileNames 
-  elif mode == 'combine': cmdLine += '--combineOnly '
+  elif mode == 'combine': 
+    if analysis == "HHWWgg":
+      filesList = ws_fullFileNames.split(',')
+      for f in filesList:
+        print
+        print'On File: ',f
+        print
+        
+        massExt = f.split('/')[-1].split('.')[0]
+        thisExt = ext + '_' + massExt
+        cmdLine = './runCombineScripts.sh -i %s -p %s -f %s --ext %s --intLumi %s --year %s --dataFile %s --isData --analysis %s '%(f,procs,cats,ext,lumi[year],year,dataFile,analysis)
+        cmdLine += ' --combineOnly '
+        print'cmdLine: ',cmdLine
+        os.system( cmdLine )
+    else:
+      cmdLine += ' --combineOnly '
   elif mode == 'combinePlots': cmdLine += '--combinePlotsOnly '
 
 elif mode == 'effAcc': cmdLine = './makeStage1EffAcc.py -i %s -s Signal/outdir_%s/sigfit/effAccCheck_all.root -p %s -c %s'%(ws_fullFileNames_effAcc,ext,procs,cats)
