@@ -206,6 +206,16 @@ echo "------------------------------------------------"
 echo "------------> Create COMBINE"
 echo "------------------------------------------------"
 
+if [ $ANALYSIS == "HHWWgg" ]; then 
+  fileDir="${FILE%/*}" # get directory 
+  fileEnd="${FILE##*/}"
+  fileID=${fileEnd::-5} # remove .root     
+  mass="$(cut -d'_' -f1 <<<$fileID)" # get text before first '_'. ex: SM, X250, X260, ...
+  # HHWWggLabel1="${mass}_WWgg_qqlnugg" 
+  HHWWggLabel="${mass}_HHWWgg_qqlnu" 
+  OUTDIR+="_${HHWWggLabel}"
+fi 
+
 if [ $ISDATA == 0 ]; then
 FAKE="_FAKE"
 fi
@@ -215,19 +225,16 @@ if [ ! -d "Signal/$OUTDIR" ]; then
   exit 1
 fi
 
-if [ $ANALYSIS == "HHWWgg" ]; then 
-  fileDir="${FILE%/*}" # get directory 
-  fileEnd="${FILE##*/}"
-  fileID=${fileEnd::-5} # remove .root     
-  mass="$(cut -d'_' -f1 <<<$fileID)" # get text before first '_'. ex: SM, X250, X260, ...
-  # HHWWggLabel1="${mass}_WWgg_qqlnugg" 
-  HHWWggLabel="${mass}_HHWWgg_qqlnu" 
-fi 
+# if [ $ANALYSIS == "HHWWgg" ]; then 
+#   fileDir="${FILE%/*}" # get directory 
+#   fileEnd="${FILE##*/}"
+#   fileID=${fileEnd::-5} # remove .root     
+#   mass="$(cut -d'_' -f1 <<<$fileID)" # get text before first '_'. ex: SM, X250, X260, ...
+#   # HHWWggLabel1="${mass}_WWgg_qqlnugg" 
+#   HHWWggLabel="${mass}_HHWWgg_qqlnu" 
+# fi 
 
 cd Plots/FinalResults
-if [ $ANALYSIS == "HHWWgg" ]; then 
-  OUTDIR+="_${HHWWggLabel}"
-fi 
 
 ls ../../Signal/$OUTDIR/CMS-HGG_*sigfit*oot  > tmp.txt
 
@@ -243,17 +250,18 @@ cp $p ./Inputs/${EXT}/${q/$EXT/mva}
 #echo " cp $p ./Inputs/${EXT}/${q/$EXT/mva} "
 done < tmp.txt
 
-
 echo "EXT: $EXT" ## hggpdfsmrel_13TeV_ggF_HHWWggTag_0
 #cp ../../Signal/$OUTDIR/CMS-HGG_sigfit_${EXT}.root ./Inputs/${EXT}/CMS-HGG_mva_13TeV_sigfit.root
 if [ $ANALYSIS == "HHWWgg" ]; then 
-  # cp ../../Signal/$OUTDIR/CMS-HGG_sigfit_${EXT}_${HHWWggLabel}.root CMS-HGG_sigfit_data_ggF_HHWWggTag_0_13TeV.root
+  # cp ../../Signal/$OUTDIR/CMS-HGG_sigfit_${EXT}_${HHWWggLabel}.root CMS-HGG_sigfit_data_ggF_HHWWggTag_0_13TeV.root # doesn't give limit for some reason 
   cp ../../Signal/$OUTDIR/CMS-HGG_mva_13TeV_sigfit.root CMS-HGG_sigfit_data_ggF_HHWWggTag_0_13TeV.root
+  # cp ../../Signal/$OUTDIR/CMS-HGG_mva_13TeV_sigfit.root CMS-HGG_sigfit_data_ggF_HHWWggTag_0_13TeV.root
   # CMS-HGG_sigfit_HHWWgg_v2-3_2017_SM_HHWWgg_qqlnu.root # bigger for some reason 
   # CMS-HGG_mva_13TeV_sigfit.root
   cp ../../Background/CMS-HGG_multipdf_${EXT}.root CMS-HGG_mva_13TeV_multipdf.root 
   cp ../../Datacard/Datacard_13TeV_${EXT}_${HHWWggLabel}.txt CMS-HGG_mva_13TeV_datacard.txt
-  combine CMS-HGG_mva_13TeV_datacard.txt -m 125 -M AsymptoticLimits --run=blind -v 2
+  combine CMS-HGG_mva_13TeV_datacard.txt -m 125 -M AsymptoticLimits --run=blind
+  # combine CMS-HGG_mva_13TeV_datacard.txt -m 125 -M AsymptoticLimits --run=blind -v 2
   cp higgsCombineTest.AsymptoticLimits.mH125.root ${EXT}_${HHWWggLabel}.root 
   # cp higgsCombineTest.AsymptoticLimits.mH125.root $outName
 else 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+import pandas as pd 
 # Script adapted from original by Matt Kenzie.
 # Used for Dry Run of Dec 2015 Hgg analysis.
 
@@ -1004,8 +1004,7 @@ def printFileOptions():
       pdfname = info[2].replace('$CHANNEL','%s'%c)
       if typ not in options.procs and typ!='data_obs': continue
       #outFile.write('shapes %-10s %-15s %-30s %-30s\n'%(typ,'%s_%dTeV'%(c,sqrts),file.replace(".root","_%s_%s.root"%(typ,c)),wsname+':'+pdfname))
-      if analysis == "HHWWgg": outFile.write('shapes %-10s %-15s %-30s %-30s\n'%(typ,'%s_%dTeV'%(c,sqrts),file,wsname+':'+pdfname))
-      else: outFile.write('shapes %-10s %-15s %-30s %-30s\n'%(typ,'%s_%dTeV'%(c,sqrts),file,wsname+':'+pdfname))
+      outFile.write('shapes %-10s %-15s %-30s %-30s\n'%(typ,'%s_%dTeV'%(c,sqrts),file,wsname+':'+pdfname))
       
   outFile.write('\n')
 ###############################################################################
@@ -1113,11 +1112,40 @@ def getReweightedDataset(dataNOMINAL,syst):
     return [dataDOWN,dataNOMINAL,dataUP]
 
 def printNuisParam(name,typ,sqrtS=None):
-  print'[printNuisParam] - name: ',name 
-  print'[printNuisParam] - typ: ',typ 
+  # print'[printNuisParam] - name: ',name 
+  # print'[printNuisParam] - typ: ',typ 
   val="1.0"
+  # get sigma from .dat file 
+  # deltafracright, nonlinearity and geant4 should already be set 
   if ":" in name:
     name,val = name.split(":") # value is already expected to be here in form name:val. When is it set? 
+  # if : not in name, need to get value 
+  else:
+    if analysis == "HHWWgg":
+      key = "%s_13TeV%s"%(name,typ)
+      # print'infilename: ',options.infilename
+      # ext = options.infilename.split('/')[-2]
+      HHWWggMass__ = options.infilename.split('/')[-1].split('_')[0]
+      prefix = '/afs/cern.ch/work/a/atishelm/private/CMSSW_10_2_13/src/flashggFinalFit/'
+      datFile = prefix + 'Signal/outdir_HHWWgg_v2-3_2017_%s_HHWWgg_qqlnu/dat/copy_photonCatSyst_HHWWgg_v2-3_2017_%s_HHWWgg_qqlnu.dat'%(HHWWggMass__,HHWWggMass__)
+      # print'datFile: ',datFile 
+      df = pd.read_csv(datFile,delim_whitespace=True)
+      allVals = df.values.tolist()
+      # skip first 7 lines, don't have values 
+      for i,info in enumerate(allVals):
+        if i < 7: continue 
+        print'key:',key 
+        systematic, mean_change, sigma_change, rate_change = info[0], info[1], info[2], info[3] 
+        if systematic == key: 
+          val = mean_change 
+          break 
+        # print'info:',info
+        # print'info[2] =',info[2] 
+      # val = "1.0"
+      print'val:',val 
+      # exit(0)
+      # options.infilename
+    # val = 
   if sqrtS:
     typ="%dTeV%s" % (sqrtS, typ)
   outFile.write('%-40s param 0.0 %s\n'%('CMS_hgg_nuisance_%s_%s'%(name,typ),val))
@@ -1560,7 +1588,7 @@ def printSimpleTTHSysts():
         else:
           outFile.write('- ')
           continue
-    outFile.write('\n')
+    outFile.write('\n')  # outdir_HHWWgg_v2-3_2017_X850_HHWWgg_qqlnu
 ###############################################################################
 
 ###############################################################################
