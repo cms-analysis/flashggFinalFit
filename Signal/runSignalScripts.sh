@@ -226,8 +226,8 @@ if [ $CALCPHOSYSTONLY == 1 ]; then
   echo "-->Determine effect of photon systematics"
   echo "=============================="
 
-  echo "./bin/calcPhotonSystConsts -i $FILE -o dat/photonCatSyst_$EXT.dat -p $PROCS -s $SCALES -S $SCALESCORR -g $SCALESGLOBAL -r $SMEARS -D $OUTDIR -f $CATS"
-  ./bin/calcPhotonSystConsts -i $FILE -o dat/photonCatSyst_$EXT.dat -p $PROCS -s $SCALES -S $SCALESCORR -g $SCALESGLOBAL -r $SMEARS -D $OUTDIR -f $CATS
+  echo "./bin/calcPhotonSystConsts -i $FILE -o dat/photonCatSyst_$EXT.dat -p $PROCS -s $SCALES -S $SCALESCORR -g $SCALESGLOBAL -r $SMEARS -D $OUTDIR -f $CATS --analysis $ANALYSIS"
+  ./bin/calcPhotonSystConsts -i $FILE -o dat/photonCatSyst_$EXT.dat -p $PROCS -s $SCALES -S $SCALESCORR -g $SCALESGLOBAL -r $SMEARS -D $OUTDIR -f $CATS --analysis $ANALYSIS 
   mkdir -p $OUTDIR/dat
   cp dat/photonCatSyst_$EXT.dat $OUTDIR/dat/copy_photonCatSyst_$EXT.dat
 fi
@@ -241,10 +241,27 @@ if [ $SIGFITONLY == 1 ]; then
   echo "-->Create actual signal model"
   echo "=============================="
 
+  # if HHWWgg analysis, need to artificially create 120, 130 GeV mass points by shifting 125 dataset 
+  if [[ $ANALYSIS == "HHWWgg" ]]; then 
+    fileDir="${FILE%/*}" # get directory 
+    fileEnd="${FILE##*/}"
+    fileID=${fileEnd::-5} # remove .root     
+    mass="$(cut -d'_' -f1 <<<$fileID)" # get text before first '_'. ex: SM, X250, X260, ... 
+    # echo "fileDir: $fileDir"
+    # echo "mass: $mass"
+    HHWWggLabel="${mass}_WWgg_qqlnugg"
+    python DirecShiftHiggsDatasets.py $fileDir $mass $HHWWggLabel # create 120 and 130 points 
+    sigFiles=""
+    for m in 120 125 130
+    do
+        sigFiles+="${fileDir}_interpolation/X_signal_${mass}_${m}_HHWWgg_qqlnu.root,"
+    done    
+    sigFiles=${sigFiles: : -1} # remove extra ","
+    FILE=$sigFiles
+  fi 
 
   if [[ $BATCH == "" ]]; then
-  
-  
+    echo "ANALYSIS: $ANALYSIS"
     echo "./bin/SignalFit -i $FILE -d dat/newConfig_$EXT.dat  --mhLow=120 --mhHigh=130 -s dat/photonCatSyst_$EXT.dat --procs $PROCS -o $OUTDIR/CMS-HGG_mva_13TeV_sigfit.root -p $OUTDIR/sigfit -f $CATS --changeIntLumi $INTLUMI  --useDCBplusGaus $USEDCBP1G --useSSF $SIMULATENOUSMASSPOINTFITTING --massList $MASSLIST --analysis $ANALYSIS --year $YEAR"
     ./bin/SignalFit -i $FILE -d dat/newConfig_$EXT.dat  --mhLow=120 --mhHigh=130 -s dat/photonCatSyst_$EXT.dat --procs $PROCS -o $OUTDIR/CMS-HGG_mva_13TeV_sigfit.root -p $OUTDIR/sigfit -f $CATS --changeIntLumi $INTLUMI  --useDCBplusGaus $USEDCBP1G --useSSF $SIMULATENOUSMASSPOINTFITTING --massList $MASSLIST --analysis $ANALYSIS --year $YEAR  
   else
@@ -253,25 +270,30 @@ if [ $SIGFITONLY == 1 ]; then
 
     PEND=`ls -l $OUTDIR/sigfit/SignalFitJobs/sub*| grep -v "\.run" | grep -v "\.done" | grep -v "\.fail" | grep -v "\.err" |grep -v "\.log" | grep -v "\.out" | grep -v "\.sub" | wc -l`
     echo "PEND $PEND"
-    while (( $PEND > 0 )) ; do
-      PEND=`ls -l $OUTDIR/sigfit/SignalFitJobs/sub* | grep -v "\.run" | grep -v "\.done" | grep -v "\.fail" | grep -v "\.err" | grep -v "\.log" | grep -v "\.out" | grep -v "\.sub" | wc -l`
-      RUN=`ls -l $OUTDIR/sigfit/SignalFitJobs/sub* | grep "\.run" | wc -l`
-      FAIL=`ls -l $OUTDIR/sigfit/SignalFitJobs/sub* | grep "\.fail" | wc -l`
-      DONE=`ls -l $OUTDIR/sigfit/SignalFitJobs/sub* | grep "\.done" | wc -l`
-      (( PEND=$PEND-$RUN-$FAIL-$DONE ))
-      echo " PEND $PEND - RUN $RUN - DONE $DONE - FAIL $FAIL"
-      if (( $RUN > 0 )) ; then PEND=1 ; fi
-      if (( $FAIL > 0 )) ; then 
-        echo "[ERROR] at least one job failed :"
-        ls -l $OUTDIR/sigfit/SignalFitJobs/sub* | grep "\.fail"
-        exit 1
-      fi
-      sleep 10
-    done
+
+    # Don't want this for HHWWgg because need to submit job for each mass point 
+    if [[ $ANALYSIS != "HHWWgg" ]]; then 
+      while (( $PEND > 0 )) ; do
+        PEND=`ls -l $OUTDIR/sigfit/SignalFitJobs/sub* | grep -v "\.run" | grep -v "\.done" | grep -v "\.fail" | grep -v "\.err" | grep -v "\.log" | grep -v "\.out" | grep -v "\.sub" | wc -l`
+        RUN=`ls -l $OUTDIR/sigfit/SignalFitJobs/sub* | grep "\.run" | wc -l`
+        FAIL=`ls -l $OUTDIR/sigfit/SignalFitJobs/sub* | grep "\.fail" | wc -l`
+        DONE=`ls -l $OUTDIR/sigfit/SignalFitJobs/sub* | grep "\.done" | wc -l`
+        (( PEND=$PEND-$RUN-$FAIL-$DONE ))
+        echo " PEND $PEND - RUN $RUN - DONE $DONE - FAIL $FAIL"
+        if (( $RUN > 0 )) ; then PEND=1 ; fi
+        if (( $FAIL > 0 )) ; then 
+          echo "[ERROR] at least one job failed :"
+          ls -l $OUTDIR/sigfit/SignalFitJobs/sub* | grep "\.fail"
+          exit 1
+        fi
+        sleep 10
+      done
+    fi 
 
     #ls $PWD/$OUTDIR/CMS-HGG_sigfit_${EXT}_*.root > out.txt
-    ls $OUTDIR/CMS-HGG_sigfit_${EXT}_*.root > out.txt
-    echo "ls ../Signal/$OUTDIR/CMS-HGG_sigfit_${EXT}_*.root > out.txt"
+    # CMS-HGG_mva_13TeV_sigfit.root
+    # ls $OUTDIR/CMS-HGG_sigfit_${EXT}_*.root > out.txt
+    # echo "ls ../Signal/$OUTDIR/CMS-HGG_sigfit_${EXT}_*.root > out.txt"
     counter=0
     while read p ; do
       if (($counter==0)); then
@@ -295,8 +317,19 @@ if [ $SIGFITONLY == 1 ]; then
 fi
 
 if [ $PACKAGEONLY == 1 ]; then
-  ls $OUTDIR/CMS-HGG_sigfit_${EXT}_*.root > out.txt
-  echo "ls ../Signal/$OUTDIR/CMS-HGG_sigfit_${EXT}_*.root > out.txt"
+
+  echo "ANALYSIS: $ANALYSIS"
+  if [[ $ANALYSIS == "HHWWgg" ]]; then 
+    ls $OUTDIR/CMS-HGG_mva_13TeV_sigfit.root > out.txt
+    echo "ls ../Signal/$OUTDIR/CMS-HGG_mva_13TeV_sigfit.root > out.txt"
+  else 
+    ls $OUTDIR/CMS-HGG_sigfit_${EXT}_*.root > out.txt
+    echo "ls ../Signal/$OUTDIR/CMS-HGG_sigfit_${EXT}_*.root > out.txt"
+  fi 
+
+  # ls $OUTDIR/CMS-HGG_sigfit_${EXT}_*.root > out.txt
+  # echo "ls ../Signal/$OUTDIR/CMS-HGG_sigfit_${EXT}_*.root > out.txt"
+
   counter=0
   while read p ; do
     if (($counter==0)); then
@@ -348,8 +381,8 @@ if [ $SIGPLOTSONLY == 1 ]; then
   echo "=============================="
   
   if [ -z $BATCH ]; then
-    echo " ./bin/makeParametricSignalModelPlots -i $OUTDIR/CMS-HGG_sigfit_$EXT.root  -o $OUTDIR -p $PROCS -f $CATS --year $YEAR"
-    ./bin/makeParametricSignalModelPlots -i $OUTDIR/CMS-HGG_sigfit_$EXT.root  -o $OUTDIR/sigplots -p $PROCS -f $CATS --year $YEAR > signumbers_${EXT}.txt
+    echo " ./bin/makeParametricSignalModelPlots -i $OUTDIR/CMS-HGG_sigfit_$EXT.root  -o $OUTDIR -p $PROCS -f $CATS --analysis $ANALYSIS --year $YEAR "
+    ./bin/makeParametricSignalModelPlots -i $OUTDIR/CMS-HGG_sigfit_$EXT.root  -o $OUTDIR/sigplots -p $PROCS -f $CATS --analysis $ANALYSIS --year $YEAR > signumbers_${EXT}.txt
     
     ./makeSlides.sh $OUTDIR
     mv fullslides.pdf $OUTDIR/fullslides_${EXT}.pdf

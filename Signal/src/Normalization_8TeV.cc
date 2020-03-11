@@ -24,7 +24,8 @@ int Normalization_8TeV::Init(int sqrtS){
     TPython::Eval(Form("buildSMHiggsSignalXSBR.Init%dTeV()", sqrtS));
     
     for (double mH=120;mH<=135.0;mH+=0.1){ // Do we need this up to 250 ?
-	double valBR    =  (double)TPython::Eval(Form("buildSMHiggsSignalXSBR.getBR(%f)",mH));
+	double valBR    =  1.; // for HHWWgg 
+	// double valBR    =  (double)TPython::Eval(Form("buildSMHiggsSignalXSBR.getBR(%f)",mH));
 	double valXSggH =  (double)TPython::Eval(Form("buildSMHiggsSignalXSBR.getXS(%f,'%s')",mH,"ggH"));
 	double valXSqqH =  (double)TPython::Eval(Form("buildSMHiggsSignalXSBR.getXS(%f,'%s')",mH,"qqH"));
 	double valXSttH =  (double)TPython::Eval(Form("buildSMHiggsSignalXSBR.getXS(%f,'%s')",mH,"ttH"));
@@ -48,6 +49,8 @@ int Normalization_8TeV::Init(int sqrtS){
         XSectionMap_testBBH[mH]	= valXSbbH;
         XSectionMap_testTHQ[mH]	= 0.074;
         XSectionMap_testTHW[mH]	= 0.015;
+
+		XSectionMap_HHWWgg[mH] = 0.001; // HHWWgg 
 	
     }
 
@@ -184,7 +187,12 @@ TGraph * Normalization_8TeV::GetSigmaGraph(TString process)
 		XSectionMap = &XSectionMap_testTHQ;
 	} else if ( process.Contains("testTHW") ) {
 		XSectionMap = &XSectionMap_testTHW;
-	} else {
+	} 
+	else if ( process.Contains("ggF") ) { // HHWWgg 
+	  	XSectionMap = &XSectionMap_HHWWgg;
+	}
+	
+	else {
 		std::cout << "[WARNING] Warning ggh, vbf, wh, zh, wzh, tth or grav or STXS proc not found in histname!!!!" << std::endl;
 		//exit(1);
 	}
@@ -266,7 +274,10 @@ double Normalization_8TeV::GetXsection(double mass, TString HistName) {
 		XSectionMap = &XSectionMap_testTHQ;
 	} else if (HistName.Contains("testTHW")) {
 		XSectionMap = &XSectionMap_testTHW;
-	} else {
+	} else if (HistName.Contains("ggF") ){ // HHWWgg 	
+	  	XSectionMap = &XSectionMap_HHWWgg;
+	} 
+	else {
 		std::cout << "[WARNING] Warning ggh, vbf, wh, zh, wzh, tth or grav or STXS proc not found in " << HistName << std::endl;
 		//exit(1);
 	}

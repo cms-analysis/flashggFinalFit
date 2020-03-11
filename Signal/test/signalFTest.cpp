@@ -39,7 +39,7 @@ namespace po = boost::program_options;
 
 string filename_;
 string datfilename_;
-string datfilename_Original;
+// string datfilename_Original;
 string json_dict_;
 string outdir_;
 int mass_;
@@ -151,7 +151,7 @@ double getMyNLL(RooRealVar *var, RooAbsPdf *pdf, RooDataHist *data){
 	return -1.*sum;
 }
 
-void fTest(string analysis_, string filename, string outdir_, vector<string> procs, string procString_, int nBins, float rangeLow, float rangeHigh, string website){
+void fTest(string analysis_, string filename, string outdir_, vector<string> procs, string procString_, int nBins, float rangeLow, float rangeHigh, string website, string datfilename_){
 
 	WSTFileWrapper *inWS 
     = new WSTFileWrapper(filename,"tagsDumper/cms_hgg_13TeV");
@@ -161,12 +161,13 @@ void fTest(string analysis_, string filename, string outdir_, vector<string> pro
 
 	string HHWWgg_Label = ""; // ex: X250_WWgg_qqlnugg
 
-  	string outdir_Original = outdir_;
+	std::cout << "outdir_: " << outdir_ << endl;
+  	// string outdir_Original = outdir_;
 
 	// if HHWWgg, customize outdir for each mass point 
 	if(analysis_ == "HHWWgg"){
 
-		// Get HHWWgg label from file name 
+	// 	// Get HHWWgg label from file name 
 		vector<string> tmpV;
 		split(tmpV,filename,boost::is_any_of("/"));	
 		unsigned int N = tmpV.size();  
@@ -176,9 +177,9 @@ void fTest(string analysis_, string filename, string outdir_, vector<string> pro
 		string mass_str = tmpV2[0];
 		HHWWgg_Label = Form("%s_WWgg_qqlnugg",mass_str.c_str());
 
-		outdir_ = outdir_Original;
-		outdir_.append("_");
-		outdir_.append(HHWWgg_Label);
+	// 	outdir_ = outdir_Original;
+	// 	outdir_.append("_");
+	// 	outdir_.append(HHWWgg_Label);
 	}
 
 	system(Form("mkdir -p %s/fTest",outdir_.c_str()));
@@ -308,7 +309,9 @@ void fTest(string analysis_, string filename, string outdir_, vector<string> pro
 				}
 
 				else{
-					RooDataSet *data00   = (RooDataSet*)inWS->data(Form("%s_%d_13TeV_%s",proc.c_str(),mass_,flashggCats_[cat].c_str()));
+					RooDataSet *data00 = (RooDataSet*)inWS->data( Form("%d%s",mass_,proc.c_str()), 
+						Form("%s_%d_13TeV_%s",proc.c_str(),mass_,flashggCats_[cat].c_str()));
+					// RooDataSet *data00   = (RooDataSet*)inWS->data(Form("%s_%d_13TeV_%s",proc.c_str(),mass_,flashggCats_[cat].c_str()));
 					data0 = data00;
 				}
 
@@ -318,7 +321,7 @@ void fTest(string analysis_, string filename, string outdir_, vector<string> pro
           if (data0) {
             std::cout << "[INFO] and it looks like this : " << *data0 << std::endl;
           } else {
-            std::cout << "[INFO] but it is a null pointer! extit " << std::endl;
+            std::cout << "[INFO] but it is a null pointer! exit " << std::endl;
             exit (1);
           }
         }
@@ -722,13 +725,13 @@ void fTest(string analysis_, string filename, string outdir_, vector<string> pro
   //write them to a file, I guess..
 
 	// if HHWWgg, customize datfilename for mass point 
-	if(analysis_ == "HHWWgg"){
-		datfilename_ = datfilename_Original;
-		datfilename_.erase(datfilename_.end()-4,datfilename_.end());
-		datfilename_.append("_");
-		datfilename_.append(HHWWgg_Label);
-		datfilename_.append(".dat");
-	}
+	// if(analysis_ == "HHWWgg"){
+	// 	datfilename_ = datfilename_Original;
+	// 	datfilename_.erase(datfilename_.end()-4,datfilename_.end());
+	// 	datfilename_.append("_");
+	// 	datfilename_.append(HHWWgg_Label);
+	// 	datfilename_.append(".dat");
+	// }
 	
 	output_datfile.open ((datfilename_).c_str());
 	if (verbose_) std::cout << "[INFO] Writing to datfilename_ " 
@@ -761,7 +764,7 @@ int main(int argc, char *argv[]){
 	string website = "/eos/user/a/atishelm/www/HHWWgg_Analysis/fggfinalfit"; // in addition to local direc, put output pngs here 
 
 	OptionParser(argc,argv);
-	datfilename_Original = datfilename_;
+	// datfilename_Original = datfilename_;
 	
 	if (verbose_) {
     std::cout << "[INFO] datfilename_	" << datfilename_ << std::endl;
@@ -822,7 +825,7 @@ int main(int argc, char *argv[]){
 			std::cout << " [INFO] considering only " << considerOnly_[j]<<std::endl;
 	}
   
-	fTest(analysis_,filename_,outdir_,procs,procString_,nBins,rangeLow,rangeHigh,website);
+	fTest(analysis_,filename_,outdir_,procs,procString_,nBins,rangeLow,rangeHigh,website,datfilename_);
 
   // open input files using WS wrapper.
 

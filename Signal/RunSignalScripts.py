@@ -232,28 +232,31 @@ else:
   print " --> Constructing the input command..."
 
   cmdLine = ''
+  # origext = ext 
 
-  # if analysis is HHWWgg, need to run process for each mass point 
+  # if analysis is HHWWgg, need to run process for each mass point...this will need to be updated when we add a second category
   if analysis == 'HHWWgg':
     # print'ws_fullFileNames: ',ws_fullFileNames
     filesList = ws_fullFileNames.split(',')
-    # ii=0
     for f in filesList:
       cmdLine = ''
       print
-      print'f: ',f
+      print'On File: ',f
       print
-      # if ii>3: continue 
-      # ii+=1
+      # ext = _HHWWgg_v2-3_2017_X280_WWgg_qqlnugg
+      
+      massExt = f.split('/')[-1].split('.')[0]
+      thisExt = ext + '_' + massExt
+
       # if batch not specified, run locally 
-      if batch == '': cmdLine += './runSignalScripts.sh -i %s -p %s -f %s --ext %s --intLumi %s --year %s --massList %s --bs %s --analysis %s --scales %s --scalesCorr %s --scalesGlobal %s --smears %s --useSSF 1 --verbosity %s '%(f,procs,cats,ext,lumi[year],year,massPoints,beamspot,analysis,scales,scalesCorr,scalesGlobal,smears,verbosity)
+      if batch == '': cmdLine += './runSignalScripts.sh -i %s -p %s -f %s --ext %s --intLumi %s --year %s --massList %s --bs %s --analysis %s --scales %s --scalesCorr %s --scalesGlobal %s --smears %s --useSSF 1 --verbosity %s '%(f,procs,cats,thisExt,lumi[year],year,massPoints,beamspot,analysis,scales,scalesCorr,scalesGlobal,smears,verbosity)
 
       # run with batch 
-      else: cmdLine += './runSignalScripts.sh -i %s -p %s -f %s --ext %s --intLumi %s --year %s --batch %s --queue %s --massList %s --bs %s --analysis %s --scales %s --scalesCorr %s --scalesGlobal %s --smears %s --useSSF 1 --verbosity %s'%(f,procs,cats,ext,lumi[year],year,batch,queue,massPoints,beamspot,analysis,scales,scalesCorr,scalesGlobal,smears,verbosity)
+      else: cmdLine += './runSignalScripts.sh -i %s -p %s -f %s --ext %s --intLumi %s --year %s --batch %s --queue %s --massList %s --bs %s --analysis %s --scales %s --scalesCorr %s --scalesGlobal %s --smears %s --useSSF 1 --verbosity %s'%(f,procs,cats,thisExt,lumi[year],year,batch,queue,massPoints,beamspot,analysis,scales,scalesCorr,scalesGlobal,smears,verbosity)
     
       finishCommand(cmdLine,useDCB,mode,printOnly)
 
-  # non HHWWgg analysis 
+  # non-HHWWgg analysis 
   else:
     cmdLine = ''
     # if batch not specified, run locally 

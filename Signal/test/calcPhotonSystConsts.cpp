@@ -66,7 +66,8 @@ string sqrtS_;
 int quadInterpolate_;
 int verbosity_;
 bool isFlashgg_;
-//RooWorkspace *inWS_;
+string analysis_;
+// RooWorkspace *inWS_;
 WSTFileWrapper * inWS_;
 RooRealVar *mass_ = new RooRealVar("CMS_hgg_mass","CMS_hgg_mass",125);
 
@@ -86,6 +87,7 @@ void OptionParser(int argc, char *argv[]){
 		("isFlashgg",	po::value<bool>(&isFlashgg_)->default_value(true),														"Use flashgg format")
 		("flashggCats,f", po::value<string>(&flashggCatsStr_)->default_value("UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,UntaggedTag_4,VBFTag_0,VBFTag_1,VBFTag_2,TTHHadronicTag,TTHLeptonicTag,VHHadronicTag,VHTightTag,VHLooseTag,VHEtTag"),       "Flashgg category names") 
 		("verbosity,v", po::value<int>(&verbosity_)->default_value(0),                                  								"How much info to write (0 none, 1 some)")
+		("analysis,a", po::value<string>(&analysis_)->default_value(""),                                  								"Analysis ex: HHWWgg")
 		;                                   
 
 	po::options_description backw_opts("Backwards compatibility options");
@@ -373,6 +375,8 @@ std::pair<std::string,std::string> convertTemplatedName(std::string dataName) {
 vector<TH1F*> getHistograms(RooWorkspace* theWS, string name, string syst){
 
 	vector<TH1F*> ret_hists;
+	cout << "name: " << name << endl;
+	cout << "syst: " << syst << endl;
 	//for (unsigned int i=0; i<files.size(); i++){
 	//	files[i]->cd();
 		//if (isFlashgg_){
@@ -482,7 +486,9 @@ int main(int argc, char *argv[]){
 		if (verbosity_)	cout << "[INFO] Opened file " << infilenames_[i] << endl;
 		inFiles[i]->Print();
 	}*/
-	//	inWS_ = (RooWorkspace*)inFiles[0]->Get("tagsDumper/cms_hgg_13TeV"); //FIXME should add all workspaces together from various files
+		// I think HHWWgg files are 
+		// inWS_ = (RooWorkspace*)infilenamesStr_.Get("tagsDumper/cms_hgg_13TeV"); //FIXME should add all workspaces together from various files
+	// inWS_ = new WSTFileWrapper(infilenamesStr_,"tagsDumper/cms_hgg_13TeV");
 	inWS_ = new WSTFileWrapper(infilenamesStr_,"tagsDumper/cms_hgg_13TeV");
 
 	ofstream outfile;
@@ -506,7 +512,43 @@ int main(int argc, char *argv[]){
 	for (int cat=0; cat<nCats_; cat++){
 		for (vector<string>::iterator proc=procs_.begin(); proc!=procs_.end(); proc++){
 			cout << "[INFO] Processing "<< *proc << " - cat " << cat << endl;
-                        RooWorkspace* theWS = inWS_->getSpecificWorkspace(Form("%d%s",mh_,proc->c_str()));
+			RooWorkspace* theWS; 
+			string HHWWgg_Label = "";
+
+			if (analysis_ == "HHWWgg"){
+
+				// inWS_
+				// RooWorkspace* theWS_ = inWS_->getSpecificWorkspace("cms_hgg_13TeV");
+				RooWorkspace* theWS_ = inWS_->getSpecificWorkspace(0); // HHWWgg only has one file for now 
+				theWS = theWS_;
+
+				// // get HHWWgg label from file name  
+				vector<string> tmpV;
+				split(tmpV,infilenamesStr_,boost::is_any_of("/"));	
+				unsigned int N = tmpV.size();  
+				string endPath = tmpV[N-1];
+				vector<string> tmpV2;
+				split(tmpV2,endPath,boost::is_any_of("_"));	 
+				string mass_str = tmpV2[0];
+				HHWWgg_Label = Form("%s_WWgg_qqlnugg",mass_str.c_str());
+				// std::cout << "HHWWgg_Label: " << HHWWgg_Label << endl;
+				// ggF_SM_WWgg_qqlnugg_13TeV_HHWWggTag_0
+				// // cout << "workspace: " << Form("%s_%s_13TeV_%s",proc->c_str(),HHWWgg_Label.c_str(),flashggCats_[cat].c_str()) << endl;
+				// RooWorkspace* theWS_ = inWS_->getSpecificWorkspace(Form("%s_%s_13TeV_%s",proc->c_str(),HHWWgg_Label.c_str(),flashggCats_[cat].c_str()));
+				// // Form("%s_%d_13TeV_%s",proc->c_str(),mh_,flashggCat.c_str()),Form("MCScale%s",phoCat->c_str())
+				// // RooWorkspace* theWS_ = inWS_->getSpecificWorkspace(Form("%d%s",mh_,proc->c_str()));
+				// theWS = theWS_;
+
+			}
+
+			else{
+				// RooWorkspace* theWS_ = inWS_->getSpecificWorkspace("cms_hgg_13TeV");
+				// theWS = theWS_;
+				// theWS = inWS_;
+				
+				RooWorkspace* theWS_ = inWS_->getSpecificWorkspace(Form("%d%s",mh_,proc->c_str()));
+				theWS = theWS_;
+			}
 
 			if (verbosity_)	cout << "[INFO] Processing "<< *proc << " - cat " << cat << endl;
 
@@ -527,7 +569,11 @@ int main(int argc, char *argv[]){
 					if (isFlashgg_){
 						string flashggCat = flashggCats_[cat]; 
 						//hists= getHistograms(inFiles,Form("%s_%d_13TeV_%s",proc->c_str(),mh_,flashggCat.c_str()),Form("MCScale%s",phoCat->c_str()));
-						hists= getHistograms(theWS, Form("%s_%d_13TeV_%s",proc->c_str(),mh_,flashggCat.c_str()),Form("MCScale%s",phoCat->c_str()));
+						// hists= getHistograms(theWS, Form("%s_%d_13TeV_%s",proc->c_str(),mh_,flashggCat.c_str()),Form("MCScale%s",phoCat->c_str()));
+						if (analysis_ == "HHWWgg") hists= getHistograms(theWS, Form("%s_%s_13TeV_%s",proc->c_str(),HHWWgg_Label.c_str(),flashggCat.c_str()),Form("MCScale%s",phoCat->c_str()));
+						else hists= getHistograms(theWS, Form("%s_%d_13TeV_%s",proc->c_str(),mh_,flashggCat.c_str()),Form("MCScale%s",phoCat->c_str()));
+
+						// hists= getHistograms(theWS, Form("%s_%d_13TeV_%s",proc->c_str(),mh_,flashggCat.c_str()),Form("MCScale%s",phoCat->c_str()));
 					}else{
 						//hists= getHistograms(inFiles,Form("th1f_sig_%s_mass_m%d_cat%d",proc->c_str(),mh_,cat),Form("E_scale_%s",phoCat->c_str()));
 						hists= getHistograms(theWS, Form("th1f_sig_%s_mass_m%d_cat%d",proc->c_str(),mh_,cat),Form("E_scale_%s",phoCat->c_str()));
@@ -569,7 +615,9 @@ int main(int argc, char *argv[]){
 					if (isFlashgg_){ // Smearing not yet supported for Flashgg
 						string flashggCat = flashggCats_[cat]; 
 						//hists= getHistograms(inFiles,Form("%s_%d_13TeV_%s",proc->c_str(),mh_,flashggCat.c_str()),Form("MCSmear%s",phoCat->c_str()));
-						hists= getHistograms(theWS, Form("%s_%d_13TeV_%s",proc->c_str(),mh_,flashggCat.c_str()),Form("MCSmear%s",phoCat->c_str()));
+						// hists= getHistograms(theWS, Form("%s_%d_13TeV_%s",proc->c_str(),mh_,flashggCat.c_str()),Form("MCSmear%s",phoCat->c_str()));
+						if (analysis_ == "HHWWgg") hists= getHistograms(theWS, Form("%s_%s_13TeV_%s",proc->c_str(),HHWWgg_Label.c_str(),flashggCat.c_str()),Form("MCSmear%s",phoCat->c_str()));
+						else hists= getHistograms(theWS, Form("%s_%d_13TeV_%s",proc->c_str(),mh_,flashggCat.c_str()),Form("MCSmear%s",phoCat->c_str()));
 					}	 else {
 
 						// this is to ensure nominal comes from the right file
@@ -611,9 +659,11 @@ int main(int argc, char *argv[]){
 				if (photonCatScalesCorrStr_.size()!=0){
 					for (vector<string>::iterator phoCat=photonCatScalesCorr_.begin(); phoCat!=photonCatScalesCorr_.end(); phoCat++){
 						string flashggCat = flashggCats_[cat]; 
+						vector<TH1F*> hists;
 						//vector<TH1F*> hists= getHistograms(inFiles,Form("%s_%d_13TeV_%s",proc->c_str(),mh_,flashggCat.c_str()),Form("%s",phoCat->c_str()));
-						vector<TH1F*> hists= getHistograms(theWS, Form("%s_%d_13TeV_%s",proc->c_str(),mh_,flashggCat.c_str()),Form("%s",phoCat->c_str()));
-
+						
+						if (analysis_ == "HHWWgg") hists= getHistograms(theWS, Form("%s_%s_13TeV_%s",proc->c_str(),HHWWgg_Label.c_str(),flashggCat.c_str()),Form("%s",phoCat->c_str()));
+						else hists= getHistograms(theWS, Form("%s_%d_13TeV_%s",proc->c_str(),mh_,flashggCat.c_str()),Form("%s",phoCat->c_str()));
 						// this is to ensure nominal comes from the right file
 						TH1F *nominal = hists[0];
 						TH1F *scaleUp = hists[1];

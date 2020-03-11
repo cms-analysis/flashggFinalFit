@@ -741,9 +741,13 @@ int main(int argc, char* argv[]){
 
 	std::string ext = is2011 ? "7TeV" : "8TeV";
         if( isFlashgg_ ){
+          std::cout << "right before" << std::endl;
           if( year_ == "all" ){ ext = "13TeV"; }
+          else if (year_ == "2017" ) {ext = "13TeV"; }
+          // else if( year_ == "2017" ){ ext = "13TeV"; }
           //else{ ext = "13TeV"; } //FIXME 
           else{ ext = Form("%s_13TeV",year_); }
+          std::cout << "right after" << std::endl;
         }
 	//if (isFlashgg_) ext = "13TeV";
         //FIXME trying to remove duplicated names for 2016+2017 combination

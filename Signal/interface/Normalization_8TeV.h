@@ -52,6 +52,7 @@ class Normalization_8TeV {
 	std::map<double,double> XSectionMap_wzh;
 	std::map<double,double> XSectionMap_tth;
   	std::map<double,double> XSectionMap_sm;
+	std::map<double,double> XSectionMap_HHWWgg; // for HHWWgg  
 
         // new for STXS stuff
 	std::map<double,double> XSectionMap_QQ2HLNU;

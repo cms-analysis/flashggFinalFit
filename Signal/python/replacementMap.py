@@ -9,14 +9,16 @@ replacementProcWV = {
   "hig-16-040":"GG2H",
   "stage1":"GG2H_0J",
   "stage1_1":"GG2H_0J_PTH_GT10",
-  "stage1_2":"GG2H_0J_PTH_GT10"
+  "stage1_2":"GG2H_0J_PTH_GT10",
+  "HHWWgg":"ggF"
 }
 # Replacement cat for WV fit: 
 replacementCatWV = {
   "hig-16-040":"UntaggedTag_2",
   "stage1":"RECO_0J_Tag1",
   "stage1_1":"RECO_0J_PTH_GT10_Tag1",
-  "stage1_2":"RECO_0J_PTH_GT10_Tag1"
+  "stage1_2":"RECO_0J_PTH_GT10_Tag1",
+  "HHWWgg":"HHWWggTag_0"
 }
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -43,6 +45,10 @@ replacementProcRVMap = {
     "VHLeptonicLooseTag:QQ2HLNU",
     "VHHadronicTag:ZH2HQQ",
     "VHMetTag:QQ2HLNU"
+  ],
+
+  "HHWWgg":[
+    "HHWWggTag_0:HHWWggTag_0"
   ],
 
   # STXS stage 1 categorisation (HIG-18-029)
@@ -193,6 +199,10 @@ replacementCatRVMap = {
     "VHLeptonicLooseTag:VHLeptonicLooseTag",
     "VHHadronicTag:VHHadronicTag",
     "VHMetTag:VHMetTag"
+  ],
+
+  "HHWWgg":[
+    "HHWWggTag_0:HHWWggTag_0"
   ],
 
   # STXS stage 1 categorisation (HIG-18-029)

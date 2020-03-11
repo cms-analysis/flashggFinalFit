@@ -68,6 +68,7 @@ bool verbose_;
 bool doCrossCheck_;
 bool markNegativeBins_;
 bool doAllSum_;
+string analysis_;
 
 void OptionParser(int argc, char *argv[]){
   po::options_description desc1("Allowed options");
@@ -87,6 +88,7 @@ void OptionParser(int argc, char *argv[]){
     ("verbose",  po::value<bool>(&verbose_)->default_value(false),                          "output additional details")
     ("markNegativeBins",  po::value<bool>(&markNegativeBins_)->default_value(false),                          " show with red arrow if a bin has a negative total value")
     ("doAllSum",  po::value<bool>(&doAllSum_)->default_value(false),                          "include the sum of all procs, categories (slow)")
+    ("analysis,a", po::value<string>(&analysis_)->default_value(""),          "analysis")
     ("flashggCats,f", po::value<string>(&flashggCatsStr_)->default_value("DiPhotonUntaggedCategory_0,DiPhotonUntaggedCategory_1,DiPhotonUntaggedCategory_2,DiPhotonUntaggedCategory_3,DiPhotonUntaggedCategory_4,VBFTag_0,VBFTag_1,VBFTag_2"),       "Flashgg category names to consider")
     ;
 
@@ -440,7 +442,7 @@ void performClosure(RooRealVar *mass, RooAbsPdf *pdf, RooDataSet *data, string c
   delete plot;
 }
 
-void Plot(RooRealVar *mass, RooDataSet *data, RooAbsPdf *pdf, pair<double,double> sigRange, vector<double> fwhmRange, string title, string savename){
+void Plot(RooRealVar *mass, RooDataSet *data, RooAbsPdf *pdf, pair<double,double> sigRange, vector<double> fwhmRange, string title, string savename, string analysis_){
 
   double semin=sigRange.first;
   double semax=sigRange.second;
@@ -525,7 +527,39 @@ void Plot(RooRealVar *mass, RooDataSet *data, RooAbsPdf *pdf, pair<double,double
   //std::cout << " [RESOLUTION CHECK] Ta/Procg " << data->GetName() << ", Mass " << mass->getVal() << " sigmaEff=" << 0.5*(semax-semin) << " , FWMH=" << (fwmax-fwmin)/2.35 << "" << std::endl;
 
   //TLatex lat1(0.65,0.85,"#splitline{CMS Simulation}{}");
-  TLatex  lat1(.129+0.03+offset,0.85,"H#rightarrow#gamma#gamma");
+  string website = "";
+  string process = "";
+  string savename_2 = "";
+  // string HHWWgg_Label = "";
+
+  if (analysis_ == "HHWWgg"){
+    website = "/eos/user/a/atishelm/www/HHWWgg_Analysis/fggfinalfit/Signal/";
+    process = "HH#rightarrow WW#gamma#gamma";
+
+    vector<string> tmpV;
+		split(tmpV,savename,boost::is_any_of("/"));	
+		unsigned int N = tmpV.size();  
+		string label = tmpV[0];
+		vector<string> tmpV2;
+		split(tmpV2,label,boost::is_any_of("_"));	 
+		string mass_str = tmpV2[4];
+		// HHWWgg_Label = Form("%s_WWgg_qqlnugg",mass_str.c_str());
+    savename_2 = Form("%s_WWgg_qqlnugg",mass_str.c_str());
+
+    // savename = Form("%s");
+    // savename = outdir_HHWWgg_v2-3_2017_SM_HHWWgg_qqlnu/sigplots/ggF_HHWWggTag_0.png
+  // want savename.split('/')[0].split('_')[4]
+    // TLatex  lat11(.129+0.03+offset,0.85,"H#rightarrow WW#gamma#gamma");
+    // lat1 = lat11;
+  }
+  else{
+    process = "H#rightarrow#gamma#gamma";
+    // TLatex  lat11(.129+0.03+offset,0.85,"H#rightarrow#gamma#gamma");
+    // lat1 = lat11;
+  }
+
+  TLatex  lat1(.129+0.03+offset,0.85,process.c_str());  
+  
   lat1.SetNDC(1);
   lat1.SetTextSize(0.047);
 
@@ -543,10 +577,19 @@ void Plot(RooRealVar *mass, RooDataSet *data, RooAbsPdf *pdf, pair<double,double
   catLabel_humanReadable.ReplaceAll("all","All Categories");
 
   //TLatex lat2(0.93,0.88,catLabel_humanReadable);
-  TLatex lat2(0.93,0.88,Form("#splitline{%s}{%s}",procLabel_humanReadable.Data(),catLabel_humanReadable.Data())); //FIXME
+  // TLatex lat2(0.93,0.88,Form("#splitline{%s}{%s}",procLabel_humanReadable.Data(),catLabel_humanReadable.Data())); //FIXME
+  cout << "procLabel_humanReadable.Data(): " << procLabel_humanReadable.Data() << endl;
+  cout << "catLabel_humanReadable.Data(): " << catLabel_humanReadable.Data() << endl;
+  TLatex lat2(0.93,0.88,Form("%s",procLabel_humanReadable.Data())); //FIXME
+  TLatex lat3(0.93,0.78,Form("%s",catLabel_humanReadable.Data())); //FIXME
+  
   lat2.SetTextAlign(33);
   lat2.SetNDC(1);
   lat2.SetTextSize(0.045);
+
+  lat3.SetTextAlign(33);
+  lat3.SetNDC(1);
+  lat3.SetTextSize(0.045);
 
   TCanvas *canv = new TCanvas("canv","canv",650,600);
   canv->SetLeftMargin(0.16);
@@ -562,6 +605,7 @@ void Plot(RooRealVar *mass, RooDataSet *data, RooAbsPdf *pdf, pair<double,double
   fwhmText->Draw("same");
   //lat1.Draw("same");
   lat2.Draw("same");
+  lat3.Draw("same");
   lat1.Draw("same");
   leg->Draw("same");
   TLatex *chi2ndof_latex = new TLatex();	
@@ -579,8 +623,14 @@ void Plot(RooRealVar *mass, RooDataSet *data, RooAbsPdf *pdf, pair<double,double
   string sim="Simulation Preliminary";
   //string sim="Simulation"; //for the paper
   CMS_lumi( canv, 0,0,sim);
+
   canv->Print(Form("%s.pdf",savename.c_str()));
   canv->Print(Form("%s.png",savename.c_str()));
+  if (analysis_ == "HHWWgg"){
+    canv->Print(Form("%s%s.pdf",website.c_str(),savename_2.c_str()));
+    canv->Print(Form("%s%s.png",website.c_str(),savename_2.c_str()));
+  }
+  
   //string path = savename.substr(0,savename.find('/'));
   //canv->Print(Form("%s/animation.gif+100",path.c_str()));
 
@@ -673,7 +723,7 @@ int main(int argc, char *argv[]){
     sigEffs.insert(pair<string,double>(dataIt->first,(thisSigRange.second-thisSigRange.first)/2.));
     fwhms.insert(pair<string,double>(dataIt->first,thisFWHMRange[1]-thisFWHMRange[0]));
     if (doCrossCheck_) performClosure(mass,pdfs[dataIt->first],dataIt->second,Form("%s/closure_%s.pdf",outfilename_.c_str(),dataIt->first.c_str()),m_hyp_-10.,m_hyp_+10.,thisSigRange.first,thisSigRange.second);
-    Plot(mass,dataIt->second,pdfs[dataIt->first],thisSigRange,thisFWHMRange,dataIt->first,Form("%s/%s",outfilename_.c_str(),dataIt->first.c_str()));
+    Plot(mass,dataIt->second,pdfs[dataIt->first],thisSigRange,thisFWHMRange,dataIt->first,Form("%s/%s",outfilename_.c_str(),dataIt->first.c_str()),analysis_);
   }
 
   for (map<string,RooDataSet*>::iterator dataIt=dataSetsGranular.begin(); dataIt!=dataSetsGranular.end(); dataIt++){
@@ -687,7 +737,7 @@ int main(int argc, char *argv[]){
     sigEffs.insert(pair<string,double>(dataIt->first,(thisSigRange.second-thisSigRange.first)/2.));
     fwhms.insert(pair<string,double>(dataIt->first,thisFWHMRange[1]-thisFWHMRange[0]));
     if (doCrossCheck_) performClosure(mass,pdfsGranular[dataIt->first],dataIt->second,Form("%s/closure_%s.pdf",outfilename_.c_str(),dataIt->first.c_str()),m_hyp_-10.,m_hyp_+10.,thisSigRange.first,thisSigRange.second);
-    Plot(mass,dataIt->second,pdfsGranular[dataIt->first],thisSigRange,thisFWHMRange,dataIt->first,Form("%s/%s",outfilename_.c_str(),dataIt->first.c_str()));
+    Plot(mass,dataIt->second,pdfsGranular[dataIt->first],thisSigRange,thisFWHMRange,dataIt->first,Form("%s/%s",outfilename_.c_str(),dataIt->first.c_str()),analysis_);
   }
 
   map<string,pair<double,double> > bkgVals;

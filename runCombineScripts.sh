@@ -1,5 +1,6 @@
 #!/bin/bash
 #bash variables
+ANALYSIS=""
 FILE="";
 EXT="auto"; #extensiom for all folders and files created by this script
 PROCS="ggh"
@@ -41,6 +42,7 @@ usage(){
 	echo "The script runs background scripts:"
 		echo "options:"
 echo "-h|--help)" 
+echo "--analysis) (default $ANALYSIS)"
 echo "-i|--inputFile) "
 echo "-p|--procs) (default $PROCS)"
 echo "-f|--flashggCats) (default $CATS) "
@@ -73,7 +75,7 @@ echo "--batch) which batch system to use (LSF,IC) (default $BATCH)) "
 
 
 # options may be followed by one colon to indicate they have a required argument
-if ! options=$(getopt -u -o hi:p:f: -l help,inputFile:,procs:,bs:,flashggCats:,uepsFile:,newGghScheme,doSTXS,doStage1,ext:,smears:,massList:,scales:,scalesCorr:,scalesGlobal:,,pseudoDataDat:,sigFile:,combine,combineOnly,combinePlotsOnly,signalOnly,backgroundOnly,datacardOnly,useSSF:,useDCB_1G:,continueLoop:,intLumi:,year:,unblind,isData,isFakeData,dataFile:,batch:,verbose -- "$@")
+if ! options=$(getopt -u -o hi:p:f: -l help,inputFile:,procs:,bs:,flashggCats:,uepsFile:,newGghScheme,doSTXS,doStage1,ext:,smears:,massList:,scales:,scalesCorr:,scalesGlobal:,,pseudoDataDat:,sigFile:,combine,combineOnly,combinePlotsOnly,signalOnly,backgroundOnly,datacardOnly,useSSF:,useDCB_1G:,continueLoop:,intLumi:,year:,unblind,isData,isFakeData,analysis:,dataFile:,batch:,verbose -- "$@")
 then
 # something went wrong, getopt will put out an error message for us
 exit 1
@@ -98,6 +100,7 @@ case $1 in
 --doStage1) DOSTAGE1=1;;
 --ext) EXT=$2; echo "test ext $EXT " ; shift ;;
 --pseudoDataDat) PSEUDODATADAT=$2; shift;;
+--analysis) ANALYSIS=$2; shift;;
 --dataFile) DATAFILE=$2; shift;;
 --batch) BATCH=$2; echo " BATCH $BATCH " ; shift;;
 --signalOnly) COMBINEONLY=0;BKGONLY=0;SIGONLY=1;DATACARDONLY=0;;
@@ -157,28 +160,39 @@ echo "------------> Create DATACARD"
 echo "------------------------------------------------"
 
 cd Datacard
-if [ $DOSTAGE1 == 1 ]; then
-  echo "./makeDatacard.py -i $FILE  -o Datacard_13TeV_${EXT}.txt -p $PROCS -c $CATS --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --intLumi $INTLUMI --year $YEAR --uepsfilename $UEPS --newGghScheme --doSTXS"
-  ./makeDatacard.py -i $FILE  -o Datacard_13TeV_${EXT}.txt -p $PROCS -c $CATS --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --intLumi $INTLUMI --year $YEAR --uepsfilename $UEPS --newGghScheme --doSTXS
-else
-  if [ $NEWGGHSCHEME == 1 ] && [ $DOSTXS == 1 ]; then
-  echo "./makeParametricModelDatacardFLASHgg.py -i $FILE  -o Datacard_13TeV_${EXT}.txt -p $PROCS -c $CATS --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --intLumi $INTLUMI --uepsfilename $UEPS --newGghScheme --doSTXS"
-  ./makeParametricModelDatacardFLASHgg.py -i $FILE  -o Datacard_13TeV_${EXT}.txt -p $PROCS -c $CATS --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --intLumi $INTLUMI --uepsfilename $UEPS --newGghScheme --doSTXS #--submitSelf
-  fi
-  if [ $NEWGGHSCHEME == 1 ] && [ $DOSTXS == 0 ]; then
-      echo "./makeParametricModelDatacardFLASHgg.py -i $FILE  -o Datacard_13TeV_${EXT}.txt -p $PROCS -c $CATS --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --intLumi $INTLUMI --uepsfilename $UEPS --newGghScheme"
-      ./makeParametricModelDatacardFLASHgg.py -i $FILE  -o Datacard_13TeV_${EXT}.txt -p $PROCS -c $CATS --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --intLumi $INTLUMI --uepsfilename $UEPS --newGghScheme #--submitSelf
-  fi
-  if [ $NEWGGHSCHEME == 0 ] && [ $DOSTXS == 1 ]; then
-  echo "./makeParametricModelDatacardFLASHgg.py -i $FILE  -o Datacard_13TeV_${EXT}.txt -p $PROCS -c $CATS --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --intLumi $INTLUMI --uepsfilename $UEPS --doSTXS"
-  ./makeParametricModelDatacardFLASHgg.py -i $FILE  -o Datacard_13TeV_${EXT}.txt -p $PROCS -c $CATS --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --intLumi $INTLUMI --uepsfilename $UEPS --doSTXS #--submitSelf
-  fi
-  if [ $NEWGGHSCHEME == 0 ] && [ $DOSTXS == 0 ]; then
-  echo "./makeParametricModelDatacardFLASHgg.py -i $FILE  -o Datacard_13TeV_${EXT}.txt -p $PROCS -c $CATS --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --intLumi $INTLUMI --uepsfilename $UEPS"
-  ./makeParametricModelDatacardFLASHgg.py -i $FILE  -o Datacard_13TeV_${EXT}.txt -p $PROCS -c $CATS --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --intLumi $INTLUMI --uepsfilename $UEPS #--submitSelf
+
+echo "Analysis: $ANALYSIS"
+if [ $ANALYSIS == "HHWWgg" ]; then 
+
+    # echo "./makeDatacard.py -i $FILE  -o Datacard_13TeV_${EXT}.txt -p $PROCS -c $CATS --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --intLumi $INTLUMI --year $YEAR --uepsfilename $UEPS --newGghScheme --doSTXS --analysis HHWWgg "
+    # ./makeDatacard.py -i $FILE  -o Datacard_13TeV_${EXT}.txt -p $PROCS -c $CATS --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --intLumi $INTLUMI --year $YEAR --uepsfilename $UEPS --newGghScheme --doSTXS --analysis HHWWgg 
+
+  echo "./makeParametricModelDatacardFLASHgg.py -i $FILE -o Datacard_13TeV_${EXT}.txt -p $PROCS -c $CATS --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --intLumi $INTLUMI --uepsfilename $UEPS --analysis HHWWgg"
+  ./makeParametricModelDatacardFLASHgg.py -i $FILE  -o Datacard_13TeV_${EXT}.txt -p $PROCS -c $CATS --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --intLumi $INTLUMI --uepsfilename $UEPS --analysis HHWWgg #--submitSelf
+
+else 
+  if [ $DOSTAGE1 == 1 ]; then
+    echo "./makeDatacard.py -i $FILE  -o Datacard_13TeV_${EXT}.txt -p $PROCS -c $CATS --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --intLumi $INTLUMI --year $YEAR --uepsfilename $UEPS --newGghScheme --doSTXS"
+    ./makeDatacard.py -i $FILE  -o Datacard_13TeV_${EXT}.txt -p $PROCS -c $CATS --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --intLumi $INTLUMI --year $YEAR --uepsfilename $UEPS --newGghScheme --doSTXS
+  else
+    if [ $NEWGGHSCHEME == 1 ] && [ $DOSTXS == 1 ]; then
+    echo "./makeParametricModelDatacardFLASHgg.py -i $FILE  -o Datacard_13TeV_${EXT}.txt -p $PROCS -c $CATS --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --intLumi $INTLUMI --uepsfilename $UEPS --newGghScheme --doSTXS"
+    ./makeParametricModelDatacardFLASHgg.py -i $FILE  -o Datacard_13TeV_${EXT}.txt -p $PROCS -c $CATS --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --intLumi $INTLUMI --uepsfilename $UEPS --newGghScheme --doSTXS #--submitSelf
+    fi
+    if [ $NEWGGHSCHEME == 1 ] && [ $DOSTXS == 0 ]; then
+        echo "./makeParametricModelDatacardFLASHgg.py -i $FILE  -o Datacard_13TeV_${EXT}.txt -p $PROCS -c $CATS --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --intLumi $INTLUMI --uepsfilename $UEPS --newGghScheme"
+        ./makeParametricModelDatacardFLASHgg.py -i $FILE  -o Datacard_13TeV_${EXT}.txt -p $PROCS -c $CATS --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --intLumi $INTLUMI --uepsfilename $UEPS --newGghScheme #--submitSelf
+    fi
+    if [ $NEWGGHSCHEME == 0 ] && [ $DOSTXS == 1 ]; then
+    echo "./makeParametricModelDatacardFLASHgg.py -i $FILE  -o Datacard_13TeV_${EXT}.txt -p $PROCS -c $CATS --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --intLumi $INTLUMI --uepsfilename $UEPS --doSTXS"
+    ./makeParametricModelDatacardFLASHgg.py -i $FILE  -o Datacard_13TeV_${EXT}.txt -p $PROCS -c $CATS --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --intLumi $INTLUMI --uepsfilename $UEPS --doSTXS #--submitSelf
+    fi
+    if [ $NEWGGHSCHEME == 0 ] && [ $DOSTXS == 0 ]; then
+    echo "./makeParametricModelDatacardFLASHgg.py -i $FILE  -o Datacard_13TeV_${EXT}.txt -p $PROCS -c $CATS --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --intLumi $INTLUMI --uepsfilename $UEPS"
+    ./makeParametricModelDatacardFLASHgg.py -i $FILE  -o Datacard_13TeV_${EXT}.txt -p $PROCS -c $CATS --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --intLumi $INTLUMI --uepsfilename $UEPS #--submitSelf
+    fi
   fi
 fi
-
 cd -
 fi
 

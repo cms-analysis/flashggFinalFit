@@ -12,6 +12,7 @@ def get_options():
   parser.add_option('--inputConfig', dest='inputConfig', default='', help="Name of input config file (if specified will ignore other options)")
   
   # Setup
+  parser.add_option('--analysis', dest='analysis', default='datacard', help="analysis option")
   parser.add_option('--mode', dest='mode', default='datacard', help="Running mode. Options: [datacard,combine,combinePlots,effAcc,yields]")
   parser.add_option('--inputWSDir', dest='inputWSDir', default='/vols/cms/es811/FinalFits/ws_ReweighAndNewggHweights', help="Directory storing flashgg workspaces" )
   parser.add_option('--cats', dest='cats', default='UntaggedTag_0,VBFTag_0', help="Define categories")
@@ -51,6 +52,7 @@ if opt.inputConfig != '':
     _cfg = combineScriptCfg
 
     #Extract options
+    analysis     = _cfg['analysis']
     mode         = _cfg['mode']
     inputWSDir   = _cfg['inputWSDir']
     cats         = _cfg['cats']
@@ -76,6 +78,7 @@ if opt.inputConfig != '':
 
 #Else extract from option parser
 else:
+  analysis     = opt.analysis 
   mode         = opt.mode
   inputWSDir   = opt.inputWSDir
   cats         = opt.cats
@@ -102,30 +105,39 @@ if mode not in ['datacard','combine','combinePlots','effAcc','yields']:
 ws_fileNames = []
 for root, dirs, files in os.walk( inputWSDir ):
   for fileName in files:
-    if not fileName.startswith('output_'): continue
+    if (analysis != "HHWWgg") and not fileName.startswith('output_'): continue # relax constraint for HHWWgg due to different naming convention 
     if not fileName.endswith('.root'): continue
     ws_fileNames.append( fileName )
-# concatenate with input dir to get full list of complete file names
-#ws_fullFileNames = ''
-#for fileName in ws_fileNames: ws_fullFileNames+="%s/%s,"%(inputWSDir,fileName)
-#ws_fullFileNames = ws_fullFileNames[:-1]
+
+# print'ws_fileNames: ',ws_fileNames
 
 # Extract string (list) of MH=125 filenames and also 120+130 for effAcc
 ws_fullFileNames_125 = ''
 ws_fullFileNames_effAcc = ''
-for fileName in ws_fileNames:
-  proc = fileName.split('pythia8_')[1].split('.root')[0]
-  if 'M125' in fileName: 
-    ws_fullFileNames_125 += "%s/%s,"%(inputWSDir,fileName)
-    if signalProcs == 'all': ws_fullFileNames_effAcc += "%s/%s,"%(inputWSDir,fileName)
-    else: 
-      if proc in signalProcs.split(","): ws_fullFileNames_effAcc += "%s/%s,"%(inputWSDir,fileName)
-  elif 'M120' in fileName or 'M130' in fileName:
-    if signalProcs == 'all': ws_fullFileNames_effAcc += "%s/%s,"%(inputWSDir,fileName)
-    else: 
-      if proc in signalProcs.split(","): ws_fullFileNames_effAcc += "%s/%s,"%(inputWSDir,fileName)
-ws_fullFileNames_125 = ws_fullFileNames_125[:-1]
-ws_fullFileNames_effAcc = ws_fullFileNames_effAcc[:-1]
+
+if analysis == "HHWWgg":
+  # concatenate with input dir to get full list of complete file names
+  ws_fullFileNames = ''
+  for fileName in ws_fileNames: ws_fullFileNames+="%s/%s,"%(inputWSDir,fileName)
+  ws_fullFileNames = ws_fullFileNames[:-1]
+
+else:
+  for fileName in ws_fileNames:
+    proc = fileName.split('pythia8_')[1].split('.root')[0]
+    if 'M125' in fileName: 
+      ws_fullFileNames_125 += "%s/%s,"%(inputWSDir,fileName)
+      if signalProcs == 'all': ws_fullFileNames_effAcc += "%s/%s,"%(inputWSDir,fileName)
+      else: 
+        if proc in signalProcs.split(","): ws_fullFileNames_effAcc += "%s/%s,"%(inputWSDir,fileName)
+    elif 'M120' in fileName or 'M130' in fileName:
+      if signalProcs == 'all': ws_fullFileNames_effAcc += "%s/%s,"%(inputWSDir,fileName)
+      else: 
+        if proc in signalProcs.split(","): ws_fullFileNames_effAcc += "%s/%s,"%(inputWSDir,fileName)
+  ws_fullFileNames_125 = ws_fullFileNames_125[:-1]
+  ws_fullFileNames_effAcc = ws_fullFileNames_effAcc[:-1]
+
+# print'ws_fullFileNames: ',ws_fullFileNames
+# exit(0)
 
 # For UE and PS uncertainties: add file names
 ueps_fileNames = ''
@@ -134,19 +146,27 @@ if doUEPS:
   print "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ RUNNING SIGNAL SCRIPTS (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
   print sys.exit(1)
 
-# Extract list of procs
-procs = ''
-for fileName in ws_fileNames:
-  if 'M125' not in fileName: continue
-  procs += "%s,"%fileName.split('pythia8_')[1].split('.root')[0]
-procs = procs[:-1]
+if analysis == "HHWWgg": procs = signalProcs
+
+else: 
+  # Extract list of procs
+  procs = ''
+  for fileName in ws_fileNames:
+    if 'M125' not in fileName: continue
+    procs += "%s,"%fileName.split('pythia8_')[1].split('.root')[0]
+  procs = procs[:-1]
 
 # Extract input files
 dataFile = "%s/allData.root"%inputWSDir
 signalFitWSFile = "%s/Signal/outdir_%s/CMS-HGG_sigfit_%s.root"%(os.environ['PWD'],ext,ext)
 # Check if signal WS file exists
 if not os.path.exists( signalFitWSFile ):
-  print " --> [ERROR] signal fit workspace (%s) does not exists. Please run signal fitting first. Leaving..."%signalFitWSFile
+  print " --> [ERROR] signal fit workspace (%s) does not exist. Please run signal fitting first. Leaving..."%signalFitWSFile
+
+# /afs/cern.ch/work/a/atishelm/private/CMSSW_10_2_13/src/flashggFinalFit/Signal/outdir_HHWWgg_v2-3_2017_X260_HHWWgg_qqlnu/CMS-HGG_sigfit_HHWWgg_v2-3_2017_X260_HHWWgg_qqlnu.root
+# /afs/cern.ch/work/a/atishelm/private/CMSSW_10_2_13/src/flashggFinalFit/Signal/outdir_HHWWgg_v2-3_2017_X260_HHWWgg_qqlnu/CMS-HGG_mva_13TeV_sigfit.root
+
+# /afs/cern.ch/work/a/atishelm/private/CMSSW_10_2_13/src/flashggFinalFit/Signal/outdir_HHWWgg_v2-3_2017/CMS-HGG_sigfit_HHWWgg_v2-3_2017.root
 
 # Print info to user
 print " --> Input flashgg ws dir: %s"%inputWSDir
@@ -179,7 +199,24 @@ elif mode == "yields": print " --> Making yields table..."
 if mode not in ['effAcc','yields']:
   cmdLine = './runCombineScripts.sh -i %s -p %s -f %s --ext %s --intLumi %s --year %s --batch %s --dataFile %s --isData '%(ws_fullFileNames_125,procs,cats,ext,lumi[year],year,batch,dataFile)
   if mode == 'datacard': 
-    cmdLine += '--datacardOnly --smears %s --scales %s --scalesCorr %s --scalesGlobal %s --doStage1 '%(smears,scales,scalesCorr,scalesGlobal)
+    # for HHWWgg analysis, need to create datacard for each mass point 
+    if analysis == "HHWWgg": 
+      filesList = ws_fullFileNames.split(',')
+      for f in filesList:
+        print
+        print'On File: ',f
+        print
+        # ext = _HHWWgg_v2-3_2017_X280_WWgg_qqlnugg
+        
+        massExt = f.split('/')[-1].split('.')[0]
+        thisExt = ext + '_' + massExt
+        cmdLine = './runCombineScripts.sh -i %s -p %s -f %s --ext %s --intLumi %s --year %s --dataFile %s --isData '%(f,procs,cats,thisExt,lumi[year],year,dataFile)
+
+        cmdLine += '--datacardOnly --smears %s --scales %s --scalesCorr %s --scalesGlobal %s --analysis %s --verbose 1 '%(smears,scales,scalesCorr,scalesGlobal,analysis)
+        print'cmdLine: ',cmdLine
+        os.system( cmdLine )
+    else: 
+      cmdLine += '--datacardOnly --smears %s --scales %s --scalesCorr %s --scalesGlobal %s --doStage1 '%(smears,scales,scalesCorr,scalesGlobal)
     if doUEPS:
       cmdLine += ' --uepsFile '+uepsFileNames 
   elif mode == 'combine': cmdLine += '--combineOnly '
@@ -189,8 +226,9 @@ elif mode == 'effAcc': cmdLine = './makeStage1EffAcc.py -i %s -s Signal/outdir_%
 
 elif mode == 'yields': cmdLine = './stage1yields.py -w %s -p %s -s Signal/signumbers_%s.txt -u Background/CMS-HGG_multipdf_%s.root --intLumi %s -c %s'%(ws_fullFileNames_125,procs,ext,ext,lumi[year],cats)
 
-# EIther print command to screen or run
-if printOnly: print "\n%s"%cmdLine
-else: os.system( cmdLine )
+if analysis != "HHWWgg":
+  # Either print command to screen or run
+  if printOnly: print "\n%s"%cmdLine
+  else: os.system( cmdLine )
 
 print "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ RUNNING SIGNAL SCRIPTS (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"

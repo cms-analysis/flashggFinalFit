@@ -127,6 +127,7 @@ class Normalization_13TeV {
     std::map<double,double> XSectionMap_THQ;
     std::map<double,double> XSectionMap_THW_FWDH;
     std::map<double,double> XSectionMap_THW;
+    std::map<double,double> XSectionMap_HHWWgg; // HHWWgg 
 
 
 };

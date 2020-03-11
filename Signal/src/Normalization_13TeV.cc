@@ -19,7 +19,8 @@ int Normalization_13TeV::Init(int sqrtS){
     TPython::Eval(Form("buildSMHiggsSignalXSBR.Init%dTeV()", sqrtS));
     
     for (double mH=120;mH<130.05;mH+=0.1){ // breaks when extended beyond 130
-        double valBR           = (double)TPython::Eval(Form("buildSMHiggsSignalXSBR.getBR(%f)",mH));
+        double valBR           = 1.; // for HHWWgg 
+        // double valBR           = (double)TPython::Eval(Form("buildSMHiggsSignalXSBR.getBR(%f)",mH));
         double valXSggH        = (double)TPython::Eval(Form("buildSMHiggsSignalXSBR.getXS(%f,'%s')",mH,"ggH"));
         double valXSqqH        = (double)TPython::Eval(Form("buildSMHiggsSignalXSBR.getXS(%f,'%s')",mH,"qqH"));
         double valXSttH        = (double)TPython::Eval(Form("buildSMHiggsSignalXSBR.getXS(%f,'%s')",mH,"ttH"));
@@ -143,6 +144,9 @@ int Normalization_13TeV::Init(int sqrtS){
 
         XSectionMap_THW_FWDH[mH]                 = 0.02 * valXStHW;
         XSectionMap_THW[mH]                      = 0.98 * valXStHW;
+
+        // HHWWgg 
+        XSectionMap_HHWWgg[mH] = 0.001; // arbitrary, same as one used in flashgg
 
     }
 }
@@ -333,7 +337,13 @@ TGraph * Normalization_13TeV::GetSigmaGraph(TString process)
     XSectionMap = &XSectionMap_WH2HQQ;
   } else if ( process=="ZH2HQQ" ) {
     XSectionMap = &XSectionMap_ZH2HQQ;
-  } else {
+  } 
+    // HHWWgg
+    else if ( process=="ggF" ) {
+    XSectionMap = &XSectionMap_HHWWgg; 
+  }
+  
+  else {
     std::cout << "[WARNING] Normalization_13TeV: No known process found in the name!!" << std::endl;
     std::cout << "[DEBUG] Normalization_13TeV failed for process = " << process << std::endl;
     //exit(1);
@@ -569,7 +579,13 @@ double Normalization_13TeV::GetXsection(double mass, TString HistName) {
     XSectionMap = &XSectionMap_THQ;
   } else if ( HistName.Contains("THW") ) {
     XSectionMap = &XSectionMap_THW;
-  } else {
+  } 
+    // HHWWgg
+    else if ( HistName.Contains("ggF") ) {
+    XSectionMap = &XSectionMap_HHWWgg; 
+  }
+  
+    else {
     std::cout << "[WARNING] Normalization_13TeV: No known process found in the name!!" << HistName << std::endl;
     //exit(1);
   }
