@@ -168,6 +168,7 @@ def get_options():
   parser.add_option('--mergeYears', dest='mergeYears', default=False, action="store_true", help="Merge specified categories across years")
   parser.add_option('--tagSplit', dest='tagSplit', default=False, action="store_true", help="If tags are split according to above splitting scheme")
   parser.add_option('--skipBkg', dest='skipBkg', default=False, action="store_true", help="Only add signal processes to datacard")
+  parser.add_option('--skipCOWCorr', dest='skipCOWCorr', default=False, action="store_true", help="Skip centralObjectWeight correction for events in acceptance")
   parser.add_option('--prune', dest='prune', default=False, action="store_true", help="Prune proc x cat which make up less than pruneThreshold (default 0.1%) of given total category")
   parser.add_option('--pruneThreshold', dest='pruneThreshold', default=0.001, type='float', help="Threshold with which to prune proc x cat (yield/cat yield)")
   parser.add_option('--doSystematics', dest='doSystematics', default=False, action="store_true", help="Include systematics calculations and add to datacard")
@@ -370,6 +371,7 @@ if not skipData:
 
   # Create columns in dataFrame to store yields
   data['nominal_yield'] = '-'
+  if not opt.skipCOWCorr: data['nominal_yield_COWCorr'] = '-'
 
   # Depending on type of systematic: anti-symmetric = 2 (up/down) columns, symmetric = 1 column
   #   * store factoryType of systematic in dictionary
@@ -390,7 +392,12 @@ if not skipData:
 	if theoryFactoryType[s['name']] in ["a_w","a_h"]:
 	  data['%s_up_yield'%s['name']] = '-'
 	  data['%s_down_yield'%s['name']] = '-'
-	else: data['%s_yield'%s['name']] = '-'
+          if not opt.skipCOWCorr:
+            data['%s_up_yield_COWCorr'%s['name']] = '-'
+            data['%s_down_yield_COWCorr'%s['name']] = '-'
+	else: 
+          data['%s_yield'%s['name']] = '-'
+          if not opt.skipCOWCorr: data['%s_yield_COWCorr'%s['name']] = '-'
 
   # Loop over signal rows in dataFrame: extract yields (nominal & systematic variations)
   totalSignalRows = float(data[data['type']=='sig'].shape[0])
@@ -404,7 +411,21 @@ if not skipData:
     # Extract nominal RooDataSet and yield
     rdata_nominal = inputWS.data(r.nominalDataName)
     data.at[ir,'nominal_yield'] = rdata_nominal.sumEntries()
-    
+
+    # Calculate nominal yield with COW correction for in acceptance events
+    if not opt.skipCOWCorr:
+      if 'NOTAG' in r['cat']: data.at[ir,'nominal_yield_COWCorr'] = rdata_nominal.sumEntries()
+      else:
+        y_COWCorr = 0
+        for i in range(0,rdata_nominal.numEntries()):
+          p = rdata_nominal.get(i)
+          w = rdata_nominal.weight()
+          f_COWCorr = p.getRealValue("centralObjectWeight")
+          if f_COWCorr == 0: continue
+          else:
+            y_COWCorr += w/f_COWCorr
+        data.at[ir,'nominal_yield_COWCorr'] = y_COWCorr
+         
     # Systematics: loop over systematics and use function to extract yield variations
     if opt.doSystematics:
       # For experimental systematics: skip NOTAG (as incorrect weights)
@@ -417,13 +438,15 @@ if not skipData:
 	  else:
 	    data.at[ir,"%s_yield"%s] = experimentalSystYields[s]
       # For theoretical systematics:
-      theorySystYields = calcSystYields(r['nominalDataName'],inputWS,theoryFactoryType)
+      theorySystYields = calcSystYields(r['nominalDataName'],inputWS,theoryFactoryType,skipCOWCorr=opt.skipCOWCorr)
       for s,f in theoryFactoryType.iteritems():
 	if f in ['a_w','a_h']: 
 	  for direction in ['up','down']: 
 	    data.at[ir,"%s_%s_yield"%(s,direction)] = theorySystYields["%s_%s"%(s,direction)]
+            if not opt.skipCOWCorr: data.at[ir,"%s_%s_yield_COWCorr"%(s,direction)] = theorySystYields["%s_%s_COWCorr"%(s,direction)]
 	else:
 	  data.at[ir,"%s_yield"%s] = theorySystYields[s]
+          if not opt.skipCOWCorr: data.at[ir,"%s_yield_COWCorr"%s] = theorySystYields["%s_COWCorr"%s]
 
     # Remove the workspace and file from heap
     inputWS.Delete()
@@ -451,7 +474,7 @@ if not skipData:
       if s['type'] == 'constant': data = addConstantSyst(data,s,opt)
     # Theory factory: group scale weights after calculation in relevant grouping scheme
     if opt.doSTXSBinMerging: 
-      data = theorySystFactory(data, theory_systematics, theoryFactoryType, opt, stxsMergeScheme=stxsBinMergingScheme )
+      data = theorySystFactory(data, theory_systematics, theoryFactoryType, opt, stxsMergeScheme=stxsBinMergingScheme)
       data, theory_systematics = groupSystematics(data, theory_systematics, opt, prefix="scaleWeight", groupings=[[1,2],[3,6],[4,8]], stxsMergeScheme=stxsBinMergingScheme)
       data, theory_systematics = groupSystematics(data, theory_systematics, opt, prefix="alphaSWeight", groupings=[[0,1]], stxsMergeScheme=stxsBinMergingScheme)
     else: 
