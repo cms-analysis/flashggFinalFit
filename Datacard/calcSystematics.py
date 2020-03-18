@@ -8,16 +8,25 @@ import ROOT
 def addConstantSyst(sd,_syst,options):
 
   # Add column to dataFrame with default value
-  if _syst['correlateAcrossYears']: 
+  if _syst['correlateAcrossYears'] == 1: 
     sd[_syst['name']] = '-'
     # If signal and not NOTAG then set value
     sd.loc[(sd['type']=='sig')&(~sd['cat'].str.contains("NOTAG")), _syst['name']] = _syst['value']
+
+  # Partial correlation
+  elif _syst['correlateAcrossYears'] == -1:
+    sd[_syst['name']] = '-'
+    # Loop over years and set value for each year
+    for year in options.years.split(","):
+      mask = (sd['type']=='sig')&(~sd['cat'].str.contains("NOTAG"))&(sd['year']==year)
+      sd.loc[mask,_syst['name']] = _syst['value'][year]
 
   # If not correlate across years then create separate columns for each year and fill separately
   else:
     for year in options.years.split(","):
       sd["%s_%s"%(_syst['name'],year)] = '-'
       sd.loc[(sd['type']=='sig')&(sd['year']==year)&(~sd['cat'].str.contains("NOTAG")), "%s_%s"%(_syst['name'],year)] = _syst['value'][year]
+
   return sd
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -55,7 +64,7 @@ def factoryType(d,s):
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Function to extract yield variations for signal row in dataFrame
-def calcSystYields(_nominalDataName,_inputWS,_systFactoryTypes,ggHFix=False):
+def calcSystYields(_nominalDataName,_inputWS,_systFactoryTypes):
 
   # FIXME: ggH central object weights is currently wrong due to NNLOPS. Added fix
 
@@ -78,16 +87,13 @@ def calcSystYields(_nominalDataName,_inputWS,_systFactoryTypes,ggHFix=False):
     for s, f in _systFactoryTypes.iteritems():
 
       if f == "a_h": continue
-      if("pdfWeight" in s)|("alphaSWeight" in s): continue # treated separately, see below
+      #if("pdfWeight" in s)|("alphaSWeight" in s): continue # treated separately, see below
 
       # If asymmetric weights:
       elif f == "a_w":
-        if "scaleWeight" in s: centralWeightStr = "scaleWeight_0"
-        else: centralWeightStr = "centralObjectWeight"
+        centralWeightStr = "centralObjectWeight"
 
-        # FIXME: ggH fix
-        if ggHFix: f_central = 0.5*(p.getRealValue("LooseMvaSFUp01sigma")+p.getRealValue("LooseMvaSFDown01sigma"))
-        else: f_central = p.getRealValue(centralWeightStr)
+        f_central = p.getRealValue(centralWeightStr)
         f_up, f_down = p.getRealValue("%sUp01sigma"%s), p.getRealValue("%sDown01sigma"%s)
         # Checks:
         # 1) if central weights are zero then skip event
@@ -103,7 +109,10 @@ def calcSystYields(_nominalDataName,_inputWS,_systFactoryTypes,ggHFix=False):
       # If symmetric weights
       else:
         if "scaleWeight" in s: centralWeightStr = "scaleWeight_0"
+        elif "alphaSWeight" in s: centralWeightStr = "scaleWeight_0" 
+        elif "pdfWeight" in s: centralWeightStr = "pdfWeight_0"
         else: centralWeightStr = "centralObjectWeight"
+
         f_central = p.getRealValue(centralWeightStr)
         f = p.getRealValue(s)
         # Check: if central weight is zero then skip event
@@ -117,26 +126,6 @@ def calcSystYields(_nominalDataName,_inputWS,_systFactoryTypes,ggHFix=False):
     if f == "a_h":
       systYields["%s_up"%s] = _inputWS.data("%s_%sUp01sigma"%(_nominalDataName,s)).sumEntries()
       systYields["%s_down"%s] = _inputWS.data("%s_%sDown01sigma"%(_nominalDataName,s)).sumEntries()
-
-  # PdfWeights and alphaS: values in separate RooDataSet with different structure (treat separately)
-  rdata_pdf = _inputWS.data("%s_pdfWeights"%_nominalDataName)
-  # Loop over pdf events and extract reweighted yields
-  for i in range(0,rdata_pdf.numEntries()):
-    p = rdata_pdf.get(i)
-    w = rdata_pdf.weight()
-    # Loop over systematics: skip all but pdf and alphaS
-    for s, f in _systFactoryTypes.iteritems():
-      if( "pdfWeight" not in s )&( "alphaSWeight" not in s): continue
-      # Only symmetric:
-      if(f == "a_w")|(f == "a_h"): continue
-      centralWeightStr = "pdfWeight_0"
-      f_central = p.getRealValue(centralWeightStr)
-      f = p.getRealValue(s)
-      # Check: if central weight is zero then skip event
-      if f_central == 0: continue
-      else:
-        # Add weights to counter
-        systYields[s] += w*(f/f_central)
 
   # Add variations to dataFrame
   return systYields
@@ -177,7 +166,7 @@ def experimentalSystFactory(d,systs,ftype,options,_removal=True):
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # THEORY SYSTEMATICS FACTORY:
-def theorySystFactory(d,systs,ftype,options,stxsMergeScheme=None,_removal=True):
+def theorySystFactory(d,systs,ftype,options,stxsMergeScheme=None,_removal=False):
    
   # Calculate the per-production mode (per-year) yield variation: add as column in dataFrame
   for proc_s0 in d[d['type']=='sig'].proc_s0.unique():
@@ -193,11 +182,16 @@ def theorySystFactory(d,systs,ftype,options,stxsMergeScheme=None,_removal=True):
 	else: 
           d.loc[mask,'proc_s0_%s_yield'%s['name']] = d[mask]['%s_yield'%s['name']].sum()
   # Calculate the per-STXS bin (per-year already in proc name) yield variations: add as column in dataFrame
+  # Fix: if THU_ggH then do not include NoTag (out of acceptance) events
   for proc in d[d['type']=='sig'].proc.unique():
     mask = (d['proc']==proc)
+    mask_xnotag = (d['proc']==proc)&(~d['cat'].str.contains("NOTAG"))
+    d.loc[mask,'proc_nominal_yield_xnotag'] = d[mask_xnotag]['nominal_yield'].sum()
     d.loc[mask,'proc_nominal_yield'] = d[mask]['nominal_yield'].sum() 
     for s in systs:
       if s['type'] == 'constant': continue
+      if "THU_ggH" in s['name']: mask = (d['proc']==proc)&(~d['cat'].str.contains("NOTAG"))
+      else: mask = (d['proc']==proc)
       f = ftype[s['name']]
       if f in ['a_w','a_h']: 
         for direction in ['up','down']: 
@@ -237,7 +231,9 @@ def theorySystFactory(d,systs,ftype,options,stxsMergeScheme=None,_removal=True):
     if s['type'] == 'constant': continue
     # Extract factory type
     f = ftype[s['name']]
-    mask = (d['type']=='sig')&(d['nominal_yield']!=0)&(d['proc_nominal_yield']!=0)&(d['proc_%s_yield'%s['name']]!=0)
+    # For ggH theory uncertainties: require proc contains "ggH"
+    if "THU_ggH" in s['name']: mask = (d['type']=='sig')&(d['nominal_yield']!=0)&(d['proc'].str.contains('ggH'))
+    else: mask = (d['type']=='sig')&(d['nominal_yield']!=0)
     # Loop over tiers and use appropriate mode for compareYield function: skip mnorm as treated separately below
     for tier in s['tiers']: 
       if tier == 'mnorm': continue
@@ -320,12 +316,14 @@ def compareYield(row,factoryType,sname,mode='default',mname=None):
       return [mnorm]
  
   elif mode == 'inorm':
+    if "THU_ggH" in sname: proc_yield_str = "proc_nominal_yield_xnotag"
+    else: proc_yield_str = "proc_nominal_yield"
     if factoryType in ["a_w","a_h"]:
-      inorm_up = (row["proc_%s_up_yield"%sname]/row["proc_nominal_yield"])
-      inorm_down = (row["proc_%s_down_yield"%sname]/row["proc_nominal_yield"])
+      inorm_up = (row["proc_%s_up_yield"%sname]/row[proc_yield_str])
+      inorm_down = (row["proc_%s_down_yield"%sname]/row[proc_yield_str])
       return [inorm_down,inorm_up]
     else:
-      inorm = (row["proc_%s_yield"%sname]/row["proc_nominal_yield"])
+      inorm = (row["proc_%s_yield"%sname]/row[proc_yield_str])
       return [inorm]  
 
   elif mode == 'inc':

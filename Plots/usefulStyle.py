@@ -131,17 +131,17 @@ def formatRatio(h):
 
 def drawCMS(onTop=False):
     #text='#bf{CMS} #it{Preliminary}  H#rightarrow#gamma#gamma'
-    text='#bf{CMS} #it{Simulation Preliminary}  H#rightarrow#gamma#gamma'
+    text='#bf{CMS} #it{Simulation}  H#rightarrow#gamma#gamma'
     latex = TLatex()
     latex.SetNDC()
     latex.SetTextFont(42)
-    latex.SetTextSize(0.05)
+    latex.SetTextSize(0.035)
     latex.DrawLatex(0.1, 0.85 if not onTop else 0.93, text)
     
 def drawEnPu(pileup=None, lumi=None):
     latex = TLatex()
     latex.SetNDC()
-    latex.SetTextSize(0.046)
+    latex.SetTextSize(0.035)
     latex.SetTextColor(1)
     latex.SetTextFont(42)
     latex.SetTextAlign(31)
@@ -153,7 +153,7 @@ def drawEnPu(pileup=None, lumi=None):
 def drawEnYear(pileup=None, year=None):
     latex = TLatex()
     latex.SetNDC()
-    latex.SetTextSize(0.046)
+    latex.SetTextSize(0.035)
     latex.SetTextColor(1)
     latex.SetTextFont(42)
     latex.SetTextAlign(31)

@@ -91,7 +91,7 @@ def writeSystematic(f,d,s,options,stxsMergeScheme=None):
       else: mergeStr = ''
     
       # Construct syst line/lines if separate by year
-      if s['correlateAcrossYears'] == 1:
+      if(s['correlateAcrossYears'] == 1)|(s['correlateAcrossYears'] == -1):
 	stitle = "%s%s%s"%(s['title'],mergeStr,tierStr)
 	lsyst = '%-50s  %-10s    '%(stitle,s['prior'])
 	# Loop over categories and then iterate over rows in category

@@ -1,5 +1,16 @@
-#!/usr/bin/env python
-# code to make first-pass stxs transfer matrix plots
+# Script to calculate eff x acc for different mass points
+print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG GET FRACTIONS MAKER RUN II ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ "
+import os, sys
+import re
+from optparse import OptionParser
+import ROOT
+import pandas as pd
+import glob
+import pickle
+def leave():
+  print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG GET FRACTIONS RUN II (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ "
+  sys.exit(1)
+
 
 from os import listdir
 import ROOT as r
@@ -8,24 +19,34 @@ from collections import OrderedDict as od
 import re, sys
 
 catsSplittingScheme = {
-  'tagsetone':['RECO_0J_PTH_0_10_Tag0', 'RECO_0J_PTH_0_10_Tag1', 'RECO_0J_PTH_0_10_Tag2', 'RECO_0J_PTH_GT10_Tag0', 'RECO_0J_PTH_GT10_Tag1', 'RECO_0J_PTH_GT10_Tag2', 'RECO_1J_PTH_0_60_Tag0', 'RECO_1J_PTH_0_60_Tag1', 'RECO_1J_PTH_0_60_Tag2', 'RECO_1J_PTH_60_120_Tag0', 'RECO_1J_PTH_60_120_Tag1', 'RECO_1J_PTH_60_120_Tag2', 'RECO_1J_PTH_120_200_Tag0', 'RECO_1J_PTH_120_200_Tag1', 'RECO_1J_PTH_120_200_Tag2', 'RECO_GE2J_PTH_0_60_Tag0', 'RECO_GE2J_PTH_0_60_Tag1', 'RECO_GE2J_PTH_0_60_Tag2', 'RECO_GE2J_PTH_60_120_Tag0', 'RECO_GE2J_PTH_60_120_Tag1', 'RECO_GE2J_PTH_60_120_Tag2', 'RECO_GE2J_PTH_120_200_Tag0', 'RECO_GE2J_PTH_120_200_Tag1', 'RECO_GE2J_PTH_120_200_Tag2'],
+  'tagsetone':['RECO_0J_PTH_0_10_Tag0', 'RECO_0J_PTH_0_10_Tag1', 'RECO_0J_PTH_0_10_Tag2', 'RECO_0J_PTH_GT10_Tag0', 'RECO_0J_PTH_GT10_Tag1', 'RECO_0J_PTH_GT10_Tag2', 'RECO_1J_PTH_0_60_Tag0', 'RECO_1J_PTH_0_60_Tag1', 'RECO_1J_PTH_0_60_Tag2', 'RECO_1J_PTH_60_120_Tag0', 'RECO_1J_PTH_60_120_Tag1', 'RECO_1J_PTH_60_120_Tag2', 'RECO_1J_PTH_120_200_Tag0', 'RECO_1J_PTH_120_200_Tag1', 'RECO_1J_PTH_120_200_Tag2', 'RECO_GE2J_PTH_0_60_Tag0', 'RECO_GE2J_PTH_0_60_Tag1', 'RECO_GE2J_PTH_0_60_Tag2', 'RECO_GE2J_PTH_60_120_Tag0', 'RECO_GE2J_PTH_60_120_Tag1', 'RECO_GE2J_PTH_60_120_Tag2', 'RECO_GE2J_PTH_120_200_Tag0', 'RECO_GE2J_PTH_120_200_Tag1', 'RECO_GE2J_PTH_120_200_Tag2','NOTAG'],
   'tagsettwo':['RECO_PTH_200_300_Tag0', 'RECO_PTH_200_300_Tag1', 'RECO_PTH_300_450_Tag0', 'RECO_PTH_300_450_Tag1', 'RECO_PTH_450_650_Tag0', 'RECO_PTH_450_650_Tag1', 'RECO_PTH_GT650_Tag0', 'RECO_PTH_GT650_Tag1', 'RECO_VBFTOPO_VHHAD_Tag0', 'RECO_VBFTOPO_VHHAD_Tag1', 'RECO_VBFTOPO_JET3VETO_LOWMJJ_Tag0', 'RECO_VBFTOPO_JET3VETO_LOWMJJ_Tag1', 'RECO_VBFTOPO_JET3VETO_HIGHMJJ_Tag0', 'RECO_VBFTOPO_JET3VETO_HIGHMJJ_Tag1', 'RECO_VBFTOPO_JET3_LOWMJJ_Tag0', 'RECO_VBFTOPO_JET3_LOWMJJ_Tag1', 'RECO_VBFTOPO_JET3_HIGHMJJ_Tag0', 'RECO_VBFTOPO_JET3_HIGHMJJ_Tag1', 'RECO_VBFTOPO_BSM_Tag0', 'RECO_VBFTOPO_BSM_Tag1', 'RECO_VBFLIKEGGH_Tag0', 'RECO_VBFLIKEGGH_Tag1'],
   'tagsetthree':['RECO_TTH_HAD_LOW_Tag0', 'RECO_TTH_HAD_LOW_Tag1', 'RECO_TTH_HAD_LOW_Tag2', 'RECO_TTH_HAD_LOW_Tag3', 'RECO_TTH_HAD_HIGH_Tag0', 'RECO_TTH_HAD_HIGH_Tag1', 'RECO_TTH_HAD_HIGH_Tag2', 'RECO_TTH_HAD_HIGH_Tag3', 'RECO_WH_LEP_LOW_Tag0', 'RECO_WH_LEP_LOW_Tag1', 'RECO_WH_LEP_LOW_Tag2', 'RECO_WH_LEP_HIGH_Tag0', 'RECO_WH_LEP_HIGH_Tag1', 'RECO_WH_LEP_HIGH_Tag2', 'RECO_ZH_LEP_Tag0', 'RECO_ZH_LEP_Tag1', 'RECO_TTH_LEP_LOW_Tag0', 'RECO_TTH_LEP_LOW_Tag1', 'RECO_TTH_LEP_LOW_Tag2', 'RECO_TTH_LEP_LOW_Tag3', 'RECO_TTH_LEP_HIGH_Tag0', 'RECO_TTH_LEP_HIGH_Tag1', 'RECO_TTH_LEP_HIGH_Tag2', 'RECO_TTH_LEP_HIGH_Tag3', 'RECO_THQ_LEP']
   }
 
-from optparse import OptionParser
-parser = OptionParser()
-parser.add_option('-e', '--ext', default='test', help='name of analysis')
-parser.add_option('-f', '--filePath', default='test', help='directory of files')
-parser.add_option('-c', '--cats', default='test', help='analysis categories')
-parser.add_option('--tagSplit', dest='tagSplit', default=False, action="store_true", help="If tags are split according to above splitting scheme")
-(opts,args) = parser.parse_args()
+def get_options():
+  parser = OptionParser()
+  parser.add_option('--ext', default='test', help='Extension (to define analysis)')
+  parser.add_option('--cats', dest='cats', default='', help='Comma separated list of analysis categories (no year tags)')
+  parser.add_option('-m', '--mass', dest='mass', default='125', help='MH')
+  parser.add_option('--inputWSDir', dest='inputWSDir', default='', help='Input WS directory')
+  parser.add_option('--tagSplit', dest='tagSplit', default=False, action="store_true", help="If tags are split according to above splitting scheme")
+  parser.add_option('--skipCOWCorr', dest='skipCOWCorr', default=False, action="store_true", help="Skip centralObjectWeight correction for events in acceptance")
+  parser.add_option('--doFractions', dest='doFractions', default=False, action="store_true", help="Fractional yields in each STXS bin. Make sure you include all possible categories")
+  parser.add_option('--doEffAcc', dest='doEffAcc', default=False, action="store_true", help="Print out eff x acc to json file (to be read by signal modelling")
+  return parser.parse_args()
+(opt,args) = get_options()
+
+proc_map = {"GG2H":"ggh","VBF":"vbf","WH2HQQ":"wh","ZH2HQQ":"zh","QQ2HLNU":"wh","QQ2HLL":"zh","TTH":"tth","BBH":"bbH","THQ":"thq","THW":"thw","TH":"th"}
+def procToData( _proc, pmap=proc_map ):
+  for key in pmap:
+    if key == _proc.split("_")[0]: _proc = re.sub( key, pmap[key], _proc )
+  return _proc
 
 # Extract processes and nominal names from tagsetone
-baseFilePath  = opts.filePath
+baseFilePath  = opt.inputWSDir
 if not baseFilePath.endswith('/'): baseFilePath += '/'
-if opts.tagSplit: baseFilePath += "tagsetone/"
-
+if opt.tagSplit: baseFilePath += "tagsetone/"
 fileNames     = []
 for fileName in listdir(baseFilePath): 
   if not fileName.startswith('output_'): continue
@@ -36,137 +57,89 @@ for fileName in fileNames: fullFileNames += baseFilePath+fileName+','
 fullFileNames = fullFileNames[:-1]
 fullFileNames = fullFileNames.split(',')
 
-#define processes and categories
-procs      = od()
-procsNoTag = od()
-for fileName in fileNames: 
-  if 'M125' not in fileName: continue
-  procs[ fileName.split('pythia8_')[1].split('.root')[0] ] = 0.
-  procsNoTag[ fileName.split('pythia8_')[1].split('.root')[0] ] = 0.
+# Add No tag to cats
+if "NOTAG" not in opt.cats: opt.cats += ",NOTAG"
 
-cats = opts.cats
-cats = cats.split(',')
-stage0procs = {}
-stage0procs['GG2H']    = 0.
-stage0procs['VBF']     = 0.
-stage0procs['WH2HQQ']  = 0.
-stage0procs['ZH2HQQ']  = 0.
-stage0procs['QQ2HLL']  = 0.
-stage0procs['QQ2HLNU'] = 0.
-stage0procs['TTH'] = 0.
-stage0procs['TH'] = 0.
+# Define dataframe to store yields: cow = centralObjectWeight
+if opt.skipCOWCorr: columns_data = ['proc','cat','granular_key','nominal_yield']
+else: columns_data = ['proc','cat','granular_key','nominal_yield','nominal_yield_COWCorr']
+data = pd.DataFrame( columns=columns_data )
 
-stage0noTag = {}
-stage0noTag['GG2H']    = 0.
-stage0noTag['VBF']     = 0.
-stage0noTag['WH2HQQ']  = 0.
-stage0noTag['ZH2HQQ']  = 0.
-stage0noTag['QQ2HLL']  = 0.
-stage0noTag['QQ2HLNU'] = 0.
-stage0noTag['TTH'] = 0.
-stage0noTag['TH'] = 0.
-print " --> [DEBUG] PROCS: ", procs.keys
-print " --> [DEBUG] CATS: ", cats
+# Loop over files and fill entries in dataframe
+for _fileName in fullFileNames:
+  if 'M%s'%opt.mass not in _fileName: continue 
+  _proc = _fileName.split('pythia8_')[1].split('.root')[0]
+  print " --> Processing: %s"%_proc
+  _f, _ws = {}, {}
+  if opt.tagSplit:
+    for ts in catsSplittingScheme.keys():
+      _f[ts] = ROOT.TFile(re.sub("tagsetone",ts,_fileName),'READ')
+      _ws[ts] = _f[ts].Get("tagsDumper/cms_hgg_13TeV")
+  else:
+    _f['alltags'] = ROOT.TFile(_fileName,'read')
+    _ws['alltags'] = _f['alltags'].Get("tagsDumper/cms_hgg_13TeV")
 
-nameMap  = {}
-nameMap['GG2H']    = 'ggh'
-nameMap['VBF']     = 'vbf'
-nameMap['WH2HQQ']  = 'wh'
-nameMap['ZH2HQQ']  = 'zh'
-nameMap['QQ2HLL']  = 'zh'
-nameMap['QQ2HLNU'] = 'wh'
-nameMap['TTH'] = 'tth'
-nameMap['TH'] = 'th'
+  # Loop over categories
+  for _cat in opt.cats.split(","):
+    key = 'alltags'
+    if opt.tagSplit:
+      for ts,tsCats in catsSplittingScheme.iteritems():
+        if _cat in tsCats: key = ts
 
-print nameMap
+    _nominalDataName = "%s_125_13TeV_%s"%(procToData(_proc.split("_")[0]),_cat)
+    _granular_key = "%s__%s"%(_proc,_cat)
+    _nominalData = _ws[key].data(_nominalDataName)
+    _nominal_yield = _nominalData.sumEntries()
+    if not opt.skipCOWCorr:
+      if "NOTAG" in _cat: _nominal_yield_COWCorr = _nominal_yield
+      else:
+	# Loop over events and sum w/centralObjWeight
+	_nominal_yield_COWCorr = 0
+	for i in range(_nominalData.numEntries()):
+	  p = _nominalData.get(i)
+	  w = _nominalData.weight()
+	  f_central = p.getRealValue("centralObjectWeight")
+	  if f_central == 0: continue
+	  else:
+	    _nominal_yield_COWCorr += w/f_central
+      
+    
+    if opt.skipCOWCorr: data.loc[len(data)] = [_proc,_cat,_granular_key,_nominal_yield]
+    else: data.loc[len(data)] = [_proc,_cat,_granular_key,_nominal_yield,_nominal_yield_COWCorr]
 
-granularMap = {}
-
-def main():
-  #checkZeros()
-  #exit(0)
-  totEffAccNumer = 0.
-  totEffAccDenom = 0.
-  for fileName in fullFileNames:
-    if 'M125' not in fileName: continue
-    theProc = fileName.split('pythia8_')[1].split('.root')[0]
-    theProc0 = theProc.split('_')[0]
-    print 'processing %s (%s)'%(theProc,theProc0)
-    theFile = r.TFile(fileName, 'READ')
-    theWS = theFile.Get('tagsDumper/cms_hgg_13TeV')
-    if opts.tagSplit:
-      theFile2 = r.TFile( re.sub("tagsetone","tagsettwo",fileName), 'READ')
-      theWS2 = theFile2.Get('tagsDumper/cms_hgg_13TeV')
-      theFile3 = r.TFile( re.sub("tagsetone","tagsetthree",fileName), 'READ')
-      theWS3 = theFile3.Get('tagsDumper/cms_hgg_13TeV')
-      for cat in cats:
-        dataName = '%s_125_13TeV_%s'%(nameMap[theProc0], cat)
-        granularKey = '%s__%s'%(theProc,cat)
-        if cat in catsSplittingScheme['tagsetone']: sumEntries = theWS.data(dataName).sumEntries()
-        elif cat in catsSplittingScheme['tagsettwo']: sumEntries = theWS2.data(dataName).sumEntries()
-        elif cat in catsSplittingScheme['tagsetthree']: sumEntries = theWS3.data(dataName).sumEntries()
-        else: 
-          print " --> [ERROR] cat not defined in tag splitting scheme. Leaving"
-          sys.exit(1)
-        if not granularKey in granularMap: granularMap[granularKey] = sumEntries
-        else: exit('DO NOT expect a given proc x cat to appear more than once!!!')
-        stage0procs[theProc0] += sumEntries
-        procs[theProc] += sumEntries
-        totEffAccNumer += sumEntries
-    else:  
-      for cat in cats:
-	sumEntries = theWS.data(dataName).sumEntries()
-	if not granularKey in granularMap: granularMap[granularKey] = sumEntries
-	else: exit('DO NOT expect a given proc x cat to appear more than once!!!')
-	stage0procs[theProc0] += sumEntries
-	procs[theProc] += sumEntries
-	totEffAccNumer += sumEntries
-    dataName = '%s_125_13TeV_NOTAG'%(nameMap[theProc0])
-    sumEntries = theWS.data(dataName).sumEntries()
-    stage0noTag[theProc0] += sumEntries
-    procsNoTag[theProc] += sumEntries
-    totEffAccDenom += sumEntries
-
-  print '\n\n\nStage 1.2 fractions:'
-  for proc,val in procs.iteritems():
-    procTot = stage0procs[ proc.split('_')[0] ]+stage0noTag[proc.split('_')[0]]
-    theFrac = (val+procsNoTag[proc]) / procTot
-    effAcc  = val / (val + procsNoTag[proc]) 
-    print 'total     for process %s is %1.4f [1fb-1]'%(proc,(val+procsNoTag[proc]))
-    print 'fraction  for process %s is %1.4f'%(proc,theFrac)
-    print 'eff x acc for process %s is %1.4f'%(proc,effAcc)
-    print '\n'
-  totEffAcc = totEffAccNumer / (totEffAccNumer + totEffAccDenom)
-  print 'total eff x acc is %1.4f'%(totEffAcc)
-
-  with open('jsons/granularEffAcc_%s.json'%(opts.ext), 'w') as outFile:
-    for proc,val in procs.iteritems():
-      for cat in cats:
-        granularKey = '%s__%s'%(proc,cat)
-        #granularEffAcc = granularMap[granularKey] / ( stage0procs[proc.split('_')[0]] + stage0noTag[proc.split('_')[0]] )
-        granularEffAcc = granularMap[granularKey] / (val + procsNoTag[proc])
-        if granularEffAcc < 0.: granularEffAcc = 0.
-        outFile.write("%s %.6f \n"%(granularKey, granularEffAcc) )
-
-def checkZeros():
-  print 'About to check for low sumEntries'
-  #masses = [120,123,124,125,126,127,130]
-  masses = [120,125,130]
-  for mass in masses:
-    mass = str(mass)
-    print 'processing mass %s'%mass
-    for fileName in fullFileNames:
-      if 'M%s'%mass not in fileName: continue
-      theProc = fileName.split('pythia8_')[1].split('.root')[0]
-      theProc0 = theProc.split('_')[0]
-      print 'processing %s'%theProc
-      theFile = r.TFile(fileName, 'READ')
-      theWS = theFile.Get('tagsDumper/cms_hgg_13TeV')
-      for cat in cats:
-        dataName = '%s_%s_13TeV_%s'%(nameMap[theProc0], mass, cat)
-        sumEntries = theWS.data(dataName).sumEntries()
-        if sumEntries < 0.1:
-          print 'WARNING: sumEntries is %1.3f for %s, %s at %s GeV'%(sumEntries, theProc, cat, mass)
-
-if __name__ == '__main__':
-  main()
+# Calculate fractions
+if opt.doFractions:
+  if opt.skipCOWCorr:
+    print " --> [ERROR] Must include centralObjectWeight corrections for signal normalisation fractions"
+    leave()
+  print "\n --> Stage 1.2 fractions:"
+  for proc_s0 in ['GG2H','VBF','WH2HQQ','ZH2HQQ','QQ2HLNU','QQ2HLL','TTH','TH','THQ','THW','BBH']:
+    mask = (data.apply( lambda x: x['proc'].split("_")[0] == proc_s0, axis=1))
+    proc_s0_yield = data[mask].nominal_yield_COWCorr.sum()
+    if proc_s0_yield > 0:
+      print " * %s:"%proc_s0
+      for proc in data[mask].proc.unique():
+        mask = (data['proc']==proc)
+        proc_yield = data[mask].nominal_yield_COWCorr.sum()
+        print "    * %s = %.4f"%(proc,proc_yield/proc_s0_yield)
+        
+# Calculate eff x Acc and store in json
+if opt.doEffAcc:
+  if not os.path.isdir("jsons"): os.mkdir("./jsons")
+  if not opt.skipCOWCorr: 
+    with open("jsons/granularEffAcc_%s.json"%opt.ext,'w') as outFile:
+      for ir,r in data.iterrows():
+        if r['cat']=='NOTAG': continue
+        proc_yield = data[data['proc']==r['proc']].nominal_yield_COWCorr.sum() # include COW correction
+        ea = r['nominal_yield']/proc_yield
+        if ea < 0.: ea = 0.
+        outFile.write("%s %.6f\n"%(r['granular_key'],ea))
+    print " --> Written eff x acc (with central object weight correction): jsons/granularEffAcc_%s.json"%opt.ext
+  with open("jsons/granularEffAcc_%s_skipCOWCorr.json"%opt.ext,'w') as outFile:
+    for ir,r in data.iterrows():
+      if r['cat']=='NOTAG': continue
+      proc_yield = data[data['proc']==r['proc']].nominal_yield.sum()
+      ea = r['nominal_yield']/proc_yield
+      if ea < 0.: ea = 0.
+      outFile.write("%s %.6f\n"%(r['granular_key'],ea))
+  print " --> Written eff x acc (no central object weight correction): jsons/granularEffAcc_%s_skipCOWCorr.json"%opt.ext
