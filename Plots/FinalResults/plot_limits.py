@@ -26,6 +26,7 @@ ol = '/eos/user/a/atishelm/www/HHWWgg_Analysis/fggfinalfit/limits'
 parser = argparse.ArgumentParser()
 parser.add_argument("-AC","--atlas_compare", action="store_true", default=False, help="Display limits in way to compare to ATLAS HHWWgg limits", required=False)
 parser.add_argument("-CMSC","--CMS_compare", action="store_true", default=False, help="Display limits in way to compare to CMS HH limits", required=False)
+parser.add_argument("-a","--All_Points", action="store_true", default=False, help="Display limits for all mass points produced", required=False)
 parser.add_argument("-SM","--SM_Radion",action="store_true", default=False, help="Display SM limits", required=False)
 args = parser.parse_args()
 
@@ -103,8 +104,10 @@ def getLimits(file_name):
         # print'quantile = ',quantile 
         if(args.atlas_compare):
             limits.append(tree.limit)
-        elif(args.CMS_compare):
-            limits.append(tree.limit*1000.) # fb 
+        elif(args.CMS_compare) or (args.All_Points):
+            limits.append(tree.limit*1000.) # fb
+	elif(args.SM_Radion):
+	    limits.append(tree.limit)
         # print ">>>   %.2f" % limits[-1]
  
     return limits[:6]
@@ -125,11 +128,14 @@ def plotUpperLimits(labels,values):
         #file_name = "higgsCombine.AsymptoticLimits.mH125." + labels[i] +  ".root"
         
         file_name = "HHWWgg_v2-3_2017_" + labels[i] + "_HHWWgg_qqlnu.root"
-        limit = getLimits(file_name)
+        #print'file_name:',file_name
+	limit = getLimits(file_name)
         # print'limit = ',limit
         # print'values[i] = ',values[i] 
-        up2s.append(limit[4])
-        yellow.SetPoint(    i,    values[i], limit[4] ) # + 2 sigma
+        #print'limit = ',limit
+	up2s.append(limit[4])
+        #if(args.SM_Radion): 
+	yellow.SetPoint(    i,    values[i], limit[4] ) # + 2 sigma
         green.SetPoint(     i,    values[i], limit[3] ) # + 1 sigma
         median.SetPoint(    i,    values[i], limit[2] ) # median
         green.SetPoint(  2*N-1-i, values[i], limit[1] ) # - 1 sigma
@@ -171,8 +177,11 @@ def plotUpperLimits(labels,values):
     
     if(args.atlas_compare):
         frame.GetYaxis().SetTitle("95% CL limits on #sigma(gg#rightarrow X)#times B(X#rightarrow HH) [pb]")
-    elif(args.CMS_compare):
+    elif(args.CMS_compare) or (args.All_Points):
         frame.GetYaxis().SetTitle("95% CL limit on #sigma(gg#rightarrow X#rightarrow HH) (fb)")
+    elif(args.SM_Radion):
+        frame.GetYaxis().SetTitle("95% CL limit on #sigma(gg#rightarrow X#rightarrow HH) (pb)")
+	#frame.GetXaxis().Set
 #    frame.GetYaxis().SetTitle("95% upper limit on #sigma #times BR / (#sigma #times BR)_{SM}")
     # frame.GetXaxis().SetTitle("background systematic uncertainty [%]")
     #if(args.SM_Radion): frame.GetXaxis.SetTitle("Standard Model")
@@ -186,7 +195,7 @@ def plotUpperLimits(labels,values):
     
     if(args.atlas_compare):
         frame.SetMaximum(7*1e2) # ATLAS
-    elif(args.CMS_compare):
+    elif(args.CMS_compare) or (args.All_Points):
         frame.SetMaximum(8*1e4) # CMS HH 
     frame.GetXaxis().SetLimits(min(values),max(values))
     # frame.SetLogy()
@@ -246,6 +255,8 @@ def plotUpperLimits(labels,values):
     outFile += ol + '/'
     if(args.CMS_compare):
         outFile += "CMS_Compare_"
+    if(args.All_Points):
+	outFile += "All_Points_"
     if(args.atlas_compare):
         outFile += "atlas_Compare_"
 
@@ -280,7 +291,7 @@ def main():
         values.append(1)
     else:       
 	    if(args.CMS_compare): masses = [250, 260, 270, 280, 300, 320, 350, 400, 500, 550, 600, 650, 700, 800, 850, 900, 1000] 
-	    
+	    if(args.All_Points): masses = [250, 260, 270, 280, 300, 320, 350, 400, 500, 550, 600, 650, 700, 800, 850, 900, 1000, 1250]
             if(args.atlas_compare): masses = [250, 260, 270, 280, 300, 320, 350, 400, 500]
 	    for m in masses:
 		labels.append("X" + str(m))

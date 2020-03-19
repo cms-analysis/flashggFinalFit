@@ -25,11 +25,15 @@ parser.add_option("--runLocal",default=False,action="store_true",help="Run local
 parser.add_option("--dryRun",default=False,action="store_true",help="Dont submit jobs")
 parser.add_option("-q","--queue",default="espresso",help="Which batch queue")
 parser.add_option("--batch",default="HTCONDOR",help="Which batch system to use (HTCONDOR,IC)")
+parser.add_option("--analysis",type="str",default="",help="Which analysis to run on")
 parser.add_option("-v","--verbose",default=False,action="store_true",help="Print more output")
 (options,args) = parser.parse_args()
 
 import os
 import subprocess
+
+print'analysis =',options.analysis
+print'options.useBinnedData = ',options.useBinnedData
 
 os.system('mkdir -p %s'%options.outDir)
 
@@ -86,7 +90,9 @@ for cat in range(ncats):
   print execLine
   
   os.system('chmod +x %s'%f.name)
-  if options.runLocal: os.system('./%s'%f.name)
+  # if(args.analysis == "HHWWgg"): 
+  # if options.runLocal: os.system('./%s'%f.name)
+  if options.runLocal or options.analysis == "HHWWgg": os.system('./%s'%f.name)
   else:
     if (options.batch == "IC") : os.system('qsub -q %s -o %s.log %s'%(options.queue,os.path.abspath(f.name),os.path.abspath(f.name)))
     elif( options.batch == "HTCONDOR" ):

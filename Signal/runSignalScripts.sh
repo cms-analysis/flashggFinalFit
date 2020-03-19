@@ -27,6 +27,7 @@ BATCH=""
 QUEUE=""
 VERBOSITY=""
 BS=""
+SYSTEMATICS="1"
 
 usage(){
 	echo "The script runs three signal scripts in this order:"
@@ -52,6 +53,7 @@ usage(){
 		echo "--year) Dataset year (default $YEAR)) "
 		echo "--batch) which batch system to use (None (''),LSF,IC) (default '$BATCH')) "
 		echo "--queue) queue to submit jobs to (specific to batch)) "
+    echo "--systematics) 0: run with empty dat file for systematics. 1: run with properly written and filled dat file for photon systematics"
 }
 
 
@@ -59,7 +61,7 @@ usage(){
 
 
 # options may be followed by one colon to indicate they have a required argument
-if ! options=$(getopt -u -o hi:p:f: -l help,inputFile:,procs:,bs:,smears:,massList:,scales:,scalesCorr:,useSSF:,useDCB_1G:,scalesGlobal:,flashggCats:,analysis:,ext:,fTestOnly,calcPhoSystOnly,sigFitOnly,dontPackage,packageOnly,sigPlotsOnly,intLumi:,year:,batch:,queue:,verbosity:, -- "$@")
+if ! options=$(getopt -u -o hi:p:f: -l help,inputFile:,procs:,bs:,smears:,massList:,scales:,scalesCorr:,useSSF:,useDCB_1G:,scalesGlobal:,flashggCats:,analysis:,ext:,fTestOnly,calcPhoSystOnly,sigFitOnly,dontPackage,packageOnly,sigPlotsOnly,intLumi:,year:,batch:,queue:,verbosity:,systematics:, -- "$@")
 then
 # something went wrong, getopt will put out an error message for us
 exit 1
@@ -94,6 +96,7 @@ case $1 in
 --batch) BATCH=$2; shift;;
 --queue) QUEUE=$2; shift;;
 --verbosity) VERBOSITY=$2; shift;;
+--systematics) SYSTEMATICS=$2; shift;; 
 
 (--) shift; break;;
 (-*) usage; echo "$0: [ERROR] - unrecognized option $1" 1>&2; usage >> /dev/stderr; exit 1;;
@@ -250,7 +253,8 @@ if [ $SIGFITONLY == 1 ]; then
     # echo "fileDir: $fileDir"
     # echo "mass: $mass"
     HHWWggLabel="${mass}_WWgg_qqlnugg"
-    python DirecShiftHiggsDatasets.py $fileDir $mass $HHWWggLabel # create 120 and 130 points 
+    # python DirecShiftHiggsDatasets.py $fileDir $mass $HHWWggLabel # create 120 and 130 points 
+    python DirecShiftHiggsDatasets.py $fileDir $mass $HHWWggLabel $CATS # create 120 and 130 points 
     sigFiles=""
     for m in 120 125 130
     do
@@ -262,8 +266,13 @@ if [ $SIGFITONLY == 1 ]; then
 
   if [[ $BATCH == "" ]]; then
     echo "ANALYSIS: $ANALYSIS"
-    echo "./bin/SignalFit -i $FILE -d dat/newConfig_$EXT.dat  --mhLow=120 --mhHigh=130 -s dat/photonCatSyst_$EXT.dat --procs $PROCS -o $OUTDIR/CMS-HGG_mva_13TeV_sigfit.root -p $OUTDIR/sigfit -f $CATS --changeIntLumi $INTLUMI  --useDCBplusGaus $USEDCBP1G --useSSF $SIMULATENOUSMASSPOINTFITTING --massList $MASSLIST --analysis $ANALYSIS --year $YEAR"
-    ./bin/SignalFit -i $FILE -d dat/newConfig_$EXT.dat  --mhLow=120 --mhHigh=130 -s dat/photonCatSyst_$EXT.dat --procs $PROCS -o $OUTDIR/CMS-HGG_mva_13TeV_sigfit.root -p $OUTDIR/sigfit -f $CATS --changeIntLumi $INTLUMI  --useDCBplusGaus $USEDCBP1G --useSSF $SIMULATENOUSMASSPOINTFITTING --massList $MASSLIST --analysis $ANALYSIS --year $YEAR  
+    echo "SYSTEMATICS: $SYSTEMATICS"
+    sysdatOption="-s dat/photonCatSyst_$EXT.dat"
+    if [ $SYSTEMATICS == 0 ]; then
+      sysdatOption="-s dat/empty.dat"
+    fi
+    echo "./bin/SignalFit -i $FILE -d dat/newConfig_$EXT.dat  --mhLow=120 --mhHigh=130 ${sysdatOption} --procs $PROCS -o $OUTDIR/CMS-HGG_mva_13TeV_sigfit.root -p $OUTDIR/sigfit -f $CATS --changeIntLumi $INTLUMI  --useDCBplusGaus $USEDCBP1G --useSSF $SIMULATENOUSMASSPOINTFITTING --massList $MASSLIST --analysis $ANALYSIS --year $YEAR"
+    ./bin/SignalFit -i $FILE -d dat/newConfig_$EXT.dat  --mhLow=120 --mhHigh=130 ${sysdatOption} --procs $PROCS -o $OUTDIR/CMS-HGG_mva_13TeV_sigfit.root -p $OUTDIR/sigfit -f $CATS --changeIntLumi $INTLUMI  --useDCBplusGaus $USEDCBP1G --useSSF $SIMULATENOUSMASSPOINTFITTING --massList $MASSLIST --analysis $ANALYSIS --year $YEAR  
   else
     echo "./python/submitSignalFit.py -i $FILE -d dat/newConfig_$EXT.dat  --mhLow=120 --mhHigh=130 -s dat/photonCatSyst_$EXT.dat --procs $PROCS -o $OUTDIR/CMS-HGG_sigfit_$EXT.root -p $OUTDIR/sigfit -f $CATS --changeIntLumi $INTLUMI --batch $BATCH --massList $MASSLIST -q $QUEUE $BSOPT --useSSF $SIMULATENOUSMASSPOINTFITTING --useDCB_1G $USEDCBP1G --analysis $ANALYSIS --year $YEAR"
     ./python/submitSignalFit.py -i $FILE -d dat/newConfig_$EXT.dat  --mhLow=120 --mhHigh=130 -s dat/photonCatSyst_$EXT.dat --procs $PROCS -o $OUTDIR/CMS-HGG_sigfit_$EXT.root -p $OUTDIR/sigfit -f $CATS --changeIntLumi $INTLUMI --batch $BATCH --massList $MASSLIST -q $QUEUE $BSOPT --useSSF $SIMULATENOUSMASSPOINTFITTING --useDCB_1G $USEDCBP1G --analysis $ANALYSIS --year $YEAR 
@@ -381,11 +390,24 @@ if [ $SIGPLOTSONLY == 1 ]; then
   echo "=============================="
   
   if [ -z $BATCH ]; then
-    echo " ./bin/makeParametricSignalModelPlots -i $OUTDIR/CMS-HGG_sigfit_$EXT.root  -o $OUTDIR -p $PROCS -f $CATS --analysis $ANALYSIS --year $YEAR "
-    ./bin/makeParametricSignalModelPlots -i $OUTDIR/CMS-HGG_sigfit_$EXT.root  -o $OUTDIR/sigplots -p $PROCS -f $CATS --analysis $ANALYSIS --year $YEAR > signumbers_${EXT}.txt
+
+    inFile="${OUTDIR}/CMS-HGG_sigfit_${EXT}.root" #packaged 
+    # if [[ $ANALYSIS == "HHWWgg" ]]; then 
+    #   inFile="${OUTDIR}/CMS-HGG_mva_13TeV_sigfit.root" # non-packaged 
+    # fi
+    # sysOption="1"
+    # if [ $SYSTEMATICS == 0 ]; then
+    #   sysOption="-s dat/empty.dat"
+    # fi
+    echo " ./bin/makeParametricSignalModelPlots -i ${inFile}  -o $OUTDIR -p $PROCS -f $CATS --analysis $ANALYSIS --year $YEAR --systematics $SYSTEMATICS"
+    ./bin/makeParametricSignalModelPlots -i ${inFile}  -o $OUTDIR/sigplots -p $PROCS -f $CATS --analysis $ANALYSIS --year $YEAR --systematics $SYSTEMATICS # Need to not output to .txt file in order to debug 
+    # ./bin/makeParametricSignalModelPlots -i ${inFile}  -o $OUTDIR/sigplots -p $PROCS -f $CATS --analysis $ANALYSIS --year $YEAR --systematics $SYSTEMATICS > signumbers_${EXT}.txt
     
-    ./makeSlides.sh $OUTDIR
-    mv fullslides.pdf $OUTDIR/fullslides_${EXT}.pdf
+    if [[ $ANALYSIS != "HHWWgg" ]]; then 
+      ./makeSlides.sh $OUTDIR
+      mv fullslides.pdf $OUTDIR/fullslides_${EXT}.pdf    
+    fi
+
   else
     echo "./python/submitSignalPlots.py -i $OUTDIR/CMS-HGG_sigfit_$EXT.root -o $OUTDIR/sigplots -p $PROCS -f $CATS --batch $BATCH -q $QUEUE --year $YEAR"
     ./python/submitSignalPlots.py -i $OUTDIR/CMS-HGG_sigfit_$EXT.root -o $OUTDIR/sigplots -p $PROCS -f $CATS --batch $BATCH -q $QUEUE --year $YEAR

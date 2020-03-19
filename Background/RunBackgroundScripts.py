@@ -26,6 +26,9 @@ def get_options():
   parser.add_option('--mode', dest='mode', default='std', help="For performing single functions [std,fTestOnly,bkgPlotsOnly]")
   parser.add_option('--printOnly', dest='printOnly', default=0, type='int', help="Dry run: print command only")
   
+  parser.add_option('--analysis', dest='analysis', default="", type='str', help="Analysis to run on. Currently just configuring for HHWWgg")
+
+
   return parser.parse_args()
 
 (opt,args) = get_options()
@@ -52,6 +55,7 @@ if opt.inputConfig != '':
     queue        = _cfg['queue']
     mode         = _cfg['mode']
     printOnly    = opt.printOnly
+    analysis     = _cfg['analysis']
 
     # Delete copy of file
     os.system("rm config.py")
@@ -72,6 +76,7 @@ else:
   queue        = opt.queue
   mode         = opt.mode
   printOnly    = opt.printOnly
+  analysis     = opt.analysis
 
 # Check if mode is allowed in options
 if mode not in ['std','fTestOnly','bkgPlotsOnly']:
@@ -129,6 +134,8 @@ cmdLine = "./runBackgroundScripts.sh -i %s -p %s -f %s --ext %s --intLumi %s --y
 if mode == "fTestOnly": cmdLine += '--fTestOnly '
 elif mode == "bkgPlotsOnly": cmdLine += '--bkgPlotsOnly '
 if unblind and not fTestOnly: cmdLine += '--undblind '
+
+if analysis != "": cmdLine += ' --analysis ' + analysis 
 
 # Either print command to screen or run
 if printOnly: print "\n%s"%cmdLine

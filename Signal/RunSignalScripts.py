@@ -53,6 +53,8 @@ def get_options():
   parser.add_option('--mode', dest='mode', default='std', help="Allows single function [std,phoSystOnly,sigFitOnly,packageOnly,sigPlotsOnly]")
   parser.add_option('--printOnly', dest='printOnly', default=0, type='int', help="Dry run: print command only")
   parser.add_option('--verbosity', dest='verbosity', default=0, type='int', help="verbosity")
+  parser.add_option('--systematics', dest='systematics', default=1, type='int', help="0: use empty dat file for photon systematics 1: use properly written and filled dat file")
+  
   # parser.add_option('--runLocal', dest='runLocal', default=0, type='int', help="Run locally, no batch systems")
   # parser.add_option('--HHWWgg', dest='HHWWgg', default=0, type='int', help="(0): Do not run for HHWWgg analysis (1): Run for HHWWgg analysis ")
   return parser.parse_args()
@@ -89,6 +91,7 @@ if opt.inputConfig != '':
     batch        = _cfg['batch']
     queue        = _cfg['queue']
     mode         = _cfg['mode']
+    systematics  = _cfg['systematics']
     printOnly    = opt.printOnly # Still take printOnly from options
     verbosity      = _cfg['verbosity']
     # runLocal     = _cfg['runLocal']
@@ -121,6 +124,7 @@ else:
   batch        = opt.batch
   queue        = opt.queue
   mode         = opt.mode
+  systematics  = opt.systematics 
   printOnly    = opt.printOnly
   verbosity      = opt.verbosity
   # runLocal     = opt.runLocal
@@ -240,16 +244,18 @@ else:
     filesList = ws_fullFileNames.split(',')
     for f in filesList:
       cmdLine = ''
-      print
+      print 
       print'On File: ',f
       print
       # ext = _HHWWgg_v2-3_2017_X280_WWgg_qqlnugg
+
+      print'systematics: ',systematics
       
       massExt = f.split('/')[-1].split('.')[0]
       thisExt = ext + '_' + massExt
 
       # if batch not specified, run locally 
-      if batch == '': cmdLine += './runSignalScripts.sh -i %s -p %s -f %s --ext %s --intLumi %s --year %s --massList %s --bs %s --analysis %s --scales %s --scalesCorr %s --scalesGlobal %s --smears %s --useSSF 1 --verbosity %s '%(f,procs,cats,thisExt,lumi[year],year,massPoints,beamspot,analysis,scales,scalesCorr,scalesGlobal,smears,verbosity)
+      if batch == '': cmdLine += './runSignalScripts.sh -i %s -p %s -f %s --ext %s --intLumi %s --year %s --massList %s --bs %s --analysis %s --scales %s --scalesCorr %s --scalesGlobal %s --smears %s --useSSF 1 --verbosity %s --systematics %s'%(f,procs,cats,thisExt,lumi[year],year,massPoints,beamspot,analysis,scales,scalesCorr,scalesGlobal,smears,verbosity,systematics)
 
       # run with batch 
       else: cmdLine += './runSignalScripts.sh -i %s -p %s -f %s --ext %s --intLumi %s --year %s --batch %s --queue %s --massList %s --bs %s --analysis %s --scales %s --scalesCorr %s --scalesGlobal %s --smears %s --useSSF 1 --verbosity %s'%(f,procs,cats,thisExt,lumi[year],year,batch,queue,massPoints,beamspot,analysis,scales,scalesCorr,scalesGlobal,smears,verbosity)

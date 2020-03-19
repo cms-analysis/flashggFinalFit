@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import pandas as pd 
+# import pandas as pd 
 # Script adapted from original by Matt Kenzie.
 # Used for Dry Run of Dec 2015 Hgg analysis.
 
@@ -1120,29 +1120,29 @@ def printNuisParam(name,typ,sqrtS=None):
   if ":" in name:
     name,val = name.split(":") # value is already expected to be here in form name:val. When is it set? 
   # if : not in name, need to get value 
-  else:
-    if analysis == "HHWWgg":
-      key = "%s_13TeV%s"%(name,typ)
-      # print'infilename: ',options.infilename
-      # ext = options.infilename.split('/')[-2]
-      HHWWggMass__ = options.infilename.split('/')[-1].split('_')[0]
-      prefix = '/afs/cern.ch/work/a/atishelm/private/CMSSW_10_2_13/src/flashggFinalFit/'
-      datFile = prefix + 'Signal/outdir_HHWWgg_v2-3_2017_%s_HHWWgg_qqlnu/dat/copy_photonCatSyst_HHWWgg_v2-3_2017_%s_HHWWgg_qqlnu.dat'%(HHWWggMass__,HHWWggMass__)
-      # print'datFile: ',datFile 
-      df = pd.read_csv(datFile,delim_whitespace=True)
-      allVals = df.values.tolist()
-      # skip first 7 lines, don't have values 
-      for i,info in enumerate(allVals):
-        if i < 7: continue 
-        print'key:',key 
-        systematic, mean_change, sigma_change, rate_change = info[0], info[1], info[2], info[3] 
-        if systematic == key: 
-          val = mean_change 
-          break 
+  # else:
+    # if analysis == "HHWWgg":
+    #   key = "%s_13TeV%s"%(name,typ)
+    #   # print'infilename: ',options.infilename
+    #   # ext = options.infilename.split('/')[-2]
+    #   HHWWggMass__ = options.infilename.split('/')[-1].split('_')[0]
+    #   prefix = '/afs/cern.ch/work/a/atishelm/private/CMSSW_10_2_13/src/flashggFinalFit/'
+    #   datFile = prefix + 'Signal/outdir_HHWWgg_v2-3_2017_%s_HHWWgg_qqlnu/dat/copy_photonCatSyst_HHWWgg_v2-3_2017_%s_HHWWgg_qqlnu.dat'%(HHWWggMass__,HHWWggMass__)
+    #   # print'datFile: ',datFile 
+    #   df = pd.read_csv(datFile,delim_whitespace=True)
+    #   allVals = df.values.tolist()
+    #   # skip first 7 lines, don't have values 
+    #   for i,info in enumerate(allVals):
+    #     if i < 7: continue 
+    #     print'key:',key 
+    #     systematic, mean_change, sigma_change, rate_change = info[0], info[1], info[2], info[3] 
+    #     if systematic == key: 
+    #       val = mean_change 
+    #       break 
         # print'info:',info
         # print'info[2] =',info[2] 
       # val = "1.0"
-      print'val:',val 
+      # print'val:',val 
       # exit(0)
       # options.infilename
     # val = 

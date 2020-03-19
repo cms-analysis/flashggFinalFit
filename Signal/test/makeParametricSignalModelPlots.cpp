@@ -69,6 +69,7 @@ bool doCrossCheck_;
 bool markNegativeBins_;
 bool doAllSum_;
 string analysis_;
+string systematics_;
 
 void OptionParser(int argc, char *argv[]){
   po::options_description desc1("Allowed options");
@@ -89,6 +90,7 @@ void OptionParser(int argc, char *argv[]){
     ("markNegativeBins",  po::value<bool>(&markNegativeBins_)->default_value(false),                          " show with red arrow if a bin has a negative total value")
     ("doAllSum",  po::value<bool>(&doAllSum_)->default_value(false),                          "include the sum of all procs, categories (slow)")
     ("analysis,a", po::value<string>(&analysis_)->default_value(""),          "analysis")
+    ("systematics,s", po::value<string>(&systematics_)->default_value("1"),          "0: Not running with systematics. 1: Running with systematics")
     ("flashggCats,f", po::value<string>(&flashggCatsStr_)->default_value("DiPhotonUntaggedCategory_0,DiPhotonUntaggedCategory_1,DiPhotonUntaggedCategory_2,DiPhotonUntaggedCategory_3,DiPhotonUntaggedCategory_4,VBFTag_0,VBFTag_1,VBFTag_2"),       "Flashgg category names to consider")
     ;
 
@@ -124,6 +126,7 @@ map<string,RooDataSet*> getFlashggData(RooWorkspace *work, int ncats, int m_hyp)
 
   for (int cat=0; cat<ncats; cat++){
     result.insert(pair<string,RooDataSet*>(Form("%s",flashggCats_[cat].c_str()),(RooDataSet*)work->data(Form("sig_mass_m%3d_%s",m_hyp,flashggCats_[cat].c_str()))));
+    // result.insert(pair<string,RooDataSet*>(Form("%s",flashggCats_[cat].c_str()),(RooDataSet*)work->data(Form("sig_ggF_mass_m%3d_%s",m_hyp,flashggCats_[cat].c_str()))));
   }
   if (doAllSum_) {
     result.insert(pair<string,RooDataSet*>("all",(RooDataSet*)work->data(Form("sig_mass_m%3d_AllCats",m_hyp))));
@@ -443,7 +446,7 @@ void performClosure(RooRealVar *mass, RooAbsPdf *pdf, RooDataSet *data, string c
 }
 
 void Plot(RooRealVar *mass, RooDataSet *data, RooAbsPdf *pdf, pair<double,double> sigRange, vector<double> fwhmRange, string title, string savename, string analysis_){
-
+  // cout << "title: "<<title<<endl;
   double semin=sigRange.first;
   double semax=sigRange.second;
   double fwmin=fwhmRange[0];
@@ -472,7 +475,7 @@ void Plot(RooRealVar *mass, RooDataSet *data, RooAbsPdf *pdf, pair<double,double
   if (data) data->plotOn(plot,Invisible());
   if (data) data->plotOn(plotchi2,Invisible());
   std::cout << " LC DEBIG A : data content: " << data->sumEntries() << std::endl;
-  data->Print();
+  // data->Print();
 
   pdf->plotOn(plot,NormRange("higgsRange"),Range(semin,semax),FillColor(19),DrawOption("F"),LineWidth(2),FillStyle(1001),VLines(),LineColor(15));
   TObject *seffLeg = plot->getObject(int(plot->numItems()-1));
@@ -532,9 +535,35 @@ void Plot(RooRealVar *mass, RooDataSet *data, RooAbsPdf *pdf, pair<double,double
   string savename_2 = "";
   // string HHWWgg_Label = "";
 
+  // title
+  string procLabel = title.substr(0,3); // HHWWgg hack to get ggF production mode 
+  string catLabel = title.substr(title.find("_") + 1);
+
+  TString procLabel_humanReadable  = TString(procLabel);
+  TString catLabel_humanReadable  = TString(catLabel);
+
+  // procLabel_humanReadable.Resize(TString(title).Index("RECO")); //FIXME not universal
+  // procLabel_humanReadable.ReplaceAll("_"," ");
+
+  // procLabel_humanReadable.Resize(TString(title).Index("RECO")); //FIXME not universal
+  // procLabel_humanReadable.ReplaceAll("_"," ");
+
+
+  // TString catLabel_humanReadable  = TString(title);
+  // catLabel_humanReadable.Remove(0,TString(title).Index("RECO")); //FIXME not universal
+  // // TString catLabel = catLabel_humanReadable;
+  // catLabel_humanReadable.ReplaceAll("RECO_","");
+  // catLabel_humanReadable.ReplaceAll("_"," ");
+  // catLabel_humanReadable.ReplaceAll("UntaggedTag","Untagged");
+  // catLabel_humanReadable.ReplaceAll("VBFTag","VBF Tag");
+  // catLabel_humanReadable.ReplaceAll("TTHLeptonicTag","TTH Leptonic Tag");
+  // catLabel_humanReadable.ReplaceAll("TTHHadronicTag","TTH Hadronic Tag");
+  // catLabel_humanReadable.ReplaceAll("all","All Categories");
+  string hhwwggMass;
   if (analysis_ == "HHWWgg"){
     website = "/eos/user/a/atishelm/www/HHWWgg_Analysis/fggfinalfit/Signal/";
     process = "HH#rightarrow WW#gamma#gamma";
+    // Can add stat or stat + sys with systematics flag 
 
     vector<string> tmpV;
 		split(tmpV,savename,boost::is_any_of("/"));	
@@ -542,9 +571,11 @@ void Plot(RooRealVar *mass, RooDataSet *data, RooAbsPdf *pdf, pair<double,double
 		string label = tmpV[0];
 		vector<string> tmpV2;
 		split(tmpV2,label,boost::is_any_of("_"));	 
-		string mass_str = tmpV2[4];
+		string mass_str = tmpV2[5]; // assuming form HHWWgg_v2-3_2017_2Cats_X650_HHWWgg_qqlnu
+		hhwwggMass = mass_str;
+    // string mass_str = tmpV2[4];
 		// HHWWgg_Label = Form("%s_WWgg_qqlnugg",mass_str.c_str());
-    savename_2 = Form("%s_WWgg_qqlnugg",mass_str.c_str());
+    savename_2 = Form("%s_%s_WWgg_qqlnugg",mass_str.c_str(),title.c_str());
 
     // savename = Form("%s");
     // savename = outdir_HHWWgg_v2-3_2017_SM_HHWWgg_qqlnu/sigplots/ggF_HHWWggTag_0.png
@@ -563,25 +594,15 @@ void Plot(RooRealVar *mass, RooDataSet *data, RooAbsPdf *pdf, pair<double,double
   lat1.SetNDC(1);
   lat1.SetTextSize(0.047);
 
-  TString procLabel_humanReadable  = TString(title);
-  procLabel_humanReadable.Resize(TString(title).Index("RECO")); //FIXME not universal
-  procLabel_humanReadable.ReplaceAll("_"," ");
-  TString catLabel_humanReadable  = TString(title);
-  catLabel_humanReadable.Remove(0,TString(title).Index("RECO")); //FIXME not universal
-  catLabel_humanReadable.ReplaceAll("RECO_","");
-  catLabel_humanReadable.ReplaceAll("_"," ");
-  catLabel_humanReadable.ReplaceAll("UntaggedTag","Untagged");
-  catLabel_humanReadable.ReplaceAll("VBFTag","VBF Tag");
-  catLabel_humanReadable.ReplaceAll("TTHLeptonicTag","TTH Leptonic Tag");
-  catLabel_humanReadable.ReplaceAll("TTHHadronicTag","TTH Hadronic Tag");
-  catLabel_humanReadable.ReplaceAll("all","All Categories");
-
   //TLatex lat2(0.93,0.88,catLabel_humanReadable);
   // TLatex lat2(0.93,0.88,Form("#splitline{%s}{%s}",procLabel_humanReadable.Data(),catLabel_humanReadable.Data())); //FIXME
-  cout << "procLabel_humanReadable.Data(): " << procLabel_humanReadable.Data() << endl;
-  cout << "catLabel_humanReadable.Data(): " << catLabel_humanReadable.Data() << endl;
+  // cout << "procLabel_humanReadable.Data(): " << procLabel_humanReadable.Data() << endl;
+  // cout << "catLabel_humanReadable.Data(): " << catLabel_humanReadable.Data() << endl;
+  // cout << "procLabel_humanReadable: " << procLabel_humanReadable << endl;
+  // cout << "catLabel_humanReadable: " << catLabel_humanReadable << endl;
   TLatex lat2(0.93,0.88,Form("%s",procLabel_humanReadable.Data())); //FIXME
   TLatex lat3(0.93,0.78,Form("%s",catLabel_humanReadable.Data())); //FIXME
+  TLatex lat4(0.93,0.68,Form("%s",hhwwggMass.c_str())); 
   
   lat2.SetTextAlign(33);
   lat2.SetNDC(1);
@@ -590,6 +611,10 @@ void Plot(RooRealVar *mass, RooDataSet *data, RooAbsPdf *pdf, pair<double,double
   lat3.SetTextAlign(33);
   lat3.SetNDC(1);
   lat3.SetTextSize(0.045);
+
+  lat4.SetTextAlign(33);
+  lat4.SetNDC(1);
+  lat4.SetTextSize(0.045);
 
   TCanvas *canv = new TCanvas("canv","canv",650,600);
   canv->SetLeftMargin(0.16);
@@ -606,6 +631,7 @@ void Plot(RooRealVar *mass, RooDataSet *data, RooAbsPdf *pdf, pair<double,double
   //lat1.Draw("same");
   lat2.Draw("same");
   lat3.Draw("same");
+  lat4.Draw("same");
   lat1.Draw("same");
   leg->Draw("same");
   TLatex *chi2ndof_latex = new TLatex();	
@@ -708,11 +734,12 @@ int main(int argc, char *argv[]){
   system(Form("mkdir -p %s",outfilename_.c_str()));
   system(Form("rm -f %s/animation.gif",outfilename_.c_str()));
 
-
   for (map<string,RooDataSet*>::iterator dataIt=dataSets.begin(); dataIt!=dataSets.end(); dataIt++){
     pair<double,double> thisSigRange;
+    cout << "in dataset loop" << endl;
     if(dataIt->first!="all") thisSigRange = getEffSigma(mass,pdfs[dataIt->first],m_hyp_-10.,m_hyp_+10.);
     else {
+      cout << "geteffsigbinned" << endl;
       thisSigRange = getEffSigBinned(mass,pdfs[dataIt->first],m_hyp_-10.,m_hyp_+10);
       //RooDataHist *binned = new RooDataHist("test","test",*mass, (dataIt->second)->createHistogram("test",*mass,RooFit::Binning(1000,m_hyp_-10.,m_hyp_+10.)));
       //thisSigRange = getEffSigmaData(mass,binned,m_hyp_-10.,m_hyp_+10.);
@@ -723,13 +750,13 @@ int main(int argc, char *argv[]){
     sigEffs.insert(pair<string,double>(dataIt->first,(thisSigRange.second-thisSigRange.first)/2.));
     fwhms.insert(pair<string,double>(dataIt->first,thisFWHMRange[1]-thisFWHMRange[0]));
     if (doCrossCheck_) performClosure(mass,pdfs[dataIt->first],dataIt->second,Form("%s/closure_%s.pdf",outfilename_.c_str(),dataIt->first.c_str()),m_hyp_-10.,m_hyp_+10.,thisSigRange.first,thisSigRange.second);
-    Plot(mass,dataIt->second,pdfs[dataIt->first],thisSigRange,thisFWHMRange,dataIt->first,Form("%s/%s",outfilename_.c_str(),dataIt->first.c_str()),analysis_);
+    if (analysis_ != "HHWWgg") Plot(mass,dataIt->second,pdfs[dataIt->first],thisSigRange,thisFWHMRange,dataIt->first,Form("%s/%s",outfilename_.c_str(),dataIt->first.c_str()),analysis_); // not sure how these are different from granular plots
   }
 
   for (map<string,RooDataSet*>::iterator dataIt=dataSetsGranular.begin(); dataIt!=dataSetsGranular.end(); dataIt++){
     //RooDataHist *binned = new RooDataHist("test","test",*mass, (dataIt->second)->createHistogram("test",*mass,RooFit::Binning(1000,m_hyp_-10.,m_hyp_+10.)));
     //RooDataHist *binned = new RooDataHist("test1","test1",*mass, (dataIt->second)->createHistogram("tes1t",*mass,RooFit::Binning(1,100,140)));
-
+    cout << "in granular dataset loop" << endl;
     //pair<double,double> thisSigRange = getEffSigmaData(mass,binned,m_hyp_-10.,m_hyp_+10.);
     pair<double,double> thisSigRange = getEffSigma(mass,pdfsGranular[dataIt->first],m_hyp_-10.,m_hyp_+10.);
     //pair<double,double> thisSigRange = getEffSigBinned(mass,pdf[dataIt->first],m_hyp_-10.,m_hyp_+10);
