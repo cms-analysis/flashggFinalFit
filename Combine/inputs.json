@@ -34,15 +34,18 @@
         "fit_opts":"--saveSpecifiedNuis all --saveInactivePOI 1"
     },
 
-    "kVkT":{
-        "pois":"kappa_V,kappa_t,kappa_b,kappa_c,kappa_tau",
-        "fits":"profile1D:statonly:kappa_t+scan1D:statonly:kappa_t",
-        "points":"60:1+60:1",
-        "fit_opts":"--saveSpecifiedNuis all --saveInactivePOI 1 --setParameterRanges kappa_t=-3,3+--saveSpecifiedNuis all --saveInactivePOI 1 --setParameterRanges kappa_t=-3,3"      
+    "kappas_resolved":{
+      "pois":"kappa_W,kappa_b,kappa_tau,kappa_Z,kappa_mu,kappa_t",
+      "fits":"scan1D:statonly:kappa_t",
+      "points":"60:1",
+      "fit_opts":"--saveSpecifiedNuis all --saveInactivePOI 1 --setParameterRanges kappa_t=-2,2"
+    },
+
+    "kVkF":{
+      "pois":"kappa_V,kappa_F",
+      "fits":"profile1D:statonly:kappa_F",
+      "points":"60:1",
+      "fit_opts":"--saveSpecifiedNuis all --saveInactivePOI 1 --setParameterRanges kappa_F=-2,2"
     }
-
-
-
     
-
 }

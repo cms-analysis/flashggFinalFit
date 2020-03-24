@@ -1,0 +1,12 @@
+{
+    "tHW_FWDH":{
+        "QCDscale_tHW":[1.049,0.933],
+        "pdf_Higgs_tHW":1.061,
+        "alphaS_tHW":1.015
+    },
+    "tHW":{
+        "QCDscale_tHW":[1.049,0.933],
+        "pdf_Higgs_tHW":1.061,
+        "alphaS_tHW":1.015
+    }
+}

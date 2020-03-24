@@ -1,0 +1,32 @@
+{
+    "ttH_FWDH":{
+        "QCDscale_ttH":[1.058,0.908],
+        "pdf_Higgs_ttH":1.030,
+        "alphaS_ttH":1.020
+    },
+    "ttH_PTH_0_60":{
+        "QCDscale_ttH":[1.058,0.908],
+        "pdf_Higgs_ttH":1.030,
+        "alphaS_ttH":1.020
+    },
+    "ttH_PTH_60_120":{
+        "QCDscale_ttH":[1.058,0.908],
+        "pdf_Higgs_ttH":1.030,
+        "alphaS_ttH":1.020
+    },
+    "ttH_PTH_120_200":{
+        "QCDscale_ttH":[1.058,0.908],
+        "pdf_Higgs_ttH":1.030,
+        "alphaS_ttH":1.020
+    },
+    "ttH_PTH_200_300":{
+        "QCDscale_ttH":[1.058,0.908],
+        "pdf_Higgs_ttH":1.030,
+        "alphaS_ttH":1.020
+    },
+    "ttH_PTH_GT300":{
+        "QCDscale_ttH":[1.058,0.908],
+        "pdf_Higgs_ttH":1.030,
+        "alphaS_ttH":1.020
+    }
+}

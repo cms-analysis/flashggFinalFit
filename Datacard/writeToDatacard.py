@@ -58,7 +58,7 @@ def writeProcesses(f,d,options):
   return True
 
 
-def writeSystematic(f,d,s,options,stxsMergeScheme=None):
+def writeSystematic(f,d,s,options,stxsMergeScheme=None,scaleCorrScheme=None):
 
   # For signal shape systematics add simple line
   if s['type'] == 'signal_shape':
@@ -103,6 +103,27 @@ def writeSystematic(f,d,s,options,stxsMergeScheme=None):
 	    lsyst = addSyst(lsyst,sval,stitle,r['proc'],cat)
 	# Remove final space from line and add to file
 	f.write("%s\n"%lsyst[:-1])
+        # For uncorrelated scale weights: not for merged bins
+        if options.doScaleCorrelationScheme:
+          if(tier!='mnorm')&("scaleWeight" in s['name']):
+	    for ps,psProcs in scaleCorrScheme.iteritems():
+	      psStr = "_%s"%ps
+	      stitle = "%s%s%s"%(s['title'],psStr,tierStr)
+	      lsyst = '%-50s  %-10s    '%(stitle,s['prior'])
+	      # Loop over categories and then iterate over rows in category
+	      for cat in d.cat.unique():
+		for ir,r in d[d['cat']==cat].iterrows():
+		  if r['proc'] == "data_obs": continue
+		  # Remove year+hgg tags from proc
+		  p = re.sub("_2016_hgg","",r['proc'])
+		  p = re.sub("_2017_hgg","",p)
+		  p = re.sub("_2018_hgg","",p)
+		  # Add value if in proc in phase space else -
+		  if p in psProcs: sval = r["%s%s"%(s['name'],tierStr)]
+		  else: sval = '-'
+		  lsyst = addSyst(lsyst,sval,stitle,r['proc'],cat)
+              # Remove final space from line and add to file
+              f.write("%s\n"%lsyst[:-1])
       else:
 	for year in options.years.split(","):
 	  stitle = "%s%s%s_%s"%(s['title'],mergeStr,tierStr,year)

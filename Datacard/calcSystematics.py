@@ -1,5 +1,5 @@
 # Hold defs of functions for calculating systematics and adding to dataframe
-import os, sys, re
+import os, sys, re, json
 import ROOT
 
 # sd = "systematics dataframe"
@@ -7,11 +7,20 @@ import ROOT
 # For constant systematics: FIXME add functionality to choose only some procs
 def addConstantSyst(sd,_syst,options):
 
+  # Read json file into dict and set flag
+  fromJson = False
+  if "json" in _syst['value']:
+    fromJson = True
+    with open( _syst['value'], "r" ) as jsonfile: uval = json.load(jsonfile)
+
   # Add column to dataFrame with default value
   if _syst['correlateAcrossYears'] == 1: 
     sd[_syst['name']] = '-'
-    # If signal and not NOTAG then set value
-    sd.loc[(sd['type']=='sig')&(~sd['cat'].str.contains("NOTAG")), _syst['name']] = _syst['value']
+    if fromJson:
+      sd.loc[(sd['type']=='sig'),_syst['name']] = sd[(sd['type']=='sig')].apply(lambda x: getValueFromJson(x,uval,_syst['name']), axis=1)
+    else:
+      # If signal and not NOTAG then set value
+      sd.loc[(sd['type']=='sig')&(~sd['cat'].str.contains("NOTAG")), _syst['name']] = _syst['value']
 
   # Partial correlation
   elif _syst['correlateAcrossYears'] == -1:
@@ -28,6 +37,16 @@ def addConstantSyst(sd,_syst,options):
       sd.loc[(sd['type']=='sig')&(sd['year']==year)&(~sd['cat'].str.contains("NOTAG")), "%s_%s"%(_syst['name'],year)] = _syst['value'][year]
 
   return sd
+
+def getValueFromJson(row,uncertainties,sname):
+  # uncertainties is a dict of the form proc:{sname:X}
+  p = re.sub("_2016_hgg","",row['proc'])
+  p = re.sub("_2017_hgg","",p)
+  p = re.sub("_2018_hgg","",p)
+  if p in uncertainties: 
+    if type(uncertainties[p][sname])==list: return uncertainties[p][sname]
+    else: return [uncertainties[p][sname]]
+  else: return '-'
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Function to return type of systematic: to be used by factory functions
@@ -109,6 +128,7 @@ def calcSystYields(_nominalDataName,_inputWS,_systFactoryTypes,skipCOWCorr=True)
         if not skipCOWCorr:
           if "NOTAG" in _nominalDataName: f_COWCorr = 1.
           else: f_COWCorr = p.getRealValue("centralObjectWeight")
+          if f_COWCorr == 0: continue
 	  systYields["%s_up_COWCorr"%s] += (w_up/f_COWCorr)        
 	  systYields["%s_down_COWCorr"%s] += (w_down/f_COWCorr)
 
@@ -129,6 +149,7 @@ def calcSystYields(_nominalDataName,_inputWS,_systFactoryTypes,skipCOWCorr=True)
           if not skipCOWCorr:
             if "NOTAG" in _nominalDataName: f_COWCorr = 1.
             else: f_COWCorr = p.getRealValue("centralObjectWeight")
+            if f_COWCorr == 0: continue
             systYields["%s_COWCorr"%s] += (w/f_COWCorr)*(f/f_central)
 
   # For systematics stored as RooDataHist
@@ -219,6 +240,7 @@ def theorySystFactory(d,systs,ftype,options,stxsMergeScheme=None,_removal=False)
         # Loop over systematics
         for s in systs:
           if s['type'] == 'constant': continue
+          elif 'mnorm' not in s['tiers']: continue
           f = ftype[s['name']]
           if f in ['a_w','a_h']:
             for direction in ['up','down']:
@@ -254,6 +276,7 @@ def theorySystFactory(d,systs,ftype,options,stxsMergeScheme=None,_removal=False)
     for mergeName in stxsMergeScheme:
       for s in systs:
 	if s['type'] == 'constant': continue
+        elif 'mnorm' not in s['tiers']: continue
 	for year in options.years.split(","):
 	  # Remove NaN entries and require specific year
 	  mask = (d['merge_%s_nominal_yield'%mergeName]==d['merge_%s_nominal_yield'%mergeName])&(d['year']==year)&(d['nominal_yield']!=0)
@@ -288,10 +311,19 @@ def theorySystFactory(d,systs,ftype,options,stxsMergeScheme=None,_removal=False)
 #   * mode == treatment of theory systematic  
 def compareYield(row,factoryType,sname,mode='default',mname=None):
 
-  # if nominal yield is zero: return 1
+  # Catch: if any yields in denominators are zero: return 1
   if row['nominal_yield']==0:
     if factoryType in ["a_w","a_h"]: return [1.,1.]
     else: return [1.]
+  if mode != 'default': #only for theory uncertainties...
+    if row['proc_nominal_yield']==0:
+      if factoryType in ["a_w","a_h"]: return [1.,1.]
+      else: return [1.]
+    if factoryType in ["a_w","a_h"]:
+      for direction in ['up','down']: 
+	if row["proc_%s_%s_yield"%(sname,direction)] == 0: return [1.,1.]
+    else:
+      if row["proc_%s_yield"%sname] == 0: return [1.]
 
   if( mode == 'default' )|( mode == 'ishape' ):
     if factoryType in ["a_w","a_h"]: return [(row["%s_down_yield"%sname]/row['nominal_yield']),(row["%s_up_yield"%sname]/row['nominal_yield'])]
@@ -399,3 +431,84 @@ def groupSystematics(d,systs,options,prefix="scaleWeight",groupings=[],stxsMerge
   return d,systs
       
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Function to calculate the envelope of systematics with a regexp
+def envelopeSystematics(d,systs,options,regexp=None,stxsMergeScheme=None,_removal=False):
+
+  if regexp is None:
+    print " --> [WARNING] No systematics with regexp (None). Cannot form envelope"
+    return d, systs
+
+  # Extract systematics with regexp
+  s_regexp = []
+  for s in systs:
+    if regexp in s['name']: s_regexp.append(s)
+  if len(s_regexp) == 0:
+    print " --> [WARNING] No systematics with regexp (%s). Cannot form envelope"%regexp
+    return d, systs
+
+  # Determine properties of envelope from first entry: remove "group" tag if in name
+  env = {}
+  env['name'] = "%s_env"%("_".join(s_regexp[0]['name'].split("_")[:-1]))
+  env['title'] = "%s_env"%("_".join(s_regexp[0]['title'].split("_")[:-1]))
+  env['tiers'] = s_regexp[0]['tiers'] 
+  env['prior'] = s_regexp[0]['prior'] 
+  env['correlateAcrossYears'] = s_regexp[0]['correlateAcrossYears'] 
+  env['type'] = s_regexp[0]['type'] 
+
+  # Loop over systematic tiers: all enveloped systematics must have the same tiers
+  for s in s_regexp:
+    if s['tiers'] != env['tiers']:
+      print " --> [WARNING] Systematics in envelope have different tiers. Cannot form envelope"
+  for tier in env['tiers']:
+    if tier == 'mnorm':
+      if options.doSTXSBinMerging:
+        # Loop over merging schemes
+        for mergeName in stxsMergeScheme:
+          env_name = "%s_%s_%s"%(env['name'],mergeName,tier)
+          d[env_name] = '-'      
+          # Define mask as all entries when first entry in envelope is set
+          mask = (d['%s_%s_%s'%(s_regexp[0]['name'],mergeName,tier)]!='-')
+          d.loc[mask,env_name] = d[mask].apply(lambda x: compareSystForEnvelope(x,s_regexp,tier,mname=mergeName) ,axis=1)
+          # Remove original columns from dataFrame
+          if _removal:
+            for s in s_regexp: d.drop( ["%s_%s_%s"%(s['name'],mergeName,tier)], axis=1, inplace=True ) 
+      else: continue
+    else:
+     env_name = "%s_%s"%(env['name'],tier)
+     d[env_name] = '-'      
+     # Define mask as all entries when first entry in envelope is set
+     mask = (d['%s_%s'%(s_regexp[0]['name'],tier)]!='-') 
+     d.loc[mask,env_name] = d[mask].apply(lambda x: compareSystForEnvelope(x,s_regexp,tier) ,axis=1)
+     # Remove original columns from dataFrame
+     if _removal:
+       for s in s_regexp: d.drop( ["%s_%s"%(s['name'],tier)], axis=1, inplace=True ) 
+ 
+  # Add envelope to syst dictionary
+  systs.append(env)
+  if _removal:
+    for s in s_regexp: systs.remove(s)
+ 
+  return d, systs
+
+# Function to compare systematic variation for envelope
+def compareSystForEnvelope(row,systs,stier,mname=None):
+  e_symm_max = 0.
+  env_idx = 0
+  for sidx in range(len(systs)):
+    s = systs[sidx]
+    if mname is not None: sname = "%s_%s_%s"%(s['name'],mname,stier)
+    else: sname = "%s_%s"%(s['name'],stier)
+    if len(row[sname]) == 2: e_symm = 0.5*(abs(row[sname][0]-1)+abs(row[sname][1]-1))
+    else: e_symm = abs(row[sname][0]-1)
+    if e_symm > e_symm_max: 
+      e_symm_max = e_symm
+      env_idx = sidx
+  env_s = systs[env_idx]
+  if mname is not None: env_sname = "%s_%s_%s"%(env_s['name'],mname,stier)
+  else: env_sname = "%s_%s"%(env_s['name'],stier)
+  return row[env_sname]
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Function to change syst title
+def renameSyst(t,oldexp,newexp): return re.sub(oldexp,newexp,t)
+

@@ -13,12 +13,4 @@
         "points":"10000:5",
         "fit_opts":"--saveSpecifiedNuis all --saveInactivePOI 1 --setParameterRanges kappa_V=0,2:kappa_F=-1.5,2.5"  
     },
-
-    "kVkT":{
-        "pois":"kappa_V,kappa_t,kappa_b,kappa_c,kappa_tau",
-        "fits":"scan2D:statonly:kappa_V,kappa_t",
-        "points":"10000:5",
-        "fit_opts":"--saveSpecifiedNuis all --saveInactivePOI 1 --setParameterRanges kappa_t=-4,4:kappa_V=0,4"      
-    }
-
 }

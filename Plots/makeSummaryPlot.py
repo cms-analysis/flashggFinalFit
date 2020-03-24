@@ -82,22 +82,22 @@ default_bar_styles = {
     },
     'qqH_Stat': {
         'LineWidth': 3,
-        'LineColor': ROOT.kOrange+7,
+        'LineColor': ROOT.kOrange-3,
         'MarkerSize': 0
     },
     'WH_lep_Stat': {
         'LineWidth': 3,
-        'LineColor': ROOT.kGreen+1,
+        'LineColor': ROOT.kGreen+2,
         'MarkerSize': 0
     },
     'ZH_lep_Stat': {
         'LineWidth': 3,
-        'LineColor': ROOT.kGreen+1,
+        'LineColor': ROOT.kGreen+2,
         'MarkerSize': 0
     },
     'ttH_Stat': {
         'LineWidth': 3,
-        'LineColor': ROOT.kPink-9,
+        'LineColor': ROOT.kPink+6,
         'MarkerSize': 0
     },
     'tHq_Stat': {
@@ -307,8 +307,8 @@ if __name__ == "__main__":
     parser.add_argument('--width', type=int, default=600, help='Canvas width in pixels')
     parser.add_argument('--labels', default=None, help='Label next to the CMS logo')
     parser.add_argument('--x-title', default='Parameter value', help='Label next to the CMS logo')
-    #parser.add_argument('--x-range', default='-0.5,6.8', help='Label next to the CMS logo')
-    parser.add_argument('--x-range', default='-0.2,2.5', help='Label next to the CMS logo')
+    parser.add_argument('--x-range', default='-0.5,6.8', help='Label next to the CMS logo')
+    #parser.add_argument('--x-range', default='-0.2,2.5', help='Label next to the CMS logo')
     parser.add_argument('--left-margin', default=0.2, type=float, help='Left pad margin')
     parser.add_argument('--bottom-margin', default=0.1, type=float, help='Bottom pad margin')
     parser.add_argument('--subline', default='137 fb^{-1} (13 TeV)', help='Label next to the CMS logo')
@@ -364,8 +364,8 @@ if __name__ == "__main__":
     for i, new_label in relabel.iteritems():
         bin_labels[i] = new_label
 
-    #gaxis = MakeYaxis(N, hframe, bin_labels=bin_labels, label_size=0.5)
-    gaxis = MakeYaxis(N, hframe, bin_labels=bin_labels, label_size=1.0)
+    gaxis = MakeYaxis(N, hframe, bin_labels=bin_labels, label_size=0.5)
+    #gaxis = MakeYaxis(N, hframe, bin_labels=bin_labels, label_size=1.0)
     gaxis.Draw()
 
     if args.vlines == None:
@@ -446,8 +446,8 @@ if __name__ == "__main__":
     stxstxt = ROOT.TLatex()
     plot.Set(hggtxt, TextFont=42, TextSize=0.04, TextAlign=12)
     plot.Set(stxstxt, TextFont=42, TextSize=0.025, TextAlign=12, TextColor=ROOT.kGray+2)
-    hggtxt.DrawLatex( 0.8, YEntryHeight(N, hframe) * (N+0.6), "H#rightarrow#gamma#gamma")
-    #stxstxt.DrawLatex( 1.1, YEntryHeight(N, hframe) * (N+0.5), "STXS stage 1.2 (reduced)")
+    hggtxt.DrawLatex( -0.15, YEntryHeight(N, hframe) * (N+0.6), "H#rightarrow#gamma#gamma")
+    stxstxt.DrawLatex( 1.1, YEntryHeight(N, hframe) * (N+0.5), "STXS stage 1.2 (reduced)")
 
 
     if args.table is not None:
