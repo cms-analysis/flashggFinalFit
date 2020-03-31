@@ -215,7 +215,7 @@
         "THU_qqH_PTHJJ25":1.0000,
         "THU_qqH_JET01":1.0089
     },
-    "qqH_GE2J_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25":{
+    "qqH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25":{
         "THU_qqH_Yield":1.0038,
         "THU_qqH_PTH200":1.0003,
         "THU_qqH_MJJ60":1.0049,
@@ -227,7 +227,7 @@
         "THU_qqH_PTHJJ25":0.9685,
         "THU_qqH_JET01":1.0089
     },
-    "WH_had_GE2J_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25":{
+    "WH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25":{
         "THU_qqH_Yield":1.0038,
         "THU_qqH_PTH200":1.0003,
         "THU_qqH_MJJ60":1.0049,
@@ -239,7 +239,7 @@
         "THU_qqH_PTHJJ25":0.9685,
         "THU_qqH_JET01":1.0089
     },
-    "ZH_had_GE2J_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25":{
+    "ZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25":{
         "THU_qqH_Yield":1.0038,
         "THU_qqH_PTH200":1.0003,
         "THU_qqH_MJJ60":1.0049,
@@ -251,19 +251,7 @@
         "THU_qqH_PTHJJ25":0.9685,
         "THU_qqH_JET01":1.0089
     },
-    "qqH_GE2J_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25":{
-        "THU_qqH_Yield":1.0038,
-        "THU_qqH_PTH200":1.0003,
-        "THU_qqH_MJJ60":1.0049,
-        "THU_qqH_MJJ120":1.0036,
-        "THU_qqH_MJJ350":1.0052,
-        "THU_qqH_MJJ700":0.9932,
-        "THU_qqH_MJJ1000":1.0000,
-        "THU_qqH_MJJ1500":1.0000,
-        "THU_qqH_PTHJJ25":1.0120,
-        "THU_qqH_JET01":1.0089
-    },
-    "WH_had_GE2J_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25":{
+    "qqH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25":{
         "THU_qqH_Yield":1.0038,
         "THU_qqH_PTH200":1.0003,
         "THU_qqH_MJJ60":1.0049,
@@ -275,7 +263,7 @@
         "THU_qqH_PTHJJ25":1.0120,
         "THU_qqH_JET01":1.0089
     },
-    "ZH_had_GE2J_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25":{
+    "WH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25":{
         "THU_qqH_Yield":1.0038,
         "THU_qqH_PTH200":1.0003,
         "THU_qqH_MJJ60":1.0049,
@@ -287,7 +275,19 @@
         "THU_qqH_PTHJJ25":1.0120,
         "THU_qqH_JET01":1.0089
     },
-    "qqH_GE2J_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25":{
+    "ZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25":{
+        "THU_qqH_Yield":1.0038,
+        "THU_qqH_PTH200":1.0003,
+        "THU_qqH_MJJ60":1.0049,
+        "THU_qqH_MJJ120":1.0036,
+        "THU_qqH_MJJ350":1.0052,
+        "THU_qqH_MJJ700":0.9932,
+        "THU_qqH_MJJ1000":1.0000,
+        "THU_qqH_MJJ1500":1.0000,
+        "THU_qqH_PTHJJ25":1.0120,
+        "THU_qqH_JET01":1.0089
+    },
+    "qqH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25":{
         "THU_qqH_Yield":1.0038,
         "THU_qqH_PTH200":1.0003,
         "THU_qqH_MJJ60":1.0049,
@@ -299,7 +299,7 @@
         "THU_qqH_PTHJJ25":0.9685,
         "THU_qqH_JET01":1.0089
     },
-    "WH_had_GE2J_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25":{
+    "WH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25":{
         "THU_qqH_Yield":1.0038,
         "THU_qqH_PTH200":1.0003,
         "THU_qqH_MJJ60":1.0049,
@@ -311,7 +311,7 @@
         "THU_qqH_PTHJJ25":0.9685,
         "THU_qqH_JET01":1.0089
     },
-    "ZH_had_GE2J_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25":{
+    "ZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25":{
         "THU_qqH_Yield":1.0038,
         "THU_qqH_PTH200":1.0003,
         "THU_qqH_MJJ60":1.0049,
@@ -323,7 +323,7 @@
         "THU_qqH_PTHJJ25":0.9685,
         "THU_qqH_JET01":1.0089
     },
-    "qqH_GE2J_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25":{
+    "qqH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25":{
         "THU_qqH_Yield":1.0038,
         "THU_qqH_PTH200":1.0003,
         "THU_qqH_MJJ60":1.0049,
@@ -335,7 +335,7 @@
         "THU_qqH_PTHJJ25":1.0089,
         "THU_qqH_JET01":1.0089
     },
-    "WH_had_GE2J_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25":{
+    "WH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25":{
         "THU_qqH_Yield":1.0038,
         "THU_qqH_PTH200":1.0003,
         "THU_qqH_MJJ60":1.0049,
@@ -347,7 +347,7 @@
         "THU_qqH_PTHJJ25":1.0089,
         "THU_qqH_JET01":1.0089
     },
-    "ZH_had_GE2J_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25":{
+    "ZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25":{
         "THU_qqH_Yield":1.0038,
         "THU_qqH_PTH200":1.0003,
         "THU_qqH_MJJ60":1.0049,

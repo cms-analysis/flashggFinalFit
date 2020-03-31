@@ -69,15 +69,15 @@ void Packager::packageOutput(bool split, string process , string tag){
         if( (mh!=125) && (*proc=="testBBH" || *proc=="testTHQ" || *proc=="testTHW") ) continue; //FIXME
 				RooDataSet *tempData = 0;
 				if( merge ) { 
-					tempData = (RooDataSet*)mergeWS->data(Form("sig_%s_mass_m%d_%s",proc->c_str(),mh,catname.c_str()));
-					if(tempData && !saveWS->data(Form("sig_%s_mass_m%d_%s",proc->c_str(),mh,catname.c_str())))  saveWS->import(*tempData); //FIXME
+					tempData = (RooDataSet*)mergeWS->data(Form("sig_%s_%d_mass_m%d_%s",proc->c_str(),year_,mh,catname.c_str()));
+					if(tempData && !saveWS->data(Form("sig_%s_%d_mass_m%d_%s",proc->c_str(),year_,mh,catname.c_str())))  saveWS->import(*tempData); //FIXME
 				} else {
-					tempData = (RooDataSet*)WS->data(Form("sig_%s_mass_m%d_%s",proc->c_str(),mh,catname.c_str()));
-					if(tempData && !saveWS->data(Form("sig_%s_mass_m%d_%s",proc->c_str(),mh,catname.c_str())))  saveWS->import(*tempData); //FIXME
+					tempData = (RooDataSet*)WS->data(Form("sig_%s_%d_mass_m%d_%s",proc->c_str(),year_,mh,catname.c_str()));
+					if(tempData && !saveWS->data(Form("sig_%s_%d_mass_m%d_%s",proc->c_str(),year_,mh,catname.c_str())))  saveWS->import(*tempData); //FIXME
 				}
 				if (!tempData) {
-				if (!split_)	cerr << "[WARNING] -- dataset: " << Form("sig_%s_mass_m%d_%s",proc->c_str(),mh,catname.c_str()) << " not found. It will be skipped (ignore this warning if just running one tag/proc)" << endl;
-					expectedObjectsNotFound.push_back(Form("sig_%s_mass_m%d_%s",proc->c_str(),mh,catname.c_str()));
+				if (!split_)	cerr << "[WARNING] -- dataset: " << Form("sig_%s_%d_mass_m%d_%s",proc->c_str(),year_,mh,catname.c_str()) << " not found. It will be skipped (ignore this warning if just running one tag/proc)" << endl;
+					expectedObjectsNotFound.push_back(Form("sig_%s_%d_mass_m%d_%s",proc->c_str(),year_,mh,catname.c_str()));
 					continue;
 				}
          std::cout << "ED DEBUG printing tempData" << std::endl;

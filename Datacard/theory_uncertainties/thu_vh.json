@@ -89,22 +89,22 @@
         "pdf_Higgs_VH":1.017,
         "alphaS_VH":1.009
     },
-    "WH_had_GE2J_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25":{
+    "WH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25":{
         "QCDscale_VH":1.000,
         "pdf_Higgs_VH":1.017,
         "alphaS_VH":1.009
     },
-    "WH_had_GE2J_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25":{
+    "WH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25":{
         "QCDscale_VH":1.000,
         "pdf_Higgs_VH":1.017,
         "alphaS_VH":1.009
     },
-    "WH_had_GE2J_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25":{
+    "WH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25":{
         "QCDscale_VH":1.000,
         "pdf_Higgs_VH":1.017,
         "alphaS_VH":1.009
     },
-    "WH_had_GE2J_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25":{
+    "WH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25":{
         "QCDscale_VH":1.000,
         "pdf_Higgs_VH":1.017,
         "alphaS_VH":1.009
@@ -144,22 +144,22 @@
         "pdf_Higgs_VH":1.013,
         "alphaS_VH":1.009
     },
-    "ZH_had_GE2J_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25":{
+    "ZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25":{
         "QCDscale_VH":1.000,
         "pdf_Higgs_VH":1.013,
         "alphaS_VH":1.009
     },
-    "ZH_had_GE2J_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25":{
+    "ZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25":{
         "QCDscale_VH":1.000,
         "pdf_Higgs_VH":1.013,
         "alphaS_VH":1.009
     },
-    "ZH_had_GE2J_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25":{
+    "ZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25":{
         "QCDscale_VH":1.000,
         "pdf_Higgs_VH":1.013,
         "alphaS_VH":1.009
     },
-    "ZH_had_GE2J_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25":{
+    "ZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25":{
         "QCDscale_VH":1.000,
         "pdf_Higgs_VH":1.013,
         "alphaS_VH":1.009

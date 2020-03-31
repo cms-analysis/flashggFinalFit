@@ -10,38 +10,6 @@ ROOT.PyConfig.IgnoreCommandLineOptions = True
 ROOT.gROOT.SetBatch(ROOT.kTRUE)
 ROOT.TH1.AddDirectory(0)
 
-XSBR = {
-  # Stage 0
-  "r_ggH":101.3111,
-  "r_VBF":7.9842,
-  "r_VH_had":3.0793,
-  "r_WH_lep":0.8897,
-  "r_ZH_lep":0.5355,
-  "r_ttH":1.1332,
-  "r_tHq":0.1751,
-  # Stage 1.2
-  "r_ggH_0J_low":14.8653,
-  "r_ggH_0J_high":43.2174,
-  "r_ggH_1J_low":16.1996,
-  "r_ggH_1J_med":11.2592,
-  "r_ggH_1J_high":2.1283,
-  "r_ggH_2J_low":2.8672,
-  "r_ggH_2J_med":4.4441,
-  "r_ggH_2J_high":2.3048,
-  "r_ggH_VBFlike":2.2938,
-  "r_ggH_BSM":1.7313, #sum 
-  "r_ggH_BSM_low":1.3013,
-  "r_ggH_BSM_high":0.4301,
-  "r_qqH_VHhad":1.2459,
-  "r_qqH_low_mjj":1.3273,
-  "r_qqH_high_mjj":1.8439,
-  "r_qqH_BSM":0.3830,
-  "r_WH_lep_low":0.4714,
-  "r_WH_lep_high":0.4184,
-  "r_ttH_low":0.6536,
-  "r_ttH_high":0.4796,
-}
-
 default_bar_styles = {
     '2sig_Error': {
         'LineWidth': 2,
@@ -53,10 +21,86 @@ default_bar_styles = {
         'LineColor': ROOT.kBlack,
         'MarkerSize': 0
     },
+    'Theory': {
+        #'LineWidth': 2,
+        'LineWidth': 20,
+        'LineColor': 17,
+        'MarkerSize': 0
+    },
+    'dummy_Theory': {
+        'LineWidth': 20,
+        'LineColor': 17,
+        'MarkerSize': 0
+    },
+    'ggH_Theory': {
+        'LineWidth': 20,
+        'LineColor': 17,
+        'MarkerSize': 0
+    },
+    'qqH_Theory': {
+        'LineWidth': 20,
+        'LineColor': 17,
+        'MarkerSize': 0
+    },
+    'WH_lep_Theory': {
+        'LineWidth': 20,
+        'LineColor': 17,
+        'MarkerSize': 0
+    },
+    'ZH_lep_Theory': {
+        'LineWidth': 20,
+        'LineColor': 17,
+        'MarkerSize': 0
+    },
+    'ttH_Theory': {
+        'LineWidth': 20,
+        'LineColor': 17,
+        'MarkerSize': 0
+    },
+    'tHq_Theory': {
+        'LineWidth': 20,
+        'LineColor': 17,
+        'MarkerSize': 0
+    },
     'Error': {
         #'LineWidth': 2,
         'LineWidth': 3,
         'LineColor': ROOT.kAzure+7,
+        'MarkerSize': 0
+    },
+    'dummy_Error': {
+        'LineWidth': 2,
+        'LineColor': ROOT.kBlack,
+        'MarkerSize': 0
+    },
+    'ggH_Error': {
+        'LineWidth': 2,
+        'LineColor': ROOT.kAzure+7,
+        'MarkerSize': 0
+    },
+    'qqH_Error': {
+        'LineWidth': 2,
+        'LineColor': ROOT.kOrange-3,
+        'MarkerSize': 0
+    },
+    'WH_lep_Error': {
+        'LineWidth': 2,
+        'LineColor': ROOT.kGreen+2,
+        'MarkerSize': 0
+    },
+    'ZH_lep_Error': {
+        'LineWidth': 2,
+        'LineColor': ROOT.kGreen+2,
+        'MarkerSize': 0
+    },
+    'ttH_Error': {
+        'LineWidth': 2,
+        'LineColor': ROOT.kPink+6,
+        'MarkerSize': 0
+    },
+    'tHq_Error': {
+        'LineWidth': 2,
+        'LineColor': ROOT.kOrange,
         'MarkerSize': 0
     },
     'OtherLimit': {
@@ -71,37 +115,37 @@ default_bar_styles = {
         'MarkerSize': 0
     },
     'dummy_Stat': {
-        'LineWidth': 3,
+        'LineWidth': 2,
         'LineColor': ROOT.kBlack,
         'MarkerSize': 0
     },
     'ggH_Stat': {
-        'LineWidth': 3,
+        'LineWidth': 2,
         'LineColor': ROOT.kAzure+7,
         'MarkerSize': 0
     },
     'qqH_Stat': {
-        'LineWidth': 3,
+        'LineWidth': 2,
         'LineColor': ROOT.kOrange-3,
         'MarkerSize': 0
     },
     'WH_lep_Stat': {
-        'LineWidth': 3,
+        'LineWidth': 2,
         'LineColor': ROOT.kGreen+2,
         'MarkerSize': 0
     },
     'ZH_lep_Stat': {
-        'LineWidth': 3,
+        'LineWidth': 2,
         'LineColor': ROOT.kGreen+2,
         'MarkerSize': 0
     },
     'ttH_Stat': {
-        'LineWidth': 3,
+        'LineWidth': 2,
         'LineColor': ROOT.kPink+6,
         'MarkerSize': 0
     },
     'tHq_Stat': {
-        'LineWidth': 3,
+        'LineWidth': 2,
         'LineColor': ROOT.kOrange,
         'MarkerSize': 0
     },
@@ -112,7 +156,7 @@ default_bar_styles = {
         'MarkerSize': 0,
     },
     'BestFit': {
-        'MarkerSize': 1.1,
+        'MarkerSize': 0.6,
         'MarkerStyle': 21
     },
     'fixedOtherPOIError': {
@@ -134,7 +178,8 @@ default_bar_labels = {
     '2sig_Error': '#pm2#sigma (stat #oplus syst)',
     'Error': '#pm1#sigma (stat #oplus syst)',
     'Stat': '#pm1#sigma (stat)',
-    'Syst': '#pm1#sigma (syst)'
+    'Syst': '#pm1#sigma (syst)',
+    'Theory': '#pm1#sigma (theory)'
 }
 
 
@@ -223,7 +268,8 @@ def MakeGraph(drawlist, hframe, label='Error', valid_checks=[],productionMode=No
             err_lo = (gr_bar.GetX()[i] - info["%sLo" % label])
             err_hi = (info["%sHi" % label] - gr_bar.GetX()[i])
         else:
-            gr_bar.SetPoint(i, info["Val"], ypos)
+            if label == "Theory": gr_bar.SetPoint(i, 1.0, ypos)
+            else: gr_bar.SetPoint(i, info["Val"], ypos)
             err_lo = -1.0 * info["%sLo" % label]
             err_hi = info["%sHi" % label]
         valid_lo = True
@@ -328,6 +374,7 @@ if __name__ == "__main__":
     else:
         plot.ModTDRStyle(l=args.left_margin, b=args.bottom_margin, height=args.height, width=args.width, t=0.05)
     ROOT.gStyle.SetNdivisions(510, 'XYZ')
+    ROOT.gStyle.SetEndErrorSize(7)
 
     canv = ROOT.TCanvas(args.output, args.output)
     pads = plot.OnePad()
@@ -394,11 +441,13 @@ if __name__ == "__main__":
         for bar in bars:
           gr_bar = MakeGraph(drawlist,hframe,bar,valid_checks=valid_checks,productionMode=pm)
           plot.Set(gr_bar, **default_bar_styles["%s_%s"%(pm,bar)])
+          gr_bar.SetName("%s_%s"%(pm,bar))
           graphs.append(gr_bar)
     else:
       for bar in bars:
 	  gr_bar = MakeGraph(drawlist, hframe, bar, valid_checks=valid_checks)
 	  plot.Set(gr_bar, **default_bar_styles[bar])
+          gr_bar.SetName(bar)
 	  graphs.append(gr_bar)
 
     gr_fit = MakeBestFitGraph(drawlist, hframe)
@@ -408,7 +457,8 @@ if __name__ == "__main__":
     ROOT.gStyle.SetHatchesSpacing(3)
 
     for gr in graphs:
-        gr.Draw('ZPSAME')
+        if "Stat" in gr.GetName(): gr.Draw('SAME[]')
+        else: gr.Draw('ZPSAME')
     gr_fit.Draw('PSAME')
 
     # Invalid regions
@@ -430,13 +480,15 @@ if __name__ == "__main__":
     if args.template == 'A1_5PD':
         legend = MakeLegend(pads[0], xlo=0.53, xhi=0.95, yhi=0.945) #for prod x decay
     else:
-        legend = MakeLegend(pads[0], xlo=0.66, xhi=0.95, yhi=0.945, topfrac=0.16)
+        legend = MakeLegend(pads[0], xlo=0.5, xhi=0.95, yhi=0.945, topfrac=0.16)
     legend.SetFillStyle(0)
+    legend.SetNColumns(2)
 
     legend.AddEntry(gr_fit, 'Expected', 'P')
     for bar in args.legend.split(','):
         i = bars.index(bar)
-        legend.AddEntry(graphs[i], default_bar_labels[bar], 'LP')
+        if bar == "Stat": legend.AddEntry(graphs[i], default_bar_labels[bar], 'E')
+        else: legend.AddEntry(graphs[i], default_bar_labels[bar], 'LP')
     legend.Draw()
 
     plot.DrawCMSLogo(pads[0], 'CMS',
@@ -449,13 +501,15 @@ if __name__ == "__main__":
     hggtxt.DrawLatex( -0.15, YEntryHeight(N, hframe) * (N+0.6), "H#rightarrow#gamma#gamma")
     stxstxt.DrawLatex( 1.1, YEntryHeight(N, hframe) * (N+0.5), "STXS stage 1.2 (reduced)")
 
-
     if args.table is not None:
         table_args = args.table.split(':')
         valtxt = ROOT.TLatex()
         with_sm = False
         if len(table_args)>1:
-          if table_args[1] == 'with_sm': with_sm = True
+          if table_args[1] == 'with_sm': 
+            with_sm = True
+            # Extract values from json
+            with open("jsons/xsbr_theory_all.json","r") as jsonfile: xsbr_theory = json.load(jsonfile)
         with_statsyst = 'Stat' in bars and 'Syst' in bars
         # pavetxt = ROOT.
         plot.Set(valtxt, TextFont=42, TextSize=float(table_args[0]), TextAlign=12)
@@ -478,9 +532,12 @@ if __name__ == "__main__":
         for i, info in enumerate(drawlist):
             if info['Name']=='dummy': continue
             if with_sm:
-              valtxt.DrawLatex(xstart, float(gr_fit.GetY()[i]), '%.2g ^{#plus%.1f}_{#minus%.1f}'% (info['Val']*XSBR[info['Name']], abs(info['ErrorHi']*XSBR[info['Name']]), abs(info['ErrorLo']*XSBR[info['Name']]))) 
-              #valtxt.DrawLatex(xstart_sm, float(gr_fit.GetY()[i]), '%.2g^{#plus%.1f}_{#minus%.1f}'% (info['Val']*XSBR[info['Name']], 0.0, 0.0)) #abs(info['ErrorHi']), abs(info['ErrorLo']))) 
-              valtxt.DrawLatex(xstart_sm, float(gr_fit.GetY()[i]), '%.2g'%(info['Val']*XSBR[info['Name']]))
+              xsbr = xsbr_theory[info['Name']]['nominal']
+              xsbr_high01Sigma = xsbr_theory[info['Name']]['High01Sigma']
+              xsbr_low01Sigma = xsbr_theory[info['Name']]['Low01Sigma']
+              valtxt.DrawLatex(xstart, float(gr_fit.GetY()[i]), '%.2g ^{#plus%.1f}_{#minus%.1f}'% (info['Val']*xsbr, abs(info['ErrorHi']*xsbr), abs(info['ErrorLo']*xsbr))) 
+              valtxt.DrawLatex(xstart_sm, float(gr_fit.GetY()[i]), '%.2g^{#plus%.1g}_{#minus%.1g}'% (xsbr, xsbr_high01Sigma, xsbr_low01Sigma)) 
+              #valtxt.DrawLatex(xstart_sm, float(gr_fit.GetY()[i]), '%.2g'%(info['Val']*XSBR[info['Name']]))
             else:
               valtxt.DrawLatex(xstart, float(gr_fit.GetY()[i]), '%.2f^{#plus%.2f}_{#minus%.2f}' % (info['Val'], abs(info['ErrorHi']), abs(info['ErrorLo'])))
               if with_statsyst:

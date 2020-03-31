@@ -143,7 +143,7 @@ elif mode == "calcPhotonSyst":
 
 elif mode == "writePhotonSyst":
   print " --> Write photon systematics to .dat file compatible with SignalFit.cpp: %s"%ext
-  os.system("eval `scramv1 runtime -sh`; python python/writePhotonSyst.py --cats %s --ext %s --scales %s --scalesCorr %s --scalesGlobal %s --smears %s"%(cats,ext,scales,scalesCorr,scalesGlobal,smears)) 
+  os.system("eval `scramv1 runtime -sh`; python python/writePhotonSyst.py --cats %s --ext %s --scales %s --scalesCorr %s --scalesGlobal %s --smears %s --setNonDiagonal diag"%(cats,ext,scales,scalesCorr,scalesGlobal,smears)) 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 else:

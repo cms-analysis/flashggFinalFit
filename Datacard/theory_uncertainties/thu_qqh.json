@@ -29,22 +29,22 @@
         "pdf_Higgs_qqH":1.021,
         "alphaS_qqH":1.005
     },
-    "qqH_GE2J_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25":{
+    "qqH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25":{
         "QCDscale_qqH":[1.004,0.997],
         "pdf_Higgs_qqH":1.021,
         "alphaS_qqH":1.005
     },
-    "qqH_GE2J_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25":{
+    "qqH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25":{
         "QCDscale_qqH":[1.004,0.997],
         "pdf_Higgs_qqH":1.021,
         "alphaS_qqH":1.005
     },
-    "qqH_GE2J_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25":{
+    "qqH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25":{
         "QCDscale_qqH":[1.004,0.997],
         "pdf_Higgs_qqH":1.021,
         "alphaS_qqH":1.005
     },
-    "qqH_GE2J_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25":{
+    "qqH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25":{
         "QCDscale_qqH":[1.004,0.997],
         "pdf_Higgs_qqH":1.021,
         "alphaS_qqH":1.005
