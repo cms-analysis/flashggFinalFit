@@ -68,17 +68,18 @@ int Normalization_13TeV::Init(int sqrtS){
         XSectionMap_GG2H_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25[mH] = 0.0030 * valXSggH;
         XSectionMap_GG2H_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25[mH] = 0.0033 * valXSggH;       
 
-        XSectionMap_VBF_FWDH[mH] = 0.0698 * valXSqqH;
-        XSectionMap_VBF_0J[mH] = 0.0653 * valXSqqH;
-        XSectionMap_VBF_1J[mH] = 0.3274 * valXSqqH;
-        XSectionMap_VBF_GE2J_MJJ_0_60[mH] = 0.0103 * valXSqqH;
-        XSectionMap_VBF_GE2J_MJJ_60_120[mH] = 0.0182 * valXSqqH;
-        XSectionMap_VBF_GE2J_MJJ_120_350[mH] = 0.1100 * valXSqqH;
-        XSectionMap_VBF_GE2J_MJJ_GT350_PTH_GT200[mH] = 0.0411 * valXSqqH;
-        XSectionMap_VBF_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25[mH] = 0.1202 * valXSqqH;
-        XSectionMap_VBF_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25[mH] = 0.0248 * valXSqqH;
-        XSectionMap_VBF_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25[mH] = 0.1681 * valXSqqH;
-        XSectionMap_VBF_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25[mH] = 0.0446 * valXSqqH;
+        // UPDATE: switched to POWHEG numbers for qqH
+        XSectionMap_VBF_FWDH[mH] = 0.067 * valXSqqH;
+        XSectionMap_VBF_0J[mH] = 0.069 * valXSqqH;
+        XSectionMap_VBF_1J[mH] = 0.329 * valXSqqH;
+        XSectionMap_VBF_GE2J_MJJ_0_60[mH] = 0.014 * valXSqqH;
+        XSectionMap_VBF_GE2J_MJJ_60_120[mH] = 0.024 * valXSqqH;
+        XSectionMap_VBF_GE2J_MJJ_120_350[mH] = 0.123 * valXSqqH;
+        XSectionMap_VBF_GE2J_MJJ_GT350_PTH_GT200[mH] = 0.040 * valXSqqH;
+        XSectionMap_VBF_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25[mH] = 0.103 * valXSqqH;
+        XSectionMap_VBF_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25[mH] = 0.038 * valXSqqH;
+        XSectionMap_VBF_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25[mH] = 0.151 * valXSqqH;
+        XSectionMap_VBF_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25[mH] = 0.042 * valXSqqH;
 
         XSectionMap_WH2HQQ_FWDH[mH] = 0.1257 * valXSWH2HQQ;
         XSectionMap_WH2HQQ_0J[mH] = 0.0570 * valXSWH2HQQ;
@@ -138,8 +139,8 @@ int Normalization_13TeV::Init(int sqrtS){
         XSectionMap_BBH_FWDH[mH]                 = 0.02* valXSbbH;
         XSectionMap_BBH[mH]                      = 0.98* valXSbbH;
 
-        XSectionMap_THQ_FWDH[mH]                 = 0.02 * valXStHq;
-        XSectionMap_THQ[mH]                      = 0.98 * valXStHq;
+        XSectionMap_THQ_FWDH[mH]                 = 0.00005 * valXStHq;
+        XSectionMap_THQ[mH]                      = 0.99995 * valXStHq;
 
         XSectionMap_THW_FWDH[mH]                 = 0.02 * valXStHW;
         XSectionMap_THW[mH]                      = 0.98 * valXStHW;
@@ -307,6 +308,10 @@ TGraph * Normalization_13TeV::GetSigmaGraph(TString process)
   } else if ( process == "THQ_FWDH" ){
           XSectionMap = &XSectionMap_THQ_FWDH;
   } else if ( process == "THQ" ){
+          XSectionMap = &XSectionMap_THQ;
+  } else if ( process == "TH_FWDH" ){
+          XSectionMap = &XSectionMap_THQ_FWDH;
+  } else if ( process == "TH" ){
           XSectionMap = &XSectionMap_THQ;
   } else if ( process == "THW_FWDH" ){
           XSectionMap = &XSectionMap_THW_FWDH;
@@ -537,6 +542,10 @@ double Normalization_13TeV::GetXsection(double mass, TString HistName) {
   } else if ( HistName.Contains("THQ_FWDH") ){
           XSectionMap = &XSectionMap_THQ_FWDH;
   } else if ( HistName.Contains("THQ") ){
+          XSectionMap = &XSectionMap_THQ;
+  } else if ( HistName.Contains("TH_FWDH") ){
+          XSectionMap = &XSectionMap_THQ_FWDH;
+  } else if ( HistName.Contains("TH") ){
           XSectionMap = &XSectionMap_THQ;
   } else if ( HistName.Contains("THW_FWDH") ){
           XSectionMap = &XSectionMap_THW_FWDH;

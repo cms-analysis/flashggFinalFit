@@ -1,0 +1,32 @@
+{
+    "ggZH_lep_FWDH":{
+        "QCDscale_ggZH":[1.251,0.811],
+        "pdf_Higgs_ggZH":1.018,
+        "alphaS_ggZH":1.016
+    },
+    "ggZH_lep_PTV_0_75":{
+        "QCDscale_ggZH":[1.251,0.811],
+        "pdf_Higgs_ggZH":1.018,
+        "alphaS_ggZH":1.016
+    },
+    "ggZH_lep_PTV_75_150":{
+        "QCDscale_ggZH":[1.251,0.811],
+        "pdf_Higgs_ggZH":1.018,
+        "alphaS_ggZH":1.016
+    },
+    "ggZH_lep_PTV_150_250_0J":{
+        "QCDscale_ggZH":[1.251,0.811],
+        "pdf_Higgs_ggZH":1.018,
+        "alphaS_ggZH":1.016
+    },
+    "ggZH_lep_PTV_150_250_GE1J":{
+        "QCDscale_ggZH":[1.251,0.811],
+        "pdf_Higgs_ggZH":1.018,
+        "alphaS_ggZH":1.016
+    },
+    "ggZH_lep_PTV_GT250":{
+        "QCDscale_ggZH":[1.251,0.811],
+        "pdf_Higgs_ggZH":1.018,
+        "alphaS_ggZH":1.016
+    }
+}

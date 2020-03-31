@@ -1,0 +1,412 @@
+{
+    "mu":{
+        "r_ggH":{
+            "ErrorHi": 0.095,
+            "ErrorLo": -0.096,
+            "StatHi": 0.095,
+            "StatLo": -0.096,
+            "Val": 1.000
+        },
+        "r_VBF":{
+            "ErrorHi": 0.382,
+            "ErrorLo": -0.323,
+            "StatHi": 0.382,
+            "StatLo": -0.323,
+            "Val": 1.000
+        },
+        "r_VH":{
+            "ErrorHi": 0.406,
+            "ErrorLo": -0.370,
+            "StatHi": 0.406,
+            "StatLo": -0.370,
+            "Val": 1.000
+        },
+        "r_top":{
+            "ErrorHi": 0.307,
+            "ErrorLo": -0.287,
+            "StatHi": 0.307,
+            "StatLo": -0.287,
+            "Val": 1.000
+        }
+    },
+
+    "stage0":{
+        "r_ggH":{
+            "ErrorHi": 0.101,
+            "ErrorLo": -0.101,
+            "StatHi": 0.101,
+            "StatLo": -0.101,
+            "Val": 1.000
+        },
+        "r_VBF":{
+            "ErrorHi": 0.383,
+            "ErrorLo": -0.322,
+            "StatHi": 0.383,
+            "StatLo": -0.322,
+            "Val": 1.000
+        },
+        "r_VH_had":{
+            "ErrorHi": 1.057,
+            "ErrorLo": -1.000,
+            "StatHi": 1.057,
+            "StatLo": -1.000,
+            "Val": 1.000
+        },
+        "r_WH_lep":{
+            "ErrorHi": 0.522,
+            "ErrorLo": -0.457,
+            "StatHi": 0.522,
+            "StatLo": -0.457,
+            "Val": 1.000
+        },
+        "r_ZH_lep":{
+            "ErrorHi": 1.158,
+            "ErrorLo": -0.896,
+            "StatHi": 1.158,
+            "StatLo": -0.896,
+            "Val": 1.000
+        },
+        "r_ttH":{
+            "ErrorHi": 0.321,
+            "ErrorLo": -0.299,
+            "StatHi": 0.321,
+            "StatLo": -0.299,
+            "Val": 1.000
+        },
+        "r_tHq":{
+            "ErrorHi": 5.660,
+            "ErrorLo": -1.000,
+            "StatHi": 5.660,
+            "StatLo": -1.000,
+            "Val": 1.000
+        }
+    },
+    "intermediate_mjj":{
+        "r_ggH_0J_low":{
+            "TheoryHi":0.061,
+            "TheoryLo":-0.078,
+            "ErrorHi": 0.337,
+            "ErrorLo": -0.293,
+            "StatHi": 0.301,
+            "StatLo": -0.279,
+            "Val": 1.000
+        },
+        "r_ggH_0J_high":{
+            "TheoryHi":0.061,
+            "TheoryLo":-0.078,
+            "ErrorHi": 0.220,
+            "ErrorLo": -0.214,
+            "StatHi": 0.209,
+            "StatLo": -0.209,
+            "Val": 1.000
+        },
+        "r_ggH_1J_low":{
+            "TheoryHi":0.061,
+            "TheoryLo":-0.078,
+            "ErrorHi": 0.488,
+            "ErrorLo": -0.485,
+            "StatHi": 0.482,
+            "StatLo": -0.480,
+            "Val": 1.000
+        },
+        "r_ggH_1J_med":{
+            "TheoryHi":0.061,
+            "TheoryLo":-0.078,
+            "ErrorHi": 0.355,
+            "ErrorLo": -0.358,
+            "StatHi": 0.349,
+            "StatLo": -0.358,
+            "Val": 1.000
+        },
+        "r_ggH_1J_high":{
+            "TheoryHi":0.061,
+            "TheoryLo":-0.078,
+            "ErrorHi": 0.692,
+            "ErrorLo": -0.603,
+            "StatHi": 0.614,
+            "StatLo": -0.597,
+            "Val": 1.000
+        },
+        "r_ggH_2J_low":{
+            "TheoryHi":0.061,
+            "TheoryLo":-0.078,
+            "ErrorHi": 1.551,
+            "ErrorLo": -1.000,
+            "StatHi": 1.533,
+            "StatLo": -1.000,
+            "Val": 1.000
+        },
+        "r_ggH_2J_med":{
+            "TheoryHi":0.061,
+            "TheoryLo":-0.078,
+            "ErrorHi": 0.728,
+            "ErrorLo": -0.704,
+            "StatHi": 0.719,
+            "StatLo": -0.701,
+            "Val": 1.000
+        },
+        "r_ggH_2J_high":{
+            "TheoryHi":0.061,
+            "TheoryLo":-0.078,
+            "ErrorHi": 0.915,
+            "ErrorLo": -0.684,
+            "StatHi": 0.693,
+            "StatLo": -0.674,
+            "Val": 1.000
+        },
+        "r_ggH_BSM_low":{
+            "TheoryHi":0.061,
+            "TheoryLo":-0.078,
+            "ErrorHi": 0.967,
+            "ErrorLo": -0.522,
+            "StatHi": 0.419,
+            "StatLo": -0.395,
+            "Val": 1.000
+        },
+        "r_ggH_BSM_high":{
+            "TheoryHi":0.061,
+            "TheoryLo":-0.078,
+            "ErrorHi": 1.220,
+            "ErrorLo": -0.783,
+            "StatHi": 0.813,
+            "StatLo": -0.770,
+            "Val": 1.000
+        },
+        "r_ggH_VBFlike":{
+            "TheoryHi":0.061,
+            "TheoryLo":-0.078,
+            "ErrorHi": 1.751,
+            "ErrorLo": -1.000,
+            "StatHi": 1.574,
+            "StatLo": -1.000,
+            "Val": 1.000
+        },
+        "r_qqH_low_mjj":{
+            "TheoryHi":0.040,
+            "TheoryLo":-0.039,
+            "ErrorHi": 1.582,
+            "ErrorLo": -1.000,
+            "StatHi": 1.553,
+            "StatLo": -1.000,
+            "Val": 1.000
+        },
+        "r_qqH_high_mjj":{
+            "TheoryHi":0.038,
+            "TheoryLo":-0.054,
+            "ErrorHi": 0.805,
+            "ErrorLo": -0.600,
+            "StatHi": 0.790,
+            "StatLo": -0.597,
+            "Val": 1.000
+        },
+        "r_qqH_BSM":{
+            "TheoryHi":0.033,
+            "TheoryLo":-0.032,
+            "ErrorHi": 0.761,
+            "ErrorLo": -0.666,
+            "StatHi": 0.729,
+            "StatLo": -0.657,
+            "Val": 1.000
+        },
+        "r_qqH_VHhad":{
+            "TheoryHi":0.083,
+            "TheoryLo":-0.077,
+            "ErrorHi": 1.319,
+            "ErrorLo": -1.000,
+            "StatHi": 1.315,
+            "StatLo": -1.000,
+            "Val": 1.000
+        },
+        "r_WH_lep_low":{
+            "TheoryHi":0.029,
+            "TheoryLo":-0.028,
+            "ErrorHi": 1.372,
+            "ErrorLo": -1.000,
+            "StatHi": 1.368,
+            "StatLo": -1.000,
+            "Val": 1.000
+        },
+        "r_WH_lep_high":{
+            "TheoryHi":0.029,
+            "TheoryLo":-0.028,
+            "ErrorHi": 0.658,
+            "ErrorLo": -0.552,
+            "StatHi": 0.655,
+            "StatLo": -0.551,
+            "Val": 1.000
+        },
+        "r_ZH_lep":{
+            "TheoryHi":0.046,
+            "TheoryLo":-0.040,
+            "ErrorHi": 1.162,
+            "ErrorLo": -0.897,
+            "StatHi": 1.160,
+            "StatLo": -0.896,
+            "Val": 1.000
+        },
+        "r_ttH_low":{
+            "TheoryHi":0.071,
+            "TheoryLo":-0.100,
+            "ErrorHi": 0.536,
+            "ErrorLo": -0.482,
+            "StatHi": 0.529,
+            "StatLo": -0.481,
+            "Val": 1.000
+        },
+        "r_ttH_high":{
+            "TheoryHi":0.071,
+            "TheoryLo":-0.100,
+            "ErrorHi": 0.443,
+            "ErrorLo": -0.395,
+            "StatHi": 0.430,
+            "StatLo": -0.390,
+            "Val": 1.000
+        },
+        "r_tHq":{
+            "TheoryHi":0.078,
+            "TheoryLo":-0.155,
+            "ErrorHi": 5.943,
+            "ErrorLo": -1.000,
+            "StatHi": 5.691,
+            "StatLo": -1.000,
+            "Val": 1.000
+        }
+    },
+    "maximal_mjj":{
+        "r_ggH_0J_low":{
+            "ErrorHi": 0.301,
+            "ErrorLo": -0.279,
+            "StatHi": 0.301,
+            "StatLo": -0.279,
+            "Val": 1.000
+        },
+        "r_ggH_0J_high":{
+            "ErrorHi": 0.209,
+            "ErrorLo": -0.209,
+            "StatHi": 0.209,
+            "StatLo": -0.209,
+            "Val": 1.000
+        },
+        "r_ggH_1J_low":{
+            "ErrorHi": 0.482,
+            "ErrorLo": -0.480,
+            "StatHi": 0.482,
+            "StatLo": -0.480,
+            "Val": 1.000
+        },
+        "r_ggH_1J_med":{
+            "ErrorHi": 0.349,
+            "ErrorLo": -0.357,
+            "StatHi": 0.349,
+            "StatLo": -0.357,
+            "Val": 1.000
+        },
+        "r_ggH_1J_high":{
+            "ErrorHi": 0.614,
+            "ErrorLo": -0.597,
+            "StatHi": 0.614,
+            "StatLo": -0.597,
+            "Val": 1.000
+        },
+        "r_ggH_2J_low":{
+            "ErrorHi": 1.533,
+            "ErrorLo": -1.000,
+            "StatHi": 1.533,
+            "StatLo": -1.000,
+            "Val": 1.000
+        },
+        "r_ggH_2J_med":{
+            "ErrorHi": 0.718,
+            "ErrorLo": -0.705,
+            "StatHi": 0.718,
+            "StatLo": -0.705,
+            "Val": 1.000
+        },
+        "r_ggH_2J_high":{
+            "ErrorHi": 0.693,
+            "ErrorLo": -0.674,
+            "StatHi": 0.693,
+            "StatLo": -0.674,
+            "Val": 1.000
+        },
+        "r_ggH_BSM":{
+            "ErrorHi": 0.374,
+            "ErrorLo": -0.357,
+            "StatHi": 0.374,
+            "StatLo": -0.357,
+            "Val": 1.000
+        },
+        "r_ggH_VBFlike":{
+            "ErrorHi": 1.573,
+            "ErrorLo": -1.000,
+            "StatHi": 1.573,
+            "StatLo": -1.000,
+            "Val": 1.000
+        },
+        "r_qqH_low_mjj":{
+            "ErrorHi": 1.552,
+            "ErrorLo": -1.000,
+            "StatHi": 1.552,
+            "StatLo": -1.000,
+            "Val": 1.000
+        },
+        "r_qqH_high_mjj":{
+            "ErrorHi": 0.789,
+            "ErrorLo": -0.597,
+            "StatHi": 0.789,
+            "StatLo": -0.597,
+            "Val": 1.000
+        },
+        "r_qqH_BSM":{
+            "ErrorHi": 0.728,
+            "ErrorLo": -0.656,
+            "StatHi": 0.728,
+            "StatLo": -0.656,
+            "Val": 1.000
+        },
+        "r_qqH_VHhad":{
+            "ErrorHi": 1.316,
+            "ErrorLo": -1.000,
+            "StatHi": 1.316,
+            "StatLo": -1.000,
+            "Val": 1.000
+        },
+        "r_WH_lep":{
+            "ErrorHi": 0.522,
+            "ErrorLo": -0.457,
+            "StatHi": 0.522,
+            "StatLo": -0.457,
+            "Val": 1.000
+        },
+        "r_ZH_lep":{
+            "ErrorHi": 1.160,
+            "ErrorLo": -0.896,
+            "StatHi": 1.160,
+            "StatLo": -0.896,
+            "Val": 1.000
+        },
+        "r_ttH":{
+            "ErrorHi": 0.325,
+            "ErrorLo": -0.303,
+            "StatHi": 0.325,
+            "StatLo": -0.303,
+            "Val": 1.000
+        },
+        "r_tHq":{
+            "ErrorHi": 5.660,
+            "ErrorLo": -1.000,
+            "StatHi": 5.660,
+            "StatLo": -1.000,
+            "Val": 1.000
+        },
+        "dummy":{
+            "ErrorHi": 0.000,
+            "ErrorLo": 0.000,
+            "StatHi": 0.000,
+            "StatLo": 0.000,
+            "Val": 0.000
+        }
+
+    }
+
+}

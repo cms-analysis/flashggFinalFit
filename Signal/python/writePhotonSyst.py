@@ -14,6 +14,81 @@ def leave():
   print "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG PHOTON SYST WRITER (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ "
   sys.exit(1)
 
+# Diagonal proc x cat
+parallelProc = {
+  "RECO_0J_PTH_0_10_Tag0":"GG2H_0J_PTH_0_10",
+  "RECO_0J_PTH_0_10_Tag1":"GG2H_0J_PTH_0_10",
+  "RECO_0J_PTH_0_10_Tag2":"GG2H_0J_PTH_0_10",
+  "RECO_0J_PTH_GT10_Tag0":"GG2H_0J_PTH_GT10",
+  "RECO_0J_PTH_GT10_Tag1":"GG2H_0J_PTH_GT10",
+  "RECO_0J_PTH_GT10_Tag2":"GG2H_0J_PTH_GT10",
+  "RECO_1J_PTH_0_60_Tag0":"GG2H_1J_PTH_0_60",
+  "RECO_1J_PTH_0_60_Tag1":"GG2H_1J_PTH_0_60",
+  "RECO_1J_PTH_0_60_Tag2":"GG2H_1J_PTH_0_60",
+  "RECO_1J_PTH_60_120_Tag0":"GG2H_1J_PTH_60_120",
+  "RECO_1J_PTH_60_120_Tag1":"GG2H_1J_PTH_60_120",
+  "RECO_1J_PTH_60_120_Tag2":"GG2H_1J_PTH_60_120",
+  "RECO_1J_PTH_120_200_Tag0":"GG2H_1J_PTH_120_200",
+  "RECO_1J_PTH_120_200_Tag1":"GG2H_1J_PTH_120_200",
+  "RECO_1J_PTH_120_200_Tag2":"GG2H_1J_PTH_120_200",
+  "RECO_GE2J_PTH_0_60_Tag0":"GG2H_GE2J_MJJ_0_350_PTH_0_60",
+  "RECO_GE2J_PTH_0_60_Tag1":"GG2H_GE2J_MJJ_0_350_PTH_0_60",
+  "RECO_GE2J_PTH_0_60_Tag2":"GG2H_GE2J_MJJ_0_350_PTH_0_60",
+  "RECO_GE2J_PTH_60_120_Tag0":"GG2H_GE2J_MJJ_0_350_PTH_60_120",
+  "RECO_GE2J_PTH_60_120_Tag1":"GG2H_GE2J_MJJ_0_350_PTH_60_120",
+  "RECO_GE2J_PTH_60_120_Tag2":"GG2H_GE2J_MJJ_0_350_PTH_60_120",
+  "RECO_GE2J_PTH_120_200_Tag0":"GG2H_GE2J_MJJ_0_350_PTH_120_200",
+  "RECO_GE2J_PTH_120_200_Tag1":"GG2H_GE2J_MJJ_0_350_PTH_120_200",
+  "RECO_GE2J_PTH_120_200_Tag2":"GG2H_GE2J_MJJ_0_350_PTH_120_200",
+  "RECO_PTH_200_300_Tag0":"GG2H_PTH_200_300",
+  "RECO_PTH_200_300_Tag1":"GG2H_PTH_200_300",
+  "RECO_PTH_300_450_Tag0":"GG2H_PTH_300_450",
+  "RECO_PTH_300_450_Tag1":"GG2H_PTH_300_450",
+  "RECO_PTH_450_650_Tag0":"GG2H_PTH_450_650",
+  "RECO_PTH_450_650_Tag1":"GG2H_PTH_450_650",
+  "RECO_PTH_GT650_Tag0":"GG2H_PTH_GT650",
+  "RECO_PTH_GT650_Tag1":"GG2H_PTH_GT650",
+  "RECO_VBFTOPO_VHHAD_Tag0":"WH2HQQ_GE2J_MJJ_60_120",
+  "RECO_VBFTOPO_VHHAD_Tag1":"WH2HQQ_GE2J_MJJ_60_120",
+  "RECO_VBFTOPO_JET3VETO_LOWMJJ_Tag0":"VBF_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25",
+  "RECO_VBFTOPO_JET3VETO_LOWMJJ_Tag1":"VBF_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25",
+  "RECO_VBFTOPO_JET3VETO_HIGHMJJ_Tag0":"VBF_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25",
+  "RECO_VBFTOPO_JET3VETO_HIGHMJJ_Tag1":"VBF_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25",
+  "RECO_VBFTOPO_JET3_LOWMJJ_Tag0":"VBF_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25",
+  "RECO_VBFTOPO_JET3_LOWMJJ_Tag1":"VBF_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25",
+  "RECO_VBFTOPO_JET3_HIGHMJJ_Tag0":"VBF_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25",
+  "RECO_VBFTOPO_JET3_HIGHMJJ_Tag1":"VBF_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25",
+  "RECO_VBFTOPO_BSM_Tag0":"VBF_GE2J_MJJ_GT350_PTH_GT200",
+  "RECO_VBFTOPO_BSM_Tag1":"VBF_GE2J_MJJ_GT350_PTH_GT200",
+  "RECO_VBFLIKEGGH_Tag0":"GG2H_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25",
+  "RECO_VBFLIKEGGH_Tag1":"GG2H_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25",
+  "RECO_TTH_HAD_LOW_Tag0":"TTH_PTH_120_200",
+  "RECO_TTH_HAD_LOW_Tag1":"TTH_PTH_120_200",
+  "RECO_TTH_HAD_LOW_Tag2":"TTH_PTH_120_200",
+  "RECO_TTH_HAD_LOW_Tag3":"TTH_PTH_120_200",
+  "RECO_TTH_HAD_HIGH_Tag0":"TTH_PTH_200_300",
+  "RECO_TTH_HAD_HIGH_Tag1":"TTH_PTH_200_300",
+  "RECO_TTH_HAD_HIGH_Tag2":"TTH_PTH_200_300",
+  "RECO_TTH_HAD_HIGH_Tag3":"TTH_PTH_200_300",
+  "RECO_WH_LEP_LOW_Tag0":"QQ2HLNU_PTV_0_75",
+  "RECO_WH_LEP_LOW_Tag1":"QQ2HLNU_PTV_0_75",
+  "RECO_WH_LEP_LOW_Tag2":"QQ2HLNU_PTV_0_75",
+  "RECO_WH_LEP_HIGH_Tag0":"QQ2HLNU_PTV_75_150",
+  "RECO_WH_LEP_HIGH_Tag1":"QQ2HLNU_PTV_75_150",
+  "RECO_WH_LEP_HIGH_Tag2":"QQ2HLNU_PTV_75_150",
+  "RECO_ZH_LEP_Tag0":"QQ2HLL_PTV_0_75",
+  "RECO_ZH_LEP_Tag1":"QQ2HLL_PTV_0_75",
+  "RECO_TTH_LEP_LOW_Tag0":"TTH_PTH_120_200",
+  "RECO_TTH_LEP_LOW_Tag1":"TTH_PTH_120_200",
+  "RECO_TTH_LEP_LOW_Tag2":"TTH_PTH_120_200",
+  "RECO_TTH_LEP_LOW_Tag3":"TTH_PTH_120_200",
+  "RECO_TTH_LEP_HIGH_Tag0":"TTH_PTH_200_300",
+  "RECO_TTH_LEP_HIGH_Tag1":"TTH_PTH_200_300",
+  "RECO_TTH_LEP_HIGH_Tag2":"TTH_PTH_200_300",
+  "RECO_TTH_LEP_HIGH_Tag3":"TTH_PTH_200_300",
+  "RECO_THQ_LEP":"TH"
+}
+
 def get_options():
   parser = OptionParser()
   parser.add_option("--cats", dest='cats', default='', help="RECO categories")
@@ -22,6 +97,7 @@ def get_options():
   parser.add_option("--scalesCorr", dest='scalesCorr', default='', help='Photon shape systematics: scalesCorr')
   parser.add_option("--scalesGlobal", dest='scalesGlobal', default='', help='Photon shape systematics: scalesGlobal')
   parser.add_option("--smears", dest='smears', default='', help='Photon shape systematics: smears')
+  parser.add_option("--setNonDiagonal", dest='setNonDiagonal', default='', help='Set non diagonal to [zero,diag]')
   return parser.parse_args()
 (opt,args) = get_options()
 
@@ -31,10 +107,11 @@ for cat in opt.cats.split(","):
     print " --> [ERROR] pkl file does not exist for %s: ./outdir_%s/calcPhotonSyst/pkl/%s.pkl"%(cat,opt.ext,cat)
     leave()
 
-print " --> Writing photon systematics to ./dat/photonCatSyst_%s.dat"%opt.ext
+diagStr = '_%s'%opt.setNonDiagonal if opt.setNonDiagonal in ['zero','diag'] else ''
+print " --> Writing photon systematics to ./dat/photonCatSyst_%s%s.dat"%(opt.ext,diagStr)
 
 # Else open file to write to
-f = open("./dat/photonCatSyst_%s.dat"%opt.ext,"w")
+f = open("./dat/photonCatSyst_%s%s.dat"%(opt.ext,diagStr),"w")
 # Write preamble
 f.write("# this file has been autogenerated by Signal/python/writePhotonSyst.py\n\n")
 systs = {'scales':'','scalesCorr':'','scalesGlobal':'','smears':''}
@@ -66,7 +143,18 @@ for cat_idx in range(len(opt.cats.split(","))):
     # Loop over systematics
     for stype in ['scales','smears','scalesCorr']:
       for s in systs[stype].split(","):
-        f.write("%-35s %-13.8f %-13.8f %-13.8f\n"%(s,r['%s_mean'%s],r['%s_sigma'%s],r['%s_rate'%s]))
+        if opt.setNonDiagonal == 'zero':
+          if r['proc']==parallelProc[cat]: f.write("%-35s %-13.8f %-13.8f %-13.8f\n"%(s,r['%s_mean'%s],r['%s_sigma'%s],r['%s_rate'%s]))
+          else: f.write("%-35s %-13.8f %-13.8f %-13.8f\n"%(s,0.,0.,0.))
+        elif opt.setNonDiagonal == 'diag':
+          mask = (data['cat']==cat)&(data['proc']==parallelProc[cat])
+          if len(data[mask])==0:
+            print " --> [ERROR] No diagonal proc (%s) found for cat: %s. Leaving"%(parallelProc[cat],cat)
+            leave()
+          r_diag = data[mask].iloc[0]
+          f.write("%-35s %-13.8f %-13.8f %-13.8f\n"%(s,r_diag['%s_mean'%s],r_diag['%s_sigma'%s],r_diag['%s_rate'%s])) 
+        else:
+          f.write("%-35s %-13.8f %-13.8f %-13.8f\n"%(s,r['%s_mean'%s],r['%s_sigma'%s],r['%s_rate'%s]))
     f.write("\n")
 
 # Close file

@@ -43,6 +43,27 @@ def set_color_palette(name, alpha=1., ncontours=256):
         red   = [1.00, 49./256.]
         green = [1.00, 163./256.]
         blue  = [1.00, 84./256.]
+    elif name == "ed_noice_mig" :
+        nStop = 10
+        nc = nStop*1.
+        stops = [0.00, 1.00]
+        red   = [1.00, 49./256.]
+        green = [1.00, 80./256.]
+        blue  = [1.00, 163./256.]
+    elif name == "ed_noice_ggh" :
+        nStop = 10
+        nc = nStop*1.
+        stops = [0.00, 1.00]
+        red   = [1.00, 0./256.]
+        green = [1.00, 180./256.]
+        blue  = [1.00, 220./256.]
+    elif name == "ed_noice_qqh" :
+        nStop = 10
+        nc = nStop*1.
+        stops = [0.00, 1.00]
+        red   = [1.00, 250./256.]
+        green = [1.00, 170./256.]
+        blue  = [1.00, 0./256.]
     elif name == "exclusion95" :
         stops = [0.00, 0.34, 0.61, 0.84, 0.95, 0.95, 1.00]
         red   = [0.00, 0.00, 0.87, 1.00, 0.51, 0.00, 0.00]

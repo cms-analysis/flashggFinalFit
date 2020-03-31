@@ -50,6 +50,8 @@ string outfilename_;
 string mergefilename_;
 string datfilename_;
 string systfilename_;
+string jsonfilename_;
+map<string,float> effAccMap_;
 string plotDir_;
 //bool skipPlots_=false;
 bool skipPlots_=true;
@@ -128,6 +130,7 @@ void OptionParser(int argc, char *argv[]){
 		("merge,m", po::value<string>(&mergefilename_)->default_value(""),                               	        "Merge the output with the given workspace")
 		("datfilename,d", po::value<string>(&datfilename_)->default_value("dat/newConfig.dat"),      			"Configuration file")
 		("systfilename,s", po::value<string>(&systfilename_)->default_value("dat/photonCatSyst.dat"),		"Systematic model numbers")
+		("jsonfilename,j", po::value<string>(&jsonfilename_)->default_value("jsons/testjson.json"),      			"Efficiency times acceptance file")
 		("plotDir,p", po::value<string>(&plotDir_)->default_value("plots"),						"Put plots in this directory")
 		("skipPlots", 																																									"Do not make any plots")
 		("mhLow,L", po::value<int>(&mhLow_)->default_value(115),                                  			"Low mass point")
@@ -577,6 +580,14 @@ int main(int argc, char *argv[]){
 		std::cerr << "[ERROR] Could not open " << datfilename_ <<std::endl;
 		exit(1);
 	}
+
+	// Prepare the eff acc values
+	ifstream jsonfile;
+	jsonfile.open(jsonfilename_.c_str());
+	if (jsonfile.fail()) {
+		std::cerr << "[ERROR] Could not open " << jsonfilename_ <<std::endl;
+		exit(1);
+	}
   
   if (0){// not actually used since DCB still needs to know which cat/procs to use a repalcement for
     for (int iproc =0 ; iproc < procs_.size() ; iproc++){
@@ -641,6 +652,21 @@ int main(int argc, char *argv[]){
       map_nG_wv_.push_back(nGaussiansWV);
     }
     datfile.close();
+
+	  while (jsonfile.good()){
+		  string line;
+		  getline(jsonfile,line);
+		  if (line=="\n" || line.substr(0,1)=="#" || line==" " || line.empty()) continue;
+		  vector<string> els;
+		  split(els,line,boost::is_any_of(" "));
+      if ( els.size() < 2 ) { 
+		    std::cerr << "[ERROR] malformed json file" << jsonfilename_ << std::endl;
+		    exit(1);
+      }
+      string procXcat = els[0];
+		  float effAccVal = boost::lexical_cast<float>(els[1]);
+      effAccMap_[procXcat] = effAccVal;
+    }
   }
   
   // now start the proper loop, so loop over teh maps we filled above.
@@ -1013,6 +1039,7 @@ int main(int argc, char *argv[]){
       outWS->import(*intLumi_);
       FinalModelConstruction finalModel(massList_, mass_,MH,intLumi_,mhLow_,mhHigh_,proc,cat,doSecondaryModels_,systfilename_,skipMasses_,verbose_,procs_, flashggCats_,plotDir_, isProblemCategory,isCutBased_,sqrts_,year_,doQuadraticSigmaSum_);
     
+      finalModel.setEffAccValues( effAccMap_[Form("%s__%s",split_[0].c_str(),split_[1].c_str())] );
       finalModel.setSecondaryModelVars(MH_SM,DeltaM,MH_2,higgsDecayWidth);
       finalModel.setRVsplines(splinesRV);
       finalModel.setWVsplines(splinesWV);

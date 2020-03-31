@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 # Script for submitting signal fitting jobs for flashggFinalFit
 
 import os, sys
@@ -13,6 +15,7 @@ def get_options():
 
   # Setup
   parser.add_option('--inputWSDir', dest='inputWSDir', default='/eos/home-j/jlangfor/hgg/ws/test_legacy_runII_102x', help="Directory storing flashgg workspaces" )
+  parser.add_option('--procs', dest='procs', default='auto', help="Procs: auto mean will determine from input WS filenames")
   parser.add_option('--cats', dest='cats', default='UntaggedTag_0,VBFTag_0', help="Define categories")
   parser.add_option('--ext', dest='ext', default='test', help="Extension: defines output dir where signal models are saved")
   parser.add_option('--analysis', dest='analysis', default='test', help="Analysis handle: used in Signal/python/replacementMap.py to specify replacement dataset mapping when too few entries")
@@ -57,6 +60,7 @@ if opt.inputConfig != '':
 
     #Extract options
     inputWSDir   = _cfg['inputWSDir']
+    procs        = _cfg['procs']
     cats         = _cfg['cats']
     ext          = _cfg['ext']
     analysis     = _cfg['analysis']
@@ -85,6 +89,7 @@ if opt.inputConfig != '':
 #Else extract from option parser
 else:
   inputWSDir   = opt.inputWSDir
+  procs        = opt.procs
   cats         = opt.cats
   ext          = opt.ext
   analysis     = opt.analysis
@@ -111,7 +116,11 @@ if mode not in ['std','calcPhotonSyst','writePhotonSyst','sigFitOnly','packageOn
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # FIXME: configure also for CONDOR
 # If mode == calcPhotonSyst: submit a job to the batch for each category
-if mode == "calcPhotonSyst":
+#if mode == "getFractions":
+#  if not os.path.isdir("./jsons"): os.system("mkdir ./jsons")
+#  os.system("./getFractions.py --ext %s -f %s --cats %s"%(ext,inputWSDir,cats))
+
+elif mode == "calcPhotonSyst":
   print " --> Calculating photon systematics: %s"%ext
   if not os.path.isdir("./outdir_%s"%ext): os.system("mkdir ./outdir_%s"%ext)
   if not os.path.isdir("./outdir_%s/calcPhotonSyst"%ext): os.system("mkdir ./outdir_%s/calcPhotonSyst"%ext)
@@ -134,10 +143,11 @@ if mode == "calcPhotonSyst":
 
 elif mode == "writePhotonSyst":
   print " --> Write photon systematics to .dat file compatible with SignalFit.cpp: %s"%ext
-  os.system("eval `scramv1 runtime -sh`; python python/writePhotonSyst.py --cats %s --ext %s --scales %s --scalesCorr %s --scalesGlobal %s --smears %s"%(cats,ext,scales,scalesCorr,scalesGlobal,smears)) 
+  os.system("eval `scramv1 runtime -sh`; python python/writePhotonSyst.py --cats %s --ext %s --scales %s --scalesCorr %s --scalesGlobal %s --smears %s --setNonDiagonal diag"%(cats,ext,scales,scalesCorr,scalesGlobal,smears)) 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 else:
+
   # Extract list of input ws filenames
   ws_fileNames = []
   for root, dirs, files in os.walk( inputWSDir ):
@@ -150,12 +160,13 @@ else:
   for fileName in ws_fileNames: ws_fullFileNames+="%s/%s,"%(inputWSDir,fileName)
   ws_fullFileNames = ws_fullFileNames[:-1]
 
-  # Extract list of procs
-  procs = ''
-  for fileName in ws_fileNames:
-    if 'M125' not in fileName: continue
-    procs += "%s,"%fileName.split('pythia8_')[1].split('.root')[0]
-  procs = procs[:-1]
+  if procs == "auto":
+    # Extract list of procs
+    procs = ''
+    for fileName in ws_fileNames:
+      if 'M125' not in fileName: continue
+      procs += "%s,"%fileName.split('pythia8_')[1].split('.root')[0]
+    procs = procs[:-1]
 
   # Extract low and high MH values
   mps = []
@@ -196,7 +207,7 @@ else:
   if useDCB: cmdLine += ' --useDCB_1G 1'
   else: cmdLine += ' --useDCB_1G 0'
   if mode == "phoSystCalc": cmdLine += ' --calcPhoSystOnly' 
-  elif mode == "sigFitOnly": cmdLine += ' --sigFitOnly --dontPackage' 
+  elif mode == "sigFitOnly": cmdLine += ' --sigFitOnly --dontPackage'
   elif mode == "packageOnly": cmdLine += ' --packageOnly'
   elif mode == "sigPlotsOnly": cmdLine += ' --sigPlotsOnly'
 

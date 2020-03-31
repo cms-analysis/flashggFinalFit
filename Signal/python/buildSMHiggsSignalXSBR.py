@@ -14,7 +14,7 @@ class dummy_options:
     self.out = "wsdefault"
     self.verbose = 0
     self.mass = 125
-    self.funcXSext = "8TeV" #default?
+    self.funcXSext = "13TeV" #default?
 
 options=dummy_options()
 DC = Datacard()

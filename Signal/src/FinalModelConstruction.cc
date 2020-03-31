@@ -382,7 +382,7 @@ void FinalModelConstruction::loadSignalSystematics(string filename){
         if (sqrts_==8 || sqrts_==7) catname=Form("cat%d",diphotonCat); // these bits can probably be factorised to avoid repetition
 	      if (sqrts_ ==13) catname = Form("%s",flashggCats_[diphotonCat].c_str()); // these bits can probably be factorised to avoid repetition
 				addToSystMap(meanSysts,proc,diphotonCat,phoSystName,meanCh);
-				RooConstVar *meanChVar = new RooConstVar(Form("const_%s_%s_%dTeV_mean_%s",proc.c_str(),catname.c_str(),sqrts_,phoSystName.c_str()),Form("const_%s_%s_%dTeV_mean_%s",proc.c_str(),catname.c_str(),sqrts_,phoSystName.c_str()),meanCh);
+				RooConstVar *meanChVar = new RooConstVar(Form("const_%s_%d_%s_%dTeV_mean_%s",proc.c_str(),year_,catname.c_str(),sqrts_,phoSystName.c_str()),Form("const_%s_%d_%s_%dTeV_mean_%s",proc.c_str(),year_,catname.c_str(),sqrts_,phoSystName.c_str()),meanCh);
 				photonSystematicConsts.insert(make_pair(meanChVar->GetName(),meanChVar));
 			}
 			double sigmaCh = lexical_cast<double>(els[2]); // effect of systematic on sigma of mgg distribution 
@@ -391,7 +391,7 @@ void FinalModelConstruction::loadSignalSystematics(string filename){
 	      if (sqrts_==8 || sqrts_==7) catname=Form("cat%d",diphotonCat); // these bits can probably be factorised to avoid repetition
 	      if (sqrts_ ==13) catname = Form("%s",flashggCats_[diphotonCat].c_str()); // these bits can probably be factorised to avoid repetition
 				addToSystMap(sigmaSysts,proc,diphotonCat,phoSystName,sigmaCh);
-				RooConstVar *sigmaChVar = new RooConstVar(Form("const_%s_%s_%dTeV_sigma_%s",proc.c_str(),catname.c_str(),sqrts_,phoSystName.c_str()),Form("const_%s_%s_%dTeV_sigma_%s",proc.c_str(),catname.c_str(),sqrts_,phoSystName.c_str()),sigmaCh);
+				RooConstVar *sigmaChVar = new RooConstVar(Form("const_%s_%d_%s_%dTeV_sigma_%s",proc.c_str(),year_,catname.c_str(),sqrts_,phoSystName.c_str()),Form("const_%s_%d_%s_%dTeV_sigma_%s",proc.c_str(),year_,catname.c_str(),sqrts_,phoSystName.c_str()),sigmaCh);
 				photonSystematicConsts.insert(make_pair(sigmaChVar->GetName(),sigmaChVar));
 			}
 			double rateCh = lexical_cast<double>(els[3]); // effect of systematic on yield of mgg distribution
@@ -400,7 +400,7 @@ void FinalModelConstruction::loadSignalSystematics(string filename){
 	      if (sqrts_==8 || sqrts_==7) catname=Form("cat%d",diphotonCat); // these bits can probably be factorised to avoid repetition
 	      if (sqrts_ ==13) catname = Form("%s",flashggCats_[diphotonCat].c_str()); // these bits can probably be factorised to avoid repetition
 				addToSystMap(rateSysts,proc,diphotonCat,phoSystName,rateCh);
-				RooConstVar *rateChVar = new RooConstVar(Form("const_%s_%s_%dTeV_rate_%s",proc.c_str(),catname.c_str(),sqrts_,phoSystName.c_str()),Form("const_%s_%s_%dTeV_rate_%s",proc.c_str(),catname.c_str(),sqrts_,phoSystName.c_str()),rateCh);
+				RooConstVar *rateChVar = new RooConstVar(Form("const_%s_%d_%s_%dTeV_rate_%s",proc.c_str(),year_,catname.c_str(),sqrts_,phoSystName.c_str()),Form("const_%s_%d_%s_%dTeV_rate_%s",proc.c_str(),year_,catname.c_str(),sqrts_,phoSystName.c_str()),rateCh);
 				photonSystematicConsts.insert(make_pair(rateChVar->GetName(),rateChVar));
 			}
 		}
@@ -643,8 +643,8 @@ RooAbsReal* FinalModelConstruction::getMeanWithPhotonSyst(RooAbsReal *dm, string
 		int formPlace = dependents->getSize();
 		bool hasEffect = false;
 		if (isPerCatSyst(syst)) {
-			if (photonSystematicConsts.find(Form("const_%s_%s_%dTeV_mean_%s",proc_.c_str(),catname.c_str(),sqrts_,syst.c_str())) != photonSystematicConsts.end() ) {
-				RooConstVar *constVar = photonSystematicConsts[Form("const_%s_%s_%dTeV_mean_%s",proc_.c_str(),catname.c_str(),sqrts_,syst.c_str())];
+			if (photonSystematicConsts.find(Form("const_%s_%d_%s_%dTeV_mean_%s",proc_.c_str(),year_,catname.c_str(),sqrts_,syst.c_str())) != photonSystematicConsts.end() ) {
+				RooConstVar *constVar = photonSystematicConsts[Form("const_%s_%d_%s_%dTeV_mean_%s",proc_.c_str(),year_,catname.c_str(),sqrts_,syst.c_str())];
 				RooAbsReal *nuisVar = photonSystematics[Form("CMS_hgg_nuisance_%s",syst.c_str())];
 				if( verbosity_ ) { 
 					std::cout << "[INFO] Systematic " << syst << std::endl;
@@ -684,8 +684,8 @@ RooAbsReal* FinalModelConstruction::getSigmaWithPhotonSyst(RooAbsReal *sig_fit, 
 		int formPlace = dependents->getSize();
 		bool hasEffect = false;
 		if (isPerCatSyst(syst)) {
-			if (photonSystematicConsts.find(Form("const_%s_%s_%dTeV_sigma_%s",proc_.c_str(),catname.c_str(),sqrts_,syst.c_str())) != photonSystematicConsts.end() ) {
-				RooConstVar *constVar = photonSystematicConsts[Form("const_%s_%s_%dTeV_sigma_%s",proc_.c_str(),catname.c_str(),sqrts_,syst.c_str())];
+			if (photonSystematicConsts.find(Form("const_%s_%d_%s_%dTeV_sigma_%s",proc_.c_str(),year_,catname.c_str(),sqrts_,syst.c_str())) != photonSystematicConsts.end() ) {
+				RooConstVar *constVar = photonSystematicConsts[Form("const_%s_%d_%s_%dTeV_sigma_%s",proc_.c_str(),year_,catname.c_str(),sqrts_,syst.c_str())];
 				RooAbsReal *nuisVar = photonSystematics[Form("CMS_hgg_nuisance_%s",syst.c_str())];
 				if (constVar->getVal()>=1.e-4) {
 					hasEffect = true;
@@ -720,8 +720,8 @@ RooAbsReal* FinalModelConstruction::getRateWithPhotonSyst(string name){
 		int formPlace = dependents->getSize();
 		bool hasEffect = false;
 		if (isPerCatSyst(syst)) {
-			if (photonSystematicConsts.find(Form("const_%s_%s_%dTeV_rate_%s",proc_.c_str(),catname.c_str(),sqrts_,syst.c_str())) != photonSystematicConsts.end() ) {
-				RooConstVar *constVar = photonSystematicConsts[Form("const_%s_%s_%dTeV_rate_%s",proc_.c_str(),catname.c_str(),sqrts_,syst.c_str())];
+			if (photonSystematicConsts.find(Form("const_%s_%d_%s_%dTeV_rate_%s",proc_.c_str(),year_,catname.c_str(),sqrts_,syst.c_str())) != photonSystematicConsts.end() ) {
+				RooConstVar *constVar = photonSystematicConsts[Form("const_%s_%d_%s_%dTeV_rate_%s",proc_.c_str(),year_,catname.c_str(),sqrts_,syst.c_str())];
 				RooAbsReal *nuisVar = photonSystematics[Form("CMS_hgg_nuisance_%s",syst.c_str())];
 				if (constVar->getVal()>=5.e-4) {
 					hasEffect = true;
@@ -1232,7 +1232,7 @@ void FinalModelConstruction::makeSTDdatasets(){
   for (unsigned int i=0; i<allMH_.size(); i++){
     int mh=allMH_[i];
     if( (proc_=="testBBH" || proc_=="testTHQ" || proc_=="testTHW") && mh!=125 ) continue;
-		RooDataSet *data = (RooDataSet*)rvDatasets[mh]->Clone(Form("sig_%s_mass_m%d_%s",proc_.c_str(),mh,catname.c_str()));
+		RooDataSet *data = (RooDataSet*)rvDatasets[mh]->Clone(Form("sig_%s_%d_mass_m%d_%s",proc_.c_str(),year_,mh,catname.c_str()));
 		data->append(*wvDatasets[mh]);
 		stdDatasets.insert(pair<int,RooDataSet*>(mh,data));
 	}	
@@ -1245,7 +1245,7 @@ void FinalModelConstruction::makeFITdatasets(){
   for (unsigned int i=0; i<allMH_.size(); i++){
     int mh=allMH_[i];
     if( (proc_=="testBBH" || proc_=="testTHQ" || proc_=="testTHW") && mh!=125 ) continue;
-		RooDataSet *data = (RooDataSet*)rvFITDatasets[mh]->Clone(Form("sig_%s_mass_m%d_%s",proc_.c_str(),mh,catname.c_str()));
+		RooDataSet *data = (RooDataSet*)rvFITDatasets[mh]->Clone(Form("sig_%s_%d_mass_m%d_%s",proc_.c_str(),year_,mh,catname.c_str()));
 		data->append(*wvFITDatasets[mh]);
 		fitDatasets.insert(pair<int,RooDataSet*>(mh,data));
 	}	
@@ -1338,6 +1338,10 @@ RooSpline1D* FinalModelConstruction::graphToSpline(string name, TGraph *graph, R
   return res;
 }
 
+void FinalModelConstruction::setEffAccValues(float effAccVal) {
+  effAccValue_ = effAccVal;
+}
+
 //here is how the normalisation is set
 void FinalModelConstruction::getNormalization(){
 	string catname;
@@ -1356,15 +1360,19 @@ void FinalModelConstruction::getNormalization(){
 	double effAcc =0.;
 	if (intLumi) {
     // calcu eA as sumEntries / totalxs * totalbr * intL
-    float sumEntries = data->sumEntries(); 
-    if (sumEntries <0 ) {
-    sumEntries =0; //negative eff*acc makes no sense...
-    fitToConstant=1;
-    }
-    effAcc = (sumEntries/(intLumi->getVal()*norm->GetXsection(mh,procLowerCase_)*norm->GetBR(mh)));
-		if(verbosity_)std::cout << "[INFO] (FinalModelConstruction) intLumi " << intLumi->getVal() <<", effAcc " << effAcc << std::endl;
-		if(verbosity_)std::cout << "[INFO] (FinalModelConstruction) data " << *data << std::endl;
-		if(verbosity_)std::cout << "[INFO] (FinalModelConstruction) sumEntries " << sumEntries <<", norm->GetXsection(mh,procLowerCase_) " << norm->GetXsection(mh,procLowerCase_) << " norm->GetBR(mh) " << norm->GetBR(mh)<< std::endl;
+    //float sumEntries = data->sumEntries(); 
+    //if (sumEntries <0 ) {
+    //sumEntries =0; //negative eff*acc makes no sense...
+    //fitToConstant=1;
+    //}
+    //effAcc = (sumEntries/(intLumi->getVal()*norm->GetXsection(mh,procLowerCase_)*norm->GetBR(mh)));
+		//if(verbosity_)std::cout << "[INFO] (FinalModelConstruction) intLumi " << intLumi->getVal() <<", effAcc " << effAcc << std::endl;
+		//if(verbosity_)std::cout << "[INFO] (FinalModelConstruction) data " << *data << std::endl;
+		//if(verbosity_)std::cout << "[INFO] (FinalModelConstruction) sumEntries " << sumEntries <<", norm->GetXsection(mh,procLowerCase_) " << norm->GetXsection(mh,procLowerCase_) << " norm->GetBR(mh) " << norm->GetBR(mh)<< std::endl;
+    
+    // replace treatment above with pre-calculated eff * acc calculated using NoTag info (allows subset of MC to be used)
+    effAcc = effAccValue_;
+    if (effAcc < 0.) effAcc = 0.;
 		} else {
 		  std::cout << "[ERROR] IntLumi rooRealVar is not in this workspace. exit." << std::endl;
 		return ;
@@ -1418,7 +1426,7 @@ void FinalModelConstruction::getNormalization(){
 
   //turn that graph into a spline!
   TGraph *eaGraph = new TGraph(pol);
-  RooSpline1D *eaSpline = graphToSpline(Form("fea_%s_%s_%dTeV",proc_.c_str(),catname.c_str(),sqrts_),eaGraph);
+  RooSpline1D *eaSpline = graphToSpline(Form("fea_%s_%d_%s_%dTeV",proc_.c_str(),year_,catname.c_str(),sqrts_),eaGraph);
   RooSpline1D *xs = xsSplines[proc_];
   TGraph *  xsGraph = new TGraph();
   TGraph *  brGraph = new TGraph();
@@ -1445,7 +1453,7 @@ void FinalModelConstruction::getNormalization(){
   c->SaveAs(Form("%s/br_spline.pdf",outDir_.c_str()));
   
   // make the relevant nuisance terms
-	RooAbsReal *rateNuisTerm = getRateWithPhotonSyst(Form("rate_%s_%s_%dTeV",proc_.c_str(),catname.c_str(),sqrts_));
+	RooAbsReal *rateNuisTerm = getRateWithPhotonSyst(Form("rate_%s_%d_%s_%dTeV",proc_.c_str(),year_,catname.c_str(),sqrts_));
 	if (!(xs && brSpline && eaSpline && rateNuisTerm && intLumi)){
   	std::cout << "[ERROR] some of the following are not set properly. exit." << std::endl;
     std::cout << "[ERROR] xs " << xs << ", brSpline " << brSpline << ", eaSpline " << eaSpline << ", rateNuisTerm " << rateNuisTerm << ", intLumi " << intLumi << std::endl;
@@ -1469,15 +1477,15 @@ void FinalModelConstruction::getNormalization(){
   if (doSecondaryModels){
     assert(secondaryModelVarsSet);
     // sm higgs as bkg
-    RooSpline1D *eaSpline_SM = graphToSpline(Form("fea_%s_%s_%dTeV_SM",proc_.c_str(),catname.c_str(),sqrts_),eaGraph,MH_SM);
+    RooSpline1D *eaSpline_SM = graphToSpline(Form("fea_%s_%d_%s_%dTeV_SM",proc_.c_str(),year_,catname.c_str(),sqrts_),eaGraph,MH_SM);
     RooSpline1D *xs_SM = xsSplines_SM[proc_];
     finalNorm_SM = new RooFormulaVar(Form("%s_norm",finalPdf_SM->GetName()),Form("%s_norm",finalPdf_SM->GetName()),"@0*@1*@2*@3",RooArgList(*xs_SM,*brSpline_SM,*eaSpline_SM,*rateNuisTerm));
     // second degen higgs
-    RooSpline1D *eaSpline_2 = graphToSpline(Form("fea_%s_%s_%dTeV_2",proc_.c_str(),catname.c_str(),sqrts_),eaGraph,MH_2);
+    RooSpline1D *eaSpline_2 = graphToSpline(Form("fea_%s_%d_%s_%dTeV_2",proc_.c_str(),year_,catname.c_str(),sqrts_),eaGraph,MH_2);
     RooSpline1D *xs_2 = xsSplines_2[proc_];
     finalNorm_2 = new RooFormulaVar(Form("%s_norm",finalPdf_2->GetName()),Form("%s_norm",finalPdf_2->GetName()),"@0*@1*@2*@3",RooArgList(*xs_2,*brSpline_2,*eaSpline_2,*rateNuisTerm));
     // natural width
-    RooSpline1D *eaSpline_NW = graphToSpline(Form("fea_%s_%s_%dTeV_NW",proc_.c_str(),catname.c_str(),sqrts_),eaGraph,MH);
+    RooSpline1D *eaSpline_NW = graphToSpline(Form("fea_%s_%d_%s_%dTeV_NW",proc_.c_str(),year_,catname.c_str(),sqrts_),eaGraph,MH);
     RooSpline1D *xs_NW = xsSplines_NW[proc_];
     finalNorm_NW = new RooFormulaVar(Form("%s_norm",finalPdf_NW->GetName()),Form("%s_norm",finalPdf_NW->GetName()),"@0*@1*@2*@3",RooArgList(*xs_NW,*brSpline_NW,*eaSpline_NW,*rateNuisTerm));
   }
