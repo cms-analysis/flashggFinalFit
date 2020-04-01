@@ -9,12 +9,12 @@ from optparse import OptionParser
 
 lumi = {'2016':'35.9', '2017':'41.5', '2018':'59.8'}
 
-#ROOT.gROOT.SetBatch(True)
+ROOT.gROOT.SetBatch(True)
 ROOT.gStyle.SetOptStat(0)
 
 def get_options():
   parser = OptionParser()
-  parser.add_option('--processMap', dest='processMap', default='', help="Signal Process Map. Form: [proc,year] or [all,all]=sum all signal procs from all years falling in category")
+  parser.add_option('--processMap', dest='processMap', default='', help="Signal Process Map. Form: [proc:year] or [all:all]=sum all signal procs from all years falling in category")
   parser.add_option('--cat', dest='cat', default='', help="Analysis category")
   parser.add_option('--ext', dest='ext', default='test', help="Extension: defines output dir where signal models are saved")
   parser.add_option("--mass", dest="mass", default='125', help="Higgs mass")
@@ -106,7 +106,7 @@ mgg.setUnit("GeV")
 mgg_arglist = ROOT.RooArgList(mgg)
 
 # Extract the procs to be plotted
-processMap = {'proc':opt.processMap.split(",")[0],'year':opt.processMap.split(",")[1]}
+processMap = {'proc':opt.processMap.split(":")[0],'year':opt.processMap.split(":")[1]}
 if processMap['proc'] == 'all':
   if processMap['year'] == 'all': allNorms = w.allFunctions().selectByName("*normThisLumi")
   else: allNorms = w.allFunctions().selectByName("*_%s_*normThisLumi"%processMap['year'])
@@ -128,7 +128,8 @@ for norm in rooiter(allNorms):
   d = w.data("sig_%s_%s_mass_m%s_%s"%(proc,year,opt.mass,opt.cat))
   d_rwgt = d.emptyClone("proc_%s_year_%s_cat_%s"%(proc,year,opt.cat))
   # Determine normFactor
-  nf = nval/d.sumEntries()
+  if d.sumEntries() == 0: nf = 0
+  else: nf = nval/d.sumEntries()
   for i in range(d.numEntries()):
     p = d.get(i)
     rw, rwe = d.weight()*nf, d.weightError()*nf
@@ -285,3 +286,21 @@ lat1.DrawLatex(0.87,0.86,"%s"%Translate(opt.cat,translateCats))
 lat1.DrawLatex(0.87,0.8,"%s %s"%(procStr,yearStr))
 
 canv.Update()
+
+# Save canvas
+if not os.path.isdir("outdir_%s/SignalModelPlots"%(opt.ext)): os.system("mkdir outdir_%s/SignalModelPlots"%(opt.ext))
+if processMap['proc']=='all':
+  if processMap['year']=='all':
+    canv.SaveAs("outdir_%s/SignalModelPlots/%s.png"%(opt.ext,opt.cat))
+    canv.SaveAs("outdir_%s/SignalModelPlots/%s.pdf"%(opt.ext,opt.cat))
+  else:
+    canv.SaveAs("outdir_%s/SignalModelPlots/%s_%s.png"%(opt.ext,opt.cat,processMap['year']))
+    canv.SaveAs("outdir_%s/SignalModelPlots/%s_%s.pdf"%(opt.ext,opt.cat,processMap['year']))
+else:
+  if processMap['year']=='all':
+    canv.SaveAs("outdir_%s/SignalModelPlots/%s_%s.png"%(opt.ext,opt.cat,processMap['proc']))
+    canv.SaveAs("outdir_%s/SignalModelPlots/%s_%s.pdf"%(opt.ext,opt.cat,processMap['proc']))
+  else:
+    canv.SaveAs("outdir_%s/SignalModelPlots/%s_%s_%s.png"%(opt.ext,opt.cat,processMap['proc'],processMap['year']))
+    canv.SaveAs("outdir_%s/SignalModelPlots/%s_%s_%s.pdf"%(opt.ext,opt.cat,processMap['proc'],processMap['year']))
+
