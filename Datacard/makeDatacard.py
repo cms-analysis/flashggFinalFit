@@ -50,7 +50,8 @@ stxsBinMergingScheme = {'ggH_VBFlike':['ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_2
 scaleCorrelationScheme = OrderedDict()
 scaleCorrelationScheme['ggH_0J'] = ['ggH_0J_PTH_0_10','ggH_0J_PTH_GT10']
 scaleCorrelationScheme['ggH_1J'] = ['ggH_1J_PTH_60_120', 'ggH_1J_PTH_120_200', 'ggH_1J_PTH_0_60']
-scaleCorrelationScheme['ggH_2J'] = ['ggH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25', 'ggH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25', 'ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25', 'ggH_GE2J_MJJ_0_350_PTH_120_200', 'ggH_GE2J_MJJ_0_350_PTH_60_120', 'ggH_GE2J_MJJ_0_350_PTH_0_60', 'ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25']
+scaleCorrelationScheme['ggH_2J'] = ['ggH_GE2J_MJJ_0_350_PTH_120_200', 'ggH_GE2J_MJJ_0_350_PTH_60_120', 'ggH_GE2J_MJJ_0_350_PTH_0_60'] 
+scaleCorrelationScheme['ggH_VBFlike'] = ['ggH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25', 'ggH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25', 'ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25', 'ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25']
 scaleCorrelationScheme['ggH_BSM'] = ['ggH_PTH_GT650', 'ggH_PTH_200_300', 'ggH_PTH_450_650', 'ggH_PTH_300_450']
 scaleCorrelationScheme['qqH_0J'] = ['qqH_0J','WH_had_0J','ZH_had_0J']
 scaleCorrelationScheme['qqH_1J'] = ['qqH_1J','WH_had_1J','ZH_had_1J']
@@ -235,6 +236,7 @@ def get_options():
   parser.add_option('--procs', dest='procs', default='', help='Comma separated list of signal processes')
   parser.add_option('--cats', dest='cats', default='', help='Comma separated list of analysis categories (no year tags)')
   parser.add_option('--modelWSDir', dest='modelWSDir', default='Models', help='Input model WS directory') 
+  parser.add_option('--packagedSignal', dest='packagedSignal', default=False, action="store_true", help='Signal models packaged into one file per category') 
   parser.add_option('--inputWSDir', dest='inputWSDir', default='/vols/cms/jl2117/hgg/ws/test_stage1_1', help='Input WS directory (without year tag _201X)') 
   parser.add_option('--saveDataFrame', dest='saveDataFrame', default='', help='Specify name of dataFrame if want to be saved') 
   parser.add_option('--loadDataFrame', dest='loadDataFrame', default='', help='Load dataFrame. Crucial generated with same options or likely to fail!') 
@@ -350,7 +352,8 @@ if not skipData:
 	# Input model ws 
 	if cat == "NOTAG": _modelWSFile, _model = '-', '-'
 	else:
-	  _modelWSFile = "./%s/signal_%s/CMS-HGG_sigfit_mva_%s_%s.root"%(opt.modelWSDir,year,proc,cat)
+          if opt.packagedSignal: _modelWSFile = "./%s/signal_%s/CMS-HGG_sigfit_mva_%s.root"%(opt.modelWSDir,year,cat)
+          else: _modelWSFile = "./%s/signal_%s/CMS-HGG_sigfit_mva_%s_%s.root"%(opt.modelWSDir,year,proc,cat)
 	  _model = "wsig_13TeV:hggpdfsmrel_%s_13TeV_%s_%s"%(year,proc,cat)
 
 	# Extract rate from lumi
