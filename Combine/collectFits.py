@@ -38,11 +38,16 @@ for fidx in range(len(fits)):
   else: _fitpois = _fit.split(":")[2].split(",")
   _name = "%s_%s"%(_fit.split(":")[0],_fit.split(":")[1])
 
+  if( _fit.split(":")[0] == "bestfit" ):
+    for poi in _fitpois:
+      mvcmd = "cd runFits%s_%s; mv higgsCombine_%s_%s.MultiDimFit.mH125.root %s_%s.root; cd .."%(opt.ext,opt.mode,_name,poi,_name,poi)
+      print " --> Storing best fit: runFits%s_%s/%s_%s.root"%(opt.ext,opt.mode,_name,poi)
+      run(mvcmd)
   if( _fit.split(":")[0] == "profile1D")|( _fit.split(":")[0] == "scan1D" ):
     for poi in _fitpois:
       haddcmd = "cd runFits%s_%s; hadd -f %s_%s.root higgsCombine_%s_%s.POINTS.*.*.root; cd .."%(opt.ext,opt.mode,_name,poi,_name,poi)
       run(haddcmd)
-      plotcmd = "cd runFits%s_%s; plot1DScan.py %s_%s.root --y-cut 40 -o Plots/%s_%s%s --POI %s; cd .."%(opt.ext,opt.mode,_name,poi,_name,poi,opt.ext,poi)
+      plotcmd = "cd runFits%s_%s; plot1DScan.py %s_%s.root --y-cut 20 --y-max 20 -o Plots/%s_%s%s --POI %s; cd .."%(opt.ext,opt.mode,_name,poi,_name,poi,opt.ext,poi)
       run(plotcmd)
 
   elif( _fit.split(":")[0] == "scan2D"):

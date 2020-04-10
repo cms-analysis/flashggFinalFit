@@ -509,7 +509,7 @@ if __name__ == "__main__":
           if table_args[1] == 'with_sm': 
             with_sm = True
             # Extract values from json
-            with open("jsons/xsbr_theory_all.json","r") as jsonfile: xsbr_theory = json.load(jsonfile)
+            with open("jsons/xsbr_theory_all_stage1p2_minimal.json","r") as jsonfile: xsbr_theory = json.load(jsonfile)
         with_statsyst = 'Stat' in bars and 'Syst' in bars
         # pavetxt = ROOT.
         plot.Set(valtxt, TextFont=42, TextSize=float(table_args[0]), TextAlign=12)

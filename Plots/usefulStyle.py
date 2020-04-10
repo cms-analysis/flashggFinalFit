@@ -54,6 +54,43 @@ def setCanvas(split=False):
 
     return can
 
+def setCanvasCorr(stage='0',split=False): 
+ 
+    # create canvas 
+    can = TCanvas("can", "can", 1000, 800 if split else 600)     
+    if split: 
+        can.Divide(1, 2)         
+        can.GetPad(1).SetPad('Top', '', 0., 0.25, 1.0, 1.0, 0, -1, 0) 
+        can.GetPad(1).SetTopMargin(0.069) 
+        can.GetPad(1).SetBottomMargin(0.0184) 
+        can.GetPad(1).SetRightMargin(0.046) 
+        can.GetPad(1).SetLeftMargin(0.138) 
+        can.GetPad(1).SetTicks(1, 1)         
+        can.GetPad(2).SetPad("Bottom", '', 0., 0., 1.0, 0.25, 0, -1, 0) 
+        can.GetPad(2).SetTopMargin(0.0092) 
+        can.GetPad(2).SetBottomMargin(0.368) 
+        can.GetPad(2).SetRightMargin(0.046) 
+        can.GetPad(2).SetLeftMargin(0.138)
+        can.GetPad(2).SetTicks(1, 1)
+    else:
+        #can.GetPad(0).SetTopMargin(0.069)
+        #can.GetPad(0).SetRightMargin(0.046)
+        #can.GetPad(0).SetLeftMargin(0.138)
+        #can.GetPad(0).SetBottomMargin(0.15)
+        can.GetPad(0).SetTopMargin(0.14)
+        can.GetPad(0).SetRightMargin(0.14)
+        if stage == '1p2':
+          can.GetPad(0).SetLeftMargin(0.17)
+          can.GetPad(0).SetBottomMargin(0.25)
+        else:
+          can.GetPad(0).SetLeftMargin(0.1)
+          can.GetPad(0).SetBottomMargin(0.15)
+        can.GetPad(0).SetTicks(1, 1)
+
+    can.cd(1)
+
+    return can
+
 def draw(hist, drawhist=False, ratio=False, log=False):
         
     # create canvas
@@ -135,13 +172,13 @@ def drawCMS(onTop=False):
     latex = TLatex()
     latex.SetNDC()
     latex.SetTextFont(42)
-    latex.SetTextSize(0.035)
+    latex.SetTextSize(0.05)
     latex.DrawLatex(0.1, 0.85 if not onTop else 0.93, text)
     
 def drawEnPu(pileup=None, lumi=None):
     latex = TLatex()
     latex.SetNDC()
-    latex.SetTextSize(0.035)
+    latex.SetTextSize(0.046)
     latex.SetTextColor(1)
     latex.SetTextFont(42)
     latex.SetTextAlign(31)
@@ -153,7 +190,7 @@ def drawEnPu(pileup=None, lumi=None):
 def drawEnYear(pileup=None, year=None):
     latex = TLatex()
     latex.SetNDC()
-    latex.SetTextSize(0.035)
+    latex.SetTextSize(0.046)
     latex.SetTextColor(1)
     latex.SetTextFont(42)
     latex.SetTextAlign(31)

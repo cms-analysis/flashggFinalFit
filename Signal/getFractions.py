@@ -37,7 +37,7 @@ def get_options():
   return parser.parse_args()
 (opt,args) = get_options()
 
-proc_map = {"GG2H":"ggh","VBF":"vbf","WH2HQQ":"wh","ZH2HQQ":"zh","QQ2HLNU":"wh","QQ2HLL":"zh","TTH":"tth","BBH":"bbH","THQ":"thq","THW":"thw","TH":"th"}
+proc_map = {"GG2H":"ggh","VBF":"vbf","WH2HQQ":"wh","ZH2HQQ":"zh","QQ2HLNU":"wh","QQ2HLL":"zh","TTH":"tth","BBH":"bbH","THQ":"thq","THW":"thw","TH":"thq"}
 def procToData( _proc, pmap=proc_map ):
   for key in pmap:
     if key == _proc.split("_")[0]: _proc = re.sub( key, pmap[key], _proc )

@@ -47,7 +47,8 @@ def writeProcesses(f,d,options):
       else:
         lprocid += "%-55s "%sigID
         sigID -= 1
-      lrate += "%-55.1f "%r['rate']
+      if r['rate'] == 1.0: lrate += "%-55.1f "%r['rate']
+      else: lrate += "%-55.7f "%r['rate']
   #Remove final space from lines and add to file
   f.write("\n")
   for l in [lbreak,lbin_cat,lobs_cat,lbreak,lbin_procXcat,lproc,lprocid,lrate,lbreak]: 

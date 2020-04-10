@@ -16,6 +16,7 @@ def run(cmd):
   os.system(cmd)
 
 common_opts = '--cminDefaultMinimizerStrategy 0 --X-rtd MINIMIZER_freezeDisassociatedParams --X-rtd MINIMIZER_multiMin_hideConstants --X-rtd MINIMIZER_multiMin_maskConstraints --X-rtd MINIMIZER_multiMin_maskChannels=2'
+#job_opts = '--job-mode SGE --sub-opts "-q hep.q -l h_rt=3:0:0 -l h_vmem=24G -pe hep.pe 2"'
 job_opts = '--job-mode SGE --sub-opts "-q hep.q -l h_rt=3:0:0 -l h_vmem=24G"'
 
 def getPdfIndicesFromJson(pdfjson):
@@ -58,12 +59,20 @@ for fidx in range(len(fits)):
   _name = "%s_%s"%(_fit.split(":")[0],_fit.split(":")[1])
   pdf_opts = getPdfIndicesFromJson("pdfindex%s.json"%opt.ext) if opt.setPdfIndices else ''
 
+  # For best fit point
+  if _fit.split(":")[0] == "bestfit":
+    if _fit.split(":")[1] == "statonly": _fit_opts += " --freezeParameters allConstrainedNuisances"
+    for poi in _fitpois:
+      fitcmd = "cd runFits%s_%s; combineTool.py --task-name %s_%s -M MultiDimFit -m 125 -d ../Datacard%s_%s.root --floatOtherPOIs 1 --expectSignal 1 -t -1 -n _%s_%s -P %s %s %s %s %s; cd .."%(opt.ext,opt.mode,_name,poi,opt.ext,opt.mode,_name,poi,poi,_fit_opts,pdf_opts,common_opts,job_opts)
+      run(fitcmd)
+
   # For 1D scan when profiling other pois
-  if _fit.split(":")[0] == "profile1D":
+  elif _fit.split(":")[0] == "profile1D":
     if _fit.split(":")[1] == "statonly": _fit_opts += " --freezeParameters allConstrainedNuisances"
     for poi in _fitpois:
       fitcmd = "cd runFits%s_%s; combineTool.py --task-name %s_%s -M MultiDimFit -m 125 -d ../Datacard%s_%s.root --floatOtherPOIs 1 --expectSignal 1 -t -1 -n _%s_%s -P %s --algo grid --points %s --alignEdges 1 --split-points %s %s %s %s %s; cd .."%(opt.ext,opt.mode,_name,poi,opt.ext,opt.mode,_name,poi,poi,_points.split(":")[0],_points.split(":")[1],_fit_opts,pdf_opts,common_opts,job_opts)
       run(fitcmd)
+
   # For 1D scan when fixing other pois
   elif _fit.split(":")[0] == "scan1D":
     if _fit.split(":")[1] == "statonly": _fit_opts += " --freezeParameters allConstrainedNuisances"

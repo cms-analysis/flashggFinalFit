@@ -2,15 +2,15 @@
 
     "kappas":{
         "pois":"kappa_W,kappa_Z,kappa_tau,kappa_t,kappa_b,kappa_g,kappa_gam",
-        "fits":"scan2D:statonly:kappa_g,kappa_gam",
-        "points":"10000:5",
-        "fit_opts":"--saveSpecifiedNuis all --saveInactivePOI 1 --setParameterRanges kappa_g=0.5,2:kappa_gam=0.4,1.6"      
+        "fits":"scan2D:statonly:kappa_g,kappa_gam+scan2D:syst:kappa_g,kappa_gam",
+        "points":"10000:5+10000:5",
+        "fit_opts":"--saveSpecifiedNuis all --saveInactivePOI 1 --setParameterRanges kappa_g=0.5,2:kappa_gam=0.4,1.6+--saveInactivePOI 1 --setParameterRanges kappa_g=0.5,2:kappa_gam=0.4,1.6"      
     },
 
     "kVkF":{
         "pois":"kappa_V,kappa_F",
-        "fits":"scan2D:statonly:kappa_V,kappa_F",
-        "points":"10000:5",
-        "fit_opts":"--saveSpecifiedNuis all --saveInactivePOI 1 --setParameterRanges kappa_V=0,2:kappa_F=-1.5,2.5"  
+        "fits":"scan2D:statonly:kappa_V,kappa_F+scan2D:syst:kappa_V,kappa_F",
+        "points":"10000:5+10000:5",
+        "fit_opts":"--saveSpecifiedNuis all --saveInactivePOI 1 --setParameterRanges kappa_V=0,2:kappa_F=-1.5,2.5+--saveInactivePOI 1 --setParameterRanges kappa_V=0,2:kappa_F=-1.5,2.5"  
     },
 }

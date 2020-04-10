@@ -8,6 +8,7 @@ import ROOT
 import pandas as pd
 import glob
 import pickle
+import json
 # Scripts for plotting
 from usefulStyle import setCanvas, drawCMS, drawEnPu, drawEnYear, formatHisto
 from shanePalette import set_color_palette
@@ -19,60 +20,9 @@ def leave():
 
 ROOT.gROOT.SetBatch(True)
 
-def paramToLabel(p):
-  p = re.sub("_"," ",p)
-  p = re.sub("0J","0j ",p)
-  p = re.sub("1J","1j ",p)
-  p = re.sub("GE2J","#geq 2j ",p)
-  p = re.sub("PTH","p_{T}^{H}",p)
-  p = re.sub("MJJ 0 350","",p)
-  p = re.sub("MJJ","m_{jj}",p)
-  p = re.sub(" 0 10","-low",p)
-  p = re.sub(" GT10","-high",p)
-  p = re.sub(" 0 60","-low",p)
-  p = re.sub(" 60 120","-med",p)
-  p = re.sub(" 120 200","-high",p)
-  p = re.sub(" 350 700","-low",p)
-  p = re.sub(" GT700","-high",p)
-  return p 
-
-def catToLabel(c,y): 
-  c = re.sub("RECO_","",c)
-  c = re.sub("_"," ",c)
-  c = re.sub("0J","0j ",c)
-  c = re.sub("1J","1j ",c)
-  c = re.sub("GE2J","#geq 2j ",c)
-  c = re.sub("PTH 200 300","200 < p_{T}^{#gamma#gamma} < 300 GeV (BSM)",c)
-  c = re.sub("PTH 300 450","300 < p_{T}^{#gamma#gamma} < 450 GeV (BSM)",c)
-  c = re.sub("PTH 450 650","450 < p_{T}^{#gamma#gamma} < 650 GeV (BSM)",c)
-  c = re.sub("PTH GT650","p_{T}^{#gamma#gamma} > 650 GeV (BSM)",c)
-  c = re.sub("PTH","p_{T}^{#gamma#gamma}",c)
-  c = re.sub(" 0 10","-low",c)
-  c = re.sub(" GT10","-high",c)
-  c = re.sub(" 0 60","-low",c)
-  c = re.sub(" 60 120","-med",c)
-  c = re.sub(" 120 200","-high",c)
-  c = re.sub("VBFLIKEGGH","ggH VBF-like",c)
-  c = re.sub("VBFTOPO ","qqH ",c)
-  c = re.sub("VHHAD","VH-like",c)
-  c = re.sub("JET3VETO","2j-like",c)
-  c = re.sub("JET3","3j-like",c)
-  c = re.sub("LOWMJJ","m_{jj}-low",c)
-  c = re.sub("HIGHMJJ","m_{jj}-high",c)
-  c = re.sub("WH LEP LOW","WH lep p_{T}^{V}-low",c)
-  c = re.sub("WH LEP HIGH","WH lep p_{T}^{V}-high",c)
-  c = re.sub("ZH LEP","ZH lep",c)
-  c = re.sub("TTH HAD LOW","ttH had p_{T}^{#gamma#gamma}-low",c)
-  c = re.sub("TTH HAD HIGH","ttH had p_{T}^{#gamma#gamma}-high",c)
-  c = re.sub("TTH LEP LOW","ttH lep p_{T}^{#gamma#gamma}-low",c)
-  c = re.sub("TTH LEP HIGH","ttH lep p_{T}^{#gamma#gamma}-high",c)
-  c = re.sub("THQ LEP","tHq lep",c)
-  c = re.sub("NOTAG %s"%y,"No Tag",c)
-  return c
-
 # Define processes
-productionModes = ['ggH','qqH','WH_had','ZH_had','WH_lep','ZH_lep','ttH','tHq']
-#productionModes = ['ggH','qqH','WH_had','ZH_had','WH_lep','ZH_lep','ttH']#,'tHq']
+#productionModes = ['ggH','qqH','WH_had','ZH_had','WH_lep','ZH_lep','ttH','tHq']
+productionModes = ['ggH','qqH','WH_had','ZH_had','WH_lep','ZH_lep','ttH']#,'tHq']
 #productionModes = ['ggH']
 stxsBins = {
   "ggH":['ggH_0J_PTH_0_10','ggH_0J_PTH_GT10','ggH_1J_PTH_0_60','ggH_1J_PTH_60_120','ggH_1J_PTH_120_200','ggH_GE2J_MJJ_0_350_PTH_0_60','ggH_GE2J_MJJ_0_350_PTH_60_120','ggH_GE2J_MJJ_0_350_PTH_120_200','ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','ggH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','ggH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25','ggH_PTH_200_300','ggH_PTH_300_450','ggH_PTH_450_650','ggH_PTH_GT650'],
@@ -87,7 +37,25 @@ stxsBins = {
 
 # Define parameter merging scheme
 paramMergingSchemes = {
-  "intermediate_mjj":{
+  "stage1p2_minimal":{
+    "ggH_BSM_low":['ggH_PTH_200_300'],
+    "ggH_BSM_high":['ggH_PTH_300_450','ggH_PTH_450_650','ggH_PTH_GT650'],
+    "ggH_VBF_like":['ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','ggH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','ggH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25'],
+    "qqH_VH_like":['qqH_GE2J_MJJ_60_120','WH_had_GE2J_MJJ_60_120','ZH_had_GE2J_MJJ_60_120'],
+    "qqH_MJJ_350_700":['qqH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','qqH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','WH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','WH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','ZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','ZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25'],
+    "qqH_MJJ_GT700":['qqH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','qqH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25','WH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','WH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25','ZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','ZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25'], 
+    "qqH_BSM":['qqH_GE2J_MJJ_GT350_PTH_GT200','WH_had_GE2J_MJJ_GT350_PTH_GT200','ZH_had_GE2J_MJJ_GT350_PTH_GT200'],
+    "qqH_other":['qqH_0J','qqH_1J','qqH_GE2J_MJJ_0_60','qqH_GE2J_MJJ_120_350','WH_had_0J','WH_had_1J','WH_had_GE2J_MJJ_0_60','WH_had_GE2J_MJJ_120_350','ZH_had_0J','ZH_had_1J','ZH_had_GE2J_MJJ_0_60','ZH_had_GE2J_MJJ_120_350'],
+    "WH_lep_low":['WH_lep_PTV_0_75'],
+    "WH_lep_high":['WH_lep_PTV_75_150','WH_lep_PTV_150_250_0J','WH_lep_PTV_150_250_GE1J','WH_lep_PTV_GT250'],
+    "ZH_lep":['ZH_lep_PTV_0_75','ZH_lep_PTV_75_150','ZH_lep_PTV_150_250_0J','ZH_lep_PTV_150_250_GE1J','ZH_lep_PTV_GT250'],
+    "ttH_low":['ttH_PTH_0_60'],
+    "ttH_medlow":['ttH_PTH_60_120'],
+    "ttH_medhigh":['ttH_PTH_120_200'],
+    "ttH_high":['ttH_PTH_200_300','ttH_PTH_GT300']
+  },
+
+  "stage1p2_intermediate":{
     "ggH_BSM_low":['ggH_PTH_200_300'],
     "ggH_BSM_high":['ggH_PTH_300_450','ggH_PTH_450_650','ggH_PTH_GT650'],
     "ggH_VBF_like":['ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','ggH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','ggH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25'],
@@ -103,7 +71,7 @@ paramMergingSchemes = {
     "ttH_high":['ttH_PTH_120_200','ttH_PTH_200_300','ttH_PTH_GT300']
   },
 
-  "maximal_mjj":{
+  "stage1p2_maximal":{
     "ggH_BSM":['ggH_PTH_200_300','ggH_PTH_300_450','ggH_PTH_450_650','ggH_PTH_GT650'],
     "ggH_VBF_like":['ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','ggH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','ggH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25'],
     "qqH_VH_like":['qqH_GE2J_MJJ_60_120','WH_had_GE2J_MJJ_60_120','ZH_had_GE2J_MJJ_60_120'],
@@ -117,10 +85,7 @@ paramMergingSchemes = {
   }
 }
 
-cats = ['RECO_0J_PTH_0_10_Tag0', 'RECO_0J_PTH_0_10_Tag1', 'RECO_0J_PTH_0_10_Tag2', 'RECO_0J_PTH_GT10_Tag0', 'RECO_0J_PTH_GT10_Tag1', 'RECO_0J_PTH_GT10_Tag2', 'RECO_1J_PTH_0_60_Tag0', 'RECO_1J_PTH_0_60_Tag1', 'RECO_1J_PTH_0_60_Tag2', 'RECO_1J_PTH_60_120_Tag0', 'RECO_1J_PTH_60_120_Tag1', 'RECO_1J_PTH_60_120_Tag2', 'RECO_1J_PTH_120_200_Tag0', 'RECO_1J_PTH_120_200_Tag1', 'RECO_1J_PTH_120_200_Tag2', 'RECO_GE2J_PTH_0_60_Tag0', 'RECO_GE2J_PTH_0_60_Tag1', 'RECO_GE2J_PTH_0_60_Tag2', 'RECO_GE2J_PTH_60_120_Tag0', 'RECO_GE2J_PTH_60_120_Tag1', 'RECO_GE2J_PTH_60_120_Tag2', 'RECO_GE2J_PTH_120_200_Tag0', 'RECO_GE2J_PTH_120_200_Tag1', 'RECO_GE2J_PTH_120_200_Tag2', 'RECO_VBFLIKEGGH_Tag0', 'RECO_VBFLIKEGGH_Tag1', 'RECO_PTH_200_300_Tag0', 'RECO_PTH_200_300_Tag1', 'RECO_PTH_300_450_Tag0', 'RECO_PTH_300_450_Tag1', 'RECO_PTH_450_650_Tag0', 'RECO_PTH_450_650_Tag1', 'RECO_PTH_GT650_Tag0', 'RECO_PTH_GT650_Tag1', 'RECO_VBFTOPO_VHHAD_Tag0', 'RECO_VBFTOPO_VHHAD_Tag1', 'RECO_VBFTOPO_JET3VETO_LOWMJJ_Tag0', 'RECO_VBFTOPO_JET3VETO_LOWMJJ_Tag1', 'RECO_VBFTOPO_JET3_LOWMJJ_Tag0', 'RECO_VBFTOPO_JET3_LOWMJJ_Tag1', 'RECO_VBFTOPO_JET3VETO_HIGHMJJ_Tag0', 'RECO_VBFTOPO_JET3VETO_HIGHMJJ_Tag1', 'RECO_VBFTOPO_JET3_HIGHMJJ_Tag0', 'RECO_VBFTOPO_JET3_HIGHMJJ_Tag1', 'RECO_VBFTOPO_BSM_Tag0', 'RECO_VBFTOPO_BSM_Tag1', 'RECO_WH_LEP_LOW_Tag0', 'RECO_WH_LEP_LOW_Tag1', 'RECO_WH_LEP_LOW_Tag2', 'RECO_WH_LEP_HIGH_Tag0', 'RECO_WH_LEP_HIGH_Tag1', 'RECO_WH_LEP_HIGH_Tag2', 'RECO_ZH_LEP_Tag0', 'RECO_ZH_LEP_Tag1', 'RECO_TTH_HAD_LOW_Tag0', 'RECO_TTH_HAD_LOW_Tag1', 'RECO_TTH_HAD_LOW_Tag2', 'RECO_TTH_HAD_LOW_Tag3', 'RECO_TTH_LEP_LOW_Tag0', 'RECO_TTH_LEP_LOW_Tag1', 'RECO_TTH_LEP_LOW_Tag2', 'RECO_TTH_HAD_HIGH_Tag0', 'RECO_TTH_HAD_HIGH_Tag1', 'RECO_TTH_HAD_HIGH_Tag2', 'RECO_TTH_HAD_HIGH_Tag3', 'RECO_TTH_LEP_HIGH_Tag0', 'RECO_TTH_LEP_HIGH_Tag1', 'RECO_TTH_LEP_HIGH_Tag2', 'RECO_TTH_LEP_HIGH_Tag3', 'RECO_THQ_LEP']
-#cats = ['RECO_0J_PTH_0_10_Tag0', 'RECO_0J_PTH_0_10_Tag1', 'RECO_0J_PTH_0_10_Tag2', 'RECO_0J_PTH_GT10_Tag0', 'RECO_0J_PTH_GT10_Tag1', 'RECO_0J_PTH_GT10_Tag2', 'RECO_1J_PTH_0_60_Tag0', 'RECO_1J_PTH_0_60_Tag1', 'RECO_1J_PTH_0_60_Tag2', 'RECO_1J_PTH_60_120_Tag0', 'RECO_1J_PTH_60_120_Tag1', 'RECO_1J_PTH_60_120_Tag2', 'RECO_1J_PTH_120_200_Tag0', 'RECO_1J_PTH_120_200_Tag1', 'RECO_1J_PTH_120_200_Tag2', 'RECO_GE2J_PTH_0_60_Tag0', 'RECO_GE2J_PTH_0_60_Tag1', 'RECO_GE2J_PTH_0_60_Tag2', 'RECO_GE2J_PTH_60_120_Tag0', 'RECO_GE2J_PTH_60_120_Tag1', 'RECO_GE2J_PTH_60_120_Tag2', 'RECO_GE2J_PTH_120_200_Tag0', 'RECO_GE2J_PTH_120_200_Tag1', 'RECO_GE2J_PTH_120_200_Tag2', 'RECO_VBFLIKEGGH_Tag0', 'RECO_VBFLIKEGGH_Tag1', 'RECO_PTH_200_300_Tag0', 'RECO_PTH_200_300_Tag1', 'RECO_PTH_300_450_Tag0', 'RECO_PTH_300_450_Tag1', 'RECO_PTH_450_650_Tag0', 'RECO_PTH_450_650_Tag1', 'RECO_PTH_GT650_Tag0', 'RECO_PTH_GT650_Tag1']
-#cats = ['RECO_VBFTOPO_VHHAD_Tag0', 'RECO_VBFTOPO_VHHAD_Tag1', 'RECO_VBFTOPO_JET3VETO_LOWMJJ_Tag0', 'RECO_VBFTOPO_JET3VETO_LOWMJJ_Tag1', 'RECO_VBFTOPO_JET3_LOWMJJ_Tag0', 'RECO_VBFTOPO_JET3_LOWMJJ_Tag1', 'RECO_VBFTOPO_JET3VETO_HIGHMJJ_Tag0', 'RECO_VBFTOPO_JET3VETO_HIGHMJJ_Tag1', 'RECO_VBFTOPO_JET3_HIGHMJJ_Tag0', 'RECO_VBFTOPO_JET3_HIGHMJJ_Tag1', 'RECO_VBFTOPO_BSM_Tag0', 'RECO_VBFTOPO_BSM_Tag1']
-#cats= ['RECO_WH_LEP_LOW_Tag0', 'RECO_WH_LEP_LOW_Tag1', 'RECO_WH_LEP_LOW_Tag2', 'RECO_WH_LEP_HIGH_Tag0', 'RECO_WH_LEP_HIGH_Tag1', 'RECO_WH_LEP_HIGH_Tag2', 'RECO_ZH_LEP_Tag0', 'RECO_ZH_LEP_Tag1', 'RECO_TTH_HAD_LOW_Tag0', 'RECO_TTH_HAD_LOW_Tag1', 'RECO_TTH_HAD_LOW_Tag2', 'RECO_TTH_HAD_LOW_Tag3', 'RECO_TTH_LEP_LOW_Tag0', 'RECO_TTH_LEP_LOW_Tag1', 'RECO_TTH_LEP_LOW_Tag2', 'RECO_TTH_HAD_HIGH_Tag0', 'RECO_TTH_HAD_HIGH_Tag1', 'RECO_TTH_HAD_HIGH_Tag2', 'RECO_TTH_HAD_HIGH_Tag3', 'RECO_TTH_LEP_HIGH_Tag0', 'RECO_TTH_LEP_HIGH_Tag1', 'RECO_TTH_LEP_HIGH_Tag2', 'RECO_TTH_LEP_HIGH_Tag3', 'RECO_THQ_LEP']
+cats = ['RECO_0J_PTH_0_10_Tag0', 'RECO_0J_PTH_0_10_Tag1', 'RECO_0J_PTH_0_10_Tag2', 'RECO_0J_PTH_GT10_Tag0', 'RECO_0J_PTH_GT10_Tag1', 'RECO_0J_PTH_GT10_Tag2', 'RECO_1J_PTH_0_60_Tag0', 'RECO_1J_PTH_0_60_Tag1', 'RECO_1J_PTH_0_60_Tag2', 'RECO_1J_PTH_60_120_Tag0', 'RECO_1J_PTH_60_120_Tag1', 'RECO_1J_PTH_60_120_Tag2', 'RECO_1J_PTH_120_200_Tag0', 'RECO_1J_PTH_120_200_Tag1', 'RECO_1J_PTH_120_200_Tag2', 'RECO_GE2J_PTH_0_60_Tag0', 'RECO_GE2J_PTH_0_60_Tag1', 'RECO_GE2J_PTH_0_60_Tag2', 'RECO_GE2J_PTH_60_120_Tag0', 'RECO_GE2J_PTH_60_120_Tag1', 'RECO_GE2J_PTH_60_120_Tag2', 'RECO_GE2J_PTH_120_200_Tag0', 'RECO_GE2J_PTH_120_200_Tag1', 'RECO_GE2J_PTH_120_200_Tag2', 'RECO_VBFLIKEGGH_Tag0', 'RECO_VBFLIKEGGH_Tag1', 'RECO_PTH_200_300_Tag0', 'RECO_PTH_200_300_Tag1', 'RECO_PTH_300_450_Tag0', 'RECO_PTH_300_450_Tag1', 'RECO_PTH_450_650_Tag0', 'RECO_PTH_GT650_Tag0', 'RECO_VBFTOPO_VHHAD_Tag0', 'RECO_VBFTOPO_VHHAD_Tag1', 'RECO_VBFTOPO_JET3VETO_LOWMJJ_Tag0', 'RECO_VBFTOPO_JET3VETO_LOWMJJ_Tag1', 'RECO_VBFTOPO_JET3_LOWMJJ_Tag0', 'RECO_VBFTOPO_JET3_LOWMJJ_Tag1', 'RECO_VBFTOPO_JET3VETO_HIGHMJJ_Tag0', 'RECO_VBFTOPO_JET3VETO_HIGHMJJ_Tag1', 'RECO_VBFTOPO_JET3_HIGHMJJ_Tag0', 'RECO_VBFTOPO_JET3_HIGHMJJ_Tag1', 'RECO_VBFTOPO_BSM_Tag0', 'RECO_VBFTOPO_BSM_Tag1', 'RECO_WH_LEP_LOW_Tag0', 'RECO_WH_LEP_LOW_Tag1', 'RECO_WH_LEP_LOW_Tag2', 'RECO_WH_LEP_HIGH_Tag0', 'RECO_WH_LEP_HIGH_Tag1', 'RECO_WH_LEP_HIGH_Tag2', 'RECO_VH_MET_Tag0', 'RECO_VH_MET_Tag1', 'RECO_ZH_LEP_Tag0', 'RECO_ZH_LEP_Tag1', 'RECO_TTH_HAD_PTH_0_60_Tag0', 'RECO_TTH_HAD_PTH_0_60_Tag1', 'RECO_TTH_HAD_PTH_0_60_Tag2', 'RECO_TTH_HAD_PTH_0_60_Tag3', 'RECO_TTH_HAD_PTH_60_120_Tag0', 'RECO_TTH_HAD_PTH_60_120_Tag1', 'RECO_TTH_HAD_PTH_60_120_Tag2', 'RECO_TTH_HAD_PTH_60_120_Tag3', 'RECO_TTH_HAD_PTH_120_200_Tag0', 'RECO_TTH_HAD_PTH_120_200_Tag1', 'RECO_TTH_HAD_PTH_120_200_Tag2', 'RECO_TTH_HAD_PTH_120_200_Tag3', 'RECO_TTH_HAD_PTH_GT200_Tag0', 'RECO_TTH_HAD_PTH_GT200_Tag1', 'RECO_TTH_HAD_PTH_GT200_Tag2', 'RECO_TTH_HAD_PTH_GT200_Tag3', 'RECO_TTH_LEP_PTH_0_60_Tag0', 'RECO_TTH_LEP_PTH_0_60_Tag1', 'RECO_TTH_LEP_PTH_0_60_Tag2', 'RECO_TTH_LEP_PTH_0_60_Tag3', 'RECO_TTH_LEP_PTH_60_120_Tag0', 'RECO_TTH_LEP_PTH_60_120_Tag1', 'RECO_TTH_LEP_PTH_120_200_Tag0', 'RECO_TTH_LEP_PTH_120_200_Tag1', 'RECO_TTH_LEP_PTH_GT200_Tag0', 'RECO_TTH_LEP_PTH_GT200_Tag1', 'RECO_THQ_LEP'] 
 
 def get_options():
   parser = OptionParser()
@@ -130,8 +95,20 @@ def get_options():
   parser.add_option("--threshold", dest="threshold", default=1.0, type='float', help="Threshold (in %%)")
   parser.add_option("--year", dest="year", default='2016', help="Used only for migration (norm by proc)")
   parser.add_option("--ext", dest="ext", default='', help="Extension for saving")
+  parser.add_option("--translateCats", dest="translateCats", default=None, help="JSON to store cat translations")
+  parser.add_option("--translateProcs", dest="translateProcs", default=None, help="JSON to store proc translations")
   return parser.parse_args()
 (opt,args) = get_options()
+
+def Translate(name, ndict):
+    return ndict[name] if name in ndict else name
+
+def LoadTranslations(jsonfilename):
+    with open(jsonfilename) as jsonfile:
+        return json.load(jsonfile)
+
+translateCats = {} if opt.translateCats is None else LoadTranslations(opt.translateCats)
+translateProcs = {} if opt.translateProcs is None else LoadTranslations(opt.translateProcs)
 
 # If norm by proc: add NoTag
 if opt.mode == 'migration': cats.insert(0,"NOTAG_%s"%opt.year)
@@ -192,8 +169,8 @@ if opt.mode == 'purity': h_matrix.SetMaximum(100)
 elif opt.mode == 'migration': h_matrix.SetMaximum(25)
 h_matrix.SetMinimum(0)
 # Set bin labels
-for xbin_idx in range(1,h_matrix.GetNbinsX()+1): h_matrix.GetXaxis().SetBinLabel( xbin_idx, paramToLabel(params[xbin_idx-1]) ) 
-for ybin_idx in range(1,h_matrix.GetNbinsY()+1): h_matrix.GetYaxis().SetBinLabel( ybin_idx, catToLabel(cats[ybin_idx-1],opt.year) ) 
+for xbin_idx in range(1,h_matrix.GetNbinsX()+1): h_matrix.GetXaxis().SetBinLabel( xbin_idx, Translate(params[xbin_idx-1],translateProcs) ) 
+for ybin_idx in range(1,h_matrix.GetNbinsY()+1): h_matrix.GetYaxis().SetBinLabel( ybin_idx, Translate(cats[ybin_idx-1],translateCats) ) 
 # Fill bins of histogram with normalised values
 for pidx in range(nParams):
   for cidx in range(nCats):
@@ -223,9 +200,9 @@ else: ROOT.gStyle.SetPaintTextFormat('.0f')
 # Formatting
 h_matrix.GetXaxis().LabelsOption("v")
 #h_matrix.GetXaxis().SetLabelSize(0.02)
-h_matrix.GetXaxis().SetLabelSize(0.03)
+h_matrix.GetXaxis().SetLabelSize(0.025)
 h_matrix.GetXaxis().SetTitle("STXS stage 1.2 process (reduced)")
-h_matrix.GetXaxis().SetTitleOffset(2.4)
+h_matrix.GetXaxis().SetTitleOffset(2.5)
 h_matrix.GetXaxis().SetTickLength(0.)
 h_matrix.GetYaxis().SetLabelSize(0.015)
 #h_matrix.GetYaxis().SetLabelSize(0.025)
@@ -255,7 +232,8 @@ for pidx in range(1,nParams):
 #pm_lines = []#'qqH_other','WH_lep','ZH_lep','ttH']#,'tHq']
 #pm_lines = ['qqH_other','WH_lep','ZH_lep','ttH']#,'tHq']
 #pm_lines = ['qqH_other','WH_lep','ZH_lep','ttH','tHq']
-pm_lines = ['qqH_other','WH_lep_low','ZH_lep','ttH_low','tHq']
+pm_lines = ['qqH_other','WH_lep_low','ZH_lep','ttH_low']#,'tHq']
+#pm_lines = ['qqH_other','WH_lep_low','ZH_lep','ttH_low','tHq']
 for pm in pm_lines:
   pidx = params.index(pm)
   lines["l_pm_%g"%pidx] = ROOT.TLine(pidx,0,pidx,nCats)
@@ -269,7 +247,7 @@ for tag in tag_lines:
   lines["l_tag_%g"%tidx] = ROOT.TLine(0,tidx,nParams,tidx)
   lines["l_tag_%g"%tidx].SetLineColorAlpha(ROOT.kGray,0.5)
   lines["l_tag_%g"%tidx].SetLineWidth(1)
-cat_lines = ['RECO_0J_PTH_0_10_Tag0','RECO_VBFTOPO_VHHAD_Tag0','RECO_WH_LEP_LOW_Tag0','RECO_ZH_LEP_Tag0','RECO_TTH_HAD_LOW_Tag0','RECO_THQ_LEP']
+cat_lines = ['RECO_0J_PTH_0_10_Tag0','RECO_VBFTOPO_VHHAD_Tag0','RECO_WH_LEP_LOW_Tag0','RECO_VH_MET_Tag0','RECO_ZH_LEP_Tag0','RECO_TTH_HAD_PTH_0_60_Tag0','RECO_THQ_LEP']
 #cat_lines = ['RECO_ZH_LEP_Tag0','RECO_TTH_HAD_LOW_Tag0','RECO_THQ_LEP']
 #cat_lines = []
 for cat in cat_lines:

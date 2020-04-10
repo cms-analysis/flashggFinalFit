@@ -113,7 +113,11 @@ def calcSystYields(_nominalDataName,_inputWS,_systFactoryTypes,skipCOWCorr=True)
       elif f == "a_w":
         centralWeightStr = "centralObjectWeight"
         if "NOTAG" in _nominalDataName: f_central = 1.
-        else: f_central = p.getRealValue(centralWeightStr)
+        else: 
+          # FIXME: temporary fix for bugged centralObjectWeight from prefire weight
+          if p.getRealValue("prefireProbabilityUp01sigma") != 0: 
+            f_central = 0.5*(p.getRealValue("LooseMvaSFUp01sigma")+p.getRealValue("LooseMvaSFDown01sigma"))
+          else: f_central = p.getRealValue(centralWeightStr)
         f_up, f_down = p.getRealValue("%sUp01sigma"%s), p.getRealValue("%sDown01sigma"%s)
         # Checks:
         # 1) if central weights are zero then skip event
@@ -145,12 +149,16 @@ def calcSystYields(_nominalDataName,_inputWS,_systFactoryTypes,skipCOWCorr=True)
         if f_central == 0: continue
         else:
           # Add weights to counter
-          systYields[s] += w*(f/f_central)
+          # FIXME: temporary fix to avoid using dodgy values in TH trees
+          if "thq" in _nominalDataName: systYields[s] += w
+          else: systYields[s] += w*(f/f_central)
           if not skipCOWCorr:
             if "NOTAG" in _nominalDataName: f_COWCorr = 1.
             else: f_COWCorr = p.getRealValue("centralObjectWeight")
             if f_COWCorr == 0: continue
-            systYields["%s_COWCorr"%s] += (w/f_COWCorr)*(f/f_central)
+            # FIXME: temporary fix to avoid using dodgy values in TH trees
+            if "thq" in _nominalDataName: systYields["%s_COWCorr"%s] += w
+            else: systYields["%s_COWCorr"%s] += (w/f_COWCorr)*(f/f_central)
 
   # For systematics stored as RooDataHist
   for s, f in _systFactoryTypes.iteritems():

@@ -14,7 +14,7 @@ def leave():
   sys.exit(1)
 
 paramMergingSchemes = {
-  "intermediate_mjj":{
+  "stage1p2_minimal":{
     "r_ggH_0J_low":['ggH_0J_PTH_0_10'],
     "r_ggH_0J_high":['ggH_0J_PTH_GT10'],
     "r_ggH_1J_low":['ggH_1J_PTH_0_60'],
@@ -28,7 +28,34 @@ paramMergingSchemes = {
     "r_ggH_BSM_high":['ggH_PTH_300_450','ggH_PTH_450_650','ggH_PTH_GT650'],
     "r_qqH_VHhad":['qqH_GE2J_MJJ_60_120','WH_had_GE2J_MJJ_60_120','ZH_had_GE2J_MJJ_60_120'],
     "r_qqH_low_mjj":['qqH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','qqH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','WH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','WH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','ZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','ZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25'],
-    "r_qqH_high_mjj":['qqH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','qqH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25','WH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','WH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25','ZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','ZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25'],
+    "r_qqH_high_mjj":['qqH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','qqH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25'],#,'WH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','WH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25','ZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','ZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25'],
+    "r_qqH_BSM":['qqH_GE2J_MJJ_GT350_PTH_GT200','WH_had_GE2J_MJJ_GT350_PTH_GT200','ZH_had_GE2J_MJJ_GT350_PTH_GT200'],
+    #"qqH_other":['qqH_0J','qqH_1J','qqH_GE2J_MJJ_0_60','qqH_GE2J_MJJ_120_350','WH_had_0J','WH_had_1J','WH_had_GE2J_MJJ_0_60','WH_had_GE2J_MJJ_120_350','ZH_had_0J','ZH_had_1J','ZH_had_GE2J_MJJ_0_60','ZH_had_GE2J_MJJ_120_350'],
+    "r_WH_lep_low":['WH_lep_PTV_0_75'],
+    "r_WH_lep_high":['WH_lep_PTV_75_150','WH_lep_PTV_150_250_0J','WH_lep_PTV_150_250_GE1J','WH_lep_PTV_GT250'],
+    "r_ZH_lep":['ZH_lep_PTV_0_75','ZH_lep_PTV_75_150','ZH_lep_PTV_150_250_0J','ZH_lep_PTV_150_250_GE1J','ZH_lep_PTV_GT250'],
+    "r_ttH_low":['ttH_PTH_0_60'],
+    "r_ttH_medlow":['ttH_PTH_60_120'],
+    "r_ttH_medhigh":['ttH_PTH_120_200'],
+    "r_ttH_high":['ttH_PTH_200_300','ttH_PTH_GT300']#,
+    "r_tHq":['tHq']
+  },
+
+  "stage1p2_intermediate":{
+    "r_ggH_0J_low":['ggH_0J_PTH_0_10'],
+    "r_ggH_0J_high":['ggH_0J_PTH_GT10'],
+    "r_ggH_1J_low":['ggH_1J_PTH_0_60'],
+    "r_ggH_1J_med":['ggH_1J_PTH_60_120'],
+    "r_ggH_1J_high":['ggH_1J_PTH_120_200'],
+    "r_ggH_2J_low":['ggH_GE2J_MJJ_0_350_PTH_0_60'],
+    "r_ggH_2J_med":['ggH_GE2J_MJJ_0_350_PTH_60_120'],
+    "r_ggH_2J_high":['ggH_GE2J_MJJ_0_350_PTH_120_200'],
+    "r_ggH_VBFlike":['ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','ggH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','ggH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25'],
+    "r_ggH_BSM_low":['ggH_PTH_200_300'],
+    "r_ggH_BSM_high":['ggH_PTH_300_450','ggH_PTH_450_650','ggH_PTH_GT650'],
+    "r_qqH_VHhad":['qqH_GE2J_MJJ_60_120','WH_had_GE2J_MJJ_60_120','ZH_had_GE2J_MJJ_60_120'],
+    "r_qqH_low_mjj":['qqH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','qqH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','WH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','WH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','ZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','ZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25'],
+    "r_qqH_high_mjj":['qqH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','qqH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25'],#,'WH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','WH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25','ZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','ZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25'],
     "r_qqH_BSM":['qqH_GE2J_MJJ_GT350_PTH_GT200','WH_had_GE2J_MJJ_GT350_PTH_GT200','ZH_had_GE2J_MJJ_GT350_PTH_GT200'],
     #"qqH_other":['qqH_0J','qqH_1J','qqH_GE2J_MJJ_0_60','qqH_GE2J_MJJ_120_350','WH_had_0J','WH_had_1J','WH_had_GE2J_MJJ_0_60','WH_had_GE2J_MJJ_120_350','ZH_had_0J','ZH_had_1J','ZH_had_GE2J_MJJ_0_60','ZH_had_GE2J_MJJ_120_350'],
     "r_WH_lep_low":['WH_lep_PTV_0_75'],
@@ -36,13 +63,13 @@ paramMergingSchemes = {
     "r_ZH_lep":['ZH_lep_PTV_0_75','ZH_lep_PTV_75_150','ZH_lep_PTV_150_250_0J','ZH_lep_PTV_150_250_GE1J','ZH_lep_PTV_GT250'],
     "r_ttH_low":['ttH_PTH_0_60','ttH_PTH_60_120'],
     "r_ttH_high":['ttH_PTH_120_200','ttH_PTH_200_300','ttH_PTH_GT300'],
-    "r_tHq":['tHq']
+    #"r_tHq":['tHq']
   }
 }
 
 theory_systematics = [
     'BR_hgg',
-    'QCDscale_ggH','pdf_Higgs_ggH','alphaS_ggH',
+    'THU_ggH_Mu','THU_ggH_Res','THU_ggH_Mig01','THU_ggH_Mig12','THU_ggH_VBF2j','THU_ggH_VBF3j','THU_ggH_PT60','THU_ggH_PT120','THU_ggH_qmtop','pdf_Higgs_ggH','alphaS_ggH',
     'THU_qqH_Yield','THU_qqH_PTH200','THU_qqH_MJJ60','THU_qqH_MJJ120','THU_qqH_MJJ350','THU_qqH_MJJ700','THU_qqH_MJJ1000','THU_qqH_MJJ1500','THU_qqH_PTHJJ25','THU_qqH_JET01','pdf_Higgs_qqH','alphaS_qqH',
     'QCDscale_VH','pdf_Higgs_VH','alphaS_VH',
     'QCDscale_ttH','pdf_Higgs_ttH','alphaS_ttH',
@@ -156,4 +183,4 @@ for poi in paramMergingSchemes[opt.paramMergingScheme]:
 # Write to json file
 print " --> Writing to json file: xsbr_theory_%s.json"%opt.POI
 if not os.path.isdir("./jsons"): os.system("mkdir ./jsons")
-with open("./jsons/xsbr_theory_%s.json"%opt.POI,'w') as jsonfile: json.dump(xsbr_theory,jsonfile)
+with open("./jsons/xsbr_theory_%s_%s.json"%(opt.POI,opt.paramMergingScheme),'w') as jsonfile: json.dump(xsbr_theory,jsonfile)

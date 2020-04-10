@@ -12,16 +12,17 @@ import pickle
 array_columns = {'alphaSWeights':2,'scaleWeights':9,'pdfWeights':60}
 
 # List of shape systs to add as RooDataHists output workspace
-shapeSysts = ['metJecUncertainty', 'SigmaEOverEShift', 'ShowerShapeHighR9EB', 'MCScaleLowR9EB', 'JEC', 'MCSmearLowR9EBRho', 'MCSmearHighR9EEPhi', 'MCScaleGain6EB', 'MCSmearLowR9EERho', 'FNUFEE', 'MCScaleLowR9EE', 'MaterialOuterBarrel', 'metJerUncertainty', 'MCSmearLowR9EEPhi', 'ShowerShapeLowR9EE', 'MCSmearHighR9EBRho', 'MCSmearLowR9EBPhi', 'MCSmearHighR9EERho', 'FNUFEB', 'JER', 'metUncUncertainty', 'MCScaleGain1EB', 'MCScaleHighR9EE', 'MCScaleHighR9EB', 'MCSmearHighR9EBPhi', 'MaterialCentralBarrel', 'MaterialForward', 'MvaShift', 'PUJIDShift', 'ShowerShapeHighR9EE', 'ShowerShapeLowR9EB', 'metPhoUncertainty']
+shapeSysts = ['FNUFEB', 'FNUFEE', 'JECAbsoluteYEAR', 'JECAbsolute', 'JECBBEC1YEAR', 'JECBBEC1', 'JECEC2YEAR', 'JECEC2', 'JECFlavorQCD', 'JECHFYEAR', 'JECHF', 'JECRelativeBal', 'JECRelativeSampleYEAR', 'JEC', 'JER', 'MCScaleGain1EB', 'MCScaleGain6EB', 'MCScaleHighR9EB', 'MCScaleHighR9EE', 'MCScaleLowR9EB', 'MCScaleLowR9EE', 'MCSmearHighR9EBPhi', 'MCSmearHighR9EBRho', 'MCSmearHighR9EEPhi', 'MCSmearHighR9EERho', 'MCSmearLowR9EBPhi', 'MCSmearLowR9EBRho', 'MCSmearLowR9EEPhi', 'MCSmearLowR9EERho', 'MaterialCentralBarrel', 'MaterialForward', 'MaterialOuterBarrel', 'MvaShift', 'PUJIDShift', 'ShowerShapeHighR9EB', 'ShowerShapeHighR9EE', 'ShowerShapeLowR9EB', 'ShowerShapeLowR9EE', 'SigmaEOverEShift', 'metJecUncertainty', 'metJerUncertainty', 'metPhoUncertainty', 'metUncUncertainty']
 
-cats = ['RECO_0J_PTH_0_10_Tag0', 'RECO_0J_PTH_0_10_Tag1', 'RECO_0J_PTH_GT10_Tag0', 'RECO_0J_PTH_GT10_Tag1', 'RECO_1J_PTH_0_60_Tag0', 'RECO_1J_PTH_0_60_Tag1', 'RECO_1J_PTH_120_200_Tag0', 'RECO_1J_PTH_120_200_Tag1', 'RECO_1J_PTH_60_120_Tag0', 'RECO_1J_PTH_60_120_Tag1', 'RECO_GE2J_PTH_0_60_Tag0', 'RECO_GE2J_PTH_0_60_Tag1', 'RECO_GE2J_PTH_120_200_Tag0', 'RECO_GE2J_PTH_120_200_Tag1', 'RECO_GE2J_PTH_60_120_Tag0', 'RECO_GE2J_PTH_60_120_Tag1', 'RECO_PTH_200_300', 'RECO_PTH_300_450', 'RECO_PTH_450_650', 'RECO_PTH_GT650', 'RECO_THQ_LEP', 'RECO_TTH_HAD_HIGH_Tag0', 'RECO_TTH_HAD_HIGH_Tag1', 'RECO_TTH_HAD_HIGH_Tag2', 'RECO_TTH_HAD_HIGH_Tag3', 'RECO_TTH_HAD_LOW_Tag0', 'RECO_TTH_HAD_LOW_Tag1', 'RECO_TTH_HAD_LOW_Tag2', 'RECO_TTH_HAD_LOW_Tag3', 'RECO_TTH_LEP_HIGH_Tag0', 'RECO_TTH_LEP_HIGH_Tag1', 'RECO_TTH_LEP_HIGH_Tag2', 'RECO_TTH_LEP_HIGH_Tag3', 'RECO_TTH_LEP_LOW_Tag0', 'RECO_TTH_LEP_LOW_Tag1', 'RECO_TTH_LEP_LOW_Tag2', 'RECO_TTH_LEP_LOW_Tag3', 'RECO_VBFLIKEGGH_Tag0', 'RECO_VBFLIKEGGH_Tag1', 'RECO_VBFTOPO_BSM_Tag0', 'RECO_VBFTOPO_BSM_Tag1', 'RECO_VBFTOPO_JET3VETO_HIGHMJJ_Tag0', 'RECO_VBFTOPO_JET3VETO_HIGHMJJ_Tag1', 'RECO_VBFTOPO_JET3VETO_LOWMJJ_Tag0', 'RECO_VBFTOPO_JET3VETO_LOWMJJ_Tag1', 'RECO_VBFTOPO_JET3_HIGHMJJ_Tag0', 'RECO_VBFTOPO_JET3_HIGHMJJ_Tag1', 'RECO_VBFTOPO_JET3_LOWMJJ_Tag0', 'RECO_VBFTOPO_JET3_LOWMJJ_Tag1', 'RECO_VBFTOPO_VHHAD_Tag0', 'RECO_VBFTOPO_VHHAD_Tag1', 'RECO_WH_LEP_HIGH_Tag0', 'RECO_WH_LEP_HIGH_Tag1', 'RECO_WH_LEP_HIGH_Tag2', 'RECO_WH_LEP_LOW_Tag0', 'RECO_WH_LEP_LOW_Tag1', 'RECO_WH_LEP_LOW_Tag2', 'RECO_ZH_LEP','NOTAG']
+cats = ['RECO_0J_PTH_0_10_Tag0', 'RECO_0J_PTH_0_10_Tag1', 'RECO_0J_PTH_0_10_Tag2', 'RECO_0J_PTH_GT10_Tag0', 'RECO_0J_PTH_GT10_Tag1', 'RECO_0J_PTH_GT10_Tag2', 'RECO_1J_PTH_0_60_Tag0', 'RECO_1J_PTH_0_60_Tag1', 'RECO_1J_PTH_0_60_Tag2', 'RECO_1J_PTH_120_200_Tag0', 'RECO_1J_PTH_120_200_Tag1', 'RECO_1J_PTH_120_200_Tag2', 'RECO_1J_PTH_60_120_Tag0', 'RECO_1J_PTH_60_120_Tag1', 'RECO_1J_PTH_60_120_Tag2', 'RECO_GE2J_PTH_0_60_Tag0', 'RECO_GE2J_PTH_0_60_Tag1', 'RECO_GE2J_PTH_0_60_Tag2', 'RECO_GE2J_PTH_120_200_Tag0', 'RECO_GE2J_PTH_120_200_Tag1', 'RECO_GE2J_PTH_120_200_Tag2', 'RECO_GE2J_PTH_60_120_Tag0', 'RECO_GE2J_PTH_60_120_Tag1', 'RECO_GE2J_PTH_60_120_Tag2', 'RECO_PTH_200_300_Tag0', 'RECO_PTH_200_300_Tag1', 'RECO_PTH_300_450_Tag0', 'RECO_PTH_300_450_Tag1', 'RECO_PTH_450_650_Tag0', 'RECO_PTH_GT650_Tag0', 'RECO_THQ_LEP', 'RECO_TTH_HAD_PTH_0_60_Tag0', 'RECO_TTH_HAD_PTH_0_60_Tag1', 'RECO_TTH_HAD_PTH_0_60_Tag2', 'RECO_TTH_HAD_PTH_0_60_Tag3', 'RECO_TTH_HAD_PTH_120_200_Tag0', 'RECO_TTH_HAD_PTH_120_200_Tag1', 'RECO_TTH_HAD_PTH_120_200_Tag2', 'RECO_TTH_HAD_PTH_120_200_Tag3', 'RECO_TTH_HAD_PTH_60_120_Tag0', 'RECO_TTH_HAD_PTH_60_120_Tag1', 'RECO_TTH_HAD_PTH_60_120_Tag2', 'RECO_TTH_HAD_PTH_60_120_Tag3', 'RECO_TTH_HAD_PTH_GT200_Tag0', 'RECO_TTH_HAD_PTH_GT200_Tag1', 'RECO_TTH_HAD_PTH_GT200_Tag2', 'RECO_TTH_HAD_PTH_GT200_Tag3', 'RECO_TTH_LEP_PTH_0_60_Tag0', 'RECO_TTH_LEP_PTH_0_60_Tag1', 'RECO_TTH_LEP_PTH_0_60_Tag2', 'RECO_TTH_LEP_PTH_0_60_Tag3', 'RECO_TTH_LEP_PTH_120_200_Tag0', 'RECO_TTH_LEP_PTH_120_200_Tag1', 'RECO_TTH_LEP_PTH_60_120_Tag0', 'RECO_TTH_LEP_PTH_60_120_Tag1', 'RECO_TTH_LEP_PTH_GT200_Tag0', 'RECO_TTH_LEP_PTH_GT200_Tag1', 'RECO_VBFLIKEGGH_Tag0', 'RECO_VBFLIKEGGH_Tag1', 'RECO_VBFTOPO_BSM_Tag0', 'RECO_VBFTOPO_BSM_Tag1', 'RECO_VBFTOPO_JET3VETO_HIGHMJJ_Tag0', 'RECO_VBFTOPO_JET3VETO_HIGHMJJ_Tag1', 'RECO_VBFTOPO_JET3VETO_LOWMJJ_Tag0', 'RECO_VBFTOPO_JET3VETO_LOWMJJ_Tag1', 'RECO_VBFTOPO_JET3_HIGHMJJ_Tag0', 'RECO_VBFTOPO_JET3_HIGHMJJ_Tag1', 'RECO_VBFTOPO_JET3_LOWMJJ_Tag0', 'RECO_VBFTOPO_JET3_LOWMJJ_Tag1', 'RECO_VBFTOPO_VHHAD_Tag0', 'RECO_VBFTOPO_VHHAD_Tag1', 'RECO_VH_MET_Tag0', 'RECO_VH_MET_Tag1', 'RECO_WH_LEP_HIGH_Tag0', 'RECO_WH_LEP_HIGH_Tag1', 'RECO_WH_LEP_HIGH_Tag2', 'RECO_WH_LEP_LOW_Tag0', 'RECO_WH_LEP_LOW_Tag1', 'RECO_WH_LEP_LOW_Tag2', 'RECO_ZH_LEP_Tag0', 'RECO_ZH_LEP_Tag1', 'NOTAG']
 
 procToWSFileName = {
   "ggh":"GluGluHToGG",
   "vbf":"VBFHToGG",
   "wh":"WHToGG",
   "zh":"ZHToGG",
-  "tth":"ttHJetToGG"
+  "tth":"ttHJetToGG",
+  "thq":"THQ_ctcvcp_HToGG"
 }
 
 stxs_stage1p2_dict = {
@@ -144,7 +145,7 @@ for ac, nWeights in array_columns.iteritems():
 argSets = {
   'nominal':'weight,CMS_hgg_mass,dZ,centralObjectWeight,LooseMvaSFUp01sigma,PreselSFUp01sigma,electronVetoSFUp01sigma,TriggerWeightUp01sigma,FracRVWeightUp01sigma,FracRVNvtxWeightUp01sigma,MuonIDWeightUp01sigma,ElectronIDWeightUp01sigma,ElectronRecoWeightUp01sigma,MuonIsoWeightUp01sigma,JetBTagCutWeightUp01sigma,JetBTagReshapeWeightUp01sigma,PrefireProbabilityUp01sigma,THU_ggH_MuUp01sigma,THU_ggH_ResUp01sigma,THU_ggH_Mig01Up01sigma,THU_ggH_Mig12Up01sigma,THU_ggH_VBF2jUp01sigma,THU_ggH_VBF3jUp01sigma,THU_ggH_PT60Up01sigma,THU_ggH_PT120Up01sigma,THU_ggH_qmtopUp01sigma,LooseMvaSFDown01sigma,PreselSFDown01sigma,electronVetoSFDown01sigma,TriggerWeightDown01sigma,FracRVWeightDown01sigma,FracRVNvtxWeightDown01sigma,MuonIDWeightDown01sigma,ElectronIDWeightDown01sigma,ElectronRecoWeightDown01sigma,MuonIsoWeightDown01sigma,JetBTagCutWeightDown01sigma,JetBTagReshapeWeightDown01sigma,PrefireProbabilityDown01sigma,THU_ggH_MuDown01sigma,THU_ggH_ResDown01sigma,THU_ggH_Mig01Down01sigma,THU_ggH_Mig12Down01sigma,THU_ggH_VBF2jDown01sigma,THU_ggH_VBF3jDown01sigma,THU_ggH_PT60Down01sigma,THU_ggH_PT120Down01sigma,THU_ggH_qmtopDown01sigma,pdfWeight_0,pdfWeight_1,pdfWeight_2,pdfWeight_3,pdfWeight_4,pdfWeight_5,pdfWeight_6,pdfWeight_7,pdfWeight_8,pdfWeight_9,pdfWeight_10,pdfWeight_11,pdfWeight_12,pdfWeight_13,pdfWeight_14,pdfWeight_15,pdfWeight_16,pdfWeight_17,pdfWeight_18,pdfWeight_19,pdfWeight_20,pdfWeight_21,pdfWeight_22,pdfWeight_23,pdfWeight_24,pdfWeight_25,pdfWeight_26,pdfWeight_27,pdfWeight_28,pdfWeight_29,pdfWeight_30,pdfWeight_31,pdfWeight_32,pdfWeight_33,pdfWeight_34,pdfWeight_35,pdfWeight_36,pdfWeight_37,pdfWeight_38,pdfWeight_39,pdfWeight_40,pdfWeight_41,pdfWeight_42,pdfWeight_43,pdfWeight_44,pdfWeight_45,pdfWeight_46,pdfWeight_47,pdfWeight_48,pdfWeight_49,pdfWeight_50,pdfWeight_51,pdfWeight_52,pdfWeight_53,pdfWeight_54,pdfWeight_55,pdfWeight_56,pdfWeight_57,pdfWeight_58,pdfWeight_59,scaleWeight_0,scaleWeight_1,scaleWeight_2,scaleWeight_3,scaleWeight_4,scaleWeight_5,scaleWeight_6,scaleWeight_7,scaleWeight_8,alphaSWeight_0,alphaSWeight_1',
   'shapeSyst':'CMS_hgg_mass',
-  'notag':'weight,pdfWeight_0,pdfWeight_1,pdfWeight_2,pdfWeight_3,pdfWeight_4,pdfWeight_5,pdfWeight_6,pdfWeight_7,pdfWeight_8,pdfWeight_9,pdfWeight_10,pdfWeight_11,pdfWeight_12,pdfWeight_13,pdfWeight_14,pdfWeight_15,pdfWeight_16,pdfWeight_17,pdfWeight_18,pdfWeight_19,pdfWeight_20,pdfWeight_21,pdfWeight_22,pdfWeight_23,pdfWeight_24,pdfWeight_25,pdfWeight_26,pdfWeight_27,pdfWeight_28,pdfWeight_29,pdfWeight_30,pdfWeight_31,pdfWeight_32,pdfWeight_33,pdfWeight_34,pdfWeight_35,pdfWeight_36,pdfWeight_37,pdfWeight_38,pdfWeight_39,pdfWeight_40,pdfWeight_41,pdfWeight_42,pdfWeight_43,pdfWeight_44,pdfWeight_45,pdfWeight_46,pdfWeight_47,pdfWeight_48,pdfWeight_49,pdfWeight_50,pdfWeight_51,pdfWeight_52,pdfWeight_53,pdfWeight_54,pdfWeight_55,pdfWeight_56,pdfWeight_57,pdfWeight_58,pdfWeight_59,scaleWeight_0,scaleWeight_1,scaleWeight_2,scaleWeight_3,scaleWeight_4,scaleWeight_5,scaleWeight_6,scaleWeight_7,scaleWeight_8,alphaSWeight_0,alphaSWeight_1'
+  'notag':'weight,THU_ggH_MuUp01sigma,THU_ggH_ResUp01sigma,THU_ggH_Mig01Up01sigma,THU_ggH_Mig12Up01sigma,THU_ggH_VBF2jUp01sigma,THU_ggH_VBF3jUp01sigma,THU_ggH_PT60Up01sigma,THU_ggH_PT120Up01sigma,THU_ggH_qmtopUp01sigma,THU_ggH_MuDown01sigma,THU_ggH_ResDown01sigma,THU_ggH_Mig01Down01sigma,THU_ggH_Mig12Down01sigma,THU_ggH_VBF2jDown01sigma,THU_ggH_VBF3jDown01sigma,THU_ggH_PT60Down01sigma,THU_ggH_PT120Down01sigma,THU_ggH_qmtopDown01sigma,pdfWeight_0,pdfWeight_1,pdfWeight_2,pdfWeight_3,pdfWeight_4,pdfWeight_5,pdfWeight_6,pdfWeight_7,pdfWeight_8,pdfWeight_9,pdfWeight_10,pdfWeight_11,pdfWeight_12,pdfWeight_13,pdfWeight_14,pdfWeight_15,pdfWeight_16,pdfWeight_17,pdfWeight_18,pdfWeight_19,pdfWeight_20,pdfWeight_21,pdfWeight_22,pdfWeight_23,pdfWeight_24,pdfWeight_25,pdfWeight_26,pdfWeight_27,pdfWeight_28,pdfWeight_29,pdfWeight_30,pdfWeight_31,pdfWeight_32,pdfWeight_33,pdfWeight_34,pdfWeight_35,pdfWeight_36,pdfWeight_37,pdfWeight_38,pdfWeight_39,pdfWeight_40,pdfWeight_41,pdfWeight_42,pdfWeight_43,pdfWeight_44,pdfWeight_45,pdfWeight_46,pdfWeight_47,pdfWeight_48,pdfWeight_49,pdfWeight_50,pdfWeight_51,pdfWeight_52,pdfWeight_53,pdfWeight_54,pdfWeight_55,pdfWeight_56,pdfWeight_57,pdfWeight_58,pdfWeight_59,scaleWeight_0,scaleWeight_1,scaleWeight_2,scaleWeight_3,scaleWeight_4,scaleWeight_5,scaleWeight_6,scaleWeight_7,scaleWeight_8,alphaSWeight_0,alphaSWeight_1'
 }
 
 # Function to add vars to workspace
@@ -173,6 +174,8 @@ def get_options():
   parser = OptionParser()
   parser.add_option('--inputPandasFile',dest='inputPandasFile', default="", help='Input pandas dataFrame file')
   parser.add_option('--productionMode',dest='productionMode', default="ggh", help='Production mode [ggh,vbf,wh,zh,tth,th]')
+  parser.add_option('--year',dest='year', default="2016", help='Year')
+  parser.add_option('--nSplit',dest='nSplit', default=1, type='int', help='Split into n output files')
   return parser.parse_args()
 (opt,args) = get_options()
 
@@ -184,63 +187,76 @@ if os.path.exists( opt.inputPandasFile ):
 # Extract STXS bin
 stxsBin = stxs_stage1p2_dict[int(data.stage1p2bin.unique()[0])]
 
-# Define output WS
-outputWSDir = "/".join(opt.inputPandasFile.split("/")[:-2])+"/ws_%s_%s"%(opt.productionMode,stxsBin)
-if not os.path.exists(outputWSDir): os.system("mkdir %s"%outputWSDir)
-f_id = re.sub(".pkl","",opt.inputPandasFile.split("_")[-1])
-outputWSFile = "%s/output_%s_M125_13TeV_amcatnloFXFX_pythia8_%s_%s.root"%(outputWSDir,procToWSFileName[opt.productionMode],stxsBin,f_id)
-fout = ROOT.TFile(outputWSFile,"RECREATE")
-foutdir = fout.mkdir("tagsDumper")
-foutdir.cd()
+# Split dataframe into equal sized chunks
+for i in range(0,opt.nSplit):
 
+  # Define output WS file
+  outputWSDir = "/".join(opt.inputPandasFile.split("/")[:-2])+"/ws_%s_%s"%(opt.productionMode,stxsBin)
+  if not os.path.exists(outputWSDir): os.system("mkdir %s"%outputWSDir)
+  f_id = re.sub(".pkl","",opt.inputPandasFile.split("_")[-1])
+  if opt.nSplit == 1: outputWSFile = "%s/output_%s_M125_13TeV_amcatnloFXFX_pythia8_%s_%s.root"%(outputWSDir,procToWSFileName[opt.productionMode],stxsBin,f_id)
+  else: outputWSFile = "%s/output_%s_M125_13TeV_amcatnloFXFX_pythia8_%s_%s_%g.root"%(outputWSDir,procToWSFileName[opt.productionMode],stxsBin,f_id,i)
+  fout = ROOT.TFile(outputWSFile,"RECREATE")
+  foutdir = fout.mkdir("tagsDumper")
+  foutdir.cd()
 
-# Initiate output workspace to store RooDataSet and RooDataHist
-ws = ROOT.RooWorkspace("cms_hgg_13TeV","cms_hgg_13TeV")
-# Add variables to workspace
-add_vars_to_workspace(ws) 
-  
-# Loop over cats
-for cat in cats:
-  # Create mask for nominal/notag dataset:
-  mask = ((data['type']=='nominal')|(data['type']=='notag'))&(data['cat']==cat)
-  # Convert dataframe to structured array and then to ROOT tree
-  sa = data[mask].to_records()
-  t = array2tree(sa)
-  # Define RooDataSet
-  dname = "%s_125_13TeV_%s"%(opt.productionMode,cat)
-  # Extract ArgSet
-  if cat == 'NOTAG': argset = make_argSet( ws, argSets, 'notag') 
-  else: argset = make_argSet( ws, argSets, 'nominal')
-  # Convert tree to RooDataSet and add to workspace
-  d = ROOT.RooDataSet(dname,dname,t,argset,'','weight')
-  getattr(ws,'import')(d)
+  # Initiate output workspace to store RooDataSet and RooDataHist
+  ws = ROOT.RooWorkspace("cms_hgg_13TeV","cms_hgg_13TeV")
+  # Add variables to workspace
+  add_vars_to_workspace(ws) 
+    
+  # Loop over cats
+  for cat in cats:
+    # Create mask for nominal/notag dataset: splitting into nSplit components
+    mask = ((data['type']=='nominal')|(data['type']=='notag'))&(data['cat']==cat)&((data.index%opt.nSplit-i)==0)
+    # Convert dataframe to structured array and then to ROOT tree
+    sa = data[mask].to_records()
+    t = array2tree(sa)
+    # Define RooDataSet
+    dname = "%s_125_13TeV_%s"%(opt.productionMode,cat)
+    # Extract ArgSet
+    if cat == 'NOTAG': argset = make_argSet( ws, argSets, 'notag') 
+    else: argset = make_argSet( ws, argSets, 'nominal')
+    # Convert tree to RooDataSet and add to workspace
+    d = ROOT.RooDataSet(dname,dname,t,argset,'','weight')
+    getattr(ws,'import')(d)
+    # Delete trees and RooDataSet
+    t.Delete()
+    d.Delete()
+    del sa
 
-  # Loop over shapeSysts and add RooDataHists
-  if cat != 'NOTAG':
-    for s in shapeSysts:
-      for direction in ['Up','Down']:
-	# Create mask for systematic variation
-	mask = (data['type']=='%s%s'%(s,direction))&(data['cat']==cat)
-	# Convert dataFrame to structured array and then to ROOT tree
-	sa = data[mask].to_records()
-	t = array2tree(sa)
-	# Name of RooDataHist
-	hname = "%s_125_13TeV_%s_%s%s01sigma"%(opt.productionMode,cat,s,direction)
-	argset = make_argSet( ws, argSets, 'shapeSyst')
-	h = ROOT.RooDataHist(hname,hname,argset)
-        # Loop over events and add to workspace
-	for ev in t:
-	  ws.var("CMS_hgg_mass").setVal(ev.CMS_hgg_mass)
-	  h.add(argset,ev.weight)
-	# Add to workspace
-	getattr(ws,'import')(h)
+    # Loop over shapeSysts and add RooDataHists
+    if cat != 'NOTAG':
+      for s in shapeSysts:
+	for direction in ['Up','Down']:
+	  # Create mask for systematic variation
+	  mask = (data['type']=='%s%s'%(s,direction))&(data['cat']==cat)&((data.index%opt.nSplit-i)==0)
+	  # Convert dataFrame to structured array and then to ROOT tree
+	  sa = data[mask].to_records()
+	  t = array2tree(sa)
+	  # Name of RooDataHist
+	  hname = "%s_125_13TeV_%s_%s%s01sigma"%(opt.productionMode,cat,s,direction)
+	  # If YEAR in hname then change to year being processed
+	  #hname = re.sub("YEAR",opt.year,hname)
+	  argset = make_argSet( ws, argSets, 'shapeSyst')
+	  h = ROOT.RooDataHist(hname,hname,argset)
+	  # Loop over events and add to workspace
+	  for ev in t:
+	    ws.var("CMS_hgg_mass").setVal(ev.CMS_hgg_mass)
+	    h.add(argset,ev.weight)
+	  # Add to workspace
+	  getattr(ws,'import')(h)
+          # Delete trees and RooDatatHist
+	  t.Delete()
+	  h.Delete()
+	  del sa
 
-# Export ws to file
-ws.Write()
+  # Export ws to file
+  ws.Write()
 
-# Delete workspace and file from heap
-fout.Close()
-ws.Delete()
-fout.Delete()
-  
-  
+  # Delete workspace and file from heap
+  fout.Close()
+  ws.Delete()
+  fout.Delete()
+    
+    
