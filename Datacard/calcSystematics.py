@@ -173,7 +173,7 @@ def calcSystYields(_nominalDataName,_inputWS,_systFactoryTypes,skipCOWCorr=True)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # EXPERIMENTAL SYSTEMATICS FACTORY:
 # d - dataFrame, systs - dict of systematics, ftype - dict of factoryTypes
-def experimentalSystFactory(d,systs,ftype,options,_removal=True):
+def experimentalSystFactory(d,systs,ftype,options,_removal=False):
 
   # Loop over systematics and add new column in dataFrame
   for s in systs:

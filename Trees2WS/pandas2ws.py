@@ -22,7 +22,9 @@ procToWSFileName = {
   "wh":"WHToGG",
   "zh":"ZHToGG",
   "tth":"ttHJetToGG",
-  "thq":"THQ_ctcvcp_HToGG"
+  "thq":"THQ_ctcvcp_HToGG",
+  "ggzh":"ggZH_HToGG",
+  "bbh":"bbHToGG"
 }
 
 stxs_stage1p2_dict = {
@@ -144,8 +146,10 @@ for ac, nWeights in array_columns.iteritems():
 # Define argsets to enter different levels of RooDataSets
 argSets = {
   'nominal':'weight,CMS_hgg_mass,dZ,centralObjectWeight,LooseMvaSFUp01sigma,PreselSFUp01sigma,electronVetoSFUp01sigma,TriggerWeightUp01sigma,FracRVWeightUp01sigma,FracRVNvtxWeightUp01sigma,MuonIDWeightUp01sigma,ElectronIDWeightUp01sigma,ElectronRecoWeightUp01sigma,MuonIsoWeightUp01sigma,JetBTagCutWeightUp01sigma,JetBTagReshapeWeightUp01sigma,PrefireProbabilityUp01sigma,THU_ggH_MuUp01sigma,THU_ggH_ResUp01sigma,THU_ggH_Mig01Up01sigma,THU_ggH_Mig12Up01sigma,THU_ggH_VBF2jUp01sigma,THU_ggH_VBF3jUp01sigma,THU_ggH_PT60Up01sigma,THU_ggH_PT120Up01sigma,THU_ggH_qmtopUp01sigma,LooseMvaSFDown01sigma,PreselSFDown01sigma,electronVetoSFDown01sigma,TriggerWeightDown01sigma,FracRVWeightDown01sigma,FracRVNvtxWeightDown01sigma,MuonIDWeightDown01sigma,ElectronIDWeightDown01sigma,ElectronRecoWeightDown01sigma,MuonIsoWeightDown01sigma,JetBTagCutWeightDown01sigma,JetBTagReshapeWeightDown01sigma,PrefireProbabilityDown01sigma,THU_ggH_MuDown01sigma,THU_ggH_ResDown01sigma,THU_ggH_Mig01Down01sigma,THU_ggH_Mig12Down01sigma,THU_ggH_VBF2jDown01sigma,THU_ggH_VBF3jDown01sigma,THU_ggH_PT60Down01sigma,THU_ggH_PT120Down01sigma,THU_ggH_qmtopDown01sigma,pdfWeight_0,pdfWeight_1,pdfWeight_2,pdfWeight_3,pdfWeight_4,pdfWeight_5,pdfWeight_6,pdfWeight_7,pdfWeight_8,pdfWeight_9,pdfWeight_10,pdfWeight_11,pdfWeight_12,pdfWeight_13,pdfWeight_14,pdfWeight_15,pdfWeight_16,pdfWeight_17,pdfWeight_18,pdfWeight_19,pdfWeight_20,pdfWeight_21,pdfWeight_22,pdfWeight_23,pdfWeight_24,pdfWeight_25,pdfWeight_26,pdfWeight_27,pdfWeight_28,pdfWeight_29,pdfWeight_30,pdfWeight_31,pdfWeight_32,pdfWeight_33,pdfWeight_34,pdfWeight_35,pdfWeight_36,pdfWeight_37,pdfWeight_38,pdfWeight_39,pdfWeight_40,pdfWeight_41,pdfWeight_42,pdfWeight_43,pdfWeight_44,pdfWeight_45,pdfWeight_46,pdfWeight_47,pdfWeight_48,pdfWeight_49,pdfWeight_50,pdfWeight_51,pdfWeight_52,pdfWeight_53,pdfWeight_54,pdfWeight_55,pdfWeight_56,pdfWeight_57,pdfWeight_58,pdfWeight_59,scaleWeight_0,scaleWeight_1,scaleWeight_2,scaleWeight_3,scaleWeight_4,scaleWeight_5,scaleWeight_6,scaleWeight_7,scaleWeight_8,alphaSWeight_0,alphaSWeight_1',
+  'nominal_bbh':'weight,CMS_hgg_mass,dZ,centralObjectWeight,LooseMvaSFUp01sigma,PreselSFUp01sigma,electronVetoSFUp01sigma,TriggerWeightUp01sigma,FracRVWeightUp01sigma,FracRVNvtxWeightUp01sigma,MuonIDWeightUp01sigma,ElectronIDWeightUp01sigma,ElectronRecoWeightUp01sigma,MuonIsoWeightUp01sigma,JetBTagCutWeightUp01sigma,JetBTagReshapeWeightUp01sigma,PrefireProbabilityUp01sigma,THU_ggH_MuUp01sigma,THU_ggH_ResUp01sigma,THU_ggH_Mig01Up01sigma,THU_ggH_Mig12Up01sigma,THU_ggH_VBF2jUp01sigma,THU_ggH_VBF3jUp01sigma,THU_ggH_PT60Up01sigma,THU_ggH_PT120Up01sigma,THU_ggH_qmtopUp01sigma,LooseMvaSFDown01sigma,PreselSFDown01sigma,electronVetoSFDown01sigma,TriggerWeightDown01sigma,FracRVWeightDown01sigma,FracRVNvtxWeightDown01sigma,MuonIDWeightDown01sigma,ElectronIDWeightDown01sigma,ElectronRecoWeightDown01sigma,MuonIsoWeightDown01sigma,JetBTagCutWeightDown01sigma,JetBTagReshapeWeightDown01sigma,PrefireProbabilityDown01sigma,THU_ggH_MuDown01sigma,THU_ggH_ResDown01sigma,THU_ggH_Mig01Down01sigma,THU_ggH_Mig12Down01sigma,THU_ggH_VBF2jDown01sigma,THU_ggH_VBF3jDown01sigma,THU_ggH_PT60Down01sigma,THU_ggH_PT120Down01sigma,THU_ggH_qmtopDown01sigma',
   'shapeSyst':'CMS_hgg_mass',
-  'notag':'weight,THU_ggH_MuUp01sigma,THU_ggH_ResUp01sigma,THU_ggH_Mig01Up01sigma,THU_ggH_Mig12Up01sigma,THU_ggH_VBF2jUp01sigma,THU_ggH_VBF3jUp01sigma,THU_ggH_PT60Up01sigma,THU_ggH_PT120Up01sigma,THU_ggH_qmtopUp01sigma,THU_ggH_MuDown01sigma,THU_ggH_ResDown01sigma,THU_ggH_Mig01Down01sigma,THU_ggH_Mig12Down01sigma,THU_ggH_VBF2jDown01sigma,THU_ggH_VBF3jDown01sigma,THU_ggH_PT60Down01sigma,THU_ggH_PT120Down01sigma,THU_ggH_qmtopDown01sigma,pdfWeight_0,pdfWeight_1,pdfWeight_2,pdfWeight_3,pdfWeight_4,pdfWeight_5,pdfWeight_6,pdfWeight_7,pdfWeight_8,pdfWeight_9,pdfWeight_10,pdfWeight_11,pdfWeight_12,pdfWeight_13,pdfWeight_14,pdfWeight_15,pdfWeight_16,pdfWeight_17,pdfWeight_18,pdfWeight_19,pdfWeight_20,pdfWeight_21,pdfWeight_22,pdfWeight_23,pdfWeight_24,pdfWeight_25,pdfWeight_26,pdfWeight_27,pdfWeight_28,pdfWeight_29,pdfWeight_30,pdfWeight_31,pdfWeight_32,pdfWeight_33,pdfWeight_34,pdfWeight_35,pdfWeight_36,pdfWeight_37,pdfWeight_38,pdfWeight_39,pdfWeight_40,pdfWeight_41,pdfWeight_42,pdfWeight_43,pdfWeight_44,pdfWeight_45,pdfWeight_46,pdfWeight_47,pdfWeight_48,pdfWeight_49,pdfWeight_50,pdfWeight_51,pdfWeight_52,pdfWeight_53,pdfWeight_54,pdfWeight_55,pdfWeight_56,pdfWeight_57,pdfWeight_58,pdfWeight_59,scaleWeight_0,scaleWeight_1,scaleWeight_2,scaleWeight_3,scaleWeight_4,scaleWeight_5,scaleWeight_6,scaleWeight_7,scaleWeight_8,alphaSWeight_0,alphaSWeight_1'
+  'notag':'weight,THU_ggH_MuUp01sigma,THU_ggH_ResUp01sigma,THU_ggH_Mig01Up01sigma,THU_ggH_Mig12Up01sigma,THU_ggH_VBF2jUp01sigma,THU_ggH_VBF3jUp01sigma,THU_ggH_PT60Up01sigma,THU_ggH_PT120Up01sigma,THU_ggH_qmtopUp01sigma,THU_ggH_MuDown01sigma,THU_ggH_ResDown01sigma,THU_ggH_Mig01Down01sigma,THU_ggH_Mig12Down01sigma,THU_ggH_VBF2jDown01sigma,THU_ggH_VBF3jDown01sigma,THU_ggH_PT60Down01sigma,THU_ggH_PT120Down01sigma,THU_ggH_qmtopDown01sigma,pdfWeight_0,pdfWeight_1,pdfWeight_2,pdfWeight_3,pdfWeight_4,pdfWeight_5,pdfWeight_6,pdfWeight_7,pdfWeight_8,pdfWeight_9,pdfWeight_10,pdfWeight_11,pdfWeight_12,pdfWeight_13,pdfWeight_14,pdfWeight_15,pdfWeight_16,pdfWeight_17,pdfWeight_18,pdfWeight_19,pdfWeight_20,pdfWeight_21,pdfWeight_22,pdfWeight_23,pdfWeight_24,pdfWeight_25,pdfWeight_26,pdfWeight_27,pdfWeight_28,pdfWeight_29,pdfWeight_30,pdfWeight_31,pdfWeight_32,pdfWeight_33,pdfWeight_34,pdfWeight_35,pdfWeight_36,pdfWeight_37,pdfWeight_38,pdfWeight_39,pdfWeight_40,pdfWeight_41,pdfWeight_42,pdfWeight_43,pdfWeight_44,pdfWeight_45,pdfWeight_46,pdfWeight_47,pdfWeight_48,pdfWeight_49,pdfWeight_50,pdfWeight_51,pdfWeight_52,pdfWeight_53,pdfWeight_54,pdfWeight_55,pdfWeight_56,pdfWeight_57,pdfWeight_58,pdfWeight_59,scaleWeight_0,scaleWeight_1,scaleWeight_2,scaleWeight_3,scaleWeight_4,scaleWeight_5,scaleWeight_6,scaleWeight_7,scaleWeight_8,alphaSWeight_0,alphaSWeight_1',
+  'notag_bbh':'weight,THU_ggH_MuUp01sigma,THU_ggH_ResUp01sigma,THU_ggH_Mig01Up01sigma,THU_ggH_Mig12Up01sigma,THU_ggH_VBF2jUp01sigma,THU_ggH_VBF3jUp01sigma,THU_ggH_PT60Up01sigma,THU_ggH_PT120Up01sigma,THU_ggH_qmtopUp01sigma,THU_ggH_MuDown01sigma,THU_ggH_ResDown01sigma,THU_ggH_Mig01Down01sigma,THU_ggH_Mig12Down01sigma,THU_ggH_VBF2jDown01sigma,THU_ggH_VBF3jDown01sigma,THU_ggH_PT60Down01sigma,THU_ggH_PT120Down01sigma,THU_ggH_qmtopDown01sigma'
 }
 
 # Function to add vars to workspace
@@ -175,6 +179,7 @@ def get_options():
   parser.add_option('--inputPandasFile',dest='inputPandasFile', default="", help='Input pandas dataFrame file')
   parser.add_option('--productionMode',dest='productionMode', default="ggh", help='Production mode [ggh,vbf,wh,zh,tth,th]')
   parser.add_option('--year',dest='year', default="2016", help='Year')
+  parser.add_option('--decayExt',dest='decayExt', default="", help='Decay extension (used for ggZH)')
   parser.add_option('--nSplit',dest='nSplit', default=1, type='int', help='Split into n output files')
   return parser.parse_args()
 (opt,args) = get_options()
@@ -186,6 +191,10 @@ if os.path.exists( opt.inputPandasFile ):
 
 # Extract STXS bin
 stxsBin = stxs_stage1p2_dict[int(data.stage1p2bin.unique()[0])]
+# If ggZH then change STXS bin according to decay extension
+if opt.productionMode == "ggzh":
+  if opt.decayExt == "_ZToQQ": stxsBin = re.sub("GG2H","GG2HQQ",stxsBin)
+  elif opt.decayExt == "_ZToNuNu": stxsBin = re.sub("GG2HLL","GG2HNUNU",stxsBin)
 
 # Split dataframe into equal sized chunks
 for i in range(0,opt.nSplit):
@@ -215,8 +224,13 @@ for i in range(0,opt.nSplit):
     # Define RooDataSet
     dname = "%s_125_13TeV_%s"%(opt.productionMode,cat)
     # Extract ArgSet
-    if cat == 'NOTAG': argset = make_argSet( ws, argSets, 'notag') 
-    else: argset = make_argSet( ws, argSets, 'nominal')
+    # FIXME: for bbH, missing theory weights
+    if opt.productionMode == 'bbh':
+      if cat == 'NOTAG': argset = make_argSet( ws, argSets, 'notag_bbh') 
+      else: argset = make_argSet( ws, argSets, 'nominal_bbh')
+    else:
+      if cat == 'NOTAG': argset = make_argSet( ws, argSets, 'notag') 
+      else: argset = make_argSet( ws, argSets, 'nominal')
     # Convert tree to RooDataSet and add to workspace
     d = ROOT.RooDataSet(dname,dname,t,argset,'','weight')
     getattr(ws,'import')(d)

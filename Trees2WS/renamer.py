@@ -1,8 +1,16 @@
 import glob, os, re
 
-vbf = glob.glob("*_VBFHToGG_*_QQ2HQQ_*")
-wh = glob.glob("*_WHToGG_*_QQ2HQQ_*")
-zh = glob.glob("*_ZHToGG_*_QQ2HQQ_*")
+from optparse import OptionParser
+
+def get_options():
+  parser = OptionParser()
+  parser.add_option('--inputDir',dest='inputDir', default="", help='Input path to workspaces')
+  return parser.parse_args()
+(opt,args) = get_options()
+
+vbf = glob.glob("%s/*_VBFHToGG_*_QQ2HQQ_*"%opt.inputDir)
+wh = glob.glob("%s/*_WHToGG_*_QQ2HQQ_*"%opt.inputDir)
+zh = glob.glob("%s/*_ZHToGG_*_QQ2HQQ_*"%opt.inputDir)
 for f in vbf:
   fnew = re.sub("QQ2HQQ","VBF",f)
   os.system("mv %s %s"%(f,fnew))

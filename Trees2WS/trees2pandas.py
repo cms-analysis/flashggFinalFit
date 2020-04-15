@@ -30,7 +30,9 @@ procToWSFileName = {
   "wh":"WHToGG",
   "zh":"ZHToGG",
   "tth":"ttHJetToGG",
-  "thq":"THQ_ctcvcp_HToGG"
+  "thq":"THQ_ctcvcp_HToGG",
+  "ggzh":"ggZH_HToGG",
+  "bbh":"bbHToGG"
 }
 
 stxs_stage1p2_dict = {
@@ -97,13 +99,14 @@ def get_options():
   parser = OptionParser()
   parser.add_option('--inputTreeFile',dest='inputTreeFile', default="/vols/cms/jl2117/hgg/ws/Feb20/trees/output_1.root", help='Input tree file')
   parser.add_option('--inputTreeDir',dest='inputTreeDir', default="tagsDumper/trees", help='Input tree file')
-  parser.add_option('--productionMode',dest='productionMode', default="ggh", help='Production mode [ggh,vbf,wh,zh,tth,thq]')
+  parser.add_option('--productionMode',dest='productionMode', default="ggh", help='Production mode [ggh,vbf,wh,zh,tth,thq,ggzh,bbh]')
   parser.add_option('--year',dest='year', default="2016", help='Year')
+  parser.add_option('--decayExt',dest='decayExt', default='', help='Decay extension')
   return parser.parse_args()
 (opt,args) = get_options()
 
 # Checks
-if opt.productionMode not in ['ggh','vbf','wh','zh','tth','thq']: 
+if opt.productionMode not in ['ggh','vbf','wh','zh','tth','thq','ggzh','bbh']: 
   print " --> [ERROR] Production mode (%s) not valid"%opt.productionMode
   sys.exit(1)
 
@@ -124,9 +127,11 @@ for cat in cats:
   if len(t) == 0: continue
   # Convert tree to pandas dataFrame: do array columns separately
   dfs_tomerge = {}
-  for ac, acNames in columns.iteritems(): 
-    dfs_tomerge[ac] = t.pandas.df(ac)
-    dfs_tomerge[ac].columns = acNames
+  # TODO: fix as no theory weights in bbh
+  if opt.productionMode != "bbh":
+    for ac, acNames in columns.iteritems(): 
+      dfs_tomerge[ac] = t.pandas.df(ac)
+      dfs_tomerge[ac].columns = acNames
   dfs_tomerge['main'] = t.pandas.df(main_var)
   # Merge all columns
   df = pandas.concat( dfs_tomerge.values(), axis=1)
@@ -158,11 +163,15 @@ for cat in cats:
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Split up dataframe into separate dataframes for each STXS stage 1.2 bin
-print " --> [VERBOSE] Splitting uYp dataframes and saving as pickle files"
+print " --> [VERBOSE] Splitting up dataframes and saving as pickle files"
 
 for b in data.stage1p2bin.unique():
   stxsBin = stxs_stage1p2_dict[int(b)]
   mask = (data['stage1p2bin']==b)
+  # Deal with decay strings for ggzh
+  if opt.productionMode == 'ggzh':
+    if opt.decayExt == '_ZToQQ': stxsBin = re.sub("GG2H","GG2HQQ",stxsBin)
+    elif opt.decayExt == '_ZToNuNu': stxsBin = re.sub("GG2HLL","GG2HNUNU",stxsBin)
   outputPickleDir = "/".join(opt.inputTreeFile.split("/")[:-1])+"/pickle_%s_%s"%(opt.productionMode,stxsBin)
   if not os.path.exists(outputPickleDir): os.system("mkdir %s"%outputPickleDir)
   outputPickleFile = "%s/output_%s_M125_13TeV_amcatnloFXFX_pythia8_%s_%s.pkl"%(outputPickleDir,procToWSFileName[opt.productionMode],stxsBin,f_id)
