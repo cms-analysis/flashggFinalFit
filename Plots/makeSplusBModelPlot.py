@@ -19,7 +19,7 @@ def leave():
   print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG MODEL PLOTTER RUN II (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ "
   sys.exit(1)
 
-ROOT.gROOT.SetBatch(True)
+#ROOT.gROOT.SetBatch(True)
 ROOT.gStyle.SetOptStat(0)
 
 def get_options():
@@ -98,7 +98,8 @@ for i in range(d_obs.numEntries()):
 cats = data_cats.keys()
 catsWeights = {}
 # If option doWeightedPlot: first extract S/S+B weights for each category
-if(opt.cat =='all')&(opt.doWeightedPlot):
+if "RECO" in opt.cat:
+#if(opt.cat =='all')&(opt.doWeightedPlot):
   print " --> Extracting S/S+B weights for categories"
   Stot, Swtot = 0, 0
   for cidx in range(len(cats)):

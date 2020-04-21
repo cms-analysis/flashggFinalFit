@@ -95,6 +95,9 @@ std::pair<std::string,std::string> WSTFileWrapper::convertTemplatedName(std::str
   TString theDataName = TString(dataName);
   std::string theProcName = "";
   std::map<std::string,std::string> tpMap;
+  tpMap["GG2HQQ"] = "ggzh";
+  tpMap["GG2HLL"] = "ggzh";
+  tpMap["GG2HNUNU"] = "ggzh";
   tpMap["GG2H"] = "ggh";
   tpMap["VBF"] = "vbf";
   tpMap["TTH"] = "tth";
@@ -106,9 +109,8 @@ std::pair<std::string,std::string> WSTFileWrapper::convertTemplatedName(std::str
   tpMap["THW"] = "thw";
   tpMap["THQ"] = "thq";
   tpMap["TH"] = "thq";
-  tpMap["GGZH"] = "ggzh";
   for( std::map<std::string,std::string>::iterator it = tpMap.begin(); it != tpMap.end(); it++ ) {
-    if( theDataName.BeginsWith(it->first) ) { 
+    if( (theDataName.BeginsWith(it->first)) && (theDataName.Index("_")==(it->first).size()) ) { 
       TString theDataNameCopy = theDataName;
       theDataNameCopy.Resize( theDataName.Index("_13TeV_")-4 ); //works because always of form proc_M1??_13TeV_cat
       theProcName = theDataNameCopy.Data();

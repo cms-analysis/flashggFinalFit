@@ -51,23 +51,30 @@ stxsBinMergingScheme = {'ggH_VBFlike':['ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_2
                        }
 
 scaleCorrelationScheme = OrderedDict()
-scaleCorrelationScheme['ggH_0J'] = ['ggH_0J_PTH_0_10','ggH_0J_PTH_GT10']
-scaleCorrelationScheme['ggH_1J'] = ['ggH_1J_PTH_60_120', 'ggH_1J_PTH_120_200', 'ggH_1J_PTH_0_60']
-scaleCorrelationScheme['ggH_2J'] = ['ggH_GE2J_MJJ_0_350_PTH_120_200', 'ggH_GE2J_MJJ_0_350_PTH_60_120', 'ggH_GE2J_MJJ_0_350_PTH_0_60'] 
-scaleCorrelationScheme['ggH_VBFlike'] = ['ggH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25', 'ggH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25', 'ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25', 'ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25']
-scaleCorrelationScheme['ggH_BSM'] = ['ggH_PTH_GT650', 'ggH_PTH_200_300', 'ggH_PTH_450_650', 'ggH_PTH_300_450']
-scaleCorrelationScheme['qqH_0J'] = ['qqH_0J','WH_had_0J','ZH_had_0J']
-scaleCorrelationScheme['qqH_1J'] = ['qqH_1J','WH_had_1J','ZH_had_1J']
-scaleCorrelationScheme['qqH_lowmjj'] = ['WH_had_GE2J_MJJ_0_60', 'qqH_GE2J_MJJ_0_60', 'ZH_had_GE2J_MJJ_0_60','WH_had_GE2J_MJJ_60_120', 'qqH_GE2J_MJJ_60_120', 'ZH_had_GE2J_MJJ_60_120','ZH_had_GE2J_MJJ_120_350', 'WH_had_GE2J_MJJ_120_350', 'qqH_GE2J_MJJ_120_350']
-scaleCorrelationScheme['qqH_highmjj_lowpt'] = ['WH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25', 'ZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','WH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25', 'ZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25', 'qqH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25', 'qqH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','WH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','WH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25', 'ZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25', 'qqH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25', 'ZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25', 'qqH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25']
-scaleCorrelationScheme['qqH_highmjj_highpt'] = ['WH_had_GE2J_MJJ_GT350_PTH_GT200', 'qqH_GE2J_MJJ_GT350_PTH_GT200', 'ZH_had_GE2J_MJJ_GT350_PTH_GT200']
-scaleCorrelationScheme['WH_lep_lowpt'] = ['WH_lep_PTV_150_250_GE1J', 'WH_lep_PTV_75_150', 'WH_lep_PTV_0_75', 'WH_lep_PTV_150_250_0J']
-scaleCorrelationScheme['WH_lep_highpt'] = ['WH_lep_PTV_GT250']
-scaleCorrelationScheme['ZH_lep_lowpt'] = ['ZH_lep_PTV_150_250_0J', 'ZH_lep_PTV_150_250_GE1J', 'ZH_lep_PTV_0_75', 'ZH_lep_PTV_75_150']
-scaleCorrelationScheme['ZH_lep_highpt'] = ['ZH_lep_PTV_GT250']
-scaleCorrelationScheme['ttH_lowpt'] = ['ttH_PTH_200_300', 'ttH_PTH_60_120', 'ttH_PTH_120_200', 'ttH_PTH_0_60']
-scaleCorrelationScheme['ttH_highpt'] = ['ttH_PTH_GT300']
-scaleCorrelationScheme['tH'] = ['tHq']
+scaleCorrelationScheme['ggH_scale_0jet'] = ['ggH_0J_PTH_0_10','ggH_0J_PTH_GT10','ggZH_had_0J_PTH_0_10','ggZH_had_0J_PTH_GT10']
+scaleCorrelationScheme['ggH_scale_1jet_lowpt'] = ['ggH_1J_PTH_60_120', 'ggH_1J_PTH_120_200', 'ggH_1J_PTH_0_60','ggZH_had_1J_PTH_60_120', 'ggZH_had_1J_PTH_120_200', 'ggZH_had_1J_PTH_0_60']
+scaleCorrelationScheme['ggH_scale_2jet_lowpt'] = ['ggH_GE2J_MJJ_0_350_PTH_120_200', 'ggH_GE2J_MJJ_0_350_PTH_60_120', 'ggH_GE2J_MJJ_0_350_PTH_0_60','ggZH_had_GE2J_MJJ_0_350_PTH_120_200', 'ggZH_had_GE2J_MJJ_0_350_PTH_60_120', 'ggZH_had_GE2J_MJJ_0_350_PTH_0_60'] 
+scaleCorrelationScheme['ggH_scale_highpt'] = ['ggH_PTH_200_300', 'ggH_PTH_300_450','ggZH_had_PTH_200_300', 'ggZH_had_PTH_300_450']
+scaleCorrelationScheme['ggH_scale_veryhighpt'] = ['ggH_PTH_GT650', 'ggH_PTH_450_650','ggZH_had_PTH_GT650', 'ggZH_had_PTH_450_650']
+scaleCorrelationScheme['ggH_scale_vbf'] = ['ggH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25', 'ggH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25', 'ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25', 'ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','ggZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25', 'ggZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25', 'ggZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25', 'ggZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25']
+scaleCorrelationScheme['vbf_scale_0jet'] = ['qqH_0J']
+scaleCorrelationScheme['vbf_scale_1jet'] = ['qqH_1J']
+scaleCorrelationScheme['vbf_scale_lowmjj'] = ['qqH_GE2J_MJJ_0_60','qqH_GE2J_MJJ_60_120','qqH_GE2J_MJJ_120_350']
+scaleCorrelationScheme['vbf_scale_highmjj_lowpt'] = ['qqH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25', 'qqH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','qqH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','qqH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25']
+scaleCorrelationScheme['vbf_scale_highmjj_highpt'] = ['qqH_GE2J_MJJ_GT350_PTH_GT200']
+scaleCorrelationScheme['VH_scale_0jet'] = ['WH_had_0J','ZH_had_0J']
+scaleCorrelationScheme['VH_scale_1jet'] = ['WH_had_1J','ZH_had_1J']
+scaleCorrelationScheme['VH_scale_lowmjj'] = ['WH_had_GE2J_MJJ_0_60','ZH_had_GE2J_MJJ_0_60','WH_had_GE2J_MJJ_60_120', 'ZH_had_GE2J_MJJ_60_120','ZH_had_GE2J_MJJ_120_350', 'WH_had_GE2J_MJJ_120_350']
+scaleCorrelationScheme['VH_scale_highmjj_lowpt'] = ['WH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25', 'ZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','WH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25', 'ZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25', 'WH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','WH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25', 'ZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25', 'ZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25']
+scaleCorrelationScheme['VH_scale_highmjj_highpt'] = ['WH_had_GE2J_MJJ_GT350_PTH_GT200', 'ZH_had_GE2J_MJJ_GT350_PTH_GT200']
+scaleCorrelationScheme['WH_scale_lowpt'] = ['WH_lep_PTV_150_250_GE1J', 'WH_lep_PTV_75_150', 'WH_lep_PTV_0_75', 'WH_lep_PTV_150_250_0J']
+scaleCorrelationScheme['WH_scale_highpt'] = ['WH_lep_PTV_GT250']
+scaleCorrelationScheme['ZH_scale_lowpt'] = ['ZH_lep_PTV_150_250_0J', 'ZH_lep_PTV_150_250_GE1J', 'ZH_lep_PTV_0_75', 'ZH_lep_PTV_75_150', 'ggZH_ll_PTV_150_250_0J', 'ggZH_ll_PTV_150_250_GE1J', 'ggZH_ll_PTV_0_75', 'ggZH_ll_PTV_75_150', 'ggZH_nunu_PTV_150_250_0J', 'ggZH_nunu_PTV_150_250_GE1J', 'ggZH_nunu_PTV_0_75', 'ggZH_nunu_PTV_75_150']
+scaleCorrelationScheme['ZH_scale_highpt'] = ['ZH_lep_PTV_GT250','ggZH_ll_PTV_GT250','ggZH_nunu_PTV_GT250']
+scaleCorrelationScheme['ttH_scale_lowpt'] = ['ttH_PTH_200_300', 'ttH_PTH_60_120', 'ttH_PTH_120_200', 'ttH_PTH_0_60']
+scaleCorrelationScheme['ttH_scale_highpt'] = ['ttH_PTH_GT300']
+scaleCorrelationScheme['tH_scale'] = ['tHq']
+scaleCorrelationScheme['bbH_scale'] = ['bbH']
 
 lumi = {'2016':'35.9', '2017':'41.5', '2018':'59.8'}
 decay = "hgg"
@@ -76,13 +83,13 @@ decay = "hgg"
 # Mapping to STXS bin and nominal dataset name:
 def procToSTXS( _proc ):
   #Do mapping
-  proc_map = {"GG2H":"ggH","VBF":"qqH","WH2HQQ":"WH_had","ZH2HQQ":"ZH_had","QQ2HLNU":"WH_lep","QQ2HLL":"ZH_lep","TTH":"ttH","BBH":"bbH","THQ":"tHq","THW":"tHW","TH":"tHq"}
+  proc_map = {"GG2H":"ggH","VBF":"qqH","WH2HQQ":"WH_had","ZH2HQQ":"ZH_had","QQ2HLNU":"WH_lep","QQ2HLL":"ZH_lep","TTH":"ttH","BBH":"bbH","THQ":"tHq","THW":"tHW","TH":"tHq","GG2HQQ":"ggZH_had","GG2HLL":"ggZH_ll","GG2HNUNU":"ggZH_nunu"}
   for key in proc_map: 
     if key == _proc.split("_")[0]: _proc = re.sub( key, proc_map[key], _proc )
   return _proc
 
 def procToData( _proc ):
-  proc_map = {"GG2H":"ggh","VBF":"vbf","WH2HQQ":"wh","ZH2HQQ":"zh","QQ2HLNU":"wh","QQ2HLL":"zh","TTH":"tth","BBH":"bbH","THQ":"thq","THW":"thw","TH":"thq"}
+  proc_map = {"GG2H":"ggh","VBF":"vbf","WH2HQQ":"wh","ZH2HQQ":"zh","QQ2HLNU":"wh","QQ2HLL":"zh","TTH":"tth","BBH":"bbh","THQ":"thq","THW":"thw","TH":"thq","GG2HQQ":"ggzh","GG2HLL":"ggzh","GG2HNUNU":"ggzh"}
   for key in proc_map: 
     if key == _proc.split("_")[0]: _proc = re.sub( key, proc_map[key], _proc )
     #_proc = re.sub( key, proc_map[key], _proc )
@@ -126,7 +133,7 @@ signal_shape_systematics = [
 # correlateAcrossYears = -1 : partially correlated
 
 experimental_systematics = [ 
-		{'name':'lumi_13TeV','title':'lumi_13TeV','type':'constant','prior':'lnN','correlateAcrossYears':0,'value':{'2016':'1.025','2017':'1.023','2018':'1.025'}},
+		#{'name':'lumi_13TeV','title':'lumi_13TeV','type':'constant','prior':'lnN','correlateAcrossYears':0,'value':{'2016':'1.025','2017':'1.023','2018':'1.025'}},
 		{'name':'lumi_13TeV_Uncorrelated','title':'lumi_13TeV_Uncorrelated','type':'constant','prior':'lnN','correlateAcrossYears':0,'value':{'2016':'1.022','2017':'1.020','2018':'1.015'}},
 		{'name':'lumi_13TeV_X_Y_Factorization','title':'lumi_13TeV_X_Y_Factorization','type':'constant','prior':'lnN','correlateAcrossYears':-1,'value':{'2016':'1.009','2017':'1.008','2018':'1.020'}},
 		{'name':'lumi_13TeV_Length_Scale','title':'lumi_13TeV_Length_Scale','type':'constant','prior':'lnN','correlateAcrossYears':-1,'value':{'2016':'-','2017':'1.003','2018':'1.002'}},
@@ -138,6 +145,12 @@ experimental_systematics = [
 		{'name':'PreselSF','title':'CMS_hgg_PreselSF','type':'factory','prior':'lnN','correlateAcrossYears':1},
 		{'name':'electronVetoSF','title':'CMS_hgg_electronVetoSF','type':'factory','prior':'lnN','correlateAcrossYears':0},
 		{'name':'TriggerWeight','title':'CMS_hgg_TriggerWeight','type':'factory','prior':'lnN','correlateAcrossYears':0},
+		{'name':'MuonIDWeight','title':'CMS_hgg_MuonID','type':'factory','prior':'lnN','correlateAcrossYears':0},
+		{'name':'MuonIsoWeight','title':'CMS_hgg_MuonIso','type':'factory','prior':'lnN','correlateAcrossYears':0},
+		{'name':'ElectronIDWeight','title':'CMS_hgg_ElectronID','type':'factory','prior':'lnN','correlateAcrossYears':0},
+		{'name':'ElectronRecoWeight','title':'CMS_hgg_ElectronReco','type':'factory','prior':'lnN','correlateAcrossYears':0},
+		{'name':'JetBTagCutWeight','title':'CMS_hgg_BTagCut','type':'factory','prior':'lnN','correlateAcrossYears':0},
+		{'name':'JetBTagReshapeWeight','title':'CMS_hgg_BTagReshape','type':'factory','prior':'lnN','correlateAcrossYears':0},
 		{'name':'SigmaEOverEShift','title':'CMS_hgg_SigmaEOverEShift','type':'factory','prior':'lnN','correlateAcrossYears':0},
 		{'name':'MvaShift','title':'CMS_hgg_phoIdMva','type':'factory','prior':'lnN','correlateAcrossYears':1},
 		{'name':'PUJIDShift','title':'CMS_hgg_PUJIDShift','type':'factory','prior':'lnN','correlateAcrossYears':0},
@@ -221,12 +234,12 @@ theory_systematics = [
                 # Shape uncertainties: enter direct XS measurements
 		# Scale weights are grouped: [1,2], [3,6], [4,8]
 		#{'name':'scaleWeight_0','title':'CMS_hgg_scaleWeight_0','type':'factory','prior':'lnN','correlateAcrossYears':1}, # nominal weight
-		{'name':'scaleWeight_1','title':'CMS_hgg_scaleWeight_1','type':'factory','prior':'lnN','correlateAcrossYears':1,'tiers':['shape','mnorm']},
-		{'name':'scaleWeight_2','title':'CMS_hgg_scaleWeight_2','type':'factory','prior':'lnN','correlateAcrossYears':1,'tiers':['shape','mnorm']},
-		{'name':'scaleWeight_3','title':'CMS_hgg_scaleWeight_3','type':'factory','prior':'lnN','correlateAcrossYears':1,'tiers':['shape','mnorm']},
+		#{'name':'scaleWeight_1','title':'CMS_hgg_scaleWeight_1','type':'factory','prior':'lnN','correlateAcrossYears':1,'tiers':['shape','mnorm']},
+		#{'name':'scaleWeight_2','title':'CMS_hgg_scaleWeight_2','type':'factory','prior':'lnN','correlateAcrossYears':1,'tiers':['shape','mnorm']},
+		#{'name':'scaleWeight_3','title':'CMS_hgg_scaleWeight_3','type':'factory','prior':'lnN','correlateAcrossYears':1,'tiers':['shape','mnorm']},
 		{'name':'scaleWeight_4','title':'CMS_hgg_scaleWeight_4','type':'factory','prior':'lnN','correlateAcrossYears':1,'tiers':['shape','mnorm']},
 		#{'name':'scaleWeight_5','title':'CMS_hgg_scaleWeight_5','type':'factory','prior':'lnN','correlateAcrossYears':1,'tiers':['norm','shape']}, #Unphysical
-		{'name':'scaleWeight_6','title':'CMS_hgg_scaleWeight_6','type':'factory','prior':'lnN','correlateAcrossYears':1,'tiers':['shape','mnorm']},
+		#{'name':'scaleWeight_6','title':'CMS_hgg_scaleWeight_6','type':'factory','prior':'lnN','correlateAcrossYears':1,'tiers':['shape','mnorm']},
 		#{'name':'scaleWeight_7','title':'CMS_hgg_scaleWeight_7','type':'factory','prior':'lnN','correlateAcrossYears':1,'tiers':['norm','shape']}, #Unphysical
 		{'name':'scaleWeight_8','title':'CMS_hgg_scaleWeight_8','type':'factory','prior':'lnN','correlateAcrossYears':1,'tiers':['shape','mnorm']},
 		{'name':'alphaSWeight_0','title':'CMS_hgg_alphaSWeight_0','type':'factory','prior':'lnN','correlateAcrossYears':1,'tiers':['shape']},
@@ -238,7 +251,7 @@ def get_options():
   parser = OptionParser()
   parser.add_option('--mergeYears', dest='mergeYears', default=False, action="store_true", help="Merge specified categories across years")
   parser.add_option('--tagSplit', dest='tagSplit', default=False, action="store_true", help="If tags are split according to above splitting scheme")
-  parser.add_option('--doBkgSplit', dest='doBkgSplit', default=False, action="store_true", help="Split background models to different files based on bkgSplittingScheme")
+  parser.add_option('--doBkgSplit', dest='doBkgSplit', default='', help="Split background models to different files scheme=bkgSplittingScheme, full=1 file per cat")
   parser.add_option('--skipBkg', dest='skipBkg', default=False, action="store_true", help="Only add signal processes to datacard")
   parser.add_option('--bkgScaler', dest='bkgScaler', default=1., type="float", help="Add overall scale factor for background")
   parser.add_option('--skipCOWCorr', dest='skipCOWCorr', default=False, action="store_true", help="Skip centralObjectWeight correction for events in acceptance")
@@ -393,9 +406,10 @@ if not skipData:
         if opt.tagSplit:
           for splitname,splitcats in catsSplittingScheme.iteritems():
             if cat in splitcats: _modelWSFile = "./%s/background_merged/CMS-HGG_mva_13TeV_multipdf_%s.root"%(opt.modelWSDir,splitname)
-        elif opt.doBkgSplit:
+        elif opt.doBkgSplit == 'scheme':
           for splitname, splitcats in bkgSplittingScheme.iteritems():
             if cat in splitcats: _modelWSFile = "./%s/background_merged/CMS-HGG_mva_13TeV_multipdf_%s.root"%(opt.modelWSDir,splitname)
+        elif opt.doBkgSplit == 'full': _modelWSFile = "./%s/background_merged/CMS-HGG_mva_13TeV_multipdf_%s.root"%(opt.modelWSDir,cat)
         else: _modelWSFile = "./%s/background_merged/CMS-HGG_mva_13TeV_multipdf.root"%opt.modelWSDir
 	_inputWSFile = '-' #not needed for data/bkg
 	_nominalDataName = '-' #not needed for data/bkg
@@ -431,9 +445,10 @@ if not skipData:
 	  if opt.tagSplit:
 	    for splitname,splitcats in catsSplittingScheme.iteritems():
 	      if cat in splitcats: _modelWSFile = "./%s/background_%s/CMS-HGG_mva_13TeV_multipdf_%s.root"%(opt.modelWSDir,year,splitname)
-          elif opt.doBkgSplit:
+          elif opt.doBkgSplit == 'scheme':
             for splitname,splitcats in bkgSplittingScheme.iteritems():
               if cat in splitcats: _modelWSFile = "./%s/background_%s/CMS-HGG_mva_13TeV_multipdf_%s.root"%(opt.modelWSDir,year,splitname)
+          elif opt.doBkgSplit == 'full': _modelWSFile = "./%s/background_merged/CMS-HGG_mva_13TeV_multipdf_%s.root"%(opt.modelWSDir,year,cat)
 	  else: _modelWSFile = "./%s/background_%s/CMS-HGG_mva_13TeV_multipdf.root"%(opt.modelWSDir,year)
 	  _inputWSFile = '-' #not needed for data/bk
 	  _nominalDataName = '-' #not needed for data/bkg
@@ -455,31 +470,32 @@ if not skipData:
   data['nominal_yield'] = '-'
   if not opt.skipCOWCorr: data['nominal_yield_COWCorr'] = '-'
 
-  # Depending on type of systematic: anti-symmetric = 2 (up/down) columns, symmetric = 1 column
-  #   * store factoryType of systematic in dictionary
-  experimentalFactoryType = {}
-  theoryFactoryType = {}
   if opt.doSystematics:
-    # Extract first row of signal dataframe and use factoryType function to extract type of systematic
-    for s in experimental_systematics: 
-      if s['type'] == 'factory': 
-	experimentalFactoryType[s['name']] = factoryType(data,s)
-	if experimentalFactoryType[s['name']] in ["a_w","a_h"]:
-	  data['%s_up_yield'%s['name']] = '-'
-	  data['%s_down_yield'%s['name']] = '-'
-	else: data['%s_yield'%s['name']] = '-'
-    for s in theory_systematics: 
-      if s['type'] == 'factory': 
-	theoryFactoryType[s['name']] = factoryType(data,s)
-	if theoryFactoryType[s['name']] in ["a_w","a_h"]:
-	  data['%s_up_yield'%s['name']] = '-'
-	  data['%s_down_yield'%s['name']] = '-'
-          if not opt.skipCOWCorr:
-            data['%s_up_yield_COWCorr'%s['name']] = '-'
-            data['%s_down_yield_COWCorr'%s['name']] = '-'
-	else: 
-          data['%s_yield'%s['name']] = '-'
-          if not opt.skipCOWCorr: data['%s_yield_COWCorr'%s['name']] = '-'
+    # Depending on type of systematic: anti-symmetric = 2 (up/down) columns, symmetric = 1 column
+    #   * store factoryType of systematic in dictionary
+    experimentalFactoryType = {}
+    theoryFactoryType = {}
+    if opt.doSystematics:
+      # Extract first row of signal dataframe and use factoryType function to extract type of systematic
+      for s in experimental_systematics: 
+	if s['type'] == 'factory': 
+	  experimentalFactoryType[s['name']] = factoryType(data,s)
+	  if experimentalFactoryType[s['name']] in ["a_w","a_h"]:
+	    data['%s_up_yield'%s['name']] = '-'
+	    data['%s_down_yield'%s['name']] = '-'
+	  else: data['%s_yield'%s['name']] = '-'
+      for s in theory_systematics: 
+	if s['type'] == 'factory': 
+	  theoryFactoryType[s['name']] = factoryType(data,s)
+	  if theoryFactoryType[s['name']] in ["a_w","a_h"]:
+	    data['%s_up_yield'%s['name']] = '-'
+	    data['%s_down_yield'%s['name']] = '-'
+	    if not opt.skipCOWCorr:
+	      data['%s_up_yield_COWCorr'%s['name']] = '-'
+	      data['%s_down_yield_COWCorr'%s['name']] = '-'
+	  else: 
+	    data['%s_yield'%s['name']] = '-'
+	    if not opt.skipCOWCorr: data['%s_yield_COWCorr'%s['name']] = '-'
 
   # Loop over signal rows in dataFrame: extract yields (nominal & systematic variations)
   totalSignalRows = float(data[data['type']=='sig'].shape[0])
@@ -558,13 +574,15 @@ if not skipData:
     # Theory factory: group scale weights after calculation in relevant grouping scheme
     if opt.doSTXSBinMerging: 
       data = theorySystFactory(data, theory_systematics, theoryFactoryType, opt, stxsMergeScheme=stxsBinMergingScheme)
-      data, theory_systematics = groupSystematics(data, theory_systematics, opt, prefix="scaleWeight", groupings=[[1,2],[3,6],[4,8]], stxsMergeScheme=stxsBinMergingScheme)
+      #data, theory_systematics = groupSystematics(data, theory_systematics, opt, prefix="scaleWeight", groupings=[[1,2],[3,6],[4,8]], stxsMergeScheme=stxsBinMergingScheme)
+      data, theory_systematics = groupSystematics(data, theory_systematics, opt, prefix="scaleWeight", groupings=[[4,8]], stxsMergeScheme=stxsBinMergingScheme)
       data, theory_systematics = groupSystematics(data, theory_systematics, opt, prefix="alphaSWeight", groupings=[[0,1]], stxsMergeScheme=stxsBinMergingScheme)
       # Calculate the envelope of scaleWeights:
       data, theory_systematics = envelopeSystematics(data, theory_systematics, opt, regexp="scaleWeight_gr", stxsMergeScheme=stxsBinMergingScheme)
     else: 
       data = theorySystFactory(data, theory_systematics, theoryFactoryType, opt)
-      data, theory_systematics = groupSystematics(data, theory_systematics, opt, prefix="scaleWeight", groupings=[[1,2],[3,6],[4,8]])
+      #data, theory_systematics = groupSystematics(data, theory_systematics, opt, prefix="scaleWeight", groupings=[[1,2],[3,6],[4,8]])
+      data, theory_systematics = groupSystematics(data, theory_systematics, opt, prefix="scaleWeight", groupings=[[4,8]])
       data, theory_systematics = groupSystematics(data, theory_systematics, opt, prefix="alphaSWeight", groupings=[[0,1]])
       data, theory_systematics = envelopeSystematics(data, theory_systematics, opt, regexp="scaleWeight_gr")
 
@@ -572,6 +590,7 @@ if not skipData:
     for s in theory_systematics: s['title'] = renameSyst(s['title'],"scaleWeight","scale")
 
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # FIXME: include cross section information!
   # Pruning: if process contributes less than 0.1% of yield in analysis category then ignore
   print " .........................................................................................."
   if opt.prune:

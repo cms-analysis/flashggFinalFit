@@ -152,6 +152,7 @@ def makeSplusBPlot(workspace,hD,hSB,hB,hS,hDr,hBr,hSr,cat,options):
       poiStr += ' %s = %.1f,'%(Translate(k,translatePOIs),float(v))
     poiStr = poiStr[:-1]
     lat0.DrawLatex(0.13,0.77,"#scale[0.75]{%s}"%poiStr)
+  else: lat0.DrawLatex(0.13,0.77,"#scale[0.75]{m_{H} = 125.0 GeV, #mu = 1.0}")
   # Ratio plot
   pad2.cd()
   h_axes_ratio = hDr.Clone()
@@ -200,5 +201,6 @@ def makeSplusBPlot(workspace,hD,hSB,hB,hS,hDr,hBr,hSr,cat,options):
   lat1.DrawLatex(0.87,0.93,"B component subtracted")
 
   # Save canvas
-  canv.SaveAs("./SplusBModels%s/%s.png"%(options.ext,cat))
-  canv.SaveAs("./SplusBModels%s/%s.pdf"%(options.ext,cat))
+  #canv.SaveAs("./SplusBModels%s/%s.png"%(options.ext,cat))
+  #canv.SaveAs("./SplusBModels%s/%s.pdf"%(options.ext,cat))
+  raw_input("Press any key to continue...")

@@ -11,9 +11,9 @@ void plot2D_kVkF(){
   TColor::CreateGradientColorTable(npoints, stops, red, green, blue, ncontours); 
   gStyle->SetNumberContours(ncontours); 
 
-  TFile *f = TFile::Open("runFits_kVkF/scan2D_statonly_kappa_V_vs_kappa_F.root");
+  TFile *f = TFile::Open("fromEd/scan2D_syst_obs_kappa_V_vs_kappa_F.root");
   TTree *limit = (TTree*) f->Get("limit");
-  limit->Draw("2*deltaNLL:kappa_F:kappa_V>>h4(100,0,2,100,-1.5,2.5)","deltaNLL<10000", "prof colz");
+  limit->Draw("2*(deltaNLL+0.608):kappa_F:kappa_V>>h4(40,0,2,40,-1.5,2.5)","deltaNLL<10000", "prof colz");
 
   TH2F *h2D = (TH2F*) gROOT->FindObject("h4");
   h2D->SetContour(ncontours);
@@ -51,6 +51,13 @@ void plot2D_kVkF(){
   h2D->GetZaxis()->SetTitleSize(0.035);
   h2D->GetZaxis()->SetTitle("-2 #Delta ln L");
 
+  TGraph *gBF = new TGraph();
+  gBF->SetPoint(0,0.5909090638160706,-0.6818181872367859);
+  gBF->SetMarkerStyle(33);
+  gBF->SetMarkerSize(2.0);
+  gBF->SetMarkerColor(kRed);
+  gBF->Draw("P");
+
   TGraph *gSM = new TGraph();
   gSM->SetPoint(0,1,1);
   gSM->SetMarkerStyle(34);
@@ -70,7 +77,7 @@ void plot2D_kVkF(){
   TLegend *leg = new TLegend(0.55,0.16,0.8,0.36);
   leg->SetBorderSize(0);
   leg->SetFillColor(0);
-
+  leg->AddEntry(gBF,  "Best fit", "P" );
   leg->AddEntry(gSM,  "SM"     , "P" );
   leg->AddEntry(c1,   "68% CL" , "L" );
   leg->AddEntry(c2,   "95% CL" , "L" );
@@ -81,6 +88,6 @@ void plot2D_kVkF(){
   can->RedrawAxis();
   can->Update(); 
 
-  can->SaveAs("scan2D_statonly_kappa_V_vs_kappa_F.pdf");
-  can->SaveAs("scan2D_statonly_kappa_V_vs_kappa_F.png");
+  can->SaveAs("fromEd/scan2D_syst_obs_kappa_V_vs_kappa_F.pdf");
+  can->SaveAs("fromEd/scan2D_syst_obs_kappa_V_vs_kappa_F.png");
 }

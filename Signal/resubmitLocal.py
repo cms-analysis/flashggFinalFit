@@ -24,6 +24,4 @@ else:
     f_resubmit = re.sub(".%s"%opt.mode,"",f)
     print " --> Resubmitting: %s"%f_resubmit
     # Run script locally
-    os.system("./%s"%f_resubmit)
-    # If mode == fail and successfully ran job then delete .fail file (.run deletes automatically)
-    if opt.mode == "fail": os.system("rm %s"%f)
+    os.system("qsub -q hep.q -l h_rt=0:20:0 -l h_vmem=24G %s"%f_resubmit)

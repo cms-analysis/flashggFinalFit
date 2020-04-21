@@ -64,7 +64,7 @@ default_bar_styles = {
     },
     'Error': {
         #'LineWidth': 2,
-        'LineWidth': 3,
+        'LineWidth': 4,
         'LineColor': ROOT.kAzure+7,
         'MarkerSize': 0
     },
@@ -150,14 +150,14 @@ default_bar_styles = {
         'MarkerSize': 0
     },
     'Syst': {
-        'LineWidth': 3,
+        'LineWidth': 4,
         'LineColor': ROOT.kAzure+7,
         'MarkerSize': 0,
         'MarkerSize': 0,
     },
     'BestFit': {
-        'MarkerSize': 0.6,
-        'MarkerStyle': 21
+        'MarkerSize': 1.2,
+        'MarkerStyle': 25
     },
     'fixedOtherPOIError': {
         'LineWidth': 10,
@@ -353,8 +353,8 @@ if __name__ == "__main__":
     parser.add_argument('--width', type=int, default=600, help='Canvas width in pixels')
     parser.add_argument('--labels', default=None, help='Label next to the CMS logo')
     parser.add_argument('--x-title', default='Parameter value', help='Label next to the CMS logo')
-    parser.add_argument('--x-range', default='-0.5,8.5', help='Label next to the CMS logo')
-    #parser.add_argument('--x-range', default='-0.2,2.5', help='Label next to the CMS logo')
+    #parser.add_argument('--x-range', default='-0.5,6.8', help='Label next to the CMS logo')
+    parser.add_argument('--x-range', default='-0.2,2.5', help='Label next to the CMS logo')
     parser.add_argument('--left-margin', default=0.2, type=float, help='Left pad margin')
     parser.add_argument('--bottom-margin', default=0.1, type=float, help='Bottom pad margin')
     parser.add_argument('--subline', default='137 fb^{-1} (13 TeV)', help='Label next to the CMS logo')
@@ -411,8 +411,8 @@ if __name__ == "__main__":
     for i, new_label in relabel.iteritems():
         bin_labels[i] = new_label
 
-    gaxis = MakeYaxis(N, hframe, bin_labels=bin_labels, label_size=0.5)
-    #gaxis = MakeYaxis(N, hframe, bin_labels=bin_labels, label_size=1.0)
+    #gaxis = MakeYaxis(N, hframe, bin_labels=bin_labels, label_size=0.5)
+    gaxis = MakeYaxis(N, hframe, bin_labels=bin_labels, label_size=1.0)
     gaxis.Draw()
 
     if args.vlines == None:
@@ -499,8 +499,8 @@ if __name__ == "__main__":
     stxstxt = ROOT.TLatex()
     plot.Set(hggtxt, TextFont=42, TextSize=0.04, TextAlign=12)
     plot.Set(stxstxt, TextFont=42, TextSize=0.025, TextAlign=12, TextColor=ROOT.kGray+2)
-    hggtxt.DrawLatex( -0.15, YEntryHeight(N, hframe) * (N+0.6), "H#rightarrow#gamma#gamma")
-    stxstxt.DrawLatex( 1.2, YEntryHeight(N, hframe) * (N+0.5), "STXS stage 1.2 (reduced)")
+    hggtxt.DrawLatex(0.5, YEntryHeight(N, hframe) * (N+0.6), "H#rightarrow#gamma#gamma")
+    #stxstxt.DrawLatex( 1.1, YEntryHeight(N, hframe) * (N+0.5), "STXS stage 1.2 (reduced)")
 
     if args.table is not None:
         table_args = args.table.split(':')
@@ -511,7 +511,8 @@ if __name__ == "__main__":
             with_sm = True
             # Extract values from json
             with open("jsons/xsbr_theory_all_stage1p2_minimal.json","r") as jsonfile: xsbr_theory = json.load(jsonfile)
-        with_statsyst = 'Stat' in bars and 'Syst' in bars
+        #with_statsyst = 'Stat' in bars and 'Syst' in bars
+        with_statsyst = False
         # pavetxt = ROOT.
         plot.Set(valtxt, TextFont=42, TextSize=float(table_args[0]), TextAlign=12)
         if with_sm:
@@ -524,8 +525,8 @@ if __name__ == "__main__":
             xstart_stat = (xmax - xmin) * 0.85 + xmin
             xstart_syst = (xmax - xmin) * 0.95 + xmin
         else:
-            xleft = (xmax - xmin) * 0.8 + xmin
-            xstart = (xmax - xmin) * 0.82 + xmin
+            xleft = (xmax - xmin) * 0.82 + xmin
+            xstart = (xmax - xmin) * 0.85 + xmin
         box = ROOT.TBox(xleft, 0, xmax*0.98, float(N) * YEntryHeight(N, hframe) - YEntryHeight(N, hframe) * 0.05)
         plot.Set(box, FillColor=0, LineWidth=0)
         #box.Draw()

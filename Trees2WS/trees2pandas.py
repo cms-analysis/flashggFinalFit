@@ -31,6 +31,7 @@ procToWSFileName = {
   "zh":"ZHToGG",
   "tth":"ttHJetToGG",
   "thq":"THQ_ctcvcp_HToGG",
+  "thw":"THW_ctcvcp_HToGG",
   "ggzh":"ggZH_HToGG",
   "bbh":"bbHToGG"
 }
@@ -106,7 +107,7 @@ def get_options():
 (opt,args) = get_options()
 
 # Checks
-if opt.productionMode not in ['ggh','vbf','wh','zh','tth','thq','ggzh','bbh']: 
+if opt.productionMode not in ['ggh','vbf','wh','zh','tth','thq','thw','ggzh','bbh']: 
   print " --> [ERROR] Production mode (%s) not valid"%opt.productionMode
   sys.exit(1)
 
@@ -127,8 +128,8 @@ for cat in cats:
   if len(t) == 0: continue
   # Convert tree to pandas dataFrame: do array columns separately
   dfs_tomerge = {}
-  # TODO: fix as no theory weights in bbh
-  if opt.productionMode != "bbh":
+  # TODO: fix as no theory weights in bbh or thw
+  if opt.productionMode not in  ["bbh","thw"]:
     for ac, acNames in columns.iteritems(): 
       dfs_tomerge[ac] = t.pandas.df(ac)
       dfs_tomerge[ac].columns = acNames
@@ -172,6 +173,9 @@ for b in data.stage1p2bin.unique():
   if opt.productionMode == 'ggzh':
     if opt.decayExt == '_ZToQQ': stxsBin = re.sub("GG2H","GG2HQQ",stxsBin)
     elif opt.decayExt == '_ZToNuNu': stxsBin = re.sub("GG2HLL","GG2HNUNU",stxsBin)
+  # Convert tHq and tHW to separate bins
+  elif opt.productionMode == 'thq': stxsBin = re.sub("TH","THQ",stxsBin)
+  elif opt.productionMode == 'thw': stxsBin = re.sub("TH","THW",stxsBin)
   outputPickleDir = "/".join(opt.inputTreeFile.split("/")[:-1])+"/pickle_%s_%s"%(opt.productionMode,stxsBin)
   if not os.path.exists(outputPickleDir): os.system("mkdir %s"%outputPickleDir)
   outputPickleFile = "%s/output_%s_M125_13TeV_amcatnloFXFX_pythia8_%s_%s.pkl"%(outputPickleDir,procToWSFileName[opt.productionMode],stxsBin,f_id)

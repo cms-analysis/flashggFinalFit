@@ -1,4 +1,5 @@
-{  
+{
+  
   "r_ggH":"ggH",
   "r_VBF":"VBF",
   "r_VH_had":"VH had",
@@ -15,20 +16,11 @@
   "r_ggH_2J_med":"ggH #geq2J med p_{T}^{H}",
   "r_ggH_2J_high":"ggH #geq2J high p_{T}^{H}",
   "r_ggH_VBFlike":"ggH VBF-like",
-  "r_ggH_BSM_low":"ggH 200 < p_{T}^{H} < 300 GeV",
-  "r_ggH_BSM_high":"ggH p_{T}^{H} > 300 GeV",
+  "r_ggH_BSM":"ggH BSM",
   "r_qqH_VHhad":"qqH VH-like",
-  "r_qqH_low_mjj_2jlike":"qqH low m_{jj} 2J-like",
-  "r_qqH_low_mjj_3jlike":"qqH low m_{jj} 3J-like",
-  "r_qqH_high_mjj_2jlike":"qqH high m_{jj} 2J-like",
-  "r_qqH_high_mjj_3jlike":"qqH high m_{jj} 3J-like",
+  "r_qqH_low_mjj":"qqH low m_{jj}",
+  "r_qqH_high_mjj":"qqH high m_{jj}",
   "r_qqH_BSM":"qqH BSM",
-  "r_WH_lep_low":"WH Lep p_{T}^{V} < 75 GeV",
-  "r_WH_lep_high":"WH Lep p_{T}^{V} > 75 GeV",
-  "r_ttH_low":"ttH p_{T}^{H} < 60 GeV",
-  "r_ttH_medlow":"ttH 60 < p_{T}^{H} < 120 GeV",
-  "r_ttH_medhigh":"ttH 120 < p_{T}^{H} < 200 GeV",
-  "r_ttH_high":"ttH p_{T}^{H} > 200 GeV",
   "dummy":""
 }
 

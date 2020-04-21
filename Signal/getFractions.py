@@ -37,7 +37,7 @@ def get_options():
   return parser.parse_args()
 (opt,args) = get_options()
 
-proc_map = {"GG2H":"ggh","VBF":"vbf","WH2HQQ":"wh","ZH2HQQ":"zh","QQ2HLNU":"wh","QQ2HLL":"zh","TTH":"tth","BBH":"bbH","THQ":"thq","THW":"thw","TH":"thq"}
+proc_map = {"GG2H":"ggh","VBF":"vbf","WH2HQQ":"wh","ZH2HQQ":"zh","QQ2HLNU":"wh","QQ2HLL":"zh","TTH":"tth","BBH":"bbh","THQ":"thq","THW":"thw","TH":"thq","GG2HQQ":"ggzh","GG2HLL":"ggzh","GG2HNUNU":"ggzh"}
 def procToData( _proc, pmap=proc_map ):
   for key in pmap:
     if key == _proc.split("_")[0]: _proc = re.sub( key, pmap[key], _proc )
@@ -113,7 +113,7 @@ if opt.doFractions:
     print " --> [ERROR] Must include centralObjectWeight corrections for signal normalisation fractions"
     leave()
   print "\n --> Stage 1.2 fractions:"
-  for proc_s0 in ['GG2H','VBF','WH2HQQ','ZH2HQQ','QQ2HLNU','QQ2HLL','TTH','TH','THQ','THW','BBH']:
+  for proc_s0 in ['GG2H','VBF','WH2HQQ','ZH2HQQ','QQ2HLNU','QQ2HLL','TTH','TH','THQ','THW','BBH',"GG2HQQ","GG2HLL","GG2HNUNU"]:
     mask = (data.apply( lambda x: x['proc'].split("_")[0] == proc_s0, axis=1))
     proc_s0_yield = data[mask].nominal_yield_COWCorr.sum()
     if proc_s0_yield > 0:

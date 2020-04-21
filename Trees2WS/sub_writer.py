@@ -53,6 +53,7 @@ for i in range(len(inputFileNames)):
   elif "ZH" in fin: p = "zh"
   elif "ttH" in fin: p = "tth"
   elif "THQ" in fin: p = "thq"
+  elif "THW" in fin: p = "thw"
   elif "bbH" in fin: p = "bbh"
   else: 
     print "ERROR: invalid input file, cannot find production mode"

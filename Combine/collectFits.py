@@ -20,6 +20,7 @@ def get_options():
   parser.add_option('--inputJson', dest='inputJson', default='inputs.json', help="Input json file to define fits")
   parser.add_option('--mode', dest='mode', default='mu_inclusive', help="Type of fit")
   parser.add_option('--ext', dest='ext', default='', help="If txt datacard has extension")
+  parser.add_option('--doObserved', dest='doObserved', action="store_true", default=False, help="Fit to data")
   return parser.parse_args()
 (opt,args) = get_options()
 
@@ -37,6 +38,7 @@ for fidx in range(len(fits)):
   if _fit.split(":")[2] == "all": _fitpois = pois
   else: _fitpois = _fit.split(":")[2].split(",")
   _name = "%s_%s"%(_fit.split(":")[0],_fit.split(":")[1])
+  if opt.doObserved: _name += "_obs"
 
   if( _fit.split(":")[0] == "bestfit" ):
     for poi in _fitpois:

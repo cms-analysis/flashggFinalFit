@@ -24,7 +24,7 @@ def get_options():
   parser.add_option('--queue', dest='queue', default='hep.q', help="Queue")
 
   # Miscellaneous options: only performing single function
-  parser.add_option('--mode', dest='mode', default='std', help="For performing single functions [std,fTestOnly,bkgPlotsOnly]")
+  parser.add_option('--mode', dest='mode', default='std', help="For performing single functions [std,fTestOnly,fTestParallel,bkgPlotsOnly]")
   parser.add_option('--printOnly', dest='printOnly', default=0, type='int', help="Dry run: print command only")
   
   return parser.parse_args()
@@ -77,8 +77,8 @@ else:
   printOnly    = opt.printOnly
 
 # Check if mode is allowed in options
-if mode not in ['std','fTestOnly','bkgPlotsOnly']:
-  print " --> [ERROR] mode %s is not allowed. Please use one of the following: [std,fTestOnly,bkgPlotsOnly]. Leaving..."%mode 
+if mode not in ['std','fTestOnly','fTestParallel','bkgPlotsOnly']:
+  print " --> [ERROR] mode %s is not allowed. Please use one of the following: [std,fTestOnly,fTestParallel,bkgPlotsOnly]. Leaving..."%mode 
   print "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ RUNNING BACKGROUND SCRIPTS (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
   sys.exit(1)
 
@@ -123,19 +123,45 @@ print "     * Batch: %s"%batch
 print "     * Queue: %s"%queue
 print ""
 if mode == "fTestOnly": print " --> Running background fTest only..."
+elif mode == "fTestParallel": print " --> Running background fTest only (in parallel)..."
 elif mode == "bkgPlotsOnly": print " --> Running background plots only..."
 print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 
-# Construct input command
-print " --> Constructing input command..."
+if mode == "fTestParallel":
+  # Write scripts for parallel fTest
+  if not os.path.isdir("./outdir_%s"%ext): os.system("mkdir ./outdir_%s"%ext)
+  if not os.path.isdir("./outdir_%s/fTestParallel"%ext): os.system("mkdir ./outdir_%s/fTestParallel"%ext)
+  if not os.path.isdir("./outdir_%s/fTestParallel/jobs"%ext): os.system("mkdir ./outdir_%s/fTestParallel/jobs"%ext)
+  for cat_idx in range(len(cats.split(","))):
+    cat = cats.split(",")[cat_idx]
+    f = open("./outdir_%s/fTestParallel/jobs/sub%g.sh"%(ext,cat_idx),"w")
+    f.write("#!/bin/bash\n\n")
+    f.write("cd %s/src/flashggFinalFit/Background\n\n"%os.environ['CMSSW_BASE'])
+    f.write("eval `scramv1 runtime -sh`\n\n")
+    co = catOffset+cat_idx  
+    cmdLine = "./runBackgroundScripts.sh -i %s -p %s -f %s --ext %s --catOffset %g --intLumi %s --year %s --batch %s --queue %s --sigFile %s --isData --fTestOnly"%(dataFile,procs,cat,ext,co,lumi[year],year,batch,queue,signalFitWSFile)
+    f.write("%s\n"%cmdLine)
+    f.close()
+  # Change permission fo scripts
+  os.system("chmod 775 ./outdir_%s/fTestParallel/jobs/sub*.sh"%ext)
+  # If not printOnly: submit scripts
+  if not printOnly:
+    for cat_idx in range(len(cats.split(","))):
+      cat = cats.split(",")[cat_idx]
+      print " --> Category: %s (sub%g.sh)"%(cat,cat_idx)
+      os.system("qsub -q hep.q -l h_rt=0:20:0 ./outdir_%s/fTestParallel/jobs/sub%g.sh"%(ext,cat_idx))
 
-cmdLine = "./runBackgroundScripts.sh -i %s -p %s -f %s --ext %s --catOffset %g --intLumi %s --year %s --batch %s --queue %s --sigFile %s --isData "%(dataFile,procs,cats,ext,catOffset,lumi[year],year,batch,queue,signalFitWSFile)
-if mode == "fTestOnly": cmdLine += '--fTestOnly '
-elif mode == "bkgPlotsOnly": cmdLine += '--bkgPlotsOnly '
-if unblind and not fTestOnly: cmdLine += '--undblind '
+else:
+  # Construct input command
+  print " --> Constructing input command..."
 
-# Either print command to screen or run
-if printOnly: print "\n%s"%cmdLine
-else: os.system( cmdLine )
+  cmdLine = "./runBackgroundScripts.sh -i %s -p %s -f %s --ext %s --catOffset %g --intLumi %s --year %s --batch %s --queue %s --sigFile %s --isData "%(dataFile,procs,cats,ext,catOffset,lumi[year],year,batch,queue,signalFitWSFile)
+  if mode == "fTestOnly": cmdLine += '--fTestOnly '
+  elif mode == "bkgPlotsOnly": cmdLine += '--bkgPlotsOnly '
+  if unblind and not fTestOnly: cmdLine += '--undblind '
+
+  # Either print command to screen or run
+  if printOnly: print "\n%s"%cmdLine
+  else: os.system( cmdLine )
 
 print "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ RUNNING BACKGROUND SCRIPTS (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"

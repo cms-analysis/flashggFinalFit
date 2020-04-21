@@ -14,6 +14,7 @@ def get_options():
   parser.add_option('--ext', dest='ext', default='', help='If running with extension in datacard')
   parser.add_option('--translate', dest='translate', default='', help='Load translations for pois')
   parser.add_option('--dropTHQ', dest='dropTHQ', default=False, action="store_true", help='Drop r_tHq from the poi list')
+  parser.add_option('--doObserved', dest='doObserved', default=False, action="store_true", help='Do observed correlation')
   return parser.parse_args()
 (opt,args) = get_options() 
 
@@ -24,6 +25,9 @@ def LoadTranslations(jsonfilename):
 ROOT.gROOT.SetBatch(True)
 ROOT.gStyle.SetNumberContours(500)
 lumi = 137
+
+if opt.doObserved: obs_ext = "_obs"
+else: obs_ext = ''
 
 modes = od()
 
@@ -38,7 +42,7 @@ modes[opt.mode] = pois
 translate = {} if opt.translate is None else LoadTranslations(opt.translate)
 
 for mode,pois in modes.iteritems():
-  fileName = '%s/src/flashggFinalFit/Combine/runFits%s_%s/robustHesse_%s.root'%(os.environ['CMSSW_BASE'],opt.ext,opt.mode,name)
+  fileName = '%s/src/flashggFinalFit/Combine_p1/runFits%s_%s/robustHesse_%s%s.root'%(os.environ['CMSSW_BASE'],opt.ext,opt.mode,name,obs_ext)
   inFile = ROOT.TFile(fileName,'READ')
   theMatrix = inFile.Get('h_correlation')
   theList   = inFile.Get('floatParsFinal')
@@ -96,5 +100,5 @@ for mode,pois in modes.iteritems():
   theHist.Draw('colz,text')
   drawCMS(True)
   drawEnPu(lumi='%2.0f fb^{-1}'%lumi)
-  canv.Print('%s/src/flashggFinalFit/Combine/runFits%s_%s/Plots/corrMatrix_%s_%s%s.png'%(os.environ['CMSSW_BASE'],opt.ext,mode,mode,name.split("_")[-1],opt.ext))
-  canv.Print('%s/src/flashggFinalFit/Combine/runFits%s_%s/Plots/corrMatrix_%s_%s%s.pdf'%(os.environ['CMSSW_BASE'],opt.ext,mode,mode,name.split("_")[-1],opt.ext))
+  canv.Print('%s/src/flashggFinalFit/Combine_p1/runFits%s_%s/Plots/corrMatrix_%s_%s%s%s.png'%(os.environ['CMSSW_BASE'],opt.ext,mode,mode,name.split("_")[-1],obs_ext,opt.ext))
+  canv.Print('%s/src/flashggFinalFit/Combine_p1/runFits%s_%s/Plots/corrMatrix_%s_%s%s%s.pdf'%(os.environ['CMSSW_BASE'],opt.ext,mode,mode,name.split("_")[-1],obs_ext,opt.ext))

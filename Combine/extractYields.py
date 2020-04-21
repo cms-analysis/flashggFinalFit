@@ -23,10 +23,14 @@ def procToProcS0(p):
   elif "qqH" in p: return "qqh"
   elif "WH_had" in p: return "wh"
   elif "ZH_had" in p: return "zh"
+  elif "ggZH_had" in p: return "ggzh"
   elif "WH_lep" in p: return "wh"
   elif "ZH_lep" in p: return "zh"
+  elif "ggZH_ll" in p: return "ggzh"
+  elif "ggZH_nunu" in p: return "ggzh"
   elif "ttH" in p: return "tth"
   elif "tHq" in p: return "thq"
+  elif "bbH" in p: return "bbh"
   else: 
     print " --> [ERROR] proc s0 not realised for process %s. Leaving"%p
     sys.exit(1)

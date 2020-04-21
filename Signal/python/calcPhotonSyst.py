@@ -37,8 +37,9 @@ inExtSyst = {'scales':'MCScale','scalesCorr':'','smears':'MCSmear'}
 outExtSyst = {'scales':'13TeVscale','scalesCorr':'scale','smears':'13TeVsmear','scalesGlobal':'13TeVscale'}
 # Function for converting STXS process to production mode in dataset name
 def procToData( _proc ):
-  proc_map = {"GG2H":"ggh","VBF":"vbf","WH2HQQ":"wh","ZH2HQQ":"zh","QQ2HLNU":"wh","QQ2HLL":"zh","TTH":"tth","BBH":"bbH","THQ":"thq","THW":"thw","TH":"thq"}
-  for key in proc_map: _proc = re.sub( key, proc_map[key], _proc )
+  proc_map = {"GG2H":"ggh","VBF":"vbf","WH2HQQ":"wh","ZH2HQQ":"zh","QQ2HLNU":"wh","QQ2HLL":"zh","TTH":"tth","BBH":"bbh","THQ":"thq","THW":"thw","TH":"thq","GG2HQQ":"ggzh","GG2HLL":"ggzh","GG2HNUNU":"ggzh"}
+  for key in proc_map: 
+    if key == _proc.split("_")[0]: _proc = re.sub( key, proc_map[key], _proc )
   return _proc
 
 # RooRealVar to fill histograms

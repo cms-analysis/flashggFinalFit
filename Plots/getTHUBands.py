@@ -16,54 +16,78 @@ def leave():
 paramMergingSchemes = {
   "stage1p2_minimal":{
     "r_ggH_0J_low":['ggH_0J_PTH_0_10'],
-    "r_ggH_0J_high":['ggH_0J_PTH_GT10'],
+    "r_ggH_0J_high":['ggH_0J_PTH_GT10','bbH'],
     "r_ggH_1J_low":['ggH_1J_PTH_0_60'],
     "r_ggH_1J_med":['ggH_1J_PTH_60_120'],
     "r_ggH_1J_high":['ggH_1J_PTH_120_200'],
-    "r_ggH_2J_low":['ggH_GE2J_MJJ_0_350_PTH_0_60'],
-    "r_ggH_2J_med":['ggH_GE2J_MJJ_0_350_PTH_60_120'],
-    "r_ggH_2J_high":['ggH_GE2J_MJJ_0_350_PTH_120_200'],
-    "r_ggH_VBFlike":['ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','ggH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','ggH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25'],
-    "r_ggH_BSM_low":['ggH_PTH_200_300'],
-    "r_ggH_BSM_high":['ggH_PTH_300_450','ggH_PTH_450_650','ggH_PTH_GT650'],
+    "r_ggH_2J_low":['ggH_GE2J_MJJ_0_350_PTH_0_60','ggZH_had_GE2J_MJJ_0_350_PTH_0_60'],
+    "r_ggH_2J_med":['ggH_GE2J_MJJ_0_350_PTH_60_120','ggZH_had_GE2J_MJJ_0_350_PTH_60_120'],
+    "r_ggH_2J_high":['ggH_GE2J_MJJ_0_350_PTH_120_200','ggZH_had_GE2J_MJJ_0_350_PTH_120_200'],
+    "r_ggH_VBFlike":['ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','ggH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','ggH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25','ggZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25'],
+    "r_ggH_BSM_low":['ggH_PTH_200_300','ggZH_had_PTH_200_300'],
+    "r_ggH_BSM_high":['ggH_PTH_300_450','ggH_PTH_450_650','ggH_PTH_GT650','ggZH_had_PTH_300_450','ggZH_had_PTH_450_650','ggZH_had_PTH_GT650'],
     "r_qqH_VHhad":['qqH_GE2J_MJJ_60_120','WH_had_GE2J_MJJ_60_120','ZH_had_GE2J_MJJ_60_120'],
-    "r_qqH_low_mjj":['qqH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','qqH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','WH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','WH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','ZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','ZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25'],
-    "r_qqH_high_mjj":['qqH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','qqH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25'],#,'WH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','WH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25','ZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','ZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25'],
+    "r_qqH_low_mjj_2jlike":['qqH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','WH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','ZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25'],
+    "r_qqH_low_mjj_3jlike":['qqH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','WH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','ZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25'],
+    "r_qqH_high_mjj_2jlike":['qqH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','ZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25'],
+    "r_qqH_high_mjj_3jlike":['qqH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25','WH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25','ZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25'],
     "r_qqH_BSM":['qqH_GE2J_MJJ_GT350_PTH_GT200','WH_had_GE2J_MJJ_GT350_PTH_GT200','ZH_had_GE2J_MJJ_GT350_PTH_GT200'],
-    #"qqH_other":['qqH_0J','qqH_1J','qqH_GE2J_MJJ_0_60','qqH_GE2J_MJJ_120_350','WH_had_0J','WH_had_1J','WH_had_GE2J_MJJ_0_60','WH_had_GE2J_MJJ_120_350','ZH_had_0J','ZH_had_1J','ZH_had_GE2J_MJJ_0_60','ZH_had_GE2J_MJJ_120_350'],
     "r_WH_lep_low":['WH_lep_PTV_0_75'],
     "r_WH_lep_high":['WH_lep_PTV_75_150','WH_lep_PTV_150_250_0J','WH_lep_PTV_150_250_GE1J','WH_lep_PTV_GT250'],
-    "r_ZH_lep":['ZH_lep_PTV_0_75','ZH_lep_PTV_75_150','ZH_lep_PTV_150_250_0J','ZH_lep_PTV_150_250_GE1J','ZH_lep_PTV_GT250'],
+    "r_ZH_lep":['ZH_lep_PTV_0_75','ZH_lep_PTV_75_150','ZH_lep_PTV_150_250_0J','ZH_lep_PTV_150_250_GE1J','ZH_lep_PTV_GT250','ggZH_ll_PTV_75_150','ggZH_ll_PTV_150_250_GE1J','ggZH_nunu_PTV_75_150','ggZH_nunu_PTV_150_250_0J','ggZH_nunu_PTV_150_250_GE1J','ggZH_nunu_PTV_GT250'],
     "r_ttH_low":['ttH_PTH_0_60'],
     "r_ttH_medlow":['ttH_PTH_60_120'],
     "r_ttH_medhigh":['ttH_PTH_120_200'],
-    "r_ttH_high":['ttH_PTH_200_300','ttH_PTH_GT300']#,
+    "r_ttH_high":['ttH_PTH_200_300','ttH_PTH_GT300'],
     "r_tHq":['tHq']
+    # Missing procs: ggZH_ll_PTV_0_75,ggZH_ll_PTV_150_250_0J,ggZH_ll_PTV_GT250,ggZH_nunu_PTV_0_75,ggZH_had_1J_PTH_60_120,ggZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25,ggZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25,ggZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25,WH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25,ggZH_had_0J_PTH_0_10,ggZH_had_0J_PTH_GT10,ggZH_had_1J_PTH_120_200,ggZH_had_1J_PTH_0_60
   },
 
   "stage1p2_intermediate":{
     "r_ggH_0J_low":['ggH_0J_PTH_0_10'],
-    "r_ggH_0J_high":['ggH_0J_PTH_GT10'],
+    "r_ggH_0J_high":['ggH_0J_PTH_GT10','bbH'],
     "r_ggH_1J_low":['ggH_1J_PTH_0_60'],
     "r_ggH_1J_med":['ggH_1J_PTH_60_120'],
     "r_ggH_1J_high":['ggH_1J_PTH_120_200'],
-    "r_ggH_2J_low":['ggH_GE2J_MJJ_0_350_PTH_0_60'],
-    "r_ggH_2J_med":['ggH_GE2J_MJJ_0_350_PTH_60_120'],
-    "r_ggH_2J_high":['ggH_GE2J_MJJ_0_350_PTH_120_200'],
-    "r_ggH_VBFlike":['ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','ggH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','ggH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25'],
-    "r_ggH_BSM_low":['ggH_PTH_200_300'],
-    "r_ggH_BSM_high":['ggH_PTH_300_450','ggH_PTH_450_650','ggH_PTH_GT650'],
+    "r_ggH_2J_low":['ggH_GE2J_MJJ_0_350_PTH_0_60','ggZH_had_GE2J_MJJ_0_350_PTH_0_60'],
+    "r_ggH_2J_med":['ggH_GE2J_MJJ_0_350_PTH_60_120','ggZH_had_GE2J_MJJ_0_350_PTH_60_120'],
+    "r_ggH_2J_high":['ggH_GE2J_MJJ_0_350_PTH_120_200','ggZH_had_GE2J_MJJ_0_350_PTH_120_200'],
+    "r_ggH_VBFlike":['ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','ggH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','ggH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25','ggZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25'],
+    "r_ggH_BSM_low":['ggH_PTH_200_300','ggZH_had_PTH_200_300'],
+    "r_ggH_BSM_high":['ggH_PTH_300_450','ggH_PTH_450_650','ggH_PTH_GT650','ggZH_had_PTH_300_450','ggZH_had_PTH_450_650','ggZH_had_PTH_GT650'],
     "r_qqH_VHhad":['qqH_GE2J_MJJ_60_120','WH_had_GE2J_MJJ_60_120','ZH_had_GE2J_MJJ_60_120'],
-    "r_qqH_low_mjj":['qqH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','qqH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','WH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','WH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','ZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','ZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25'],
-    "r_qqH_high_mjj":['qqH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','qqH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25'],#,'WH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','WH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25','ZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','ZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25'],
+    "r_qqH_low_mjj":['qqH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','WH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','ZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','qqH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','WH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','ZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25'],
+    "r_qqH_high_mjj":['qqH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','ZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','qqH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25','WH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25','ZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25'],
     "r_qqH_BSM":['qqH_GE2J_MJJ_GT350_PTH_GT200','WH_had_GE2J_MJJ_GT350_PTH_GT200','ZH_had_GE2J_MJJ_GT350_PTH_GT200'],
-    #"qqH_other":['qqH_0J','qqH_1J','qqH_GE2J_MJJ_0_60','qqH_GE2J_MJJ_120_350','WH_had_0J','WH_had_1J','WH_had_GE2J_MJJ_0_60','WH_had_GE2J_MJJ_120_350','ZH_had_0J','ZH_had_1J','ZH_had_GE2J_MJJ_0_60','ZH_had_GE2J_MJJ_120_350'],
     "r_WH_lep_low":['WH_lep_PTV_0_75'],
     "r_WH_lep_high":['WH_lep_PTV_75_150','WH_lep_PTV_150_250_0J','WH_lep_PTV_150_250_GE1J','WH_lep_PTV_GT250'],
-    "r_ZH_lep":['ZH_lep_PTV_0_75','ZH_lep_PTV_75_150','ZH_lep_PTV_150_250_0J','ZH_lep_PTV_150_250_GE1J','ZH_lep_PTV_GT250'],
+    "r_ZH_lep":['ZH_lep_PTV_0_75','ZH_lep_PTV_75_150','ZH_lep_PTV_150_250_0J','ZH_lep_PTV_150_250_GE1J','ZH_lep_PTV_GT250','ggZH_ll_PTV_75_150','ggZH_ll_PTV_150_250_GE1J','ggZH_nunu_PTV_75_150','ggZH_nunu_PTV_150_250_0J','ggZH_nunu_PTV_150_250_GE1J','ggZH_nunu_PTV_GT250'],
     "r_ttH_low":['ttH_PTH_0_60','ttH_PTH_60_120'],
     "r_ttH_high":['ttH_PTH_120_200','ttH_PTH_200_300','ttH_PTH_GT300'],
-    #"r_tHq":['tHq']
+    "r_tHq":['tHq']
+    # Missing procs: ggZH_ll_PTV_0_75,ggZH_ll_PTV_150_250_0J,ggZH_ll_PTV_GT250,ggZH_nunu_PTV_0_75,ggZH_had_1J_PTH_60_120,ggZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25,ggZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25,ggZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25,WH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25,ggZH_had_0J_PTH_0_10,ggZH_had_0J_PTH_GT10,ggZH_had_1J_PTH_120_200,ggZH_had_1J_PTH_0_60
+  },
+
+  "stage1p2_maximal":{
+    "r_ggH_0J_low":['ggH_0J_PTH_0_10'],
+    "r_ggH_0J_high":['ggH_0J_PTH_GT10','bbH'],
+    "r_ggH_1J_low":['ggH_1J_PTH_0_60'],
+    "r_ggH_1J_med":['ggH_1J_PTH_60_120'],
+    "r_ggH_1J_high":['ggH_1J_PTH_120_200'],
+    "r_ggH_2J_low":['ggH_GE2J_MJJ_0_350_PTH_0_60','ggZH_had_GE2J_MJJ_0_350_PTH_0_60'],
+    "r_ggH_2J_med":['ggH_GE2J_MJJ_0_350_PTH_60_120','ggZH_had_GE2J_MJJ_0_350_PTH_60_120'],
+    "r_ggH_2J_high":['ggH_GE2J_MJJ_0_350_PTH_120_200','ggZH_had_GE2J_MJJ_0_350_PTH_120_200'],
+    "r_ggH_VBFlike":['ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','ggH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','ggH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25','ggZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25'],
+    "r_ggH_BSM":['ggH_PTH_200_300','ggZH_had_PTH_200_300','ggH_PTH_300_450','ggH_PTH_450_650','ggH_PTH_GT650','ggZH_had_PTH_300_450','ggZH_had_PTH_450_650','ggZH_had_PTH_GT650'],
+    "r_qqH_VHhad":['qqH_GE2J_MJJ_60_120','WH_had_GE2J_MJJ_60_120','ZH_had_GE2J_MJJ_60_120'],
+    "r_qqH_low_mjj":['qqH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','WH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','ZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','qqH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','WH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','ZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25'],
+    "r_qqH_high_mjj":['qqH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','ZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','qqH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25','WH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25','ZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25'],
+    "r_qqH_BSM":['qqH_GE2J_MJJ_GT350_PTH_GT200','WH_had_GE2J_MJJ_GT350_PTH_GT200','ZH_had_GE2J_MJJ_GT350_PTH_GT200'],
+    "r_WH_lep":['WH_lep_PTV_0_75','WH_lep_PTV_75_150','WH_lep_PTV_150_250_0J','WH_lep_PTV_150_250_GE1J','WH_lep_PTV_GT250'],
+    "r_ZH_lep":['ZH_lep_PTV_0_75','ZH_lep_PTV_75_150','ZH_lep_PTV_150_250_0J','ZH_lep_PTV_150_250_GE1J','ZH_lep_PTV_GT250','ggZH_ll_PTV_75_150','ggZH_ll_PTV_150_250_GE1J','ggZH_nunu_PTV_75_150','ggZH_nunu_PTV_150_250_0J','ggZH_nunu_PTV_150_250_GE1J','ggZH_nunu_PTV_GT250'],
+    "r_ttH":['ttH_PTH_0_60','ttH_PTH_60_120','ttH_PTH_120_200','ttH_PTH_200_300','ttH_PTH_GT300'],
+    "r_tHq":['tHq']
+    # Missing procs: ggZH_ll_PTV_0_75,ggZH_ll_PTV_150_250_0J,ggZH_ll_PTV_GT250,ggZH_nunu_PTV_0_75,ggZH_had_1J_PTH_60_120,ggZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25,ggZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25,ggZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25,WH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25,ggZH_had_0J_PTH_0_10,ggZH_had_0J_PTH_GT10,ggZH_had_1J_PTH_120_200,ggZH_had_1J_PTH_0_60
   }
 }
 
@@ -76,13 +100,13 @@ theory_systematics = [
     'QCDscale_tHq','pdf_Higgs_tHq','alphaS_tHq'
 ]
 
-proc_map = {"GG2H":"ggH","VBF":"qqH","WH2HQQ":"WH_had","ZH2HQQ":"ZH_had","QQ2HLNU":"WH_lep","QQ2HLL":"ZH_lep","TTH":"ttH","BBH":"bbH","THQ":"tHq","THW":"tHW","TH":"tHq"}
+proc_map = {"GG2H":"ggH","VBF":"qqH","WH2HQQ":"WH_had","ZH2HQQ":"ZH_had","GG2HQQ":"ggZH_had","QQ2HLNU":"WH_lep","QQ2HLL":"ZH_lep","GG2HLL":"ggZH_ll","GG2HNUNU":"ggZH_nunu","TTH":"ttH","BBH":"bbH","THQ":"tHq","THW":"tHW","TH":"tHq"}
 
 def get_options():
   parser = OptionParser()
   parser.add_option('--paramMergingScheme', dest='paramMergingScheme', default='none', help="Parameter merging scenario e.g. maximal_mjj")
   parser.add_option('--POI', dest='POI', default='', help="Parameter of interest")
-  parser.add_option("--inputWS", dest="inputWS", default='', help="Input pickle file")
+  parser.add_option("--inputWS", dest="inputWS", default='', help="Input workspace")
   parser.add_option("--year", dest="year", default='2016', help="Year to extract THU from")
   return parser.parse_args()
 (opt,args) = get_options()

@@ -13,7 +13,7 @@
   "r_ggH_1J_high":"ggH 1J high p_{T}^{H}",
   "r_ggH_2J_low":"ggH #geq2J low p_{T}^{H}",
   "r_ggH_2J_med":"ggH #geq2J med p_{T}^{H}",
-  "r_ggH_2J_high":"ggH #geq2J med p_{T}^{H}",
+  "r_ggH_2J_high":"ggH #geq2J high p_{T}^{H}",
   "r_ggH_VBFlike":"ggH VBF-like",
   "r_ggH_BSM_low":"ggH 200 < p_{T}^{H} < 300 GeV",
   "r_ggH_BSM_high":"ggH p_{T}^{H} > 300 GeV",

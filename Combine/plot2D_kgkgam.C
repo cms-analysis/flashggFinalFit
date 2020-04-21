@@ -12,9 +12,9 @@ void plot2D_kgkgam(){
   TColor::CreateGradientColorTable(npoints, stops, red, green, blue, ncontours); 
   gStyle->SetNumberContours(ncontours); 
 
-  TFile *f = TFile::Open("runFits_kappas/scan2D_statonly_kappa_g_vs_kappa_gam.root");
+  TFile *f = TFile::Open("fromEd/scan2D_syst_obs_kappa_g_vs_kappa_gam.root");
   TTree *limit = (TTree*) f->Get("limit");
-  limit->Draw("2*deltaNLL:kappa_g:kappa_gam>>h4(100,0.4,1.6,100,0.5,2)","deltaNLL<10000", "prof colz");
+  limit->Draw("2*deltaNLL:kappa_g:kappa_gam>>h4(40,0.4,1.6,40,0.5,2)","deltaNLL<10000", "prof colz");
 
   TH2F *h2D = (TH2F*) gROOT->FindObject("h4");
   h2D->SetContour(ncontours);
@@ -52,6 +52,13 @@ void plot2D_kgkgam(){
   h2D->GetZaxis()->SetTitleSize(0.035);
   h2D->GetZaxis()->SetTitle("-2 #Delta ln L");
 
+  TGraph *gBF = new TGraph();
+  gBF->SetPoint(0,1.03325,0.916305);
+  gBF->SetMarkerStyle(33);
+  gBF->SetMarkerSize(2.0);
+  gBF->SetMarkerColor(kRed);
+  gBF->Draw("P");
+
   TGraph *gSM = new TGraph();
   gSM->SetPoint(0,1,1);
   gSM->SetMarkerStyle(34);
@@ -71,10 +78,10 @@ void plot2D_kgkgam(){
   TLegend *leg = new TLegend(0.55,0.66,0.8,0.86);
   leg->SetBorderSize(0);
   leg->SetFillColor(0);
-
-  leg->AddEntry(gSM,  "SM"     , "P" );
-  leg->AddEntry(c1,   "68% CL" , "L" );
-  leg->AddEntry(c2,   "95% CL" , "L" );
+  leg->AddEntry(gBF,  "Best fit", "P" );
+  leg->AddEntry(gSM,  "SM"      , "P" );
+  leg->AddEntry(c1,   "68% CL"  , "L" );
+  leg->AddEntry(c2,   "95% CL"  , "L" );
   leg->Draw();
 
   can->SetTicky();
@@ -82,6 +89,6 @@ void plot2D_kgkgam(){
   can->RedrawAxis();
   can->Update(); 
 
-  can->SaveAs("scan2D_statonly_kappa_g_vs_kappa_gam.pdf");
-  can->SaveAs("scan2D_statonly_kappa_g_vs_kappa_gam.png");
+  can->SaveAs("fromEd/scan2D_syst_obs_kappa_g_vs_kappa_gam.pdf");
+  can->SaveAs("fromEd/scan2D_syst_obs_kappa_g_vs_kappa_gam.png");
 }
