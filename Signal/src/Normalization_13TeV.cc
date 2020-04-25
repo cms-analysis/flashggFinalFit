@@ -160,10 +160,10 @@ int Normalization_13TeV::Init(int sqrtS){
         XSectionMap_TTH_PTH_200_300[mH]          = 0.1070 * valXSttH;
         XSectionMap_TTH_PTH_GT300[mH]            = 0.0486 * valXSttH;
 
+        // FIXME: add correct fwd splits for subdominant modes
         XSectionMap_BBH_FWDH[mH]                 = 0.0001* valXSbbH;
         XSectionMap_BBH[mH]                      = 0.9999* valXSbbH;
 
-        // FIXME: is this the correct tHq fwd!
         XSectionMap_THQ_FWDH[mH]                 = 0.00005 * valXStHq;
         XSectionMap_THQ[mH]                      = 0.99995 * valXStHq;
 
@@ -660,14 +660,14 @@ double Normalization_13TeV::GetXsection(double mass, TString HistName) {
           XSectionMap = &XSectionMap_THQ_FWDH;
   } else if ( HistName.Contains("THQ") ){
           XSectionMap = &XSectionMap_THQ;
-  } else if ( HistName.Contains("TH_FWDH") ){
-          XSectionMap = &XSectionMap_THQ_FWDH;
-  } else if ( HistName.Contains("TH") ){
-          XSectionMap = &XSectionMap_THQ;
   } else if ( HistName.Contains("THW_FWDH") ){
           XSectionMap = &XSectionMap_THW_FWDH;
   } else if ( HistName.Contains("THW") ){
           XSectionMap = &XSectionMap_THW;
+  } else if ( HistName.Contains("TH_FWDH") ){
+          XSectionMap = &XSectionMap_THQ_FWDH;
+  } else if ( HistName.Contains("TH") ){
+          XSectionMap = &XSectionMap_THQ;
   // Stage 0
   } else if ( HistName.Contains("ggh") || HistName.Contains("GG2H") ) {
     XSectionMap = &XSectionMap_ggh;

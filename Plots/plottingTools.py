@@ -1,5 +1,8 @@
 import ROOT
 import json
+import math
+import pandas
+import numpy as np
 
 def Translate(name, ndict):
     return ndict[name] if name in ndict else name
@@ -61,10 +64,26 @@ def getEffSigma(_h):
   # Return effSigma
   return wmin
 
-def makeSplusBPlot(workspace,hD,hSB,hB,hS,hDr,hBr,hSr,cat,options):
+def extractBandProperties(data,category,bidx):
+  props = {}
+  if category == 'all': c = 'sum'
+  elif category == 'wall': c = 'wsum'
+  else: c = category
+  props['median'] = np.median(data['%s_%g'%(c,bidx)].values)
+  props['up1sigma'] = np.percentile(data['%s_%g'%(c,bidx)].values,50*(1+math.erf(1./math.sqrt(2))))
+  props['down1sigma'] = np.percentile(data['%s_%g'%(c,bidx)].values,50*(1+math.erf(-1./math.sqrt(2))))
+  props['up2sigma'] = np.percentile(data['%s_%g'%(c,bidx)].values,50*(1+math.erf(2./math.sqrt(2))))
+  props['down2sigma'] = np.percentile(data['%s_%g'%(c,bidx)].values,50*(1+math.erf(-2./math.sqrt(2))))
+  return props
+
+def makeSplusBPlot(workspace,hD,hSB,hB,hS,hDr,hBr,hSr,cat,options,dB=None,reduceRange=None):
   translateCats = {} if options.translateCats is None else LoadTranslations(options.translateCats)
   translatePOIs = {} if options.translatePOIs is None else LoadTranslations(options.translatePOIs)
   blindingRegion = [float(options.blindingRegion.split(",")[0]),float(options.blindingRegion.split(",")[1])]
+  if reduceRange is not None:
+    for h in [hD,hDr,hBr,hSr]: h.GetXaxis().SetRangeUser(reduceRange[0],reduceRange[1])
+    for h_ipdf in [hSB,hB,hS]:
+      for h in h_ipdf.itervalues(): h.GetXaxis().SetRangeUser(reduceRange[0],reduceRange[1])
   
   canv = ROOT.TCanvas("canv_%s"%cat,"canv_%s"%cat,700,700)
   pad1 = ROOT.TPad("pad1_%s"%cat,"pad1_%s"%cat,0,0.25,1,1)
@@ -84,7 +103,8 @@ def makeSplusBPlot(workspace,hD,hSB,hB,hS,hDr,hBr,hSr,cat,options):
   pad1.cd()
   h_axes = hD.Clone()
   h_axes.Reset()
-  h_axes.SetMaximum((hD.GetMaximum()+hD.GetBinError(hD.GetMaximumBin()))*1.3)
+  if options.doBands: h_axes.SetMaximum((hD.GetMaximum()+hD.GetBinError(hD.GetMaximumBin()))*1.4)
+  else: h_axes.SetMaximum((hD.GetMaximum()+hD.GetBinError(hD.GetMaximumBin()))*1.3)
   h_axes.SetMinimum(0.)
   h_axes.SetTitle("")
   h_axes.GetXaxis().SetTitle("")
@@ -93,9 +113,40 @@ def makeSplusBPlot(workspace,hD,hSB,hB,hS,hDr,hBr,hSr,cat,options):
   h_axes.GetYaxis().SetTitleOffset(0.9)
   h_axes.GetYaxis().SetLabelSize(0.035)
   h_axes.GetYaxis().SetLabelOffset(0.007)
+  if cat == "wall": h_axes.GetYaxis().SetTitle("S/(S+B) Weighted %s"%h_axes.GetYaxis().GetTitle())
   h_axes.Draw()
+  # Add bands
+  if options.doBands:
+    gr_1sig, gr_1sig_r = ROOT.TGraphAsymmErrors(), ROOT.TGraphAsymmErrors()
+    gr_2sig, gr_2sig_r = ROOT.TGraphAsymmErrors(), ROOT.TGraphAsymmErrors()
+    gr_i = 0
+    # Loop over bins and extract median and +-1/2sigma bands
+    for ibin in range(h_axes.GetXaxis().GetFirst(),h_axes.GetNbinsX()+1):
+      xval = h_axes.GetXaxis().GetBinCenter(ibin)
+      xerr = 0.5*(h_axes.GetXaxis().GetBinWidth(ibin))
+      bkgval = hB['nBins'].GetBinContent(ibin)
+      properties = extractBandProperties(dB,cat,ibin)
+      gr_1sig.SetPoint(gr_i,xval,properties['median'])
+      gr_2sig.SetPoint(gr_i,xval,properties['median'])
+      gr_1sig_r.SetPoint(gr_i,xval,properties['median']-bkgval)
+      gr_2sig_r.SetPoint(gr_i,xval,properties['median']-bkgval)
+      gr_1sig.SetPointError(gr_i,xerr,xerr,properties['median']-properties['down1sigma'],properties['up1sigma']-properties['median'])
+      gr_2sig.SetPointError(gr_i,xerr,xerr,properties['median']-properties['down2sigma'],properties['up2sigma']-properties['median'])
+      gr_1sig_r.SetPointError(gr_i,xerr,xerr,properties['median']-properties['down1sigma'],properties['up1sigma']-properties['median'])
+      gr_2sig_r.SetPointError(gr_i,xerr,xerr,properties['median']-properties['down2sigma'],properties['up2sigma']-properties['median'])
+      gr_i += 1
+    gr_1sig.SetFillColor(ROOT.kGreen)
+    gr_1sig.SetFillStyle(1001)
+    gr_2sig.SetFillColor(ROOT.kYellow)
+    gr_2sig.SetFillStyle(1001)
+    gr_1sig_r.SetFillColor(ROOT.kGreen)
+    gr_1sig_r.SetFillStyle(1001)
+    gr_2sig_r.SetFillColor(ROOT.kYellow)
+    gr_2sig_r.SetFillStyle(1001)
+    gr_2sig.Draw("LE3SAME")
+    gr_1sig.Draw("LE3SAME")
   # Add legend
-  if options.doBands: leg = ROOT.TLegend(0.58,0.36,0.86,0.76)
+  if options.doBands: leg = ROOT.TLegend(0.58,0.46,0.86,0.76)
   else: leg = ROOT.TLegend(0.58,0.52,0.86,0.76)
   leg.SetFillStyle(0)
   leg.SetLineColor(0)
@@ -107,6 +158,9 @@ def makeSplusBPlot(workspace,hD,hSB,hB,hS,hDr,hBr,hSr,cat,options):
   else:
     leg.AddEntry(hB['pdfNBins'],"B fit","l")
     leg.AddEntry(hS['pdfNBins'],"S model","fl")
+  if options.doBands:
+    leg.AddEntry(gr_1sig,"#pm1 #sigma","F")
+    leg.AddEntry(gr_2sig,"#pm2 #sigma","F")
   leg.Draw("Same")
   # Set pdf style
   if options.unblind:
@@ -168,6 +222,10 @@ def makeSplusBPlot(workspace,hD,hSB,hB,hS,hDr,hBr,hSr,cat,options):
   h_axes_ratio.GetYaxis().SetLabelOffset(0.007)
   h_axes_ratio.GetYaxis().SetTitle("")
   h_axes_ratio.Draw()
+  # Draw bands 
+  if options.doBands:
+    gr_2sig_r.Draw("LE3SAME")
+    gr_1sig_r.Draw("LE3SAME")
   # Set pdf style
   if options.unblind:
     hSr.SetLineWidth(3)
@@ -201,6 +259,7 @@ def makeSplusBPlot(workspace,hD,hSB,hB,hS,hDr,hBr,hSr,cat,options):
   lat1.DrawLatex(0.87,0.93,"B component subtracted")
 
   # Save canvas
-  #canv.SaveAs("./SplusBModels%s/%s.png"%(options.ext,cat))
-  #canv.SaveAs("./SplusBModels%s/%s.pdf"%(options.ext,cat))
-  raw_input("Press any key to continue...")
+  canv.Update()
+  canv.SaveAs("./SplusBModels%s/%s_%s.png"%(options.ext,cat,options.xvar.split(",")[0]))
+  canv.SaveAs("./SplusBModels%s/%s_%s.pdf"%(options.ext,cat,options.xvar.split(",")[0]))
+  #raw_input("Press any key to continue...")

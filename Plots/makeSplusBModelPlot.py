@@ -6,6 +6,7 @@ import re
 from optparse import OptionParser
 import ROOT
 import pandas as pd
+import numpy as np
 import glob
 import pickle
 import math
@@ -19,22 +20,27 @@ def leave():
   print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG MODEL PLOTTER RUN II (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ "
   sys.exit(1)
 
-#ROOT.gROOT.SetBatch(True)
+ROOT.gROOT.SetBatch(True)
 ROOT.gStyle.SetOptStat(0)
 
 def get_options():
   parser = OptionParser()
   parser.add_option("--inputWSFile", dest="inputWSFile", default=None, help="Input RooWorkspace file. If loading snapshot then use a post-fit workspace where the option --saveWorkspace was set")
-  parser.add_option("--cat", dest="cat", default=None, help="Analysis category. all = loop over cats and plot sum")
+  parser.add_option("--loadSnapshot", dest="loadSnapshot", default=None, help="Load best-fit snapshot name")
+  parser.add_option("--cats", dest="cats", default=None, help="Analysis categories. all = loop over cats and plot sum")
   parser.add_option("--unblind", dest="unblind", default=False, action="store_true", help="Unblind signal region")
   parser.add_option("--blindingRegion", dest="blindingRegion", default="116,134", help="Region in xvar to blind")
   parser.add_option("--dataScaler", dest="dataScaler", default=1., type='float', help="Scaling term for data histogram")
   parser.add_option("--doBkgRenormalization", dest="doBkgRenormalization", default=False, action="store_true", help="Do Bkg renormalization")
   parser.add_option("--doBands", dest="doBands", default=False, action="store_true", help="Do +-1/2sigma bands for bkg model")
+  parser.add_option("--loadToyYields", dest="loadToyYields", default='', help="Load pkl file storing toy yields in dataframe")
+  parser.add_option("--saveToyYields", dest="saveToyYields", default=False, action="store_true", help="Save toy yields dataframe")
   parser.add_option("--doZeroes", dest="doZeroes", default=False, action="store_true", help="Add error of unity to zero bins to show on plot")
   parser.add_option("--skipIndividualCatPlots", dest="skipIndividualCatPlots", default=False, action="store_true", help="Skip plotting of individual categories")
-  parser.add_option("--doWeightedPlot", dest="doWeightedPlot", default=False, action="store_true", help="Do S/S+B weighted plot if cat=all")
-  parser.add_option("--loadSnapshot", dest="loadSnapshot", default=None, help="Load best-fit snapshot name")
+  parser.add_option("--doSumCategories", dest="doSumCategories", default=False, action="store_true", help="Do plot summing the categories being processed")
+  parser.add_option("--doCatWeights", dest="doCatWeights", default=False, action="store_true", help="Do S/S+B weighted plot")
+  parser.add_option("--loadWeights", dest="loadWeights", default='', help="JSON file storing category weights")
+  parser.add_option("--saveWeights", dest="saveWeights", default=False, action='store_true', help="Save category weights to json file")
   parser.add_option("--parameterMap", dest="parameterMap", default=None, help="Comma separated pairs of model parameters:values,...")
   parser.add_option("--ext", dest="ext", default='', help="Extension for saving")
   parser.add_option("--mass", dest="mass", default=None, help="Higgs mass")
@@ -46,8 +52,6 @@ def get_options():
   parser.add_option("--problematicCats", dest="problematicCats", default='', help='Problematic analysis categories to skip when processing all')
   return parser.parse_args()
 (opt,args) = get_options()
-
-
 
 # Open WS
 if opt.inputWSFile is not None:
@@ -71,87 +75,179 @@ blindingRegion = [float(opt.blindingRegion.split(",")[0]),float(opt.blindingRegi
 # Define xvariable and categories
 if opt.mass is not None: w.var("MH").setVal(float(opt.mass))
 xvar = w.var(opt.xvar.split(",")[0]) 
+weight = ROOT.RooRealVar("weight","weight",0)
 xvar.SetTitle(opt.xvar.split(",")[1])
 xvar.setPlotLabel(opt.xvar.split(",")[1])
 xvar.setUnit(opt.xvar.split(",")[2])
 xvar_arglist, xvar_argset = ROOT.RooArgList(xvar), ROOT.RooArgSet(xvar)
+wxvar_arglist, wxvar_argset = ROOT.RooArgList(xvar,weight), ROOT.RooArgSet(xvar,weight)
 chan = w.cat("CMS_channel")
 # Extract the total SB/B models
 sb_model, b_model = w.pdf("model_s"), w.pdf("model_b")
 
-# Extract dataset for opt.cat
+# Extract dataset for opt.cats
 d_obs = w.data("data_obs")
 data_cats = OrderedDict()
-print " --> Extracting datasets"
+wdata_cats = OrderedDict()
 for cidx in range(chan.numTypes()):
   chan.setIndex(cidx)
-  if(opt.cat!='all')&(chan.getLabel()!=opt.cat): continue
+  if(opt.cats!='all')&(chan.getLabel() not in opt.cats.split(",")): continue
   data_cats[chan.getLabel()] = ROOT.RooDataSet("d_%s"%chan.getLabel(),"d_%s"%chan.getLabel(),xvar_argset)
+  wdata_cats[chan.getLabel()] = ROOT.RooDataSet("wd_%s"%chan.getLabel(),"wd_%s"%chan.getLabel(),wxvar_argset,"weight")
+
+# Define cateogries
+cats = data_cats.keys()
+
+# Load cat weights from json file if specified
+if opt.loadWeights != '':
+  print " --> Loading category S/S+B weights from json file: %s"%opt.loadWeights
+  with open(opt.loadWeights) as jsonfile: catsWeights = json.load(jsonfile)
+  # Check all cats are in loaded weights file
+  for c in cats:
+    if c not in catsWeights: 
+      print " --> [ERROR] category %s is not in S/S+B weights json. Leaving..."
+      sys.exit(1)
+else:
+  # Loop over categories to extract weights
+  catsWeights = {}
+  # If option doCatWeights: first extract S/S+B weights for each category
+  if opt.doCatWeights:
+    print " --> Extracting S/S+B weights for categories"
+    Stot, Swtot = 0, 0
+    for cidx in range(len(cats)):
+      c = cats[cidx]
+      if c in opt.problematicCats.split(","): continue
+      sbpdf, bpdf = sb_model.getPdf(c), b_model.getPdf(c)
+      h_sbpdf_tmp = sbpdf.createHistogram("h_sb_tmp_pdfNBins_%s"%c,xvar,ROOT.RooFit.Binning(opt.pdfNBins))
+      h_bpdf_tmp = bpdf.createHistogram("h_b_tmp_pdfNBins_%s"%c,xvar,ROOT.RooFit.Binning(opt.pdfNBins))
+      # Calculate yields
+      SB, B = sbpdf.expectedEvents(xvar_argset), bpdf.expectedEvents(xvar_argset)
+      S = SB-B 
+      # If option doBkfRenormalization: renormalize B pdf to be S+B-S
+      if opt.doBkgRenormalization:
+	Bcorr = B-S
+	SBcorr = B
+	normFactor_B, normFactor_SB = Bcorr/B, SBcorr/SB
+	h_sbpdf_tmp.Scale(normFactor_SB)
+	h_bpdf_tmp.Scale(normFactor_B)
+	B = Bcorr # set new bkg yield
+      # Make signal pdf
+      h_spdf_tmp = h_sbpdf_tmp-h_bpdf_tmp
+
+      # Extract effSigma for signal model
+      effSigma = getEffSigma(h_spdf_tmp) 
+      # Calculate S/B yields in +-1sigma of peak
+      rangeName = "effSigma_%s"%c
+      xvar.setRange(rangeName,w.var("MH").getVal()-effSigma,w.var("MH").getVal()+effSigma)
+      Beff = bpdf.createIntegral(xvar_argset,xvar_argset,rangeName).getVal()*B
+      Seff = math.erf(1./math.sqrt(2))*S
+      # Caclualte weight for cat
+      wcat = Seff/(Seff+Beff)
+      catsWeights[c] = wcat
+      print "   * %s: S = %.2f, B = %.2f --> S_eff = %.2f, B_eff = %.2f"%(c,S,B,Seff,Beff)
+      Stot += S
+      Swtot += S*wcat
+    # Renormalise to nominal signal yield
+    for c in cats: catsWeights[c] *= (Stot/Swtot)
+    # Save cat weights if specified
+    if opt.saveWeights:
+      print "      * Saving S/S+B weights to json file: ./jsons/catsWeights_sospb%s.json"%opt.ext
+      if not os.path.isdir("./jsons"): os.system("mkdir ./jsons")
+      with open("./jsons/catsWeights_sospb%s.json"%opt.ext,'w') as jsonfile: json.dump(catsWeights,jsonfile)
+
+# Fill datasets
+print " --> Extracting datasets"
 # Loop over bins and add entry for each "weight" to cat datasets 
 for i in range(d_obs.numEntries()):
   p = d_obs.get(i)
-  if(opt.cat!='all')&(p.getCatLabel("CMS_channel")!=opt.cat): continue
+  if(opt.cats!='all')&(p.getCatLabel("CMS_channel") not in opt.cats.split(",")): continue
   nent = int(d_obs.weight())
   for ient in range(nent): data_cats[p.getCatLabel("CMS_channel")].add(p)
+  if opt.doCatWeights: 
+    for ient in range(nent): wdata_cats[p.getCatLabel("CMS_channel")].add(p,catsWeights[p.getCatLabel("CMS_channel")])
 
-# Loop over categories
-cats = data_cats.keys()
-catsWeights = {}
-# If option doWeightedPlot: first extract S/S+B weights for each category
-if "RECO" in opt.cat:
-#if(opt.cat =='all')&(opt.doWeightedPlot):
-  print " --> Extracting S/S+B weights for categories"
-  Stot, Swtot = 0, 0
-  for cidx in range(len(cats)):
-    c = cats[cidx]
-    d = data_cats[c]
-    if c in opt.problematicCats.split(","): continue
-    sbpdf, bpdf = sb_model.getPdf(c), b_model.getPdf(c)
-    h_sbpdf_tmp = sbpdf.createHistogram("h_sb_tmp_pdfNBins_%s"%c,xvar,ROOT.RooFit.Binning(opt.pdfNBins))
-    h_bpdf_tmp = bpdf.createHistogram("h_b_tmp_pdfNBins_%s"%c,xvar,ROOT.RooFit.Binning(opt.pdfNBins))
-    # Calculate yields
-    SB, B = sbpdf.expectedEvents(xvar_argset), bpdf.expectedEvents(xvar_argset)
-    S = SB-B 
-    # If option doBkfRenormalization: renormalize B pdf to be S+B-S
-    if opt.doBkgRenormalization:
-      Bcorr = B-S
-      SBcorr = B
-      normFactor_B, normFactor_SB = Bcorr/B, SBcorr/SB
-      h_sbpdf_tmp.Scale(normFactor_SB)
-      h_bpdf_tmp.Scale(normFactor_B)
-      B = Bcorr # set new bkg yield
-    # Make signal pdf
-    h_spdf_tmp = h_sbpdf_tmp-h_bpdf_tmp
+# if opt.doBands: make dataframe storing toy yields in each bin
+if opt.doBands:
+  if opt.loadToyYields != '':
+    print " --> Loading toy yields for +-1/2sigma bands from %s"%opt.loadToyYields
+    with open(opt.loadToyYields,"rb") as fD: df_bands = pickle.load(fD)
+  else:
+    print " --> Extracting toy yields for +-1/2sigma bands"
+    # Define columns
+    _columns = []
+    for cat in cats:
+      for ibin in range(1,opt.nBins+1): 
+	_columns.append("%s_%g"%(cat,ibin))
+    if opt.doSumCategories: 
+      for ibin in range(1,opt.nBins+1):_columns.append("sum_%g"%ibin)
+      if opt.doCatWeights: 
+	for ibin in range(1,opt.nBins+1):_columns.append("wsum_%g"%ibin)
+    # Create dataframe
+    df_bands = pd.DataFrame(columns=_columns)
+    # Loop over toys file and add row for each toy dataset
+    toyFiles = glob.glob("./SplusBModels%s/toys/toy_*.root"%opt.ext)
+    if len(toyFiles) == 0:
+      print "     * [ERROR] No toys files of form ./SplusBModels%s/toys/toy_*.root. Skipping bands"%opt.ext
+      opt.doBands = False
+    else:
+      for tidx in range(len(toyFiles)):
+        print " [DEBUG] toys processed = (%g/%g)"%(tidx,len(toyFiles))
+	ftoy = ROOT.TFile(toyFiles[tidx])
+	toy = ftoy.Get("toys/toy_asimov")
+	# Save bin contents in dict
+	values = {}
+	# Add columns for summing categories
+	if opt.doSumCategories:
+	  for ibin in range(1,opt.nBins+1): values['sum_%g'%ibin] = 0
+	  if opt.doCatWeights:
+	    for ibin in range(1,opt.nBins+1): values['wsum_%g'%ibin] = 0
+	# Loop over cats
+	for cidx in range(chan.numTypes()):
+	  chan.setIndex(cidx)
+	  c = chan.getLabel()
+	  if( opt.cats == 'all' )|( c in opt.cats.split(",") ):
+	    dtoy = toy.reduce("CMS_channel==CMS_channel::%g"%(cidx))
+	    htoy = xvar.createHistogram("h_%s"%c,ROOT.RooFit.Binning(opt.nBins))
+	    dtoy.fillHistogram(htoy,xvar_arglist)
+	    for ibin in range(1,htoy.GetNbinsX()+1): 
+	      v = htoy.GetBinContent(ibin)
+	      values['%s_%g'%(c,ibin)] = v
+	      if opt.doSumCategories:
+		values['sum_%g'%ibin] += v
+		if opt.doCatWeights: values['wsum_%g'%ibin] += v*catsWeights[c]
+	    # Clear memory
+	    htoy.Delete()
+	    dtoy.Delete()
+	# Add values to dataframe
+	df_bands.loc[tidx] = values
+      # Savin toy yields dataframe to pickle file
+      if opt.saveToyYields:
+        print "      * Saving toy yields to: SplusBModels%s/toyYields.pkl"%opt.ext
+        with open("SplusBModels%s/toyYields.pkl"%opt.ext,"w") as fD: pickle.dump(df_bands,fD)
 
-    # Extract effSigma for signal model
-    effSigma = getEffSigma(h_spdf_tmp) 
-    # Calculate S/B yields in +-1sigma of peak
-    rangeName = "effSigma_%s"%c
-    xvar.setRange(rangeName,w.var("MH").getVal()-effSigma,w.var("MH").getVal()+effSigma)
-    Beff = bpdf.createIntegral(xvar_argset,xvar_argset,rangeName).getVal()*B
-    Seff = math.erf(1./math.sqrt(2))*S
-    # Caclualte weight for cat
-    wcat = Seff/(Seff+Beff)
-    catsWeights[c] = wcat
-    Stot += S
-    Swtot += S*wcat
-  for c in cats: catsWeights[c] *= (Stot/Swtot)
-
+# Process each category separately
 for cidx in range(len(cats)):
   c = cats[cidx]
   d = data_cats[c]
+  wd = wdata_cats[c]
   if c in opt.problematicCats.split(","): continue
   print " --> Processing category: %s"%c
 
-  # Create data histogram
+  # Create data histogram (+weighted)
   print "    * creating data histogram"
   h_data = xvar.createHistogram("h_data_%s"%c, ROOT.RooFit.Binning(opt.nBins))
   h_data.SetBinErrorOption(ROOT.TH1.kPoisson)
   if opt.unblind: d.fillHistogram(h_data,xvar_arglist)
   else: d.reduce("%s<%f|%s>%f"%(xvar.GetName(),blindingRegion[0],xvar.GetName(),blindingRegion[1])).fillHistogram(h_data,xvar_arglist)
+  if opt.doCatWeights:
+    h_wdata = xvar.createHistogram("h_wdata_%s"%c, ROOT.RooFit.Binning(opt.nBins))
+    h_wdata.SetBinErrorOption(ROOT.TH1.kPoisson)
+    if opt.unblind: wd.fillHistogram(h_wdata,xvar_arglist)
+    else: wd.reduce("%s<%f|%s>%f"%(xvar.GetName(),blindingRegion[0],xvar.GetName(),blindingRegion[1])).fillHistogram(h_wdata,xvar_arglist)
 
   # Scale data histogram
   h_data.Scale(opt.dataScaler)
+  if opt.doCatWeights: h_wdata.Scale(opt.dataScaler)
 
   # If option doZeroes: add error of +-unity for zero bins
   if opt.doZeroes:
@@ -159,7 +255,9 @@ for cidx in range(len(cats)):
       bcenter = h_data.GetBinCenter(ibin)
       # Skip blinded region
       if( not opt.unblind )&(bcenter > blindingRegion[0])&(bcenter < blindingRegion[1]): continue 
-      if h_data.GetBinContent(ibin)==0.: h_data.SetBinError(ibin,1)
+      if h_data.GetBinContent(ibin)==0.: 
+        h_data.SetBinError(ibin,1)
+        if opt.doCatWeights: h_wdata.SetBinError(ibin,catsWeights[c])
 
   # Extract pdfs for category and create histograms
   print "    * creating pdf histograms: S+B, B"
@@ -197,7 +295,16 @@ for cidx in range(len(cats)):
     for h_ipdf in [h_sbpdf,h_bpdf,h_spdf]:
       for h in h_ipdf.itervalues(): h.Scale(float(xvar_range)/opt.nBins)
 
-  # Create ratio histograms
+  # Create weighted pdf histograms
+  if opt.doCatWeights:
+    print "     * creating S/S+B weighted pdf histograms"
+    h_wsbpdf = {'pdfNBins':h_sbpdf['pdfNBins'].Clone(),'nBins':h_sbpdf['nBins'].Clone()}
+    h_wbpdf = {'pdfNBins':h_bpdf['pdfNBins'].Clone(),'nBins':h_bpdf['nBins'].Clone()}
+    h_wspdf = {'pdfNBins':h_spdf['pdfNBins'].Clone(),'nBins':h_spdf['nBins'].Clone()}
+    for h_ipdf in [h_wsbpdf,h_wbpdf,h_wspdf]:
+      for h in h_ipdf.itervalues(): h.Scale(catsWeights[c])
+  
+  # Create ratio histograms (+weighted)
   print "    * creating ratio histograms"
   h_bpdf_ratio = h_bpdf['pdfNBins']-h_bpdf['pdfNBins']
   h_spdf_ratio = h_spdf['pdfNBins'].Clone()
@@ -210,32 +317,62 @@ for cidx in range(len(cats)):
     bkgval = h_bpdf['nBins'].GetBinContent(ibin)
     h_data_ratio.SetBinContent(ibin,bval-bkgval)
     h_data_ratio.SetBinError(ibin,berr)
+  if opt.doCatWeights:
+    h_wbpdf_ratio = h_wbpdf['pdfNBins']-h_wbpdf['pdfNBins']
+    h_wspdf_ratio = h_wspdf['pdfNBins'].Clone()
+    h_wdata_ratio = h_wdata.Clone()
+    h_wdata_ratio.Reset()
+    for ibin in range(1,h_wdata.GetNbinsX()+1):
+      bcenter = h_wdata.GetBinCenter(ibin)
+      if(not opt.unblind)&(bcenter>blindingRegion[0])&(bcenter<blindingRegion[1]): continue
+      wbval, wberr = h_wdata.GetBinContent(ibin), h_wdata.GetBinError(ibin)
+      wbkgval = h_wbpdf['nBins'].GetBinContent(ibin)
+      h_wdata_ratio.SetBinContent(ibin,wbval-wbkgval)
+      h_wdata_ratio.SetBinError(ibin,wberr)
 
-  # Sum histograms if processing all categories
-  if opt.cat == 'all':
-    print "    * adding histogram to sum"
-    if cidx == 0:
-      h_data_all = h_data.Clone()
-      h_data_ratio_all = h_data_ratio.Clone()
-      h_sbpdf_all = {'pdfNBins':h_sbpdf['pdfNBins'].Clone(),'nBins':h_sbpdf['nBins'].Clone()}
-      h_bpdf_all = {'pdfNBins':h_bpdf['pdfNBins'].Clone(),'nBins':h_bpdf['nBins'].Clone()}
-      h_bpdf_ratio_all = h_bpdf_ratio.Clone()
-      h_spdf_all = {'pdfNBins':h_spdf['pdfNBins'].Clone(),'nBins':h_spdf['nBins'].Clone()}
-      h_spdf_ratio_all = h_spdf_ratio.Clone()
-    else:
-      h_data_all += h_data.Clone()
-      h_data_ratio_all += h_data_ratio.Clone()
-      for b,h in h_sbpdf.iteritems(): h_sbpdf_all[b] += h.Clone()
-      for b,h in h_bpdf.iteritems(): h_bpdf_all[b] += h.Clone()
-      h_bpdf_ratio_all += h_bpdf_ratio.Clone()
-      for b,h in h_spdf.iteritems(): h_spdf_all[b] += h.Clone()
-      h_spdf_ratio_all += h_spdf_ratio.Clone()
+  # Sum histograms if processing multiple categories
+  if( len(opt.cats.split(",")) > 1 )|( opt.cats == 'all' ):
+    if opt.doSumCategories:
+      print "    * adding histogram to sum"
+      if cidx == 0:
+	h_data_sum = h_data.Clone()
+	h_data_ratio_sum = h_data_ratio.Clone()
+	h_sbpdf_sum = {'pdfNBins':h_sbpdf['pdfNBins'].Clone(),'nBins':h_sbpdf['nBins'].Clone()}
+	h_bpdf_sum = {'pdfNBins':h_bpdf['pdfNBins'].Clone(),'nBins':h_bpdf['nBins'].Clone()}
+	h_bpdf_ratio_sum = h_bpdf_ratio.Clone()
+	h_spdf_sum = {'pdfNBins':h_spdf['pdfNBins'].Clone(),'nBins':h_spdf['nBins'].Clone()}
+	h_spdf_ratio_sum = h_spdf_ratio.Clone()
+        if opt.doCatWeights:
+	  h_wdata_sum = h_wdata.Clone()
+	  h_wdata_ratio_sum = h_wdata_ratio.Clone()
+	  h_wsbpdf_sum = {'pdfNBins':h_wsbpdf['pdfNBins'].Clone(),'nBins':h_wsbpdf['nBins'].Clone()}
+	  h_wbpdf_sum = {'pdfNBins':h_wbpdf['pdfNBins'].Clone(),'nBins':h_wbpdf['nBins'].Clone()}
+	  h_wbpdf_ratio_sum = h_wbpdf_ratio.Clone()
+	  h_wspdf_sum = {'pdfNBins':h_wspdf['pdfNBins'].Clone(),'nBins':h_wspdf['nBins'].Clone()}
+	  h_wspdf_ratio_sum = h_wspdf_ratio.Clone()
+      else:
+	h_data_sum += h_data.Clone()
+	h_data_ratio_sum += h_data_ratio.Clone()
+	for b,h in h_sbpdf.iteritems(): h_sbpdf_sum[b] += h.Clone()
+	for b,h in h_bpdf.iteritems(): h_bpdf_sum[b] += h.Clone()
+	h_bpdf_ratio_sum += h_bpdf_ratio.Clone()
+	for b,h in h_spdf.iteritems(): h_spdf_sum[b] += h.Clone()
+	h_spdf_ratio_sum += h_spdf_ratio.Clone()
+        if opt.doCatWeights:
+	  h_wdata_sum += h_wdata.Clone()
+	  h_wdata_ratio_sum += h_wdata_ratio.Clone()
+	  for b,h in h_wsbpdf.iteritems(): h_wsbpdf_sum[b] += h.Clone()
+	  for b,h in h_wbpdf.iteritems(): h_wbpdf_sum[b] += h.Clone()
+	  h_wbpdf_ratio_sum += h_wbpdf_ratio.Clone()
+	  for b,h in h_wspdf.iteritems(): h_wspdf_sum[b] += h.Clone()
+	  h_wspdf_ratio_sum += h_wspdf_ratio.Clone()
 
   # Make plot for individual cats
   if not opt.skipIndividualCatPlots:
     print "    * making plot"
     if not os.path.isdir("./SplusBModels%s"%(opt.ext)): os.system("mkdir ./SplusBModels%s"%(opt.ext))
-    makeSplusBPlot(w,h_data,h_sbpdf,h_bpdf,h_spdf,h_data_ratio,h_bpdf_ratio,h_spdf_ratio,c,opt)
+    if opt.doBands: makeSplusBPlot(w,h_data,h_sbpdf,h_bpdf,h_spdf,h_data_ratio,h_bpdf_ratio,h_spdf_ratio,c,opt,df_bands)
+    else: makeSplusBPlot(w,h_data,h_sbpdf,h_bpdf,h_spdf,h_data_ratio,h_bpdf_ratio,h_spdf_ratio,c,opt)
 
   # Delete histograms
   h_data.Delete()
@@ -245,10 +382,25 @@ for cidx in range(len(cats)):
   h_bpdf_ratio.Delete()
   for h in h_spdf.itervalues(): h.Delete()
   h_spdf_ratio.Delete()
+  if opt.doCatWeights:
+    h_wdata.Delete()
+    h_wdata_ratio.Delete()
+    for h in h_wsbpdf.itervalues(): h.Delete()
+    for h in h_wbpdf.itervalues(): h.Delete()
+    h_wbpdf_ratio.Delete()
+    for h in h_wspdf.itervalues(): h.Delete()
+    h_wspdf_ratio.Delete()
+  print "    * finished processing\n"
   print "    * finished processing\n"
 
 # Finished processing individual categories: if all then plot all
-if opt.cat == 'all':
-  if not os.path.isdir("./SplusBModels%s"%(opt.ext)): os.system("mkdir ./SplusBModels%s"%(opt.ext))
-  print " --> Making plot for all categories"
-  makeSplusBPlot(w,h_data_all,h_sbpdf_all,h_bpdf_all,h_spdf_all,h_data_ratio_all,h_bpdf_ratio_all,h_spdf_ratio_all,'all',opt)
+if( len(opt.cats.split(",")) > 1 )|( opt.cats == 'all' ):
+  if opt.doSumCategories:
+    if not os.path.isdir("./SplusBModels%s"%(opt.ext)): os.system("mkdir ./SplusBModels%s"%(opt.ext))
+    print " --> Making plot for sum of categories"
+    if opt.doBands: makeSplusBPlot(w,h_data_sum,h_sbpdf_sum,h_bpdf_sum,h_spdf_sum,h_data_ratio_sum,h_bpdf_ratio_sum,h_spdf_ratio_sum,'all',opt, df_bands)
+    else: makeSplusBPlot(w,h_data_sum,h_sbpdf_sum,h_bpdf_sum,h_spdf_sum,h_data_ratio_sum,h_bpdf_ratio_sum,h_spdf_ratio_sum,'all',opt)
+    if opt.doCatWeights:
+      print " --> Making weighted plot for sum of categories"
+      if opt.doBands: makeSplusBPlot(w,h_wdata_sum,h_wsbpdf_sum,h_wbpdf_sum,h_wspdf_sum,h_wdata_ratio_sum,h_wbpdf_ratio_sum,h_wspdf_ratio_sum,'wall',opt, df_bands)
+      else: makeSplusBPlot(w,h_wdata_sum,h_wsbpdf_sum,h_wbpdf_sum,h_wspdf_sum,h_wdata_ratio_sum,h_wbpdf_ratio_sum,h_wspdf_ratio_sum,'wall',opt)

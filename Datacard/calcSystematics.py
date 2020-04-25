@@ -140,7 +140,7 @@ def calcSystYields(_nominalDataName,_inputWS,_systFactoryTypes,skipCOWCorr=True)
         else: centralWeightStr = "centralObjectWeight"
 
         # FIXME: temporary fix to avoid non/wrong entries in tH/bbH
-        if("tHq" in _nominalDataName)|("bbH" in _nominalDataName): 
+        if("tHq" in _nominalDataName)|("tHW" in _nominalDataName)|("bbH" in _nominalDataName): 
           systYields[s] += w
           if not skipCOWCorr: systYields["%s_COWCorr"%s] += w
         else:
