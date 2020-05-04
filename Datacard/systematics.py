@@ -71,6 +71,20 @@ theory_systematics = [
                 {'name':'scaleWeight_8','title':'CMS_hgg_scaleWeight_8','type':'factory','prior':'lnN','correlateAcrossYears':1,'tiers':['shape','mnorm']},
                 {'name':'alphaSWeight_0','title':'CMS_hgg_alphaSWeight_0','type':'factory','prior':'lnN','correlateAcrossYears':1,'tiers':['shape']},
                 {'name':'alphaSWeight_1','title':'CMS_hgg_alphaSWeight_1','type':'factory','prior':'lnN','correlateAcrossYears':1,'tiers':['shape']},
+
+                # Theory uncertainties for constrained to SM bins
+                {'name':'THU_qqH_Yield_qqH_cnstr','title':'THU_qqH_Yield_qqH_cnstr','type':'constant','prior':'lnN','correlateAcrossYears':1,'value':'theory_uncertainties/thu_qqh_stxs_constrain.json'},
+                {'name':'THU_qqH_PTH200_qqH_cnstr','title':'THU_qqH_PTH200_qqH_cnstr','type':'constant','prior':'lnN','correlateAcrossYears':1,'value':'theory_uncertainties/thu_qqh_stxs_constrain.json'},
+                {'name':'THU_qqH_MJJ60_qqH_cnstr','title':'THU_qqH_MJJ60_qqH_cnstr','type':'constant','prior':'lnN','correlateAcrossYears':1,'value':'theory_uncertainties/thu_qqh_stxs_constrain.json'},
+                {'name':'THU_qqH_MJJ120_qqH_cnstr','title':'THU_qqH_MJJ120_qqH_cnstr','type':'constant','prior':'lnN','correlateAcrossYears':1,'value':'theory_uncertainties/thu_qqh_stxs_constrain.json'},
+                {'name':'THU_qqH_MJJ350_qqH_cnstr','title':'THU_qqH_MJJ350_qqH_cnstr','type':'constant','prior':'lnN','correlateAcrossYears':1,'value':'theory_uncertainties/thu_qqh_stxs_constrain.json'},
+                {'name':'THU_qqH_MJJ700_qqH_cnstr','title':'THU_qqH_MJJ700_qqH_cnstr','type':'constant','prior':'lnN','correlateAcrossYears':1,'value':'theory_uncertainties/thu_qqh_stxs_constrain.json'},
+                {'name':'THU_qqH_MJJ1000_qqH_cnstr','title':'THU_qqH_MJJ1000_qqH_cnstr','type':'constant','prior':'lnN','correlateAcrossYears':1,'value':'theory_uncertainties/thu_qqh_stxs_constrain.json'},
+                {'name':'THU_qqH_MJJ1500_qqH_cnstr','title':'THU_qqH_MJJ1500_qqH_cnstr','type':'constant','prior':'lnN','correlateAcrossYears':1,'value':'theory_uncertainties/thu_qqh_stxs_constrain.json'},
+                {'name':'THU_qqH_PTHJJ25_qqH_cnstr','title':'THU_qqH_PTHJJ25_qqH_cnstr','type':'constant','prior':'lnN','correlateAcrossYears':1,'value':'theory_uncertainties/thu_qqh_stxs_constrain.json'},
+                {'name':'THU_qqH_JET01_qqH_cnstr','title':'THU_qqH_JET01_qqH_cnstr','type':'constant','prior':'lnN','correlateAcrossYears':1,'value':'theory_uncertainties/thu_qqh_stxs_constrain.json'},
+                {'name':'pdf_Higgs_qqH_cnstr','title':'pdf_Higgs_qqH_cnstr','type':'constant','prior':'lnN','correlateAcrossYears':1,'value':'theory_uncertainties/thu_qqh_stxs_constrain.json'},
+                {'name':'alphaS_qqH_cnstr','title':'alphaS_qqH_cnstr','type':'constant','prior':'lnN','correlateAcrossYears':1,'value':'theory_uncertainties/thu_qqh_stxs_constrain.json'}
               ]
 for i in range(1,60): theory_systematics.append( {'name':'pdfWeight_%g'%i, 'title':'CMS_hgg_pdfWeight_%g'%i, 'type':'factory','prior':'lnN','correlateAcrossYears':1,'tiers':['shape']} )
 
@@ -99,6 +113,7 @@ experimental_systematics = [
                 {'name':'ElectronRecoWeight','title':'CMS_hgg_ElectronReco','type':'factory','prior':'lnN','correlateAcrossYears':0},
                 {'name':'JetBTagCutWeight','title':'CMS_hgg_BTagCut','type':'factory','prior':'lnN','correlateAcrossYears':0},
                 {'name':'JetBTagReshapeWeight','title':'CMS_hgg_BTagReshape','type':'factory','prior':'lnN','correlateAcrossYears':0},
+                {'name':'prefireWeight','title':'CMS_hgg_prefire','type':'factory','prior':'lnN','correlateAcrossYears':0},
                 {'name':'SigmaEOverEShift','title':'CMS_hgg_SigmaEOverEShift','type':'factory','prior':'lnN','correlateAcrossYears':0},
                 {'name':'MvaShift','title':'CMS_hgg_phoIdMva','type':'factory','prior':'lnN','correlateAcrossYears':1},
                 {'name':'PUJIDShift','title':'CMS_hgg_PUJIDShift','type':'factory','prior':'lnN','correlateAcrossYears':0},

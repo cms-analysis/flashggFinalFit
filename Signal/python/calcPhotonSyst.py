@@ -147,8 +147,10 @@ def getSigmaVar(_hists):
 def getRateVar(_hists):
   rate, rateVar = {}, {}
   for htype,h in _hists.iteritems(): rate[htype] = h.Integral()
-  if rate['nominal']==0: return 0
-  for htype in ['up','down']: rateVar[htype] = (rate[htype]-rate['nominal'])/rate['nominal']
+  # FIXME: shape variations can both be one sided therefore use midpoint as nominal
+  rate['midpoint'] = 0.5*(rate['up']+rate['down'])
+  if rate['midpoint']==0: return 0
+  for htype in ['up','down']: rateVar[htype] = (rate[htype]-rate['midpoint'])/rate['midpoint']
   x = (abs(rateVar['up'])+abs(rateVar['down']))/2
   if x!=x: return 0
   else: return min(x,opt.thresholdRate)

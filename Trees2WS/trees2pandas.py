@@ -10,7 +10,9 @@ import uproot
 import pickle
 
 # List of main variables to be stored in dataFrame: dZ and central
-main_var = ["CMS_hgg_mass*","weight","stage1p2bin","*sigma"]
+main_var = ["CMS_hgg_mass*","weight","stage1p2bin","centralObjectWeight","dZ","*sigma"]
+main_var_nnlops = ["CMS_hgg_mass*","weight","stage1p2bin","centralObjectWeight","dZ","*sigma","NNLOPSweight"]
+main_var_notag = ["CMS_hgg_mass*","weight","stage1p2bin","*sigma"]
 # Array columns to be treated separately
 array_columns = {'alphaSWeights':2,'scaleWeights':9,'pdfWeights':60}
 columns = {}
@@ -23,18 +25,6 @@ shapeSysts = ['FNUFEB', 'FNUFEE', 'JECAbsoluteYEAR', 'JECAbsolute', 'JECBBEC1YEA
 syst_var = ["CMS_hgg_mass","weight","stage1p2bin"]
 
 cats = ['RECO_0J_PTH_0_10_Tag0', 'RECO_0J_PTH_0_10_Tag1', 'RECO_0J_PTH_0_10_Tag2', 'RECO_0J_PTH_GT10_Tag0', 'RECO_0J_PTH_GT10_Tag1', 'RECO_0J_PTH_GT10_Tag2', 'RECO_1J_PTH_0_60_Tag0', 'RECO_1J_PTH_0_60_Tag1', 'RECO_1J_PTH_0_60_Tag2', 'RECO_1J_PTH_120_200_Tag0', 'RECO_1J_PTH_120_200_Tag1', 'RECO_1J_PTH_120_200_Tag2', 'RECO_1J_PTH_60_120_Tag0', 'RECO_1J_PTH_60_120_Tag1', 'RECO_1J_PTH_60_120_Tag2', 'RECO_GE2J_PTH_0_60_Tag0', 'RECO_GE2J_PTH_0_60_Tag1', 'RECO_GE2J_PTH_0_60_Tag2', 'RECO_GE2J_PTH_120_200_Tag0', 'RECO_GE2J_PTH_120_200_Tag1', 'RECO_GE2J_PTH_120_200_Tag2', 'RECO_GE2J_PTH_60_120_Tag0', 'RECO_GE2J_PTH_60_120_Tag1', 'RECO_GE2J_PTH_60_120_Tag2', 'RECO_PTH_200_300_Tag0', 'RECO_PTH_200_300_Tag1', 'RECO_PTH_300_450_Tag0', 'RECO_PTH_300_450_Tag1', 'RECO_PTH_450_650_Tag0', 'RECO_PTH_GT650_Tag0', 'RECO_THQ_LEP', 'RECO_TTH_HAD_PTH_0_60_Tag0', 'RECO_TTH_HAD_PTH_0_60_Tag1', 'RECO_TTH_HAD_PTH_0_60_Tag2', 'RECO_TTH_HAD_PTH_0_60_Tag3', 'RECO_TTH_HAD_PTH_120_200_Tag0', 'RECO_TTH_HAD_PTH_120_200_Tag1', 'RECO_TTH_HAD_PTH_120_200_Tag2', 'RECO_TTH_HAD_PTH_120_200_Tag3', 'RECO_TTH_HAD_PTH_60_120_Tag0', 'RECO_TTH_HAD_PTH_60_120_Tag1', 'RECO_TTH_HAD_PTH_60_120_Tag2', 'RECO_TTH_HAD_PTH_60_120_Tag3', 'RECO_TTH_HAD_PTH_GT200_Tag0', 'RECO_TTH_HAD_PTH_GT200_Tag1', 'RECO_TTH_HAD_PTH_GT200_Tag2', 'RECO_TTH_HAD_PTH_GT200_Tag3', 'RECO_TTH_LEP_PTH_0_60_Tag0', 'RECO_TTH_LEP_PTH_0_60_Tag1', 'RECO_TTH_LEP_PTH_0_60_Tag2', 'RECO_TTH_LEP_PTH_0_60_Tag3', 'RECO_TTH_LEP_PTH_120_200_Tag0', 'RECO_TTH_LEP_PTH_120_200_Tag1', 'RECO_TTH_LEP_PTH_60_120_Tag0', 'RECO_TTH_LEP_PTH_60_120_Tag1', 'RECO_TTH_LEP_PTH_GT200_Tag0', 'RECO_TTH_LEP_PTH_GT200_Tag1', 'RECO_VBFLIKEGGH_Tag0', 'RECO_VBFLIKEGGH_Tag1', 'RECO_VBFTOPO_BSM_Tag0', 'RECO_VBFTOPO_BSM_Tag1', 'RECO_VBFTOPO_JET3VETO_HIGHMJJ_Tag0', 'RECO_VBFTOPO_JET3VETO_HIGHMJJ_Tag1', 'RECO_VBFTOPO_JET3VETO_LOWMJJ_Tag0', 'RECO_VBFTOPO_JET3VETO_LOWMJJ_Tag1', 'RECO_VBFTOPO_JET3_HIGHMJJ_Tag0', 'RECO_VBFTOPO_JET3_HIGHMJJ_Tag1', 'RECO_VBFTOPO_JET3_LOWMJJ_Tag0', 'RECO_VBFTOPO_JET3_LOWMJJ_Tag1', 'RECO_VBFTOPO_VHHAD_Tag0', 'RECO_VBFTOPO_VHHAD_Tag1', 'RECO_VH_MET_Tag0', 'RECO_VH_MET_Tag1', 'RECO_WH_LEP_HIGH_Tag0', 'RECO_WH_LEP_HIGH_Tag1', 'RECO_WH_LEP_HIGH_Tag2', 'RECO_WH_LEP_LOW_Tag0', 'RECO_WH_LEP_LOW_Tag1', 'RECO_WH_LEP_LOW_Tag2', 'RECO_ZH_LEP_Tag0', 'RECO_ZH_LEP_Tag1', 'NOTAG'] 
-
-procToWSFileName = {
-  "ggh":"GluGluHToGG",
-  "vbf":"VBFHToGG",
-  "wh":"WHToGG",
-  "zh":"ZHToGG",
-  "tth":"ttHJetToGG",
-  "thq":"THQ_ctcvcp_HToGG",
-  "thw":"THW_ctcvcp_HToGG",
-  "ggzh":"ggZH_HToGG",
-  "bbh":"bbHToGG"
-}
 
 stxs_stage1p2_dict = {
   0:"UNKNOWN",
@@ -100,6 +90,7 @@ def get_options():
   parser = OptionParser()
   parser.add_option('--inputTreeFile',dest='inputTreeFile', default="/vols/cms/jl2117/hgg/ws/Feb20/trees/output_1.root", help='Input tree file')
   parser.add_option('--inputTreeDir',dest='inputTreeDir', default="tagsDumper/trees", help='Input tree file')
+  parser.add_option('--inputMass',dest='inputMass', default="125", help='Input mass')
   parser.add_option('--productionMode',dest='productionMode', default="ggh", help='Production mode [ggh,vbf,wh,zh,tth,thq,ggzh,bbh]')
   parser.add_option('--year',dest='year', default="2016", help='Year')
   parser.add_option('--decayExt',dest='decayExt', default='', help='Decay extension')
@@ -115,6 +106,8 @@ if opt.productionMode not in ['ggh','vbf','wh','zh','tth','thq','thw','ggzh','bb
 f = uproot.open(opt.inputTreeFile)
 # Extract id from input file
 f_id = re.sub(".root","",opt.inputTreeFile.split("_")[-1])
+# Extract file handle for output file
+f_out_name = "_".join(opt.inputTreeFile.split("/")[-1].split("_")[:-1])
 
 # Dataframe to store all events in file
 data = pandas.DataFrame()
@@ -122,28 +115,50 @@ data = pandas.DataFrame()
 # Extract events: loop over events
 for cat in cats:
   print " --> [VERBOSE] Extracting events from category: %s"%cat
-  treeName = "%s/%s_125_13TeV_%s"%(opt.inputTreeDir,opt.productionMode,cat)
+  treeName = "%s/%s_%s_13TeV_%s"%(opt.inputTreeDir,opt.productionMode,opt.inputMass,cat)
   # Extract tree from uproot
   t = f[treeName]
   if len(t) == 0: continue
-  # Convert tree to pandas dataFrame: do array columns separately
-  dfs_tomerge = {}
-  # TODO: fix as no theory weights in bbh or thw
-  if opt.productionMode not in  ["bbh","thw"]:
-    for ac, acNames in columns.iteritems(): 
-      dfs_tomerge[ac] = t.pandas.df(ac)
-      dfs_tomerge[ac].columns = acNames
-  dfs_tomerge['main'] = t.pandas.df(main_var)
-  # Merge all columns
-  df = pandas.concat( dfs_tomerge.values(), axis=1)
-  # Add column to specify "nominal"
-  df['type'] = 'nominal' if cat!='NOTAG' else 'notag'
-  # Add columns for dZ = 0 and central object weight (mean of LooseMVAShiftUp and LooseMVAShiftDown)
-  df['dZ'] = 0.
-  df['centralObjectWeight'] = df.apply(lambda x: 0.5*(x['LooseMvaSFUp01sigma']+x['LooseMvaSFDown01sigma']), axis=1) if cat!='NOTAG' else 1.
 
-  # Loop over shape systematic variations: extract dataframe with reduced variables
-  if cat != "NOTAG": # NOTAG does not include syst shifts
+  # Convert tree to pandas dataFrame: treat NOTAG differently as different variables
+  if cat == "NOTAG":
+    dfs_tomerge = {}
+    # No theory weights for bbh, thw and thq therefore skip
+    #if opt.productionMode not in  ["bbh","thw","thq"]:
+    # FIXME: also tth for now
+    if opt.productionMode not in  ["tth","bbh","thw","thq"]:
+      for ac, acNames in columns.iteritems(): 
+        dfs_tomerge[ac] = t.pandas.df(ac)
+        dfs_tomerge[ac].columns = acNames
+    # Add notag vars to dataframe
+    dfs_tomerge['main'] = t.pandas.df(main_var_notag) 
+    # Merge all columns
+    df = pandas.concat( dfs_tomerge.values(), axis=1)
+    # Add column to specify untagged 
+    df['type'] = 'notag'
+    # Add dummy columns for centralObjectWeight, dZ and NNLOPs
+    df['dZ'] = -1.
+    df['centralObjectWeight'] = df.apply(lambda x: 0.5*(x['THU_ggH_qmtopUp01sigma']+x['THU_ggH_qmtopDown01sigma']), axis=1)
+    df['NNLOPSweight'] = df.apply(lambda x: 0.5*(x['THU_ggH_qmtopUp01sigma']+x['THU_ggH_qmtopDown01sigma']), axis=1)
+  else:
+    dfs_tomerge = {}
+    # No theory weights for bbh, thw and thq therefore skip
+    #if opt.productionMode not in  ["bbh","thw","thq"]:
+    # FIXME: also tth for now
+    if opt.productionMode not in  ["tth","bbh","thw","thq"]:
+      for ac, acNames in columns.iteritems(): 
+	dfs_tomerge[ac] = t.pandas.df(ac)
+	dfs_tomerge[ac].columns = acNames
+    if opt.productionMode == "ggh": dfs_tomerge['main'] = t.pandas.df(main_var_nnlops)
+    else: dfs_tomerge['main'] = t.pandas.df(main_var)
+    # Merge all columns
+    df = pandas.concat( dfs_tomerge.values(), axis=1)
+    # Add column to specify "nominal"
+    df['type'] = 'nominal'
+    # If not ggH then add column for NNLOPS weight = 1
+    if opt.productionMode != "ggh": df['NNLOPSweight'] = 1.
+
+    # For tagged events: loop over shape systematic variations and extract dataframes with reduced variables
     print " --> [VERBOSE] Systematics from category: %s"%cat
     for s in shapeSysts:
       for direction in ['Up','Down']:
@@ -178,7 +193,7 @@ for b in data.stage1p2bin.unique():
   elif opt.productionMode == 'thw': stxsBin = re.sub("TH","THW",stxsBin)
   outputPickleDir = "/".join(opt.inputTreeFile.split("/")[:-1])+"/pickle_%s_%s"%(opt.productionMode,stxsBin)
   if not os.path.exists(outputPickleDir): os.system("mkdir %s"%outputPickleDir)
-  outputPickleFile = "%s/output_%s_M125_13TeV_amcatnloFXFX_pythia8_%s_%s.pkl"%(outputPickleDir,procToWSFileName[opt.productionMode],stxsBin,f_id)
+  outputPickleFile = "%s/%s_%s_%s.pkl"%(outputPickleDir,f_out_name,stxsBin,f_id)
   with open( outputPickleFile, "wb") as fout: pickle.dump( data[mask], fout )
   print " --> [VERBOSE] Written %s to file: %s"%(stxsBin,outputPickleFile)
   

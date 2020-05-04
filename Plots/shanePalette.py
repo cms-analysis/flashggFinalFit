@@ -43,6 +43,20 @@ def set_color_palette(name, alpha=1., ncontours=256):
         red   = [1.00, 49./256.]
         green = [1.00, 163./256.]
         blue  = [1.00, 84./256.]
+    elif name == "boring" :
+        nStop = 10
+        nc = nStop*1.
+        stops = [0.00, 1.00]
+        red   = [1.00, 1.00]
+        green = [1.00, 1.00]
+        blue  = [1.00, 1.00]
+    elif name == "jonno_flip" :
+        nStop = 10
+        nc = nStop*1.
+        stops = [0.0, 0.2, 0.4, 0.6, 0.8, 1.00]
+        red   = [0.0, 0.0, 0.0, 0.0, 0.0, 200./256]
+        green = [0.0, 100./256, 150./256, 200./256, 250./256, 1.00]
+        blue  = [250./256, 250./256, 250./256, 250./256, 250./256, 1.00]
     elif name == "ed_noice_mig" :
         nStop = 10
         nc = nStop*1.

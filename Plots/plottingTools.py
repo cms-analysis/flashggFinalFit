@@ -195,10 +195,13 @@ def makeSplusBPlot(workspace,hD,hSB,hB,hS,hDr,hBr,hSr,cat,options,dB=None,reduce
   lat0.DrawLatex(0.1,0.92,"#bf{CMS} #it{Preliminary}")
   lat0.DrawLatex(0.6,0.92,"137 fb^{-1} (13 TeV)")
   lat0.DrawLatex(0.6,0.8,"#scale[0.75]{%s}"%Translate(cat,translateCats))
-  lat0.DrawLatex(0.13,0.83,"#scale[0.75]{H#rightarrow#gamma#gamma}")
+  #lat0.DrawLatex(0.13,0.83,"#scale[0.75]{H#rightarrow#gamma#gamma}")
   if(options.loadSnapshot is not None):
-    muhat, mhhat = workspace.var("r").getVal(), workspace.var("MH").getVal()
-    lat0.DrawLatex(0.13,0.77,"#scale[0.75]{#hat{m}_{H} = %.1f GeV, #hat{#mu} = %.2f}"%(mhhat,muhat))
+    muhat_ggh, muhat_vbf, muhat_vh, muhat_top, mhhat = workspace.var("r_ggH").getVal(), workspace.var("r_VBF").getVal(), workspace.var("r_VH").getVal(), workspace.var("r_top").getVal(), workspace.var("MH").getVal()
+    lat0.DrawLatex(0.13,0.83,"#scale[0.75]{H#rightarrow#gamma#gamma, #hat{m}_{H} = %.1f GeV}"%mhhat)
+    lat0.DrawLatex(0.13,0.77,"#scale[0.6]{(#hat{#mu}_{ggH},#hat{#mu}_{VBF},#hat{#mu}_{VH},#hat{#mu}_{top}) = (%.2f,%.2f,%.2f,%.2f)}"%(muhat_ggh,muhat_vbf,muhat_vh,muhat_top))
+    #muhat, mhhat = workspace.var("r").getVal(), workspace.var("MH").getVal()
+    #lat0.DrawLatex(0.13,0.77,"#scale[0.75]{#hat{m}_{H} = %.1f GeV, #hat{#mu} = %.2f}"%(mhhat,muhat))
   elif options.parameterMap is not None:
     poiStr = ''
     for kv in options.parameterMap.split(","):

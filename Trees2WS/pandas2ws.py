@@ -95,6 +95,7 @@ ws_vars = [ # [name,default value, min value, max value, bins]
   {'name':"CMS_hgg_mass", 'default':125., 'minValue':100., 'maxValue':180., 'bins':160},
   {'name':"dZ", 'default':0, 'minValue':-20, 'maxValue':20, 'bins':40},
   {'name':"centralObjectWeight", 'default':1.0, 'minValue':-999999, 'maxValue':999999, 'bins':1},
+  {'name':"NNLOPSweight", 'default':1.0, 'minValue':-999999, 'maxValue':999999, 'bins':1},
   {'name':"LooseMvaSFUp01sigma", 'default':1.0, 'minValue':-999999, 'maxValue':999999, 'bins':1},
   {'name':"PreselSFUp01sigma", 'default':1.0, 'minValue':-999999, 'maxValue':999999, 'bins':1},
   {'name':"electronVetoSFUp01sigma", 'default':1.0, 'minValue':-999999, 'maxValue':999999, 'bins':1},
@@ -107,7 +108,7 @@ ws_vars = [ # [name,default value, min value, max value, bins]
   {'name':"MuonIsoWeightUp01sigma", 'default':1.0, 'minValue':-999999, 'maxValue':999999, 'bins':1},
   {'name':"JetBTagCutWeightUp01sigma", 'default':1.0, 'minValue':-999999, 'maxValue':999999, 'bins':1},
   {'name':"JetBTagReshapeWeightUp01sigma", 'default':1.0, 'minValue':-999999, 'maxValue':999999, 'bins':1},
-  {'name':"PrefireProbabilityUp01sigma", 'default':0, 'minValue':-999999, 'maxValue':999999, 'bins':1},
+  {'name':"prefireWeightUp01sigma", 'default':0, 'minValue':-999999, 'maxValue':999999, 'bins':1},
   {'name':"THU_ggH_MuUp01sigma", 'default':1.0, 'minValue':-999999, 'maxValue':999999, 'bins':1},
   {'name':"THU_ggH_ResUp01sigma", 'default':1.0, 'minValue':-999999, 'maxValue':999999, 'bins':1},
   {'name':"THU_ggH_Mig01Up01sigma", 'default':1.0, 'minValue':-999999, 'maxValue':999999, 'bins':1},
@@ -129,7 +130,7 @@ ws_vars = [ # [name,default value, min value, max value, bins]
   {'name':"MuonIsoWeightDown01sigma", 'default':1.0, 'minValue':-999999, 'maxValue':999999, 'bins':1},
   {'name':"JetBTagCutWeightDown01sigma", 'default':1.0, 'minValue':-999999, 'maxValue':999999, 'bins':1},
   {'name':"JetBTagReshapeWeightDown01sigma", 'default':1.0, 'minValue':-999999, 'maxValue':999999, 'bins':1},
-  {'name':"PrefireProbabilityDown01sigma", 'default':0, 'minValue':-999999, 'maxValue':999999, 'bins':1},
+  {'name':"prefireWeightDown01sigma", 'default':0, 'minValue':-999999, 'maxValue':999999, 'bins':1},
   {'name':"THU_ggH_MuDown01sigma", 'default':1.0, 'minValue':-999999, 'maxValue':999999, 'bins':1},
   {'name':"THU_ggH_ResDown01sigma", 'default':1.0, 'minValue':-999999, 'maxValue':999999, 'bins':1},
   {'name':"THU_ggH_Mig01Down01sigma", 'default':1.0, 'minValue':-999999, 'maxValue':999999, 'bins':1},
@@ -146,11 +147,11 @@ for ac, nWeights in array_columns.iteritems():
 
 # Define argsets to enter different levels of RooDataSets
 argSets = {
-  'nominal':'weight,CMS_hgg_mass,dZ,centralObjectWeight,LooseMvaSFUp01sigma,PreselSFUp01sigma,electronVetoSFUp01sigma,TriggerWeightUp01sigma,FracRVWeightUp01sigma,FracRVNvtxWeightUp01sigma,MuonIDWeightUp01sigma,ElectronIDWeightUp01sigma,ElectronRecoWeightUp01sigma,MuonIsoWeightUp01sigma,JetBTagCutWeightUp01sigma,JetBTagReshapeWeightUp01sigma,PrefireProbabilityUp01sigma,THU_ggH_MuUp01sigma,THU_ggH_ResUp01sigma,THU_ggH_Mig01Up01sigma,THU_ggH_Mig12Up01sigma,THU_ggH_VBF2jUp01sigma,THU_ggH_VBF3jUp01sigma,THU_ggH_PT60Up01sigma,THU_ggH_PT120Up01sigma,THU_ggH_qmtopUp01sigma,LooseMvaSFDown01sigma,PreselSFDown01sigma,electronVetoSFDown01sigma,TriggerWeightDown01sigma,FracRVWeightDown01sigma,FracRVNvtxWeightDown01sigma,MuonIDWeightDown01sigma,ElectronIDWeightDown01sigma,ElectronRecoWeightDown01sigma,MuonIsoWeightDown01sigma,JetBTagCutWeightDown01sigma,JetBTagReshapeWeightDown01sigma,PrefireProbabilityDown01sigma,THU_ggH_MuDown01sigma,THU_ggH_ResDown01sigma,THU_ggH_Mig01Down01sigma,THU_ggH_Mig12Down01sigma,THU_ggH_VBF2jDown01sigma,THU_ggH_VBF3jDown01sigma,THU_ggH_PT60Down01sigma,THU_ggH_PT120Down01sigma,THU_ggH_qmtopDown01sigma,pdfWeight_0,pdfWeight_1,pdfWeight_2,pdfWeight_3,pdfWeight_4,pdfWeight_5,pdfWeight_6,pdfWeight_7,pdfWeight_8,pdfWeight_9,pdfWeight_10,pdfWeight_11,pdfWeight_12,pdfWeight_13,pdfWeight_14,pdfWeight_15,pdfWeight_16,pdfWeight_17,pdfWeight_18,pdfWeight_19,pdfWeight_20,pdfWeight_21,pdfWeight_22,pdfWeight_23,pdfWeight_24,pdfWeight_25,pdfWeight_26,pdfWeight_27,pdfWeight_28,pdfWeight_29,pdfWeight_30,pdfWeight_31,pdfWeight_32,pdfWeight_33,pdfWeight_34,pdfWeight_35,pdfWeight_36,pdfWeight_37,pdfWeight_38,pdfWeight_39,pdfWeight_40,pdfWeight_41,pdfWeight_42,pdfWeight_43,pdfWeight_44,pdfWeight_45,pdfWeight_46,pdfWeight_47,pdfWeight_48,pdfWeight_49,pdfWeight_50,pdfWeight_51,pdfWeight_52,pdfWeight_53,pdfWeight_54,pdfWeight_55,pdfWeight_56,pdfWeight_57,pdfWeight_58,pdfWeight_59,scaleWeight_0,scaleWeight_1,scaleWeight_2,scaleWeight_3,scaleWeight_4,scaleWeight_5,scaleWeight_6,scaleWeight_7,scaleWeight_8,alphaSWeight_0,alphaSWeight_1',
-  'nominal_sub':'weight,CMS_hgg_mass,dZ,centralObjectWeight,LooseMvaSFUp01sigma,PreselSFUp01sigma,electronVetoSFUp01sigma,TriggerWeightUp01sigma,FracRVWeightUp01sigma,FracRVNvtxWeightUp01sigma,MuonIDWeightUp01sigma,ElectronIDWeightUp01sigma,ElectronRecoWeightUp01sigma,MuonIsoWeightUp01sigma,JetBTagCutWeightUp01sigma,JetBTagReshapeWeightUp01sigma,PrefireProbabilityUp01sigma,THU_ggH_MuUp01sigma,THU_ggH_ResUp01sigma,THU_ggH_Mig01Up01sigma,THU_ggH_Mig12Up01sigma,THU_ggH_VBF2jUp01sigma,THU_ggH_VBF3jUp01sigma,THU_ggH_PT60Up01sigma,THU_ggH_PT120Up01sigma,THU_ggH_qmtopUp01sigma,LooseMvaSFDown01sigma,PreselSFDown01sigma,electronVetoSFDown01sigma,TriggerWeightDown01sigma,FracRVWeightDown01sigma,FracRVNvtxWeightDown01sigma,MuonIDWeightDown01sigma,ElectronIDWeightDown01sigma,ElectronRecoWeightDown01sigma,MuonIsoWeightDown01sigma,JetBTagCutWeightDown01sigma,JetBTagReshapeWeightDown01sigma,PrefireProbabilityDown01sigma,THU_ggH_MuDown01sigma,THU_ggH_ResDown01sigma,THU_ggH_Mig01Down01sigma,THU_ggH_Mig12Down01sigma,THU_ggH_VBF2jDown01sigma,THU_ggH_VBF3jDown01sigma,THU_ggH_PT60Down01sigma,THU_ggH_PT120Down01sigma,THU_ggH_qmtopDown01sigma',
+  'nominal':'weight,CMS_hgg_mass,dZ,centralObjectWeight,NNLOPSweight,LooseMvaSFUp01sigma,PreselSFUp01sigma,electronVetoSFUp01sigma,TriggerWeightUp01sigma,FracRVWeightUp01sigma,FracRVNvtxWeightUp01sigma,MuonIDWeightUp01sigma,ElectronIDWeightUp01sigma,ElectronRecoWeightUp01sigma,MuonIsoWeightUp01sigma,JetBTagCutWeightUp01sigma,JetBTagReshapeWeightUp01sigma,prefireWeightUp01sigma,THU_ggH_MuUp01sigma,THU_ggH_ResUp01sigma,THU_ggH_Mig01Up01sigma,THU_ggH_Mig12Up01sigma,THU_ggH_VBF2jUp01sigma,THU_ggH_VBF3jUp01sigma,THU_ggH_PT60Up01sigma,THU_ggH_PT120Up01sigma,THU_ggH_qmtopUp01sigma,LooseMvaSFDown01sigma,PreselSFDown01sigma,electronVetoSFDown01sigma,TriggerWeightDown01sigma,FracRVWeightDown01sigma,FracRVNvtxWeightDown01sigma,MuonIDWeightDown01sigma,ElectronIDWeightDown01sigma,ElectronRecoWeightDown01sigma,MuonIsoWeightDown01sigma,JetBTagCutWeightDown01sigma,JetBTagReshapeWeightDown01sigma,prefireWeightDown01sigma,THU_ggH_MuDown01sigma,THU_ggH_ResDown01sigma,THU_ggH_Mig01Down01sigma,THU_ggH_Mig12Down01sigma,THU_ggH_VBF2jDown01sigma,THU_ggH_VBF3jDown01sigma,THU_ggH_PT60Down01sigma,THU_ggH_PT120Down01sigma,THU_ggH_qmtopDown01sigma,pdfWeight_0,pdfWeight_1,pdfWeight_2,pdfWeight_3,pdfWeight_4,pdfWeight_5,pdfWeight_6,pdfWeight_7,pdfWeight_8,pdfWeight_9,pdfWeight_10,pdfWeight_11,pdfWeight_12,pdfWeight_13,pdfWeight_14,pdfWeight_15,pdfWeight_16,pdfWeight_17,pdfWeight_18,pdfWeight_19,pdfWeight_20,pdfWeight_21,pdfWeight_22,pdfWeight_23,pdfWeight_24,pdfWeight_25,pdfWeight_26,pdfWeight_27,pdfWeight_28,pdfWeight_29,pdfWeight_30,pdfWeight_31,pdfWeight_32,pdfWeight_33,pdfWeight_34,pdfWeight_35,pdfWeight_36,pdfWeight_37,pdfWeight_38,pdfWeight_39,pdfWeight_40,pdfWeight_41,pdfWeight_42,pdfWeight_43,pdfWeight_44,pdfWeight_45,pdfWeight_46,pdfWeight_47,pdfWeight_48,pdfWeight_49,pdfWeight_50,pdfWeight_51,pdfWeight_52,pdfWeight_53,pdfWeight_54,pdfWeight_55,pdfWeight_56,pdfWeight_57,pdfWeight_58,pdfWeight_59,scaleWeight_0,scaleWeight_1,scaleWeight_2,scaleWeight_3,scaleWeight_4,scaleWeight_5,scaleWeight_6,scaleWeight_7,scaleWeight_8,alphaSWeight_0,alphaSWeight_1',
+  'nominal_sub':'weight,CMS_hgg_mass,dZ,centralObjectWeight,NNLOPSweight,LooseMvaSFUp01sigma,PreselSFUp01sigma,electronVetoSFUp01sigma,TriggerWeightUp01sigma,FracRVWeightUp01sigma,FracRVNvtxWeightUp01sigma,MuonIDWeightUp01sigma,ElectronIDWeightUp01sigma,ElectronRecoWeightUp01sigma,MuonIsoWeightUp01sigma,JetBTagCutWeightUp01sigma,JetBTagReshapeWeightUp01sigma,prefireWeightUp01sigma,THU_ggH_MuUp01sigma,THU_ggH_ResUp01sigma,THU_ggH_Mig01Up01sigma,THU_ggH_Mig12Up01sigma,THU_ggH_VBF2jUp01sigma,THU_ggH_VBF3jUp01sigma,THU_ggH_PT60Up01sigma,THU_ggH_PT120Up01sigma,THU_ggH_qmtopUp01sigma,LooseMvaSFDown01sigma,PreselSFDown01sigma,electronVetoSFDown01sigma,TriggerWeightDown01sigma,FracRVWeightDown01sigma,FracRVNvtxWeightDown01sigma,MuonIDWeightDown01sigma,ElectronIDWeightDown01sigma,ElectronRecoWeightDown01sigma,MuonIsoWeightDown01sigma,JetBTagCutWeightDown01sigma,JetBTagReshapeWeightDown01sigma,prefireWeightDown01sigma,THU_ggH_MuDown01sigma,THU_ggH_ResDown01sigma,THU_ggH_Mig01Down01sigma,THU_ggH_Mig12Down01sigma,THU_ggH_VBF2jDown01sigma,THU_ggH_VBF3jDown01sigma,THU_ggH_PT60Down01sigma,THU_ggH_PT120Down01sigma,THU_ggH_qmtopDown01sigma',
   'shapeSyst':'CMS_hgg_mass',
-  'notag':'weight,THU_ggH_MuUp01sigma,THU_ggH_ResUp01sigma,THU_ggH_Mig01Up01sigma,THU_ggH_Mig12Up01sigma,THU_ggH_VBF2jUp01sigma,THU_ggH_VBF3jUp01sigma,THU_ggH_PT60Up01sigma,THU_ggH_PT120Up01sigma,THU_ggH_qmtopUp01sigma,THU_ggH_MuDown01sigma,THU_ggH_ResDown01sigma,THU_ggH_Mig01Down01sigma,THU_ggH_Mig12Down01sigma,THU_ggH_VBF2jDown01sigma,THU_ggH_VBF3jDown01sigma,THU_ggH_PT60Down01sigma,THU_ggH_PT120Down01sigma,THU_ggH_qmtopDown01sigma,pdfWeight_0,pdfWeight_1,pdfWeight_2,pdfWeight_3,pdfWeight_4,pdfWeight_5,pdfWeight_6,pdfWeight_7,pdfWeight_8,pdfWeight_9,pdfWeight_10,pdfWeight_11,pdfWeight_12,pdfWeight_13,pdfWeight_14,pdfWeight_15,pdfWeight_16,pdfWeight_17,pdfWeight_18,pdfWeight_19,pdfWeight_20,pdfWeight_21,pdfWeight_22,pdfWeight_23,pdfWeight_24,pdfWeight_25,pdfWeight_26,pdfWeight_27,pdfWeight_28,pdfWeight_29,pdfWeight_30,pdfWeight_31,pdfWeight_32,pdfWeight_33,pdfWeight_34,pdfWeight_35,pdfWeight_36,pdfWeight_37,pdfWeight_38,pdfWeight_39,pdfWeight_40,pdfWeight_41,pdfWeight_42,pdfWeight_43,pdfWeight_44,pdfWeight_45,pdfWeight_46,pdfWeight_47,pdfWeight_48,pdfWeight_49,pdfWeight_50,pdfWeight_51,pdfWeight_52,pdfWeight_53,pdfWeight_54,pdfWeight_55,pdfWeight_56,pdfWeight_57,pdfWeight_58,pdfWeight_59,scaleWeight_0,scaleWeight_1,scaleWeight_2,scaleWeight_3,scaleWeight_4,scaleWeight_5,scaleWeight_6,scaleWeight_7,scaleWeight_8,alphaSWeight_0,alphaSWeight_1',
-  'notag_sub':'weight,THU_ggH_MuUp01sigma,THU_ggH_ResUp01sigma,THU_ggH_Mig01Up01sigma,THU_ggH_Mig12Up01sigma,THU_ggH_VBF2jUp01sigma,THU_ggH_VBF3jUp01sigma,THU_ggH_PT60Up01sigma,THU_ggH_PT120Up01sigma,THU_ggH_qmtopUp01sigma,THU_ggH_MuDown01sigma,THU_ggH_ResDown01sigma,THU_ggH_Mig01Down01sigma,THU_ggH_Mig12Down01sigma,THU_ggH_VBF2jDown01sigma,THU_ggH_VBF3jDown01sigma,THU_ggH_PT60Down01sigma,THU_ggH_PT120Down01sigma,THU_ggH_qmtopDown01sigma'
+  'notag':'weight,centralObjectWeight,NNLOPSweight,THU_ggH_MuUp01sigma,THU_ggH_ResUp01sigma,THU_ggH_Mig01Up01sigma,THU_ggH_Mig12Up01sigma,THU_ggH_VBF2jUp01sigma,THU_ggH_VBF3jUp01sigma,THU_ggH_PT60Up01sigma,THU_ggH_PT120Up01sigma,THU_ggH_qmtopUp01sigma,THU_ggH_MuDown01sigma,THU_ggH_ResDown01sigma,THU_ggH_Mig01Down01sigma,THU_ggH_Mig12Down01sigma,THU_ggH_VBF2jDown01sigma,THU_ggH_VBF3jDown01sigma,THU_ggH_PT60Down01sigma,THU_ggH_PT120Down01sigma,THU_ggH_qmtopDown01sigma,pdfWeight_0,pdfWeight_1,pdfWeight_2,pdfWeight_3,pdfWeight_4,pdfWeight_5,pdfWeight_6,pdfWeight_7,pdfWeight_8,pdfWeight_9,pdfWeight_10,pdfWeight_11,pdfWeight_12,pdfWeight_13,pdfWeight_14,pdfWeight_15,pdfWeight_16,pdfWeight_17,pdfWeight_18,pdfWeight_19,pdfWeight_20,pdfWeight_21,pdfWeight_22,pdfWeight_23,pdfWeight_24,pdfWeight_25,pdfWeight_26,pdfWeight_27,pdfWeight_28,pdfWeight_29,pdfWeight_30,pdfWeight_31,pdfWeight_32,pdfWeight_33,pdfWeight_34,pdfWeight_35,pdfWeight_36,pdfWeight_37,pdfWeight_38,pdfWeight_39,pdfWeight_40,pdfWeight_41,pdfWeight_42,pdfWeight_43,pdfWeight_44,pdfWeight_45,pdfWeight_46,pdfWeight_47,pdfWeight_48,pdfWeight_49,pdfWeight_50,pdfWeight_51,pdfWeight_52,pdfWeight_53,pdfWeight_54,pdfWeight_55,pdfWeight_56,pdfWeight_57,pdfWeight_58,pdfWeight_59,scaleWeight_0,scaleWeight_1,scaleWeight_2,scaleWeight_3,scaleWeight_4,scaleWeight_5,scaleWeight_6,scaleWeight_7,scaleWeight_8,alphaSWeight_0,alphaSWeight_1',
+  'notag_sub':'weight,centralObjectWeight,NNLOPSweight,THU_ggH_MuUp01sigma,THU_ggH_ResUp01sigma,THU_ggH_Mig01Up01sigma,THU_ggH_Mig12Up01sigma,THU_ggH_VBF2jUp01sigma,THU_ggH_VBF3jUp01sigma,THU_ggH_PT60Up01sigma,THU_ggH_PT120Up01sigma,THU_ggH_qmtopUp01sigma,THU_ggH_MuDown01sigma,THU_ggH_ResDown01sigma,THU_ggH_Mig01Down01sigma,THU_ggH_Mig12Down01sigma,THU_ggH_VBF2jDown01sigma,THU_ggH_VBF3jDown01sigma,THU_ggH_PT60Down01sigma,THU_ggH_PT120Down01sigma,THU_ggH_qmtopDown01sigma'
 }
 
 # Function to add vars to workspace
@@ -178,6 +179,7 @@ def make_argSet( _ws, _argSets, _type ):
 def get_options():
   parser = OptionParser()
   parser.add_option('--inputPandasFile',dest='inputPandasFile', default="", help='Input pandas dataFrame file')
+  parser.add_option('--inputMass',dest='inputMass', default="125", help='Input mass')
   parser.add_option('--productionMode',dest='productionMode', default="ggh", help='Production mode [ggh,vbf,wh,zh,tth,th]')
   parser.add_option('--year',dest='year', default="2016", help='Year')
   parser.add_option('--decayExt',dest='decayExt', default="", help='Decay extension (used for ggZH)')
@@ -189,6 +191,9 @@ def get_options():
 if os.path.exists( opt.inputPandasFile ):
   print " --> [VERBOSE] Loading pandas dataFrame: %s"%opt.inputPandasFile
   with open( opt.inputPandasFile, "rb") as f_in: data = pickle.load(f_in)
+
+# Extract output file name
+f_out_name = "_".join(opt.inputPandasFile.split("/")[-1].split("_")[:-1])
 
 # Extract STXS bin
 stxsBin = stxs_stage1p2_dict[int(data.stage1p2bin.unique()[0])]
@@ -207,8 +212,8 @@ for i in range(0,opt.nSplit):
   outputWSDir = "/".join(opt.inputPandasFile.split("/")[:-2])+"/ws_%s_%s"%(opt.productionMode,stxsBin)
   if not os.path.exists(outputWSDir): os.system("mkdir %s"%outputWSDir)
   f_id = re.sub(".pkl","",opt.inputPandasFile.split("_")[-1])
-  if opt.nSplit == 1: outputWSFile = "%s/output_%s_M125_13TeV_amcatnloFXFX_pythia8_%s_%s.root"%(outputWSDir,procToWSFileName[opt.productionMode],stxsBin,f_id)
-  else: outputWSFile = "%s/output_%s_M125_13TeV_amcatnloFXFX_pythia8_%s_%s_%g.root"%(outputWSDir,procToWSFileName[opt.productionMode],stxsBin,f_id,i)
+  if opt.nSplit == 1: outputWSFile = "%s/%s_%s.root"%(outputWSDir,f_out_name,f_id)
+  else: outputWSFile = "%s/%s_%s_%g.root"%(outputWSDir,f_out_name,f_id,i)
   fout = ROOT.TFile(outputWSFile,"RECREATE")
   foutdir = fout.mkdir("tagsDumper")
   foutdir.cd()
@@ -226,10 +231,12 @@ for i in range(0,opt.nSplit):
     sa = data[mask].to_records()
     t = array2tree(sa)
     # Define RooDataSet
-    dname = "%s_125_13TeV_%s"%(opt.productionMode,cat)
+    dname = "%s_%s_13TeV_%s"%(opt.productionMode,opt.inputMass,cat)
     # Extract ArgSet
-    # FIXME: for bbH and tHW, missing theory weights
-    if opt.productionMode in ['bbh','thw']:
+    # bbH and tH do not have theory weights
+    #if opt.productionMode in ['bbh','thq','thw']:
+    # FIXME: also ttH for now
+    if opt.productionMode in ['tth','bbh','thq','thw']:
       if cat == 'NOTAG': argset = make_argSet( ws, argSets, 'notag_sub') 
       else: argset = make_argSet( ws, argSets, 'nominal_sub')
     else:
@@ -253,7 +260,7 @@ for i in range(0,opt.nSplit):
 	  sa = data[mask].to_records()
 	  t = array2tree(sa)
 	  # Name of RooDataHist
-	  hname = "%s_125_13TeV_%s_%s%s01sigma"%(opt.productionMode,cat,s,direction)
+	  hname = "%s_%s_13TeV_%s_%s%s01sigma"%(opt.productionMode,opt.inputMass,cat,s,direction)
 	  # If YEAR in hname then change to year being processed
 	  #hname = re.sub("YEAR",opt.year,hname)
 	  argset = make_argSet( ws, argSets, 'shapeSyst')

@@ -51,37 +51,38 @@ int Normalization_13TeV::Init(int sqrtS){
         XSectionMap_WH2HQQ[mH]  = valXSWH2HQQ;
         XSectionMap_ZH2HQQ[mH]  = valXSZH2HQQ;
 
-        // Stage 1.2: now include forward as separate process (taken from 2018 only: need to compare)
-        XSectionMap_GG2H_FWDH[mH] = 0.0810 * valXSggH;
-        XSectionMap_GG2H_PTH_200_300[mH] = 0.0118 * valXSggH;
-        XSectionMap_GG2H_PTH_300_450[mH] = 0.0032 * valXSggH;
-        XSectionMap_GG2H_PTH_450_650[mH] = 0.0006 * valXSggH;
+        // Stage 1.2: 
+        // ggH includes NNLOPS reweighting
+        XSectionMap_GG2H_FWDH[mH] = 0.0809 * valXSggH;
+        XSectionMap_GG2H_PTH_200_300[mH] = 0.0098 * valXSggH;
+        XSectionMap_GG2H_PTH_300_450[mH] = 0.0025 * valXSggH;
+        XSectionMap_GG2H_PTH_450_650[mH] = 0.0003 * valXSggH;
         XSectionMap_GG2H_PTH_GT650[mH] = 0.0001 * valXSggH;
-        XSectionMap_GG2H_0J_PTH_0_10[mH] = 0.1348 * valXSggH;
-        XSectionMap_GG2H_0J_PTH_GT10[mH] = 0.3919 * valXSggH;
-        XSectionMap_GG2H_1J_PTH_0_60[mH] = 0.1469 * valXSggH;
-        XSectionMap_GG2H_1J_PTH_60_120[mH] = 0.1021 * valXSggH;
-        XSectionMap_GG2H_1J_PTH_120_200[mH] = 0.0193 * valXSggH;
-        XSectionMap_GG2H_GE2J_MJJ_0_350_PTH_0_60[mH] = 0.0260 * valXSggH;
-        XSectionMap_GG2H_GE2J_MJJ_0_350_PTH_60_120[mH] = 0.0403 * valXSggH;
-        XSectionMap_GG2H_GE2J_MJJ_0_350_PTH_120_200[mH] = 0.0209 * valXSggH;
-        XSectionMap_GG2H_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25[mH] = 0.0064 * valXSggH;
-        XSectionMap_GG2H_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25[mH] = 0.0081 * valXSggH;
-        XSectionMap_GG2H_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25[mH] = 0.0030 * valXSggH;
-        XSectionMap_GG2H_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25[mH] = 0.0033 * valXSggH;       
+        XSectionMap_GG2H_0J_PTH_0_10[mH] = 0.1387 * valXSggH;
+        XSectionMap_GG2H_0J_PTH_GT10[mH] = 0.3940 * valXSggH;
+        XSectionMap_GG2H_1J_PTH_0_60[mH] = 0.1477 * valXSggH;
+        XSectionMap_GG2H_1J_PTH_60_120[mH] = 0.1023 * valXSggH;
+        XSectionMap_GG2H_1J_PTH_120_200[mH] = 0.0182 * valXSggH;
+        XSectionMap_GG2H_GE2J_MJJ_0_350_PTH_0_60[mH] = 0.0256 * valXSggH;
+        XSectionMap_GG2H_GE2J_MJJ_0_350_PTH_60_120[mH] = 0.0410 * valXSggH;
+        XSectionMap_GG2H_GE2J_MJJ_0_350_PTH_120_200[mH] = 0.0188 * valXSggH;
+        XSectionMap_GG2H_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25[mH] = 0.0063 * valXSggH;
+        XSectionMap_GG2H_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25[mH] = 0.0077 * valXSggH;
+        XSectionMap_GG2H_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25[mH] = 0.0028 * valXSggH;
+        XSectionMap_GG2H_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25[mH] = 0.0032 * valXSggH;       
 
-        // UPDATE: switched to POWHEG numbers for qqH
-        XSectionMap_VBF_FWDH[mH] = 0.067 * valXSqqH;
-        XSectionMap_VBF_0J[mH] = 0.069 * valXSqqH;
-        XSectionMap_VBF_1J[mH] = 0.329 * valXSqqH;
-        XSectionMap_VBF_GE2J_MJJ_0_60[mH] = 0.014 * valXSqqH;
-        XSectionMap_VBF_GE2J_MJJ_60_120[mH] = 0.024 * valXSqqH;
-        XSectionMap_VBF_GE2J_MJJ_120_350[mH] = 0.123 * valXSqqH;
-        XSectionMap_VBF_GE2J_MJJ_GT350_PTH_GT200[mH] = 0.040 * valXSqqH;
-        XSectionMap_VBF_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25[mH] = 0.103 * valXSqqH;
-        XSectionMap_VBF_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25[mH] = 0.038 * valXSqqH;
-        XSectionMap_VBF_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25[mH] = 0.151 * valXSqqH;
-        XSectionMap_VBF_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25[mH] = 0.042 * valXSqqH;
+        // POWHEG numbers for qqH: inconsisitencies across mg5 years
+        XSectionMap_VBF_FWDH[mH] = 0.0669 * valXSqqH;
+        XSectionMap_VBF_0J[mH] = 0.0695 * valXSqqH;
+        XSectionMap_VBF_1J[mH] = 0.3283 * valXSqqH;
+        XSectionMap_VBF_GE2J_MJJ_0_60[mH] = 0.0136 * valXSqqH;
+        XSectionMap_VBF_GE2J_MJJ_60_120[mH] = 0.0240 * valXSqqH;
+        XSectionMap_VBF_GE2J_MJJ_120_350[mH] = 0.1234 * valXSqqH;
+        XSectionMap_VBF_GE2J_MJJ_GT350_PTH_GT200[mH] = 0.0398 * valXSqqH;
+        XSectionMap_VBF_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25[mH] = 0.1026 * valXSqqH;
+        XSectionMap_VBF_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25[mH] = 0.0385 * valXSqqH;
+        XSectionMap_VBF_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25[mH] = 0.1509 * valXSqqH;
+        XSectionMap_VBF_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25[mH] = 0.0425 * valXSqqH;
 
         XSectionMap_WH2HQQ_FWDH[mH] = 0.1257 * valXSWH2HQQ;
         XSectionMap_WH2HQQ_0J[mH] = 0.0570 * valXSWH2HQQ;
@@ -107,68 +108,67 @@ int Normalization_13TeV::Init(int sqrtS){
         XSectionMap_ZH2HQQ_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25[mH] = 0.0009 * valXSZH2HQQ;
         XSectionMap_ZH2HQQ_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25[mH] = 0.0045 * valXSZH2HQQ;
 
-        XSectionMap_QQ2HLNU_FWDH[mH] = 0.1238 * valXSQQ2HLNU;
-        XSectionMap_QQ2HLNU_PTV_0_75[mH] = 0.4642 * valXSQQ2HLNU;
-        XSectionMap_QQ2HLNU_PTV_75_150[mH] = 0.2922 * valXSQQ2HLNU;
-        XSectionMap_QQ2HLNU_PTV_150_250_0J[mH] = 0.0509 * valXSQQ2HLNU;
-        XSectionMap_QQ2HLNU_PTV_150_250_GE1J[mH] = 0.0395 * valXSQQ2HLNU;
-        XSectionMap_QQ2HLNU_PTV_GT250[mH] = 0.0294 * valXSQQ2HLNU;
+        XSectionMap_QQ2HLNU_FWDH[mH] = 0.1213 * valXSQQ2HLNU;
+        XSectionMap_QQ2HLNU_PTV_0_75[mH] = 0.4655 * valXSQQ2HLNU;
+        XSectionMap_QQ2HLNU_PTV_75_150[mH] = 0.2930 * valXSQQ2HLNU;
+        XSectionMap_QQ2HLNU_PTV_150_250_0J[mH] = 0.0510 * valXSQQ2HLNU;
+        XSectionMap_QQ2HLNU_PTV_150_250_GE1J[mH] = 0.0397 * valXSQQ2HLNU;
+        XSectionMap_QQ2HLNU_PTV_GT250[mH] = 0.0295 * valXSQQ2HLNU;
 
-        XSectionMap_QQ2HLL_FWDH[mH] = 0.1131 * valXSQQ2HLL;
-        XSectionMap_QQ2HLL_PTV_0_75[mH] = 0.4556 * valXSQQ2HLL;
-        XSectionMap_QQ2HLL_PTV_75_150[mH] = 0.3076 * valXSQQ2HLL;
+        XSectionMap_QQ2HLL_FWDH[mH] = 0.1121 * valXSQQ2HLL;
+        XSectionMap_QQ2HLL_PTV_0_75[mH] = 0.4565 * valXSQQ2HLL;
+        XSectionMap_QQ2HLL_PTV_75_150[mH] = 0.3070 * valXSQQ2HLL;
         XSectionMap_QQ2HLL_PTV_150_250_0J[mH] = 0.0516 * valXSQQ2HLL;
-        XSectionMap_QQ2HLL_PTV_150_250_GE1J[mH] = 0.0421 * valXSQQ2HLL;
-        XSectionMap_QQ2HLL_PTV_GT250[mH] = 0.0299 * valXSQQ2HLL;
+        XSectionMap_QQ2HLL_PTV_150_250_GE1J[mH] = 0.0427 * valXSQQ2HLL;
+        XSectionMap_QQ2HLL_PTV_GT250[mH] = 0.0301 * valXSQQ2HLL;
 
-        XSectionMap_GG2HQQ_FWDH[mH] = 0.0282 * valXSGG2HQQ;
-        XSectionMap_GG2HQQ_PTH_200_300[mH] = 0.1361 * valXSGG2HQQ;
-        XSectionMap_GG2HQQ_PTH_300_450[mH] = 0.0372 * valXSGG2HQQ;
-        XSectionMap_GG2HQQ_PTH_450_650[mH] = 0.0075 * valXSGG2HQQ;
-        XSectionMap_GG2HQQ_PTH_GT650[mH] = 0.0019 * valXSGG2HQQ;
+        XSectionMap_GG2HQQ_FWDH[mH] = 0.0273 * valXSGG2HQQ;
+        XSectionMap_GG2HQQ_PTH_200_300[mH] = 0.1393 * valXSGG2HQQ;
+        XSectionMap_GG2HQQ_PTH_300_450[mH] = 0.0386 * valXSGG2HQQ;
+        XSectionMap_GG2HQQ_PTH_450_650[mH] = 0.0077 * valXSGG2HQQ;
+        XSectionMap_GG2HQQ_PTH_GT650[mH] = 0.0020 * valXSGG2HQQ;
         XSectionMap_GG2HQQ_0J_PTH_0_10[mH] = 0.0001 * valXSGG2HQQ;
         XSectionMap_GG2HQQ_0J_PTH_GT10[mH] = 0.0029 * valXSGG2HQQ;
-        XSectionMap_GG2HQQ_1J_PTH_0_60[mH] = 0.0209 * valXSGG2HQQ;
-        XSectionMap_GG2HQQ_1J_PTH_60_120[mH] = 0.0528 * valXSGG2HQQ;
-        XSectionMap_GG2HQQ_1J_PTH_120_200[mH] = 0.0359 * valXSGG2HQQ;
-        XSectionMap_GG2HQQ_GE2J_MJJ_0_350_PTH_0_60[mH] = 0.0575 * valXSGG2HQQ;
-        XSectionMap_GG2HQQ_GE2J_MJJ_0_350_PTH_60_120[mH] = 0.1993 * valXSGG2HQQ;
-        XSectionMap_GG2HQQ_GE2J_MJJ_0_350_PTH_120_200[mH] = 0.2962 * valXSGG2HQQ;
-        XSectionMap_GG2HQQ_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25[mH] = 0.0118 * valXSGG2HQQ;
-        XSectionMap_GG2HQQ_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25[mH] = 0.0807 * valXSGG2HQQ;
-        XSectionMap_GG2HQQ_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25[mH] = 0.0038 * valXSGG2HQQ;
-        XSectionMap_GG2HQQ_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25[mH] = 0.0270 * valXSGG2HQQ;       
+        XSectionMap_GG2HQQ_1J_PTH_0_60[mH] = 0.0200 * valXSGG2HQQ;
+        XSectionMap_GG2HQQ_1J_PTH_60_120[mH] = 0.0534 * valXSGG2HQQ;
+        XSectionMap_GG2HQQ_1J_PTH_120_200[mH] = 0.0353 * valXSGG2HQQ;
+        XSectionMap_GG2HQQ_GE2J_MJJ_0_350_PTH_0_60[mH] = 0.0574 * valXSGG2HQQ;
+        XSectionMap_GG2HQQ_GE2J_MJJ_0_350_PTH_60_120[mH] = 0.1963 * valXSGG2HQQ;
+        XSectionMap_GG2HQQ_GE2J_MJJ_0_350_PTH_120_200[mH] = 0.2954 * valXSGG2HQQ;
+        XSectionMap_GG2HQQ_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25[mH] = 0.0114 * valXSGG2HQQ;
+        XSectionMap_GG2HQQ_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25[mH] = 0.0806 * valXSGG2HQQ;
+        XSectionMap_GG2HQQ_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25[mH] = 0.0036 * valXSGG2HQQ;
+        XSectionMap_GG2HQQ_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25[mH] = 0.0285 * valXSGG2HQQ;       
 
-        XSectionMap_GG2HLL_FWDH[mH] = 0.0268 * valXSGG2HLL;
-        XSectionMap_GG2HLL_PTV_0_75[mH] = 0.1604 * valXSGG2HLL;
-        XSectionMap_GG2HLL_PTV_75_150[mH] = 0.4344 * valXSGG2HLL;
-        XSectionMap_GG2HLL_PTV_150_250_0J[mH] = 0.0916 * valXSGG2HLL;
-        XSectionMap_GG2HLL_PTV_150_250_GE1J[mH] = 0.2030 * valXSGG2HLL;
-        XSectionMap_GG2HLL_PTV_GT250[mH] = 0.0838 * valXSGG2HLL;
+        XSectionMap_GG2HLL_FWDH[mH] = 0.0270 * valXSGG2HLL;
+        XSectionMap_GG2HLL_PTV_0_75[mH] = 0.1605 * valXSGG2HLL;
+        XSectionMap_GG2HLL_PTV_75_150[mH] = 0.4325 * valXSGG2HLL;
+        XSectionMap_GG2HLL_PTV_150_250_0J[mH] = 0.0913 * valXSGG2HLL;
+        XSectionMap_GG2HLL_PTV_150_250_GE1J[mH] = 0.2044 * valXSGG2HLL;
+        XSectionMap_GG2HLL_PTV_GT250[mH] = 0.0844 * valXSGG2HLL;
 
-        XSectionMap_GG2HNUNU_FWDH[mH] = 0.0272 * valXSGG2HNUNU;
-        XSectionMap_GG2HNUNU_PTV_0_75[mH] = 0.1594 * valXSGG2HNUNU;
-        XSectionMap_GG2HNUNU_PTV_75_150[mH] = 0.4342 * valXSGG2HNUNU;
-        XSectionMap_GG2HNUNU_PTV_150_250_0J[mH] = 0.0906 * valXSGG2HNUNU;
-        XSectionMap_GG2HNUNU_PTV_150_250_GE1J[mH] = 0.2044 * valXSGG2HNUNU;
-        XSectionMap_GG2HNUNU_PTV_GT250[mH] = 0.0841 * valXSGG2HNUNU;
+        XSectionMap_GG2HNUNU_FWDH[mH] = 0.0271 * valXSGG2HNUNU;
+        XSectionMap_GG2HNUNU_PTV_0_75[mH] = 0.1591 * valXSGG2HNUNU;
+        XSectionMap_GG2HNUNU_PTV_75_150[mH] = 0.4336 * valXSGG2HNUNU;
+        XSectionMap_GG2HNUNU_PTV_150_250_0J[mH] = 0.0905 * valXSGG2HNUNU;
+        XSectionMap_GG2HNUNU_PTV_150_250_GE1J[mH] = 0.2051 * valXSGG2HNUNU;
+        XSectionMap_GG2HNUNU_PTV_GT250[mH] = 0.0845 * valXSGG2HNUNU;
 
-        XSectionMap_TTH_FWDH[mH]                 = 0.0142 * valXSttH;
-        XSectionMap_TTH_PTH_0_60[mH]             = 0.2239 * valXSttH;
-        XSectionMap_TTH_PTH_60_120[mH]           = 0.3520 * valXSttH;
-        XSectionMap_TTH_PTH_120_200[mH]          = 0.2543 * valXSttH;
-        XSectionMap_TTH_PTH_200_300[mH]          = 0.1070 * valXSttH;
-        XSectionMap_TTH_PTH_GT300[mH]            = 0.0486 * valXSttH;
+        XSectionMap_TTH_FWDH[mH]                 = 0.0135 * valXSttH;
+        XSectionMap_TTH_PTH_0_60[mH]             = 0.2250 * valXSttH;
+        XSectionMap_TTH_PTH_60_120[mH]           = 0.3473 * valXSttH;
+        XSectionMap_TTH_PTH_120_200[mH]          = 0.2569 * valXSttH;
+        XSectionMap_TTH_PTH_200_300[mH]          = 0.1076 * valXSttH;
+        XSectionMap_TTH_PTH_GT300[mH]            = 0.0533 * valXSttH;
 
-        // FIXME: add correct fwd splits for subdominant modes
-        XSectionMap_BBH_FWDH[mH]                 = 0.0001* valXSbbH;
-        XSectionMap_BBH[mH]                      = 0.9999* valXSbbH;
+        XSectionMap_BBH_FWDH[mH]                 = 0.0487* valXSbbH;
+        XSectionMap_BBH[mH]                      = 0.9513* valXSbbH;
 
-        XSectionMap_THQ_FWDH[mH]                 = 0.00005 * valXStHq;
-        XSectionMap_THQ[mH]                      = 0.99995 * valXStHq;
+        XSectionMap_THQ_FWDH[mH]                 = 0.0279 * valXStHq;
+        XSectionMap_THQ[mH]                      = 0.9721 * valXStHq;
 
-        XSectionMap_THW_FWDH[mH]                 = 0.02 * valXStHW;
-        XSectionMap_THW[mH]                      = 0.98 * valXStHW;
+        XSectionMap_THW_FWDH[mH]                 = 0.0106 * valXStHW;
+        XSectionMap_THW[mH]                      = 0.9894 * valXStHW;
 
     }
 }

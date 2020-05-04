@@ -34,7 +34,7 @@ for i in range(len(inputFileNames)):
   # Open submission file to write to
   fsub = open("./%s_jobs_%s%s/sub%g.sh"%(scriptShortcut[opt.script],opt.year,opt.ext,i),'w')
   fsub.write("#!/bin/bash\n\n")
-  fsub.write("cd /vols/build/cms/jl2117/hgg/FinalFits/legacy/April20/CMSSW_10_2_13/src/flashggFinalFit/Trees2WS\n\n")
+  fsub.write("cd %s/src/flashggFinalFit/Trees2WS\n\n"%os.environ['CMSSW_BASE'])
   fsub.write("eval `scramv1 runtime -sh`\n\n")
 
   # Extract production mode (and decay if needed e.g. for ggzh)

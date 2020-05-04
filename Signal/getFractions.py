@@ -18,19 +18,12 @@ r.gROOT.SetBatch(True)
 from collections import OrderedDict as od
 import re, sys
 
-catsSplittingScheme = {
-  'tagsetone':['RECO_0J_PTH_0_10_Tag0', 'RECO_0J_PTH_0_10_Tag1', 'RECO_0J_PTH_0_10_Tag2', 'RECO_0J_PTH_GT10_Tag0', 'RECO_0J_PTH_GT10_Tag1', 'RECO_0J_PTH_GT10_Tag2', 'RECO_1J_PTH_0_60_Tag0', 'RECO_1J_PTH_0_60_Tag1', 'RECO_1J_PTH_0_60_Tag2', 'RECO_1J_PTH_60_120_Tag0', 'RECO_1J_PTH_60_120_Tag1', 'RECO_1J_PTH_60_120_Tag2', 'RECO_1J_PTH_120_200_Tag0', 'RECO_1J_PTH_120_200_Tag1', 'RECO_1J_PTH_120_200_Tag2', 'RECO_GE2J_PTH_0_60_Tag0', 'RECO_GE2J_PTH_0_60_Tag1', 'RECO_GE2J_PTH_0_60_Tag2', 'RECO_GE2J_PTH_60_120_Tag0', 'RECO_GE2J_PTH_60_120_Tag1', 'RECO_GE2J_PTH_60_120_Tag2', 'RECO_GE2J_PTH_120_200_Tag0', 'RECO_GE2J_PTH_120_200_Tag1', 'RECO_GE2J_PTH_120_200_Tag2','NOTAG'],
-  'tagsettwo':['RECO_PTH_200_300_Tag0', 'RECO_PTH_200_300_Tag1', 'RECO_PTH_300_450_Tag0', 'RECO_PTH_300_450_Tag1', 'RECO_PTH_450_650_Tag0', 'RECO_PTH_450_650_Tag1', 'RECO_PTH_GT650_Tag0', 'RECO_PTH_GT650_Tag1', 'RECO_VBFTOPO_VHHAD_Tag0', 'RECO_VBFTOPO_VHHAD_Tag1', 'RECO_VBFTOPO_JET3VETO_LOWMJJ_Tag0', 'RECO_VBFTOPO_JET3VETO_LOWMJJ_Tag1', 'RECO_VBFTOPO_JET3VETO_HIGHMJJ_Tag0', 'RECO_VBFTOPO_JET3VETO_HIGHMJJ_Tag1', 'RECO_VBFTOPO_JET3_LOWMJJ_Tag0', 'RECO_VBFTOPO_JET3_LOWMJJ_Tag1', 'RECO_VBFTOPO_JET3_HIGHMJJ_Tag0', 'RECO_VBFTOPO_JET3_HIGHMJJ_Tag1', 'RECO_VBFTOPO_BSM_Tag0', 'RECO_VBFTOPO_BSM_Tag1', 'RECO_VBFLIKEGGH_Tag0', 'RECO_VBFLIKEGGH_Tag1'],
-  'tagsetthree':['RECO_TTH_HAD_LOW_Tag0', 'RECO_TTH_HAD_LOW_Tag1', 'RECO_TTH_HAD_LOW_Tag2', 'RECO_TTH_HAD_LOW_Tag3', 'RECO_TTH_HAD_HIGH_Tag0', 'RECO_TTH_HAD_HIGH_Tag1', 'RECO_TTH_HAD_HIGH_Tag2', 'RECO_TTH_HAD_HIGH_Tag3', 'RECO_WH_LEP_LOW_Tag0', 'RECO_WH_LEP_LOW_Tag1', 'RECO_WH_LEP_LOW_Tag2', 'RECO_WH_LEP_HIGH_Tag0', 'RECO_WH_LEP_HIGH_Tag1', 'RECO_WH_LEP_HIGH_Tag2', 'RECO_ZH_LEP_Tag0', 'RECO_ZH_LEP_Tag1', 'RECO_TTH_LEP_LOW_Tag0', 'RECO_TTH_LEP_LOW_Tag1', 'RECO_TTH_LEP_LOW_Tag2', 'RECO_TTH_LEP_LOW_Tag3', 'RECO_TTH_LEP_HIGH_Tag0', 'RECO_TTH_LEP_HIGH_Tag1', 'RECO_TTH_LEP_HIGH_Tag2', 'RECO_TTH_LEP_HIGH_Tag3', 'RECO_THQ_LEP']
-  }
-
 def get_options():
   parser = OptionParser()
   parser.add_option('--ext', default='test', help='Extension (to define analysis)')
   parser.add_option('--cats', dest='cats', default='', help='Comma separated list of analysis categories (no year tags)')
   parser.add_option('-m', '--mass', dest='mass', default='125', help='MH')
   parser.add_option('--inputWSDir', dest='inputWSDir', default='', help='Input WS directory')
-  parser.add_option('--tagSplit', dest='tagSplit', default=False, action="store_true", help="If tags are split according to above splitting scheme")
   parser.add_option('--skipCOWCorr', dest='skipCOWCorr', default=False, action="store_true", help="Skip centralObjectWeight correction for events in acceptance")
   parser.add_option('--doFractions', dest='doFractions', default=False, action="store_true", help="Fractional yields in each STXS bin. Make sure you include all possible categories")
   parser.add_option('--doEffAcc', dest='doEffAcc', default=False, action="store_true", help="Print out eff x acc to json file (to be read by signal modelling")
@@ -46,7 +39,6 @@ def procToData( _proc, pmap=proc_map ):
 # Extract processes and nominal names from tagsetone
 baseFilePath  = opt.inputWSDir
 if not baseFilePath.endswith('/'): baseFilePath += '/'
-if opt.tagSplit: baseFilePath += "tagsetone/"
 fileNames     = []
 for fileName in listdir(baseFilePath): 
   if not fileName.startswith('output_'): continue
@@ -71,38 +63,25 @@ for _fileName in fullFileNames:
   _proc = _fileName.split('pythia8_')[1].split('.root')[0]
   print " --> Processing: %s"%_proc
   _f, _ws = {}, {}
-  if opt.tagSplit:
-    for ts in catsSplittingScheme.keys():
-      _f[ts] = ROOT.TFile(re.sub("tagsetone",ts,_fileName),'READ')
-      _ws[ts] = _f[ts].Get("tagsDumper/cms_hgg_13TeV")
-  else:
-    _f['alltags'] = ROOT.TFile(_fileName,'read')
-    _ws['alltags'] = _f['alltags'].Get("tagsDumper/cms_hgg_13TeV")
+  _f['alltags'] = ROOT.TFile(_fileName,'read')
+  _ws['alltags'] = _f['alltags'].Get("tagsDumper/cms_hgg_13TeV")
 
   # Loop over categories
   for _cat in opt.cats.split(","):
     key = 'alltags'
-    if opt.tagSplit:
-      for ts,tsCats in catsSplittingScheme.iteritems():
-        if _cat in tsCats: key = ts
-
     _nominalDataName = "%s_125_13TeV_%s"%(procToData(_proc.split("_")[0]),_cat)
     _granular_key = "%s__%s"%(_proc,_cat)
     _nominalData = _ws[key].data(_nominalDataName)
     _nominal_yield = _nominalData.sumEntries()
     if not opt.skipCOWCorr:
-      if "NOTAG" in _cat: _nominal_yield_COWCorr = _nominal_yield
-      else:
-	# Loop over events and sum w/centralObjWeight
-	_nominal_yield_COWCorr = 0
-	for i in range(_nominalData.numEntries()):
-	  p = _nominalData.get(i)
-	  w = _nominalData.weight()
-	  f_central = p.getRealValue("centralObjectWeight")
-	  if f_central == 0: continue
-	  else:
-	    _nominal_yield_COWCorr += w/f_central
-      
+      # Loop over events and sum w/centralObjWeight
+      _nominal_yield_COWCorr = 0
+      for i in range(_nominalData.numEntries()):
+	p = _nominalData.get(i)
+	w = _nominalData.weight()
+        f_COWCorr, f_NNLOPS = p.getRealValue("centralObjectWeight"), abs(p.getRealValue("NNLOPSweight"))
+        if f_COWCorr == 0: continue
+        else: _nominal_yield_COWCorr += w*(f_NNLOPS/f_COWCorr)
     
     if opt.skipCOWCorr: data.loc[len(data)] = [_proc,_cat,_granular_key,_nominal_yield]
     else: data.loc[len(data)] = [_proc,_cat,_granular_key,_nominal_yield,_nominal_yield_COWCorr]

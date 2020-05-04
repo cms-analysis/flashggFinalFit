@@ -55,7 +55,7 @@ def getValueFromJson(row,uncertainties,sname):
 # c) Anti-symmetric shifts in RooDataHist: "a_h"
 def factoryType(d,s):
 
-  #FIXME: fix for pdfWeight (as > 10)
+  #Fix for pdfWeight (as > 10)
   if('pdfWeight' in s['name'])|('alphaSWeight' in s['name']): return "s_w"
 
   # Extract first signal entry of dataFrame
@@ -67,6 +67,7 @@ def factoryType(d,s):
   # Check if syst is var (weight) in workspace
   if ws.allVars().selectByName("%s*"%(s['name'])).getSize():
     nWeights = ws.allVars().selectByName("%s*"%(s['name'])).getSize()
+    ws.Delete()
     if nWeights == 2: return "a_w"
     elif nWeights == 1: return "s_w"
     else:
@@ -76,7 +77,10 @@ def factoryType(d,s):
   # Else: check if RooDataHist exist
   dataHistUp = "%s_%sUp01sigma"%(r0.nominalDataName,s['name'])
   dataHistDown = "%s_%sDown01sigma"%(r0.nominalDataName,s['name'])
-  if(ws.data(dataHistUp)!=None)&(ws.data(dataHistDown)!=None): return "a_h"
+  if(ws.data(dataHistUp)!=None)&(ws.data(dataHistDown)!=None): 
+    ws.Delete()
+    return "a_h"
+
   
   print " --> [ERROR] systematic %s: cannot extract type in factoryType function. Doesn't match requirement for (anti)-symmetric weights or anti-symmetric histograms. Leaving..."
   sys.exit(1)
@@ -112,8 +116,7 @@ def calcSystYields(_nominalDataName,_inputWS,_systFactoryTypes,skipCOWCorr=True)
       # If asymmetric weights:
       elif f == "a_w":
         centralWeightStr = "centralObjectWeight"
-        if "NOTAG" in _nominalDataName: f_central = 1.
-        else: f_central = p.getRealValue(centralWeightStr)
+        f_central = p.getRealValue(centralWeightStr)
         f_up, f_down = p.getRealValue("%sUp01sigma"%s), p.getRealValue("%sDown01sigma"%s)
         # Checks:
         # 1) if central weights are zero then skip event
@@ -126,11 +129,11 @@ def calcSystYields(_nominalDataName,_inputWS,_systFactoryTypes,skipCOWCorr=True)
         systYields["%s_up"%s] += w_up        
         systYields["%s_down"%s] += w_down
         if not skipCOWCorr:
-          if "NOTAG" in _nominalDataName: f_COWCorr = 1.
-          else: f_COWCorr = p.getRealValue("centralObjectWeight")
+          f_COWCorr, f_NNLOPS = p.getRealValue("centralObjectWeight"), abs(p.getRealValue("NNLOPSweight"))
           if f_COWCorr == 0: continue
-	  systYields["%s_up_COWCorr"%s] += (w_up/f_COWCorr)        
-	  systYields["%s_down_COWCorr"%s] += (w_down/f_COWCorr)
+          else: 
+            systYields["%s_up_COWCorr"%s] += w_up*(f_NNLOPS/f_COWCorr)
+            systYields["%s_down_COWCorr"%s] += w_down*(f_NNLOPS/f_COWCorr)
 
       # If symmetric weights
       else:
@@ -139,10 +142,14 @@ def calcSystYields(_nominalDataName,_inputWS,_systFactoryTypes,skipCOWCorr=True)
         elif "pdfWeight" in s: centralWeightStr = "pdfWeight_0"
         else: centralWeightStr = "centralObjectWeight"
 
-        # FIXME: temporary fix to avoid non/wrong entries in tH/bbH
-        if("tHq" in _nominalDataName)|("tHW" in _nominalDataName)|("bbH" in _nominalDataName): 
+        # No theory weights for tH, bbH
+        # FIXME: all for ttH in this iteration (being fixed)
+        if("tth" in _nominalDataName)|("thq" in _nominalDataName)|("thw" in _nominalDataName)|("bbh" in _nominalDataName): 
           systYields[s] += w
-          if not skipCOWCorr: systYields["%s_COWCorr"%s] += w
+          if not skipCOWCorr: 
+            f_COWCorr, f_NNLOPS = p.getRealValue("centralObjectWeight"), abs(p.getRealValue("NNLOPSweight"))
+            if f_COWCorr == 0: continue
+            else: systYields["%s_COWCorr"%s] += w*(f_NNLOPS/f_COWCorr)
         else:
 	  f_central = p.getRealValue(centralWeightStr)
 	  f = p.getRealValue(s)
@@ -152,10 +159,9 @@ def calcSystYields(_nominalDataName,_inputWS,_systFactoryTypes,skipCOWCorr=True)
 	    # Add weights to counter
 	    systYields[s] += w*(f/f_central)
 	    if not skipCOWCorr:
-	      if "NOTAG" in _nominalDataName: f_COWCorr = 1.
-	      else: f_COWCorr = p.getRealValue("centralObjectWeight")
-	      if f_COWCorr == 0: continue
-	      systYields["%s_COWCorr"%s] += (w/f_COWCorr)*(f/f_central)
+              f_COWCorr, f_NNLOPS = p.getRealValue("centralObjectWeight"), abs(p.getRealValue("NNLOPSweight"))
+              if f_COWCorr == 0: continue
+              else: systYields["%s_COWCorr"%s] += w*(f_NNLOPS/f_COWCorr)*(f/f_central)
 
   # For systematics stored as RooDataHist
   for s, f in _systFactoryTypes.iteritems():
@@ -331,7 +337,12 @@ def compareYield(row,factoryType,sname,mode='default',mname=None):
       if row["proc_%s_yield"%sname] == 0: return [1.]
 
   if( mode == 'default' )|( mode == 'ishape' ):
-    if factoryType in ["a_w","a_h"]: return [(row["%s_down_yield"%sname]/row['nominal_yield']),(row["%s_up_yield"%sname]/row['nominal_yield'])]
+    # FIXME: some a_h variations are not centred around nominal_yield, take symmetric
+    if factoryType == "a_h":
+      midpoint_yield = 0.5*(row["%s_down_yield"%sname]+row["%s_up_yield"%sname])
+      if midpoint_yield == 0: return [1.,1.]
+      else: return [(row["%s_down_yield"%sname]/midpoint_yield),(row["%s_up_yield"%sname]/midpoint_yield)]
+    elif factoryType == "a_w": return [(row["%s_down_yield"%sname]/row['nominal_yield']),(row["%s_up_yield"%sname]/row['nominal_yield'])]
     else: return [row["%s_yield"%sname]/row['nominal_yield']]
 
   elif mode=='shape':

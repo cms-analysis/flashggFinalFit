@@ -216,6 +216,7 @@ if opt.doBands:
       opt.doBands = False
     else:
       for tidx in range(len(toyFiles)):
+        print " --> Processing toy (%g/%g)"%(tidx,len(toyFiles))
 	ftoy = ROOT.TFile(toyFiles[tidx])
 	toy = ftoy.Get("toys/toy_asimov")
 	# Save bin contents in dict

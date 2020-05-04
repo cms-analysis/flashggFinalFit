@@ -240,22 +240,18 @@ for ir,r in data[data['type']=='sig'].iterrows():
 
   # Calculate nominal yield with COW correction for in acceptance events
   if not opt.skipCOWCorr:
-    if 'NOTAG' in r['cat']: data.at[ir,'nominal_yield_COWCorr'] = rdata_nominal.sumEntries()
-    # FIXME: Temporary fix for tHq (centralObjectWeight) is wrong
-    elif 'tHq' in r['proc']: data.at[ir,'nominal_yield_COWCorr'] = rdata_nominal.sumEntries()
-    else:
-      y_COWCorr = 0
-      for i in range(0,rdata_nominal.numEntries()):
-	p = rdata_nominal.get(i)
-	w = rdata_nominal.weight()
-	f_COWCorr = p.getRealValue("centralObjectWeight")
-	if f_COWCorr == 0: continue
-	else: y_COWCorr += w/f_COWCorr
-      data.at[ir,'nominal_yield_COWCorr'] = y_COWCorr
+    y_COWCorr = 0
+    for i in range(0,rdata_nominal.numEntries()):
+      p = rdata_nominal.get(i)
+      w = rdata_nominal.weight()
+      f_COWCorr, f_NNLOPS = p.getRealValue("centralObjectWeight"), abs(p.getRealValue("NNLOPSweight"))
+      if f_COWCorr == 0: continue
+      else: y_COWCorr += w*(f_NNLOPS/f_COWCorr)
+    data.at[ir,'nominal_yield_COWCorr'] = y_COWCorr
        
   # Systematics: loop over systematics and use function to extract yield variations
   if opt.doSystematics:
-    # For experimental systematics: skip NOTAG (as incorrect weights)
+    # For experimental systematics: skip NOTAG events
     if "NOTAG" not in r['cat']:
       experimentalSystYields = calcSystYields(r['nominalDataName'],inputWS,experimentalFactoryType)
       for s,f in experimentalFactoryType.iteritems():

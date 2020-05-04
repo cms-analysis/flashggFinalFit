@@ -12,7 +12,7 @@ def get_options():
   parser.add_option("--loadSnapshot", dest="loadSnapshot", default=None, help="Load best-fit snapshot name")
   parser.add_option("--ext", dest="ext", default='', help="Extension for saving")
   parser.add_option("--nToys", dest="nToys", default=500, type='int', help="Number of toys")
-  parser.add_option("--POI", dest="POI", default="r", help="Parameter of interest in fit")
+  parser.add_option("--POIs", dest="POIs", default="r", help="Parameters of interest in fit")
   parser.add_option('--dryRun',dest='dryRun', default=False, action="store_true", help='Dry run')
   return parser.parse_args()
 (opt,args) = get_options()
@@ -30,7 +30,15 @@ inputWSFile = "%s/%s"%(os.environ['PWD'],opt.inputWSFile)
 f = ROOT.TFile(inputWSFile)
 w = f.Get("w")
 if opt.loadSnapshot is not None: w.loadSnapshot(opt.loadSnapshot)
-poi_bf = w.var( opt.POI ).getVal()
+poi_bf = {}
+for poi in opt.POIs.split(","): poi_bf[poi] = w.var(poi).getVal()
+setParamStr = "--setParameters "
+setParam0Str = "--setParameters "
+for p,v in poi_bf.iteritems(): 
+  setParamStr += "%s=%.3f,"%(p,v)
+  setParam0Str += "%s=0,"%p
+setParamStr = setParamStr[:-1]
+setParam0Str = setParam0Str[:-1]
 mh_bf = w.var("MH").getVal()
 
 # Create submission file
@@ -42,19 +50,19 @@ for itoy in range(0,opt.nToys):
   # Generate command
   fsub.write("#Generate command\n")
   #gen_cmd = "combine %s -m %.3f -M GenerateOnly --saveWorkspace --toysFrequentist --bypassFrequentistFit -t 1 --setParameters %s=%.3f -s -1 -n _%g_gen_step"%(inputWSFile,mh_bf,opt.POI,poi_bf,itoy)
-  gen_cmd = "combine %s -m %.3f -M GenerateOnly --saveWorkspace --toysFrequentist --bypassFrequentistFit -t 1 --expectSignal %.3f -s -1 -n _%g_gen_step"%(inputWSFile,mh_bf,poi_bf,itoy)
+  gen_cmd = "combine %s -m %.3f -M GenerateOnly --saveWorkspace --toysFrequentist --bypassFrequentistFit -t 1 %s -s -1 -n _%g_gen_step"%(inputWSFile,mh_bf,setParamStr,itoy)
   if opt.loadSnapshot is not None: gen_cmd += " --snapshotName %s"%opt.loadSnapshot
   fsub.write("%s\n\n"%gen_cmd)
   # Fit cmd
   fsub.write("#Fit command\n")
   fsub.write("mv higgsCombine_%g_gen_step*.root gen_%g.root\n"%(itoy,itoy))
   #fit_cmd = "combine gen_%g.root -m %.3f -M MultiDimFit --floatOtherPOIs=1 --saveWorkspace --toysFrequentist --bypassFrequentistFit -t 1 --setParameters %s=%.3f -s -1 -n _%g_fit_step --cminDefaultMinimizerStrategy 0 --X-rtd MINIMIZER_freezeDisassociatedParams --X-rtd MINIMIZER_multiMin_hideConstants --X-rtd MINIMIZER_multiMin_maskConstraints --X-rtd MINIMIZER_multiMin_maskChannels=2"%(itoy,mh_bf,opt.POI,poi_bf,itoy)
-  fit_cmd = "combine gen_%g.root -m %.3f -M MultiDimFit --floatOtherPOIs=1 --saveWorkspace --toysFrequentist --bypassFrequentistFit -t 1 --expectSignal %.3f -s -1 -n _%g_fit_step --cminDefaultMinimizerStrategy 0 --X-rtd MINIMIZER_freezeDisassociatedParams --X-rtd MINIMIZER_multiMin_hideConstants --X-rtd MINIMIZER_multiMin_maskConstraints --X-rtd MINIMIZER_multiMin_maskChannels=2"%(itoy,mh_bf,poi_bf,itoy)
+  fit_cmd = "combine gen_%g.root -m %.3f -M MultiDimFit -P %s --floatOtherPOIs=1 --saveWorkspace --toysFrequentist --bypassFrequentistFit -t 1 %s -s -1 -n _%g_fit_step --cminDefaultMinimizerStrategy 0 --X-rtd MINIMIZER_freezeDisassociatedParams --X-rtd MINIMIZER_multiMin_hideConstants --X-rtd MINIMIZER_multiMin_maskConstraints --X-rtd MINIMIZER_multiMin_maskChannels=2"%(itoy,mh_bf,opt.POIs.split(",")[0],setParamStr,itoy)
   fsub.write("%s\n\n"%fit_cmd)
   # Throw cmd
   fsub.write("#Throw command\n")
   fsub.write("mv higgsCombine_%g_fit_step*.root fit_%g.root\n"%(itoy,itoy))
-  throw_cmd = "combine fit_%g.root -m %.3f --snapshotName MultiDimFit -M GenerateOnly --saveToys --toysFrequentist --bypassFrequentistFit -t -1 -n _%g_throw_step --expectSignal 0"%(itoy,mh_bf,itoy)
+  throw_cmd = "combine fit_%g.root -m %.3f --snapshotName MultiDimFit -M GenerateOnly --saveToys --toysFrequentist --bypassFrequentistFit -t -1 -n _%g_throw_step %s"%(itoy,mh_bf,itoy,setParam0Str)
   fsub.write("%s\n\n"%throw_cmd)
   # Clean up
   fsub.write("mv higgsCombine_%g_throw_step*.root toy_%g.root\n"%(itoy,itoy))
@@ -65,6 +73,6 @@ for itoy in range(0,opt.nToys):
 os.system("chmod 775 ./SplusBModels%s/toys/jobs/sub*.sh"%opt.ext)
 if not opt.dryRun:
   subs = glob.glob("./SplusBModels%s/toys/jobs/sub*"%opt.ext)
-  for fsub in subs: os.system("qsub -q hep.q -l h_rt=3:0:0 -l h_vmem=24G %s"%fsub)
+  for fsub in subs: os.system("qsub -q hep.q -l h_rt=4:0:0 -l h_vmem=24G %s"%fsub)
 else: print " --> [DRY-RUN] jobs have not been submitted"
   
