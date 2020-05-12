@@ -697,7 +697,7 @@ int main(int argc, char* argv[]){
 			intL  = intLumi_;
 			sqrts = (RooRealVar*)inWS->var("SqrtS");
 			if (!sqrts){ sqrts = new RooRealVar("SqrtS","SqrtS",13); }
-		std::cout << "[INFO] got intL and sqrts " << intL << ", " << sqrts << std::endl;
+		// std::cout << "[INFO] got intL and sqrts " << intL << ", " << sqrts << std::endl;
 
 
 		} else {
@@ -741,13 +741,11 @@ int main(int argc, char* argv[]){
 
 	std::string ext = is2011 ? "7TeV" : "8TeV";
         if( isFlashgg_ ){
-          std::cout << "right before" << std::endl;
           if( year_ == "all" ){ ext = "13TeV"; }
           else if (year_ == "2017" ) {ext = "13TeV"; }
           // else if( year_ == "2017" ){ ext = "13TeV"; }
           //else{ ext = "13TeV"; } //FIXME 
           else{ ext = Form("%s_13TeV",year_); }
-          std::cout << "right after" << std::endl;
         }
 	//if (isFlashgg_) ext = "13TeV";
         //FIXME trying to remove duplicated names for 2016+2017 combination

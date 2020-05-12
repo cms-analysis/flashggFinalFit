@@ -118,6 +118,7 @@ RooRealVar *intLumi_;
 bool beamSpotReweigh_ = false;
 bool useDCBplusGaus_ = false;
 string analysis_ = "hig-16-040"; // Option to define which replacement mapping to use, default is hig-16-040
+string analysis_type_ = "";
 // string ReplaceMapping_ = "hig-16-040";
 
 void OptionParser(int argc, char *argv[]){
@@ -156,6 +157,7 @@ void OptionParser(int argc, char *argv[]){
 		("beamSpotReweigh",	po::value<bool>(&beamSpotReweigh_)->default_value(false),														"Reweight events to  discrepancy in width of beamspot between data and MC")
 		("useDCBplusGaus",	po::value<bool>(&useDCBplusGaus_)->default_value(false),														"Use Double Crystal Ball plus 1 Gaussian to do fits instead of a sum of Gaussians")
 		("analysis",	po::value<string>(&analysis_)->default_value("hig-16-040"),  	"Configure replacement dataset mapping for given analysis (Mapping defined in python/replacementMap.py")
+		("analysis_type",	po::value<string>(&analysis_type_)->default_value(""),  	"Used for HHWWgg. Ex: Res, EFT, NMSSM")
 		("year",	po::value<int>(&year_)->default_value(2016),  	"Dataset year")
       ("split", po::value<string>(&splitStr_)->default_value(""), "do just one tag,proc ")
 		("changeIntLumi",	po::value<float>(&newIntLumi_)->default_value(0),														"If you want to specify an intLumi other than the one in the file. The event weights and rooRealVar IntLumi are both changed accordingly. (Specify new intlumi in fb^{-1})")
@@ -514,7 +516,8 @@ int main(int argc, char *argv[]){
 	dZ_->setBins(100);
   intLumi_ = (RooRealVar*)inWS->var("IntLumi");
   if (!intLumi_) {
-     intLumi_ = new RooRealVar("IntLumi","hacked int lumi", 1000.);
+    //  intLumi_ = new RooRealVar("IntLumi","hacked int lumi", 1000.);
+     intLumi_ = new RooRealVar("IntLumi","hacked int lumi", 1000);
      std::cout << "WARNING THIS IS A DUMMY INTLUMI MAKE SURE TO REMOVE ONCE NORMALISATION BUG IS FIXED " << std::endl;
   }
   originalIntLumi_ =(intLumi_->getVal());// specify in 1/pb
@@ -705,7 +708,12 @@ int main(int argc, char *argv[]){
 
     	string HHWWgg_Label = ""; // ex: X250_WWgg_qqlnugg
 
+
+
       if(analysis_ == "HHWWgg"){
+
+        // Get HHWWgg label from file name 
+        if(analysis_type_ == "Res"){
           // vector<string> filenameStr_;
           // get hhwwgg label from first of three files (120,125,130)
           // filename_[0].c_str()
@@ -719,13 +727,49 @@ int main(int argc, char *argv[]){
           split(tmpV2,endPath,boost::is_any_of("_"));	           
           string mass_str = tmpV2[2];
           HHWWgg_Label = Form("%s_WWgg_qqlnugg",mass_str.c_str());
+        }
+        else if (analysis_type_ == "EFT"){
+          // RooAbsData name format: GluGluToHHTo_WWgg_qqlnu_nodeX_13TeV_HHWWggTag_Y
+          // proc = GluGluToHHTo, 13TeV_HHWWggTag_Y already included 
+          // HHWWgg_Label = WWgg_qqlnu_nodeX
+          vector<string> tmpV;
+          split(tmpV,filename_[0],boost::is_any_of("/"));	
+          unsigned int N = tmpV.size();  
+          string endPath = tmpV[N-1];
+          vector<string> tmpV2;
+          split(tmpV2,endPath,boost::is_any_of("_"));	 
+          string node_str = tmpV2[2];
+          HHWWgg_Label = Form("WWgg_qqlnu_%s",node_str.c_str());
+        }
+				else if (analysis_type_ == "NMSSM"){
+					// file name format: X_signal_MX<xmass>_MY<ymass>_<interpMass>_HHWWgg_qqlnu.root
+					// RooAbsData name format: NMSSM_XYHWWggqqlnu_MX<massX>_MY<massY>_13TeV_HHWWggTag_Y
+					vector<string> tmpV;
+					split(tmpV,filename_[0],boost::is_any_of("/"));	
+					unsigned int N = tmpV.size();  
+					string endPath = tmpV[N-1];
+					vector<string> tmpV2;
+					split(tmpV2,endPath,boost::is_any_of("_"));	 
+					string XmassString = tmpV2[2]; // for this file the form is different. X_signal_MX300_MY170_120_HHWWgg_qqlnu.root 
+					string YmassString = tmpV2[3]; 
+					HHWWgg_Label = Form("XYHWWggqqlnu_%s_%s",XmassString.c_str(),YmassString.c_str());
+					cout << "Going to look for: " << HHWWgg_Label.c_str() << endl;
+				}
+// GluGluToHHTo_WWgg_qqlnu_node2_13TeV_HHWWggTag_0_120 // there 
+// GluGluToHHTo_node2_WWgg_qqlnugg_13TeV_HHWWggTag_0_120 // looking for  
+
       }
 
         if (verbose_)std::cout << "[INFO] Opening dataset called "<< Form("%s_%d_13TeV_%s",proc.c_str(),mh,cat.c_str()) << " in in WS " << inWS << std::endl;
         // RooDataSet *data0   = reduceDataset((RooDataSet*)inWS->data(Form("%d%s",mh,proc.c_str()), Form("%s_%d_13TeV_%s",proc.c_str(),mh,cat.c_str())));
         RooDataSet *data0;
         if(analysis_ == "HHWWgg"){
-          RooDataSet *data00   = reduceDataset((RooDataSet*)inWS->data(Form("%s_%s_13TeV_%s_%d",proc.c_str(),HHWWgg_Label.c_str(),cat.c_str(),mh)));  
+          RooDataSet *data00;
+          // if(analysis_type_ == "NMSSM") (RooDataSet*)inWS->data(Form("NMSSM_%s_13TeV_%s",HHWWgg_Label.c_str(),flashggCats_[cat].c_str())); // HHWWgg NMSSM form 
+          if(analysis_type_ == "NMSSM") data00 = reduceDataset((RooDataSet*)inWS->data(Form("NMSSM_%s_13TeV_%s_%d",HHWWgg_Label.c_str(),cat.c_str(),mh))); 
+          else data00 = reduceDataset((RooDataSet*)inWS->data(Form("%s_%s_13TeV_%s_%d",proc.c_str(),HHWWgg_Label.c_str(),cat.c_str(),mh))); 
+
+          // RooDataSet *data00   = reduceDataset((RooDataSet*)inWS->data(Form("%s_%s_13TeV_%s_%d",proc.c_str(),HHWWgg_Label.c_str(),cat.c_str(),mh)));  
           data0 = data00;
         }
         else{
@@ -774,7 +818,10 @@ int main(int argc, char *argv[]){
 
         RooDataSet *data0;
         if(analysis_ == "HHWWgg"){
-          RooDataSet *data00   = reduceDataset((RooDataSet*)inWS->data(Form("%s_%s_13TeV_%s_%d",proc.c_str(),HHWWgg_Label.c_str(),cat.c_str(),mh)));  
+          RooDataSet *data00;
+          if(analysis_type_ == "NMSSM") data00 = reduceDataset((RooDataSet*)inWS->data(Form("NMSSM_%s_13TeV_%s_%d",HHWWgg_Label.c_str(),cat.c_str(),mh))); 
+          else data00 = reduceDataset((RooDataSet*)inWS->data(Form("%s_%s_13TeV_%s_%d",proc.c_str(),HHWWgg_Label.c_str(),cat.c_str(),mh))); 
+          // RooDataSet *data00   = reduceDataset((RooDataSet*)inWS->data(Form("%s_%s_13TeV_%s_%d",proc.c_str(),HHWWgg_Label.c_str(),cat.c_str(),mh)));  
           data0 = data00;
         }
         else{
@@ -831,7 +878,7 @@ int main(int argc, char *argv[]){
           
           string replancementProc = map_replacement_proc_WV_[thisProcCatIndex];
           string replancementCat = map_replacement_cat_WV_[thisProcCatIndex];
-          cout << "replancementProc: " << replancementProc << endl;
+          cout << "replacementProc: " << replancementProc << endl;
           int replacementIndex = getIndexOfReferenceDataset(replancementProc,replancementCat);
           nGaussiansWV= map_nG_wv_[replacementIndex]; 
         
@@ -854,6 +901,17 @@ int main(int argc, char *argv[]){
 
         if(analysis_ == "HHWWgg"){
           string HHWWggLabel = "";
+
+          // vector<string> tmpV;
+          // split(tmpV,filename_[0],boost::is_any_of("/"));	
+          // unsigned int N = tmpV.size();  
+          // string endPath = tmpV[N-1];
+          // vector<string> tmpV2;                    
+          // split(tmpV2,endPath,boost::is_any_of("_"));	           
+          // string mass_str = tmpV2[2];
+          // HHWWggLabel = Form("%s_WWgg_qqlnugg",mass_str.c_str());
+
+        if(analysis_type_ == "Res"){
           vector<string> tmpV;
           split(tmpV,filename_[0],boost::is_any_of("/"));	
           unsigned int N = tmpV.size();  
@@ -862,16 +920,77 @@ int main(int argc, char *argv[]){
           split(tmpV2,endPath,boost::is_any_of("_"));	           
           string mass_str = tmpV2[2];
           HHWWggLabel = Form("%s_WWgg_qqlnugg",mass_str.c_str());
-         RooDataSet *data0Ref00   = rvwvDataset(
+        }
+        else if (analysis_type_ == "EFT"){
+          // File name format: nodeX_HHWWgg_qqlnu
+          // RooAbsData name format: GluGluToHHTo_WWgg_qqlnu_nodeX_13TeV_HHWWggTag_Y
+          // proc = GluGluToHHTo, 13TeV_HHWWggTag_Y already included 
+          // HHWWgg_Label = WWgg_qqlnu_nodeX
+          vector<string> tmpV;
+          split(tmpV,filename_[0],boost::is_any_of("/"));	
+          unsigned int N = tmpV.size();  
+          string endPath = tmpV[N-1];
+          vector<string> tmpV2;
+          split(tmpV2,endPath,boost::is_any_of("_"));	 
+          string node_str = tmpV2[2];
+          HHWWggLabel = Form("WWgg_qqlnu_%s",node_str.c_str());
+        }
+				else if (analysis_type_ == "NMSSM"){
+					// file name format: MX<massX>_MY<massY>_HHWWgg_qqlnu.root
+					// RooAbsData name format: NMSSM_XYHWWggqqlnu_MX<massX>_MY<massY>_13TeV_HHWWggTag_Y
+					// vector<string> tmpV;
+					// split(tmpV,filename_[0],boost::is_any_of("/"));	
+					// unsigned int N = tmpV.size();  
+					// string endPath = tmpV[N-1];
+					// vector<string> tmpV2;
+					// split(tmpV2,endPath,boost::is_any_of("_"));	 
+					// string XmassString = tmpV2[0]; 
+					// string YmassString = tmpV2[1]; 
+					// HHWWgg_Label = Form("XYHWWggqqlnu_%s_%s",XmassString.c_str(),YmassString.c_str());
+
+
+					// file name format: X_signal_MX<xmass>_MY<ymass>_<interpMass>_HHWWgg_qqlnu.root
+					// RooAbsData name format: NMSSM_XYHWWggqqlnu_MX<massX>_MY<massY>_13TeV_HHWWggTag_Y
+					vector<string> tmpV;
+					split(tmpV,filename_[0],boost::is_any_of("/"));	
+					unsigned int N = tmpV.size();  
+					string endPath = tmpV[N-1];
+					vector<string> tmpV2;
+					split(tmpV2,endPath,boost::is_any_of("_"));	 
+					string XmassString = tmpV2[2]; // for this file the form is different. X_signal_MX300_MY170_120_HHWWgg_qqlnu.root 
+					string YmassString = tmpV2[3]; 
+					HHWWggLabel = Form("XYHWWggqqlnu_%s_%s",XmassString.c_str(),YmassString.c_str());
+
+				}         
+
+        RooDataSet *data0Ref00;
+        if(analysis_type_ == "NMSSM"){
+         data0Ref00   = rvwvDataset(
                         intLumiReweigh(
-                          reduceDataset(
-                          (RooDataSet*)inWS->data(Form("%s_%s_13TeV_%s_%d",replancementProc.c_str(),HHWWggLabel.c_str(),replancementCat.c_str(),mh))
-                          // (RooDataSet*)inWS->data(Form("%s_%d_13TeV_%s",referenceProcWV_.c_str(),mh,referenceTagWV_.c_str()))
-                          	// (RooDataSet*)inWS->data(Form("%d%s",mh,replancementProc.c_str()), Form("%s_%d_13TeV_%s",replancementProc.c_str(),mh,replancementCat.c_str()))
+                          reduceDataset( 
+                          (RooDataSet*)inWS->data(Form("NMSSM_%s_13TeV_%s_%d",HHWWggLabel.c_str(),replancementCat.c_str(),mh))
                          )
                        ), "WV"
                       );
-          data0Ref = data0Ref00;        
+        }
+
+        else{
+         data0Ref00   = rvwvDataset(
+                        intLumiReweigh(
+                          reduceDataset(
+                          (RooDataSet*)inWS->data(Form("%s_%s_13TeV_%s_%d",replancementProc.c_str(),HHWWggLabel.c_str(),replancementCat.c_str(),mh))
+                         )
+                       ), "WV"
+                      );
+        }
+
+
+
+          data0Ref = data0Ref00;       
+
+
+
+
         }  
 
         else{
@@ -1137,6 +1256,12 @@ int main(int argc, char *argv[]){
     // cout << "split: " << split << endl;
     // cout << "split_[0]: " << split_[0] << endl;
     // cout << "split_[1]: " << split_[1] << endl;
+
+    // string HHWWggproc = "";
+
+    // if(analysis_type_ == "Res") HHWWggProc = "ggF";
+    // else if (analysis_type_ == "EFT") HHWWggProc = "GluGluToHHTo";
+    // else if (analysis_type_ == "NMSSM") HHWWggProc = "ggF";
 
     // packager.packageOutput(/*split*/split, /*proc*/split_[0], /*tag*/ split_[1] );
     packager.packageOutput(/*split*/split, /*proc*/"ggF", /*tag*/ "HHWWggTag_0" ); // HHWWgg 

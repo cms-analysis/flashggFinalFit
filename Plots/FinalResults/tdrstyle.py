@@ -132,6 +132,7 @@ def setTDRStyle():
  
 # Change for log plots:
   tdrStyle.SetOptLogx(0)
+  # tdrStyle.SetOptLogy(0)
   tdrStyle.SetOptLogy(1)
   tdrStyle.SetOptLogz(0)
  
@@ -152,4 +153,6 @@ def setTDRStyle():
   tdrStyle.SetHatchesLineWidth(5)
   tdrStyle.SetHatchesSpacing(0.05)
  
-  tdrStyle.cd()
+  # tdrStyle.cd()
+
+  return tdrStyle 

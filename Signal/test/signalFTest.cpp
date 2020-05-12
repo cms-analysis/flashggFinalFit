@@ -54,6 +54,7 @@ bool forceFracUnity_=false;
 bool isFlashgg_;
 bool verbose_;
 string analysis_ = "";
+string analysis_type_ = "";
 
 void OptionParser(int argc, char *argv[]){
 	po::options_description desc1("Allowed options");
@@ -72,7 +73,8 @@ void OptionParser(int argc, char *argv[]){
 		("flashggCats,f", po::value<string>(&flashggCatsStr_)->default_value("UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,UntaggedTag_4,VBFTag_0,VBFTag_1,VBFTag_2,TTHHadronicTag,TTHLeptonicTag,VHHadronicTag,VHTightTag,VHLooseTag,VHEtTag"),       "Flashgg category names to consider")
 		("considerOnly", po::value<string>(&considerOnlyStr_)->default_value("All"), 
     "If you wish to only consider a subset cat in the list, list them as separated by commas. ")
-		("analysis",	po::value<string>(&analysis_)->default_value(""),  	"analysis")
+		("analysis",	po::value<string>(&analysis_)->default_value(""),  	"analysis. Ex: HHWWgg")
+		("analysis_type",	po::value<string>(&analysis_type_)->default_value(""),  	"analysis type. Ex: Res, EFT, NMSSM")
 		;
 
 	po::options_description desc("Allowed options");
@@ -159,7 +161,7 @@ void fTest(string analysis_, string filename, string outdir_, vector<string> pro
 	RooRealVar *mass = (RooRealVar*)inWS->var("CMS_hgg_mass");
   if(verbose_) std::cout << "[INFO] Got mass variable " << mass << std::endl;
 
-	string HHWWgg_Label = ""; // ex: X250_WWgg_qqlnugg
+	string HHWWgg_Label = ""; // ex: X250_WWgg_qqlnugg, GluGluToHHTo_WWgg_qqlnu_node2
 
 	std::cout << "outdir_: " << outdir_ << endl;
   	// string outdir_Original = outdir_;
@@ -167,15 +169,50 @@ void fTest(string analysis_, string filename, string outdir_, vector<string> pro
 	// if HHWWgg, customize outdir for each mass point 
 	if(analysis_ == "HHWWgg"){
 
+		// get Res, EFT, or NMSSM flag 
+
 	// 	// Get HHWWgg label from file name 
-		vector<string> tmpV;
-		split(tmpV,filename,boost::is_any_of("/"));	
-		unsigned int N = tmpV.size();  
-		string endPath = tmpV[N-1];
-		vector<string> tmpV2;
-		split(tmpV2,endPath,boost::is_any_of("_"));	 
-		string mass_str = tmpV2[0];
-		HHWWgg_Label = Form("%s_WWgg_qqlnugg",mass_str.c_str());
+
+		if(analysis_type_ == "Res"){
+			vector<string> tmpV;
+			split(tmpV,filename,boost::is_any_of("/"));	
+			unsigned int N = tmpV.size();  
+			string endPath = tmpV[N-1];
+			vector<string> tmpV2;
+			split(tmpV2,endPath,boost::is_any_of("_"));	 
+			string mass_str = tmpV2[0];
+			HHWWgg_Label = Form("%s_WWgg_qqlnugg",mass_str.c_str());
+		}
+		else if (analysis_type_ == "EFT"){
+			// File name format: nodeX_HHWWgg_qqlnu
+			// RooAbsData name format: GluGluToHHTo_WWgg_qqlnu_nodeX_13TeV_HHWWggTag_Y
+			// proc = GluGluToHHTo, 13TeV_HHWWggTag_Y already included 
+			// HHWWgg_Label = WWgg_qqlnu_nodeX
+			vector<string> tmpV;
+			split(tmpV,filename,boost::is_any_of("/"));	
+			unsigned int N = tmpV.size();  
+			string endPath = tmpV[N-1];
+			vector<string> tmpV2;
+			split(tmpV2,endPath,boost::is_any_of("_"));	 
+			string node_str = tmpV2[0];
+			HHWWgg_Label = Form("WWgg_qqlnu_%s",node_str.c_str());
+		}
+		else if (analysis_type_ == "NMSSM"){
+			// file name format: MX<massX>_MY<massY>_HHWWgg_qqlnu.root
+			// RooAbsData name format: NMSSM_XYHWWggqqlnu_MX<massX>_MY<massY>_13TeV_HHWWggTag_Y
+			vector<string> tmpV;
+			split(tmpV,filename,boost::is_any_of("/"));	
+			unsigned int N = tmpV.size();  
+			string endPath = tmpV[N-1];
+			vector<string> tmpV2;
+			split(tmpV2,endPath,boost::is_any_of("_"));	 
+			string XmassString = tmpV2[0]; 
+			string YmassString = tmpV2[1]; 
+			HHWWgg_Label = Form("XYHWWggqqlnu_%s_%s",XmassString.c_str(),YmassString.c_str());
+			cout << "Going to look for: " << HHWWgg_Label.c_str() << endl;
+		}
+
+		
 
 	// 	outdir_ = outdir_Original;
 	// 	outdir_.append("_");
@@ -281,22 +318,21 @@ void fTest(string analysis_, string filename, string outdir_, vector<string> pro
 				RooDataSet *data0;
 				if(analysis_ == "HHWWgg"){
 
-					// // Get HHWWgg label from file name 
-					// vector<string> tmpV;
-					// split(tmpV,filename,boost::is_any_of("/"));	
-					// unsigned int N = tmpV.size();  
-					// string endPath = tmpV[N-1];
-					// vector<string> tmpV2;
-					// split(tmpV2,endPath,boost::is_any_of("_"));	 
-					// string mass = tmpV2[0];
-					// HHWWgg_Label = Form("%s_WWgg_qqlnugg",mass.c_str());
-
 					if(verbose_) {
 						std::cout << "HHWWgg label: " << HHWWgg_Label << endl;
 						std::cout << "dataset to look for: " << Form("%s_%s_13TeV_%s",proc.c_str(),HHWWgg_Label.c_str(),flashggCats_[cat].c_str()) << endl;				
 					}
 
-					RooDataSet *data00   = (RooDataSet*)inWS->data(Form("%s_%s_13TeV_%s",proc.c_str(),HHWWgg_Label.c_str(),flashggCats_[cat].c_str())); // HHWWgg
+					RooDataSet *data00;
+
+					if(analysis_type_ == "NMSSM"){
+						data00   = (RooDataSet*)inWS->data(Form("NMSSM_%s_13TeV_%s",HHWWgg_Label.c_str(),flashggCats_[cat].c_str())); // HHWWgg NMSSM form 
+					}
+
+					else{
+						data00   = (RooDataSet*)inWS->data(Form("%s_%s_13TeV_%s",proc.c_str(),HHWWgg_Label.c_str(),flashggCats_[cat].c_str())); // HHWWgg
+					}
+
 					data0 = data00;
 					// std::cout << "dset: " << data0 << endl;
 

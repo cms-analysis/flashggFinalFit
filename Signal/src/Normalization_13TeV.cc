@@ -343,6 +343,10 @@ TGraph * Normalization_13TeV::GetSigmaGraph(TString process)
     XSectionMap = &XSectionMap_HHWWgg; 
   }
   
+    else if ( process=="GluGluToHHTo" ) {
+    XSectionMap = &XSectionMap_HHWWgg; 
+  }
+
   else {
     std::cout << "[WARNING] Normalization_13TeV: No known process found in the name!!" << std::endl;
     std::cout << "[DEBUG] Normalization_13TeV failed for process = " << process << std::endl;
@@ -585,6 +589,10 @@ double Normalization_13TeV::GetXsection(double mass, TString HistName) {
     XSectionMap = &XSectionMap_HHWWgg; 
   }
   
+    else if ( HistName.Contains("GluGluToHHTo") ) {
+    XSectionMap = &XSectionMap_HHWWgg; 
+  }
+
     else {
     std::cout << "[WARNING] Normalization_13TeV: No known process found in the name!!" << HistName << std::endl;
     //exit(1);

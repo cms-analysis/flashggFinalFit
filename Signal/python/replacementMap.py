@@ -10,7 +10,8 @@ replacementProcWV = {
   "stage1":"GG2H_0J",
   "stage1_1":"GG2H_0J_PTH_GT10",
   "stage1_2":"GG2H_0J_PTH_GT10",
-  "HHWWgg":"ggF"
+  "HHWWgg":"ggF",
+  # "HHWWgg":"GluGluToHHTo"
 }
 # Replacement cat for WV fit: 
 replacementCatWV = {
@@ -19,6 +20,7 @@ replacementCatWV = {
   "stage1_1":"RECO_0J_PTH_GT10_Tag1",
   "stage1_2":"RECO_0J_PTH_GT10_Tag1",
   "HHWWgg":"HHWWggTag_0"
+  # "HHWWgg":"HHWWggTag_1"
 }
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

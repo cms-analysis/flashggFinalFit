@@ -88,11 +88,11 @@ FinalModelConstruction::FinalModelConstruction( std::vector<int> massList, RooRe
 	  std::cout << "[ERROR] Normalization Initiation failed, exit." << std::endl;
 	  exit(1);
 	}
-  // this is used to make a graph of the Hgg Branchign Ratio as a function of MH 
+  // this is used to make a graph of the Hgg Branching Ratio as a function of MH 
   TGraph *brGraph = norm->GetBrGraph();
 	brSpline = graphToSpline(Form("fbr_%dTeV",sqrts_),brGraph);
   
-  // make the XS graphs foe each process
+  // make the XS graphs for each process
   for (unsigned int i=0; i<procs_.size(); i++){
     TGraph *xsGraph = norm->GetSigmaGraph(procs_[i].c_str());
     RooSpline1D *xsSpline = graphToSpline(Form("fxs_%s_%dTeV",procs_[i].c_str(),sqrts_),xsGraph);

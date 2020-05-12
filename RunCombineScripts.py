@@ -11,8 +11,10 @@ def get_options():
   # Take inputs from a config file: if this is used then ignore all other options
   parser.add_option('--inputConfig', dest='inputConfig', default='', help="Name of input config file (if specified will ignore other options)")
   
-  # Setup
-  parser.add_option('--analysis', dest='analysis', default='datacard', help="analysis option")
+  # Setup 
+  parser.add_option('--analysis', dest='analysis', default='datacard', help="analysis option") 
+  parser.add_option('--analysis_type', dest='analysis_type', default='', help="analysis type. For HHWWgg: Res, EFT, NMSSM") 
+  parser.add_option('--HHWWggCatLabel', dest='HHWWggCatLabel', default='UnLabelled', help="Option to add to name of comine output files") 
   parser.add_option('--mode', dest='mode', default='datacard', help="Running mode. Options: [datacard,combine,combinePlots,effAcc,yields]")
   parser.add_option('--inputWSDir', dest='inputWSDir', default='/vols/cms/es811/FinalFits/ws_ReweighAndNewggHweights', help="Directory storing flashgg workspaces" )
   parser.add_option('--cats', dest='cats', default='UntaggedTag_0,VBFTag_0', help="Define categories")
@@ -35,6 +37,8 @@ def get_options():
 
   # Miscellaneous options
   parser.add_option('--printOnly', dest='printOnly', default=0, type='int', help="Dry run: print command only")
+  parser.add_option('--doSystematics', dest='doSystematics', default='0', help="Queue")
+  
   return parser.parse_args()
 
 (opt,args) = get_options()
@@ -53,6 +57,8 @@ if opt.inputConfig != '':
 
     #Extract options
     analysis     = _cfg['analysis']
+    analysis_type = _cfg['analysis_type']
+    HHWWggCatLabel = _cfg['HHWWggCatLabel']
     mode         = _cfg['mode']
     inputWSDir   = _cfg['inputWSDir']
     cats         = _cfg['cats']
@@ -67,6 +73,7 @@ if opt.inputConfig != '':
     batch        = _cfg['batch']
     queue        = _cfg['queue']
     printOnly    = opt.printOnly
+    doSystematics= _cfg['doSystematics']
 
     #Delete copy of file
     os.system("rm config.py")
@@ -79,6 +86,8 @@ if opt.inputConfig != '':
 #Else extract from option parser
 else:
   analysis     = opt.analysis 
+  analysis_type = opt.analysis_type
+  HHWWggCatLabel = opt.HHWWggCatLabel
   mode         = opt.mode
   inputWSDir   = opt.inputWSDir
   cats         = opt.cats
@@ -93,6 +102,7 @@ else:
   batch        = opt.batch
   queue        = opt.queue
   printOnly    = opt.printOnly
+  doSystematics= opt.doSystematics
 
 # Check if mode in allowed options
 if mode not in ['datacard','combine','combinePlots','effAcc','yields']:
@@ -207,12 +217,13 @@ if mode not in ['effAcc','yields']:
         print'On File: ',f
         print
         # ext = _HHWWgg_v2-3_2017_X280_WWgg_qqlnugg
+        shortExt = "%s"%ext
         
         massExt = f.split('/')[-1].split('.')[0]
         thisExt = ext + '_' + massExt
-        cmdLine = './runCombineScripts.sh -i %s -p %s -f %s --ext %s --intLumi %s --year %s --dataFile %s --isData '%(f,procs,cats,thisExt,lumi[year],year,dataFile)
+        cmdLine = './runCombineScripts.sh -i %s -p %s -f %s --ext %s --intLumi %s --year %s --dataFile %s --isData --doSystematics %s --shortExt %s --HHWWggCatLabel %s '%(f,procs,cats,thisExt,lumi[year],year,dataFile,doSystematics,shortExt,HHWWggCatLabel)
 
-        cmdLine += '--datacardOnly --smears %s --scales %s --scalesCorr %s --scalesGlobal %s --analysis %s --verbose 1 '%(smears,scales,scalesCorr,scalesGlobal,analysis)
+        cmdLine += ' --datacardOnly --smears %s --scales %s --scalesCorr %s --scalesGlobal %s --analysis %s --verbose 1 --analysis_type %s'%(smears,scales,scalesCorr,scalesGlobal,analysis,analysis_type)
         print'cmdLine: ',cmdLine
         os.system( cmdLine )
     else: 
@@ -226,10 +237,11 @@ if mode not in ['effAcc','yields']:
         print
         print'On File: ',f
         print
-        
+        shortExt = "%s"%ext
         massExt = f.split('/')[-1].split('.')[0]
         thisExt = ext + '_' + massExt
-        cmdLine = './runCombineScripts.sh -i %s -p %s -f %s --ext %s --intLumi %s --year %s --dataFile %s --isData --analysis %s '%(f,procs,cats,ext,lumi[year],year,dataFile,analysis)
+        # print'shortExt:',shortExt
+        cmdLine = './runCombineScripts.sh -i %s -p %s -f %s --ext %s --intLumi %s --year %s --dataFile %s --isData --analysis %s --shortExt %s --HHWWggCatLabel %s --analysis_type %s'%(f,procs,cats,ext,lumi[year],year,dataFile,analysis,shortExt,HHWWggCatLabel,analysis_type)
         cmdLine += ' --combineOnly '
         print'cmdLine: ',cmdLine
         os.system( cmdLine )

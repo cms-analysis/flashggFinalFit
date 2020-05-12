@@ -85,6 +85,8 @@ for cat in range(ncats):
     execLine += ' --makeCrossCheckProfPlots'
   if options.verbose:
     execLine += ' --verbose'
+  if options.analysis == "HHWWgg":
+    execLine += ' --analysis HHWWgg'
   f.write('%s\n'%execLine);
   f.close()
   print execLine
@@ -92,7 +94,10 @@ for cat in range(ncats):
   os.system('chmod +x %s'%f.name)
   # if(args.analysis == "HHWWgg"): 
   # if options.runLocal: os.system('./%s'%f.name)
-  if options.runLocal or options.analysis == "HHWWgg": os.system('./%s'%f.name)
+  print'Running: ','./%s'%f.name
+
+  # if options.runLocal or options.analysis == "HHWWgg": os.system('./%s'%f.name)
+  if options.runLocal or options.analysis == "HHWWgg": os.system(execLine)
   else:
     if (options.batch == "IC") : os.system('qsub -q %s -o %s.log %s'%(options.queue,os.path.abspath(f.name),os.path.abspath(f.name)))
     elif( options.batch == "HTCONDOR" ):

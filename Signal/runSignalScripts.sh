@@ -13,6 +13,7 @@ SCALESGLOBAL="NonLinearity,Geant4,LightYield,Absolute"
 SMEARS="HighR9EE,LowR9EE,HighR9EB,LowR9EB" #DRY RUN
 MASSLIST="120,125,130"
 ANALYSIS="hig-16-040"
+ANALYSIS_TYPE=""
 YEAR="2016"
 FTESTONLY=0
 CALCPHOSYSTONLY=0
@@ -42,7 +43,8 @@ usage(){
 		echo "--analysis) Specifies the replacement dataset to use"
                 echo "--useDCB_1G) Use the functional form ofi a Double Crystal Ball + one Gaussian (same mean) (default $USEDCBP1G)"
                 echo "--useSSF) SSF = Simultaneous Signal Fitting. Do a fit where the mass points are all fitted at once where the parameters have MH dependence (default $SIMULATENOUSMASSPOINTFITTING)"
-		echo "--ext)  (default auto)"
+		echo "--analysis_type) Analysis type used for HHWWgg. Ex) Res, EFT, NMSSM"
+    echo "--ext)  (default auto)"
 		echo "--fTestOnly) "
 		echo "--calcPhoSystOnly) "
 		echo "--sigFitOnly) "
@@ -61,7 +63,7 @@ usage(){
 
 
 # options may be followed by one colon to indicate they have a required argument
-if ! options=$(getopt -u -o hi:p:f: -l help,inputFile:,procs:,bs:,smears:,massList:,scales:,scalesCorr:,useSSF:,useDCB_1G:,scalesGlobal:,flashggCats:,analysis:,ext:,fTestOnly,calcPhoSystOnly,sigFitOnly,dontPackage,packageOnly,sigPlotsOnly,intLumi:,year:,batch:,queue:,verbosity:,systematics:, -- "$@")
+if ! options=$(getopt -u -o hi:p:f: -l help,inputFile:,procs:,bs:,smears:,massList:,scales:,scalesCorr:,useSSF:,useDCB_1G:,scalesGlobal:,flashggCats:,analysis:,analysis_type:,ext:,fTestOnly,calcPhoSystOnly,sigFitOnly,dontPackage,packageOnly,sigPlotsOnly,intLumi:,year:,batch:,queue:,verbosity:,systematics:, -- "$@")
 then
 # something went wrong, getopt will put out an error message for us
 exit 1
@@ -82,6 +84,7 @@ case $1 in
 --bs) BS=$2; shift ;;
 -f|--flashggCats) CATS=$2; shift ;;
 --analysis) ANALYSIS=$2; shift ;;
+--analysis_type) ANALYSIS_TYPE=$2; shift ;;
 --ext) EXT=$2 ; shift ;;
 --useSSF) SIMULATENOUSMASSPOINTFITTING=$2 ; shift;;
 --useDCB_1G) USEDCBP1G=$2 ; shift;;
@@ -176,8 +179,8 @@ else
     # If it's HHWWgg need to run signalFTest for each file 
 
     if [ -z $BATCH ]; then
-      echo "./bin/signalFTest -i $FILE -d dat/newConfig_$EXT.dat -p $PROCS -f $CATS -o $OUTDIR --analysis $ANALYSIS --verbose $VERBOSITY"
-      ./bin/signalFTest -i $FILE -d dat/newConfig_$EXT.dat -p $PROCS -f $CATS -o $OUTDIR --analysis $ANALYSIS --verbose $VERBOSITY
+      echo "./bin/signalFTest -i $FILE -d dat/newConfig_$EXT.dat -p $PROCS -f $CATS -o $OUTDIR --analysis $ANALYSIS --verbose $VERBOSITY --analysis_type $ANALYSIS_TYPE"
+      ./bin/signalFTest -i $FILE -d dat/newConfig_$EXT.dat -p $PROCS -f $CATS -o $OUTDIR --analysis $ANALYSIS --verbose $VERBOSITY --analysis_type $ANALYSIS_TYPE
     else
       echo "./python/submitSignalFTest.py --procs $PROCS --flashggCats $CATS --outDir $OUTDIR --i $FILE --batch $BATCH -q $QUEUE --analysis $ANALYSIS --verbose $VERBOSITY"
       ./python/submitSignalFTest.py --procs $PROCS --flashggCats $CATS --outDir $OUTDIR --i $FILE --batch $BATCH -q $QUEUE --analysis $ANALYSIS --verbose $VERBOSITY
@@ -229,8 +232,8 @@ if [ $CALCPHOSYSTONLY == 1 ]; then
   echo "-->Determine effect of photon systematics"
   echo "=============================="
 
-  echo "./bin/calcPhotonSystConsts -i $FILE -o dat/photonCatSyst_$EXT.dat -p $PROCS -s $SCALES -S $SCALESCORR -g $SCALESGLOBAL -r $SMEARS -D $OUTDIR -f $CATS --analysis $ANALYSIS"
-  ./bin/calcPhotonSystConsts -i $FILE -o dat/photonCatSyst_$EXT.dat -p $PROCS -s $SCALES -S $SCALESCORR -g $SCALESGLOBAL -r $SMEARS -D $OUTDIR -f $CATS --analysis $ANALYSIS 
+  echo "./bin/calcPhotonSystConsts -i $FILE -o dat/photonCatSyst_$EXT.dat -p $PROCS -s $SCALES -S $SCALESCORR -g $SCALESGLOBAL -r $SMEARS -D $OUTDIR -f $CATS --analysis $ANALYSIS --analysis_type $ANALYSIS_TYPE"
+  ./bin/calcPhotonSystConsts -i $FILE -o dat/photonCatSyst_$EXT.dat -p $PROCS -s $SCALES -S $SCALESCORR -g $SCALESGLOBAL -r $SMEARS -D $OUTDIR -f $CATS --analysis $ANALYSIS --analysis_type $ANALYSIS_TYPE
   mkdir -p $OUTDIR/dat
   cp dat/photonCatSyst_$EXT.dat $OUTDIR/dat/copy_photonCatSyst_$EXT.dat
 fi
@@ -246,19 +249,74 @@ if [ $SIGFITONLY == 1 ]; then
 
   # if HHWWgg analysis, need to artificially create 120, 130 GeV mass points by shifting 125 dataset 
   if [[ $ANALYSIS == "HHWWgg" ]]; then 
+
     fileDir="${FILE%/*}" # get directory 
     fileEnd="${FILE##*/}"
-    fileID=${fileEnd::-5} # remove .root     
-    mass="$(cut -d'_' -f1 <<<$fileID)" # get text before first '_'. ex: SM, X250, X260, ... 
-    # echo "fileDir: $fileDir"
-    # echo "mass: $mass"
-    HHWWggLabel="${mass}_WWgg_qqlnugg"
+    fileID=${fileEnd::-5} # remove .root   
+
+    ## Get HHWWgg label from file name 
+    if [[ $ANALYSIS_TYPE == "Res" ]]; then 
+      # For res analysis, ID = SM, X250, ... 
+      ID="$(cut -d'_' -f1 <<<$fileID)" # get text before first '_'. ex: SM, X250, X260, ... 
+      # echo "fileDir: $fileDir"
+      # echo "mass: $mass"
+      HHWWggLabel="${ID}_WWgg_qqlnugg"
+      proc="ggF"
+    elif [[ $ANALYSIS_TYPE == "EFT" ]];
+    then 
+      ## --EFT: 
+      # File name format: nodeX_HHWWgg_qqlnu
+      # RooAbsData name format: GluGluToHHTo_WWgg_qqlnu_nodeX_13TeV_HHWWggTag_Y
+      # proc = GluGluToHHTo, 13TeV_HHWWggTag_Y already included 
+      # HHWWgg_Label = WWgg_qqlnu_nodeX
+
+      # For EFT analysis, ID = node2, node9, ... 
+      ID="$(cut -d'_' -f1 <<<$fileID)"
+      HHWWggLabel="WWgg_qqlnu_${ID}"
+      proc="GluGluToHHTo"
+
+    elif [[ $ANALYSIS_TYPE == "NMSSM" ]];
+    then 
+      # // file name format: MX<massX>_MY<massY>_HHWWgg_qqlnu.root
+      # // RooAbsData name format: NMSSM_XYHWWggqqlnu_MX<massX>_MY<massY>_13TeV_HHWWggTag_Y
+      # vector<string> tmpV;
+      # split(tmpV,filename_[0],boost::is_any_of("/"));	
+      # unsigned int N = tmpV.size();  
+      # string endPath = tmpV[N-1];
+      # vector<string> tmpV2;
+      # split(tmpV2,endPath,boost::is_any_of("_"));	 
+      # string XmassString = tmpV2[0]; 
+      # string YmassString = tmpV2[1]; 
+      # HHWWgg_Label = Form("XYHWWggqqlnu_%s_%s",XmassString.c_str(),YmassString.c_str());
+      # cout << "Going to look for: " << HHWWgg_Label.c_str() << endl;    
+      echo "Doing NMSSM analysis"
+      mX="$(cut -d'_' -f1 <<<$fileID)"
+      mY="$(cut -d'_' -f2 <<<$fileID)"
+      ID="${mX}_${mY}"
+      HHWWggLabel="NMSSM_XYHWWggqqlnu_${ID}"
+      proc="ggF"
+      # echo "
+      # ID="$(cut -d'_' -f1 <<<$fileID)"
+    fi 
+
     # python DirecShiftHiggsDatasets.py $fileDir $mass $HHWWggLabel # create 120 and 130 points 
-    python DirecShiftHiggsDatasets.py $fileDir $mass $HHWWggLabel $CATS # create 120 and 130 points 
+    echo "COMMAND: python DirecShiftHiggsDatasets.py $fileDir $ID $HHWWggLabel $CATS $ANALYSIS_TYPE $proc"
+    python DirecShiftHiggsDatasets.py $fileDir $ID $HHWWggLabel $CATS $ANALYSIS_TYPE $proc # create 120 and 130 points 
     sigFiles=""
     for m in 120 125 130
     do
-        sigFiles+="${fileDir}_interpolation/X_signal_${mass}_${m}_HHWWgg_qqlnu.root,"
+      sigFiles+="${fileDir}_interpolation/X_signal_${ID}_${m}_HHWWgg_qqlnu.root,"
+
+      # if [[ $ANALYSIS_TYPE == "Res" ]]; then 
+      #   sigFiles+="${fileDir}_interpolation/X_signal_${ID}_${m}_HHWWgg_qqlnu.root,"
+      # elif [[ $ANALYSIS_TYPE == "EFT" ]];
+      # then 
+      #   sigFiles+="${fileDir}_interpolation/X_signal_${ID}_${m}_HHWWgg_qqlnu.root,"
+      # elif [[ $ANALYSIS_TYPE == "NMSSM" ]];
+      # then 
+      #   sigFiles+="${fileDir}_interpolation/X_signal_${ID}_${m}_HHWWgg_qqlnu.root,"        
+      # fi         
+        
     done    
     sigFiles=${sigFiles: : -1} # remove extra ","
     FILE=$sigFiles
@@ -271,8 +329,8 @@ if [ $SIGFITONLY == 1 ]; then
     if [ $SYSTEMATICS == 0 ]; then
       sysdatOption="-s dat/empty.dat"
     fi
-    echo "./bin/SignalFit -i $FILE -d dat/newConfig_$EXT.dat  --mhLow=120 --mhHigh=130 ${sysdatOption} --procs $PROCS -o $OUTDIR/CMS-HGG_mva_13TeV_sigfit.root -p $OUTDIR/sigfit -f $CATS --changeIntLumi $INTLUMI  --useDCBplusGaus $USEDCBP1G --useSSF $SIMULATENOUSMASSPOINTFITTING --massList $MASSLIST --analysis $ANALYSIS --year $YEAR"
-    ./bin/SignalFit -i $FILE -d dat/newConfig_$EXT.dat  --mhLow=120 --mhHigh=130 ${sysdatOption} --procs $PROCS -o $OUTDIR/CMS-HGG_mva_13TeV_sigfit.root -p $OUTDIR/sigfit -f $CATS --changeIntLumi $INTLUMI  --useDCBplusGaus $USEDCBP1G --useSSF $SIMULATENOUSMASSPOINTFITTING --massList $MASSLIST --analysis $ANALYSIS --year $YEAR  
+    echo "./bin/SignalFit -i $FILE -d dat/newConfig_$EXT.dat  --mhLow=120 --mhHigh=130 ${sysdatOption} --procs $PROCS -o $OUTDIR/CMS-HGG_mva_13TeV_sigfit.root -p $OUTDIR/sigfit -f $CATS --changeIntLumi $INTLUMI  --useDCBplusGaus $USEDCBP1G --useSSF $SIMULATENOUSMASSPOINTFITTING --massList $MASSLIST --analysis $ANALYSIS --year $YEAR --analysis_type $ANALYSIS_TYPE"
+    ./bin/SignalFit -i $FILE -d dat/newConfig_$EXT.dat  --mhLow=120 --mhHigh=130 ${sysdatOption} --procs $PROCS -o $OUTDIR/CMS-HGG_mva_13TeV_sigfit.root -p $OUTDIR/sigfit -f $CATS --changeIntLumi $INTLUMI  --useDCBplusGaus $USEDCBP1G --useSSF $SIMULATENOUSMASSPOINTFITTING --massList $MASSLIST --analysis $ANALYSIS --year $YEAR --analysis_type $ANALYSIS_TYPE
   else
     echo "./python/submitSignalFit.py -i $FILE -d dat/newConfig_$EXT.dat  --mhLow=120 --mhHigh=130 -s dat/photonCatSyst_$EXT.dat --procs $PROCS -o $OUTDIR/CMS-HGG_sigfit_$EXT.root -p $OUTDIR/sigfit -f $CATS --changeIntLumi $INTLUMI --batch $BATCH --massList $MASSLIST -q $QUEUE $BSOPT --useSSF $SIMULATENOUSMASSPOINTFITTING --useDCB_1G $USEDCBP1G --analysis $ANALYSIS --year $YEAR"
     ./python/submitSignalFit.py -i $FILE -d dat/newConfig_$EXT.dat  --mhLow=120 --mhHigh=130 -s dat/photonCatSyst_$EXT.dat --procs $PROCS -o $OUTDIR/CMS-HGG_sigfit_$EXT.root -p $OUTDIR/sigfit -f $CATS --changeIntLumi $INTLUMI --batch $BATCH --massList $MASSLIST -q $QUEUE $BSOPT --useSSF $SIMULATENOUSMASSPOINTFITTING --useDCB_1G $USEDCBP1G --analysis $ANALYSIS --year $YEAR 
@@ -399,8 +457,8 @@ if [ $SIGPLOTSONLY == 1 ]; then
     # if [ $SYSTEMATICS == 0 ]; then
     #   sysOption="-s dat/empty.dat"
     # fi
-    echo " ./bin/makeParametricSignalModelPlots -i ${inFile}  -o $OUTDIR -p $PROCS -f $CATS --analysis $ANALYSIS --year $YEAR --systematics $SYSTEMATICS"
-    ./bin/makeParametricSignalModelPlots -i ${inFile}  -o $OUTDIR/sigplots -p $PROCS -f $CATS --analysis $ANALYSIS --year $YEAR --systematics $SYSTEMATICS # Need to not output to .txt file in order to debug 
+    echo " ./bin/makeParametricSignalModelPlots -i ${inFile}  -o $OUTDIR -p $PROCS -f $CATS --analysis $ANALYSIS --year $YEAR --systematics $SYSTEMATICS --analysis_type $ANALYSIS_TYPE"
+    ./bin/makeParametricSignalModelPlots -i ${inFile}  -o $OUTDIR/sigplots -p $PROCS -f $CATS --analysis $ANALYSIS --year $YEAR --systematics $SYSTEMATICS --analysis_type $ANALYSIS_TYPE # Need to not output to .txt file in order to debug 
     # ./bin/makeParametricSignalModelPlots -i ${inFile}  -o $OUTDIR/sigplots -p $PROCS -f $CATS --analysis $ANALYSIS --year $YEAR --systematics $SYSTEMATICS > signumbers_${EXT}.txt
     
     if [[ $ANALYSIS != "HHWWgg" ]]; then 

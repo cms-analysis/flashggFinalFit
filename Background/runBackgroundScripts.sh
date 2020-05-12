@@ -64,8 +64,8 @@ case $1 in
 -i|--inputFile) FILE=$2; shift ;;
 -p|--procs) PROCS=$2; shift ;;
 -f|--flashggCats) CATS=$2; shift ;;
---ext) EXT=$2; echo "test" ; shift ;;
---fTestOnly) FTESTONLY=1; echo "ftest" ;;
+--ext) EXT=$2; shift ;;
+--fTestOnly) FTESTONLY=1 ;;
 --pseudoDataOnly) PSEUDODATAONLY=1;;
 --pseudoDataDat) PSEUDODATADAT=$2; shift;;
 --sigFile) SIGFILE=$2; shift;;
@@ -147,7 +147,7 @@ if [ $FTESTONLY == 1 ]; then
 
 echo "--------------------------------------"
 echo "Running Background F-Test"
-echo "-->Greate background model"
+echo "-->Create background model"
 echo "--------------------------------------"
 if [ $UNBLIND == 1 ]; then
 OPT=" --unblind"

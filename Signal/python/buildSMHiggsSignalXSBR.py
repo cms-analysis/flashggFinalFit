@@ -73,5 +73,6 @@ def getXS(mh,prod):
  print'------------------------------------------------------------------------------'
  print'prod: ',prod 
  funcXS = SM.modelBuilder.out.function("SM_XS_%s_%s"%(prod,options.funcXSext))
+ print'------------------------------------------------------------------------------'
  return funcXS.getVal()
 

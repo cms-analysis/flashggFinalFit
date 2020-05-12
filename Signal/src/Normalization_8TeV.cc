@@ -50,7 +50,7 @@ int Normalization_8TeV::Init(int sqrtS){
         XSectionMap_testTHQ[mH]	= 0.074;
         XSectionMap_testTHW[mH]	= 0.015;
 
-		XSectionMap_HHWWgg[mH] = 0.001; // HHWWgg 
+	XSectionMap_HHWWgg[mH] = 0.001; // HHWWgg 
 	
     }
 

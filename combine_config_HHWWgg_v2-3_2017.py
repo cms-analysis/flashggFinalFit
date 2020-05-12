@@ -10,12 +10,16 @@ combineScriptCfg = {
   # Setup
   'analysis':'HHWWgg',
   'mode':mode,
-  # 'mode':'combine',
-  'inputWSDir':'/eos/user/a/atishelm/ntuples/HHWWgg/HHWWgg_v2-3_Workspaces_AllEvents_Hadded', # all files 
+  # 'mode':'combine', 
+  'doSystematics':0, # 0: do not include systematics in datacard. 1: include systematics in datacard
+  'inputWSDir':'/eos/user/a/atishelm/ntuples/HHWWgg/HHWWgg_v2-3_Workspaces_AllEvents_Hadded_X250Only', # all files 
+  # 'inputWSDir':'/eos/user/a/atishelm/ntuples/HHWWgg/HHWWgg_v2-3_Workspaces_AllEvents_Hadded', # all files 
   # 'inputWSDir':'/eos/user/a/atishelm/ntuples/HHWWgg/HHWWgg_v2-3_Workspaces_AllEvents_Hadded_Shorter', # less files for testing 
   #Procs will be inferred automatically from filenames
+  'HHWWggCatLabel':'1TotCatX250Only', # for name of combine output files  
+  # 'HHWWggCatLabel':'1TotCatWithSyst', # for name of combine output files  
   'cats':'HHWWggTag_0',
-  'ext':'HHWWgg_v2-3_2017',
+  'ext':'HHWWgg_v2-3_2017_1TotCatX250Only',
   'year':'2017', 
   'signalProcs':'ggF',
 

@@ -69,6 +69,7 @@ bool doCrossCheck_;
 bool markNegativeBins_;
 bool doAllSum_;
 string analysis_;
+string analysis_type_;
 string systematics_;
 
 void OptionParser(int argc, char *argv[]){
@@ -90,6 +91,7 @@ void OptionParser(int argc, char *argv[]){
     ("markNegativeBins",  po::value<bool>(&markNegativeBins_)->default_value(false),                          " show with red arrow if a bin has a negative total value")
     ("doAllSum",  po::value<bool>(&doAllSum_)->default_value(false),                          "include the sum of all procs, categories (slow)")
     ("analysis,a", po::value<string>(&analysis_)->default_value(""),          "analysis")
+    ("analysis_type,at", po::value<string>(&analysis_type_)->default_value(""),          "analysis type, used for HHWWgg. Ex: Res, EFT, NMSSM")
     ("systematics,s", po::value<string>(&systematics_)->default_value("1"),          "0: Not running with systematics. 1: Running with systematics")
     ("flashggCats,f", po::value<string>(&flashggCatsStr_)->default_value("DiPhotonUntaggedCategory_0,DiPhotonUntaggedCategory_1,DiPhotonUntaggedCategory_2,DiPhotonUntaggedCategory_3,DiPhotonUntaggedCategory_4,VBFTag_0,VBFTag_1,VBFTag_2"),       "Flashgg category names to consider")
     ;
@@ -445,7 +447,7 @@ void performClosure(RooRealVar *mass, RooAbsPdf *pdf, RooDataSet *data, string c
   delete plot;
 }
 
-void Plot(RooRealVar *mass, RooDataSet *data, RooAbsPdf *pdf, pair<double,double> sigRange, vector<double> fwhmRange, string title, string savename, string analysis_){
+void Plot(RooRealVar *mass, RooDataSet *data, RooAbsPdf *pdf, pair<double,double> sigRange, vector<double> fwhmRange, string title, string savename, string analysis_, string analysis_type_){
   // cout << "title: "<<title<<endl;
   double semin=sigRange.first;
   double semax=sigRange.second;
@@ -562,7 +564,7 @@ void Plot(RooRealVar *mass, RooDataSet *data, RooAbsPdf *pdf, pair<double,double
   string hhwwggMass;
   if (analysis_ == "HHWWgg"){
     website = "/eos/user/a/atishelm/www/HHWWgg_Analysis/fggfinalfit/Signal/";
-    process = "HH#rightarrow WW#gamma#gamma";
+    process = "HH#rightarrowWW#gamma#gamma";
     // Can add stat or stat + sys with systematics flag 
 
     vector<string> tmpV;
@@ -575,7 +577,14 @@ void Plot(RooRealVar *mass, RooDataSet *data, RooAbsPdf *pdf, pair<double,double
 		hhwwggMass = mass_str;
     // string mass_str = tmpV2[4];
 		// HHWWgg_Label = Form("%s_WWgg_qqlnugg",mass_str.c_str());
-    savename_2 = Form("%s_%s_WWgg_qqlnugg",mass_str.c_str(),title.c_str());
+    if(analysis_type_ == "NMSSM"){
+      string mX = tmpV2[5];
+      string mY = tmpV2[6];
+      savename_2 = Form("%s_%s_%s_WWgg_qqlnugg",mX.c_str(),mY.c_str(),title.c_str());
+    }
+    else savename_2 = Form("%s_%s_WWgg_qqlnugg",mass_str.c_str(),title.c_str());
+    
+
 
     // savename = Form("%s");
     // savename = outdir_HHWWgg_v2-3_2017_SM_HHWWgg_qqlnu/sigplots/ggF_HHWWggTag_0.png
@@ -750,7 +759,7 @@ int main(int argc, char *argv[]){
     sigEffs.insert(pair<string,double>(dataIt->first,(thisSigRange.second-thisSigRange.first)/2.));
     fwhms.insert(pair<string,double>(dataIt->first,thisFWHMRange[1]-thisFWHMRange[0]));
     if (doCrossCheck_) performClosure(mass,pdfs[dataIt->first],dataIt->second,Form("%s/closure_%s.pdf",outfilename_.c_str(),dataIt->first.c_str()),m_hyp_-10.,m_hyp_+10.,thisSigRange.first,thisSigRange.second);
-    if (analysis_ != "HHWWgg") Plot(mass,dataIt->second,pdfs[dataIt->first],thisSigRange,thisFWHMRange,dataIt->first,Form("%s/%s",outfilename_.c_str(),dataIt->first.c_str()),analysis_); // not sure how these are different from granular plots
+    if (analysis_ != "HHWWgg") Plot(mass,dataIt->second,pdfs[dataIt->first],thisSigRange,thisFWHMRange,dataIt->first,Form("%s/%s",outfilename_.c_str(),dataIt->first.c_str()),analysis_,analysis_type_); // not sure how these are different from granular plots
   }
 
   for (map<string,RooDataSet*>::iterator dataIt=dataSetsGranular.begin(); dataIt!=dataSetsGranular.end(); dataIt++){
@@ -764,7 +773,7 @@ int main(int argc, char *argv[]){
     sigEffs.insert(pair<string,double>(dataIt->first,(thisSigRange.second-thisSigRange.first)/2.));
     fwhms.insert(pair<string,double>(dataIt->first,thisFWHMRange[1]-thisFWHMRange[0]));
     if (doCrossCheck_) performClosure(mass,pdfsGranular[dataIt->first],dataIt->second,Form("%s/closure_%s.pdf",outfilename_.c_str(),dataIt->first.c_str()),m_hyp_-10.,m_hyp_+10.,thisSigRange.first,thisSigRange.second);
-    Plot(mass,dataIt->second,pdfsGranular[dataIt->first],thisSigRange,thisFWHMRange,dataIt->first,Form("%s/%s",outfilename_.c_str(),dataIt->first.c_str()),analysis_);
+    Plot(mass,dataIt->second,pdfsGranular[dataIt->first],thisSigRange,thisFWHMRange,dataIt->first,Form("%s/%s",outfilename_.c_str(),dataIt->first.c_str()),analysis_,analysis_type_);
   }
 
   map<string,pair<double,double> > bkgVals;

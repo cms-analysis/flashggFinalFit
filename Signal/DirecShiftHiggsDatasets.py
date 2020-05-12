@@ -5,9 +5,11 @@ import sys
 import os
 
 inDir = sys.argv[1]
-mass = sys.argv[2]
+ID = sys.argv[2]
 HHWWgg_Label = sys.argv[3]
 cats_ = sys.argv[4]
+analysis_type = sys.argv[5] # Res, EFT, NMSSM 
+proc = sys.argv[6]
 
 
 # print'***************************************************'
@@ -27,17 +29,21 @@ if not os.path.exists(outDir):
 #masses = []
 #masses.append(mass)
 #for m in mass:
-m = mass
+# ID = mass
 
-print "Looking at Radion mass = ", m
+# print "Looking at Radion mass = ", m
+print "Looking at HHWWgg ID:", ID
 values = [-5,0,5]
 higgs_mass = 125
 
 ws_name = 'tagsDumper/cms_hgg_13TeV'
-# dataset_name = 'ggF_' + str(HHWWgg_Label) + '_13TeV_HHWWggTag_0' 
-# dataset_name = 'ggF_125_13TeV_SL'
-#temp_ws = TFile(inDir+'testWS.root').Get(ws_name)
-temp_ws = TFile(inDir+'/'+str(m)+'_HHWWgg_qqlnu.root').Get(ws_name)
+
+# temp_ws = TFile(inDir+'/'+str(ID)+'_HHWWgg_qqlnu.root').Get(ws_name)
+temp_ws = TFile(inDir+'/'+str(ID)+'_HHWWgg_qqlnu.root').Get(ws_name)
+
+# Res: ID_HHWWgg_qqlnu.root 
+# EFT: nodeX_HHWWgg_qqlnu.root
+# NMSSM: MX<xmass>_MY<ymass>_HHWWgg_qqlnu.root 
 
 # cats = ['0','1'] # HHWWggTag categories 
 
@@ -46,13 +52,14 @@ for value in values:
 	print'mass shift:',value 
 	shift = value + higgs_mass
 
-	output = TFile(outDir + 'X_signal_'+str(m)+'_'+str(shift)+'_HHWWgg_qqlnu.root','RECREATE')
+	output = TFile(outDir + 'X_signal_'+str(ID)+'_'+str(shift)+'_HHWWgg_qqlnu.root','RECREATE')
 	output.mkdir("tagsDumper")
 	output.cd("tagsDumper")
 	ws_new = ROOT.RooWorkspace("cms_hgg_13TeV")
 
 	for cat in cats: 
-		dataset_name = 'ggF_' + str(HHWWgg_Label) + '_13TeV_' + cat 
+		if(analysis_type == "NMSSM"): dataset_name = str(HHWWgg_Label) + '_13TeV_' + cat
+		else: dataset_name = str(proc) + '_' + str(HHWWgg_Label) + '_13TeV_' + cat
 
 		dataset = (temp_ws.data(dataset_name)).Clone(dataset_name + '_' + str(shift)) # includes process and category 
 		dataset.Print()

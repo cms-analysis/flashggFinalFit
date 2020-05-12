@@ -109,8 +109,9 @@ if len(procs)==0: procs = 'arbitrary'
 dataFile = "%s/allData.root"%inputWSDir
 signalFitWSFile = "%s/../Signal/outdir_%s/CMS-HGG_sigfit_%s.root"%(os.environ['PWD'],ext,ext)
 
-if not os.path.exists( signalFitWSFile ):
-  print " --> [ERROR] signal fit workspace (%s) does not exists. Please run signal fitting first. Leaving..."%signalFitWSFile
+if(analysis != "HHWWgg"):
+  if not os.path.exists( signalFitWSFile ):
+    print " --> [ERROR] signal fit workspace (%s) does not exists. Please run signal fitting first. Leaving..."%signalFitWSFile
 
 # Print info to user
 print " --> Input flashgg ws dir: %s"%inputWSDir
@@ -135,7 +136,7 @@ if mode == "fTestOnly": cmdLine += '--fTestOnly '
 elif mode == "bkgPlotsOnly": cmdLine += '--bkgPlotsOnly '
 if unblind and not fTestOnly: cmdLine += '--undblind '
 
-if analysis != "": cmdLine += ' --analysis ' + analysis 
+if analysis != "": cmdLine += ' --analysis ' + analysis # for HHWWgg customization 
 
 # Either print command to screen or run
 if printOnly: print "\n%s"%cmdLine

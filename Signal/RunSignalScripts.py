@@ -29,6 +29,7 @@ def get_options():
   parser.add_option('--usrprocs', dest='usrprocs', default='', help="Define production categories")
   parser.add_option('--ext', dest='ext', default='test', help="Extension: defines output dir where signal models are saved")
   parser.add_option('--analysis', dest='analysis', default='test', help="Analysis handle: used in Signal/python/replacementMap.py to specify replacement dataset mapping when too few entries")
+  parser.add_option('--analysis_type', dest='analysis_type', default='test', help="Analysis type. Used for HHWWgg. Ex: Res, EFT, NMSSM")
   parser.add_option('--year', dest='year', default='2016', help="Dataset year")
   parser.add_option('--beamspot', dest='beamspot', default='3.4', help="Beamspot")
   parser.add_option('--numberOfBins', dest='numberOfBins', default='320', help="Number of bins in mgg to fit")
@@ -79,6 +80,7 @@ if opt.inputConfig != '':
     usrprocs     = _cfg['usrprocs']
     ext          = _cfg['ext']
     analysis     = _cfg['analysis']
+    analysis_type     = _cfg['analysis_type']
     year         = _cfg['year']
     beamspot     = _cfg['beamspot']
     numberOfBins = _cfg['numberOfBins']
@@ -94,8 +96,6 @@ if opt.inputConfig != '':
     systematics  = _cfg['systematics']
     printOnly    = opt.printOnly # Still take printOnly from options
     verbosity      = _cfg['verbosity']
-    # runLocal     = _cfg['runLocal']
-    # HHWWgg       = _cfg['HHWWgg']
   
     #Delete copy of file
     os.system("rm config.py")
@@ -112,6 +112,7 @@ else:
   usrprocs     = opt.usrprocs
   ext          = opt.ext
   analysis     = opt.analysis
+  analysis_type = opt.analysis_type
   year         = opt.year
   beamspot     = opt.beamspot
   numberOfBins = opt.numberOfBins
@@ -127,8 +128,6 @@ else:
   systematics  = opt.systematics 
   printOnly    = opt.printOnly
   verbosity      = opt.verbosity
-  # runLocal     = opt.runLocal
-  # HHWWgg       = opt.HHWWgg
 
 # Check if mode in allowed options
 if mode not in ['std','calcPhotonSyst','writePhotonSyst','sigFitOnly','packageOnly','sigPlotsOnly']:
@@ -139,26 +138,31 @@ if mode not in ['std','calcPhotonSyst','writePhotonSyst','sigFitOnly','packageOn
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # FIXME: configure also for CONDOR
 # If mode == calcPhotonSyst: submit a job to the batch for each category
-if mode == "calcPhotonSyst":
+if mode == "calcPhotonSyst" and batch != "":
   print " --> Calculating photon systematics: %s"%ext
   if not os.path.isdir("./outdir_%s"%ext): os.system("mkdir ./outdir_%s"%ext)
   if not os.path.isdir("./outdir_%s/calcPhotonSyst"%ext): os.system("mkdir ./outdir_%s/calcPhotonSyst"%ext)
   if not os.path.isdir("./outdir_%s/calcPhotonSyst/jobs"%ext): os.system("mkdir ./outdir_%s/calcPhotonSyst/jobs"%ext)
   # Write submission scripts
   for cat_idx in range(len(cats.split(","))):
-    cat = cats.split(",")[cat_idx]
-    f = open("./outdir_%s/calcPhotonSyst/jobs/sub%g.sh"%(ext,cat_idx),"w")
-    f.write("#!/bin/bash\n\n")
-    f.write("cd %s/src/flashggFinalFit/Signal\n\n"%os.environ['CMSSW_BASE']) 
-    f.write("eval `scramv1 runtime -sh`\n\n")
-    f.write("python python/calcPhotonSyst.py --cat %s --ext %s --inputWSDir %s --scales %s --scalesCorr %s --scalesGlobal %s --smears %s"%(cat,ext,inputWSDir,scales,scalesCorr,scalesGlobal,smears))
-    f.close()
+    if analysis == "HHWWgg":
+      command ="python python/calcPhotonSyst.py --cat %s --ext %s --inputWSDir %s --scales %s --scalesCorr %s --scalesGlobal %s --smears %s"%(cat,ext,inputWSDir,scales,scalesCorr,scalesGlobal,smears)
+      os.system( command )
+    else:
+      cat = cats.split(",")[cat_idx]
+      f = open("./outdir_%s/calcPhotonSyst/jobs/sub%g.sh"%(ext,cat_idx),"w")
+      f.write("#!/bin/bash\n\n")
+      f.write("cd %s/src/flashggFinalFit/Signal\n\n"%os.environ['CMSSW_BASE']) 
+      f.write("eval `scramv1 runtime -sh`\n\n")
+      f.write("python python/calcPhotonSyst.py --cat %s --ext %s --inputWSDir %s --scales %s --scalesCorr %s --scalesGlobal %s --smears %s"%(cat,ext,inputWSDir,scales,scalesCorr,scalesGlobal,smears))
+      f.close()
   # If not printOnly: submit submission scripts to batch
   if not printOnly:
     for cat_idx in range(len(cats.split(","))):
       cat = cats.split(",")[cat_idx]
       print " --> Category: %s (sub%g.sh)"%(cat,cat_idx)
-      os.system("qsub -q hep.q -l h_rt=0:20:0 ./outdir_%s/calcPhotonSyst/jobs/sub%g.sh"%(ext,cat_idx))
+      if analysis != 'HHWWgg':
+        os.system("qsub -q hep.q -l h_rt=0:20:0 ./outdir_%s/calcPhotonSyst/jobs/sub%g.sh"%(ext,cat_idx))
 
 elif mode == "writePhotonSyst":
   print " --> Write photon systematics to .dat file compatible with SignalFit.cpp: %s"%ext
@@ -171,7 +175,7 @@ else:
   for root, dirs, files in os.walk( inputWSDir ):
     # print'files = ',files 
     for fileName in files:
-      # if not fileName.startswith('output_'): continue # remove requirement of output_ string for HHWWgg files 
+      if not fileName.startswith('output_') and analysis != 'HHWWgg': continue 
       if not fileName.endswith('.root'): continue
       ws_fileNames.append( fileName )
       # print'fileName: ',fileName 
@@ -196,7 +200,7 @@ else:
   # otherwise get from files 
   else:
     for fileName in ws_fileNames:
-      if 'M125' not in fileName: continue
+      if 'M125' not in fileName and analysis != 'HHWWgg': continue
       procs += "%s,"%fileName.split('pythia8_')[1].split('.root')[0]
     procs = procs[:-1]    
 
@@ -212,6 +216,7 @@ else:
   print " --> Mass points: %s --> Low = %s, High = %s"%(massPoints,mass_low,mass_high)
   print " --> Extension: %s"%ext
   print " --> Analysis: %s"%analysis
+  print " --> Analysis type: %s"%analysis_type
   print " --> Year: %s ::: Corresponds to intLumi = %s fb^-1"%(year,lumi[year])
   if useDCB: print " --> Using DCB in signal model"
   # print " --> HHWWgg: %s"%HHWWgg
@@ -254,8 +259,10 @@ else:
       massExt = f.split('/')[-1].split('.')[0]
       thisExt = ext + '_' + massExt
 
+      intLumi = 1 # HHWWgg. Set luminosity in datacard 
+
       # if batch not specified, run locally 
-      if batch == '': cmdLine += './runSignalScripts.sh -i %s -p %s -f %s --ext %s --intLumi %s --year %s --massList %s --bs %s --analysis %s --scales %s --scalesCorr %s --scalesGlobal %s --smears %s --useSSF 1 --verbosity %s --systematics %s'%(f,procs,cats,thisExt,lumi[year],year,massPoints,beamspot,analysis,scales,scalesCorr,scalesGlobal,smears,verbosity,systematics)
+      if batch == '': cmdLine += './runSignalScripts.sh -i %s -p %s -f %s --ext %s --intLumi %s --year %s --massList %s --bs %s --analysis %s --scales %s --scalesCorr %s --scalesGlobal %s --smears %s --useSSF 1 --verbosity %s --systematics %s --analysis_type %s'%(f,procs,cats,thisExt,intLumi,year,massPoints,beamspot,analysis,scales,scalesCorr,scalesGlobal,smears,verbosity,systematics,analysis_type)
 
       # run with batch 
       else: cmdLine += './runSignalScripts.sh -i %s -p %s -f %s --ext %s --intLumi %s --year %s --batch %s --queue %s --massList %s --bs %s --analysis %s --scales %s --scalesCorr %s --scalesGlobal %s --smears %s --useSSF 1 --verbosity %s'%(f,procs,cats,thisExt,lumi[year],year,batch,queue,massPoints,beamspot,analysis,scales,scalesCorr,scalesGlobal,smears,verbosity)

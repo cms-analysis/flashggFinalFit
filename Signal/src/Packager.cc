@@ -80,6 +80,7 @@ void Packager::packageOutput(bool split, string process , string tag){
 					expectedObjectsNotFound.push_back(Form("sig_%s_mass_m%d_%s",proc->c_str(),mh,catname.c_str()));
 					continue;
 				}
+		 std::cout << "merge = " << merge << std::endl;				
          std::cout << "ED DEBUG printing tempData" << std::endl;
          tempData->Print();
          //std::cout << "ED DEBUG allDataThisMass" << std::endl;

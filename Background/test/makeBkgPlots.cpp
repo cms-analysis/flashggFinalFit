@@ -728,6 +728,7 @@ int main(int argc, char* argv[]){
 	string sigFileName;
 	string outFileName;
 	string outDir;
+	string analysis;
 	int cat;
 	string catLabel;
 	double massStep;
@@ -757,6 +758,7 @@ int main(int argc, char* argv[]){
 		("sigFileName,s", po::value<string>(&sigFileName), 																	"Input file name")
 		("outFileName,o", po::value<string>(&outFileName)->default_value("BkgPlots.root"),	"Output file name")
 		("outDir,d", po::value<string>(&outDir)->default_value("BkgPlots"),						 			"Output directory")
+		("analysis,a", po::value<string>(&analysis)->default_value(""),						 			"Output directory")
 		("cat,c", po::value<int>(&cat),																								 			"Category")
 		("catLabel,l", po::value<string>(&catLabel),																	 			"Label category")
 		("doBands",																																		 			"Do error bands")
@@ -815,7 +817,8 @@ int main(int argc, char* argv[]){
 	TFile *outFile = TFile::Open(outFileName.c_str(),"RECREATE");
 	RooWorkspace *outWS = new RooWorkspace("bkgplotws","bkgplotws");
 
-	// useBinnedData=1; // HHWWgg hack 
+	useBinnedData=1; // HHWWgg hack 
+	std::cout << "[makeBkgPlots] - in source code" << std::endl;
 
 	RooAbsData *data = (RooDataSet*)inWS->data(Form("data_mass_%s",catname.c_str()));
 	if (useBinnedData) data = (RooDataHist*)inWS->data(Form("roohist_data_mass_%s",catname.c_str()));
@@ -824,8 +827,16 @@ int main(int argc, char* argv[]){
 	RooMultiPdf *mpdf = 0; 
 	RooCategory *mcat = 0;
 	if (isMultiPdf) {
-		mpdf = (RooMultiPdf*)inWS->pdf(Form("CMS_hgg_%s_%dTeV_%d_bkgshape",catname.c_str(),sqrts,year_));
-		mcat = (RooCategory*)inWS->cat(Form("pdfindex_%s_%dTeV_%d",catname.c_str(),sqrts,year_));
+		RooMultiPdf* mpdf; 
+		RooCategory* mcat; 
+		if(analysis == "HHWWgg") mpdf = (RooMultiPdf*)inWS->pdf(Form("CMS_hgg_%s_%dTeV_bkgshape",catname.c_str(),sqrts)); // get rid of 13TeV in name 
+		else mpdf = (RooMultiPdf*)inWS->pdf(Form("CMS_hgg_%s_%dTeV_%d_bkgshape",catname.c_str(),sqrts,year_));
+		if(analysis == "HHWWgg") mcat = (RooCategory*)inWS->cat(Form("pdfindex_%s_13TeV",catname.c_str()));
+		else mcat = (RooCategory*)inWS->cat(Form("pdfindex_%s_%dTeV_%d",catname.c_str(),sqrts,year_));
+		
+		cout << "mpdf: " << mpdf << endl;
+		cout << "mcat: " << mcat << endl;
+
 		if (!mpdf || !mcat){
 			cout << "[ERROR] "<< "Can't find multipdfs (" << Form("CMS_hgg_%s_%dTeV_%d_bkgshape",catname.c_str(),sqrts,year_) << ") or multicat ("<< Form("pdfindex_%s_%dTeV_%d",catname.c_str(),sqrts,year_) <<")" << endl;
 			exit(0);
@@ -844,8 +855,8 @@ int main(int argc, char* argv[]){
 	}
 
 	cout << "[INFO] "<< "Current PDF and data:" << endl;
-	cout<< "[INFO] " << "\t"; mpdf->getCurrentPdf()->Print();
-	cout << "[INFO] "<< "\t"; data->Print();
+	// cout<< "[INFO] " << "\t"; mpdf->getCurrentPdf()->Print();
+	// cout << "[INFO] "<< "\t"; data->Print();
 
 	// plot all the pdfs for reference
 	if (isMultiPdf || verbose_) plotAllPdfs(mgg,data,mpdf,mcat,Form("%s/allPdfs_%s",outDir.c_str(),catname.c_str()),cat,unblind, isFlashgg_, flashggCats_, year_);

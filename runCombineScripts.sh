@@ -1,8 +1,11 @@
 #!/bin/bash
 #bash variables
 ANALYSIS=""
+ANALYSIS_TYPE=""
+HHWWGGCATLABEL="NotLabelled"
 FILE="";
 EXT="auto"; #extensiom for all folders and files created by this script
+SHORTEXT="a"
 PROCS="ggh"
 CATS="UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,UntaggedTag_4,VBFTag_0,VBFTag_1,VBFTag_2,TTHHadronicTag,TTHLeptonicTag,VHHadronicTag,VHTightTag,VHLooseTag,VHEtTag"
 #CATS="UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,UntaggedTag_4,VBFTag_0,VBFTag_1,VBFTag_2,TTHLeptonicTag,VHHadronicTag,VHTightTag,VHLooseTag"
@@ -33,6 +36,7 @@ ISDATA=0
 BS=0
 VERBOSE=0
 BATCH="LSF"
+DOSYSTEMATICS="1"
 DEFAULTQUEUE="1nh"
 UEPS="none"
 NEWGGHSCHEME=0
@@ -43,6 +47,8 @@ usage(){
 		echo "options:"
 echo "-h|--help)" 
 echo "--analysis) (default $ANALYSIS)"
+echo "--analysis_type) (default $ANALYSIS_TYPE)"
+echo "--HHWWggCatLabel) (default $HHWWGGCATLABEL)"
 echo "-i|--inputFile) "
 echo "-p|--procs) (default $PROCS)"
 echo "-f|--flashggCats) (default $CATS) "
@@ -51,6 +57,7 @@ echo "--newGghScheme) (default $NEWGGHSCHEME) "
 echo "--doSTXS) (default $DOSTXS) "
 echo "--doStage1) (default $DOSTAGE1) "
 echo "--ext) (default $EXT)"
+exho "--shortExt) (default $SHORTEXT)"
 echo "--pseudoDataDat)"
 echo "--combine) "
 echo "--combineOnly) "
@@ -68,6 +75,7 @@ echo "--isFakeData) FAKE DATA (default 0)) "
 echo "--unblind) specified in fb^-{1} (default $UNBLIND)) "
 echo "--dataFile) specified in fb^-{1} (default $DATAFILE)) "
 echo "--batch) which batch system to use (LSF,IC) (default $BATCH)) "
+echo "--doSystematics) run with or without systematics (default $DOSYSTEMATICS)"
 }
 
 
@@ -75,7 +83,7 @@ echo "--batch) which batch system to use (LSF,IC) (default $BATCH)) "
 
 
 # options may be followed by one colon to indicate they have a required argument
-if ! options=$(getopt -u -o hi:p:f: -l help,inputFile:,procs:,bs:,flashggCats:,uepsFile:,newGghScheme,doSTXS,doStage1,ext:,smears:,massList:,scales:,scalesCorr:,scalesGlobal:,,pseudoDataDat:,sigFile:,combine,combineOnly,combinePlotsOnly,signalOnly,backgroundOnly,datacardOnly,useSSF:,useDCB_1G:,continueLoop:,intLumi:,year:,unblind,isData,isFakeData,analysis:,dataFile:,batch:,verbose -- "$@")
+if ! options=$(getopt -u -o hi:p:f: -l help,inputFile:,procs:,bs:,flashggCats:,uepsFile:,newGghScheme,doSTXS,doStage1,ext:,smears:,massList:,scales:,scalesCorr:,scalesGlobal:,,pseudoDataDat:,sigFile:,combine,combineOnly,combinePlotsOnly,signalOnly,backgroundOnly,datacardOnly,useSSF:,useDCB_1G:,continueLoop:,intLumi:,year:,unblind,isData,isFakeData,analysis:,analysis_type:,HHWWggCatLabel:,shortExt:,dataFile:,batch:,doSystematics:,verbose -- "$@")
 then
 # something went wrong, getopt will put out an error message for us
 exit 1
@@ -101,8 +109,12 @@ case $1 in
 --ext) EXT=$2; echo "test ext $EXT " ; shift ;;
 --pseudoDataDat) PSEUDODATADAT=$2; shift;;
 --analysis) ANALYSIS=$2; shift;;
+--analysis_type) ANALYSIS_TYPE=$2; shift;; 
+--HHWWggCatLabel) HHWWGGCATLABEL=$2; shift;;
+--shortExt) SHORTEXT=$2; echo "short ext $SHORTEXT"; shift ;;
 --dataFile) DATAFILE=$2; shift;;
 --batch) BATCH=$2; echo " BATCH $BATCH " ; shift;;
+--doSystematics) DOSYSTEMATICS=$2; echo " DOSYSTEMATICS $DOSYSTEMATICS" ; shift;; 
 --signalOnly) COMBINEONLY=0;BKGONLY=0;SIGONLY=1;DATACARDONLY=0;;
 --backgroundOnly) COMBINEONLY=0;BKGONLY=1;SIGONLY=0;DATACARDONLY=0;;
 --datacardOnly) COMBINEONLY=0;BKGONLY=0;SIGONLY=0;DATACARDONLY=1;;
@@ -162,10 +174,37 @@ echo "------------------------------------------------"
 cd Datacard
 
 echo "Analysis: $ANALYSIS"
+echo "analysis_type: $ANALYSIS_TYPE"
 if [ $ANALYSIS == "HHWWgg" ]; then 
 
-    echo "./makeDatacard.py -i $FILE  -o Datacard_13TeV_${EXT}.txt -p $PROCS -c $CATS --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --intLumi $INTLUMI --year $YEAR --uepsfilename $UEPS --newGghScheme --analysis HHWWgg "
-    ./makeDatacard.py -i $FILE  -o Datacard_13TeV_${EXT}.txt -p $PROCS -c $CATS --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --intLumi $INTLUMI --year $YEAR --uepsfilename $UEPS --newGghScheme --analysis HHWWgg 
+    # echo "./makeDatacard.py -i $FILE  -o Datacard_13TeV_${EXT}.txt -p $PROCS -c $CATS --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --intLumi $INTLUMI --year $YEAR --uepsfilename $UEPS --newGghScheme --analysis HHWWgg "
+    # ./makeDatacard.py -i $FILE  -o Datacard_13TeV_${EXT}.txt -p $PROCS -c $CATS --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --intLumi $INTLUMI --year $YEAR --uepsfilename $UEPS --newGghScheme --analysis HHWWgg 
+  
+    systematicsOption=""
+    
+    if [[ $DOSYSTEMATICS == "1" ]]; then
+      systematicsOption=" --doSystematics "
+    fi
+
+    # shortExt=""
+    echo "shortExt: $SHORTEXT"
+
+    datacardDirec="${SHORTEXT}_${HHWWGGCATLABEL}_datacards"
+    mkdir -p $datacardDirec
+
+    DatacardName="Datacard_13TeV_${EXT}.txt"
+    DatacardNameCleaned="Datacard_13TeV_${EXT}_cleaned.txt"
+    echo "python makeDatacard.py --inputWSDir $FILE --years $YEAR --procs $PROCS --analysis $ANALYSIS --cats $CATS ${systematicsOption} --removeNoTag --DatacardName $DatacardName --ext $SHORTEXT --analysis_type $ANALYSIS_TYPE"
+    python makeDatacard.py --inputWSDir $FILE --years $YEAR --procs $PROCS --analysis $ANALYSIS --cats $CATS ${systematicsOption} --removeNoTag --DatacardName $DatacardName --ext $SHORTEXT --analysis_type $ANALYSIS_TYPE
+    
+    # echo "python cleanDatacard.py --inputWSDir $FILE --years $YEAR --procs $PROCS --analysis $ANALYSIS --cats $CATS ${systematicsOption} --removeNoTag"
+    echo "python cleanDatacard.py --datacard $DatacardName --outfilename $DatacardNameCleaned"
+    python cleanDatacard.py --datacard $DatacardName --outfilename $DatacardNameCleaned
+    mv $DatacardName $datacardDirec
+    mv $DatacardNameCleaned $datacardDirec
+
+    # echo "python makeDatacard.py -i $FILE  -o Datacard_13TeV_${EXT}.txt -p $PROCS -c $CATS --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --intLumi $INTLUMI --year $YEAR --uepsfilename $UEPS --newGghScheme --analysis HHWWgg "
+    # python makeDatacard.py -i $FILE  -o Datacard_13TeV_${EXT}.txt -p $PROCS -c $CATS --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --intLumi $INTLUMI --year $YEAR --uepsfilename $UEPS --newGghScheme --analysis HHWWgg 
 
   # echo "./makeParametricModelDatacardFLASHgg.py -i $FILE -o Datacard_13TeV_${EXT}.txt -p $PROCS -c $CATS --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --intLumi $INTLUMI --uepsfilename $UEPS --analysis HHWWgg"
   # ./makeParametricModelDatacardFLASHgg.py -i $FILE  -o Datacard_13TeV_${EXT}.txt -p $PROCS -c $CATS --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --intLumi $INTLUMI --uepsfilename $UEPS --analysis HHWWgg #--submitSelf
@@ -206,24 +245,111 @@ echo "------------------------------------------------"
 echo "------------> Create COMBINE"
 echo "------------------------------------------------"
 
-if [ $ANALYSIS == "HHWWgg" ]; then 
-  fileDir="${FILE%/*}" # get directory 
-  fileEnd="${FILE##*/}"
-  fileID=${fileEnd::-5} # remove .root     
-  mass="$(cut -d'_' -f1 <<<$fileID)" # get text before first '_'. ex: SM, X250, X260, ...
-  # HHWWggLabel1="${mass}_WWgg_qqlnugg" 
-  HHWWggLabel="${mass}_HHWWgg_qqlnu" 
-  OUTDIR+="_${HHWWggLabel}"
-fi 
+
 
 if [ $ISDATA == 0 ]; then
 FAKE="_FAKE"
 fi
 
+if [ $ANALYSIS == "HHWWgg" ]; then 
+  fileDir="${FILE%/*}" # get directory 
+  fileEnd="${FILE##*/}"
+  fileID=${fileEnd::-5} # remove .root   
+  if [ $ANALYSIS_TYPE == "NMSSM" ]; then 
+    # HHWWggmass="$(cut -d'_' -f1 <<<$fileID)" # get text before first '_'. ex: SM, X250, X260, ...
+    # HHWWggLabel1="${mass}_WWgg_qqlnugg" 
+    massX="$(cut -d'_' -f1 <<<$fileID)"
+    massY="$(cut -d'_' -f2 <<<$fileID)"
+    HHWWggmass="${massX}_${massY}"
+    HHWWggLabel="${HHWWggmass}_HHWWgg_qqlnu" 
+  else 
+    HHWWggmass="$(cut -d'_' -f1 <<<$fileID)" # get text before first '_'. ex: SM, X250, X260, ...
+    # HHWWggLabel1="${mass}_WWgg_qqlnugg" 
+    HHWWggLabel="${HHWWggmass}_HHWWgg_qqlnu" 
+  fi 
+  OUTDIR+="_${HHWWggLabel}"
+fi 
+
+echo "HHWWggmass: $HHWWggmass"
+
 if [ ! -d "Signal/$OUTDIR" ]; then
   echo "Signal/$OUTDIR doesn't exist, maybe your EXT is wrong? Exiting..."
   exit 1
 fi
+#need 
+# Datacard_13TeV_HHWWgg_v2-3_2017_2Cats_X650_HHWWgg_qqlnu_cleaned.txt
+
+#looked for 
+# Datacard_13TeV_HHWWgg_v2-3_2017_2Cats_cleaned.txt
+
+datacardDirec="${SHORTEXT}_${HHWWGGCATLABEL}_datacards"
+
+DatacardName="Datacard_13TeV_${EXT}_cleaned.txt"
+if [ $ANALYSIS == "HHWWgg" ]; then 
+  DatacardName="Datacard_13TeV_${EXT}_${HHWWggLabel}_cleaned.txt"
+fi
+
+DatacardLocation="${datacardDirec}/${DatacardName}"
+
+cd Plots/FinalResults
+# ls ../../Signal/$OUTDIR/CMS-HGG_*sigfit*oot  > tmp.txt
+if [ $ANALYSIS == "HHWWgg" ]; then 
+  # ls ../../Signal/$OUTDIR/CMS-HGG_*sigfit*oot  > tmp.txt
+  ls ../../Signal/$OUTDIR/CMS-HGG_mva_13TeV_sigfit.root  > tmp.txt
+else
+  ls ../../Signal/$OUTDIR/CMS-HGG_*sigfit*oot  > tmp.txt
+fi
+
+while read p;
+do
+q=$(basename $p)
+
+mkdir -p ./Models
+mkdir -p ./Models/${EXT}
+# mkdir -p ./Models/${EXT}/${q}
+# mkdir -p ./Models/${EXT}/${q}/${EXT}
+# mkdir -p ./Models/${EXT}/${q}/${EXT}/mva 
+
+cp $p ./Models/${EXT}/${q/$EXT/mva} 
+#echo " cp $p ./Inputs/${EXT}/${q/$EXT/mva} "
+done < tmp.txt
+
+mkdir -p ${HHWWGGCATLABEL}_limits
+
+echo "FAKE: ${FAKE}"
+echo "BACKGROUND COMMAND: cp ../../Background/CMS-HGG_multipdf_${EXT}${FAKE}.root"
+
+echo "EXT: $EXT"
+echo "SHORTEXT: $SHORTEXT"
+# shorterEXT=$EXT
+shorterEXT=${EXT%_*}
+# echo ${foo##*:}
+echo "shorterEXT: $shorterEXT"
+
+if [ $ANALYSIS == "HHWWgg" ]; then 
+  # echo "cp ../../Signal/$OUTDIR/CMS-HGG_mva_13TeV_sigfit.root ./Models/${EXT}/CMS-HGG_mva_13TeV_sigfit.root"
+  cp ../../Signal/$OUTDIR/CMS-HGG_mva_13TeV_sigfit.root ./Models/${EXT}/CMS-HGG_mva_13TeV_sigfit.root
+else 
+  cp ../../Signal/$OUTDIR/CMS-HGG_sigfit_${EXT}.root ./Models/${EXT}/CMS-HGG_mva_13TeV_sigfit.root
+fi 
+cp ../../Background/CMS-HGG_multipdf_${EXT}${FAKE}.root ./Models/${EXT}/CMS-HGG_mva_13TeV_multipdf${FAKE}.root
+cp ../../Datacard/${DatacardLocation} CMS-HGG_mva_13TeV_datacard_${EXT}.txt
+
+if [ $ANALYSIS == "HHWWgg" ]; then 
+  combine CMS-HGG_mva_13TeV_datacard_${EXT}.txt -m 125 -M AsymptoticLimits --run=blind
+  
+  mv higgsCombineTest.AsymptoticLimits.mH125.root ${HHWWGGCATLABEL}_limits/${shorterEXT}_${HHWWggmass}_${HHWWGGCATLABEL}_HHWWgg_qqlnu.root
+  # mv higgsCombineTest.AsymptoticLimits.mH125.root # save for mass point, category 
+fi
+
+# if [ $ISDATA == 0 ]; then
+# FAKE="_FAKE"
+# fi
+
+# if [ ! -d "Signal/$OUTDIR" ]; then
+#   echo "Signal/$OUTDIR doesn't exist, maybe your EXT is wrong? Exiting..."
+#   exit 1
+# fi
 
 # if [ $ANALYSIS == "HHWWgg" ]; then 
 #   fileDir="${FILE%/*}" # get directory 
@@ -234,40 +360,49 @@ fi
 #   HHWWggLabel="${mass}_HHWWgg_qqlnu" 
 # fi 
 
-cd Plots/FinalResults
 
-ls ../../Signal/$OUTDIR/CMS-HGG_*sigfit*oot  > tmp.txt
 
-while read p;
-do
-q=$(basename $p)
-mkdir -p ./Inputs
-mkdir -p ./Inputs/${EXT}
-mkdir -p ./Inputs/${EXT}/${q}
-mkdir -p ./Inputs/${EXT}/${q}/${EXT}
-mkdir -p ./Inputs/${EXT}/${q}/${EXT}/mva 
-cp $p ./Inputs/${EXT}/${q/$EXT/mva} 
-#echo " cp $p ./Inputs/${EXT}/${q/$EXT/mva} "
-done < tmp.txt
 
-echo "EXT: $EXT" ## hggpdfsmrel_13TeV_ggF_HHWWggTag_0
-#cp ../../Signal/$OUTDIR/CMS-HGG_sigfit_${EXT}.root ./Inputs/${EXT}/CMS-HGG_mva_13TeV_sigfit.root
-if [ $ANALYSIS == "HHWWgg" ]; then 
-  # cp ../../Signal/$OUTDIR/CMS-HGG_sigfit_${EXT}_${HHWWggLabel}.root CMS-HGG_sigfit_data_ggF_HHWWggTag_0_13TeV.root # doesn't give limit for some reason 
-  cp ../../Signal/$OUTDIR/CMS-HGG_mva_13TeV_sigfit.root CMS-HGG_sigfit_data_ggF_HHWWggTag_0_13TeV.root
-  # cp ../../Signal/$OUTDIR/CMS-HGG_mva_13TeV_sigfit.root CMS-HGG_sigfit_data_ggF_HHWWggTag_0_13TeV.root
-  # CMS-HGG_sigfit_HHWWgg_v2-3_2017_SM_HHWWgg_qqlnu.root # bigger for some reason 
-  # CMS-HGG_mva_13TeV_sigfit.root
-  cp ../../Background/CMS-HGG_multipdf_${EXT}.root CMS-HGG_mva_13TeV_multipdf.root 
-  cp ../../Datacard/Datacard_13TeV_${EXT}_${HHWWggLabel}.txt CMS-HGG_mva_13TeV_datacard.txt
-  combine CMS-HGG_mva_13TeV_datacard.txt -m 125 -M AsymptoticLimits --run=blind
-  # combine CMS-HGG_mva_13TeV_datacard.txt -m 125 -M AsymptoticLimits --run=blind -v 2
-  cp higgsCombineTest.AsymptoticLimits.mH125.root ${EXT}_${HHWWggLabel}.root 
-  # cp higgsCombineTest.AsymptoticLimits.mH125.root $outName
-else 
-  cp ../../Background/CMS-HGG_multipdf_${EXT}${FAKE}.root ./Inputs/${EXT}/CMS-HGG_mva_13TeV_multipdf${FAKE}.root
-  cp ../../Datacard/Datacard_13TeV_${EXT}_cleaned.txt CMS-HGG_mva_13TeV_datacard_${EXT}.txt
-fi 
+# cd Plots/FinalResults
+
+# ls ../../Signal/$OUTDIR/CMS-HGG_*sigfit*oot  > tmp.txt
+
+# while read p;
+# do
+# q=$(basename $p)
+# mkdir -p ./Inputs
+# mkdir -p ./Inputs/${EXT}
+# mkdir -p ./Inputs/${EXT}/${q}
+# mkdir -p ./Inputs/${EXT}/${q}/${EXT}
+# mkdir -p ./Inputs/${EXT}/${q}/${EXT}/mva 
+# cp $p ./Inputs/${EXT}/${q/$EXT/mva} 
+# #echo " cp $p ./Inputs/${EXT}/${q/$EXT/mva} "
+# done < tmp.txt
+
+# echo "EXT: $EXT" ## hggpdfsmrel_13TeV_ggF_HHWWggTag_0
+# #cp ../../Signal/$OUTDIR/CMS-HGG_sigfit_${EXT}.root ./Inputs/${EXT}/CMS-HGG_mva_13TeV_sigfit.root
+
+
+
+# if [ $ANALYSIS == "HHWWgg" ]; then 
+#   # cp ../../Signal/$OUTDIR/CMS-HGG_sigfit_${EXT}_${HHWWggLabel}.root CMS-HGG_sigfit_data_ggF_HHWWggTag_0_13TeV.root # doesn't give limit for some reason 
+#   cp ../../Signal/$OUTDIR/CMS-HGG_mva_13TeV_sigfit.root CMS-HGG_sigfit_data_ggF_HHWWggTag_0_13TeV.root
+#   # cp ../../Signal/$OUTDIR/CMS-HGG_mva_13TeV_sigfit.root CMS-HGG_sigfit_data_ggF_HHWWggTag_0_13TeV.root
+#   # CMS-HGG_sigfit_HHWWgg_v2-3_2017_SM_HHWWgg_qqlnu.root # bigger for some reason 
+#   # CMS-HGG_mva_13TeV_sigfit.root
+#   cp ../../Background/CMS-HGG_multipdf_${EXT}.root CMS-HGG_mva_13TeV_multipdf.root 
+#   cp ../../Datacard/Datacard_13TeV_${EXT}_${HHWWggLabel}.txt CMS-HGG_mva_13TeV_datacard.txt
+#   combine CMS-HGG_mva_13TeV_datacard.txt -m 125 -M AsymptoticLimits --run=blind
+#   # combine CMS-HGG_mva_13TeV_datacard.txt -m 125 -M AsymptoticLimits --run=blind -v 2
+#   cp higgsCombineTest.AsymptoticLimits.mH125.root ${EXT}_${HHWWggLabel}.root 
+#   # cp higgsCombineTest.AsymptoticLimits.mH125.root $outName
+# else 
+#   cp ../../Background/CMS-HGG_multipdf_${EXT}${FAKE}.root ./Inputs/${EXT}/CMS-HGG_mva_13TeV_multipdf${FAKE}.root
+#   cp ../../Datacard/Datacard_13TeV_${EXT}_cleaned.txt CMS-HGG_mva_13TeV_datacard_${EXT}.txt
+# fi 
+
+
+
 
 exit 1
 
@@ -278,8 +413,15 @@ echo "Adding _FAKE  ($FAKE) t multipdf if ISDATA == $ISDATA"
 sed -i -e "s/multipdf.root/multipdf${FAKE}.root/g" CMS-HGG_mva_13TeV_datacard.txt 
 sed -i -e "s/\!INTLUMI\!/$INTLUMI/g" combineHarvesterOptions_${EXT}${FAKE}.dat 
 
-echo "./combineHarvester.py -d combineHarvesterOptions_$EXT.dat -q $DEFAULTQUEUE --batch $BATCH --verbose"
-./combineHarvester.py -d combineHarvesterOptions_${EXT}${FAKE}.dat -q $DEFAULTQUEUE --batch $BATCH --verbose
+# if HHWWgg add local runLocal
+runLocalOption=""
+if [ $ANALYSIS == "HHWWgg" ]; then 
+  runLocalOption=" --runLocal "
+fi
+
+echo "./combineHarvester.py -d combineHarvesterOptions_$EXT.dat -q $DEFAULTQUEUE --batch $BATCH --verbose $runLocalOption"
+./combineHarvester.py -d combineHarvesterOptions_${EXT}${FAKE}.dat -q $DEFAULTQUEUE --batch $BATCH --verbose $runLocalOption
+
 
 JOBS=999
 RUN=999

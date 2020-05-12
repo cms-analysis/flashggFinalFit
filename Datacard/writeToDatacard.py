@@ -19,11 +19,30 @@ def writeProcesses(f,d,options):
   # d = Pandas DataFrame
   # Shapes
   # Loop over categories in dataframe
+  # print'd:'d
   for cat in d.cat.unique():
     # Loop over rows for respective category
     for ir,r in d[d['cat']==cat].iterrows():
       # Write to datacard
-      f.write("shapes      %-55s %-40s %s %s\n"%(r['proc'],r['cat'],r['modelWSFile'],r['model']))
+      # print'r:',r
+      
+      if(options.analysis=="HHWWgg"): 
+        # print' r["type"]:',r['type']
+        model = r['model']
+        if r['type']=='sig': 
+          # print'r["modelWSFile"]:',r['model']
+          yr = r['year']
+          model = model.replace('hggpdfsmrel_13TeV','hggpdfsmrel_%s_13TeV'%yr) # HHWWgg fix for running 2017 only
+        if r['type']=='data' or r['type']=='bkg':
+          yr = r['year']
+          model = model.replace('_%s_'%yr,'_') # HHWWgg fix for running 2017 only
+
+        yr = r['year']
+        thiscat = r['cat']
+        thiscat.replace('%s'%yr,'13TeV')
+        f.write("shapes      %-55s %-40s %s %s\n"%(r['proc'],thiscat,r['modelWSFile'],model))
+      else: 
+        f.write("shapes      %-55s %-40s %s %s\n"%(r['proc'],r['cat'],r['modelWSFile'],r['model']))
 
   # Bin, observation and rate lines
   lbreak = '----------------------------------------------------------------------------------------------------------------------------------'
@@ -32,9 +51,14 @@ def writeProcesses(f,d,options):
   lbin_procXcat = '%-30s'%"bin"
   lproc = '%-30s'%"process"
   lprocid = '%-30s'%"process"
-  lrate = '%-30s'%"rate"        
+  lrate = '%-30s'%"rate"     
+  # yr = r['year']   
+  yr='2017'
   # Loop over categories
   for cat in d.cat.unique():
+    if(options.analysis=="HHWWgg"):
+      cat.replace('_%s'%yr,'_13TeV')
+      # print'cat:',cat 
     lbin_cat += "%-55s "%cat
     lobs_cat += "%-55s "%"-1"
     sigID = 0
@@ -162,6 +186,17 @@ def writePdfIndex(f,d,options):
   f.write("\n")
   for cat in d[~d['cat'].str.contains("NOTAG")].cat.unique(): 
     indexStr = "pdfindex_%s_13TeV"%cat
+    print'indexStr:',indexStr
+    if(options.analysis=="HHWWgg"): 
+      print'replace'
+      indexStr = indexStr.replace("_2017_","_")
+    print'indexStr:',indexStr
+    # else: indexStr = "pdfindex_%s_13TeV"%cat
+      # yr = r['year']
+      # yr='2017'
+      # indexStr.replace('_%s_'%yr,'_')
+    
+    # print'indexStr:',indexStr
     f.write("%-55s  discrete\n"%indexStr)
   return True
 
