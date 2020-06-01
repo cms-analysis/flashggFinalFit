@@ -21,7 +21,7 @@ def leave():
 ROOT.gROOT.SetBatch(True)
 
 # Define processes
-productionModes = ['ggH','qqH','WH_had','ZH_had','ggZH_had','WH_lep','ZH_lep','ggZH_ll','ggZH_nunu','ttH','tHq','bbH']
+productionModes = ['ggH','qqH','WH_had','ZH_had','ggZH_had','WH_lep','ZH_lep','ggZH_ll','ggZH_nunu','ttH','bbH','tHq','tHW']
 #productionModes = ['ggH','qqH','WH_had','ZH_had','WH_lep','ZH_lep','ttH']#,'tHq']
 #productionModes = ['ggH']
 stxsBins = {
@@ -35,8 +35,9 @@ stxsBins = {
   "ggZH_ll":['ggZH_ll_PTV_0_75','ggZH_ll_PTV_75_150','ggZH_ll_PTV_150_250_0J','ggZH_ll_PTV_150_250_GE1J','ggZH_ll_PTV_GT250'],
   "ggZH_nunu":['ggZH_nunu_PTV_0_75','ggZH_nunu_PTV_75_150','ggZH_nunu_PTV_150_250_0J','ggZH_nunu_PTV_150_250_GE1J','ggZH_nunu_PTV_GT250'],
   "ttH":['ttH_PTH_0_60','ttH_PTH_60_120','ttH_PTH_120_200','ttH_PTH_200_300','ttH_PTH_GT300'],
+  "bbH":['bbH'],
   "tHq":['tHq'],
-  "bbH":['bbH'] 
+  "tHW":['tHW']
 } 
 
 # Define parameter merging scheme

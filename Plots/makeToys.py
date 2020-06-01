@@ -66,7 +66,7 @@ for itoy in range(0,opt.nToys):
   fsub.write("%s\n\n"%throw_cmd)
   # Clean up
   fsub.write("mv higgsCombine_%g_throw_step*.root toy_%g.root\n"%(itoy,itoy))
-  #fsub.write("rm gen_%g.root fit_%g.root\n"%(itoy,itoy))
+  fsub.write("rm gen_%g.root fit_%g.root\n"%(itoy,itoy))
   fsub.close()
 
 # Change permission of all files and set running on batch

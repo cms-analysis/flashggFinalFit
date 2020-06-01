@@ -27,44 +27,9 @@ default_bar_styles = {
         'LineColor': 17,
         'MarkerSize': 0
     },
-    'dummy_Theory': {
-        'LineWidth': 20,
-        'LineColor': 17,
-        'MarkerSize': 0
-    },
-    'ggH_Theory': {
-        'LineWidth': 20,
-        'LineColor': 17,
-        'MarkerSize': 0
-    },
-    'qqH_Theory': {
-        'LineWidth': 20,
-        'LineColor': 17,
-        'MarkerSize': 0
-    },
-    'WH_lep_Theory': {
-        'LineWidth': 20,
-        'LineColor': 17,
-        'MarkerSize': 0
-    },
-    'ZH_lep_Theory': {
-        'LineWidth': 20,
-        'LineColor': 17,
-        'MarkerSize': 0
-    },
-    'ttH_Theory': {
-        'LineWidth': 20,
-        'LineColor': 17,
-        'MarkerSize': 0
-    },
-    'tHq_Theory': {
-        'LineWidth': 20,
-        'LineColor': 17,
-        'MarkerSize': 0
-    },
     'Error': {
         #'LineWidth': 2,
-        'LineWidth': 4,
+        'LineWidth': 3,
         'LineColor': ROOT.kAzure+7,
         'MarkerSize': 0
     },
@@ -74,33 +39,28 @@ default_bar_styles = {
         'MarkerSize': 0
     },
     'ggH_Error': {
-        'LineWidth': 2,
+        'LineWidth': 3,
         'LineColor': ROOT.kAzure+7,
         'MarkerSize': 0
     },
-    'qqH_Error': {
-        'LineWidth': 2,
+    'VBF_Error': {
+        'LineWidth': 3,
         'LineColor': ROOT.kOrange-3,
         'MarkerSize': 0
     },
-    'WH_lep_Error': {
-        'LineWidth': 2,
+    'VH_Error': {
+        'LineWidth': 3,
         'LineColor': ROOT.kGreen+2,
         'MarkerSize': 0
     },
-    'ZH_lep_Error': {
-        'LineWidth': 2,
-        'LineColor': ROOT.kGreen+2,
-        'MarkerSize': 0
-    },
-    'ttH_Error': {
-        'LineWidth': 2,
+    'top_Error': {
+        'LineWidth': 3,
         'LineColor': ROOT.kPink+6,
         'MarkerSize': 0
     },
-    'tHq_Error': {
-        'LineWidth': 2,
-        'LineColor': ROOT.kOrange,
+    'inclusive_Error': {
+        'LineWidth': 3,
+        'LineColor': ROOT.kGray+1,
         'MarkerSize': 0
     },
     'OtherLimit': {
@@ -109,9 +69,9 @@ default_bar_styles = {
         'MarkerSize': 0
     },
     'Stat': {
-        'LineWidth': 4,
-        'LineColor': ROOT.kAzure+7,
-        #'LineColor': ROOT.kGray+1,
+        'LineWidth': 3,
+        #'LineColor': ROOT.kAzure+7,
+        'LineColor': ROOT.kGray+1,
         'MarkerSize': 0
     },
     'dummy_Stat': {
@@ -120,33 +80,28 @@ default_bar_styles = {
         'MarkerSize': 0
     },
     'ggH_Stat': {
-        'LineWidth': 2,
+        'LineWidth': 3,
         'LineColor': ROOT.kAzure+7,
         'MarkerSize': 0
     },
-    'qqH_Stat': {
-        'LineWidth': 2,
+    'VBF_Stat': {
+        'LineWidth': 3,
         'LineColor': ROOT.kOrange-3,
         'MarkerSize': 0
     },
-    'WH_lep_Stat': {
-        'LineWidth': 2,
+    'VH_Stat': {
+        'LineWidth': 3,
         'LineColor': ROOT.kGreen+2,
         'MarkerSize': 0
     },
-    'ZH_lep_Stat': {
-        'LineWidth': 2,
-        'LineColor': ROOT.kGreen+2,
-        'MarkerSize': 0
-    },
-    'ttH_Stat': {
-        'LineWidth': 2,
+    'top_Stat': {
+        'LineWidth': 3,
         'LineColor': ROOT.kPink+6,
         'MarkerSize': 0
     },
-    'tHq_Stat': {
-        'LineWidth': 2,
-        'LineColor': ROOT.kOrange,
+    'inclusive_Stat': {
+        'LineWidth': 3,
+        'LineColor': ROOT.kGray+1,
         'MarkerSize': 0
     },
     'Syst': {
@@ -354,12 +309,12 @@ if __name__ == "__main__":
     parser.add_argument('--labels', default=None, help='Label next to the CMS logo')
     parser.add_argument('--x-title', default='Parameter value', help='Label next to the CMS logo')
     #parser.add_argument('--x-range', default='-0.5,6.8', help='Label next to the CMS logo')
-    parser.add_argument('--x-range', default='-0.2,2.5', help='Label next to the CMS logo')
+    parser.add_argument('--x-range', default='0.25,3.5', help='Label next to the CMS logo')
     parser.add_argument('--left-margin', default=0.2, type=float, help='Left pad margin')
     parser.add_argument('--bottom-margin', default=0.1, type=float, help='Bottom pad margin')
     parser.add_argument('--subline', default='137 fb^{-1} (13 TeV)', help='Label next to the CMS logo')
     parser.add_argument('--extra-text', nargs='*', help='Text:SIZE:X:Y')
-    parser.add_argument('--frame-frac', type=float, default=0.8, help='Fraction of the frame y height the graphs will occupy')
+    parser.add_argument('--frame-frac', type=float, default=0.7, help='Fraction of the frame y height the graphs will occupy')
     parser.add_argument('--table', default=None, help='Draw table of numeric values, with opts SIZE')
     parser.add_argument('--doHatching', default=None, help='Hatched box at 0')
     parser.add_argument('--doSTXSColour', default=None, help='Plot different STXS production modes in different colours')
@@ -435,7 +390,7 @@ if __name__ == "__main__":
 
     valid_checks = [X for X in args.require_valid.split(',') if X != '']
 
-    productionModes = ['dummy','ggH','qqH','WH_lep','ZH_lep','ttH','tHq']
+    productionModes = ['dummy','ggH','VBF','VH','top','inclusive']
     if args.doSTXSColour is not None:
       for pm in productionModes:
         for bar in bars:
@@ -480,7 +435,7 @@ if __name__ == "__main__":
     if args.template == 'A1_5PD':
         legend = MakeLegend(pads[0], xlo=0.53, xhi=0.95, yhi=0.945) #for prod x decay
     else:
-        legend = MakeLegend(pads[0], xlo=0.5, xhi=0.95, yhi=0.945, topfrac=0.16)
+        legend = MakeLegend(pads[0], xlo=0.5, xhi=0.95, yhi=0.945, topfrac=0.26)
     legend.SetFillStyle(0)
     legend.SetNColumns(2)
 
@@ -499,59 +454,29 @@ if __name__ == "__main__":
     stxstxt = ROOT.TLatex()
     plot.Set(hggtxt, TextFont=42, TextSize=0.04, TextAlign=12)
     plot.Set(stxstxt, TextFont=42, TextSize=0.025, TextAlign=12, TextColor=ROOT.kGray+2)
-    hggtxt.DrawLatex(0.5, YEntryHeight(N, hframe) * (N+0.6), "H#rightarrow#gamma#gamma")
+    if "observed" in args.input[0].split(":")[0]: hggtxt.DrawLatex(0.4, YEntryHeight(N, hframe) * (N+0.4), "H#rightarrow#gamma#gamma, #hat{m}_{H}= 126.1 GeV")
+    else: hggtxt.DrawLatex(0.4, YEntryHeight(N, hframe) * (N+0.4), "H#rightarrow#gamma#gamma, m_{H}= 125.0 GeV")
     #stxstxt.DrawLatex( 1.1, YEntryHeight(N, hframe) * (N+0.5), "STXS stage 1.2 (reduced)")
 
     if args.table is not None:
         table_args = args.table.split(':')
         valtxt = ROOT.TLatex()
-        with_sm = False
-        if len(table_args)>1:
-          if table_args[1] == 'with_sm': 
-            with_sm = True
-            # Extract values from json
-            with open("jsons/xsbr_theory_all_stage1p2_minimal.json","r") as jsonfile: xsbr_theory = json.load(jsonfile)
-        #with_statsyst = 'Stat' in bars and 'Syst' in bars
-        with_statsyst = False
-        # pavetxt = ROOT.
-        plot.Set(valtxt, TextFont=42, TextSize=float(table_args[0]), TextAlign=12)
-        if with_sm:
-            xleft = (xmax - xmin) * 0.63 + xmin
-            xstart = (xmax - xmin) * 0.65 + xmin
-            xstart_sm = (xmax - xmin) * 0.82 + xmin
-        elif with_statsyst:
-            xleft = (xmax - xmin) * 0.60 + xmin
-            xstart = (xmax - xmin) * 0.75 + xmin
-            xstart_stat = (xmax - xmin) * 0.85 + xmin
-            xstart_syst = (xmax - xmin) * 0.95 + xmin
-        else:
-            xleft = (xmax - xmin) * 0.82 + xmin
-            xstart = (xmax - xmin) * 0.85 + xmin
-        box = ROOT.TBox(xleft, 0, xmax*0.98, float(N) * YEntryHeight(N, hframe) - YEntryHeight(N, hframe) * 0.05)
-        plot.Set(box, FillColor=0, LineWidth=0)
-        #box.Draw()
+        plot.Set(valtxt, TextFont=42, TextSize=float(table_args[0]), TextAlign=11)
+        xleft = (xmax - xmin) * 0.55 + xmin
+        xstart = (xmax - xmin) * 0.55 + xmin
+        xstart_th = (xmax - xmin) * 0.7 + xmin
+        xstart_exp = (xmax - xmin) * 0.8 + xmin
+        xstart_stat = (xmax - xmin) * 0.9 + xmin
         # If with SM: add titles
         for i, info in enumerate(drawlist):
-            if info['Name']=='dummy': continue
-            if with_sm:
-              xsbr = xsbr_theory[info['Name']]['nominal']
-              xsbr_high01Sigma = xsbr_theory[info['Name']]['High01Sigma']
-              xsbr_low01Sigma = xsbr_theory[info['Name']]['Low01Sigma']
-              valtxt.DrawLatex(xstart, float(gr_fit.GetY()[i]), '%.2g ^{#plus%.1f}_{#minus%.1f}'% (info['Val']*xsbr, abs(info['ErrorHi']*xsbr), abs(info['ErrorLo']*xsbr))) 
-              valtxt.DrawLatex(xstart_sm, float(gr_fit.GetY()[i]), '%.2g^{#plus%.1g}_{#minus%.1g}'% (xsbr, xsbr_high01Sigma, xsbr_low01Sigma)) 
-              #valtxt.DrawLatex(xstart_sm, float(gr_fit.GetY()[i]), '%.2g'%(info['Val']*XSBR[info['Name']]))
-            else:
-              valtxt.DrawLatex(xstart, float(gr_fit.GetY()[i]), '%.2f^{#plus%.2f}_{#minus%.2f}' % (info['Val'], abs(info['ErrorHi']), abs(info['ErrorLo'])))
-              if with_statsyst:
-                valtxt.DrawLatex(xstart_stat, float(gr_fit.GetY()[i]), '{}^{#plus%.2f}_{#minus%.2f}' % (abs(info['StatHi']), abs(info['StatLo'])))
-                valtxt.DrawLatex(xstart_syst, float(gr_fit.GetY()[i]), '{}^{#plus%.2f}_{#minus%.2f}' % (abs(info['SystHi']), abs(info['SystLo'])))
-        plot.Set(valtxt, TextFont=62, TextSize=float(table_args[0])/1.1,TextAlign=12)
-        if with_sm:
-            valtxt.DrawLatex(xstart, YEntryHeight(N, hframe) * (N+0.5), '#sigma#upointBR [fb]')
-            valtxt.DrawLatex(xstart_sm, YEntryHeight(N, hframe) * (N+0.5), '(#sigma#upointBR)_{SM} [fb]')
-        elif with_statsyst:
-            valtxt.DrawLatex(xstart_stat, YEntryHeight(N, hframe) * N, 'Stat')
-            valtxt.DrawLatex(xstart_syst, YEntryHeight(N, hframe) * N, 'Syst')
+            valtxt.DrawLatex(xstart, float(gr_fit.GetY()[i])-YEntryHeight(N, hframe)*0.1, '%.2f^{#plus%.2f}_{#minus%.2f}' % (info['Val'], abs(info['ErrorHi']), abs(info['ErrorLo'])))
+            valtxt.DrawLatex(xstart_th, float(gr_fit.GetY()[i])-YEntryHeight(N, hframe)*0.1, '{}^{#plus%.2f}_{#minus%.2f}' % (abs(info['TheoryHi']), abs(info['TheoryLo'])))
+            valtxt.DrawLatex(xstart_exp, float(gr_fit.GetY()[i])-YEntryHeight(N, hframe)*0.1, '{}^{#plus%.2f}_{#minus%.2f}' % (abs(info['SystHi']), abs(info['SystLo'])))
+            valtxt.DrawLatex(xstart_stat, float(gr_fit.GetY()[i])-YEntryHeight(N, hframe)*0.1, '{}^{#plus%.2f}_{#minus%.2f}' % (abs(info['StatHi']), abs(info['StatLo'])))
+        plot.Set(valtxt, TextFont=62, TextSize=float(table_args[0])/1.1,TextAlign=11)
+        valtxt.DrawLatex(xstart_th, YEntryHeight(N, hframe) * (N+0.1), 'Th.')
+        valtxt.DrawLatex(xstart_exp, YEntryHeight(N, hframe) * (N+0.1), 'Exp.')
+        valtxt.DrawLatex(xstart_stat, YEntryHeight(N, hframe) * (N+0.1), 'Stat.')
         #line = ROOT.TLine()
         # plot.Set(line, **linestyle)
         #line.DrawLine(xleft, 0., xleft, float(N) * YEntryHeight(N, hframe))

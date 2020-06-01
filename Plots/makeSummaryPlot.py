@@ -5,6 +5,7 @@ import json
 import argparse
 import CombineHarvester.CombineTools.plotting as plot
 import fnmatch
+import re
 
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 ROOT.gROOT.SetBatch(ROOT.kTRUE)
@@ -57,7 +58,7 @@ default_bar_styles = {
         'LineColor': 17,
         'MarkerSize': 0
     },
-    'tHq_Theory': {
+    'tH_Theory': {
         'LineWidth': 20,
         'LineColor': 17,
         'MarkerSize': 0
@@ -98,7 +99,7 @@ default_bar_styles = {
         'LineColor': ROOT.kPink+6,
         'MarkerSize': 0
     },
-    'tHq_Error': {
+    'tH_Error': {
         'LineWidth': 2,
         'LineColor': ROOT.kOrange,
         'MarkerSize': 0
@@ -144,7 +145,7 @@ default_bar_styles = {
         'LineColor': ROOT.kPink+6,
         'MarkerSize': 0
     },
-    'tHq_Stat': {
+    'tH_Stat': {
         'LineWidth': 2,
         'LineColor': ROOT.kOrange,
         'MarkerSize': 0
@@ -254,7 +255,7 @@ def MakeGraph(drawlist, hframe, label='Error', valid_checks=[],productionMode=No
     if productionMode is not None:
       nPoints = 0
       for i, info in enumerate(drawlist):
-        if productionMode in info['Name']: nPoints += 1
+        if productionMode.split("_")[0] in info['Name'].split("_"): nPoints += 1
     else: nPoints = len(drawlist)
     gr_bar = ROOT.TGraphAsymmErrors(nPoints)
 
@@ -262,7 +263,7 @@ def MakeGraph(drawlist, hframe, label='Error', valid_checks=[],productionMode=No
         if info['Name']=='dummy': continue
         ypos = YPos(i, len(drawlist), hframe)
         if( productionMode is not None ):
-          if( productionMode not in info['Name'] ): continue
+          if( productionMode.split("_")[0] not in info['Name'].split("_") ): continue
         if 'OtherLimit' in label:
             gr_bar.SetPoint(i, (info["%sLo" % label] + info["%sHi" % label]) / 2., ypos)
             err_lo = (gr_bar.GetX()[i] - info["%sLo" % label])
@@ -353,7 +354,7 @@ if __name__ == "__main__":
     parser.add_argument('--width', type=int, default=600, help='Canvas width in pixels')
     parser.add_argument('--labels', default=None, help='Label next to the CMS logo')
     parser.add_argument('--x-title', default='Parameter value', help='Label next to the CMS logo')
-    parser.add_argument('--x-range', default='-0.5,8.5', help='Label next to the CMS logo')
+    parser.add_argument('--x_range', default='-0.5,8.5', help='Label next to the CMS logo')
     #parser.add_argument('--x-range', default='-0.2,2.5', help='Label next to the CMS logo')
     parser.add_argument('--left-margin', default=0.2, type=float, help='Left pad margin')
     parser.add_argument('--bottom-margin', default=0.1, type=float, help='Bottom pad margin')
@@ -363,8 +364,10 @@ if __name__ == "__main__":
     parser.add_argument('--table', default=None, help='Draw table of numeric values, with opts SIZE')
     parser.add_argument('--doHatching', default=None, help='Hatched box at 0')
     parser.add_argument('--doSTXSColour', default=None, help='Plot different STXS production modes in different colours')
+    parser.add_argument('--inputXSBRjson', default=None, help='JSON storing XS values and uncertainties')
     args = parser.parse_args()
 
+    if args.inputXSBRjson.count("minimal"): args.x_range = "-0.5,9.5"
     # Dictionary to translate parameter names
     translate = {} if args.translate is None else LoadTranslations(args.translate)
 
@@ -435,7 +438,7 @@ if __name__ == "__main__":
 
     valid_checks = [X for X in args.require_valid.split(',') if X != '']
 
-    productionModes = ['dummy','ggH','qqH','WH_lep','ZH_lep','ttH','tHq']
+    productionModes = ['dummy','ggH','qqH','WH_lep','ZH_lep','ttH','tH']
     if args.doSTXSColour is not None:
       for pm in productionModes:
         for bar in bars:
@@ -480,7 +483,7 @@ if __name__ == "__main__":
     if args.template == 'A1_5PD':
         legend = MakeLegend(pads[0], xlo=0.53, xhi=0.95, yhi=0.945) #for prod x decay
     else:
-        legend = MakeLegend(pads[0], xlo=0.5, xhi=0.95, yhi=0.945, topfrac=0.16)
+        legend = MakeLegend(pads[0], xlo=0.53, xhi=0.98, yhi=0.96, topfrac=0.12)
     legend.SetFillStyle(0)
     legend.SetNColumns(2)
 
@@ -493,14 +496,16 @@ if __name__ == "__main__":
     legend.Draw()
 
     plot.DrawCMSLogo(pads[0], 'CMS',
-                     args.cms_label, 11, 0.045, 0.035, 1.2, '', 1.3)
+                     args.cms_label, 11, 0.045, 0.025, 1.2, '', 1.0)
 
     hggtxt = ROOT.TLatex()
     stxstxt = ROOT.TLatex()
-    plot.Set(hggtxt, TextFont=42, TextSize=0.04, TextAlign=12)
+    plot.Set(hggtxt, TextFont=42, TextSize=0.035, TextAlign=12)
     plot.Set(stxstxt, TextFont=42, TextSize=0.025, TextAlign=12, TextColor=ROOT.kGray+2)
-    hggtxt.DrawLatex( -0.15, YEntryHeight(N, hframe) * (N+0.6), "H#rightarrow#gamma#gamma")
-    stxstxt.DrawLatex( 1.2, YEntryHeight(N, hframe) * (N+0.5), "STXS stage 1.2 (reduced)")
+    mHtext = float(re.sub("p",".",args.inputXSBRjson.split("_")[-1].split(".json")[0]))
+    hggtxt.DrawLatex( -0.1, YEntryHeight(N, hframe)*N*1.0725, "H#rightarrow#gamma#gamma, #scale[0.75]{#hat{m}_{H} = %.1f GeV}"%mHtext)
+    if args.inputXSBRjson.count("maximal"): stxstxt.DrawLatex( -0.1, YEntryHeight(N, hframe)*N*1.0225, "STXS stage 1.2: maximal merging")
+    elif args.inputXSBRjson.count("minimal"): stxstxt.DrawLatex( -0.1, YEntryHeight(N, hframe)*N*1.0225, "STXS stage 1.2: minimal merging")
 
     if args.table is not None:
         table_args = args.table.split(':')
@@ -510,7 +515,7 @@ if __name__ == "__main__":
           if table_args[1] == 'with_sm': 
             with_sm = True
             # Extract values from json
-            with open("jsons/xsbr_theory_all_stage1p2_minimal.json","r") as jsonfile: xsbr_theory = json.load(jsonfile)
+            with open(args.inputXSBRjson,"r") as jsonfile: xsbr_theory = json.load(jsonfile)
         with_statsyst = 'Stat' in bars and 'Syst' in bars
         # pavetxt = ROOT.
         plot.Set(valtxt, TextFont=42, TextSize=float(table_args[0]), TextAlign=12)
@@ -526,9 +531,9 @@ if __name__ == "__main__":
         else:
             xleft = (xmax - xmin) * 0.8 + xmin
             xstart = (xmax - xmin) * 0.82 + xmin
-        box = ROOT.TBox(xleft, 0, xmax*0.98, float(N) * YEntryHeight(N, hframe) - YEntryHeight(N, hframe) * 0.05)
+        box = ROOT.TBox(xleft, 0, xmax, float(N) * YEntryHeight(N, hframe) - YEntryHeight(N, hframe) * 0.05)
         plot.Set(box, FillColor=0, LineWidth=0)
-        #box.Draw()
+        box.Draw()
         # If with SM: add titles
         for i, info in enumerate(drawlist):
             if info['Name']=='dummy': continue

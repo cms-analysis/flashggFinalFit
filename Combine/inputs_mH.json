@@ -1,0 +1,8 @@
+{
+    "mu_inclusive":{
+        "pois":"r",
+        "fits":"singles:statonly:MH",
+        "points":"",
+        "fit_opts":"--setParameterRanges r=0.5,1.5:MH=125,127 --saveSpecifiedNuis all"
+    }
+}

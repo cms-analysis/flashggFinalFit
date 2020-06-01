@@ -32,6 +32,7 @@ def get_options():
   parser.add_option("--inputTreeFile", dest="inputTreeFile", default=None, help="Input ROOT tree")  
   parser.add_option("--xparam", dest="xparam", default="kappa_V:0.4,1.25", help="X-parameter:range")
   parser.add_option("--yparam", dest="yparam", default="kappa_F:-1.5,2.5", help="Y-parameter:range")
+  parser.add_option("--nPoints", dest="nPoints", default=1000, type='int', help="N bins")
   parser.add_option("--nBins", dest="nBins", default=200, type='int', help="N bins")
   parser.add_option("--interpolation", dest="interpolation", default='linear', help="Interpolation")
   parser.add_option("--translatePOIs", dest="translatePOIs", default=None, help="JSON to store poi translations")
@@ -73,7 +74,7 @@ for ev in t_in:
 dnll = np.asarray(deltaNLL)
 points = np.array([xvals,yvals]).transpose()
 # Set up grid
-grid_x, grid_y = np.mgrid[x_range[0]:x_range[1]:opt.nBins*1j, y_range[0]:y_range[1]:opt.nBins*1j]
+grid_x, grid_y = np.mgrid[x_range[0]:x_range[1]:opt.nPoints*1j, y_range[0]:y_range[1]:opt.nPoints*1j]
 grid_vals = griddata(points,dnll,(grid_x,grid_y), method=opt.interpolation)
 
 # Remove NANS
@@ -156,10 +157,10 @@ lat.DrawLatex(0.62,0.92,"137 fb^{-1} (13#scale[0.75]{ }TeV)")
 
 # Add legend
 if opt.placeLegend == "bottom_right": leg = ROOT.TLegend(0.55,0.16,0.8,0.36)
-else: leg = ROOT.TLegend(0.55,0.67,0.8,0.87)
+else: leg = ROOT.TLegend(0.6,0.67,0.8,0.87)
 leg.SetBorderSize(0)
 leg.SetFillColor(0)
-leg.SetFillStyle(0)
+#leg.SetFillStyle(0)
 if opt.doBestFit: leg.AddEntry(gBF,  "Best fit", "P" )
 leg.AddEntry(c68, "68% CL" , "L" )
 leg.AddEntry(c95, "95% CL" , "L" )
@@ -168,5 +169,5 @@ leg.Draw()
 
 canv.Update()
 if not os.path.isdir("./FinalPlots"): os.system("mkdir FinalPlots")
-canv.SaveAs("./FinalPlots/scan2D_%s_vs_%s%s.png"%(x,y,opt.ext))
-canv.SaveAs("./FinalPlots/scan2D_%s_vs_%s%s.pdf"%(x,y,opt.ext))
+#canv.SaveAs("./FinalPlots/scan2D_%s_vs_%s%s.png"%(x,y,opt.ext))
+#canv.SaveAs("./FinalPlots/scan2D_%s_vs_%s%s.pdf"%(x,y,opt.ext))

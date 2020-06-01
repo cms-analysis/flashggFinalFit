@@ -42,7 +42,7 @@ modes[opt.mode] = pois
 translate = {} if opt.translate is None else LoadTranslations(opt.translate)
 
 for mode,pois in modes.iteritems():
-  fileName = '%s/src/flashggFinalFit/Combine_p1/runFits%s_%s/robustHesse_%s%s.root'%(os.environ['CMSSW_BASE'],opt.ext,opt.mode,name,obs_ext)
+  fileName = '%s/src/flashggFinalFit/Combine/runFits%s_%s/robustHesse_%s%s.root'%(os.environ['CMSSW_BASE'],opt.ext,opt.mode,name,obs_ext)
   inFile = ROOT.TFile(fileName,'READ')
   theMatrix = inFile.Get('h_correlation')
   theList   = inFile.Get('floatParsFinal')
@@ -68,12 +68,15 @@ for mode,pois in modes.iteritems():
       #print 'Value for correlation between %s and %s is %.3f'%(revPars[iPar],revPars[jPar],theVal)
       theMap[(revPars[iPar],revPars[jPar])] = theVal
 
+  
+  pois_reverse = list(pois)
+  pois_reverse.reverse()
   for iBin,iPar in enumerate(pois):
-    for jBin,jPar in enumerate(pois):
+    for jBin,jPar in enumerate(pois_reverse):
       theHist.GetXaxis().SetBinLabel(iBin+1, translate[iPar])
       theHist.GetYaxis().SetBinLabel(jBin+1, translate[jPar])
       #print 'Filling correlation for %s and %s of %.3f'%(iPar, jPar, theMap[(iPar,jPar)])
-      theHist.Fill(iBin, jBin, theMap[(iPar,jPar)])
+      if iBin <= (theHist.GetNbinsX()-1-jBin): theHist.Fill(iBin, jBin, theMap[(iPar,jPar)])
 
   print 'Final correlation map used is:'
   print theMap
@@ -81,24 +84,45 @@ for mode,pois in modes.iteritems():
   set_color_palette('frenchFlag')
   ROOT.gStyle.SetNumberContours(500)
   ROOT.gStyle.SetPaintTextFormat('1.2f')
+  ROOT.gStyle.SetTextFont(42)
 
   if mode.count('stage1p2'): canv = setCanvasCorr(stage='1p2')
   else: canv = setCanvasCorr()
   formatHisto(theHist)
   theHist.GetXaxis().SetTickLength(0.)
   theHist.GetXaxis().SetLabelSize(0.06)
+  theHist.GetXaxis().SetLabelFont(42)
   theHist.GetYaxis().SetTickLength(0.)
   theHist.GetYaxis().SetLabelSize(0.06)
+  theHist.GetYaxis().SetLabelFont(42)
   theHist.GetZaxis().SetRangeUser(-1.,1.)
   theHist.GetZaxis().SetTickLength(0.)
+  theHist.GetZaxis().SetLabelSize(0.03)
   if mode.count('stage1p2'): 
-    theHist.GetXaxis().SetLabelSize(0.03)
-    theHist.GetYaxis().SetLabelSize(0.03)
+    theHist.GetXaxis().SetLabelOffset(0.0075)
     theHist.GetXaxis().LabelsOption("v")
+    if mode.count('minimal'):
+      theHist.GetXaxis().SetLabelSize(0.02)
+      theHist.GetYaxis().SetLabelSize(0.02)
+      theHist.SetMarkerSize(0.6)
+    else:
+      theHist.GetXaxis().SetLabelSize(0.03)
+      theHist.GetYaxis().SetLabelSize(0.03)
+      theHist.SetMarkerSize(0.7)
   else:
+    theHist.GetYaxis().SetLabelOffset(0.007)  
     theHist.SetMarkerSize(1.5)
   theHist.Draw('colz,text')
-  drawCMS(True)
-  drawEnPu(lumi='%2.0f fb^{-1}'%lumi)
-  canv.Print('%s/src/flashggFinalFit/Combine_p1/runFits%s_%s/Plots/corrMatrix_%s_%s%s%s.png'%(os.environ['CMSSW_BASE'],opt.ext,mode,mode,name.split("_")[-1],obs_ext,opt.ext))
-  canv.Print('%s/src/flashggFinalFit/Combine_p1/runFits%s_%s/Plots/corrMatrix_%s_%s%s%s.pdf'%(os.environ['CMSSW_BASE'],opt.ext,mode,mode,name.split("_")[-1],obs_ext,opt.ext))
+  latex = ROOT.TLatex()
+  latex.SetNDC()
+  latex.SetTextFont(42)
+  latex.SetTextAlign(32)
+  latex.SetTextSize(0.05)
+  latex.DrawLatex(1.00-canv.GetRightMargin()-0.02,1.00-canv.GetTopMargin()-0.06,'#bf{CMS} #it{Preliminary}')
+  latex.SetTextSize(0.04)
+  latex.DrawLatex(1.00-canv.GetRightMargin()-0.02,1.00-canv.GetTopMargin()-0.12,'%2.0f fb^{-1} (13 TeV)'%lumi)
+  latex.DrawLatex(1.00-canv.GetRightMargin()-0.02,1.00-canv.GetTopMargin()-0.18,'H#rightarrow#gamma#gamma')
+  #canv.Print("/eos/home-j/jlangfor/www/CMS/hgg/stxs_runII/May20/pass0/test/test_%s.png"%opt.mode)
+  #canv.Print("/eos/home-j/jlangfor/www/CMS/hgg/stxs_runII/May20/pass0/test/test_%s.pdf"%opt.mode)
+  canv.Print('%s/src/flashggFinalFit/Combine/runFits%s_%s/Plots/corrMatrix_%s_%s%s%s.png'%(os.environ['CMSSW_BASE'],opt.ext,mode,mode,name.split("_")[-1],obs_ext,opt.ext))
+  canv.Print('%s/src/flashggFinalFit/Combine/runFits%s_%s/Plots/corrMatrix_%s_%s%s%s.pdf'%(os.environ['CMSSW_BASE'],opt.ext,mode,mode,name.split("_")[-1],obs_ext,opt.ext))

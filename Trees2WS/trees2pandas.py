@@ -125,8 +125,7 @@ for cat in cats:
     dfs_tomerge = {}
     # No theory weights for bbh, thw and thq therefore skip
     #if opt.productionMode not in  ["bbh","thw","thq"]:
-    # FIXME: also tth for now
-    if opt.productionMode not in  ["tth","bbh","thw","thq"]:
+    if opt.productionMode not in  ["bbh","thw","thq"]:
       for ac, acNames in columns.iteritems(): 
         dfs_tomerge[ac] = t.pandas.df(ac)
         dfs_tomerge[ac].columns = acNames
@@ -144,8 +143,7 @@ for cat in cats:
     dfs_tomerge = {}
     # No theory weights for bbh, thw and thq therefore skip
     #if opt.productionMode not in  ["bbh","thw","thq"]:
-    # FIXME: also tth for now
-    if opt.productionMode not in  ["tth","bbh","thw","thq"]:
+    if opt.productionMode not in  ["bbh","thw","thq"]:
       for ac, acNames in columns.iteritems(): 
 	dfs_tomerge[ac] = t.pandas.df(ac)
 	dfs_tomerge[ac].columns = acNames

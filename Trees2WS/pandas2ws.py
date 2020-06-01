@@ -235,8 +235,7 @@ for i in range(0,opt.nSplit):
     # Extract ArgSet
     # bbH and tH do not have theory weights
     #if opt.productionMode in ['bbh','thq','thw']:
-    # FIXME: also ttH for now
-    if opt.productionMode in ['tth','bbh','thq','thw']:
+    if opt.productionMode in ['bbh','thq','thw']:
       if cat == 'NOTAG': argset = make_argSet( ws, argSets, 'notag_sub') 
       else: argset = make_argSet( ws, argSets, 'nominal_sub')
     else:

@@ -1,4 +1,4 @@
-import os, glob
+import os, glob, sys
 from optparse import OptionParser
 from models import models
 
@@ -16,6 +16,8 @@ def get_options():
   parser.add_option('--mode', dest='mode', default='mu_inclusive', help="Physics Model")
   parser.add_option('--ext',dest='ext', default="", help='In case running over datacard with extension')
   parser.add_option('--common_opts',dest='common_opts', default="-m 125 higgsMassRange=122,128", help='Common options')
+  parser.add_option('--batch', dest='batch', default='IC', help="Batch system [IC,condor]")
+  parser.add_option('--queue', dest='queue', default='workday', help="Condor queue")
   parser.add_option('--dryRun', dest='dryRun', action="store_true", default=False, help="Only create submission files")
   return parser.parse_args()
 (opt,args) = get_options()
@@ -38,7 +40,20 @@ fsub.close()
 # Change permission for file
 os.system("chmod 775 ./t2w_jobs/t2w_%s%s.sh"%(opt.mode,opt.ext))
 
+# If using condor then also write submission file
+if opt.batch == 'condor':
+  f_cdr = open("./t2w_jobs/t2w_%s%s.sub"%(opt.mode,opt.ext),"w")
+  f_cdr.write("executable          = %s/src/flashggFinalFit/Combine/t2w_jobs/t2w_%s%s.sh\n"%(os.environ['CMSSW_BASE'],opt.mode,opt.ext))
+  f_cdr.write("output              = %s/src/flashggFinalFit/Combine/t2w_jobs/t2w_%s%s.sh.out\n"%(os.environ['CMSSW_BASE'],opt.mode,opt.ext))
+  f_cdr.write("error               = %s/src/flashggFinalFit/Combine/t2w_jobs/t2w_%s%s.sh.err\n"%(os.environ['CMSSW_BASE'],opt.mode,opt.ext))
+  f_cdr.write("log                 = %s/src/flashggFinalFit/Combine/t2w_jobs/t2w_%s%s.sh.log\n"%(os.environ['CMSSW_BASE'],opt.mode,opt.ext))
+  f_cdr.write("+JobFlavour         = \"%s\"\n"%opt.queue)
+  f_cdr.write("RequestCpus         = 4\n")
+  f_cdr.write("queue\n")
+  f_cdr.close()
+
 # Submit
-subcmd = "qsub -q hep.q -l h_rt=3:0:0 -l h_vmem=24G ./t2w_jobs/t2w_%s%s.sh"%(opt.mode,opt.ext)
+if opt.batch == "condor": subcmd = "condor_submit ./t2w_jobs/t2w_%s%s.sub"%(opt.mode,opt.ext)
+else: subcmd = "qsub -q hep.q -l h_rt=3:0:0 -l h_vmem=24G ./t2w_jobs/t2w_%s%s.sh"%(opt.mode,opt.ext)
 if opt.dryRun: print "[DRY RUN] %s"%subcmd
 else: run(subcmd)

@@ -57,7 +57,8 @@ def setCanvas(split=False):
 def setCanvasCorr(stage='0',split=False): 
  
     # create canvas 
-    can = TCanvas("can", "can", 1000, 800 if split else 600)     
+    if stage == '1p2': can = TCanvas("can", "can", 800, 1000 if split else 900)     
+    else: can = TCanvas("can", "can", 800, 1000 if split else 800)
     if split: 
         can.Divide(1, 2)         
         can.GetPad(1).SetPad('Top', '', 0., 0.25, 1.0, 1.0, 0, -1, 0) 
@@ -77,13 +78,13 @@ def setCanvasCorr(stage='0',split=False):
         #can.GetPad(0).SetRightMargin(0.046)
         #can.GetPad(0).SetLeftMargin(0.138)
         #can.GetPad(0).SetBottomMargin(0.15)
-        can.GetPad(0).SetTopMargin(0.14)
+        #can.GetPad(0).SetTopMargin(0.14)
         can.GetPad(0).SetRightMargin(0.14)
         if stage == '1p2':
-          can.GetPad(0).SetLeftMargin(0.17)
-          can.GetPad(0).SetBottomMargin(0.25)
+          can.GetPad(0).SetLeftMargin(0.18)
+          can.GetPad(0).SetBottomMargin(0.2)
         else:
-          can.GetPad(0).SetLeftMargin(0.1)
+          can.GetPad(0).SetLeftMargin(0.15)
           can.GetPad(0).SetBottomMargin(0.15)
         can.GetPad(0).SetTicks(1, 1)
 

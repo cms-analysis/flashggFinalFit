@@ -216,7 +216,7 @@ if opt.doBands:
       opt.doBands = False
     else:
       for tidx in range(len(toyFiles)):
-        print " --> Processing toy (%g/%g)"%(tidx,len(toyFiles))
+        print " --> Processing toy (%g/%g) ::: %s"%(tidx,len(toyFiles),toyFiles[tidx])
 	ftoy = ROOT.TFile(toyFiles[tidx])
 	toy = ftoy.Get("toys/toy_asimov")
 	# Save bin contents in dict
@@ -249,6 +249,8 @@ if opt.doBands:
 	    # Clear memory
 	    htoy.Delete()
 	    dtoy.Delete()
+        toy.Delete()
+        ftoy.Close()
 	# Add values to dataframe
 	df_bands.loc[tidx] = values
       # Savin toy yields dataframe to pickle file

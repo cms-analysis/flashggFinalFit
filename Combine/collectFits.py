@@ -52,7 +52,7 @@ for fidx in range(len(fits)):
       plotcmd = "cd runFits%s_%s; plot1DScan.py %s_%s.root --y-cut 20 --y-max 20 -o Plots/%s_%s%s --POI %s; cd .."%(opt.ext,opt.mode,_name,poi,_name,poi,opt.ext,poi)
       run(plotcmd)
 
-  elif( _fit.split(":")[0] == "scan2D"):
+  elif( _fit.split(":")[0] == "scan2D")|( _fit.split(":")[0] == "profile2D" ):
     _poisStr = "%s_vs_%s"%(_fitpois[0],_fitpois[1])
     haddcmd = "cd runFits%s_%s; hadd -f %s_%s.root higgsCombine_%s_%s.POINTS.*.*.root; cd .."%(opt.ext,opt.mode,_name,_poisStr,_name,_poisStr)
     run(haddcmd)

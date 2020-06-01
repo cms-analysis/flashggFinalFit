@@ -1,12 +1,4 @@
-{
-  
-  "r_ggH":"ggH",
-  "r_VBF":"VBF",
-  "r_VH_had":"VH had",
-  "r_WH_lep":"WH lep",
-  "r_ZH_lep":"ZH lep",
-  "r_ttH":"ttH",
-  "r_tHq":"tHq",
+{  
   "r_ggH_0J_low":"ggH 0J low p_{T}^{H}",
   "r_ggH_0J_high":"ggH 0J high p_{T}^{H}",
   "r_ggH_1J_low":"ggH 1J low p_{T}^{H}",
@@ -18,10 +10,12 @@
   "r_ggH_VBFlike":"ggH VBF-like",
   "r_ggH_BSM":"ggH BSM",
   "r_qqH_VHhad":"qqH VH-like",
-  "r_qqH_low_mjj":"qqH low m_{jj}",
-  "r_qqH_high_mjj":"qqH high m_{jj}",
-  "r_qqH":"qqH",
+  "r_qqH_VBFlike":"qqH VBF-like",
   "r_qqH_BSM":"qqH BSM",
+  "r_WH_lep":"WH lep",
+  "r_ZH_lep":"ZH lep",
+  "r_ttH":"ttH",
+  "r_tH":"tH",
   "dummy":""
 }
 

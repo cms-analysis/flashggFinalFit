@@ -30,6 +30,7 @@ def procToProcS0(p):
   elif "ggZH_nunu" in p: return "ggzh"
   elif "ttH" in p: return "tth"
   elif "tHq" in p: return "thq"
+  elif "tHW" in p: return "thw"
   elif "bbH" in p: return "bbh"
   else: 
     print " --> [ERROR] proc s0 not realised for process %s. Leaving"%p
