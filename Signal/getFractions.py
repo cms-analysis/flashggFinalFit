@@ -69,7 +69,7 @@ for _fileName in fullFileNames:
   # Loop over categories
   for _cat in opt.cats.split(","):
     key = 'alltags'
-    _nominalDataName = "%s_125_13TeV_%s"%(procToData(_proc.split("_")[0]),_cat)
+    _nominalDataName = "%s_%s_13TeV_%s"%(procToData(_proc.split("_")[0]),opt.mass,_cat)
     _granular_key = "%s__%s"%(_proc,_cat)
     _nominalData = _ws[key].data(_nominalDataName)
     _nominal_yield = _nominalData.sumEntries()
@@ -106,19 +106,19 @@ if opt.doFractions:
 if opt.doEffAcc:
   if not os.path.isdir("jsons"): os.mkdir("./jsons")
   if not opt.skipCOWCorr: 
-    with open("jsons/granularEffAcc_%s.json"%opt.ext,'w') as outFile:
+    with open("jsons/granularEffAcc_M%s_%s.json"%(opt.mass,opt.ext),'w') as outFile:
       for ir,r in data.iterrows():
         if r['cat']=='NOTAG': continue
         proc_yield = data[data['proc']==r['proc']].nominal_yield_COWCorr.sum() # include COW correction
         ea = r['nominal_yield']/proc_yield
         if ea < 0.: ea = 0.
         outFile.write("%s %.6f\n"%(r['granular_key'],ea))
-    print " --> Written eff x acc (with central object weight correction): jsons/granularEffAcc_%s.json"%opt.ext
-  with open("jsons/granularEffAcc_%s_skipCOWCorr.json"%opt.ext,'w') as outFile:
+    print " --> Written eff x acc (with central object weight correction): jsons/granularEffAcc_M%s_%s.json"%(opt.mass,opt.ext)
+  with open("jsons/granularEffAcc_M%s_%s_skipCOWCorr.json"%(opt.mass,opt.ext),'w') as outFile:
     for ir,r in data.iterrows():
       if r['cat']=='NOTAG': continue
       proc_yield = data[data['proc']==r['proc']].nominal_yield.sum()
       ea = r['nominal_yield']/proc_yield
       if ea < 0.: ea = 0.
       outFile.write("%s %.6f\n"%(r['granular_key'],ea))
-  print " --> Written eff x acc (no central object weight correction): jsons/granularEffAcc_%s_skipCOWCorr.json"%opt.ext
+  print " --> Written eff x acc (no central object weight correction): jsons/granularEffAcc_M%s_%s_skipCOWCorr.json"%(opt.mass,opt.ext)

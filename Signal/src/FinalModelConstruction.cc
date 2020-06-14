@@ -1339,11 +1339,11 @@ RooSpline1D* FinalModelConstruction::graphToSpline(string name, TGraph *graph, R
 }
 
 void FinalModelConstruction::setEffAccValues(float effAccVal) {
-  effAccValue_ = effAccVal;
+  effAccValues_ = effAccVal;
 }
 
 //here is how the normalisation is set
-void FinalModelConstruction::getNormalization(){
+void FinalModelConstruction::getNormalization(map<string,float> effAccMap){
 	string catname;
 	if (sqrts_==8 || sqrts_==7) catname=Form("cat%s",cat_.c_str()); //obsolete
 	if (sqrts_ ==13) catname = Form("%s",cat_.c_str()); //should probably factorise this from other functions
@@ -1371,7 +1371,8 @@ void FinalModelConstruction::getNormalization(){
 		//if(verbosity_)std::cout << "[INFO] (FinalModelConstruction) sumEntries " << sumEntries <<", norm->GetXsection(mh,procLowerCase_) " << norm->GetXsection(mh,procLowerCase_) << " norm->GetBR(mh) " << norm->GetBR(mh)<< std::endl;
     
     // replace treatment above with pre-calculated eff * acc calculated using NoTag info (allows subset of MC to be used)
-    effAcc = effAccValue_;
+    string key = Form("%s__%s__M%d",proc_.c_str(),catname.c_str(),allMH_[i]);
+    effAcc = effAccMap[key];
     if (effAcc < 0.) effAcc = 0.;
 		} else {
 		  std::cout << "[ERROR] IntLumi rooRealVar is not in this workspace. exit." << std::endl;

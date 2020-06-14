@@ -10,8 +10,8 @@ import uproot
 import pickle
 
 # List of main variables to be stored in dataFrame: dZ and central
-main_var = ["CMS_hgg_mass*","weight","stage1p2bin","centralObjectWeight","dZ","*sigma"]
-main_var_nnlops = ["CMS_hgg_mass*","weight","stage1p2bin","centralObjectWeight","dZ","*sigma","NNLOPSweight"]
+main_var = ["CMS_hgg_mass*","weight","stage1p2bin","centralObjectWeight","dZ","*sigma","btagReshapeNorm_*"]
+main_var_nnlops = ["CMS_hgg_mass*","weight","stage1p2bin","centralObjectWeight","dZ","*sigma","btagReshapeNorm_*","NNLOPSweight"]
 main_var_notag = ["CMS_hgg_mass*","weight","stage1p2bin","*sigma"]
 # Array columns to be treated separately
 array_columns = {'alphaSWeights':2,'scaleWeights':9,'pdfWeights':60}
@@ -25,6 +25,7 @@ shapeSysts = ['FNUFEB', 'FNUFEE', 'JECAbsoluteYEAR', 'JECAbsolute', 'JECBBEC1YEA
 syst_var = ["CMS_hgg_mass","weight","stage1p2bin"]
 
 cats = ['RECO_0J_PTH_0_10_Tag0', 'RECO_0J_PTH_0_10_Tag1', 'RECO_0J_PTH_0_10_Tag2', 'RECO_0J_PTH_GT10_Tag0', 'RECO_0J_PTH_GT10_Tag1', 'RECO_0J_PTH_GT10_Tag2', 'RECO_1J_PTH_0_60_Tag0', 'RECO_1J_PTH_0_60_Tag1', 'RECO_1J_PTH_0_60_Tag2', 'RECO_1J_PTH_120_200_Tag0', 'RECO_1J_PTH_120_200_Tag1', 'RECO_1J_PTH_120_200_Tag2', 'RECO_1J_PTH_60_120_Tag0', 'RECO_1J_PTH_60_120_Tag1', 'RECO_1J_PTH_60_120_Tag2', 'RECO_GE2J_PTH_0_60_Tag0', 'RECO_GE2J_PTH_0_60_Tag1', 'RECO_GE2J_PTH_0_60_Tag2', 'RECO_GE2J_PTH_120_200_Tag0', 'RECO_GE2J_PTH_120_200_Tag1', 'RECO_GE2J_PTH_120_200_Tag2', 'RECO_GE2J_PTH_60_120_Tag0', 'RECO_GE2J_PTH_60_120_Tag1', 'RECO_GE2J_PTH_60_120_Tag2', 'RECO_PTH_200_300_Tag0', 'RECO_PTH_200_300_Tag1', 'RECO_PTH_300_450_Tag0', 'RECO_PTH_300_450_Tag1', 'RECO_PTH_450_650_Tag0', 'RECO_PTH_GT650_Tag0', 'RECO_THQ_LEP', 'RECO_TTH_HAD_PTH_0_60_Tag0', 'RECO_TTH_HAD_PTH_0_60_Tag1', 'RECO_TTH_HAD_PTH_0_60_Tag2', 'RECO_TTH_HAD_PTH_0_60_Tag3', 'RECO_TTH_HAD_PTH_120_200_Tag0', 'RECO_TTH_HAD_PTH_120_200_Tag1', 'RECO_TTH_HAD_PTH_120_200_Tag2', 'RECO_TTH_HAD_PTH_120_200_Tag3', 'RECO_TTH_HAD_PTH_60_120_Tag0', 'RECO_TTH_HAD_PTH_60_120_Tag1', 'RECO_TTH_HAD_PTH_60_120_Tag2', 'RECO_TTH_HAD_PTH_60_120_Tag3', 'RECO_TTH_HAD_PTH_GT200_Tag0', 'RECO_TTH_HAD_PTH_GT200_Tag1', 'RECO_TTH_HAD_PTH_GT200_Tag2', 'RECO_TTH_HAD_PTH_GT200_Tag3', 'RECO_TTH_LEP_PTH_0_60_Tag0', 'RECO_TTH_LEP_PTH_0_60_Tag1', 'RECO_TTH_LEP_PTH_0_60_Tag2', 'RECO_TTH_LEP_PTH_0_60_Tag3', 'RECO_TTH_LEP_PTH_120_200_Tag0', 'RECO_TTH_LEP_PTH_120_200_Tag1', 'RECO_TTH_LEP_PTH_60_120_Tag0', 'RECO_TTH_LEP_PTH_60_120_Tag1', 'RECO_TTH_LEP_PTH_GT200_Tag0', 'RECO_TTH_LEP_PTH_GT200_Tag1', 'RECO_VBFLIKEGGH_Tag0', 'RECO_VBFLIKEGGH_Tag1', 'RECO_VBFTOPO_BSM_Tag0', 'RECO_VBFTOPO_BSM_Tag1', 'RECO_VBFTOPO_JET3VETO_HIGHMJJ_Tag0', 'RECO_VBFTOPO_JET3VETO_HIGHMJJ_Tag1', 'RECO_VBFTOPO_JET3VETO_LOWMJJ_Tag0', 'RECO_VBFTOPO_JET3VETO_LOWMJJ_Tag1', 'RECO_VBFTOPO_JET3_HIGHMJJ_Tag0', 'RECO_VBFTOPO_JET3_HIGHMJJ_Tag1', 'RECO_VBFTOPO_JET3_LOWMJJ_Tag0', 'RECO_VBFTOPO_JET3_LOWMJJ_Tag1', 'RECO_VBFTOPO_VHHAD_Tag0', 'RECO_VBFTOPO_VHHAD_Tag1', 'RECO_VH_MET_Tag0', 'RECO_VH_MET_Tag1', 'RECO_WH_LEP_HIGH_Tag0', 'RECO_WH_LEP_HIGH_Tag1', 'RECO_WH_LEP_HIGH_Tag2', 'RECO_WH_LEP_LOW_Tag0', 'RECO_WH_LEP_LOW_Tag1', 'RECO_WH_LEP_LOW_Tag2', 'RECO_ZH_LEP_Tag0', 'RECO_ZH_LEP_Tag1', 'NOTAG'] 
+#cats = ['RECO_0J_PTH_0_10_Tag0', 'NOTAG', 'RECO_THQ_LEP']
 
 stxs_stage1p2_dict = {
   0:"UNKNOWN",
@@ -97,6 +98,9 @@ def get_options():
   return parser.parse_args()
 (opt,args) = get_options()
 
+# Add HEM to shape systs if year = 2018
+if opt.year == '2018': shapeSysts.append('JetHEM')
+
 # Checks
 if opt.productionMode not in ['ggh','vbf','wh','zh','tth','thq','thw','ggzh','bbh']: 
   print " --> [ERROR] Production mode (%s) not valid"%opt.productionMode
@@ -124,7 +128,6 @@ for cat in cats:
   if cat == "NOTAG":
     dfs_tomerge = {}
     # No theory weights for bbh, thw and thq therefore skip
-    #if opt.productionMode not in  ["bbh","thw","thq"]:
     if opt.productionMode not in  ["bbh","thw","thq"]:
       for ac, acNames in columns.iteritems(): 
         dfs_tomerge[ac] = t.pandas.df(ac)
@@ -142,7 +145,6 @@ for cat in cats:
   else:
     dfs_tomerge = {}
     # No theory weights for bbh, thw and thq therefore skip
-    #if opt.productionMode not in  ["bbh","thw","thq"]:
     if opt.productionMode not in  ["bbh","thw","thq"]:
       for ac, acNames in columns.iteritems(): 
 	dfs_tomerge[ac] = t.pandas.df(ac)

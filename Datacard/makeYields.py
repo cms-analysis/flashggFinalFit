@@ -207,7 +207,9 @@ if opt.doSystematics:
     if opt.cat != "NOTAG":
       for s in experimental_systematics: 
 	if s['type'] == 'factory': 
-	  experimentalFactoryType[s['name']] = factoryType(data,s)
+          # Fix for HEM as only in 2018 workspaces
+          if s['name'] == 'JetHEM': experimentalFactoryType[s['name']] = "a_h"
+	  else: experimentalFactoryType[s['name']] = factoryType(data,s)
 	  if experimentalFactoryType[s['name']] in ["a_w","a_h"]:
 	    data['%s_up_yield'%s['name']] = '-'
 	    data['%s_down_yield'%s['name']] = '-'
@@ -253,7 +255,7 @@ for ir,r in data[data['type']=='sig'].iterrows():
   if opt.doSystematics:
     # For experimental systematics: skip NOTAG events
     if "NOTAG" not in r['cat']:
-      experimentalSystYields = calcSystYields(r['nominalDataName'],inputWS,experimentalFactoryType)
+      experimentalSystYields = calcSystYields(r['nominalDataName'],inputWS,experimentalFactoryType,skipCOWCorr=True,year=r['year'])
       for s,f in experimentalFactoryType.iteritems():
 	if f in ['a_w','a_h']: 
 	  for direction in ['up','down']: 

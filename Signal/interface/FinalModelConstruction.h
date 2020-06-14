@@ -42,7 +42,7 @@ class FinalModelConstruction {
     std::vector<RooAbsPdf*> build_DCBpGaus_Pdf(std::string name, int nGaussians, bool recursive, std::map<std::string,RooSpline1D*> splines, string add="");
     void getRvFractionFunc(std::string name);
     void setupSystematics();
-    void getNormalization();
+    void getNormalization(map<string,float> effAccMap);
 
 		RooAbsReal *getMeanWithPhotonSyst(RooAbsReal *dm, string name, bool isMH2=false, bool isMHSM=false);
 		RooAbsReal *getSigmaWithPhotonSyst(RooAbsReal *sig_fit, string name);
@@ -102,7 +102,7 @@ class FinalModelConstruction {
     ofstream paramDump_;
 
     //pre-defined eff acc value(s)
-    float effAccValue_; //FIXME move to vector for different mH values
+    float effAccValues_; //FIXME move to vector for different mH values
 
     std::map<std::string,RooSpline1D*> stdSplines;
     std::map<std::string,RooSpline1D*> rvSplines;

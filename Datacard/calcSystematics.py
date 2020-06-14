@@ -87,7 +87,7 @@ def factoryType(d,s):
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Function to extract yield variations for signal row in dataFrame
-def calcSystYields(_nominalDataName,_inputWS,_systFactoryTypes,skipCOWCorr=True):
+def calcSystYields(_nominalDataName,_inputWS,_systFactoryTypes,skipCOWCorr=True,year='2016'):
 
   # Define dictionary to store systematic yield counters
   systYields = {}
@@ -166,8 +166,16 @@ def calcSystYields(_nominalDataName,_inputWS,_systFactoryTypes,skipCOWCorr=True)
   # For systematics stored as RooDataHist
   for s, f in _systFactoryTypes.iteritems():
     if f == "a_h":
-      systYields["%s_up"%s] = _inputWS.data("%s_%sUp01sigma"%(_nominalDataName,s)).sumEntries()
-      systYields["%s_down"%s] = _inputWS.data("%s_%sDown01sigma"%(_nominalDataName,s)).sumEntries()
+      if s == 'JetHEM':
+        if (year == '2018')&("thw" not in _nominalDataName):
+          systYields["%s_up"%s] = _inputWS.data("%s_%sUp01sigma"%(_nominalDataName,s)).sumEntries()
+          systYields["%s_down"%s] = _inputWS.data("%s_%sDown01sigma"%(_nominalDataName,s)).sumEntries()
+        else:
+          systYields["%s_up"%s] = _inputWS.data(_nominalDataName).sumEntries()
+          systYields["%s_down"%s] = _inputWS.data(_nominalDataName).sumEntries()
+      else:
+        systYields["%s_up"%s] = _inputWS.data("%s_%sUp01sigma"%(_nominalDataName,s)).sumEntries()
+        systYields["%s_down"%s] = _inputWS.data("%s_%sDown01sigma"%(_nominalDataName,s)).sumEntries()
 
   # Add variations to dataFrame
   return systYields

@@ -10,6 +10,7 @@ def get_options():
   parser.add_option('--outputDir',dest='outputDir', default="~", help='Used only for trees2ws_data.py script')
   parser.add_option('--script',dest='script', default = '', help="Options: trees2pandas.py, pandas2ws.py, trees2ws_data.py")
   parser.add_option('--year',dest='year', default="2016", help='Year')
+  parser.add_option('--inputMass',dest='inputMass', default="125", help='Input mass')
   parser.add_option('--ext',dest='ext', default="", help='Extension')
   return parser.parse_args()
 (opt,args) = get_options()
@@ -60,11 +61,11 @@ for i in range(len(inputFileNames)):
     sys.exit(1)
 
   if opt.script == "trees2pandas.py":
-    if d == '': fsub.write("python %s --inputTreeFile %s --productionMode %s --year %s\n"%(opt.script,fin,p,opt.year))
-    else: fsub.write("python %s --inputTreeFile %s --productionMode %s --year %s --decayExt %s\n"%(opt.script,fin,p,opt.year,d))
+    if d == '': fsub.write("python %s --inputTreeFile %s --productionMode %s --year %s --inputMass %s\n"%(opt.script,fin,p,opt.year,opt.inputMass))
+    else: fsub.write("python %s --inputTreeFile %s --productionMode %s --year %s --decayExt %s --inputMass %s\n"%(opt.script,fin,p,opt.year,d,opt.inputMass))
   elif opt.script == "pandas2ws.py":
-    if d == '': fsub.write("python %s --inputPandasFile %s --productionMode %s --year %s\n"%(opt.script,fin,p,opt.year))
-    else: fsub.write("python %s --inputPandasFile %s --productionMode %s --year %s --decayExt %s\n"%(opt.script,fin,p,opt.year,d))
+    if d == '': fsub.write("python %s --inputPandasFile %s --productionMode %s --year %s --inputMass %s\n"%(opt.script,fin,p,opt.year,opt.inputMass))
+    else: fsub.write("python %s --inputPandasFile %s --productionMode %s --year %s --decayExt %s --inputMass %s\n"%(opt.script,fin,p,opt.year,d,opt.inputMass))
   elif opt.script == "trees2ws_data.py":
     fsub.write("python %s --inputTreeFile %s --outputWSPath %s\n"%(opt.script,fin,outputWSPath))
   else:

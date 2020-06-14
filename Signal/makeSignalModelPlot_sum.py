@@ -6,6 +6,7 @@ import ROOT
 import re, glob
 import json
 from optparse import OptionParser
+from collections import OrderedDict as od
 
 lumi = {'2016':'35.9', '2017':'41.5', '2018':'59.8'}
 
@@ -15,9 +16,11 @@ ROOT.gStyle.SetOptStat(0)
 def get_options():
   parser = OptionParser()
   parser.add_option('--processMap', dest='processMap', default='', help="Signal Process Map. Form: [proc:year] or [all:all]=sum all signal procs from all years falling in category")
-  parser.add_option('--cat', dest='cat', default='', help="Analysis category")
+  parser.add_option('--cats', dest='cats', default='', help="Analysis categories. all = process all")
+  parser.add_option('--loadCatWeights', dest='loadCatWeights', default='', help="Load S/S+B weights for analysis categories (path to weights json file)")
   parser.add_option('--ext', dest='ext', default='test', help="Extension: defines output dir where signal models are saved")
-  parser.add_option("--mass", dest="mass", default='125', help="Higgs mass")
+  parser.add_option("--mass", dest="mass", default='125', help="Mass of data samples")
+  parser.add_option("--MH", dest="MH", default='125', help="Higgs mass (for pdf)")
   parser.add_option("--nBins", dest="nBins", default=160, type='int', help="Number of bins")
   parser.add_option("--pdf_nBins", dest="pdf_nBins", default=3200, type='int', help="Number of bins")
   parser.add_option("--translateCats", dest="translateCats", default=None, help="JSON to store cat translations")
@@ -96,84 +99,135 @@ def getEffSigma(_h):
 translateCats = {} if opt.translateCats is None else LoadTranslations(opt.translateCats)
 translateProcs = {} if opt.translateProcs is None else LoadTranslations(opt.translateProcs)
 
-# Open signal workspace (output of packageSignal)
-fin = ROOT.TFile("outdir_%s/CMS-HGG_sigfit_%s_%s.root"%(opt.ext,opt.ext,opt.cat))
-w = fin.Get("wsig_13TeV")
-w.var("MH").setVal(float(opt.mass))
-mgg = w.var("CMS_hgg_mass")
-mgg.setPlotLabel("m_{#gamma#gamma}")
-mgg.setUnit("GeV")
-mgg_arglist = ROOT.RooArgList(mgg)
+# Extract input files: for first file extract mgg var
+inputFiles = od()
+cat_itr = 0
+if opt.cats == "all":
+  fs = glob.glob("outdir_%s/CMS-HGG_sigfit_%s_*.root"%(opt.ext,opt.ext))
+  for f in fs:
+    cat = re.sub(".root","","RECO"+f.split("RECO")[-1])
+    inputFiles[cat] = f
+    if cat_itr == 0:
+      w0 = ROOT.TFile(f).Get("wsig_13TeV")
+      mgg = w0.var("CMS_hgg_mass")
+      mgg.setPlotLabel("m_{#gamma#gamma}")
+      mgg.setUnit("GeV")
+      mgg_arglist = ROOT.RooArgList(mgg)
+    cat_itr += 1
+
+else:
+  for cat in opt.cats.split(","):
+    f = "outdir_%s/CMS-HGG_sigfit_%s_%s.root"%(opt.ext,opt.ext,cat)
+    inputFiles[cat] = f
+    if cat_itr == 0:
+      w0 = ROOT.TFile(f).Get("wsig_13TeV")
+      mgg = w0.var("CMS_hgg_mass")
+      mgg.setPlotLabel("m_{#gamma#gamma}")
+      mgg.setUnit("GeV")
+      mgg_arglist = ROOT.RooArgList(mgg)
+    cat_itr += 1
+
+# Load cat weight
+if opt.loadCatWeights != '':
+  with open( opt.loadCatWeights ) as jsonfile: catsWeights = json.load(jsonfile)
 
 # Extract the procs to be plotted
 processMap = {'proc':opt.processMap.split(":")[0],'year':opt.processMap.split(":")[1]}
-if processMap['proc'] == 'all':
-  if processMap['year'] == 'all': allNorms = w.allFunctions().selectByName("*normThisLumi")
-  else: allNorms = w.allFunctions().selectByName("*_%s_*normThisLumi"%processMap['year'])
-elif processMap['year'] == 'all': allNorms = w.allFunctions().selectByName("*_%s_*normThisLumi"%processMap['proc'])
-else: allNorms = w.allFunctions().selectByName("*_%s_*_%s_*normThisLumi"%(processMap['year'],processMap['proc']))
 
-# Iterate over norms: re-weight dataset and create Histogram from pdf
-data_rwgt = {}
-pdf_hists = {}
-catNorm = 0
-for norm in rooiter(allNorms):
-  nnorm = norm.GetName()
-  # Extract year and proc from n
-  year = nnorm.split("_")[1]
-  proc = nnorm.split("13TeV_")[-1].split("_RECO")[0]
-  # Set luminosity value depending on year
-  w.var("IntLumi").setVal(float(lumi[year])*1000)
-  nval = norm.getVal()
-  catNorm += nval
+# Define data histogram and dict to store per-year pdf histograms
+h_data = mgg.createHistogram("h_data", ROOT.RooFit.Binning(opt.nBins))
+h_pdf_splitByYear = {}
+pdfitr = 0
 
-for norm in rooiter(allNorms):
-  nnorm = norm.GetName()
-  # Extract year and proc from n
-  year = nnorm.split("_")[1]
-  proc = nnorm.split("13TeV_")[-1].split("_RECO")[0]
-  # Set luminosity value depending on year
-  w.var("IntLumi").setVal(float(lumi[year])*1000)
-  nval = norm.getVal()
-  if nval < 0.001*catNorm: continue
-  # Make empty copy of dataset:
-  d = w.data("sig_%s_%s_mass_m%s_%s"%(proc,year,opt.mass,opt.cat))
-  d_rwgt = d.emptyClone("proc_%s_year_%s_cat_%s"%(proc,year,opt.cat))
-  # Determine normFactor
-  if d.sumEntries() < 0.001: nf = 0
-  else: nf = nval/d.sumEntries()
-  for i in range(d.numEntries()):
-    p = d.get(i)
-    rw, rwe = d.weight()*nf, d.weightError()*nf
-    d_rwgt.add(p,rw,rwe)
-  # Add dataset to rwgt dataset 
-  data_rwgt[d_rwgt.GetName()] = d_rwgt
+# Loop over input files
+for cat,f in inputFiles.iteritems():
 
-  # Extract pdf and create histogram from pdf
-  pdf = w.pdf("extendhggpdfsmrel_%s_13TeV_%s_%sThisLumi"%(year,proc,opt.cat))
-  pdf_hists["proc_%s_year_%s_cat_%s"%(proc,year,opt.cat)] = pdf.createHistogram("hpdf_proc_%s_year_%s_cat_%s"%(proc,year,opt.cat),mgg,ROOT.RooFit.Binning(opt.pdf_nBins))
-  # Scale by factor to match binning
-  pdf_hists["proc_%s_year_%s_cat_%s"%(proc,year,opt.cat)].Scale(float(opt.nBins)/320)
+  print " --> Processing %s: file = %s"%(cat,f)
+
+  # Define cat weight
+  if opt.loadCatWeights != '': wcat = catsWeights[cat]
+  else: wcat = 1.
+
+  # Open signal workspace (output of packageSignal)
+  fin = ROOT.TFile(f)
+  w = fin.Get("wsig_13TeV")
+  w.var("MH").setVal(float(opt.MH))
+
+  if processMap['proc'] == 'all':
+    if processMap['year'] == 'all': allNorms = w.allFunctions().selectByName("*normThisLumi")
+    else: allNorms = w.allFunctions().selectByName("*_%s_*normThisLumi"%processMap['year'])
+  elif processMap['year'] == 'all': allNorms = w.allFunctions().selectByName("*_%s_*normThisLumi"%processMap['proc'])
+  else: allNorms = w.allFunctions().selectByName("*_%s_*_%s_*normThisLumi"%(processMap['year'],processMap['proc']))
+
+  # Iterate over norms: re-weight dataset and create Histogram from pdf
+  data_rwgt = {}
+  pdf_hists = {}
+  catNorm = 0
+  for norm in rooiter(allNorms):
+    nnorm = norm.GetName()
+    # Extract year and proc from n
+    year = nnorm.split("_")[1]
+    proc = nnorm.split("13TeV_")[-1].split("_RECO")[0]
+    # Set luminosity value depending on year
+    w.var("IntLumi").setVal(float(lumi[year])*1000)
+    nval = norm.getVal()
+    catNorm += nval
+
+  for norm in rooiter(allNorms):
+    nnorm = norm.GetName()
+    # Extract year and proc from n
+    year = nnorm.split("_")[1]
+    proc = nnorm.split("13TeV_")[-1].split("_RECO")[0]
+    # Set luminosity value depending on year
+    w.var("IntLumi").setVal(float(lumi[year])*1000)
+    nval = norm.getVal()
+    if nval < 0.001*catNorm: continue # Prune processes which contribute less than 0.1% of signal model
+    # Make empty copy of dataset:
+    d = w.data("sig_%s_%s_mass_m%s_%s"%(proc,year,opt.mass,cat))
+    d_rwgt = d.emptyClone("proc_%s_year_%s_cat_%s"%(proc,year,cat))
+    # Determine normFactor
+    if d.sumEntries() == 0: nf = 0
+    else: nf = nval/d.sumEntries()
+    for i in range(d.numEntries()):
+      p = d.get(i)
+      rw, rwe = d.weight()*nf*wcat, d.weightError()*nf*wcat
+      d_rwgt.add(p,rw,rwe)
+    # Add dataset to rwgt dataset 
+    data_rwgt[d_rwgt.GetName()] = d_rwgt
+
+    # Extract pdf and create histogram from pdf
+    pdf = w.pdf("extendhggpdfsmrel_%s_13TeV_%s_%sThisLumi"%(year,proc,cat))
+    pdf_hists["proc_%s_year_%s_cat_%s"%(proc,year,cat)] = pdf.createHistogram("hpdf_proc_%s_year_%s_cat_%s"%(proc,year,cat),mgg,ROOT.RooFit.Binning(opt.pdf_nBins))
+    # Scale by factor to match binning
+    pdf_hists["proc_%s_year_%s_cat_%s"%(proc,year,cat)].Scale(wcat*float(opt.nBins)/320)
+    
+  # Fill data histogram with all datasets
+  for k, v in data_rwgt.iteritems(): v.fillHistogram(h_data,mgg_arglist)
+
+  # Sum pdf histograms:
+  for k, v in pdf_hists.iteritems():
+    if pdfitr == 0: 
+      h_pdf = v.Clone("h_pdf")
+      if processMap['year'] == 'all':
+        for y in lumi:
+          h_pdf_splitByYear[y] = h_pdf.Clone("h_pdf_%s"%y)
+          h_pdf_splitByYear[y].Reset()
+          if y in k: h_pdf_splitByYear[y] += v
+    else: 
+      h_pdf += v
+      if processMap['year'] == 'all':
+        for y in lumi:
+          if y in k: h_pdf_splitByYear[y] += v
+    pdfitr += 1
+
+  # Garbage removal
+  for v in data_rwgt.itervalues(): v.Delete()
+  for v in pdf_hists.itervalues(): v.Delete()
+  w.Delete()
+  fin.Close()
+  fin.Delete()
   
 
-# Define data histogram and fill with all datasets
-h_data = mgg.createHistogram("h_data", ROOT.RooFit.Binning(opt.nBins))
-for k, v in data_rwgt.iteritems(): v.fillHistogram(h_data,mgg_arglist)
-# Sum pdf histograms:
-pdfitr = 0
-for k, v in pdf_hists.iteritems():
-  if pdfitr == 0: h_pdf = v.Clone("h_pdf")
-  else: h_pdf += v
-  pdfitr += 1
-# Make individual year histograms
-if processMap['year'] == 'all':
-  h_pdf_splitByYear = {}
-  for y in lumi: 
-    h_pdf_splitByYear[y] = h_pdf.Clone("h_pdf_%s"%y)
-    h_pdf_splitByYear[y].Reset()
-  for k, v in pdf_hists.iteritems():
-    for y in lumi:
-      if y in k: h_pdf_splitByYear[y] += v 
 # Extract and make eff sigma 
 effSigma = getEffSigma(h_pdf)
 effSigma_low, effSigma_high = h_pdf.GetMean()-effSigma, h_pdf.GetMean()+effSigma
@@ -204,7 +258,7 @@ if processMap['year'] == 'all':
   leg0.SetFillStyle(0)
   leg0.SetLineColor(0)
   leg0.SetTextSize(0.03)
-  leg0.AddEntry(h_data,"Simulation","lep")
+  leg0.AddEntry(h_data,"Simulation","ep")
   leg0.AddEntry(h_pdf,"#splitline{Parametric}{model}","l")
   leg0.Draw("Same")
 
@@ -278,9 +332,6 @@ h_data.SetLineColor(1)
 h_data.SetLineWidth(2)
 h_data.Draw("Same PE")
 
-#Redraw axes
-h_axes.Draw("Same")
-
 # Add TLatex to plot
 lat0 = ROOT.TLatex()
 lat0.SetTextFont(42)
@@ -297,25 +348,18 @@ lat1.SetNDC(1)
 lat1.SetTextSize(0.035)
 procStr = Translate(processMap['proc'],translateProcs) if processMap['proc']!='all' else ''
 yearStr = processMap['year'] if processMap['year']!='all' else ''
-lat1.DrawLatex(0.87,0.86,"%s"%Translate(opt.cat,translateCats))
-lat1.DrawLatex(0.87,0.8,"%s %s"%(procStr,yearStr))
+if opt.loadCatWeights != '': lat1.DrawLatex(0.85,0.86,"%s"%Translate("wall",translateCats))
+else: lat1.DrawLatex(0.85,0.86,"%s"%Translate("all",translateCats))
+#lat1.DrawLatex(0.87,0.86,"%s"%plotLabel)
+lat1.DrawLatex(0.83,0.8,"%s %s"%(procStr,yearStr))
 
 canv.Update()
 
 # Save canvas
 if not os.path.isdir("outdir_%s/SignalModelPlots"%(opt.ext)): os.system("mkdir outdir_%s/SignalModelPlots"%(opt.ext))
-if processMap['proc']=='all':
-  if processMap['year']=='all':
-    canv.SaveAs("outdir_%s/SignalModelPlots/%s.png"%(opt.ext,opt.cat))
-    canv.SaveAs("outdir_%s/SignalModelPlots/%s.pdf"%(opt.ext,opt.cat))
-  else:
-    canv.SaveAs("outdir_%s/SignalModelPlots/%s_%s.png"%(opt.ext,opt.cat,processMap['year']))
-    canv.SaveAs("outdir_%s/SignalModelPlots/%s_%s.pdf"%(opt.ext,opt.cat,processMap['year']))
+if opt.loadCatWeights != '':
+  canv.SaveAs("outdir_%s/SignalModelPlots/wall_M%s.png"%(opt.ext,opt.MH))
+  canv.SaveAs("outdir_%s/SignalModelPlots/wall_M%s.pdf"%(opt.ext,opt.MH))
 else:
-  if processMap['year']=='all':
-    canv.SaveAs("outdir_%s/SignalModelPlots/%s_%s.png"%(opt.ext,opt.cat,processMap['proc']))
-    canv.SaveAs("outdir_%s/SignalModelPlots/%s_%s.pdf"%(opt.ext,opt.cat,processMap['proc']))
-  else:
-    canv.SaveAs("outdir_%s/SignalModelPlots/%s_%s_%s.png"%(opt.ext,opt.cat,processMap['proc'],processMap['year']))
-    canv.SaveAs("outdir_%s/SignalModelPlots/%s_%s_%s.pdf"%(opt.ext,opt.cat,processMap['proc'],processMap['year']))
-
+  canv.SaveAs("outdir_%s/SignalModelPlots/all_M%s.png"%(opt.ext,opt.MH))
+  canv.SaveAs("outdir_%s/SignalModelPlots/all_M%s.pdf"%(opt.ext,opt.MH))

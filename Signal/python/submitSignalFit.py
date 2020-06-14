@@ -75,6 +75,7 @@ parser.add_option("--mhLow",default="120",help="mh Low")
 parser.add_option("--mhHigh",default="130",help="mh High")
 parser.add_option("-q","--queue",default="espresso",help="Which batch queue")
 parser.add_option("--runLocal",default=False,action="store_true",help="Run locally")
+parser.add_option("--groupJobsByProc",default=False,action="store_true",help="Group jobs by cat")
 parser.add_option("--batch",default="HTCONDOR",help="Which batch system to use (HTCONDOR,IC)")
 parser.add_option("--changeIntLumi",default="1.")
 parser.add_option("-o","--outfilename",default=None)
@@ -133,9 +134,12 @@ def writePostamble(sub_file, exec_line):
     system('rm -f %s.err'%os.path.abspath(sub_file.name))
     system('rm -f %s.out'%os.path.abspath(sub_file.name))
     system('rm -f %s.sub'%os.path.abspath(sub_file.name))
-    if (opts.batch == "IC") :
-      pass
-      #system('qsub -q %s -l h_rt=0:20:0 -o %s.log -e %s.err %s'%(opts.queue,os.path.abspath(sub_file.name),os.path.abspath(sub_file.name),os.path.abspath(sub_file.name)))
+    if (opts.batch == "IC"):
+      pass 
+      #if opts.groupJobsByProc:
+      #  system('qsub -q %s -l h_rt=3:0:0 -l h_vmem=16G -o %s.log -e %s.err %s'%(opts.queue,os.path.abspath(sub_file.name),os.path.abspath(sub_file.name),os.path.abspath(sub_file.name)))
+      #else:
+      #  system('qsub -q %s -l h_rt=0:20:0 -l h_vmem=12G -o %s.log -e %s.err %s'%(opts.queue,os.path.abspath(sub_file.name),os.path.abspath(sub_file.name),os.path.abspath(sub_file.name)))
     elif( opts.batch == "HTCONDOR" ):
       sub_file_name = re.sub("\.sh","",os.path.abspath(sub_file.name))
       HTCondorSubfile = open("%s.sub"%sub_file_name,'w')
@@ -165,8 +169,8 @@ system('mkdir -p %s/SignalFitJobs/outputs'%opts.outDir)
 print ('mkdir -p %s/SignalFitJobs/outputs'%opts.outDir)
 counter=0
 for proc in  opts.procs.split(","):
-  for cat in opts.flashggCats.split(","):
-    print "job ", counter , " - ", proc, " - ", cat
+  if opts.groupJobsByProc:
+    print "job ", counter , " - ", proc, " - all cats"
     file = open('%s/SignalFitJobs/sub%d.sh'%(opts.outDir,counter),'w')
     writePreamble(file)
     counter =  counter+1
@@ -175,9 +179,26 @@ for proc in  opts.procs.split(","):
       bsRW=0
     else:
       bsRW=1
-    exec_line = "%s/bin/SignalFit --verbose 0 -i %s -d %s/%s  --mhLow=%s --mhHigh=%s -s %s/%s --procs %s -o  %s/%s -p %s/%s -f %s --changeIntLumi %s --binnedFit 1 --nBins 320 --split %s,%s --beamSpotReweigh %d --dataBeamSpotWidth %f --massList %s --useDCBplusGaus %s --useSSF %s --analysis %s --year %s -C -1 -j %s/%s" %(os.getcwd(), opts.infile,os.getcwd(),opts.datfile,opts.mhLow, opts.mhHigh, os.getcwd(),opts.systdatfile, opts.procs,os.getcwd(),opts.outfilename.replace(".root","_%s_%s.root"%(proc,cat)), os.getcwd(),opts.outDir, opts.flashggCats ,opts.changeIntLumi, proc,cat,bsRW,float(opts.bs), opts.massList, opts.useDCB_1G, opts.useSSF, opts.analysis, opts.year, os.getcwd(), opts.jsonfile)
-    #print exec_line
+    exec_line = ''
+    for cat in opts.flashggCats.split(","):
+      exec_line += " %s/bin/SignalFit --verbose 0 -i %s -d %s/%s  --mhLow=%s --mhHigh=%s -s %s/%s --procs %s -o  %s/%s -p %s/%s -f %s --changeIntLumi %s --binnedFit 1 --nBins 320 --split %s,%s --beamSpotReweigh %d --dataBeamSpotWidth %f --massList %s --useDCBplusGaus %s --useSSF %s --analysis %s --year %s -C -1 -j %s/%s;" %(os.getcwd(), opts.infile,os.getcwd(),opts.datfile,opts.mhLow, opts.mhHigh, os.getcwd(),opts.systdatfile, opts.procs,os.getcwd(),opts.outfilename.replace(".root","_%s_%s.root"%(proc,cat)), os.getcwd(),opts.outDir, opts.flashggCats ,opts.changeIntLumi, proc,cat,bsRW,float(opts.bs), opts.massList, opts.useDCB_1G, opts.useSSF, opts.analysis, opts.year, os.getcwd(), opts.jsonfile)
+    exec_line = exec_line[:-1] # Remove final semi-colon
     writePostamble(file,exec_line) #includes submission
+
+  else: 
+    for cat in opts.flashggCats.split(","):
+      print "job ", counter , " - ", proc, " - ", cat
+      file = open('%s/SignalFitJobs/sub%d.sh'%(opts.outDir,counter),'w')
+      writePreamble(file)
+      counter =  counter+1
+      bsRW=0
+      if (float(opts.bs)==0):
+	bsRW=0
+      else:
+	bsRW=1
+      exec_line = "%s/bin/SignalFit --verbose 0 -i %s -d %s/%s  --mhLow=%s --mhHigh=%s -s %s/%s --procs %s -o  %s/%s -p %s/%s -f %s --changeIntLumi %s --binnedFit 1 --nBins 320 --split %s,%s --beamSpotReweigh %d --dataBeamSpotWidth %f --massList %s --useDCBplusGaus %s --useSSF %s --analysis %s --year %s -C -1 -j %s/%s" %(os.getcwd(), opts.infile,os.getcwd(),opts.datfile,opts.mhLow, opts.mhHigh, os.getcwd(),opts.systdatfile, opts.procs,os.getcwd(),opts.outfilename.replace(".root","_%s_%s.root"%(proc,cat)), os.getcwd(),opts.outDir, opts.flashggCats ,opts.changeIntLumi, proc,cat,bsRW,float(opts.bs), opts.massList, opts.useDCB_1G, opts.useSSF, opts.analysis, opts.year, os.getcwd(), opts.jsonfile)
+      #print exec_line
+      writePostamble(file,exec_line) #includes submission
 
 
 

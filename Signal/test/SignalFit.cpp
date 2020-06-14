@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <string>
 #include <map>
 #include <vector>
@@ -51,7 +52,7 @@ string mergefilename_;
 string datfilename_;
 string systfilename_;
 string jsonfilename_;
-map<string,float> effAccMap_;
+map<string,float> effAccMap_; // For each proc x cat x mass point
 string plotDir_;
 //bool skipPlots_=false;
 bool skipPlots_=true;
@@ -581,13 +582,6 @@ int main(int argc, char *argv[]){
 		exit(1);
 	}
 
-	// Prepare the eff acc values
-	ifstream jsonfile;
-	jsonfile.open(jsonfilename_.c_str());
-	if (jsonfile.fail()) {
-		std::cerr << "[ERROR] Could not open " << jsonfilename_ <<std::endl;
-		exit(1);
-	}
   
   if (0){// not actually used since DCB still needs to know which cat/procs to use a repalcement for
     for (int iproc =0 ; iproc < procs_.size() ; iproc++){
@@ -653,19 +647,37 @@ int main(int argc, char *argv[]){
     }
     datfile.close();
 
-	  while (jsonfile.good()){
+    // Loop over mass values
+    for (int mhIndex=0; mhIndex< massList_.size() ; mhIndex++){
+        int mh=massList_[mhIndex];
+
+	// Prepare the eff acc values
+	ifstream jsonfile;
+        TString jfname = jsonfilename_.c_str();
+        TString jfname_mass = jfname.Replace(jfname.Index("_M"),5,Form("_M%d",mh));
+        std::cout << " --> Extracting eff x Acc values from " << jfname_mass << std::endl;
+	jsonfile.open(jfname_mass);
+	if (jsonfile.fail()) {
+	    std::cerr << "[ERROR] Could not open " << jfname_mass <<std::endl;
+	    exit(1);
+	}
+
+	 while (jsonfile.good()){
 		  string line;
 		  getline(jsonfile,line);
 		  if (line=="\n" || line.substr(0,1)=="#" || line==" " || line.empty()) continue;
 		  vector<string> els;
 		  split(els,line,boost::is_any_of(" "));
       if ( els.size() < 2 ) { 
-		    std::cerr << "[ERROR] malformed json file" << jsonfilename_ << std::endl;
+		    std::cerr << "[ERROR] malformed json file" << jfname_mass << std::endl;
 		    exit(1);
       }
-      string procXcat = els[0];
-		  float effAccVal = boost::lexical_cast<float>(els[1]);
-      effAccMap_[procXcat] = effAccVal;
+	  string key = els[0]+Form("__M%d",mh);
+	  float effAccVal = boost::lexical_cast<float>(els[1]);
+	  effAccMap_[key] = effAccVal;
+        }
+	jsonfile.close();
+
     }
   }
   
@@ -1038,8 +1050,8 @@ int main(int argc, char *argv[]){
         
       outWS->import(*intLumi_);
       FinalModelConstruction finalModel(massList_, mass_,MH,intLumi_,mhLow_,mhHigh_,proc,cat,doSecondaryModels_,systfilename_,skipMasses_,verbose_,procs_, flashggCats_,plotDir_, isProblemCategory,isCutBased_,sqrts_,year_,doQuadraticSigmaSum_);
-    
-      finalModel.setEffAccValues( effAccMap_[Form("%s__%s",split_[0].c_str(),split_[1].c_str())] );
+   
+      finalModel.setEffAccValues( effAccMap_[Form("%s__%s__M125",split_[0].c_str(),split_[1].c_str())] );
       finalModel.setSecondaryModelVars(MH_SM,DeltaM,MH_2,higgsDecayWidth);
       finalModel.setRVsplines(splinesRV);
       finalModel.setWVsplines(splinesWV);
@@ -1056,7 +1068,7 @@ int main(int argc, char *argv[]){
         //FIXME
         finalModel.buildRvWvPdf(Form("hggpdfsmrel_%d_13TeV",year_),nGaussiansRV,nGaussiansWV,recursive_,useDCBplusGaus_);
       }
-      finalModel.getNormalization();
+      finalModel.getNormalization(effAccMap_);
       //if (!skipPlots_) finalModel.plotPdf(plotDir_);
       finalModel.plotPdf(plotDir_);
       finalModel.save(outWS);
