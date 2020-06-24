@@ -15,19 +15,13 @@ combineScriptCfg = {
   'mode':mode,
   # 'mode':'combine',
   'doSystematics':1, # 0: do not include systematics in datacard. 1: include systematics in datacard
-  # 'inputWSDir':'/eos/user/a/atishelm/ntuples/HHWWgg/HHWWgg_v2-3_WithSyst_Hadded', # all files 
-  # 'inputWSDir':'/eos/user/a/atishelm/ntuples/HHWWgg/HHWWgg_v2-4_NMSSM_Hadded',
-  'inputWSDir':'/eos/user/a/atishelm/ntuples/HHWWgg/HHWWgg_v2-6_Workspaces_Hadded',
-  # 'inputWSDir':'/eos/user/a/atishelm/ntuples/HHWWgg/HHWWgg_v2-4_NMSSM_Hadded_1Signal',
-  # 'inputWSDir':'/eos/user/a/atishelm/ntuples/HHWWgg/HHWWgg_v2-4_EFT_cpy_Hadded',
-  # 'inputWSDir':'/eos/user/a/atishelm/ntuples/HHWWgg/HHWWgg_v2-3_NoSyst_Hadded_Shorter', # all files 
-  # 'inputWSDir':'/eos/user/a/atishelm/ntuples/HHWWgg/HHWWgg_v2-3_Workspaces_AllEvents_Hadded_Shorter', # less files for testing 
+  'inputWSDir':'/eos/user/a/atishelm/ntuples/HHWWgg/HHWWgg_v2-6_Workspaces_X600_Synch_Hadded',
   #Procs will be inferred automatically from filenames
   'HHWWggCatLabel':'2TotCatsCOMBINEDWithSyst', # for name of combine output files 
   # 'cats':'HHWWggTag_0',
   # 'cats':'HHWWggTag_1',
   'cats':'HHWWggTag_0,HHWWggTag_1',
-  'ext':'HHWWgg_v2-6_2017_2CatsSyst',
+  'ext':'HHWWgg_v2-6_2017_Synch',
   # 'ext':'HHWWgg_v2-3_2017_2CatsSyst',
   # 'ext':'HHWWgg_v2-3_2017_2CatsSyst',
   'year':'2017', 

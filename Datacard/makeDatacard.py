@@ -282,7 +282,7 @@ if not skipData:
         # Input flashgg ws
         if(opt.analysis=="HHWWgg"):
 
-          if opt.analysis_type == "res":
+          if opt.analysis_type == "Res":
             HHWWgg_Mass = opt.inputWSDir.split('/')[-1].split('_')[0]
             _inputWSFile = opt.inputWSDir
             _nominalDataName = "%s_%s_WWgg_qqlnugg_13TeV_%s"%(_proc_s0,HHWWgg_Mass,cat)

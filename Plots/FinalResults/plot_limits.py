@@ -22,7 +22,7 @@ import argparse
 
 # ol = '/afs/cern.ch/work/a/atishelm/private/ecall1algooptimization/PileupMC_v2/Plot/ntuples/'
 #ol = '/eos/user/a/atishelm/www/EcalL1Optimization/BX-1/'
-ol = '/eos/user/a/atishelm/www/HHWWgg_Analysis/fggfinalfit/limits2'
+ol = '/eos/user/a/atishelm/www/HHWWgg/fggfinalfit/limits2'
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-AC","--atlas_compare", action="store_true", default=False, help="Display limits in way to compare to ATLAS HHWWgg limits", required=False)
@@ -35,7 +35,7 @@ parser.add_argument("-l","--HHWWggCatLabel",type=str, default="UnLabeled", help=
 parser.add_argument("-sl","--SecondHHWWggCatLabel",type=str, default="SecondUnLabeled", help="Category Label to find second set of files. Used for ratio plots", required=False)
 parser.add_argument("-g","--Grid",action="store_true", default=False, help="Plot grid of limits", required=False)
 parser.add_argument("-gl", "--GridLabels", type=str, nargs='+',default="", help="Labels to add to grid", required=False)
-parser.add_argument("--campaign",type=str, default="", help="Campaign name used to find limit root files", required=True)
+parser.add_argument("--campaign",type=str, default="", help="Campaign name used to find limit root files", required=False)
 parser.add_argument("--resultType",type=str, default="", help="Result type to choose which BR's to apply", required=True) # Ex: WWgg, HH
 parser.add_argument("--unit",type=str, default="", help="Result unit: fb or pb", required=True)
 parser.add_argument("--ymin",type=float, default=0, help="Y minimum", required=True)
@@ -44,6 +44,8 @@ parser.add_argument("--yboost",type=float, default=0, help="Y boost of legend. E
 parser.add_argument("--EFT",action="store_true", default=False, help="EFT results", required=False)
 parser.add_argument("--NMSSM",action="store_true", default=False, help="NMSSM results", required=False)
 
+parser.add_argument("--campaignOne",type=str, default="UnLabeled", help="Campaign of first limits in ratio", required=False)
+parser.add_argument("--campaignTwo",type=str, default="UnLabeled", help="Campaign of second limits in ratio", required=False)
 
 args = parser.parse_args()
 
@@ -149,15 +151,25 @@ def plotUpperLimits(labels,values,resultType):
         # file_name = "higgsCombine"+labels[i]+"AsymptoticLimits.mH125.root"
         #file_name = "higgsCombine.AsymptoticLimits.mH125." + labels[i] +  ".root"
         direc = args.HHWWggCatLabel
-        file_name = direc + "_limits/HHWWgg_v2-3_2017_" + labels[i] + "_HHWWgg_qqlnu.root"
+        # file_name = direc + "_limits/HHWWgg_v2-3_2017_" + labels[i] + "_HHWWgg_qqlnu.root"
+        file_name = direc + "_limits/HHWWgg_v2-6_2017_" + labels[i] + "_HHWWgg_qqlnu.root"
+        print"file: ",file_name
         #print'file_name:',file_name
         limit = getLimits(file_name)
         # print'limit = ',limit
         # print'values[i] = ',values[i] 
         #print'limit = ',limit
         up2s.append(limit[4])
-        HHWWgg_qqlnu_factor = 6.983 # 1 / branching ratio of qqlnugg including electron and muon channels. Need to multiply measured XS by this to get measured XS of HH->WWgg production
-        HHWWgg_WWgg_factor = 2061.43 # (1 / 0.0004851), 0.0004851 is BR of HH->WWgg
+        # HHWWgg_qqlnu_factor = 6.983 # 1 / branching ratio of qqlnugg including electron and muon channels. Need to multiply measured XS by this to get measured XS of HH->WWgg production
+        # HHWWgg_qqlnu_factor = 3.4916 # electron and muon channels ONLY
+        # HHWWgg_WWgg_factor = 2061.43 # (1 / 0.0004851), 0.0004851 is BR of HH->WWgg
+
+
+        ##
+        # HHWWgg_qqlnu_factor = 2.2779 ## (1 / BR) with Electron, Muon, all Tau decays INCLUDED 
+        HHWWgg_qqlnu_factor = 2.3079 ## (1 / BR) with Electron, Muon, all Tau decays INCLUDED 
+
+        HHWWgg_WWgg_factor = 1030.7153 
         if(resultType == "WWgg"): HHWWgg_factor = HHWWgg_qqlnu_factor
         elif(resultType == "HH"): HHWWgg_factor = HHWWgg_qqlnu_factor*HHWWgg_WWgg_factor
         # HHWWgg_qqlnu_factor = 2061.43 # 1 / branching ratio of qqlnugg including electron and muon channels. Need to multiply measured XS by this to get measured XS of HH production
@@ -169,8 +181,10 @@ def plotUpperLimits(labels,values,resultType):
         median.SetPoint(    i,    values[i], limit[2]*HHWWgg_factor ) # median
         green.SetPoint(  2*N-1-i, values[i], limit[1]*HHWWgg_factor ) # - 1 sigma
         yellow.SetPoint( 2*N-1-i, values[i], limit[0]*HHWWgg_factor ) # - 2 sigma
+        print"limit[2]*HHWWgg_factor:",limit[2]*HHWWgg_factor
+
  
-    print"limit[2]*HHWWgg_factor:",limit[2]*HHWWgg_factor
+    # print"limit[2]*HHWWgg_factor:",limit[2]*HHWWgg_factor
     # print"limit[2]:",limit[2]
     # print"limit[2]*HHWWgg_qqlnu_factor:",limit[2]*HHWWgg_qqlnu_factor
 
@@ -263,7 +277,9 @@ def plotUpperLimits(labels,values,resultType):
     median.SetLineColor(1)
     median.SetLineWidth(2)
     median.SetLineStyle(2)
-    median.Draw('Lsame')
+    median.SetMarkerStyle(8)
+    # median.
+    median.Draw('PLsame')
  
     CMS_lumi.CMS_lumi(c,4,11)
     ROOT.gPad.SetTicks(1,1)
@@ -333,12 +349,21 @@ def plotRatio(values, labels1, labels2):
     Label_1 = args.HHWWggCatLabel
     Label_2 = args.SecondHHWWggCatLabel
 
+    campaignOne = args.campaignOne
+    campaignTwo = args.campaignTwo
+
     # up2s = [ ]
     for i in range(N):
-        file_name_1 = Label_1 + "_limits/HHWWgg_v2-3_2017_" + labels1[i] + "_HHWWgg_qqlnu.root"
-        file_name_2 = Label_2 + "_limits/HHWWgg_v2-3_2017_" + labels2[i] + "_HHWWgg_qqlnu.root"
+        file_name_1 = "%s_limits/%s_2017_%s_HHWWgg_qqlnu.root"%(Label_1,campaignOne,labels1[i]) 
+        file_name_2 = "%s_limits/%s_2017_%s_HHWWgg_qqlnu.root"%(Label_2,campaignTwo,labels2[i]) 
+        # file_name_2 = Label_1 + "_limits/HHWWgg_v2-3_2017_" + labels1[i] + "_HHWWgg_qqlnu.root"
+        # file_name_1 = Label_1 + "_limits/HHWWgg_v2-3_2017_" + labels1[i] + "_HHWWgg_qqlnu.root"
+        # file_name_2 = Label_2 + "_limits/HHWWgg_v2-3_2017_" + labels2[i] + "_HHWWgg_qqlnu.root"
         limit_1 = getLimits(file_name_1)        
         limit_2 = getLimits(file_name_2)
+
+        # if(campaignOne=="HHWWgg_v2-3"): limit_1[2] *= 3.4916
+        # if(campaignTwo=="HHWWgg_v2-6"): limit_2[2] *= 2.3079
 	    # yellow.SetPoint(    i,    values[i], limit[4] ) # + 2 sigma
         # green.SetPoint(     i,    values[i], limit[3] ) # + 1 sigma
         median.SetPoint(    i,    values[i], limit_1[2]/limit_2[2] ) # median
@@ -383,7 +408,8 @@ def plotRatio(values, labels1, labels2):
     # frame.GetYaxis().SetTitle("95% upper limit on #sigma / #sigma_{SM}")
 
     frame.GetYaxis().SetTitle(Label_1 + " / " + Label_2)
-    frame.GetYaxis().SetRangeUser(0.8,1.2)
+    # frame.GetYaxis().SetRangeUser(0.8,1.2)
+    frame.GetYaxis().SetRangeUser(0.5,1.2)
     # frame.GetYaxis().SetTitle("95% CL limits ratio: " + Label_1 + " / " + Label_2)
 
     # if(args.atlas_compare):
@@ -519,8 +545,12 @@ def plotNonResUpperLimits(campaign,labels,resultType,plotLabels):
     xerrorLow = array ( 'd' )
     xerrorHigh = array ( 'd' )
 
-    HHWWgg_qqlnu_factor = 6.983 # 1 / branching ratio of qqlnugg including electron and muon channels. Need to multiply measured XS by this to get measured XS of HH->WWgg production
-    HHWWgg_WWgg_factor = 2061.43 # (1 / 0.0004851), 0.0004851 is BR of HH->WWgg
+    # HHWWgg_qqlnu_factor = 6.983 # 1 / branching ratio of qqlnugg including electron and muon channels. Need to multiply measured XS by this to get measured XS of HH->WWgg production
+    # HHWWgg_WWgg_factor = 2061.43 # (1 / 0.0004851), 0.0004851 is BR of HH->WWgg
+    # e, mu (no tau), qq (assuming negligible b quark BR): 3.4916 
+    # 1030.7153 
+    HHWWgg_qqlnu_factor = 3.4916 # e, mu semileptonic channels only 
+    HHWWgg_WWgg_factor = 1030.7153 
     if(resultType == "WWgg"): HHWWgg_factor = HHWWgg_qqlnu_factor
     elif(resultType == "HH"): HHWWgg_factor = HHWWgg_qqlnu_factor*HHWWgg_WWgg_factor
 
@@ -623,13 +653,28 @@ def plotNonResUpperLimits(campaign,labels,resultType,plotLabels):
     frame.GetXaxis().SetNdivisions(N)
     frame.GetYaxis().CenterTitle(True)
 
-    if(args.unit == "pb"):
-        if(resultType == "WWgg"): frame.GetYaxis().SetTitle("95% CL limits on #sigma(gg#rightarrow X)#times B(X#rightarrow HH#rightarrow WW#gamma#gamma) [pb]")    
-        elif(resultType == "HH"): frame.GetYaxis().SetTitle("95% CL limits on #sigma(gg#rightarrow X)#times B(X#rightarrow HH) [pb]")    
-            
-    elif(args.unit == "fb"):
-        if(resultType == "WWgg"): frame.GetYaxis().SetTitle("95% CL limits on #sigma(gg#rightarrow X)#times B(X#rightarrow HH#rightarrow WW#gamma#gamma) [fb]")    
-        elif(resultType == "HH"): frame.GetYaxis().SetTitle("95% CL limits on #sigma(gg#rightarrow X)#times B(X#rightarrow HH) [fb]")    
+    # if(args.SM_Point or args.EFT):
+        # process = "#sigma(gg#rightarrow HH"
+    # else:
+        # process = "#sigma(gg#rightarrow X)#times B(X#rightarrow HH"
+
+    if(args.SM_Point or args.EFT):
+        if(args.unit == "pb"):
+            if(resultType == "WWgg"): frame.GetYaxis().SetTitle("95% CL limits on #sigma(gg #rightarrow HH) #times B(HH #rightarrow WW#gamma#gamma) [pb]")    
+            elif(resultType == "HH"): frame.GetYaxis().SetTitle("95% CL limits on #sigma(gg #rightarrow HH) [pb]")         
+                
+        elif(args.unit == "fb"):
+            if(resultType == "WWgg"): frame.GetYaxis().SetTitle("95% CL limits on #sigma(gg #rightarrow HH) #times B(HH #rightarrow WW#gamma#gamma) [fb]")    
+            elif(resultType == "HH"): frame.GetYaxis().SetTitle("95% CL limits on #sigma(gg #rightarrow HH) [fb]")          
+    else:
+        if(args.unit == "pb"):
+            if(resultType == "WWgg"): frame.GetYaxis().SetTitle("95% CL limits on #sigma(gg#rightarrow X)#times B(X#rightarrow HH#rightarrow WW#gamma#gamma) [pb]")    
+            elif(resultType == "HH"): frame.GetYaxis().SetTitle("95% CL limits on #sigma(gg#rightarrow X)#times B(X#rightarrow HH) [pb]")         
+                
+        elif(args.unit == "fb"):
+            if(resultType == "WWgg"): frame.GetYaxis().SetTitle("95% CL limits on #sigma(gg#rightarrow X)#times B(X#rightarrow HH#rightarrow WW#gamma#gamma) [fb]")    
+            elif(resultType == "HH"): frame.GetYaxis().SetTitle("95% CL limits on #sigma(gg#rightarrow X)#times B(X#rightarrow HH) [fb]")          
+ 
 
     if(resultType == "WWgg"): 
         frame.GetYaxis().SetTitleSize(0.04)
@@ -683,6 +728,10 @@ def plotNonResUpperLimits(campaign,labels,resultType,plotLabels):
     frame.LabelsOption("h","X")
     # frame.GetXaxis().CenterLabels(True)
 
+    if(args.NMSSM): 
+	frame.GetXaxis().SetTitle("(M_{X},M_{Y}) [GeV]")
+	#print"title offset:",frame.GetXaxis().GetTitleOffset()
+	frame.GetXaxis().SetTitleOffset(1.1)
 
     # print"frame:",frame
     # frame.SetDirectory(0)
@@ -764,8 +813,8 @@ def plotNonResUpperLimits(campaign,labels,resultType,plotLabels):
     label.SetTextSize(0.045)
     label.SetLineWidth(2)
 
-    # if(args.systematics): label.DrawLatex(0.7,0.7 + yboost,"SYST + STAT")
-    # else: label.DrawLatex(0.7,0.7 + yboost,"STAT ONLY")
+    if(args.systematics): label.DrawLatex(0.7,0.7 + yboost,"SYST + STAT")
+    else: label.DrawLatex(0.7,0.7 + yboost,"STAT ONLY")
     
     print " "
     # c.SaveAs("UpperLimit.png")
@@ -810,9 +859,12 @@ def main():
         # values.append(1)   
     # else: 
     masses = []
-    if(args.CMS_compare): masses = [250, 260, 270, 280, 300, 320, 350, 400, 500, 550, 600, 650, 700, 800, 850, 900, 1000] 
-    if(args.All_Points): masses = [250, 260, 270, 280, 300, 320, 350, 400, 500, 550, 600, 650, 700, 800, 850, 900, 1000, 1250]
-    if(args.atlas_compare): masses = [250, 260, 270, 280, 300, 320, 350, 400, 500]
+    # if(args.CMS_compare): masses = [250, 260, 270, 280, 300, 320, 350, 400, 500, 550, 600, 650, 700, 800, 850, 900, 1000] 
+    if(args.CMS_compare): masses = [260,1000] 
+    # if(args.All_Points): masses = [250, 260, 270, 280, 300, 320, 350, 400, 500, 550, 600, 650, 700, 800, 850, 900, 1000, 1250]
+    if(args.All_Points): masses = [260,1000]
+    # if(args.atlas_compare): masses = [250, 260, 270, 280, 300, 320, 350, 400, 500]
+    if(args.atlas_compare): masses = [260,1000]
     for m in masses: 
         values.append(m)
 
@@ -838,7 +890,7 @@ def main():
 
     elif args.Grid:
         print'Creating grid of limit values'
-        ol = '/eos/user/a/atishelm/www/HHWWgg_Analysis/fggfinalfit/grid'
+        ol = '/eos/user/a/atishelm/www/HHWWgg/fggfinalfit/grid'
         # ol = '/eos/user/a/atishelm/www/HHWWgg_Analysis/fggfinalfit/gridSyst'
         masses = [250, 260, 270, 280, 300, 320, 350, 400, 500, 550, 600, 650, 700, 800, 850, 900, 1000, 1250]
         #masses = [250]

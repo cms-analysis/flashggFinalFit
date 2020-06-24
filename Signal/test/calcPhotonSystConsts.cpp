@@ -533,6 +533,7 @@ int main(int argc, char *argv[]){
 					vector<string> tmpV2;
 					split(tmpV2,endPath,boost::is_any_of("_"));	 
 					string mass_str = tmpV2[0];
+					// HHWWgg_Label = Form("%s_HHWWgg_qqlnu",mass_str.c_str());
 					HHWWgg_Label = Form("%s_WWgg_qqlnugg",mass_str.c_str());
 				}
 				else if (analysis_type_ == "EFT"){

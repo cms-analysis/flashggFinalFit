@@ -261,6 +261,7 @@ if [ $SIGFITONLY == 1 ]; then
       # echo "fileDir: $fileDir"
       # echo "mass: $mass"
       HHWWggLabel="${ID}_WWgg_qqlnugg"
+      # HHWWggLabel="${ID}_HHWWgg_qqlnu"
       proc="ggF"
     elif [[ $ANALYSIS_TYPE == "EFT" ]];
     then 

@@ -1,13 +1,13 @@
-# Config file: options for signal fitting
+# Config file: options for background fitting
 
 backgroundScriptCfg = {
   
   # Setup
-  'inputWSDir':'/eos/user/a/atishelm/ntuples/HHWWgg/HHWWgg_2017_Data_WithSyst_Hadded/final', 
+  'inputWSDir':'/eos/user/a/atishelm/ntuples/HHWWgg/HHWWgg_v2-6_2017_Data_Workspaces_v2_Hadded_againtest_Combined', 
   #Procs will be inferred automatically from filenames
   'cats':'HHWWggTag_0,HHWWggTag_1',
   # 'ext':'HHWWgg_v2-3_2017_2CatsSyst',
-  'ext':'HHWWgg_v2-6_2017_2CatsSyst',
+  'ext':'HHWWgg_v2-6_2017_Synch',
   'year':'2017', 
   'unblind':0,
 

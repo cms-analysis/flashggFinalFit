@@ -6,21 +6,13 @@ signalScriptCfg = {
   
   # Setup
   'systematics':1, # (0): Use empty systematics dat file. (1): Use generated systematics dat file 
-
-  # 'inputWSDir':'/eos/user/a/atishelm/ntuples/HHWWgg/HHWWgg_v2-3_NoSyst_Hadded_Shorter',
-  # 'inputWSDir':'/eos/user/a/atishelm/ntuples/HHWWgg/HHWWgg_v2-3_WithSyst_Hadded',
-  # 'inputWSDir':'/eos/user/a/atishelm/ntuples/HHWWgg/HHWWgg_v2-4_NMSSM_Hadded',
-  'inputWSDir':'/eos/user/a/atishelm/ntuples/HHWWgg/HHWWgg_v2-6_Workspaces_Hadded',
-  # 'inputWSDir':'/eos/user/a/atishelm/ntuples/HHWWgg/HHWWgg_v2-4_NMSSM_Hadded_1Signal',
-  # 'inputWSDir':'/eos/user/a/atishelm/ntuples/HHWWgg/HHWWgg_v2-4_EFT_cpy_Hadded',
-  
-  # 'inputWSDir':'/eos/user/a/atishelm/ntuples/HHWWgg/HHWWgg_v2-3_Workspaces_AllEvents_Hadded_Shorter',
+  'inputWSDir':'/eos/user/a/atishelm/ntuples/HHWWgg/HHWWgg_v2-6_Workspaces_X600_Synch_Hadded',
   'usrprocs':'ggF', # if you want user input production categories 
   # 'usrprocs':'GluGluToHHTo', # if you want user input production categories 
   #Procs will be inferred automatically from filenames
   'cats':'HHWWggTag_0,HHWWggTag_1',
   # 'ext':'HHWWgg_v2-3_%s_2CatsSyst'%_year,
-  'ext':'HHWWgg_v2-6_%s_2CatsSyst'%_year,
+  'ext':'HHWWgg_v2-6_%s_Synch'%_year,
   # 'analysis':'stage1_2', # To specify which replacement dataset mapping (defined in ./python/replacementMap.py)
   'analysis':'HHWWgg', # To specify which replacement dataset mapping (defined in ./python/replacementMap.py)
   # 'analysis_type':'EFT', # For HHWWgg: Res, EFT or NMSSM 

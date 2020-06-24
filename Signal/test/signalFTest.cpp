@@ -182,6 +182,7 @@ void fTest(string analysis_, string filename, string outdir_, vector<string> pro
 			split(tmpV2,endPath,boost::is_any_of("_"));	 
 			string mass_str = tmpV2[0];
 			HHWWgg_Label = Form("%s_WWgg_qqlnugg",mass_str.c_str());
+			// HHWWgg_Label = Form("%s_HHWWgg_qqlnu",mass_str.c_str());
 		}
 		else if (analysis_type_ == "EFT"){
 			// File name format: nodeX_HHWWgg_qqlnu
@@ -797,7 +798,7 @@ void fTest(string analysis_, string filename, string outdir_, vector<string> pro
 
 int main(int argc, char *argv[]){
 
-	string website = "/eos/user/a/atishelm/www/HHWWgg_Analysis/fggfinalfit"; // in addition to local direc, put output pngs here 
+	string website = "/eos/user/a/atishelm/www/HHWWgg/fggfinalfit"; // in addition to local direc, put output pngs here 
 
 	OptionParser(argc,argv);
 	// datfilename_Original = datfilename_;
