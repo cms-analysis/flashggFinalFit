@@ -108,7 +108,42 @@ The modes are used for the following (run in sequential order):
 
 ## Clone Repository 
 
-After cloning the repository, the main HHWWgg script is HHWWggFinalFitScript.sh, which is used to call each of the finalfit steps. 
+The cloning instructions are the same as above, except the forked repository should be cloned, like so:
+
+
+```
+export SCRAM_ARCH=slc7_amd64_gcc700
+cmsrel CMSSW_10_2_13
+cd CMSSW_10_2_13/src
+cmsenv
+git cms-init
+
+# Install the GBRLikelihood package which contains the RooDoubleCBFast implementation
+git clone git@github.com:jonathon-langford/HiggsAnalysis.git
+# Install Combine as per the documentation here: cms-analysis.github.io/HiggsAnalysis-CombinedLimit/
+git clone git@github.com:cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit
+
+# Compile external libraries
+cd HiggsAnalysis
+cmsenv
+scram b -j 9
+
+# Install Flashgg Final Fit packages
+cd ..
+git clone -b HHWWgg_Dev_runII_102x git@github.com:atishelmanch/flashggFinalFit.git # to clone via SSH 
+cd flashggFinalFit/
+```
+
+Two packages need to be built with their own makefiles, if needed. Please note that there will be verbose warnings from BOOST etc, which can be ignored. So long as the `make` commands finish without error, then the compilation happened fine.:
+
+```
+cd ${CMSSW_BASE}/src/flashggFinalFit/Background
+make
+cd ${CMSSW_BASE}/src/flashggFinalFit/Signal
+make
+```
+
+After cloning the repository, the main HHWWgg script to use is HHWWggFinalFitScript.sh, which is used to call each of the finalfit steps below.
 
 ## Background 
 
