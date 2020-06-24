@@ -168,7 +168,11 @@ The next step is to create the datacard containing information from the Backgrou
 . HHWWggFinalFitScript.sh datacard 
 ```
 
-If it works properly, this should create a directory Datacard/<extension>, containing the datacard. Note that the datacard ending with "_cleaned.txt" is the one used in the combine step. If you are satisfied with the datacard, you can now run combine with: 
+If it works properly, this should create a directory Datacard/<extension>, containing the datacard. Note that the datacard ending with "_cleaned.txt" is the one used in the combine step.
+
+## Combine
+
+If you are satisfied with the datacard, you can now run combine with: 
 
 ```
 . HHWWggFinalFitScript.sh combine  
