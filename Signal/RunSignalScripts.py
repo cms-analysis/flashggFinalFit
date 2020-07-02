@@ -30,6 +30,7 @@ def get_options():
   parser.add_option('--ext', dest='ext', default='test', help="Extension: defines output dir where signal models are saved")
   parser.add_option('--analysis', dest='analysis', default='test', help="Analysis handle: used in Signal/python/replacementMap.py to specify replacement dataset mapping when too few entries")
   parser.add_option('--analysis_type', dest='analysis_type', default='test', help="Analysis type. Used for HHWWgg. Ex: Res, EFT, NMSSM")
+  parser.add_option('--FinalState', dest='FinalState', default='qqlnu', help="Final state, used for HHWWgg. Ex: qqlnu, lnulnu, qqqq")
   parser.add_option('--year', dest='year', default='2016', help="Dataset year")
   parser.add_option('--beamspot', dest='beamspot', default='3.4', help="Beamspot")
   parser.add_option('--numberOfBins', dest='numberOfBins', default='320', help="Number of bins in mgg to fit")
@@ -81,6 +82,7 @@ if opt.inputConfig != '':
     ext          = _cfg['ext']
     analysis     = _cfg['analysis']
     analysis_type     = _cfg['analysis_type']
+    FinalState   = _cfg['FinalState']
     year         = _cfg['year']
     beamspot     = _cfg['beamspot']
     numberOfBins = _cfg['numberOfBins']
@@ -113,6 +115,7 @@ else:
   ext          = opt.ext
   analysis     = opt.analysis
   analysis_type = opt.analysis_type
+  FinalState   = opt.FinalState
   year         = opt.year
   beamspot     = opt.beamspot
   numberOfBins = opt.numberOfBins
@@ -217,6 +220,7 @@ else:
   print " --> Extension: %s"%ext
   print " --> Analysis: %s"%analysis
   print " --> Analysis type: %s"%analysis_type
+  print " --> HHWWgg final state: %s"%(FinalState)
   print " --> Year: %s ::: Corresponds to intLumi = %s fb^-1"%(year,lumi[year])
   if useDCB: print " --> Using DCB in signal model"
   # print " --> HHWWgg: %s"%HHWWgg
@@ -262,7 +266,7 @@ else:
       intLumi = 1 # HHWWgg. Set luminosity in datacard 
 
       # if batch not specified, run locally 
-      if batch == '': cmdLine += './runSignalScripts.sh -i %s -p %s -f %s --ext %s --intLumi %s --year %s --massList %s --bs %s --analysis %s --scales %s --scalesCorr %s --scalesGlobal %s --smears %s --useSSF 1 --verbosity %s --systematics %s --analysis_type %s'%(f,procs,cats,thisExt,intLumi,year,massPoints,beamspot,analysis,scales,scalesCorr,scalesGlobal,smears,verbosity,systematics,analysis_type)
+      if batch == '': cmdLine += './runSignalScripts.sh -i %s -p %s -f %s --ext %s --intLumi %s --year %s --massList %s --bs %s --analysis %s --scales %s --scalesCorr %s --scalesGlobal %s --smears %s --useSSF 1 --verbosity %s --systematics %s --analysis_type %s --FinalState %s'%(f,procs,cats,thisExt,intLumi,year,massPoints,beamspot,analysis,scales,scalesCorr,scalesGlobal,smears,verbosity,systematics,analysis_type,FinalState)
 
       # run with batch 
       else: cmdLine += './runSignalScripts.sh -i %s -p %s -f %s --ext %s --intLumi %s --year %s --batch %s --queue %s --massList %s --bs %s --analysis %s --scales %s --scalesCorr %s --scalesGlobal %s --smears %s --useSSF 1 --verbosity %s'%(f,procs,cats,thisExt,lumi[year],year,batch,queue,massPoints,beamspot,analysis,scales,scalesCorr,scalesGlobal,smears,verbosity)

@@ -68,6 +68,7 @@ int verbosity_;
 bool isFlashgg_;
 string analysis_;
 string analysis_type_;
+string FinalState_; // for HHWWgg
 // RooWorkspace *inWS_;
 WSTFileWrapper * inWS_;
 RooRealVar *mass_ = new RooRealVar("CMS_hgg_mass","CMS_hgg_mass",125);
@@ -89,7 +90,8 @@ void OptionParser(int argc, char *argv[]){
 		("flashggCats,f", po::value<string>(&flashggCatsStr_)->default_value("UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,UntaggedTag_4,VBFTag_0,VBFTag_1,VBFTag_2,TTHHadronicTag,TTHLeptonicTag,VHHadronicTag,VHTightTag,VHLooseTag,VHEtTag"),       "Flashgg category names") 
 		("verbosity,v", po::value<int>(&verbosity_)->default_value(0),                                  								"How much info to write (0 none, 1 some)")
 		("analysis,a", po::value<string>(&analysis_)->default_value(""),                                  								"Analysis ex: HHWWgg")
-		("analysis_type,a", po::value<string>(&analysis_type_)->default_value(""),                                  								"Used by HHWWgg. Ex: Res, EFT, NMSSM")
+		("analysis_type", po::value<string>(&analysis_type_)->default_value(""),                                  								"Used by HHWWgg. Ex: Res, EFT, NMSSM")
+		("FinalState", po::value<string>(&FinalState_)->default_value(""),                                  								"Used by HHWWgg. Ex: qqlnu, lnulnu, qqqq")
 		;                                   
 
 	po::options_description backw_opts("Backwards compatibility options");
@@ -534,13 +536,13 @@ int main(int argc, char *argv[]){
 					split(tmpV2,endPath,boost::is_any_of("_"));	 
 					string mass_str = tmpV2[0];
 					// HHWWgg_Label = Form("%s_HHWWgg_qqlnu",mass_str.c_str());
-					HHWWgg_Label = Form("%s_WWgg_qqlnugg",mass_str.c_str());
+					HHWWgg_Label = Form("%s_WWgg_%sgg",mass_str.c_str(),FinalState_.c_str());
 				}
 				else if (analysis_type_ == "EFT"){
-					// File name format: nodeX_HHWWgg_qqlnu
-					// RooAbsData name format: GluGluToHHTo_WWgg_qqlnu_nodeX_13TeV_HHWWggTag_Y
+					// File name format: nodeX_HHWWgg_<FinalState>
+					// RooAbsData name format: GluGluToHHTo_WWgg_<FinalState>_nodeX_13TeV_HHWWggTag_Y
 					// proc = GluGluToHHTo, 13TeV_HHWWggTag_Y already included 
-					// HHWWgg_Label = WWgg_qqlnu_nodeX
+					// HHWWgg_Label = WWgg_<FinalState>_nodeX
 					vector<string> tmpV;
 					split(tmpV,infilenamesStr_,boost::is_any_of("/"));	
 					unsigned int N = tmpV.size();  
@@ -548,12 +550,12 @@ int main(int argc, char *argv[]){
 					vector<string> tmpV2;
 					split(tmpV2,endPath,boost::is_any_of("_"));	 
 					string node_str = tmpV2[0];
-					HHWWgg_Label = Form("WWgg_qqlnu_%s",node_str.c_str());
+					HHWWgg_Label = Form("WWgg_%s_%s",FinalState_.c_str(),node_str.c_str());
 				}
 
 				else if (analysis_type_ == "NMSSM"){
-					// file name format: MX<massX>_MY<massY>_HHWWgg_qqlnu.root
-					// RooAbsData name format: NMSSM_XYHWWggqqlnu_MX<massX>_MY<massY>_13TeV_HHWWggTag_Y
+					// file name format: MX<massX>_MY<massY>_HHWWgg_<FinalState>.root
+					// RooAbsData name format: NMSSM_XYHWWgg<FinalState>_MX<massX>_MY<massY>_13TeV_HHWWggTag_Y
 					vector<string> tmpV;
 					split(tmpV,infilenamesStr_,boost::is_any_of("/"));	
 					unsigned int N = tmpV.size();  
@@ -562,13 +564,13 @@ int main(int argc, char *argv[]){
 					split(tmpV2,endPath,boost::is_any_of("_"));	 
 					string XmassString = tmpV2[0]; 
 					string YmassString = tmpV2[1]; 
-					HHWWgg_Label = Form("XYHWWggqqlnu_%s_%s",XmassString.c_str(),YmassString.c_str());
+					HHWWgg_Label = Form("XYHWWgg%s_%s_%s",FinalState_.c_str(),XmassString.c_str(),YmassString.c_str());
 					cout << "Going to look for: " << HHWWgg_Label.c_str() << endl;
 				}
 
 
 				// std::cout << "HHWWgg_Label: " << HHWWgg_Label << endl;
-				// ggF_SM_WWgg_qqlnugg_13TeV_HHWWggTag_0
+				// ggF_SM_WWgg_<FinalState>gg_13TeV_HHWWggTag_0
 				// // cout << "workspace: " << Form("%s_%s_13TeV_%s",proc->c_str(),HHWWgg_Label.c_str(),flashggCats_[cat].c_str()) << endl;
 				// RooWorkspace* theWS_ = inWS_->getSpecificWorkspace(Form("%s_%s_13TeV_%s",proc->c_str(),HHWWgg_Label.c_str(),flashggCats_[cat].c_str()));
 				// // Form("%s_%d_13TeV_%s",proc->c_str(),mh_,flashggCat.c_str()),Form("MCScale%s",phoCat->c_str())

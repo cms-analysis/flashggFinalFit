@@ -12,12 +12,13 @@ signalScriptCfg = {
   #Procs will be inferred automatically from filenames
   'cats':'HHWWggTag_0,HHWWggTag_1',
   # 'ext':'HHWWgg_v2-3_%s_2CatsSyst'%_year,
-  'ext':'HHWWgg_v2-6_%s_Synch'%_year,
+  'ext':'HHWWgg_v2-6_%s_ChannelTest'%_year,
   # 'analysis':'stage1_2', # To specify which replacement dataset mapping (defined in ./python/replacementMap.py)
   'analysis':'HHWWgg', # To specify which replacement dataset mapping (defined in ./python/replacementMap.py)
   # 'analysis_type':'EFT', # For HHWWgg: Res, EFT or NMSSM 
   'analysis_type':'Res', # For HHWWgg: Res, EFT or NMSSM 
   # 'analysis_type':'NMSSM', # For HHWWgg: Res, EFT or NMSSM 
+  'FinalState':'qqlnu', # For HHWWgg. Should choose qqlnu, lnulnu, or qqqq for final state. Will look for this in expected name formats. When we combine channels, and they're defined by tags, we'll add "combined" here and naming format in file will be something like "combined" instead of qqlnu, etc.
   'year':'%s'%_year, 
   'beamspot':'3.4',
   'numberOfBins':'320',

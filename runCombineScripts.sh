@@ -1,7 +1,8 @@
 #!/bin/bash
 #bash variables
 ANALYSIS=""
-ANALYSIS_TYPE=""
+ANALYSIS_TYPE="" # for HHWWgg 
+FINALSTATE="" # for HHWWgg
 HHWWGGCATLABEL="NotLabelled"
 FILE="";
 EXT="auto"; #extensiom for all folders and files created by this script
@@ -48,6 +49,7 @@ usage(){
 echo "-h|--help)" 
 echo "--analysis) (default $ANALYSIS)"
 echo "--analysis_type) (default $ANALYSIS_TYPE)"
+echo "--FinalState) (default $FINALSTATE)" # for HHWWgg. qqlnu, lnulnu, or qqqq 
 echo "--HHWWggCatLabel) (default $HHWWGGCATLABEL)"
 echo "-i|--inputFile) "
 echo "-p|--procs) (default $PROCS)"
@@ -83,7 +85,7 @@ echo "--doSystematics) run with or without systematics (default $DOSYSTEMATICS)"
 
 
 # options may be followed by one colon to indicate they have a required argument
-if ! options=$(getopt -u -o hi:p:f: -l help,inputFile:,procs:,bs:,flashggCats:,uepsFile:,newGghScheme,doSTXS,doStage1,ext:,smears:,massList:,scales:,scalesCorr:,scalesGlobal:,,pseudoDataDat:,sigFile:,combine,combineOnly,combinePlotsOnly,signalOnly,backgroundOnly,datacardOnly,useSSF:,useDCB_1G:,continueLoop:,intLumi:,year:,unblind,isData,isFakeData,analysis:,analysis_type:,HHWWggCatLabel:,shortExt:,dataFile:,batch:,doSystematics:,verbose -- "$@")
+if ! options=$(getopt -u -o hi:p:f: -l help,inputFile:,procs:,bs:,flashggCats:,uepsFile:,newGghScheme,doSTXS,doStage1,ext:,smears:,massList:,scales:,scalesCorr:,scalesGlobal:,,pseudoDataDat:,sigFile:,combine,combineOnly,combinePlotsOnly,signalOnly,backgroundOnly,datacardOnly,useSSF:,useDCB_1G:,continueLoop:,intLumi:,year:,unblind,isData,isFakeData,analysis:,analysis_type:,FinalState:,HHWWggCatLabel:,shortExt:,dataFile:,batch:,doSystematics:,verbose -- "$@")
 then
 # something went wrong, getopt will put out an error message for us
 exit 1
@@ -110,6 +112,7 @@ case $1 in
 --pseudoDataDat) PSEUDODATADAT=$2; shift;;
 --analysis) ANALYSIS=$2; shift;;
 --analysis_type) ANALYSIS_TYPE=$2; shift;; 
+--FinalState) FINALSTATE=$2; shift ;; 
 --HHWWggCatLabel) HHWWGGCATLABEL=$2; shift;;
 --shortExt) SHORTEXT=$2; echo "short ext $SHORTEXT"; shift ;;
 --dataFile) DATAFILE=$2; shift;;
@@ -175,6 +178,7 @@ cd Datacard
 
 echo "Analysis: $ANALYSIS"
 echo "analysis_type: $ANALYSIS_TYPE"
+echo "FinalState: $FINALSTATE"
 if [ $ANALYSIS == "HHWWgg" ]; then 
 
     # echo "./makeDatacard.py -i $FILE  -o Datacard_13TeV_${EXT}.txt -p $PROCS -c $CATS --photonCatScales $SCALES --photonCatSmears $SMEARS --isMultiPdf --mass 125 --intLumi $INTLUMI --year $YEAR --uepsfilename $UEPS --newGghScheme --analysis HHWWgg "
@@ -194,8 +198,8 @@ if [ $ANALYSIS == "HHWWgg" ]; then
 
     DatacardName="Datacard_13TeV_${EXT}.txt"
     DatacardNameCleaned="Datacard_13TeV_${EXT}_cleaned.txt"
-    echo "python makeDatacard.py --inputWSDir $FILE --years $YEAR --procs $PROCS --analysis $ANALYSIS --cats $CATS ${systematicsOption} --removeNoTag --DatacardName $DatacardName --ext $SHORTEXT --analysis_type $ANALYSIS_TYPE"
-    python makeDatacard.py --inputWSDir $FILE --years $YEAR --procs $PROCS --analysis $ANALYSIS --cats $CATS ${systematicsOption} --removeNoTag --DatacardName $DatacardName --ext $SHORTEXT --analysis_type $ANALYSIS_TYPE
+    echo "python makeDatacard.py --inputWSDir $FILE --years $YEAR --procs $PROCS --analysis $ANALYSIS --cats $CATS ${systematicsOption} --removeNoTag --DatacardName $DatacardName --ext $SHORTEXT --analysis_type $ANALYSIS_TYPE --FinalState $FINALSTATE"
+    python makeDatacard.py --inputWSDir $FILE --years $YEAR --procs $PROCS --analysis $ANALYSIS --cats $CATS ${systematicsOption} --removeNoTag --DatacardName $DatacardName --ext $SHORTEXT --analysis_type $ANALYSIS_TYPE --FinalState $FINALSTATE
     
     # echo "python cleanDatacard.py --inputWSDir $FILE --years $YEAR --procs $PROCS --analysis $ANALYSIS --cats $CATS ${systematicsOption} --removeNoTag"
     echo "python cleanDatacard.py --datacard $DatacardName --outfilename $DatacardNameCleaned"
@@ -259,11 +263,11 @@ if [ $ANALYSIS == "HHWWgg" ]; then
     massX="$(cut -d'_' -f1 <<<$fileID)"
     massY="$(cut -d'_' -f2 <<<$fileID)"
     HHWWggmass="${massX}_${massY}"
-    HHWWggLabel="${HHWWggmass}_HHWWgg_qqlnu" 
+    HHWWggLabel="${HHWWggmass}_HHWWgg_${FINALSTATE}" 
   else 
     HHWWggmass="$(cut -d'_' -f1 <<<$fileID)" # get text before first '_'. ex: SM, X250, X260, ...
     # HHWWggLabel1="${mass}_WWgg_qqlnugg" 
-    HHWWggLabel="${HHWWggmass}_HHWWgg_qqlnu" 
+    HHWWggLabel="${HHWWggmass}_HHWWgg_${FINALSTATE}" 
   fi 
   OUTDIR+="_${HHWWggLabel}"
 fi 
@@ -336,7 +340,7 @@ cp ../../Datacard/${DatacardLocation} CMS-HGG_mva_13TeV_datacard_${EXT}.txt
 if [ $ANALYSIS == "HHWWgg" ]; then 
   combine CMS-HGG_mva_13TeV_datacard_${EXT}.txt -m 125 -M AsymptoticLimits --run=blind
   
-  mv higgsCombineTest.AsymptoticLimits.mH125.root ${HHWWGGCATLABEL}_limits/${shorterEXT}_${HHWWggmass}_${HHWWGGCATLABEL}_HHWWgg_qqlnu.root
+  mv higgsCombineTest.AsymptoticLimits.mH125.root ${HHWWGGCATLABEL}_limits/${shorterEXT}_${HHWWggmass}_${HHWWGGCATLABEL}_HHWWgg_${FINALSTATE}.root
   # mv higgsCombineTest.AsymptoticLimits.mH125.root # save for mass point, category 
 fi
 

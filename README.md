@@ -182,6 +182,7 @@ This configuration contains the following parameters:
   * ext: Extension. Same definition as Background instructions. This should be the same as the extension used for the background model you want to combine with your signal models. 
   * analysis: Set to HHWWgg to configure for HHWWgg file naming conventions.
   * analysis_type: Used for HHWWgg. Set to either EFT, Res or NMSSM. Used to configure the names of the workspaces, used for easily looping over mass points, mass pairs or benchmarks. 
+  * FinalState: The HHWWgg final state. For now the options are: qqlnu, lnulnu or qqqq, corresponding to the Semi-Leptonic, Fully-Leptonic, and Fully-Hadronic final states. The FinalState you enter here will be looked for in file and RooDataSet names. This is meant to be used if you are running on HHWWgg signal files for a given final state. When we run our tagger on a signal final containing all final states, a "combined" option will be added here.
   * year: Data taking year. 
   * scales, scalesCorr, scalesGlobal, smears: Systematic trees to look for in signal workspaces. 
   * batch and queue: Set to empty strings as HHWWgg only configured to run locally. 

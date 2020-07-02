@@ -7,7 +7,7 @@
 # The purpose of this script is to run all fggfinalfit steps for the HHWWgg analysis    #
 #                                                                                       #
 # Example usage:                                                                        #
-# . HHWWggFinalFitScript.sh background                                                  #
+# . HHWWggFinalFitScript.sh backgroundftest                                                  #
 # . HHWWggFinalFitScript.sh signal                                                      #
 #########################################################################################
 
@@ -18,6 +18,7 @@ cmsenv
 if [ $step == "backgroundftest" ]; then 
     cd Background 
     python RunBackgroundScripts.py --inputConfig HHWWgg_Synch_Background_Config.py 
+    # python RunBackgroundScripts.py --inputConfig HHWWgg_tests.py 
     cd .. 
 fi
 
@@ -39,6 +40,7 @@ fi
 #-- Datacards
 if [ $step == "datacard" ]; then 
     python RunCombineScripts.py datacard --inputConfig HHWWgg_Synch_Combine_Config.py # Make datacard 
+    # python RunCombineScripts.py datacard --inputConfig HHWWgg_Synch_Combine_Config.py # Make datacard 
 fi
 
 #-- Combine 

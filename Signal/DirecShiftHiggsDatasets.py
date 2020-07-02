@@ -1,3 +1,14 @@
+####################################################################################################################################
+# Abe Tishelman-Charny 
+#
+# The purpose of this python module is to artificially shift the HHWWgg CMS_hgg_mass distribution left and right 5 GeV
+# in order to be compatabile with the fggfinalfit framework, as the standard Hgg analysis
+# uses an interpolation technique with Hgg mass points ~ 110->130 GeV  
+#
+# We only have a 125 GeV Higgs mass point for HHWWgg, so we must do this artifial shift.
+#
+####################################################################################################################################
+
 import ROOT
 from ROOT import *
 
@@ -10,49 +21,32 @@ HHWWgg_Label = sys.argv[3]
 cats_ = sys.argv[4]
 analysis_type = sys.argv[5] # Res, EFT, NMSSM 
 proc = sys.argv[6]
-
-
-# print'***************************************************'
-# print'cats: ',cats
-# print'***************************************************'
+finalState = sys.argv[7] # qqlnu, lnulnu, qqqq 
 
 cats = cats_.split(",") # turn to list 
 
-# exit(1)
-
-#print'in python, mass:',mass
 outDir = inDir + '_' + 'interpolation/'
 if not os.path.exists(outDir):
     os.makedirs(outDir) 
-# outDir += "interpolation/"
-#mass = [250] # radion mass 
-#masses = []
-#masses.append(mass)
-#for m in mass:
-# ID = mass
-
-# print "Looking at Radion mass = ", m
 print "Looking at HHWWgg ID:", ID
 values = [-5,0,5]
 higgs_mass = 125
 
 ws_name = 'tagsDumper/cms_hgg_13TeV'
 
-# temp_ws = TFile(inDir+'/'+str(ID)+'_HHWWgg_qqlnu.root').Get(ws_name)
-temp_ws = TFile(inDir+'/'+str(ID)+'_HHWWgg_qqlnu.root').Get(ws_name)
+temp_ws = TFile("%s/%s_HHWWgg_%s.root"%(inDir,str(ID),finalState)).Get(ws_name)
 
-# Res: ID_HHWWgg_qqlnu.root 
-# EFT: nodeX_HHWWgg_qqlnu.root
-# NMSSM: MX<xmass>_MY<ymass>_HHWWgg_qqlnu.root 
+# Res: ID_HHWWgg_<finalState>.root 
+# EFT: nodeX_HHWWgg_<finalState>.root
+# NMSSM: MX<xmass>_MY<ymass>_HHWWgg_<finalState>.root 
 
-# cats = ['0','1'] # HHWWggTag categories 
-
-# temp_ws.Print()
 for value in values:
 	print'mass shift:',value 
 	shift = value + higgs_mass
 
-	output = TFile(outDir + 'X_signal_'+str(ID)+'_'+str(shift)+'_HHWWgg_qqlnu.root','RECREATE')
+	# output = TFile(outDir + 'X_signal_'+str(ID)+'_'+str(shift)+'_HHWWgg_qqlnu.root','RECREATE')
+
+	output = TFile("%s/X_signal_%s_%s_HHWWgg_%s.root"%(outDir,str(ID),str(shift),finalState),'RECREATE')
 	output.mkdir("tagsDumper")
 	output.cd("tagsDumper")
 	ws_new = ROOT.RooWorkspace("cms_hgg_13TeV")

@@ -12,16 +12,18 @@ combineScriptCfg = {
   # 'analysis_type':'EFT',
   # 'analysis_type':'NMSSM',
   'analysis_type':'Res',
+  'FinalState':'qqlnu', # for HHWWgg. qqlnu, lnulnu, or qqqq. Will add combined eventually.
   'mode':mode,
   # 'mode':'combine',
   'doSystematics':1, # 0: do not include systematics in datacard. 1: include systematics in datacard
   'inputWSDir':'/eos/user/a/atishelm/ntuples/HHWWgg/HHWWgg_v2-6_Workspaces_X600_Synch_Hadded',
   #Procs will be inferred automatically from filenames
-  'HHWWggCatLabel':'2TotCatsCOMBINEDWithSyst', # for name of combine output files 
+  #'HHWWggCatLabel':'2TotCatsCOMBINEDWithSyst', # for name of combine output files 
+  'HHWWggCatLabel':'2TotCatsbothcombined',
   # 'cats':'HHWWggTag_0',
   # 'cats':'HHWWggTag_1',
   'cats':'HHWWggTag_0,HHWWggTag_1',
-  'ext':'HHWWgg_v2-6_2017_Synch',
+  'ext':'HHWWgg_v2-6_2017_ChannelTest',
   # 'ext':'HHWWgg_v2-3_2017_2CatsSyst',
   # 'ext':'HHWWgg_v2-3_2017_2CatsSyst',
   'year':'2017', 

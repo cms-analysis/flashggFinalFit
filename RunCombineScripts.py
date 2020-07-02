@@ -14,6 +14,7 @@ def get_options():
   # Setup 
   parser.add_option('--analysis', dest='analysis', default='datacard', help="analysis option") 
   parser.add_option('--analysis_type', dest='analysis_type', default='', help="analysis type. For HHWWgg: Res, EFT, NMSSM") 
+  parser.add_option('--FinalState', dest='FinalState', default='', help="Used for HHWWgg. Ex) qqlnu, lnulnu, qqqq") 
   parser.add_option('--HHWWggCatLabel', dest='HHWWggCatLabel', default='UnLabelled', help="Option to add to name of comine output files") 
   parser.add_option('--mode', dest='mode', default='datacard', help="Running mode. Options: [datacard,combine,combinePlots,effAcc,yields]")
   parser.add_option('--inputWSDir', dest='inputWSDir', default='/vols/cms/es811/FinalFits/ws_ReweighAndNewggHweights', help="Directory storing flashgg workspaces" )
@@ -58,6 +59,7 @@ if opt.inputConfig != '':
     #Extract options
     analysis     = _cfg['analysis']
     analysis_type = _cfg['analysis_type']
+    FinalState   = _cfg['FinalState']
     HHWWggCatLabel = _cfg['HHWWggCatLabel']
     mode         = _cfg['mode']
     inputWSDir   = _cfg['inputWSDir']
@@ -87,6 +89,7 @@ if opt.inputConfig != '':
 else:
   analysis     = opt.analysis 
   analysis_type = opt.analysis_type
+  FinalState   = opt.FinalState
   HHWWggCatLabel = opt.HHWWggCatLabel
   mode         = opt.mode
   inputWSDir   = opt.inputWSDir
@@ -223,7 +226,7 @@ if mode not in ['effAcc','yields']:
         thisExt = ext + '_' + massExt
         cmdLine = './runCombineScripts.sh -i %s -p %s -f %s --ext %s --intLumi %s --year %s --dataFile %s --isData --doSystematics %s --shortExt %s --HHWWggCatLabel %s '%(f,procs,cats,thisExt,lumi[year],year,dataFile,doSystematics,shortExt,HHWWggCatLabel)
 
-        cmdLine += ' --datacardOnly --smears %s --scales %s --scalesCorr %s --scalesGlobal %s --analysis %s --verbose 1 --analysis_type %s'%(smears,scales,scalesCorr,scalesGlobal,analysis,analysis_type)
+        cmdLine += ' --datacardOnly --smears %s --scales %s --scalesCorr %s --scalesGlobal %s --analysis %s --verbose 1 --analysis_type %s --FinalState %s'%(smears,scales,scalesCorr,scalesGlobal,analysis,analysis_type,FinalState)
         print'cmdLine: ',cmdLine
         os.system( cmdLine )
     else: 
@@ -241,7 +244,7 @@ if mode not in ['effAcc','yields']:
         massExt = f.split('/')[-1].split('.')[0]
         thisExt = ext + '_' + massExt
         # print'shortExt:',shortExt
-        cmdLine = './runCombineScripts.sh -i %s -p %s -f %s --ext %s --intLumi %s --year %s --dataFile %s --isData --analysis %s --shortExt %s --HHWWggCatLabel %s --analysis_type %s'%(f,procs,cats,ext,lumi[year],year,dataFile,analysis,shortExt,HHWWggCatLabel,analysis_type)
+        cmdLine = './runCombineScripts.sh -i %s -p %s -f %s --ext %s --intLumi %s --year %s --dataFile %s --isData --analysis %s --shortExt %s --HHWWggCatLabel %s --analysis_type %s --FinalState %s'%(f,procs,cats,ext,lumi[year],year,dataFile,analysis,shortExt,HHWWggCatLabel,analysis_type,FinalState)
         cmdLine += ' --combineOnly '
         print'cmdLine: ',cmdLine
         os.system( cmdLine )

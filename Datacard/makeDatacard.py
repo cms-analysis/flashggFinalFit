@@ -155,6 +155,7 @@ def get_options():
   parser.add_option('--loadDataFrame', dest='loadDataFrame', default='', help='Load dataFrame. Crucial generated with same options or likely to fail!') 
   parser.add_option('--analysis', dest='analysis', default='', help='Analysis to run on')
   parser.add_option('--analysis_type', dest='analysis_type', default='', help='Analysis type, used in HHWWgg. Ex: Res, EFT, NMSSM')
+  parser.add_option('--FinalState', dest='FinalState', default='', help='HHWWgg final state. Ex) qqlnu, lnulnu, qqqq')
   parser.add_option('--DatacardName', dest='DatacardName', default='Datacard_dummy.txt', help='Output name of datacard')
   parser.add_option('--ext', dest='ext', default='', help='Extension')
 
@@ -285,19 +286,18 @@ if not skipData:
           if opt.analysis_type == "Res":
             HHWWgg_Mass = opt.inputWSDir.split('/')[-1].split('_')[0]
             _inputWSFile = opt.inputWSDir
-            _nominalDataName = "%s_%s_WWgg_qqlnugg_13TeV_%s"%(_proc_s0,HHWWgg_Mass,cat)
+            _nominalDataName = "%s_%s_WWgg_%sgg_13TeV_%s"%(_proc_s0,HHWWgg_Mass,opt.FinalState,cat)
           elif opt.analysis_type == "EFT":
             HHWWgg_node = opt.inputWSDir.split('/')[-1].split('_')[0]
             _inputWSFile = opt.inputWSDir
-            _nominalDataName = "%s_WWgg_qqlnu_%s_13TeV_%s"%(_proc_s0,HHWWgg_node,cat)
+            _nominalDataName = "%s_WWgg_%s_%s_13TeV_%s"%(_proc_s0,opt.FinalState,HHWWgg_node,cat)
           elif opt.analysis_type == "NMSSM":
             # HHWWgg_massPair = opt.inputWSDir.split('/')[-1].split('_')[0]
             mx = opt.inputWSDir.split('/')[-1].split('_')[0]
             my = opt.inputWSDir.split('/')[-1].split('_')[1]
             _inputWSFile = opt.inputWSDir
-            # dataname should be "NMSSM_XYHWWggqqlnu_MX300_MY170_13TeV_HHWWggTag_0"
-            _nominalDataName = "NMSSM_XYHWWggqqlnu_%s_%s_13TeV_%s"%(mx,my,cat)            
-            # _nominalDataName = "%s_WWgg_qqlnu_%s_13TeV_%s"%(_proc_s0,HHWWgg_node,cat)            
+            # dataname should be "NMSSM_XYHWWgg<FinalState>_MX300_MY170_13TeV_HHWWggTag_0"
+            _nominalDataName = "NMSSM_XYHWWgg%s_%s_%s_13TeV_%s"%(opt.FinalState,mx,my,cat)            
 
 
 
