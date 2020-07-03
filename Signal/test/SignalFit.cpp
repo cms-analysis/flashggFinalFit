@@ -742,7 +742,7 @@ int main(int argc, char *argv[]){
           vector<string> tmpV2;
           split(tmpV2,endPath,boost::is_any_of("_"));	 
           string node_str = tmpV2[2];
-          HHWWgg_Label = Form("WWgg_%s_%s",node_str.c_str());
+          HHWWgg_Label = Form("WWgg_%s_%s",FinalState_.c_str(),node_str.c_str());
         }
 				else if (analysis_type_ == "NMSSM"){
 					// file name format: X_signal_MX<xmass>_MY<ymass>_<interpMass>_HHWWgg_<FinalState>.root
