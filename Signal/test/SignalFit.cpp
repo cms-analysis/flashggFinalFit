@@ -456,6 +456,11 @@ int main(int argc, char *argv[]){
   string replacementCatWV = replacementMap.getReplacementCatWV();
   string replacementProcWV = replacementMap.getReplacementProcWV();
 
+  if(analysis_ == "HHWWgg"){
+    if(analysis_type_ == "EFT") replacementProcWV = "GluGluToHHTo";
+    else replacementProcWV = "ggF";
+  }
+
   // isFlashgg should now be the only option.
 	if (isFlashgg_){ 
     nCats_= flashggCats_.size();
@@ -1268,7 +1273,14 @@ int main(int argc, char *argv[]){
     // else if (analysis_type_ == "NMSSM") HHWWggProc = "ggF";
 
     // packager.packageOutput(/*split*/split, /*proc*/split_[0], /*tag*/ split_[1] );
-    packager.packageOutput(/*split*/split, /*proc*/"ggF", /*tag*/ "HHWWggTag_0" ); // HHWWgg 
+    if(analysis_ == "HHWWgg"){
+      if(analysis_type_ == "EFT") packager.packageOutput(/*split*/split, /*proc*/"GluGluToHHTo", /*tag*/ "HHWWggTag_0" ); // HHWWgg. Does this need to be done for each tag? Is one just chosen?
+      else packager.packageOutput(/*split*/split, /*proc*/"ggF", /*tag*/ "HHWWggTag_0" ); // HHWWgg
+    }
+    else{
+      packager.packageOutput(/*split*/split, /*proc*/split_[0], /*tag*/ split_[1] );
+    }
+    
     sw.Stop();
     cout << "[INFO] Combination complete." << endl;
     cout << "[INFO] Whole process took..." << endl;
