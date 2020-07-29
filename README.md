@@ -14,14 +14,14 @@ git cms-init
 git clone git@github.com:jonathon-langford/HiggsAnalysis.git
 # Install Combine as per the documentation here: cms-analysis.github.io/HiggsAnalysis-CombinedLimit/
 git clone git@github.com:cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit
+# Install Combine Harvester for parallelizing fits
+git clone https://github.com/cms-analysis/CombineHarvester.git CombineHarvester
 
 # Compile external libraries
-cd HiggsAnalysis
 cmsenv
 scram b -j 9
 
 # Install Flashgg Final Fit packages
-cd ..
 git clone -b dev_runII_102x git@github.com:cms-analysis/flashggFinalFit.git
 cd flashggFinalFit/
 ```
