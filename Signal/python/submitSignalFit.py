@@ -75,7 +75,7 @@ parser.add_option("--mhLow",default="120",help="mh Low")
 parser.add_option("--mhHigh",default="130",help="mh High")
 parser.add_option("-q","--queue",default="espresso",help="Which batch queue")
 parser.add_option("--runLocal",default=False,action="store_true",help="Run locally")
-parser.add_option("--groupJobsByProc",default=False,action="store_true",help="Group jobs by cat")
+parser.add_option("--groupJobsByProc",default=False,action="store_true",help="Group jobs by proc")
 parser.add_option("--batch",default="HTCONDOR",help="Which batch system to use (HTCONDOR,IC)")
 parser.add_option("--changeIntLumi",default="1.")
 parser.add_option("-o","--outfilename",default=None)
@@ -135,11 +135,11 @@ def writePostamble(sub_file, exec_line):
     system('rm -f %s.out'%os.path.abspath(sub_file.name))
     system('rm -f %s.sub'%os.path.abspath(sub_file.name))
     if (opts.batch == "IC"):
-      pass 
-      #if opts.groupJobsByProc:
-      #  system('qsub -q %s -l h_rt=3:0:0 -l h_vmem=16G -o %s.log -e %s.err %s'%(opts.queue,os.path.abspath(sub_file.name),os.path.abspath(sub_file.name),os.path.abspath(sub_file.name)))
-      #else:
-      #  system('qsub -q %s -l h_rt=0:20:0 -l h_vmem=12G -o %s.log -e %s.err %s'%(opts.queue,os.path.abspath(sub_file.name),os.path.abspath(sub_file.name),os.path.abspath(sub_file.name)))
+      #pass 
+      if opts.groupJobsByProc:
+        system('qsub -q %s -l h_rt=3:0:0 -l h_vmem=16G -o %s.log -e %s.err %s'%(opts.queue,os.path.abspath(sub_file.name),os.path.abspath(sub_file.name),os.path.abspath(sub_file.name)))
+      else:
+        system('qsub -q %s -l h_rt=0:20:0 -l h_vmem=12G -o %s.log -e %s.err %s'%(opts.queue,os.path.abspath(sub_file.name),os.path.abspath(sub_file.name),os.path.abspath(sub_file.name)))
     elif( opts.batch == "HTCONDOR" ):
       sub_file_name = re.sub("\.sh","",os.path.abspath(sub_file.name))
       HTCondorSubfile = open("%s.sub"%sub_file_name,'w')

@@ -3,6 +3,7 @@ import json
 import math
 import pandas
 import numpy as np
+import re
 
 def Translate(name, ndict):
     return ndict[name] if name in ndict else name
@@ -90,14 +91,20 @@ def makeSplusBPlot(workspace,hD,hSB,hB,hS,hDr,hBr,hSr,cat,options,dB=None,reduce
   pad1.SetTickx()
   pad1.SetTicky()
   pad1.SetBottomMargin(0.18)
+  pad1.SetLeftMargin(0.12)
   pad1.Draw()
   pad2 = ROOT.TPad("pad2_%s"%cat,"pad2_%s"%cat,0,0,1,0.35)
   pad2.SetTickx()
   pad2.SetTicky()
-  pad2.SetTopMargin(0.000001)
+  pad2.SetTopMargin(0.03)
   pad2.SetBottomMargin(0.25)
+  pad2.SetLeftMargin(0.12)
   pad2.Draw()
   padSizeRatio = 0.75/0.35
+
+  # Axis options 
+  ROOT.TGaxis.SetMaxDigits(4)
+  ROOT.TGaxis.SetExponentOffset(-0.05,0.00,"y")
 
   # Nominal plot
   pad1.cd()
@@ -110,10 +117,12 @@ def makeSplusBPlot(workspace,hD,hSB,hB,hS,hDr,hBr,hSr,cat,options,dB=None,reduce
   h_axes.GetXaxis().SetTitle("")
   h_axes.GetXaxis().SetLabelSize(0)
   h_axes.GetYaxis().SetTitleSize(0.05)
-  h_axes.GetYaxis().SetTitleOffset(0.9)
+  h_axes.GetYaxis().SetTitle("Events / GeV")
+  h_axes.GetYaxis().SetTitleOffset(1.1)
   h_axes.GetYaxis().SetLabelSize(0.035)
   h_axes.GetYaxis().SetLabelOffset(0.007)
-  if cat == "wall": h_axes.GetYaxis().SetTitle("S/(S+B) Weighted %s"%h_axes.GetYaxis().GetTitle())
+  #if cat == "wall": h_axes.GetYaxis().SetTitle("S/(S+B) Weighted %s"%h_axes.GetYaxis().GetTitle())
+  if cat == "wall": h_axes.GetYaxis().SetTitle("S/(S+B) Weighted Events / GeV")
   h_axes.Draw()
   # Add bands
   if options.doBands:
@@ -192,13 +201,17 @@ def makeSplusBPlot(workspace,hD,hSB,hB,hS,hDr,hBr,hSr,cat,options,dB=None,reduce
   lat0.SetTextAlign(11)
   lat0.SetNDC()
   lat0.SetTextSize(0.06)
-  lat0.DrawLatex(0.1,0.92,"#bf{CMS} #it{Preliminary}")
+  lat0.DrawLatex(0.12,0.92,"#bf{CMS} #it{Preliminary}")
+  #lat0.DrawLatex(0.12,0.92,"#bf{CMS}")
   lat0.DrawLatex(0.6,0.92,"137 fb^{-1} (13 TeV)")
   lat0.DrawLatex(0.6,0.8,"#scale[0.75]{%s}"%Translate(cat,translateCats))
-  lat0.DrawLatex(0.13,0.83,"#scale[0.75]{H#rightarrow#gamma#gamma}")
+  #lat0.DrawLatex(0.15,0.83,"#scale[0.75]{H#rightarrow#gamma#gamma")
+  lat0.DrawLatex(0.15,0.83,"#scale[0.75]{H#rightarrow#gamma#gamma, m_{H} = 125.38 GeV}")
   if(options.loadSnapshot is not None):
-    muhat_ggh, muhat_vbf, muhat_vh, muhat_top, mhhat = workspace.var("r_ggH").getVal(), workspace.var("r_VBF").getVal(), workspace.var("r_VH").getVal(), workspace.var("r_top").getVal(), workspace.var("MH").getVal()
-    lat0.DrawLatex(0.13,0.77,"#scale[0.6]{(#hat{#mu}_{ggH},#hat{#mu}_{VBF},#hat{#mu}_{VH},#hat{#mu}_{top}) = (%.2f,%.2f,%.2f,%.2f)}"%(muhat_ggh,muhat_vbf,muhat_vh,muhat_top))
+    lat0.DrawLatex(0.15,0.77,"#scale[0.5]{(#hat{#mu}_{ggH},#hat{#mu}_{VBF},#hat{#mu}_{VH},#hat{#mu}_{top}) = (0.98,1.15,0.71,1.40)}")
+    #lat0.DrawLatex(0.15,0.77,"#scale[0.75]{#hat{#mu} = 1.03}")
+    #muhat_ggh, muhat_vbf, muhat_vh, muhat_top, mhhat = workspace.var("r_ggH").getVal(), workspace.var("r_VBF").getVal(), workspace.var("r_VH").getVal(), workspace.var("r_top").getVal(), workspace.var("MH").getVal()
+    #lat0.DrawLatex(0.13,0.77,"#scale[0.6]{(#hat{#mu}_{ggH},#hat{#mu}_{VBF},#hat{#mu}_{VH},#hat{#mu}_{top}) = (%.2f,%.2f,%.2f,%.2f)}"%(muhat_ggh,muhat_vbf,muhat_vh,muhat_top))
     #muhat, mhhat = workspace.var("r").getVal(), workspace.var("MH").getVal()
     #lat0.DrawLatex(0.13,0.77,"#scale[0.75]{#hat{m}_{H} = %.1f GeV, #hat{#mu} = %.2f}"%(mhhat,muhat))
   #elif options.parameterMap is not None:
@@ -214,7 +227,7 @@ def makeSplusBPlot(workspace,hD,hSB,hB,hS,hDr,hBr,hSr,cat,options,dB=None,reduce
   h_axes_ratio = hDr.Clone()
   h_axes_ratio.Reset()
   h_axes_ratio.SetMaximum(max((hDr.GetMaximum()+hDr.GetBinError(hDr.GetMaximumBin()))*1.5,hSr.GetMaximum()*1.2))
-  h_axes_ratio.SetMinimum((hDr.GetMinimum()-hDr.GetBinError(hDr.GetMinimumBin()))*1.2)
+  h_axes_ratio.SetMinimum((hDr.GetMinimum()-hDr.GetBinError(hDr.GetMinimumBin()))*1.3)
   h_axes_ratio.SetTitle("")
   h_axes_ratio.GetXaxis().SetTitleSize(0.05*padSizeRatio)
   h_axes_ratio.GetXaxis().SetLabelSize(0.035*padSizeRatio)
@@ -258,7 +271,7 @@ def makeSplusBPlot(workspace,hD,hSB,hB,hS,hDr,hBr,hSr,cat,options,dB=None,reduce
   lat1.SetTextAlign(33)
   lat1.SetNDC(1)
   lat1.SetTextSize(0.045*padSizeRatio)
-  lat1.DrawLatex(0.87,0.93,"B component subtracted")
+  lat1.DrawLatex(0.87,0.91,"B component subtracted")
 
   # Save canvas
   canv.Update()

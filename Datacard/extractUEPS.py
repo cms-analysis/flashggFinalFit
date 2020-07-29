@@ -10,6 +10,7 @@ import pickle
 def get_options():
   parser = OptionParser()
   parser.add_option('--inputTreeFile',dest='inputTreeFile', default="", help="Input file")
+  parser.add_option('--year',dest='year',default="2016", help="Year")
   parser.add_option('--mode',dest='mode',default="nominal", help="Looping over nominal trees or UEPS trees")
   parser.add_option('--ext',dest='ext',default="", help="Extension for saving dataframe")
   return parser.parse_args()
@@ -89,21 +90,42 @@ def extractProductionMode(_f):
     print " --> Production mode not recognised for file: %s. Skipping."%_f
     sys.exit(1)
 
-def extractType(_f):
-  if "UpPS" in _f: return "ps_up"
-  elif "DownPS" in _f: return "ps_down"
-  elif "CUETP8M1Up" in _f: return "ue_up"
-  elif "CUETP8M1Down" in _f: return "ue_down"
+def extractType(_f,_y):
+  if _y == '2016':
+    if "UpPS" in _f: return "ps_up"
+    elif "DownPS" in _f: return "ps_down"
+    elif "CUETP8M1Up" in _f: return "ue_up"
+    elif "CUETP8M1Down" in _f: return "ue_down"
+    else:
+      print " --> Type (UEPS) not recognised for file: %s. Skipping"%_f
+      sys.exit(1)
+  elif _y == '2017':
+    if "UpPS" in _f: return "ps_up"
+    elif "DownPS" in _f: return "ps_down"
+    elif "CP5Up" in _f: return "ue_up"
+    elif "CP5Down" in _f: return "ue_down"
+    else:
+      print " --> Type (UEPS) not recognised for file: %s. Skipping"%_f
+      sys.exit(1)
+  elif _y == '2018':
+    if "UpPS" in _f: return "ps_up"
+    elif "DownPS" in _f: return "ps_down"
+    elif "TuneCP5Down" in _f: return "ue_down"
+    elif "TuneCP5Up" in _f: return "ue_up"
+    else:
+      print " --> Type (UEPS) not recognised for file: %s. Skipping"%_f
+      sys.exit(1)
   else:
-    print " --> Type (UEPS) not recognised for file: %s. Skipping"%_f
+    print " --> Year not recognised: %s. Skipping"%_y
     sys.exit(1)
+
 
 # Define variables to store in dataframe
 tree_vars = ["stage1p2bin","weight","centralObjectWeight","NNLOPSweight"]
 tree_vars_notag = ["stage1p2bin","weight","THU_ggH_qmtopUp01sigma","THU_ggH_qmtopDown01sigma"]
 
 # Define dataframe to store 
-_columns = ['file_id','production_mode','type','proc','cat','stage1p2bin','exp_yield','exp_wsq','theory_yield','theory_wsq']
+_columns = ['file_id','production_mode','type','proc','cat','year','stage1p2bin','exp_yield','exp_wsq','theory_yield','theory_wsq']
 data = pandas.DataFrame( columns=_columns )
 
 # Extract files in nominal dir
@@ -113,7 +135,7 @@ print " --> Processing file: %s"%f_name
 # Extract production mode, type, file id
 pm = extractProductionMode(f_name)
 if opt.mode == "nominal": ftype = "nominal"
-else: ftype = extractType(f_name)
+else: ftype = extractType(f_name,opt.year)
 f_id = re.sub(".root","",f_name.split("_")[-1])
 
 # Uproot file
@@ -147,8 +169,8 @@ for cat in cats:
     exp_wsq = df[mask].apply(lambda x: x['weight']*x['weight'],axis=1).sum()
     theory_yield = df[mask].apply( lambda x: x['weight']*(x['NNLOPSweight']/x['centralObjectWeight']), axis=1).sum()
     theory_wsq = df[mask].apply( lambda x: (x['weight']*(x['NNLOPSweight']/x['centralObjectWeight']))*(x['weight']*(x['NNLOPSweight']/x['centralObjectWeight'])), axis=1).sum()
-    data.loc[len(data)] = [f_id,pm,ftype,proc,cat,stxsid,exp_yield,exp_wsq,theory_yield,theory_wsq]
+    data.loc[len(data)] = [f_id,pm,ftype,proc,cat,opt.year,stxsid,exp_yield,exp_wsq,theory_yield,theory_wsq]
 
 # Save dataframe
-if not os.path.isdir("ueps_dataframes"): os.system("mkdir ueps_dataframes")
-with open("./ueps_dataframes/yields%s.pkl"%opt.ext,"wb") as fD: pickle.dump(data,fD)
+if not os.path.isdir("ueps_dataframes_%s"%opt.year): os.system("mkdir ueps_dataframes_%s"%opt.year)
+with open("./ueps_dataframes_%s/yields%s.pkl"%(opt.year,opt.ext),"wb") as fD: pickle.dump(data,fD)

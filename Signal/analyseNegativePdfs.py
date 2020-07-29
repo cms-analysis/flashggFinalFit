@@ -4,12 +4,11 @@ from optparse import OptionParser
 def get_options():
   parser = OptionParser()
   parser.add_option("--year", dest='year', default='2016', help="Dataset year")
-  parser.add_option("--tagSet", dest='tagSet', default='tagsetone', help="Tag set")
   return parser.parse_args()
 (opt,args) = get_options()
 
-ext = 'stage1_2_%s_%s'%(opt.tagSet,opt.year)
-fileName = 'potentialNegPdfs_%s_%s.txt'%(opt.year,opt.tagSet)
+ext = 'stage1_2_%s'%opt.year
+fileName = 'potentialNegPdfs_stage1_2_%s_%s.txt'%opt.year
 
 with open(fileName, 'r') as f:
   theInput = f.read().splitlines()

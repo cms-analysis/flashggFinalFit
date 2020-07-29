@@ -33,6 +33,7 @@ def get_options():
   parser.add_option("--dataScaler", dest="dataScaler", default=1., type='float', help="Scaling term for data histogram")
   parser.add_option("--doBkgRenormalization", dest="doBkgRenormalization", default=False, action="store_true", help="Do Bkg renormalization")
   parser.add_option("--doBands", dest="doBands", default=False, action="store_true", help="Do +-1/2sigma bands for bkg model")
+  parser.add_option("--doToyVeto", dest="doToyVeto", default=False, action="store_true", help="Veto non-sensical toys with 0 as first entry in bin")
   parser.add_option("--loadToyYields", dest="loadToyYields", default='', help="Load pkl file storing toy yields in dataframe")
   parser.add_option("--saveToyYields", dest="saveToyYields", default=False, action="store_true", help="Save toy yields dataframe")
   parser.add_option("--doZeroes", dest="doZeroes", default=False, action="store_true", help="Add error of unity to zero bins to show on plot")
@@ -219,6 +220,8 @@ if opt.doBands:
         print " --> Processing toy (%g/%g) ::: %s"%(tidx,len(toyFiles),toyFiles[tidx])
 	ftoy = ROOT.TFile(toyFiles[tidx])
 	toy = ftoy.Get("toys/toy_asimov")
+        # Fla for vetoing toy
+        vetoToy = False
 	# Save bin contents in dict
 	values = {}
 	# Add columns for summing categories
@@ -242,17 +245,22 @@ if opt.doBands:
 	    dtoy.fillHistogram(htoy,_xvar_arglist)
 	    for ibin in range(1,htoy.GetNbinsX()+1): 
 	      v = htoy.GetBinContent(ibin)
+              if v!=v: vetoToy = True # Veto toys which have a NaN
 	      values['%s_%g'%(c,ibin)] = v
 	      if opt.doSumCategories:
 	        values['sum_%g'%ibin] += v
 	        if opt.doCatWeights: values['wsum_%g'%ibin] += v*catsWeights[c]
+            # Option for vetoing toy
+            if opt.doToyVeto:
+              if values['%s_1'%c] == 0: vetoToy = True
 	    # Clear memory
 	    htoy.Delete()
 	    dtoy.Delete()
         toy.Delete()
         ftoy.Close()
 	# Add values to dataframe
-	df_bands.loc[tidx] = values
+	if not vetoToy: df_bands.loc[len(df_bands)] = values
+        else: print "   --> Toy veto: zero entries in first bin"
       # Savin toy yields dataframe to pickle file
       if opt.saveToyYields:
         print "      * Saving toy yields to: SplusBModels%s/toyYields_%s.pkl"%(opt.ext,opt.xvar.split(",")[0])

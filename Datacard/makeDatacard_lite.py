@@ -12,6 +12,7 @@ import glob
 import pickle
 from collections import OrderedDict
 from systematics import theory_systematics, experimental_systematics, signal_shape_systematics
+#from systematics_scaleWeights import theory_systematics, experimental_systematics, signal_shape_systematics
 from cross_sections import stxs_xs
 
 def leave():
@@ -19,8 +20,24 @@ def leave():
   sys.exit(1)
 
 stxsBinMergingScheme = OrderedDict()
-# TODO: bins here to define merging scheme
+# Maximal merging scheme
+stxsBinMergingScheme['max_ggH_BSM'] = ['ggH_PTH_200_300', 'ggH_PTH_300_450','ggH_PTH_GT650', 'ggH_PTH_450_650']
+stxsBinMergingScheme['max_ggH_VBFlike'] = ['ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','ggH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','ggH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25']
+stxsBinMergingScheme['max_qqH_VBFlike'] = ['qqH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25', 'qqH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','qqH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','qqH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25','WH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25', 'ZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','WH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25', 'ZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25', 'WH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','WH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25', 'ZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25', 'ZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25']
+stxsBinMergingScheme['max_WH_lep'] = ['WH_lep_PTV_150_250_GE1J', 'WH_lep_PTV_75_150', 'WH_lep_PTV_0_75', 'WH_lep_PTV_150_250_0J','WH_lep_PTV_GT250']
+stxsBinMergingScheme['max_ZH_lep'] = ['ZH_lep_PTV_150_250_0J', 'ZH_lep_PTV_150_250_GE1J', 'ZH_lep_PTV_0_75', 'ZH_lep_PTV_75_150', 'ggZH_ll_PTV_150_250_0J', 'ggZH_ll_PTV_150_250_GE1J', 'ggZH_ll_PTV_0_75', 'ggZH_ll_PTV_75_150', 'ggZH_nunu_PTV_150_250_0J', 'ggZH_nunu_PTV_150_250_GE1J', 'ggZH_nunu_PTV_0_75', 'ggZH_nunu_PTV_75_150','ZH_lep_PTV_GT250','ggZH_ll_PTV_GT250','ggZH_nunu_PTV_GT250']
+stxsBinMergingScheme['max_ttH'] = ['ttH_PTH_200_300', 'ttH_PTH_60_120', 'ttH_PTH_120_200', 'ttH_PTH_0_60','ttH_PTH_GT300']
+# Minimal merging scheme
+stxsBinMergingScheme['min_ggH_BSM_high'] = ['ggH_PTH_300_450','ggH_PTH_GT650', 'ggH_PTH_450_650']
+stxsBinMergingScheme['min_VBFlike_low_mjj_low_pthjj'] = ['ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','qqH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','WH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','ZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25']
+stxsBinMergingScheme['min_VBFlike_low_mjj_high_pthjj'] = ['ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','qqH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','WH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','ZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25']
+stxsBinMergingScheme['min_VBFlike_high_mjj_low_pthjj'] = ['ggH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','qqH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','WH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','ZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25']
+stxsBinMergingScheme['min_VBFlike_high_mjj_high_pthjj'] = ['ggH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25','qqH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25','WH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25','ZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25']
+stxsBinMergingScheme['min_WH_lep_high'] = ['WH_lep_PTV_150_250_GE1J', 'WH_lep_PTV_75_150', 'WH_lep_PTV_150_250_0J','WH_lep_PTV_GT250']
+stxsBinMergingScheme['min_ZH_lep'] = ['ZH_lep_PTV_150_250_0J', 'ZH_lep_PTV_150_250_GE1J', 'ZH_lep_PTV_0_75', 'ZH_lep_PTV_75_150', 'ggZH_ll_PTV_150_250_0J', 'ggZH_ll_PTV_150_250_GE1J', 'ggZH_ll_PTV_0_75', 'ggZH_ll_PTV_75_150', 'ggZH_nunu_PTV_150_250_0J', 'ggZH_nunu_PTV_150_250_GE1J', 'ggZH_nunu_PTV_0_75', 'ggZH_nunu_PTV_75_150','ZH_lep_PTV_GT250','ggZH_ll_PTV_GT250','ggZH_nunu_PTV_GT250']
+stxsBinMergingScheme['min_ttH_high'] = ['ttH_PTH_200_300', 'ttH_PTH_GT300']
 
+# Scale correlation scheme
 scaleCorrelationScheme = OrderedDict()
 scaleCorrelationScheme['ggH_scale_0jet'] = ['ggH_0J_PTH_0_10','ggH_0J_PTH_GT10','ggZH_had_0J_PTH_0_10','ggZH_had_0J_PTH_GT10']
 scaleCorrelationScheme['ggH_scale_1jet_lowpt'] = ['ggH_1J_PTH_60_120', 'ggH_1J_PTH_120_200', 'ggH_1J_PTH_0_60','ggZH_had_1J_PTH_60_120', 'ggZH_had_1J_PTH_120_200', 'ggZH_had_1J_PTH_0_60']
@@ -44,8 +61,8 @@ scaleCorrelationScheme['ZH_scale_lowpt'] = ['ZH_lep_PTV_150_250_0J', 'ZH_lep_PTV
 scaleCorrelationScheme['ZH_scale_highpt'] = ['ZH_lep_PTV_GT250','ggZH_ll_PTV_GT250','ggZH_nunu_PTV_GT250']
 scaleCorrelationScheme['ttH_scale_lowpt'] = ['ttH_PTH_200_300', 'ttH_PTH_60_120', 'ttH_PTH_120_200', 'ttH_PTH_0_60']
 scaleCorrelationScheme['ttH_scale_highpt'] = ['ttH_PTH_GT300']
-scaleCorrelationScheme['tH_scale'] = ['tHq','tHW']
-scaleCorrelationScheme['bbH_scale'] = ['bbH']
+#scaleCorrelationScheme['tH_scale'] = ['tHq','tHW']
+#scaleCorrelationScheme['bbH_scale'] = ['bbH']
 
 lumi = {'2016':'35.92', '2017':'41.53', '2018':'59.74'}
 decay = "hgg"
@@ -87,7 +104,9 @@ if opt.doSystematics:
   experimentalFactoryType = {}
   theoryFactoryType = {}
   for s in experimental_systematics:
-    if s['type'] == 'factory': experimentalFactoryType[s['name']] = factoryType(data,s)
+    if s['type'] == 'factory': 
+      if s['name'] == 'JetHEM': experimentalFactoryType[s['name']] = "a_h"
+      else: experimentalFactoryType[s['name']] = factoryType(data,s)
   for s in theory_systematics:
     if s['type'] == 'factory': theoryFactoryType[s['name']] = factoryType(data,s)
   
@@ -110,8 +129,8 @@ if opt.doSystematics:
     data, theory_systematics = groupSystematics(data, theory_systematics, opt, prefix="alphaSWeight", groupings=[[0,1]], stxsMergeScheme=stxsBinMergingScheme)
   else: 
     data = theorySystFactory(data, theory_systematics, theoryFactoryType, opt)
-    data, theory_systematics = groupSystematics(data, theory_systematics, opt, prefix="scaleWeight", groupings=[[4,8]])
-    data, theory_systematics = groupSystematics(data, theory_systematics, opt, prefix="alphaSWeight", groupings=[[0,1]])
+    data, theory_systematics = groupSystematics(data, theory_systematics, opt, prefix="scaleWeight", groupings=[[1,2],[3,6],[4,8]])
+    #data, theory_systematics = groupSystematics(data, theory_systematics, opt, prefix="alphaSWeight", groupings=[[0,1]])
 
   # Rename systematics
   for s in theory_systematics: s['title'] = renameSyst(s['title'],"scaleWeight","scale")

@@ -176,6 +176,9 @@ if processMap['year'] == 'all':
       if y in k: h_pdf_splitByYear[y] += v 
 # Extract and make eff sigma 
 effSigma = getEffSigma(h_pdf)
+fout = open("outdir_%s/SignalModelPlots/%s_effSigma.txt"%(opt.ext,opt.cat),"w")
+fout.write("%s %.5f"%(opt.cat,effSigma))
+fout.close()
 effSigma_low, effSigma_high = h_pdf.GetMean()-effSigma, h_pdf.GetMean()+effSigma
 h_effSigma = h_pdf.Clone()
 h_effSigma.GetXaxis().SetRangeUser(effSigma_low,effSigma_high)
@@ -204,7 +207,7 @@ if processMap['year'] == 'all':
   leg0.SetFillStyle(0)
   leg0.SetLineColor(0)
   leg0.SetTextSize(0.03)
-  leg0.AddEntry(h_data,"Simulation","lep")
+  leg0.AddEntry(h_data,"Simulation","ep")
   leg0.AddEntry(h_pdf,"#splitline{Parametric}{model}","l")
   leg0.Draw("Same")
 
@@ -287,7 +290,8 @@ lat0.SetTextFont(42)
 lat0.SetTextAlign(11)
 lat0.SetNDC()
 lat0.SetTextSize(0.045)
-lat0.DrawLatex(0.15,0.92,"#bf{CMS} #it{Simulation}")
+lat0.DrawLatex(0.15,0.92,"#bf{CMS} #it{Simulation Preliminary}")
+#lat0.DrawLatex(0.15,0.92,"#bf{CMS} #it{Simulation}")
 lat0.DrawLatex(0.77,0.92,"13 TeV")
 lat0.DrawLatex(0.16+offset,0.83,"H#rightarrow#gamma#gamma")
 lat1 = ROOT.TLatex()

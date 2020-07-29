@@ -143,8 +143,7 @@ def calcSystYields(_nominalDataName,_inputWS,_systFactoryTypes,skipCOWCorr=True,
         else: centralWeightStr = "centralObjectWeight"
 
         # No theory weights for tH, bbH
-        # FIXME: all for ttH in this iteration (being fixed)
-        if("tth" in _nominalDataName)|("thq" in _nominalDataName)|("thw" in _nominalDataName)|("bbh" in _nominalDataName): 
+        if("thq" in _nominalDataName)|("thw" in _nominalDataName)|("bbh" in _nominalDataName): 
           systYields[s] += w
           if not skipCOWCorr: 
             f_COWCorr, f_NNLOPS = p.getRealValue("centralObjectWeight"), abs(p.getRealValue("NNLOPSweight"))
@@ -153,8 +152,15 @@ def calcSystYields(_nominalDataName,_inputWS,_systFactoryTypes,skipCOWCorr=True,
         else:
 	  f_central = p.getRealValue(centralWeightStr)
 	  f = p.getRealValue(s)
-	  # Check: if central weight is zero then skip event
-	  if f_central == 0: continue
+          # Check 1) if both central weight and shifted weight are 0 then add nominal weight
+          if( f_central == 0 )&( f == 0 ):
+            systYields[s] += w
+            if not skipCOWCorr:
+	      f_COWCorr, f_NNLOPS = p.getRealValue("centralObjectWeight"), abs(p.getRealValue("NNLOPSweight"))
+	      if f_COWCorr == 0: continue
+	      else: systYields["%s_COWCorr"%s] += w*(f_NNLOPS/f_COWCorr)
+	  # Check: only central weight is zero
+	  elif f_central == 0: continue
 	  else:
 	    # Add weights to counter
 	    systYields[s] += w*(f/f_central)
@@ -167,7 +173,7 @@ def calcSystYields(_nominalDataName,_inputWS,_systFactoryTypes,skipCOWCorr=True,
   for s, f in _systFactoryTypes.iteritems():
     if f == "a_h":
       if s == 'JetHEM':
-        if (year == '2018')&("thw" not in _nominalDataName):
+        if (year == '2018')&("thw" not in _nominalDataName)&("ggzh" not in _nominalDataName)&("bbh" not in _nominalDataName):
           systYields["%s_up"%s] = _inputWS.data("%s_%sUp01sigma"%(_nominalDataName,s)).sumEntries()
           systYields["%s_down"%s] = _inputWS.data("%s_%sDown01sigma"%(_nominalDataName,s)).sumEntries()
         else:
@@ -404,7 +410,7 @@ def compareYield(row,factoryType,sname,mode='default',mname=None):
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Function to group systematics: e.g. for scaleWeight where up/down = [1,2],[3,6] etc
-def groupSystematics(d,systs,options,prefix="scaleWeight",groupings=[],stxsMergeScheme=None,_removal=True):
+def groupSystematics(d,systs,options,prefix="scaleWeight",groupings=[],stxsMergeScheme=None,_removal=False):
   
   # Loop over groupings
   for group_idx in range(len(groupings)): 

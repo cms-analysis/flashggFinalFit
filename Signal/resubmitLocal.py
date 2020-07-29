@@ -15,9 +15,9 @@ if opt.mode == "not_done":
     done_file = glob.glob("%s.done"%f)
     if len(done_file)==0: files.append(f)
   for f in files:
-    #print " --> Resubmitting: %s"%f
-    os.system("./%s"%f)
-    #os.system("qsub -q hep.q -l h_rt=0:20:0 -l h_vmem=24G %s"%f)
+    print " --> Resubmitting: %s"%f
+    #os.system("./%s"%f)
+    os.system("qsub -q hep.q -l h_rt=3:0:0 -l h_vmem=24G %s"%f)
 else: 
   files = glob.glob("./outdir_%s/sigfit/SignalFitJobs/*.%s"%(opt.ext,opt.mode))
   for f in files:
