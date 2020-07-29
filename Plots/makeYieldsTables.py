@@ -20,114 +20,139 @@ def leave():
   sys.exit(1)
 
 # Define STXS stage 0 mapping to procs
-stage0 = od()
-stage0["ggH"] = ['ggH_0J_PTH_0_10','ggZH_had_0J_PTH_0_10','ggH_0J_PTH_GT10','ggZH_had_0J_PTH_GT10','ggH_1J_PTH_0_60','ggZH_had_1J_PTH_0_60','ggH_1J_PTH_60_120','ggZH_had_1J_PTH_60_120','ggH_1J_PTH_120_200','ggZH_had_1J_PTH_120_200','ggH_GE2J_MJJ_0_350_PTH_0_60','ggZH_had_GE2J_MJJ_0_350_PTH_0_60','ggH_GE2J_MJJ_0_350_PTH_60_120','ggZH_had_GE2J_MJJ_0_350_PTH_60_120','ggH_GE2J_MJJ_0_350_PTH_120_200','ggZH_had_GE2J_MJJ_0_350_PTH_120_200','ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','ggH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','ggH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25','ggZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','ggZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','ggZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','ggZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25','ggH_PTH_200_300','ggZH_had_PTH_200_300','ggH_PTH_300_450','ggH_PTH_450_650','ggH_PTH_GT650','ggZH_had_PTH_300_450','ggZH_had_PTH_450_650','ggZH_had_PTH_GT650']
-stage0["VBF"] = ['qqH_0J','qqH_1J','qqH_GE2J_MJJ_0_60','qqH_GE2J_MJJ_60_120','qqH_GE2J_MJJ_120_350','qqH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','qqH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','qqH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','qqH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25','qqH_GE2J_MJJ_GT350_PTH_GT200']
-stage0["VH_had"] = ['WH_had_0J','WH_had_1J','WH_had_GE2J_MJJ_0_60','WH_had_GE2J_MJJ_60_120','WH_had_GE2J_MJJ_120_350','WH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','WH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','WH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','WH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25','WH_had_GE2J_MJJ_GT350_PTH_GT200','ZH_had_0J','ZH_had_1J','ZH_had_GE2J_MJJ_0_60','ZH_had_GE2J_MJJ_60_120','ZH_had_GE2J_MJJ_120_350','ZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','ZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','ZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','ZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25','ZH_had_GE2J_MJJ_GT350_PTH_GT200']
-stage0["WH_lep"] = ['WH_lep_PTV_0_75','WH_lep_PTV_75_150','WH_lep_PTV_150_250_0J','WH_lep_PTV_150_250_GE1J','WH_lep_PTV_GT250']
-stage0["ZH_lep"] = ['ZH_lep_PTV_0_75','ZH_lep_PTV_75_150','ZH_lep_PTV_150_250_0J','ZH_lep_PTV_150_250_GE1J','ZH_lep_PTV_GT250']
-stage0["ggZH_lep"] = ['ggZH_ll_PTV_0_75','ggZH_ll_PTV_75_150','ggZH_ll_PTV_150_250_0J','ggZH_ll_PTV_150_250_GE1J','ggZH_ll_PTV_GT250','ggZH_nunu_PTV_0_75','ggZH_nunu_PTV_75_150','ggZH_nunu_PTV_150_250_0J','ggZH_nunu_PTV_150_250_GE1J','ggZH_nunu_PTV_GT250']
-stage0["ttH"] = ['ttH_PTH_0_60','ttH_PTH_60_120','ttH_PTH_120_200','ttH_PTH_200_300','ttH_PTH_GT300']
-stage0["bbH"] = ['bbH']
-stage0["tHq"] = ['tHq']
-stage0["tHW"] = ['tHW']
+stage0_ggh = od()
+stage0_ggh["ggH"] = ['ggH_0J_PTH_0_10','ggZH_had_0J_PTH_0_10','ggH_0J_PTH_GT10','ggZH_had_0J_PTH_GT10','ggH_1J_PTH_0_60','ggZH_had_1J_PTH_0_60','ggH_1J_PTH_60_120','ggZH_had_1J_PTH_60_120','ggH_1J_PTH_120_200','ggZH_had_1J_PTH_120_200','ggH_GE2J_MJJ_0_350_PTH_0_60','ggZH_had_GE2J_MJJ_0_350_PTH_0_60','ggH_GE2J_MJJ_0_350_PTH_60_120','ggZH_had_GE2J_MJJ_0_350_PTH_60_120','ggH_GE2J_MJJ_0_350_PTH_120_200','ggZH_had_GE2J_MJJ_0_350_PTH_120_200','ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','ggH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','ggH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25','ggZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','ggZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','ggZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','ggZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25','ggH_PTH_200_300','ggZH_had_PTH_200_300','ggH_PTH_300_450','ggH_PTH_450_650','ggH_PTH_GT650','ggZH_had_PTH_300_450','ggZH_had_PTH_450_650','ggZH_had_PTH_GT650']
+stage0_ggh["bbH"] = ['bbH']
+stage0_ggh["qqH"] = ['qqH_0J','qqH_1J','qqH_GE2J_MJJ_0_60','qqH_GE2J_MJJ_60_120','qqH_GE2J_MJJ_120_350','qqH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','qqH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','qqH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','qqH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25','qqH_GE2J_MJJ_GT350_PTH_GT200','WH_had_0J','WH_had_1J','WH_had_GE2J_MJJ_0_60','WH_had_GE2J_MJJ_60_120','WH_had_GE2J_MJJ_120_350','WH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','WH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','WH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','WH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25','WH_had_GE2J_MJJ_GT350_PTH_GT200','ZH_had_0J','ZH_had_1J','ZH_had_GE2J_MJJ_0_60','ZH_had_GE2J_MJJ_60_120','ZH_had_GE2J_MJJ_120_350','ZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','ZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','ZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','ZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25','ZH_had_GE2J_MJJ_GT350_PTH_GT200']
+stage0_ggh["VH_lep"] = ['WH_lep_PTV_0_75','WH_lep_PTV_75_150','WH_lep_PTV_150_250_0J','WH_lep_PTV_150_250_GE1J','WH_lep_PTV_GT250','ZH_lep_PTV_0_75','ZH_lep_PTV_75_150','ZH_lep_PTV_150_250_0J','ZH_lep_PTV_150_250_GE1J','ZH_lep_PTV_GT250','ggZH_ll_PTV_0_75','ggZH_ll_PTV_75_150','ggZH_ll_PTV_150_250_0J','ggZH_ll_PTV_150_250_GE1J','ggZH_ll_PTV_GT250','ggZH_nunu_PTV_0_75','ggZH_nunu_PTV_75_150','ggZH_nunu_PTV_150_250_0J','ggZH_nunu_PTV_150_250_GE1J','ggZH_nunu_PTV_GT250']
+stage0_ggh["top"] = ['ttH_PTH_0_60','ttH_PTH_60_120','ttH_PTH_120_200','ttH_PTH_200_300','ttH_PTH_GT300','tHq','tHW']
 
-target_procs = od()
+stage0_qqh = od()
+stage0_qqh["ggH"] = ['ggH_0J_PTH_0_10','ggZH_had_0J_PTH_0_10','ggH_0J_PTH_GT10','ggZH_had_0J_PTH_GT10','ggH_1J_PTH_0_60','ggZH_had_1J_PTH_0_60','ggH_1J_PTH_60_120','ggZH_had_1J_PTH_60_120','ggH_1J_PTH_120_200','ggZH_had_1J_PTH_120_200','ggH_GE2J_MJJ_0_350_PTH_0_60','ggZH_had_GE2J_MJJ_0_350_PTH_0_60','ggH_GE2J_MJJ_0_350_PTH_60_120','ggZH_had_GE2J_MJJ_0_350_PTH_60_120','ggH_GE2J_MJJ_0_350_PTH_120_200','ggZH_had_GE2J_MJJ_0_350_PTH_120_200','ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','ggH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','ggH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25','ggZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','ggZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','ggZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','ggZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25','ggH_PTH_200_300','ggZH_had_PTH_200_300','ggH_PTH_300_450','ggH_PTH_450_650','ggH_PTH_GT650','ggZH_had_PTH_300_450','ggZH_had_PTH_450_650','ggZH_had_PTH_GT650','bbH']
+stage0_qqh["VBF"] = ['qqH_0J','qqH_1J','qqH_GE2J_MJJ_0_60','qqH_GE2J_MJJ_60_120','qqH_GE2J_MJJ_120_350','qqH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','qqH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','qqH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','qqH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25','qqH_GE2J_MJJ_GT350_PTH_GT200']
+stage0_qqh["VH_had"] = ['WH_had_0J','WH_had_1J','WH_had_GE2J_MJJ_0_60','WH_had_GE2J_MJJ_60_120','WH_had_GE2J_MJJ_120_350','WH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','WH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','WH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','WH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25','WH_had_GE2J_MJJ_GT350_PTH_GT200','ZH_had_0J','ZH_had_1J','ZH_had_GE2J_MJJ_0_60','ZH_had_GE2J_MJJ_60_120','ZH_had_GE2J_MJJ_120_350','ZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','ZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','ZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','ZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25','ZH_had_GE2J_MJJ_GT350_PTH_GT200']
+stage0_qqh["VH_lep"] = ['WH_lep_PTV_0_75','WH_lep_PTV_75_150','WH_lep_PTV_150_250_0J','WH_lep_PTV_150_250_GE1J','WH_lep_PTV_GT250','ZH_lep_PTV_0_75','ZH_lep_PTV_75_150','ZH_lep_PTV_150_250_0J','ZH_lep_PTV_150_250_GE1J','ZH_lep_PTV_GT250','ggZH_ll_PTV_0_75','ggZH_ll_PTV_75_150','ggZH_ll_PTV_150_250_0J','ggZH_ll_PTV_150_250_GE1J','ggZH_ll_PTV_GT250','ggZH_nunu_PTV_0_75','ggZH_nunu_PTV_75_150','ggZH_nunu_PTV_150_250_0J','ggZH_nunu_PTV_150_250_GE1J','ggZH_nunu_PTV_GT250']
+stage0_qqh["top"] = ['ttH_PTH_0_60','ttH_PTH_60_120','ttH_PTH_120_200','ttH_PTH_200_300','ttH_PTH_GT300','tHq','tHW']
+
+stage0_vh = od()
+stage0_vh["ggH"] = ['ggH_0J_PTH_0_10','ggZH_had_0J_PTH_0_10','ggH_0J_PTH_GT10','ggZH_had_0J_PTH_GT10','ggH_1J_PTH_0_60','ggZH_had_1J_PTH_0_60','ggH_1J_PTH_60_120','ggZH_had_1J_PTH_60_120','ggH_1J_PTH_120_200','ggZH_had_1J_PTH_120_200','ggH_GE2J_MJJ_0_350_PTH_0_60','ggZH_had_GE2J_MJJ_0_350_PTH_0_60','ggH_GE2J_MJJ_0_350_PTH_60_120','ggZH_had_GE2J_MJJ_0_350_PTH_60_120','ggH_GE2J_MJJ_0_350_PTH_120_200','ggZH_had_GE2J_MJJ_0_350_PTH_120_200','ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','ggH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','ggH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25','ggZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','ggZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','ggZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','ggZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25','ggH_PTH_200_300','ggZH_had_PTH_200_300','ggH_PTH_300_450','ggH_PTH_450_650','ggH_PTH_GT650','ggZH_had_PTH_300_450','ggZH_had_PTH_450_650','ggZH_had_PTH_GT650','bbH']
+stage0_vh["qqH"] = ['qqH_0J','qqH_1J','qqH_GE2J_MJJ_0_60','qqH_GE2J_MJJ_60_120','qqH_GE2J_MJJ_120_350','qqH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','qqH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','qqH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','qqH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25','qqH_GE2J_MJJ_GT350_PTH_GT200','WH_had_0J','WH_had_1J','WH_had_GE2J_MJJ_0_60','WH_had_GE2J_MJJ_60_120','WH_had_GE2J_MJJ_120_350','WH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','WH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','WH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','WH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25','WH_had_GE2J_MJJ_GT350_PTH_GT200','ZH_had_0J','ZH_had_1J','ZH_had_GE2J_MJJ_0_60','ZH_had_GE2J_MJJ_60_120','ZH_had_GE2J_MJJ_120_350','ZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','ZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','ZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','ZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25','ZH_had_GE2J_MJJ_GT350_PTH_GT200']
+stage0_vh["WH_lep"] = ['WH_lep_PTV_0_75','WH_lep_PTV_75_150','WH_lep_PTV_150_250_0J','WH_lep_PTV_150_250_GE1J','WH_lep_PTV_GT250']
+stage0_vh["ZH_lep"] = ['ZH_lep_PTV_0_75','ZH_lep_PTV_75_150','ZH_lep_PTV_150_250_0J','ZH_lep_PTV_150_250_GE1J','ZH_lep_PTV_GT250']
+stage0_vh["ggZH_lep"] = ['ggZH_ll_PTV_0_75','ggZH_ll_PTV_75_150','ggZH_ll_PTV_150_250_0J','ggZH_ll_PTV_150_250_GE1J','ggZH_ll_PTV_GT250','ggZH_nunu_PTV_0_75','ggZH_nunu_PTV_75_150','ggZH_nunu_PTV_150_250_0J','ggZH_nunu_PTV_150_250_GE1J','ggZH_nunu_PTV_GT250']
+stage0_vh["top"] = ['ttH_PTH_0_60','ttH_PTH_60_120','ttH_PTH_120_200','ttH_PTH_200_300','ttH_PTH_GT300','tHq','tHW']
+
+stage0_top = od()
+stage0_top["ggH"] = ['ggH_0J_PTH_0_10','ggZH_had_0J_PTH_0_10','ggH_0J_PTH_GT10','ggZH_had_0J_PTH_GT10','ggH_1J_PTH_0_60','ggZH_had_1J_PTH_0_60','ggH_1J_PTH_60_120','ggZH_had_1J_PTH_60_120','ggH_1J_PTH_120_200','ggZH_had_1J_PTH_120_200','ggH_GE2J_MJJ_0_350_PTH_0_60','ggZH_had_GE2J_MJJ_0_350_PTH_0_60','ggH_GE2J_MJJ_0_350_PTH_60_120','ggZH_had_GE2J_MJJ_0_350_PTH_60_120','ggH_GE2J_MJJ_0_350_PTH_120_200','ggZH_had_GE2J_MJJ_0_350_PTH_120_200','ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','ggH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','ggH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25','ggZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','ggZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','ggZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','ggZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25','ggH_PTH_200_300','ggZH_had_PTH_200_300','ggH_PTH_300_450','ggH_PTH_450_650','ggH_PTH_GT650','ggZH_had_PTH_300_450','ggZH_had_PTH_450_650','ggZH_had_PTH_GT650','bbH']
+stage0_top["qqH"] = ['qqH_0J','qqH_1J','qqH_GE2J_MJJ_0_60','qqH_GE2J_MJJ_60_120','qqH_GE2J_MJJ_120_350','qqH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','qqH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','qqH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','qqH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25','qqH_GE2J_MJJ_GT350_PTH_GT200','WH_had_0J','WH_had_1J','WH_had_GE2J_MJJ_0_60','WH_had_GE2J_MJJ_60_120','WH_had_GE2J_MJJ_120_350','WH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','WH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','WH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','WH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25','WH_had_GE2J_MJJ_GT350_PTH_GT200','ZH_had_0J','ZH_had_1J','ZH_had_GE2J_MJJ_0_60','ZH_had_GE2J_MJJ_60_120','ZH_had_GE2J_MJJ_120_350','ZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','ZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','ZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','ZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25','ZH_had_GE2J_MJJ_GT350_PTH_GT200']
+stage0_top["VH_lep"] = ['WH_lep_PTV_0_75','WH_lep_PTV_75_150','WH_lep_PTV_150_250_0J','WH_lep_PTV_150_250_GE1J','WH_lep_PTV_GT250','ZH_lep_PTV_0_75','ZH_lep_PTV_75_150','ZH_lep_PTV_150_250_0J','ZH_lep_PTV_150_250_GE1J','ZH_lep_PTV_GT250','ggZH_ll_PTV_0_75','ggZH_ll_PTV_75_150','ggZH_ll_PTV_150_250_0J','ggZH_ll_PTV_150_250_GE1J','ggZH_ll_PTV_GT250','ggZH_nunu_PTV_0_75','ggZH_nunu_PTV_75_150','ggZH_nunu_PTV_150_250_0J','ggZH_nunu_PTV_150_250_GE1J','ggZH_nunu_PTV_GT250']
+stage0_top["ttH"] = ['ttH_PTH_0_60','ttH_PTH_60_120','ttH_PTH_120_200','ttH_PTH_200_300','ttH_PTH_GT300']
+stage0_top["tHq"] = ['tHq']
+stage0_top["tHW"] = ['tHW']
+
+
 # ggH tags
-target_procs["RECO_0J_PTH_0_10_Tag0"] = ['ggH_0J_PTH_0_10','ggZH_had_0J_PTH_0_10']
-target_procs["RECO_0J_PTH_0_10_Tag1"] = ['ggH_0J_PTH_0_10','ggZH_had_0J_PTH_0_10']
-target_procs["RECO_0J_PTH_0_10_Tag2"] = ['ggH_0J_PTH_0_10','ggZH_had_0J_PTH_0_10']
-target_procs["RECO_0J_PTH_GT10_Tag0"] = ['ggH_0J_PTH_GT10','ggZH_had_0J_PTH_GT10']
-target_procs["RECO_0J_PTH_GT10_Tag1"] = ['ggH_0J_PTH_GT10','ggZH_had_0J_PTH_GT10']
-target_procs["RECO_0J_PTH_GT10_Tag2"] = ['ggH_0J_PTH_GT10','ggZH_had_0J_PTH_GT10']
-target_procs["RECO_1J_PTH_0_60_Tag0"] = ['ggH_1J_PTH_0_60','ggZH_had_1J_PTH_0_60']
-target_procs["RECO_1J_PTH_0_60_Tag1"] = ['ggH_1J_PTH_0_60','ggZH_had_1J_PTH_0_60']
-target_procs["RECO_1J_PTH_0_60_Tag2"] = ['ggH_1J_PTH_0_60','ggZH_had_1J_PTH_0_60']
-target_procs["RECO_1J_PTH_60_120_Tag0"] = ['ggH_1J_PTH_60_120','ggZH_had_1J_PTH_60_120']
-target_procs["RECO_1J_PTH_60_120_Tag1"] = ['ggH_1J_PTH_60_120','ggZH_had_1J_PTH_60_120']
-target_procs["RECO_1J_PTH_60_120_Tag2"] = ['ggH_1J_PTH_60_120','ggZH_had_1J_PTH_60_120']
-target_procs["RECO_1J_PTH_120_200_Tag0"] = ['ggH_1J_PTH_120_200','ggZH_had_1J_PTH_120_200']
-target_procs["RECO_1J_PTH_120_200_Tag1"] = ['ggH_1J_PTH_120_200','ggZH_had_1J_PTH_120_200']
-target_procs["RECO_1J_PTH_120_200_Tag2"] = ['ggH_1J_PTH_120_200','ggZH_had_1J_PTH_120_200']
-target_procs["RECO_GE2J_PTH_0_60_Tag0"] = ['ggH_GE2J_MJJ_0_350_PTH_0_60','ggZH_had_GE2J_MJJ_0_350_PTH_0_60']
-target_procs["RECO_GE2J_PTH_0_60_Tag1"] = ['ggH_GE2J_MJJ_0_350_PTH_0_60','ggZH_had_GE2J_MJJ_0_350_PTH_0_60']
-target_procs["RECO_GE2J_PTH_0_60_Tag2"] = ['ggH_GE2J_MJJ_0_350_PTH_0_60','ggZH_had_GE2J_MJJ_0_350_PTH_0_60']
-target_procs["RECO_GE2J_PTH_60_120_Tag0"] = ['ggH_GE2J_MJJ_0_350_PTH_60_120','ggZH_had_GE2J_MJJ_0_350_PTH_60_120']
-target_procs["RECO_GE2J_PTH_60_120_Tag1"] = ['ggH_GE2J_MJJ_0_350_PTH_60_120','ggZH_had_GE2J_MJJ_0_350_PTH_60_120']
-target_procs["RECO_GE2J_PTH_60_120_Tag2"] = ['ggH_GE2J_MJJ_0_350_PTH_60_120','ggZH_had_GE2J_MJJ_0_350_PTH_60_120']
-target_procs["RECO_GE2J_PTH_120_200_Tag0"] = ['ggH_GE2J_MJJ_0_350_PTH_120_200','ggZH_had_GE2J_MJJ_0_350_PTH_120_200']
-target_procs["RECO_GE2J_PTH_120_200_Tag1"] = ['ggH_GE2J_MJJ_0_350_PTH_120_200','ggZH_had_GE2J_MJJ_0_350_PTH_120_200']
-target_procs["RECO_GE2J_PTH_120_200_Tag2"] = ['ggH_GE2J_MJJ_0_350_PTH_120_200','ggZH_had_GE2J_MJJ_0_350_PTH_120_200']
-target_procs["RECO_VBFLIKEGGH_Tag0"] = ['ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','ggH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','ggH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25','ggZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','ggZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','ggZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','ggZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25']
-target_procs["RECO_VBFLIKEGGH_Tag1"] = ['ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','ggH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','ggH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25','ggZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','ggZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','ggZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','ggZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25']
-target_procs["RECO_PTH_200_300_Tag0"] = ['ggH_PTH_200_300','ggZH_had_PTH_200_300']
-target_procs["RECO_PTH_200_300_Tag1"] = ['ggH_PTH_200_300','ggZH_had_PTH_200_300']
-target_procs["RECO_PTH_300_450_Tag0"] = ['ggH_PTH_300_450','ggZH_had_PTH_300_450']
-target_procs["RECO_PTH_300_450_Tag1"] = ['ggH_PTH_300_450','ggZH_had_PTH_300_450']
-target_procs["RECO_PTH_450_650_Tag0"] = ['ggH_PTH_450_650','ggZH_had_PTH_450_650']
-target_procs["RECO_PTH_GT650_Tag0"] = ['ggH_PTH_GT650','ggZH_had_PTH_GT650']
+target_procs_ggh = od()
+target_procs_ggh["RECO_0J_PTH_0_10_Tag0"] = ['ggH_0J_PTH_0_10','ggZH_had_0J_PTH_0_10']
+target_procs_ggh["RECO_0J_PTH_0_10_Tag1"] = ['ggH_0J_PTH_0_10','ggZH_had_0J_PTH_0_10']
+target_procs_ggh["RECO_0J_PTH_0_10_Tag2"] = ['ggH_0J_PTH_0_10','ggZH_had_0J_PTH_0_10']
+target_procs_ggh["RECO_0J_PTH_GT10_Tag0"] = ['ggH_0J_PTH_GT10','ggZH_had_0J_PTH_GT10']
+target_procs_ggh["RECO_0J_PTH_GT10_Tag1"] = ['ggH_0J_PTH_GT10','ggZH_had_0J_PTH_GT10']
+target_procs_ggh["RECO_0J_PTH_GT10_Tag2"] = ['ggH_0J_PTH_GT10','ggZH_had_0J_PTH_GT10']
+target_procs_ggh["RECO_1J_PTH_0_60_Tag0"] = ['ggH_1J_PTH_0_60','ggZH_had_1J_PTH_0_60']
+target_procs_ggh["RECO_1J_PTH_0_60_Tag1"] = ['ggH_1J_PTH_0_60','ggZH_had_1J_PTH_0_60']
+target_procs_ggh["RECO_1J_PTH_0_60_Tag2"] = ['ggH_1J_PTH_0_60','ggZH_had_1J_PTH_0_60']
+target_procs_ggh["RECO_1J_PTH_60_120_Tag0"] = ['ggH_1J_PTH_60_120','ggZH_had_1J_PTH_60_120']
+target_procs_ggh["RECO_1J_PTH_60_120_Tag1"] = ['ggH_1J_PTH_60_120','ggZH_had_1J_PTH_60_120']
+target_procs_ggh["RECO_1J_PTH_60_120_Tag2"] = ['ggH_1J_PTH_60_120','ggZH_had_1J_PTH_60_120']
+target_procs_ggh["RECO_1J_PTH_120_200_Tag0"] = ['ggH_1J_PTH_120_200','ggZH_had_1J_PTH_120_200']
+target_procs_ggh["RECO_1J_PTH_120_200_Tag1"] = ['ggH_1J_PTH_120_200','ggZH_had_1J_PTH_120_200']
+target_procs_ggh["RECO_1J_PTH_120_200_Tag2"] = ['ggH_1J_PTH_120_200','ggZH_had_1J_PTH_120_200']
+target_procs_ggh["RECO_GE2J_PTH_0_60_Tag0"] = ['ggH_GE2J_MJJ_0_350_PTH_0_60','ggZH_had_GE2J_MJJ_0_350_PTH_0_60']
+target_procs_ggh["RECO_GE2J_PTH_0_60_Tag1"] = ['ggH_GE2J_MJJ_0_350_PTH_0_60','ggZH_had_GE2J_MJJ_0_350_PTH_0_60']
+target_procs_ggh["RECO_GE2J_PTH_0_60_Tag2"] = ['ggH_GE2J_MJJ_0_350_PTH_0_60','ggZH_had_GE2J_MJJ_0_350_PTH_0_60']
+target_procs_ggh["RECO_GE2J_PTH_60_120_Tag0"] = ['ggH_GE2J_MJJ_0_350_PTH_60_120','ggZH_had_GE2J_MJJ_0_350_PTH_60_120']
+target_procs_ggh["RECO_GE2J_PTH_60_120_Tag1"] = ['ggH_GE2J_MJJ_0_350_PTH_60_120','ggZH_had_GE2J_MJJ_0_350_PTH_60_120']
+target_procs_ggh["RECO_GE2J_PTH_60_120_Tag2"] = ['ggH_GE2J_MJJ_0_350_PTH_60_120','ggZH_had_GE2J_MJJ_0_350_PTH_60_120']
+target_procs_ggh["RECO_GE2J_PTH_120_200_Tag0"] = ['ggH_GE2J_MJJ_0_350_PTH_120_200','ggZH_had_GE2J_MJJ_0_350_PTH_120_200']
+target_procs_ggh["RECO_GE2J_PTH_120_200_Tag1"] = ['ggH_GE2J_MJJ_0_350_PTH_120_200','ggZH_had_GE2J_MJJ_0_350_PTH_120_200']
+target_procs_ggh["RECO_GE2J_PTH_120_200_Tag2"] = ['ggH_GE2J_MJJ_0_350_PTH_120_200','ggZH_had_GE2J_MJJ_0_350_PTH_120_200']
+target_procs_ggh["RECO_PTH_200_300_Tag0"] = ['ggH_PTH_200_300','ggZH_had_PTH_200_300']
+target_procs_ggh["RECO_PTH_200_300_Tag1"] = ['ggH_PTH_200_300','ggZH_had_PTH_200_300']
+target_procs_ggh["RECO_PTH_300_450_Tag0"] = ['ggH_PTH_300_450','ggZH_had_PTH_300_450']
+target_procs_ggh["RECO_PTH_300_450_Tag1"] = ['ggH_PTH_300_450','ggZH_had_PTH_300_450']
+target_procs_ggh["RECO_PTH_450_650_Tag0"] = ['ggH_PTH_450_650','ggZH_had_PTH_450_650']
+target_procs_ggh["RECO_PTH_GT650_Tag0"] = ['ggH_PTH_GT650','ggZH_had_PTH_GT650']
+
 # Top tags
-target_procs["RECO_THQ_LEP"] = ['tHq']
-target_procs["RECO_TTH_LEP_PTH_0_60_Tag0"] = ['ttH_PTH_0_60']
-target_procs["RECO_TTH_LEP_PTH_0_60_Tag1"] = ['ttH_PTH_0_60']
-target_procs["RECO_TTH_LEP_PTH_0_60_Tag2"] = ['ttH_PTH_0_60']
-target_procs["RECO_TTH_LEP_PTH_0_60_Tag3"] = ['ttH_PTH_0_60']
-target_procs["RECO_TTH_LEP_PTH_60_120_Tag0"] = ['ttH_PTH_60_120']
-target_procs["RECO_TTH_LEP_PTH_60_120_Tag1"] = ['ttH_PTH_60_120']
-target_procs["RECO_TTH_LEP_PTH_120_200_Tag0"] = ['ttH_PTH_120_200']
-target_procs["RECO_TTH_LEP_PTH_120_200_Tag1"] = ['ttH_PTH_120_200']
-target_procs["RECO_TTH_LEP_PTH_GT200_Tag0"] = ['ttH_PTH_200_300','ttH_PTH_GT300']
-target_procs["RECO_TTH_LEP_PTH_GT200_Tag1"] = ['ttH_PTH_200_300','ttH_PTH_GT300']
-target_procs["RECO_TTH_HAD_PTH_0_60_Tag0"] = ['ttH_PTH_0_60']
-target_procs["RECO_TTH_HAD_PTH_0_60_Tag1"] = ['ttH_PTH_0_60']
-target_procs["RECO_TTH_HAD_PTH_0_60_Tag2"] = ['ttH_PTH_0_60']
-target_procs["RECO_TTH_HAD_PTH_0_60_Tag3"] = ['ttH_PTH_0_60']
-target_procs["RECO_TTH_HAD_PTH_60_120_Tag0"] = ['ttH_PTH_60_120']
-target_procs["RECO_TTH_HAD_PTH_60_120_Tag1"] = ['ttH_PTH_60_120']
-target_procs["RECO_TTH_HAD_PTH_60_120_Tag2"] = ['ttH_PTH_60_120']
-target_procs["RECO_TTH_HAD_PTH_60_120_Tag3"] = ['ttH_PTH_60_120']
-target_procs["RECO_TTH_HAD_PTH_120_200_Tag0"] = ['ttH_PTH_120_200']
-target_procs["RECO_TTH_HAD_PTH_120_200_Tag1"] = ['ttH_PTH_120_200']
-target_procs["RECO_TTH_HAD_PTH_120_200_Tag2"] = ['ttH_PTH_120_200']
-target_procs["RECO_TTH_HAD_PTH_120_200_Tag3"] = ['ttH_PTH_120_200']
-target_procs["RECO_TTH_HAD_PTH_GT200_Tag0"] = ['ttH_PTH_200_300','ttH_PTH_GT300']
-target_procs["RECO_TTH_HAD_PTH_GT200_Tag1"] = ['ttH_PTH_200_300','ttH_PTH_GT300']
-target_procs["RECO_TTH_HAD_PTH_GT200_Tag2"] = ['ttH_PTH_200_300','ttH_PTH_GT300']
-target_procs["RECO_TTH_HAD_PTH_GT200_Tag3"] = ['ttH_PTH_200_300','ttH_PTH_GT300']
+target_procs_top = od()
+target_procs_top["RECO_THQ_LEP"] = ['tHq']
+target_procs_top["RECO_TTH_LEP_PTH_0_60_Tag0"] = ['ttH_PTH_0_60']
+target_procs_top["RECO_TTH_LEP_PTH_0_60_Tag1"] = ['ttH_PTH_0_60']
+target_procs_top["RECO_TTH_LEP_PTH_0_60_Tag2"] = ['ttH_PTH_0_60']
+target_procs_top["RECO_TTH_LEP_PTH_0_60_Tag3"] = ['ttH_PTH_0_60']
+target_procs_top["RECO_TTH_LEP_PTH_60_120_Tag0"] = ['ttH_PTH_60_120']
+target_procs_top["RECO_TTH_LEP_PTH_60_120_Tag1"] = ['ttH_PTH_60_120']
+target_procs_top["RECO_TTH_LEP_PTH_120_200_Tag0"] = ['ttH_PTH_120_200']
+target_procs_top["RECO_TTH_LEP_PTH_120_200_Tag1"] = ['ttH_PTH_120_200']
+target_procs_top["RECO_TTH_LEP_PTH_GT200_Tag0"] = ['ttH_PTH_200_300','ttH_PTH_GT300']
+target_procs_top["RECO_TTH_LEP_PTH_GT200_Tag1"] = ['ttH_PTH_200_300','ttH_PTH_GT300']
+target_procs_top["RECO_TTH_HAD_PTH_0_60_Tag0"] = ['ttH_PTH_0_60']
+target_procs_top["RECO_TTH_HAD_PTH_0_60_Tag1"] = ['ttH_PTH_0_60']
+target_procs_top["RECO_TTH_HAD_PTH_0_60_Tag2"] = ['ttH_PTH_0_60']
+target_procs_top["RECO_TTH_HAD_PTH_0_60_Tag3"] = ['ttH_PTH_0_60']
+target_procs_top["RECO_TTH_HAD_PTH_60_120_Tag0"] = ['ttH_PTH_60_120']
+target_procs_top["RECO_TTH_HAD_PTH_60_120_Tag1"] = ['ttH_PTH_60_120']
+target_procs_top["RECO_TTH_HAD_PTH_60_120_Tag2"] = ['ttH_PTH_60_120']
+target_procs_top["RECO_TTH_HAD_PTH_60_120_Tag3"] = ['ttH_PTH_60_120']
+target_procs_top["RECO_TTH_HAD_PTH_120_200_Tag0"] = ['ttH_PTH_120_200']
+target_procs_top["RECO_TTH_HAD_PTH_120_200_Tag1"] = ['ttH_PTH_120_200']
+target_procs_top["RECO_TTH_HAD_PTH_120_200_Tag2"] = ['ttH_PTH_120_200']
+target_procs_top["RECO_TTH_HAD_PTH_120_200_Tag3"] = ['ttH_PTH_120_200']
+target_procs_top["RECO_TTH_HAD_PTH_GT200_Tag0"] = ['ttH_PTH_200_300','ttH_PTH_GT300']
+target_procs_top["RECO_TTH_HAD_PTH_GT200_Tag1"] = ['ttH_PTH_200_300','ttH_PTH_GT300']
+target_procs_top["RECO_TTH_HAD_PTH_GT200_Tag2"] = ['ttH_PTH_200_300','ttH_PTH_GT300']
+target_procs_top["RECO_TTH_HAD_PTH_GT200_Tag3"] = ['ttH_PTH_200_300','ttH_PTH_GT300']
+
 # VH tags
-target_procs["RECO_ZH_LEP_Tag0"] = ['ZH_lep_PTV_0_75','ZH_lep_PTV_75_150','ZH_lep_PTV_150_250_0J','ZH_lep_PTV_150_250_GE1J','ZH_lep_PTV_GT250','ggZH_ll_PTV_0_75','ggZH_ll_PTV_75_150','ggZH_ll_PTV_150_250_0J','ggZH_ll_PTV_150_250_GE1J','ggZH_ll_PTV_GT250','ggZH_nunu_PTV_0_75','ggZH_nunu_PTV_75_150','ggZH_nunu_PTV_150_250_0J','ggZH_nunu_PTV_150_250_GE1J','ggZH_nunu_PTV_GT250']
-target_procs["RECO_ZH_LEP_Tag1"] = ['ZH_lep_PTV_0_75','ZH_lep_PTV_75_150','ZH_lep_PTV_150_250_0J','ZH_lep_PTV_150_250_GE1J','ZH_lep_PTV_GT250','ggZH_ll_PTV_0_75','ggZH_ll_PTV_75_150','ggZH_ll_PTV_150_250_0J','ggZH_ll_PTV_150_250_GE1J','ggZH_ll_PTV_GT250','ggZH_nunu_PTV_0_75','ggZH_nunu_PTV_75_150','ggZH_nunu_PTV_150_250_0J','ggZH_nunu_PTV_150_250_GE1J','ggZH_nunu_PTV_GT250']
-target_procs["RECO_WH_LEP_LOW_Tag0"] = ['WH_lep_PTV_0_75']
-target_procs["RECO_WH_LEP_LOW_Tag1"] = ['WH_lep_PTV_0_75']
-target_procs["RECO_WH_LEP_LOW_Tag2"] = ['WH_lep_PTV_0_75']
-target_procs["RECO_WH_LEP_HIGH_Tag0"] = ['WH_lep_PTV_75_150','WH_lep_PTV_150_250_0J','WH_lep_PTV_150_250_GE1J','WH_lep_PTV_GT250']
-target_procs["RECO_WH_LEP_HIGH_Tag1"] = ['WH_lep_PTV_75_150','WH_lep_PTV_150_250_0J','WH_lep_PTV_150_250_GE1J','WH_lep_PTV_GT250']
-target_procs["RECO_WH_LEP_HIGH_Tag2"] = ['WH_lep_PTV_75_150','WH_lep_PTV_150_250_0J','WH_lep_PTV_150_250_GE1J','WH_lep_PTV_GT250']
-target_procs["RECO_VH_MET_Tag0"] = ['WH_lep_PTV_0_75','WH_lep_PTV_75_150','WH_lep_PTV_150_250_0J','WH_lep_PTV_150_250_GE1J','WH_lep_PTV_GT250','ZH_lep_PTV_0_75','ZH_lep_PTV_75_150','ZH_lep_PTV_150_250_0J','ZH_lep_PTV_150_250_GE1J','ZH_lep_PTV_GT250','ggZH_ll_PTV_0_75','ggZH_ll_PTV_75_150','ggZH_ll_PTV_150_250_0J','ggZH_ll_PTV_150_250_GE1J','ggZH_ll_PTV_GT250','ggZH_nunu_PTV_0_75','ggZH_nunu_PTV_75_150','ggZH_nunu_PTV_150_250_0J','ggZH_nunu_PTV_150_250_GE1J','ggZH_nunu_PTV_GT250']
-target_procs["RECO_VH_MET_Tag1"] = ['WH_lep_PTV_0_75','WH_lep_PTV_75_150','WH_lep_PTV_150_250_0J','WH_lep_PTV_150_250_GE1J','WH_lep_PTV_GT250','ZH_lep_PTV_0_75','ZH_lep_PTV_75_150','ZH_lep_PTV_150_250_0J','ZH_lep_PTV_150_250_GE1J','ZH_lep_PTV_GT250','ggZH_ll_PTV_0_75','ggZH_ll_PTV_75_150','ggZH_ll_PTV_150_250_0J','ggZH_ll_PTV_150_250_GE1J','ggZH_ll_PTV_GT250','ggZH_nunu_PTV_0_75','ggZH_nunu_PTV_75_150','ggZH_nunu_PTV_150_250_0J','ggZH_nunu_PTV_150_250_GE1J','ggZH_nunu_PTV_GT250']
-# VBF tags
-target_procs["RECO_VBFTOPO_JET3VETO_LOWMJJ_Tag0"] = ['qqH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','WH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','ZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25']
-target_procs["RECO_VBFTOPO_JET3VETO_LOWMJJ_Tag1"] = ['qqH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','WH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','ZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25']
-target_procs["RECO_VBFTOPO_JET3VETO_HIGHMJJ_Tag0"] = ['qqH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','WH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','ZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25']
-target_procs["RECO_VBFTOPO_JET3VETO_HIGHMJJ_Tag1"] = ['qqH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','WH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','ZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25']
-target_procs["RECO_VBFTOPO_JET3_LOWMJJ_Tag0"] = ['qqH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','WH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','ZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25']
-target_procs["RECO_VBFTOPO_JET3_LOWMJJ_Tag1"] = ['qqH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','WH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','ZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25']
-target_procs["RECO_VBFTOPO_JET3_HIGHMJJ_Tag0"] = ['qqH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25','WH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25','ZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25']
-target_procs["RECO_VBFTOPO_JET3_HIGHMJJ_Tag1"] = ['qqH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25','WH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25','ZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25']
-target_procs["RECO_VBFTOPO_BSM_Tag0"] = ['qqH_GE2J_MJJ_GT350_PTH_GT200','WH_had_GE2J_MJJ_GT350_PTH_GT200','ZH_had_GE2J_MJJ_GT350_PTH_GT200']
-target_procs["RECO_VBFTOPO_BSM_Tag1"] = ['qqH_GE2J_MJJ_GT350_PTH_GT200','WH_had_GE2J_MJJ_GT350_PTH_GT200','ZH_had_GE2J_MJJ_GT350_PTH_GT200']
-target_procs["RECO_VBFTOPO_VHHAD_Tag0"] = ['qqH_GE2J_MJJ_60_120','WH_had_GE2J_MJJ_60_120','ZH_had_GE2J_MJJ_60_120']
-target_procs["RECO_VBFTOPO_VHHAD_Tag1"] = ['qqH_GE2J_MJJ_60_120','WH_had_GE2J_MJJ_60_120','ZH_had_GE2J_MJJ_60_120']
+target_procs_vh = od()
+target_procs_vh["RECO_ZH_LEP_Tag0"] = ['ZH_lep_PTV_0_75','ZH_lep_PTV_75_150','ZH_lep_PTV_150_250_0J','ZH_lep_PTV_150_250_GE1J','ZH_lep_PTV_GT250','ggZH_ll_PTV_0_75','ggZH_ll_PTV_75_150','ggZH_ll_PTV_150_250_0J','ggZH_ll_PTV_150_250_GE1J','ggZH_ll_PTV_GT250','ggZH_nunu_PTV_0_75','ggZH_nunu_PTV_75_150','ggZH_nunu_PTV_150_250_0J','ggZH_nunu_PTV_150_250_GE1J','ggZH_nunu_PTV_GT250']
+target_procs_vh["RECO_ZH_LEP_Tag1"] = ['ZH_lep_PTV_0_75','ZH_lep_PTV_75_150','ZH_lep_PTV_150_250_0J','ZH_lep_PTV_150_250_GE1J','ZH_lep_PTV_GT250','ggZH_ll_PTV_0_75','ggZH_ll_PTV_75_150','ggZH_ll_PTV_150_250_0J','ggZH_ll_PTV_150_250_GE1J','ggZH_ll_PTV_GT250','ggZH_nunu_PTV_0_75','ggZH_nunu_PTV_75_150','ggZH_nunu_PTV_150_250_0J','ggZH_nunu_PTV_150_250_GE1J','ggZH_nunu_PTV_GT250']
+target_procs_vh["RECO_WH_LEP_LOW_Tag0"] = ['WH_lep_PTV_0_75']
+target_procs_vh["RECO_WH_LEP_LOW_Tag1"] = ['WH_lep_PTV_0_75']
+target_procs_vh["RECO_WH_LEP_LOW_Tag2"] = ['WH_lep_PTV_0_75']
+target_procs_vh["RECO_WH_LEP_HIGH_Tag0"] = ['WH_lep_PTV_75_150','WH_lep_PTV_150_250_0J','WH_lep_PTV_150_250_GE1J','WH_lep_PTV_GT250']
+target_procs_vh["RECO_WH_LEP_HIGH_Tag1"] = ['WH_lep_PTV_75_150','WH_lep_PTV_150_250_0J','WH_lep_PTV_150_250_GE1J','WH_lep_PTV_GT250']
+target_procs_vh["RECO_WH_LEP_HIGH_Tag2"] = ['WH_lep_PTV_75_150','WH_lep_PTV_150_250_0J','WH_lep_PTV_150_250_GE1J','WH_lep_PTV_GT250']
+target_procs_vh["RECO_VH_MET_Tag0"] = ['WH_lep_PTV_0_75','WH_lep_PTV_75_150','WH_lep_PTV_150_250_0J','WH_lep_PTV_150_250_GE1J','WH_lep_PTV_GT250','ZH_lep_PTV_0_75','ZH_lep_PTV_75_150','ZH_lep_PTV_150_250_0J','ZH_lep_PTV_150_250_GE1J','ZH_lep_PTV_GT250','ggZH_ll_PTV_0_75','ggZH_ll_PTV_75_150','ggZH_ll_PTV_150_250_0J','ggZH_ll_PTV_150_250_GE1J','ggZH_ll_PTV_GT250','ggZH_nunu_PTV_0_75','ggZH_nunu_PTV_75_150','ggZH_nunu_PTV_150_250_0J','ggZH_nunu_PTV_150_250_GE1J','ggZH_nunu_PTV_GT250']
+target_procs_vh["RECO_VH_MET_Tag1"] = ['WH_lep_PTV_0_75','WH_lep_PTV_75_150','WH_lep_PTV_150_250_0J','WH_lep_PTV_150_250_GE1J','WH_lep_PTV_GT250','ZH_lep_PTV_0_75','ZH_lep_PTV_75_150','ZH_lep_PTV_150_250_0J','ZH_lep_PTV_150_250_GE1J','ZH_lep_PTV_GT250','ggZH_ll_PTV_0_75','ggZH_ll_PTV_75_150','ggZH_ll_PTV_150_250_0J','ggZH_ll_PTV_150_250_GE1J','ggZH_ll_PTV_GT250','ggZH_nunu_PTV_0_75','ggZH_nunu_PTV_75_150','ggZH_nunu_PTV_150_250_0J','ggZH_nunu_PTV_150_250_GE1J','ggZH_nunu_PTV_GT250']
 
-
+# qqH tags
+target_procs_qqh = od()
+target_procs_qqh["RECO_VBFLIKEGGH_Tag0"] = ['ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','ggH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','ggH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25','ggZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','ggZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','ggZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','ggZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25']
+target_procs_qqh["RECO_VBFLIKEGGH_Tag1"] = ['ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','ggH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','ggH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25','ggZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','ggZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','ggZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','ggZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25']
+target_procs_qqh["RECO_VBFTOPO_JET3VETO_LOWMJJ_Tag0"] = ['qqH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','WH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','ZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25']
+target_procs_qqh["RECO_VBFTOPO_JET3VETO_LOWMJJ_Tag1"] = ['qqH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','WH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','ZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25']
+target_procs_qqh["RECO_VBFTOPO_JET3VETO_HIGHMJJ_Tag0"] = ['qqH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','WH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','ZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25']
+target_procs_qqh["RECO_VBFTOPO_JET3VETO_HIGHMJJ_Tag1"] = ['qqH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','WH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','ZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25']
+target_procs_qqh["RECO_VBFTOPO_JET3_LOWMJJ_Tag0"] = ['qqH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','WH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','ZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25']
+target_procs_qqh["RECO_VBFTOPO_JET3_LOWMJJ_Tag1"] = ['qqH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','WH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','ZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25']
+target_procs_qqh["RECO_VBFTOPO_JET3_HIGHMJJ_Tag0"] = ['qqH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25','WH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25','ZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25']
+target_procs_qqh["RECO_VBFTOPO_JET3_HIGHMJJ_Tag1"] = ['qqH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25','WH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25','ZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25']
+target_procs_qqh["RECO_VBFTOPO_BSM_Tag0"] = ['qqH_GE2J_MJJ_GT350_PTH_GT200','WH_had_GE2J_MJJ_GT350_PTH_GT200','ZH_had_GE2J_MJJ_GT350_PTH_GT200']
+target_procs_qqh["RECO_VBFTOPO_BSM_Tag1"] = ['qqH_GE2J_MJJ_GT350_PTH_GT200','WH_had_GE2J_MJJ_GT350_PTH_GT200','ZH_had_GE2J_MJJ_GT350_PTH_GT200']
+target_procs_qqh["RECO_VBFTOPO_VHHAD_Tag0"] = ['qqH_GE2J_MJJ_60_120','WH_had_GE2J_MJJ_60_120','ZH_had_GE2J_MJJ_60_120']
+target_procs_qqh["RECO_VBFTOPO_VHHAD_Tag1"] = ['qqH_GE2J_MJJ_60_120','WH_had_GE2J_MJJ_60_120','ZH_had_GE2J_MJJ_60_120']
 
 def get_options():
   parser = OptionParser()
   parser.add_option("--inputPkl", dest="inputPkl", default='', help="Input pickle file")
   parser.add_option("--loadCatInfo", dest="loadCatInfo", default='', help="Load eff sigma, B and S/S+B from pickle file")
+  parser.add_option("--group", dest="group", default='ggh', help="Group of cats")
   parser.add_option("--ext", dest="ext", default='', help="Extension for saving")
   parser.add_option("--translateCats", dest="translateCats", default=None, help="JSON to store cat translations")
-  parser.add_option("--translateTargets", dest="translateTargets", default=None, help="JSON to store target proc translations")
+  parser.add_option("--translateStage0", dest="translateStage0", default=None, help="JSON to store stage 0 translations")
+  parser.add_option("--translateTargets", dest="translateTargets", default=None, help="JSON to store target bin translations")
   return parser.parse_args()
 (opt,args) = get_options()
 
@@ -137,7 +162,24 @@ def LoadTranslations(jsonfilename):
     with open(jsonfilename) as jsonfile:
         return json.load(jsonfile)
 translateCats = {} if opt.translateCats is None else LoadTranslations(opt.translateCats)
+translateStage0 = {} if opt.translateStage0 is None else LoadTranslations(opt.translateStage0)
 translateTargets = {} if opt.translateTargets is None else LoadTranslations(opt.translateTargets)
+
+if opt.group == "ggh": 
+  stage0 = stage0_ggh
+  target_procs = target_procs_ggh
+elif opt.group == "qqh": 
+  stage0 = stage0_qqh
+  target_procs = target_procs_qqh
+elif opt.group == "vh": 
+  stage0 = stage0_vh
+  target_procs = target_procs_vh
+elif opt.group == "top": 
+  stage0 = stage0_top
+  target_procs = target_procs_top
+else:
+  print " --> [ERROR] target group of categories %s does not exist"%opt.group
+  leave()
 
 # Load input dataFrame from pickle file
 if not os.path.exists( opt.inputPkl ): 
@@ -179,16 +221,18 @@ for cat in target_procs:
   tab_data.loc[len(tab_data)] = vals
 
 # Make table
-fout = open("./yields_table%s.txt"%opt.ext,"w")
-fout.write("\\begin{table}[htb]\n")
-fout.write("    \\centering\n")
-fout.write("    \\setlength{\\tabcolsep}{4pt}\n")
-fout.write("    \\scriptsize\n")
-fout.write("    \\begin{tabular}{%s}\n"%("|"+"c|"*17))
-fout.write("        \\hline \\hline \n")
-fout.write("        \\multirow{3}{*}{Analysis categories} & \\multirow{3}{*}{\\begin{tabular}[c]{@{}c@{}}Target STXS\\\\bins, units in GeV\\end{tabular}} & \\multicolumn{13}{c|}{SM 125 GeV Higgs boson expected signal} & \\multirow{3}{*}{\\begin{tabular}[c]{@{}c@{}}Bkg\\\\(GeV$^{\\rm{-1}}$)\\end{tabular}} & \\multirow{3}{*}{S/S+B} \\\\ \\cline{3-15}\n")
-fout.write("         & & \\multirow{2}{*}{\\begin{tabular}[c]{@{}c@{}}Total\\\\Yield\\end{tabular}} & \\multirow{2}{*}{\\begin{tabular}[c]{@{}c@{}}Target\\\\fraction\\end{tabular}} & \\multicolumn{10}{|c|}{STXS stage 0 fractions} & \\multirow{2}{*}{\\begin{tabular}[c]{@{}c@{}}$\\sigma_{\\rm{eff}}$\\\\(GeV)\\end{tabular}} & & \\\\ \\cline{5-14}\n")
-fout.write("         & & & & ggH & VBF & VH had & WH lep & ZH lep & ggZH lep & ttH & bbH & tHq & tHW & & & \\\\ \\hline \\hline \n")
+nColumns = 5+len(stage0.keys())
+fout = open("./yields_table_lite_%s%s.txt"%(opt.group,opt.ext),"w")
+fout.write("\\begin{tabular}{%s}\n"%("l|"+("c"*(nColumns-1))))
+#fout.write("    \\hline \\hline \n")
+#fout.write("    \\multirow{3}{*}{Analysis categories} & \\multicolumn{%g}{c|}{SM 125 GeV Higgs boson expected signal} & \\multirow{3}{*}{S/S+B} \\\\ \\cline{2-%g}\n"%(3+len(stage0.keys()),nColumns-1))
+fout.write("    \\multirow{3}{*}{Analysis categories} & \\multicolumn{%g}{c}{SM 125 GeV Higgs boson expected signal} & \\multirow{3}{*}{S/S+B} \\\\ \n"%(3+len(stage0.keys())))
+#fout.write("     & \\multirow{2}{*}{\\begin{tabular}[c]{@{}c@{}}Total\\\\Yield\\end{tabular}} & \\multirow{2}{*}{\\begin{tabular}[c]{@{}c@{}}Target\\\\Fraction\\end{tabular}} & \\multicolumn{%g}{c|}{Production Mode Fractions} & \\multirow{2}{*}{\\begin{tabular}[c]{@{}c@{}}$\\sigma_{\\rm{eff}}$\\\\(GeV)\\end{tabular}} & \\\\ \\cline{4-%g}\n"%(len(stage0.keys()),nColumns-2))
+fout.write("     & \\multirow{2}{*}{\\begin{tabular}[c]{@{}c@{}}Total\\\\Yield\\end{tabular}} & \\multirow{2}{*}{\\begin{tabular}[c]{@{}c@{}}Target\\\\Fraction\\end{tabular}} & \\multicolumn{%g}{c}{Production Mode Fractions} & \\multirow{2}{*}{\\begin{tabular}[c]{@{}c@{}}$\\sigma_{\\rm{eff}}$\\\\(GeV)\\end{tabular}} & \\\\ \n"%(len(stage0.keys())))
+s0_str = Translate(stage0.keys()[0],translateStage0)
+for s0 in stage0.keys()[1:]: s0_str += " & %s"%Translate(s0,translateStage0)
+#fout.write("     & & & %s & & \\\\ \\hline \\hline \n"%s0_str)
+fout.write("     & & & %s & & \\\\ \\hline \n"%s0_str)
 # Add numbers
 tag_itr = -1
 for ir,r in tab_data.iterrows():
@@ -196,19 +240,16 @@ for ir,r in tab_data.iterrows():
     tag_itr = len(tab_data[tab_data['cat'].str.contains(r['cat'].split("_Tag")[0])])-1
     doRow = True
   else: doRow = False
-  if doRow: catline = "         \\tiny{%s} & \\multirow{%g}{*}{\\tiny{%s}} & %.1f & %.1f\\%%"%(Translate(r['cat'],translateCats),(tag_itr+1),r['target_bins_str'],r['nominal_yield'],100*(r['target_yield']/r['nominal_yield']))
-  else: catline = "         \\tiny{%s} & & %.1f & %.1f\\%%"%(Translate(r['cat'],translateCats),r['nominal_yield'],100*(r['target_yield']/r['nominal_yield']))
+  catline = "     %s & %.1f & %.1f\\%%"%(Translate(r['cat'],translateCats),r['nominal_yield'],100*(r['target_yield']/r['nominal_yield']))
   for s0 in stage0:
     pcs0 = 100*(r['%s_yield'%s0]/r['nominal_yield'])
     #if pcs0 < 0.1: catline += " & $<$0.1\\%"
     if pcs0 == 0.: catline += " & -"
     else: catline += " & %.1f\\%%"%pcs0
-  catline += " & %.2f & %.1f & %.2f"%(r['effSigma'],r['bkg'],r['SoverSplusB'])
+  catline += " & %.2f & %.2f"%(r['effSigma'],r['SoverSplusB'])
   fout.write("%s \\\\ \n"%catline)
-  if tag_itr == 0: fout.write("         \\hline\n")
+  #if tag_itr == 0: fout.write("     \\hline\n")
+  if tag_itr == 0: fout.write("     [\\cmsTabSkip]\n")
   tag_itr -= 1
-fout.write("    \\hline \\hline \n")
-fout.write("    \\end{tabular}\n")
-fout.write("\\end{table}\n")
-
-
+#fout.write("     \\hline \n")
+fout.write("\\end{tabular}\n")

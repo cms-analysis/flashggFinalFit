@@ -1,6 +1,0 @@
-#!/bin/bash
-
-cd /vols/build/cms/jl2117/hgg/FinalFits/legacy/Jun20/CMSSW_10_2_13/src/flashggFinalFit/Plots
-eval `scramv1 runtime -sh`
-
-python makeSplusBModelPlot.py --inputWSFile InputWS_fixedMH/bestfit_mu.root --loadSnapshot MultiDimFit --cats RECO_THQ_LEP,RECO_TTH_HAD_PTH_0_60_Tag0,RECO_TTH_HAD_PTH_0_60_Tag1,RECO_TTH_HAD_PTH_0_60_Tag2,RECO_TTH_HAD_PTH_0_60_Tag3,RECO_TTH_HAD_PTH_120_200_Tag0,RECO_TTH_HAD_PTH_120_200_Tag1,RECO_TTH_HAD_PTH_120_200_Tag2,RECO_TTH_HAD_PTH_120_200_Tag3,RECO_TTH_HAD_PTH_60_120_Tag0,RECO_TTH_HAD_PTH_60_120_Tag1,RECO_TTH_HAD_PTH_60_120_Tag2,RECO_TTH_HAD_PTH_60_120_Tag3,RECO_TTH_HAD_PTH_GT200_Tag0,RECO_TTH_HAD_PTH_GT200_Tag1,RECO_TTH_HAD_PTH_GT200_Tag2,RECO_TTH_HAD_PTH_GT200_Tag3,RECO_TTH_LEP_PTH_0_60_Tag0,RECO_TTH_LEP_PTH_0_60_Tag1,RECO_TTH_LEP_PTH_0_60_Tag2,RECO_TTH_LEP_PTH_0_60_Tag3,RECO_TTH_LEP_PTH_120_200_Tag0,RECO_TTH_LEP_PTH_120_200_Tag1,RECO_TTH_LEP_PTH_60_120_Tag0,RECO_TTH_LEP_PTH_60_120_Tag1,RECO_TTH_LEP_PTH_GT200_Tag0,RECO_TTH_LEP_PTH_GT200_Tag1 --unblind --doBands --loadToyYields SplusBModels_pass1_shift_top/toyYields_CMS_hgg_mass.pkl --doSumCategories --doCatWeights --loadWeights jsons/catsWeights_sospb_pass1_shift_top_CMS_hgg_mass.json --doZeroes --ext _Jul20_pass0_top --translateCats cats_top.json --translatePOIs pois_mu.json --skipIndividualCatPlots --doToyVeto
