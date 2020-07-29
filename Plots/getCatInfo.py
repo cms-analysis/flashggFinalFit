@@ -27,6 +27,7 @@ def get_options():
   parser = OptionParser()
   parser.add_option("--inputWSFile", dest="inputWSFile", default=None, help="Input RooWorkspace file. If loading snapshot then use a post-fit workspace where the option --saveWorkspace was set")
   parser.add_option("--loadSnapshot", dest="loadSnapshot", default=None, help="Load best-fit snapshot name")
+  parser.add_option("--inputEffSigma", dest="inputEffSigma", default=None, help="Load eff sigma from json")
   parser.add_option("--cats", dest="cats", default=None, help="Analysis categories. all = loop over cats and plot sum")
   parser.add_option("--doBkgRenormalization", dest="doBkgRenormalization", default=False, action="store_true", help="Do Bkg renormalization")
   parser.add_option("--saveCatInfo", dest="saveCatInfo", default=False, action='store_true', help="Save category info to pkl file")
@@ -45,6 +46,9 @@ if opt.inputWSFile is not None:
   if opt.loadSnapshot is not None: 
     print "    * Loading snapshot: %s"%opt.loadSnapshot
     w.loadSnapshot(opt.loadSnapshot)
+
+if opt.inputEffSigma is not None:
+  with open(opt.inputEffSigma,"r") as jsonfile: effSigmaVals = json.load(jsonfile)
 
 # Define xvariable and categories
 xvar = w.var(opt.xvar.split(",")[0]) 
@@ -90,7 +94,8 @@ for c in cats:
   h_spdf_tmp = h_sbpdf_tmp-h_bpdf_tmp
 
   # Extract effSigma for signal model
-  effSigma = getEffSigma(h_spdf_tmp) 
+  if opt.inputEffSigma is not None: effSigma = effSigmaVals[c]
+  else: effSigma = getEffSigma(h_spdf_tmp) 
   # Calculate S/B yields in +-1sigma of peak
   rangeName = "effSigma_%s"%c
   xvar.setRange(rangeName,w.var("MH").getVal()-effSigma,w.var("MH").getVal()+effSigma)

@@ -223,13 +223,16 @@ for cat in target_procs:
 # Make table
 nColumns = 5+len(stage0.keys())
 fout = open("./yields_table_lite_%s%s.txt"%(opt.group,opt.ext),"w")
-fout.write("\\begin{tabular}{%s}\n"%(("c|"*nColumns_[:-1]))
-fout.write("    \\hline \\hline \n")
-fout.write("    \\multirow{3}{*}{Analysis categories} & \\multicolumn{%g}{c|}{SM 125 GeV Higgs boson expected signal} & \\multirow{3}{*}{S/S+B} \\\\ \\cline{2-%g}\n"%(3+len(stage0.keys()),nColumns-1))
-fout.write("     & \\multirow{2}{*}{\\begin{tabular}[c]{@{}c@{}}Total\\\\Yield\\end{tabular}} & \\multirow{2}{*}{\\begin{tabular}[c]{@{}c@{}}Target\\\\Fraction\\end{tabular}} & \\multicolumn{%g}{c|}{Production Mode Fractions} & \\multirow{2}{*}{\\begin{tabular}[c]{@{}c@{}}$\\sigma_{\\rm{eff}}$\\\\(GeV)\\end{tabular}} & \\\\ \\cline{4-%g}\n"%(len(stage0.keys()),nColumns-2))
+fout.write("\\begin{tabular}{%s}\n"%("l|"+("c"*(nColumns-1))))
+#fout.write("    \\hline \\hline \n")
+#fout.write("    \\multirow{3}{*}{Analysis categories} & \\multicolumn{%g}{c|}{SM 125 GeV Higgs boson expected signal} & \\multirow{3}{*}{S/S+B} \\\\ \\cline{2-%g}\n"%(3+len(stage0.keys()),nColumns-1))
+fout.write("    \\multirow{3}{*}{Analysis categories} & \\multicolumn{%g}{c}{SM 125 GeV Higgs boson expected signal} & \\multirow{3}{*}{S/S+B} \\\\ \n"%(3+len(stage0.keys())))
+#fout.write("     & \\multirow{2}{*}{\\begin{tabular}[c]{@{}c@{}}Total\\\\Yield\\end{tabular}} & \\multirow{2}{*}{\\begin{tabular}[c]{@{}c@{}}Target\\\\Fraction\\end{tabular}} & \\multicolumn{%g}{c|}{Production Mode Fractions} & \\multirow{2}{*}{\\begin{tabular}[c]{@{}c@{}}$\\sigma_{\\rm{eff}}$\\\\(GeV)\\end{tabular}} & \\\\ \\cline{4-%g}\n"%(len(stage0.keys()),nColumns-2))
+fout.write("     & \\multirow{2}{*}{\\begin{tabular}[c]{@{}c@{}}Total\\\\Yield\\end{tabular}} & \\multirow{2}{*}{\\begin{tabular}[c]{@{}c@{}}Target\\\\Fraction\\end{tabular}} & \\multicolumn{%g}{c}{Production Mode Fractions} & \\multirow{2}{*}{\\begin{tabular}[c]{@{}c@{}}$\\sigma_{\\rm{eff}}$\\\\(GeV)\\end{tabular}} & \\\\ \n"%(len(stage0.keys())))
 s0_str = Translate(stage0.keys()[0],translateStage0)
 for s0 in stage0.keys()[1:]: s0_str += " & %s"%Translate(s0,translateStage0)
-fout.write("     & & & %s & & \\\\ \\hline \\hline \n"%s0_str)
+#fout.write("     & & & %s & & \\\\ \\hline \\hline \n"%s0_str)
+fout.write("     & & & %s & & \\\\ \\hline \n"%s0_str)
 # Add numbers
 tag_itr = -1
 for ir,r in tab_data.iterrows():
@@ -245,7 +248,8 @@ for ir,r in tab_data.iterrows():
     else: catline += " & %.1f\\%%"%pcs0
   catline += " & %.2f & %.2f"%(r['effSigma'],r['SoverSplusB'])
   fout.write("%s \\\\ \n"%catline)
-  if tag_itr == 0: fout.write("     \\hline\n")
+  #if tag_itr == 0: fout.write("     \\hline\n")
+  if tag_itr == 0: fout.write("     [\\cmsTabSkip]\n")
   tag_itr -= 1
-fout.write("     \\hline \n")
+#fout.write("     \\hline \n")
 fout.write("\\end{tabular}\n")

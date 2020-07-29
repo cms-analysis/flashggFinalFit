@@ -17,6 +17,7 @@ def leave():
   sys.exit(1)
 
 params = od()
+params['stage0'] = ['r_ggH', 'r_qqH', 'r_WH_lep', 'r_ZH_lep', 'r_ttH', 'r_tH']
 params['stage1p2_maximal'] = ['r_ggH_0J_low', 'r_ggH_0J_high', 'r_ggH_1J_low', 'r_ggH_1J_med', 'r_ggH_1J_high', 'r_ggH_2J_low', 'r_ggH_2J_med', 'r_ggH_2J_high', 'r_ggH_VBFlike', 'r_ggH_BSM', 'r_qqH_VBFlike', 'r_qqH_VHhad', 'r_qqH_BSM', 'r_WH_lep', 'r_ZH_lep', 'r_ttH', 'r_tH']
 params['stage1p2_minimal'] = ['r_ggH_0J_low', 'r_ggH_0J_high', 'r_ggH_1J_low', 'r_ggH_1J_med', 'r_ggH_1J_high', 'r_ggH_2J_low', 'r_ggH_2J_med', 'r_ggH_2J_high', 'r_ggH_BSM_low', 'r_ggH_BSM_high', 'r_qqH_low_mjj_low_pthjj', 'r_qqH_low_mjj_high_pthjj', 'r_qqH_high_mjj_low_pthjj', 'r_qqH_high_mjj_high_pthjj', 'r_qqH_VHhad', 'r_qqH_BSM', 'r_WH_lep_low', 'r_WH_lep_high', 'r_ZH_lep', 'r_ttH_low', 'r_ttH_medlow', 'r_ttH_medhigh', 'r_ttH_high', 'r_tH']
 
@@ -56,10 +57,13 @@ fout.write("    \\renewcommand{\\arraystretch}{1.8}\n")
 fout.write("    \\setlength{\\tabcolsep}{3pt}\n")
 fout.write("    \\begin{tabular}{c|c|ccc|c}\n")
 fout.write("      \\hline \n")
-fout.write("      \\multicolumn{6}{c}{\\textbf{STXS stage 1.2: %s merging scheme}} \\\\ \\hline \n"%opt.mode.split("_")[-1])
-fout.write("      \\multirow{3}{*}{Parameters} & \\multicolumn{4}{c|}{$\\sigma\\cdot\\rm{BR}$~[fb]} & $\\sigma\\cdot\\rm{BR}$/$(\\sigma\\cdot\\rm{BR})_{\\rm{SM}}$ \\\\ \\cline{2-5} \n")
+if opt.mode == "stage0":
+  fout.write("      \\multicolumn{6}{c}{\\textbf{STXS stage 0}} \\\\ \\hline \n")
+else:
+  fout.write("      \\multicolumn{6}{c}{\\textbf{STXS stage 1.2: %s merging scheme}} \\\\ \\hline \n"%opt.mode.split("_")[-1])
+fout.write("      \\multirow{3}{*}{Parameters} & \\multicolumn{4}{c|}{$\\sigma\\mathcal{B}$~[fb]} & $\\sigma\\mathcal{B}$/$(\\sigma\\mathcal{B})_{\\rm{SM}}$ \\\\ \\cline{2-5} \n")
 fout.write("      & SM prediction & \\multicolumn{3}{c|}{Observed (Expected)} & Observed (Expected) \\\\ \n")
-fout.write("      & \\scriptsize{($m_H$~=~%.1f~GeV)} & Best fit & Stat unc. & Syst unc. & Best fit \\\\ \\hline \n"%mh)
+fout.write("      & \\scriptsize{($m_H$~=~%.2f~GeV)} & Best fit & Stat unc. & Syst unc. & Best fit \\\\ \\hline \n"%mh)
 for poi in params[opt.mode]:
   sm_pred = "\\begin{tabular}{r@{}l}$%.2f$ & {}$^{+%.2f}_{-%.2f}$\\end{tabular}"%(xsbr_theory[poi]['nominal'],xsbr_theory[poi]['High01Sigma'],xsbr_theory[poi]['Low01Sigma'])
   bf = "\\begin{tabular}{r@{}l@{}l}$%.2f$ & {}$^{+%.2f}_{-%.2f}$ & $\Big($$^{+%.2f}_{-%.2f}$$\Big)$ \\end{tabular}"%(xsbr_theory[poi]['nominal']*observed[poi]['Val'],abs(xsbr_theory[poi]['nominal']*observed[poi]['ErrorHi']),abs(xsbr_theory[poi]['nominal']*observed[poi]['ErrorLo']),abs(xsbr_theory[poi]['nominal']*expected[poi]['ErrorHi']),abs(xsbr_theory[poi]['nominal']*expected[poi]['ErrorLo']))

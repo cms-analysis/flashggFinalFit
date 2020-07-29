@@ -88,6 +88,14 @@ h2D = ROOT.TProfile2D("h","h",opt.nBins,x_range[0],x_range[1],opt.nBins,y_range[
 for i in range(len(grid_vals)):
   if opt.doShift: h2D.Fill( grid_x[i], grid_y[i], 2*(grid_vals[i]-min_val) )
   else: h2D.Fill( grid_x[i], grid_y[i], 2*grid_vals[i] )
+
+# Loop over bins: if content = 0 then set 999
+for ibin in range(1,h2D.GetNbinsX()+1):
+  for jbin in range(1,h2D.GetNbinsY()+1):
+    if h2D.GetBinContent(ibin,jbin)==0: 
+      xc, yc = h2D.GetXaxis().GetBinCenter(ibin), h2D.GetYaxis().GetBinCenter(jbin)
+      h2D.Fill(xc,yc,999)
+
 # Set up canvas
 canv = ROOT.TCanvas("canv","canv",600,600)
 canv.SetTickx()
@@ -112,6 +120,7 @@ h2D.GetYaxis().SetRangeUser(y_range[0]+yw,y_range[1]-yw)
 h2D.GetZaxis().SetTitle("-2 #Delta ln L")
 h2D.GetZaxis().SetTitleSize(0.05)
 h2D.GetZaxis().SetTitleOffset(0.8)
+#h2D.SetMaximum(10)
 h2D.SetMaximum(25)
 # Make CI contours
 c68, c95 = h2D.Clone(), h2D.Clone()
@@ -153,7 +162,10 @@ lat.SetTextAlign(11)
 lat.SetNDC()
 lat.SetTextSize(0.042)
 lat.DrawLatex(0.115,0.92,"#bf{CMS} #it{Preliminary}")
+#lat.DrawLatex(0.115,0.92,"#bf{CMS}")
 lat.DrawLatex(0.62,0.92,"137 fb^{-1} (13#scale[0.75]{ }TeV)")
+if "kappa_gam" in opt.inputTreeFile: lat.DrawLatex(0.17,0.2,"#scale[0.75]{m_{H} = 125.38 GeV}")
+else: lat.DrawLatex(0.17,0.8,"#scale[0.75]{m_{H} = 125.38 GeV}")
 
 # Add legend
 if opt.placeLegend == "bottom_right": leg = ROOT.TLegend(0.55,0.16,0.8,0.36)
@@ -169,5 +181,5 @@ leg.Draw()
 
 canv.Update()
 if not os.path.isdir("./FinalPlots"): os.system("mkdir FinalPlots")
-#canv.SaveAs("./FinalPlots/scan2D_%s_vs_%s%s.png"%(x,y,opt.ext))
-#canv.SaveAs("./FinalPlots/scan2D_%s_vs_%s%s.pdf"%(x,y,opt.ext))
+canv.SaveAs("./FinalPlots/scan2D_%s_vs_%s%s.png"%(x,y,opt.ext))
+canv.SaveAs("./FinalPlots/scan2D_%s_vs_%s%s.pdf"%(x,y,opt.ext))

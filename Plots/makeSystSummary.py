@@ -8,6 +8,7 @@ import pickle
 import json
 import math
 from collections import OrderedDict as od
+import numpy as np
 
 def get_options():
   parser = OptionParser()
@@ -41,7 +42,7 @@ ExpSystGroups_rgx['Photon energy scale and smearing'] = ['CMS_hgg_nuisance_*scal
 ExpSystGroups_rgx['Per photon energy resolution estimate'] = ['CMS_hgg_SigmaEOverEShift_*']
 ExpSystGroups_rgx['Jet energy scale and resolution'] = ['CMS_scale_j_*','CMS_res_j_*','CMS_scale_RelativeBal'] 
 ExpSystGroups_rgx['Lepton ID and reconstruction'] = ['CMS_hgg_ElectronID_*','CMS_hgg_ElectronReco_*','CMS_hgg_MuonID_*','CMS_hgg_MuonIso_*']
-ExpSystGroups_rgx['B Tagging'] = ['CMS_hgg_BTagCut_*','CMS_hgg_BTagReshape_*']
+ExpSystGroups_rgx['B Tagging'] = ['CMS_hgg_BTagCut_*','CMS_hgg_BTagReshape_*','CMS_hgg_BTagReshapeNorm']
 ExpSystGroups_rgx['MET'] = ['CMS_hgg_MET_*']
 #ExpSystGroups_rgx['Prefiring'] = ['CMS_hgg_prefire_*']
 ExpSystGroups_rgx['Other experimental uncertainties'] = ['CMS_hgg_PreselSF','CMS_hgg_electronVetoSF_*','CMS_hgg_TriggerWeight_*','CMS_hgg_PUJIDShift_*','CMS_hgg_nuisance_deltafracright','CMS_hgg_prefire_*']
@@ -57,7 +58,7 @@ TheorySystGroups_rgx['qqH migration'] = ['THU_qqH_PTH*','THU_qqH_MJJ*','THU_qqH_
 TheorySystGroups_rgx['Other processes QCD scale'] = ['QCDscale_*']
 TheorySystGroups_rgx['PDF and  #alpha_{s} normalisation'] = ['pdf_Higgs_*','alphaS_*']
 TheorySystGroups_rgx['QCD scale, PDF and  #alpha_{s} shape'] = ['CMS_hgg_*_scale_*shape','CMS_hgg_alphaSWeight_shape','CMS_hgg_pdfWeight_*shape']
-TheorySystGroups_rgx['Underlying event and parton shower'] = []
+TheorySystGroups_rgx['Underlying event and parton shower'] = ['UnderlyingEvent_norm','PartonShower_norm']
 
 OtherSystGroups_rgx = od()
 #OtherSystGroups_rgx['Background modelling'] = ['shapeBkg_*norm','env_*']
@@ -219,6 +220,8 @@ if opt.inputExpJson != '':
   for gr, systs in ExpSystGroups.iteritems():
     ExpSystVals_exp[gr] = {}
     print " --> %s"%gr
+    #if gr == "Photon identification":
+    #  systs = ['CMS_hgg_phoIdMva']#`_2016','CMS_hgg_phoIdMva_2017','CMS_hgg_phoIdMva_2018']
     # Loop over pois
     for poi in opt.pois.split(","):
       u_up, u_down = 0, 0
@@ -244,12 +247,21 @@ if opt.inputExpJson != '':
                 u_up += b*b
                 u_down += a*a
       print "   * %s: (+%.4f,-%.4f)"%(poi,math.sqrt(u_up),math.sqrt(u_down))
-      ExpSystVals_exp[gr]['%s_up'%poi] = math.sqrt(u_up)
-      ExpSystVals_exp[gr]['%s_down'%poi] = math.sqrt(u_down)
+      if( poi == "r_ggH")&( gr in ['Lepton ID and reconstruction','B Tagging','MET'] ):
+        ExpSystVals_exp[gr]['%s_up'%poi] = 0.0005
+        ExpSystVals_exp[gr]['%s_down'%poi] = 0.0005
+      else:
+        ExpSystVals_exp[gr]['%s_up'%poi] = math.sqrt(u_up)
+        ExpSystVals_exp[gr]['%s_down'%poi] = math.sqrt(u_down)
 
   for gr, systs in TheorySystGroups.iteritems():
     TheorySystVals_exp[gr] = {}
     print " --> %s"%gr
+    # No UEPS for expected: copy 
+    #if gr == "Underlying event and parton shower":
+    #  for k, v in TheorySystVals[gr].iteritems():
+    #    TheorySystVals_exp[gr][k] = v*np.random.normal(1,0.2)
+    #else: 
     # Loop over pois
     for poi in opt.pois.split(","):
       u_up, u_down = 0, 0
@@ -488,6 +500,7 @@ lat.SetTextAlign(11)
 lat.SetNDC()
 lat.SetTextSize(0.04)
 lat.DrawLatex(2*(float(chunk_width)/canv_width),0.92,"#bf{CMS} #it{Preliminary}")
+#lat.DrawLatex(2*(float(chunk_width)/canv_width),0.92,"#bf{CMS}")
 lat2 = ROOT.TLatex()
 lat2.SetTextFont(42)
 lat2.SetTextAlign(31)
@@ -495,5 +508,5 @@ lat2.SetNDC()
 lat2.SetTextSize(0.04)
 lat2.DrawLatex(0.9,0.92,"137 fb^{-1} (13 TeV)")
 
-canv.Print("/eos/home-j/jlangfor/www/CMS/hgg/stxs_runII/May20/pass0/checks/syst_new.png")
-canv.Print("/eos/home-j/jlangfor/www/CMS/hgg/stxs_runII/May20/pass0/checks/syst_new.pdf")
+canv.Print("/eos/home-j/jlangfor/www/CMS/hgg/stxs_runII/Jul20/pass0/checks/syst_new.png")
+canv.Print("/eos/home-j/jlangfor/www/CMS/hgg/stxs_runII/Jul20/pass0/checks/syst_new.pdf")
