@@ -109,6 +109,12 @@ for mode,pois in modes.iteritems():
       theHist.GetXaxis().SetLabelSize(0.03)
       theHist.GetYaxis().SetLabelSize(0.03)
       theHist.SetMarkerSize(0.7)
+  elif mode.count('stage0'):
+    theHist.GetXaxis().LabelsOption("h")
+    theHist.GetYaxis().SetLabelOffset(0.007)
+    theHist.SetMarkerSize(1.5)
+    theHist.GetXaxis().SetLabelSize(0.05)
+    theHist.GetYaxis().SetLabelSize(0.05)
   else:
     theHist.GetYaxis().SetLabelOffset(0.007)  
     theHist.SetMarkerSize(1.5)
@@ -119,6 +125,7 @@ for mode,pois in modes.iteritems():
   latex.SetTextAlign(32)
   latex.SetTextSize(0.05)
   latex.DrawLatex(1.00-canv.GetRightMargin()-0.02,1.00-canv.GetTopMargin()-0.06,'#bf{CMS} #it{Preliminary}')
+  #latex.DrawLatex(1.00-canv.GetRightMargin()-0.02,1.00-canv.GetTopMargin()-0.06,'#bf{CMS}')
   latex.SetTextSize(0.04)
   latex.DrawLatex(1.00-canv.GetRightMargin()-0.02,1.00-canv.GetTopMargin()-0.12,'%2.0f fb^{-1} (13 TeV)'%lumi)
   latex.DrawLatex(1.00-canv.GetRightMargin()-0.02,1.00-canv.GetTopMargin()-0.18,'H#rightarrow#gamma#gamma')

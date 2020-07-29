@@ -45,7 +45,14 @@ for fidx in range(len(fits)):
       mvcmd = "cd runFits%s_%s; mv higgsCombine_%s_%s.MultiDimFit.mH125.root %s_%s.root; cd .."%(opt.ext,opt.mode,_name,poi,_name,poi)
       print " --> Storing best fit: runFits%s_%s/%s_%s.root"%(opt.ext,opt.mode,_name,poi)
       run(mvcmd)
-  if( _fit.split(":")[0] == "profile1D")|( _fit.split(":")[0] == "scan1D" ):
+
+  elif( _fit.split(":")[0] == "fixed" ):
+    for poi in _fitpois:
+      mvcmd = "cd runFits%s_%s; mv higgsCombine_%s_%s.MultiDimFit.mH125.root %s.root; cd .."%(opt.ext,opt.mode,_name,poi,_name)
+      print " --> Storing fixed point: runFits%s_%s/%s.root"%(opt.ext,opt.mode,_name)
+      run(mvcmd)
+
+  elif( _fit.split(":")[0] == "profile1D")|( _fit.split(":")[0] == "scan1D" ):
     for poi in _fitpois:
       haddcmd = "cd runFits%s_%s; hadd -f %s_%s.root higgsCombine_%s_%s.POINTS.*.*.root; cd .."%(opt.ext,opt.mode,_name,poi,_name,poi)
       run(haddcmd)

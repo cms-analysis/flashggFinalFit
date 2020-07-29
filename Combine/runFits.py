@@ -5,6 +5,7 @@ import re
 from optparse import OptionParser
 import glob
 import json
+from nuisances import allConstrainedNuisances
 
 print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG SUBMIT FITS RUN II ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ "
 def leave():
@@ -17,8 +18,10 @@ def run(cmd):
 
 exp_opts = '--expectSignal 1 -t -1'
 common_opts = '--cminDefaultMinimizerStrategy 0 --X-rtd MINIMIZER_freezeDisassociatedParams --X-rtd MINIMIZER_multiMin_hideConstants --X-rtd MINIMIZER_multiMin_maskConstraints --X-rtd MINIMIZER_multiMin_maskChannels=2'
+#common_opts = '--cminDefaultMinimizerStrategy 0'
 #job_opts = '--job-mode SGE --sub-opts "-q hep.q -l h_rt=3:0:0 -l h_vmem=24G -pe hep.pe 2"'
 job_opts = '--job-mode condor --sub-opts=\'+JobFlavour = \"workday\"\''
+#job_opts = '--job-mode condor --sub-opts=\'+JobFlavour = \"testmatch\"\''
 
 def getPdfIndicesFromJson(pdfjson):
   pdfStr = "--setParameters "
@@ -61,13 +64,26 @@ for fidx in range(len(fits)):
 
   _points = points[fidx]
   _fit_opts = fit_opts[fidx]
+
+  # Replace ALL by allConstrainedNuisances
+  if "ALL" in _fit_opts: _fit_opts = re.sub("ALL",allConstrainedNuisances,_fit_opts)
+
+
   if opt.dryRun: _fit_opts += " --dry-run"
   _name = "%s_%s"%(_fit.split(":")[0],_fit.split(":")[1])
-  if opt.doObserved: _name += "_obs"
-  pdf_opts = getPdfIndicesFromJson("pdfindex%s.json"%opt.ext) if opt.setPdfIndices else ''
+  if opt.doObserved: 
+    _name += "_obs"
+    pdf_opts = getPdfIndicesFromJson("pdfindex%s_observed.json"%opt.ext) if opt.setPdfIndices else ''
+  else: pdf_opts = getPdfIndicesFromJson("pdfindex%s.json"%opt.ext) if opt.setPdfIndices else ''
   # File to load workspace
   if opt.snapshotWSFile != '': d_opts = '-d %s --snapshotName MultiDimFit'%opt.snapshotWSFile
   else: d_opts = '-d ../Datacard%s_%s.root'%(opt.ext,opt.mode)
+
+  # If setParameters already in _fit_opts then add to fit opts and set pdfOpts = ''
+  if( "setParameters" in _fit_opts )&( pdf_opts != '' ):
+    pdfstr = re.sub("--setParameters ","",pdf_opts)
+    _fit_opts = re.sub("--setParameters ","--setParameters %s,"%pdfstr,_fit_opts)
+    pdf_opts = ''
 
   # For best fit point
   if _fit.split(":")[0] == "bestfit":
@@ -82,6 +98,21 @@ for fidx in range(len(fits)):
     for poi in _fitpois:
       fitcmd = "cd runFits%s_%s; combineTool.py --task-name %s_%s -M MultiDimFit -m 125 %s --floatOtherPOIs 1 %s -n _%s_%s -P %s --algo singles %s %s %s %s; cd .."%(opt.ext,opt.mode,_name,poi,d_opts,exp_opts,_name,poi,poi,_fit_opts,pdf_opts,common_opts,job_opts)
       run(fitcmd)
+
+  # For fixed point
+  if _fit.split(":")[0] == "fixed":
+    if "statonly" in _fit.split(":")[1]: _fit_opts += " --freezeParameters allConstrainedNuisances"
+    for poi in _fitpois:
+      fitcmd = "cd runFits%s_%s; combineTool.py --task-name %s_%s -M MultiDimFit -m 125 %s --floatOtherPOIs 1 %s -n _%s_%s --algo fixed %s %s %s %s; cd .."%(opt.ext,opt.mode,_name,poi,d_opts,exp_opts,_name,poi,_fit_opts,pdf_opts,common_opts,job_opts)
+      run(fitcmd)
+
+  # For asymptotic limit
+  if _fit.split(":")[0] == "AsymptoticLimit":
+    if "statonly" in _fit.split(":")[1]: _fit_opts += " --freezeParameters allConstrainedNuisances"
+    for poi in _fitpois:
+      fitcmd = "cd runFits%s_%s; combineTool.py --task-name %s_%s -M AsymptoticLimits -m 125 %s %s -n _%s_%s --redefineSignalPOI %s %s %s %s %s; cd .."%(opt.ext,opt.mode,_name,poi,d_opts,exp_opts,_name,poi,poi,_fit_opts,pdf_opts,common_opts,job_opts)
+      run(fitcmd)
+
 
   # For 1D scan when profiling other pois
   elif _fit.split(":")[0] == "profile1D":

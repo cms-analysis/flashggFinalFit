@@ -168,8 +168,8 @@ def formatRatio(h):
     h.GetYaxis().SetRangeUser(0.4, 1.6)
 
 def drawCMS(onTop=False):
-    #text='#bf{CMS} #it{Preliminary}  H#rightarrow#gamma#gamma'
-    text='#bf{CMS} #it{Simulation}  H#rightarrow#gamma#gamma'
+    #text='#bf{CMS} #it{Simulation}  H#rightarrow#gamma#gamma'
+    text='#bf{CMS} #scale[0.75]{#it{Simulation Preliminary}  H#rightarrow#gamma#gamma}'
     latex = TLatex()
     latex.SetNDC()
     latex.SetTextFont(42)

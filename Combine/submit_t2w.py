@@ -18,6 +18,7 @@ def get_options():
   parser.add_option('--common_opts',dest='common_opts', default="-m 125 higgsMassRange=122,128", help='Common options')
   parser.add_option('--batch', dest='batch', default='IC', help="Batch system [IC,condor]")
   parser.add_option('--queue', dest='queue', default='workday', help="Condor queue")
+  parser.add_option('--ncpus', dest='ncpus', default=4, type='int', help="Number of cpus")
   parser.add_option('--dryRun', dest='dryRun', action="store_true", default=False, help="Only create submission files")
   return parser.parse_args()
 (opt,args) = get_options()
@@ -48,7 +49,7 @@ if opt.batch == 'condor':
   f_cdr.write("error               = %s/src/flashggFinalFit/Combine/t2w_jobs/t2w_%s%s.sh.err\n"%(os.environ['CMSSW_BASE'],opt.mode,opt.ext))
   f_cdr.write("log                 = %s/src/flashggFinalFit/Combine/t2w_jobs/t2w_%s%s.sh.log\n"%(os.environ['CMSSW_BASE'],opt.mode,opt.ext))
   f_cdr.write("+JobFlavour         = \"%s\"\n"%opt.queue)
-  f_cdr.write("RequestCpus         = 4\n")
+  f_cdr.write("RequestCpus         = %g\n"%opt.ncpus)
   f_cdr.write("queue\n")
   f_cdr.close()
 

@@ -14,6 +14,13 @@ def leave():
   print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG THU BANDS RUN II (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ "
   sys.exit(1)
 
+paramMergingScheme_stage0 = od()
+paramMergingScheme_stage0["r_ggH"] = ['bbH','ggH_0J_PTH_0_10','ggZH_had_0J_PTH_0_10','ggH_0J_PTH_GT10','ggZH_had_0J_PTH_GT10','ggH_1J_PTH_0_60','ggZH_had_1J_PTH_0_60','ggH_1J_PTH_60_120','ggZH_had_1J_PTH_60_120','ggH_1J_PTH_120_200','ggZH_had_1J_PTH_120_200','ggH_GE2J_MJJ_0_350_PTH_0_60','ggZH_had_GE2J_MJJ_0_350_PTH_0_60','ggH_GE2J_MJJ_0_350_PTH_60_120','ggZH_had_GE2J_MJJ_0_350_PTH_60_120','ggH_GE2J_MJJ_0_350_PTH_120_200','ggZH_had_GE2J_MJJ_0_350_PTH_120_200','ggH_PTH_200_300','ggZH_had_PTH_200_300','ggH_PTH_300_450','ggH_PTH_450_650','ggH_PTH_GT650','ggZH_had_PTH_300_450','ggZH_had_PTH_450_650','ggZH_had_PTH_GT650','ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','ggZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','ggZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','ggH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','ggZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','ggH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25','ggZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25']
+paramMergingScheme_stage0["r_qqH"] = ['qqH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','WH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','ZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','qqH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','WH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','ZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','qqH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','WH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','ZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','qqH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25','WH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25','ZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25','qqH_GE2J_MJJ_60_120','WH_had_GE2J_MJJ_60_120','ZH_had_GE2J_MJJ_60_120','qqH_GE2J_MJJ_GT350_PTH_GT200','WH_had_GE2J_MJJ_GT350_PTH_GT200','ZH_had_GE2J_MJJ_GT350_PTH_GT200']
+paramMergingScheme_stage0["r_WH_lep"] = ['WH_lep_PTV_0_75','WH_lep_PTV_75_150','WH_lep_PTV_150_250_0J','WH_lep_PTV_150_250_GE1J','WH_lep_PTV_GT250']
+paramMergingScheme_stage0["r_ZH_lep"] = ['ZH_lep_PTV_0_75','ZH_lep_PTV_75_150','ZH_lep_PTV_150_250_0J','ZH_lep_PTV_150_250_GE1J','ZH_lep_PTV_GT250','ggZH_ll_PTV_0_75','ggZH_ll_PTV_75_150','ggZH_ll_PTV_150_250_0J','ggZH_ll_PTV_150_250_GE1J','ggZH_ll_PTV_GT250','ggZH_nunu_PTV_0_75','ggZH_nunu_PTV_75_150','ggZH_nunu_PTV_150_250_0J','ggZH_nunu_PTV_150_250_GE1J','ggZH_nunu_PTV_GT250']
+paramMergingScheme_stage0["r_ttH"] = ['ttH_PTH_0_60','ttH_PTH_60_120','ttH_PTH_120_200','ttH_PTH_200_300','ttH_PTH_GT300']
+paramMergingScheme_stage0["r_tH"] = ['tHq','tHW']
 
 paramMergingScheme_minimal = od()
 paramMergingScheme_minimal["r_ggH_0J_low"] = ['ggH_0J_PTH_0_10','ggZH_had_0J_PTH_0_10']
@@ -66,9 +73,10 @@ theory_systematics = [
     'THU_qqH_Yield','THU_qqH_PTH200','THU_qqH_MJJ60','THU_qqH_MJJ120','THU_qqH_MJJ350','THU_qqH_MJJ700','THU_qqH_MJJ1000','THU_qqH_MJJ1500','THU_qqH_PTHJJ25','THU_qqH_JET01','pdf_Higgs_qqH','alphaS_qqH',
     'QCDscale_VH','pdf_Higgs_VH','alphaS_VH',
     'QCDscale_ttH','pdf_Higgs_ttH','alphaS_ttH',
-    'QCDscale_tHq','pdf_Higgs_tHq','alphaS_tHq'
-    'QCDscale_tHW','pdf_Higgs_tHW','alphaS_tHW'
-    'QCDscale_bbH'
+    'QCDscale_tHq','pdf_Higgs_tHq','alphaS_tHq',
+    'QCDscale_tHW','pdf_Higgs_tHW','alphaS_tHW',
+    'QCDscale_bbH',
+    'UnderlyingEvent_norm','PartonShower_norm'
 ]
 
 proc_map = {"GG2H":"ggH","VBF":"qqH","WH2HQQ":"WH_had","ZH2HQQ":"ZH_had","GG2HQQ":"ggZH_had","QQ2HLNU":"WH_lep","QQ2HLL":"ZH_lep","GG2HLL":"ggZH_ll","GG2HNUNU":"ggZH_nunu","TTH":"ttH","BBH":"bbH","THQ":"tHq","THW":"tHW","TH":"tHq"}
@@ -78,6 +86,7 @@ def get_options():
   parser.add_option('--mode', dest='mode', default='maximal', help="Parameter merging scenario e.g. maximal")
   parser.add_option("--inputWS", dest="inputWS", default='', help="Input workspace")
   parser.add_option('--loadSnapshot', dest='loadSnapshot', default='', help="Load snapshot")
+  parser.add_option('--setParameter', dest='setParameter', default='', help="Set parameter e.g. MH=125.38,r=1.10")
   parser.add_option("--year", dest="year", default='2018', help="Year to extract THU from")
   return parser.parse_args()
 (opt,args) = get_options()
@@ -91,6 +100,7 @@ def rooiter(x):
 
 if opt.mode == "maximal": pms = paramMergingScheme_maximal
 elif opt.mode == "minimal": pms = paramMergingScheme_minimal
+elif opt.mode == "stage0": pms = paramMergingScheme_stage0
 else:
   print " --> [ERROR] %s mode not supported. Leaving"%mode
   sys.exit(1)
@@ -102,6 +112,11 @@ pois = pms.keys()
 f = ROOT.TFile(opt.inputWS)
 w = f.Get("w")
 if opt.loadSnapshot != '': w.loadSnapshot("MultiDimFit")
+if opt.setParameter != '':
+  for paramMap in opt.setParameter.split(","):
+    p, val = paramMap.split("=")
+    w.var(p).setVal(float(val))
+    print " --> Setting value of %s in workspace to be %s"%(p,val)
 print " --> Extracting cross sections for best fit mH = %.2f GeV"%w.var("MH").getVal()
 # Extract all XS x BR
 br_hgg = w.function("fbr_13TeV").getVal()

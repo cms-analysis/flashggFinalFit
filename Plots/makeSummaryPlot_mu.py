@@ -53,6 +53,16 @@ default_bar_styles = {
         'LineColor': ROOT.kGreen+2,
         'MarkerSize': 0
     },
+    'WH_Error': {
+        'LineWidth': 3,
+        'LineColor': ROOT.kGreen+1,
+        'MarkerSize': 0
+    },
+    'ZH_Error': {
+        'LineWidth': 3,
+        'LineColor': ROOT.kGreen+3,
+        'MarkerSize': 0
+    },
     'top_Error': {
         'LineWidth': 3,
         'LineColor': ROOT.kPink+6,
@@ -60,7 +70,7 @@ default_bar_styles = {
     },
     'inclusive_Error': {
         'LineWidth': 3,
-        'LineColor': ROOT.kGray+1,
+        'LineColor': ROOT.kBlack,
         'MarkerSize': 0
     },
     'OtherLimit': {
@@ -94,6 +104,16 @@ default_bar_styles = {
         'LineColor': ROOT.kGreen+2,
         'MarkerSize': 0
     },
+    'WH_Stat': {
+        'LineWidth': 3,
+        'LineColor': ROOT.kGreen+1,
+        'MarkerSize': 0
+    },
+    'ZH_Stat': {
+        'LineWidth': 3,
+        'LineColor': ROOT.kGreen+3,
+        'MarkerSize': 0
+    },
     'top_Stat': {
         'LineWidth': 3,
         'LineColor': ROOT.kPink+6,
@@ -101,7 +121,7 @@ default_bar_styles = {
     },
     'inclusive_Stat': {
         'LineWidth': 3,
-        'LineColor': ROOT.kGray+1,
+        'LineColor': ROOT.kBlack,
         'MarkerSize': 0
     },
     'Syst': {
@@ -312,7 +332,8 @@ if __name__ == "__main__":
     parser.add_argument('--x-range', default='0.25,3.5', help='Label next to the CMS logo')
     parser.add_argument('--left-margin', default=0.2, type=float, help='Left pad margin')
     parser.add_argument('--bottom-margin', default=0.1, type=float, help='Bottom pad margin')
-    parser.add_argument('--subline', default='137 fb^{-1} (13 TeV)', help='Label next to the CMS logo')
+    #parser.add_argument('--subline', default='137 fb^{-1} (13 TeV)', help='Label next to the CMS logo')
+    parser.add_argument('--subline', default='', help='Label next to the CMS logo')
     parser.add_argument('--extra-text', nargs='*', help='Text:SIZE:X:Y')
     parser.add_argument('--frame-frac', type=float, default=0.7, help='Fraction of the frame y height the graphs will occupy')
     parser.add_argument('--table', default=None, help='Draw table of numeric values, with opts SIZE')
@@ -332,6 +353,7 @@ if __name__ == "__main__":
     ROOT.gStyle.SetEndErrorSize(7)
 
     canv = ROOT.TCanvas(args.output, args.output)
+    canv.SetTickx()
     pads = plot.OnePad()
 
     poilist = []
@@ -391,6 +413,7 @@ if __name__ == "__main__":
     valid_checks = [X for X in args.require_valid.split(',') if X != '']
 
     productionModes = ['dummy','ggH','VBF','VH','top','inclusive']
+    #productionModes = ['dummy','ggH','VBF','WH','ZH','top','inclusive']
     if args.doSTXSColour is not None:
       for pm in productionModes:
         for bar in bars:
@@ -447,15 +470,31 @@ if __name__ == "__main__":
         else: legend.AddEntry(graphs[i], default_bar_labels[bar], 'LP')
     legend.Draw()
 
-    plot.DrawCMSLogo(pads[0], 'CMS',
-                     args.cms_label, 11, 0.045, 0.035, 1.2, '', 1.3)
+    plot.DrawCMSLogo(pads[0], 'CMS #scale[0.75]{#it{#bf{%s}}}'%args.cms_label,
+                     '', 11, 0.045, 0.035, 1.2, '', 1.3)
 
     hggtxt = ROOT.TLatex()
+    pvaltxt = ROOT.TLatex()
     stxstxt = ROOT.TLatex()
     plot.Set(hggtxt, TextFont=42, TextSize=0.04, TextAlign=12)
+    plot.Set(pvaltxt, TextFont=42, TextSize=0.03, TextAlign=12)
     plot.Set(stxstxt, TextFont=42, TextSize=0.025, TextAlign=12, TextColor=ROOT.kGray+2)
-    if "observed" in args.input[0].split(":")[0]: hggtxt.DrawLatex(0.4, YEntryHeight(N, hframe) * (N+0.4), "H#rightarrow#gamma#gamma, #hat{m}_{H}= 126.1 GeV")
-    else: hggtxt.DrawLatex(0.4, YEntryHeight(N, hframe) * (N+0.4), "H#rightarrow#gamma#gamma, m_{H}= 125.0 GeV")
+    if "extended" in args.input[0].split(":")[1]: 
+      xinset = 0.15
+      yshift = 1.2
+      pval = "59"
+    else: 
+      xinset = 0.4
+      yshift = 1
+      pval = "53"
+    if "observed" in args.input[0].split(":")[0]: 
+      hggtxt.DrawLatex(xinset, YEntryHeight(N, hframe) * (N+yshift), "H#rightarrow#gamma#gamma, 137 fb^{-1} (13 TeV)")
+      #pvaltxt.DrawLatex(xinset, YEntryHeight(N, hframe) * (N+0.4), "#it{p}_{SM} = 50%")
+      pvaltxt.DrawLatex(xinset, YEntryHeight(N, hframe) * (N+0.4), "m_{H} = 125.38 GeV,  #it{p}_{SM} = %s%%"%pval)
+      pvaltxt.DrawLatex(xinset, YEntryHeight(N, hframe) * 0.5, "#it{p}_{SM} = 74%")
+    else: 
+      hggtxt.DrawLatex(xinset, YEntryHeight(N, hframe) * (N+yshift), "H#rightarrow#gamma#gamma, 137 fb^{-1} (13 TeV)")
+      pvaltxt.DrawLatex(xinset, YEntryHeight(N, hframe) * (N+0.4), "m_{H} = 125.38 GeV")
     #stxstxt.DrawLatex( 1.1, YEntryHeight(N, hframe) * (N+0.5), "STXS stage 1.2 (reduced)")
 
     if args.table is not None:

@@ -89,6 +89,7 @@ for pm in ['ggH','qqH','WH','ZH','ttH','tH']:
 
   grs_ratio[pm] = ROOT.TGraphAsymmErrors()
   grs_ratio[pm].SetLineColor(colorMap[pm])
+  grs_ratio[pm].SetFillColor(colorMap[pm])
   grs_ratio[pm].SetLineWidth(2)
   grs_ratio[pm].SetMarkerSize(0.2)
   grs_ratio[pm].SetMarkerStyle(25)
@@ -129,7 +130,7 @@ for poi_idx in range(len(params[opt.mode])):
   xsbr = xsbr_theory[poi]['nominal']
   pm = poi.split("_")[1]
   grs_nominal[pm].SetPoint(grs_nominal[pm].GetN(),poi_idx+0.5,results[poi]['Val']*xsbr)
-  grs_nominal[pm].SetPointError(grs_nominal[pm].GetN()-1,0.025,0.025,abs(results[poi]['ErrorLo']*xsbr),abs(results[poi]['ErrorHi']*xsbr))
+  grs_nominal[pm].SetPointError(grs_nominal[pm].GetN()-1,0.015,0.015,abs(results[poi]['ErrorLo']*xsbr),abs(results[poi]['ErrorHi']*xsbr))
   grs_nominal_systonly[pm].SetPoint(grs_nominal_systonly[pm].GetN(),poi_idx+0.5,results[poi]['Val']*xsbr)
   grs_nominal_systonly[pm].SetPointError(grs_nominal_systonly[pm].GetN()-1,0.15,0.15,abs(results[poi]['SystLo']*xsbr),abs(results[poi]['SystHi']*xsbr))
   grs_nominal_bf[pm].SetPoint(grs_nominal_bf[pm].GetN(),poi_idx+0.5,results[poi]['Val']*xsbr)
@@ -138,7 +139,7 @@ for poi_idx in range(len(params[opt.mode])):
   grs_nominal_theory[pm].SetPointError(grs_nominal_theory[pm].GetN()-1,0.35,0.35,xsbr_theory[poi]['Low01Sigma'],xsbr_theory[poi]['High01Sigma'])
 
   grs_ratio[pm].SetPoint(grs_ratio[pm].GetN(),poi_idx+0.5,results[poi]['Val'])
-  grs_ratio[pm].SetPointError(grs_ratio[pm].GetN()-1,0,0,abs(results[poi]['ErrorLo']),abs(results[poi]['ErrorHi']))
+  grs_ratio[pm].SetPointError(grs_ratio[pm].GetN()-1,0.015,0.015,abs(results[poi]['ErrorLo']),abs(results[poi]['ErrorHi']))
   grs_ratio_systonly[pm].SetPoint(grs_ratio_systonly[pm].GetN(),poi_idx+0.5,results[poi]['Val'])
   grs_ratio_systonly[pm].SetPointError(grs_ratio_systonly[pm].GetN()-1,0.15,0.15,abs(results[poi]['SystLo']),abs(results[poi]['SystHi']))
   grs_ratio_bf[pm].SetPoint(grs_ratio_bf[pm].GetN(),poi_idx+0.5,results[poi]['Val'])
@@ -165,8 +166,8 @@ for gr in grs_ratio.itervalues():
   if max(gr.GetY()) > ratio_max: ratio_max = max(gr.GetY())
 
 # Create canvas
-canv = ROOT.TCanvas("canv","canv",1500,900)
-pad1 = ROOT.TPad("pad1","pad1",0,0.35,1,1)
+canv = ROOT.TCanvas("canv","canv",1000,900)
+pad1 = ROOT.TPad("pad1","pad1",0,0.25,1,1)
 pad1.SetTickx()
 pad1.SetTicky()
 pad1.SetLogy()
@@ -174,13 +175,13 @@ pad1.SetTopMargin(0.14)
 pad1.SetBottomMargin(0.18)
 #pad1.SetBottomMargin(0.28)
 pad1.Draw()
-pad2 = ROOT.TPad("pad2","pad2",0,0,1,0.45)
+pad2 = ROOT.TPad("pad2","pad2",0,0,1,0.37)
 pad2.SetTickx()
 pad2.SetTicky()
 pad2.SetTopMargin(0.000001)
-pad2.SetBottomMargin(0.5)
+pad2.SetBottomMargin(0.2)
 pad2.Draw()
-padSizeRatio = 0.65/0.45
+padSizeRatio = 0.75/0.37
 
 # FUnction to extract label string
 def extractLabelStr(p,res,theory):
@@ -209,7 +210,7 @@ haxes.GetYaxis().SetTitle("#sigma_{obs} #bf{#it{#Beta}} [fb]")
 haxes.GetYaxis().SetTitleSize(0.06)
 haxes.GetYaxis().SetTitleOffset(0.7)
 haxes.SetMaximum(nominal_max*5)
-haxes.SetMinimum(nominal_min*0.3)
+haxes.SetMinimum(nominal_min*0.1)
 haxes.SetLineWidth(0)
 haxes.Draw()
 # Vertical lines for each poi
@@ -224,7 +225,7 @@ for gr in grs_nominal.itervalues(): gr.Draw("SAME E2P")
 if "minimal" in opt.mode: grs_nominal_VBFlike.Draw("SAME ZP")
 #for gr in grs_nominal_bf.itervalues(): gr.Draw("SAME E2")
 # Add legend
-leg = ROOT.TLegend(0.67,0.55,0.87,0.85)
+leg = ROOT.TLegend(0.52,0.55,0.87,0.85)
 leg.SetFillColor(0)
 leg.SetFillStyle(0)
 leg.SetLineColor(0)
@@ -266,7 +267,7 @@ lat1.SetTextAlign(21)
 boxes = {}
 #lat1.SetNDC()
 if "maximal" in opt.mode: lat1.SetTextSize(0.032)
-elif "stage0" in opt.mode: lat1.SetTextSize(0.04)
+elif "stage0" in opt.mode: lat1.SetTextSize(0.035)
 else: lat1.SetTextSize(0.024)
 for bidx in range(1,haxes.GetNbinsX()+1):
   poi = params[opt.mode][bidx-1]
@@ -279,7 +280,7 @@ for bidx in range(1,haxes.GetNbinsX()+1):
   if bidx in [1,haxes.GetNbinsX()]:
     boxes["b%g"%bidx] = ROOT.TBox(xval-0.37,yval*0.8,xval+0.42,yval*1.4)
     boxes["b%g"%bidx].SetFillColor(0)
-    boxes["b%g"%bidx].Draw("Same")
+    #boxes["b%g"%bidx].Draw("Same")
 
   lat1.DrawLatex(xval,yval,label_str)
     
@@ -288,8 +289,8 @@ lat2 = ROOT.TLatex()
 lat2.SetTextFont(42)
 lat2.SetTextAlign(11)
 lat2.SetNDC()
-lat2.SetTextSize(0.04)
-lat2.DrawLatex(0.13,0.39,"H#rightarrow#gamma#gamma, |y_{H}| < 2.5")
+lat2.SetTextSize(0.032)
+lat2.DrawLatex(0.15,0.39,"H#rightarrow#gamma#gamma, |y_{H}| < 2.5")
 if "minimal" in opt.mode: 
   lat2.DrawLatex(0.13,0.32,"STXS stage 1.2: minimal")
   if "obs" in opt.inputJson: lat2.DrawLatex(0.13,0.25,"m_{H} = 125.38 GeV,  #it{p}_{SM} = 85%")
@@ -299,8 +300,8 @@ elif "maximal" in opt.mode:
   if "obs" in opt.inputJson: lat2.DrawLatex(0.13,0.25,"m_{H} = 125.38 GeV,  #it{p}_{SM} = 62%")
   else: lat2.DrawLatex(0.13,0.25,"m_{H} = 125.38 GeV")
 elif "stage0" in opt.mode:
-  lat2.DrawLatex(0.13,0.32,"STXS stage 0")
-  if "obs" in opt.inputJson: lat2.DrawLatex(0.13,0.25,"m_{H} = 125.38 GeV,  #it{p}_{SM} = 66%")
+  lat2.DrawLatex(0.15,0.32,"STXS stage 0")
+  if "obs" in opt.inputJson: lat2.DrawLatex(0.15,0.25,"m_{H} = 125.38 GeV,  #it{p}_{SM} = 66%")
   else: lat2.DrawLatex(0.13,0.25,"m_{H} = 125.38 GeV")
 
 #if "obs" in opt.inputJson: lat1.DrawLatex(0.13,0.8,"H#rightarrow#gamma#gamma")
@@ -312,10 +313,10 @@ haxes_r = ROOT.TH1F("haxes_r","",nPOIs,0,nPOIs)
 for bidx in range(1,haxes_r.GetNbinsX()+1): haxes_r.GetXaxis().SetBinLabel(bidx,Translate(params[opt.mode][bidx-1],translatePOIs))
 if opt.mode == "stage1p2_minimal": haxes_r.GetXaxis().SetLabelSize(0.045*padSizeRatio)
 elif opt.mode == "stage1p2_maximal": haxes_r.GetXaxis().SetLabelSize(0.06*padSizeRatio)
-else: haxes_r.GetXaxis().SetLabelSize(0.08*padSizeRatio)
+else: haxes_r.GetXaxis().SetLabelSize(0.07*padSizeRatio)
 haxes_r.GetXaxis().SetTickSize(0)
 haxes_r.GetXaxis().SetLabelOffset(0.02)
-haxes_r.GetXaxis().LabelsOption("v")
+haxes_r.GetXaxis().LabelsOption("h")
 haxes_r.GetYaxis().SetLabelSize(0.04*padSizeRatio)
 haxes_r.GetYaxis().SetTitle("Ratio to SM")
 haxes_r.GetYaxis().SetTitleSize(0.06*padSizeRatio)
@@ -353,7 +354,7 @@ for i in range(len(yvals)):
 # Draw graphs
 for gr in grs_ratio_theory.itervalues(): gr.Draw("SAME E2")
 for gr in grs_ratio_systonly.itervalues(): gr.Draw("SAME E2")
-for gr in grs_ratio.itervalues(): gr.Draw("SAME ZP")
+for gr in grs_ratio.itervalues(): gr.Draw("SAME E2P")
 if "minimal" in opt.mode: grs_ratio_VBFlike.Draw("SAME ZP")
 
 # Add text

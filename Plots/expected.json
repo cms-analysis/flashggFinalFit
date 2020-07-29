@@ -1,597 +1,702 @@
 {
     "mu":{
         "r_inclusive":{
-            "ErrorHi": 0.099,
-            "ErrorLo": -0.091,
-            "StatHi": 0.066,
+            "ErrorHi": 0.097,
+            "ErrorLo": -0.090,
+            "StatHi": 0.065,
             "StatLo": -0.065,
-            "SystHi": 0.041,
-            "SystLo": -0.037,
-            "TheoryHi": 0.060,
-            "TheoryLo": -0.052,
+            "SystHi": 0.037,
+            "SystLo": -0.033,
+            "TheoryHi": 0.062,
+            "TheoryLo": -0.054,
             "Val": 1.000
         },
         "r_ggH":{
-            "ErrorHi": 0.128,
-            "ErrorLo": -0.116,
-            "StatHi": 0.091,
+            "ErrorHi": 0.124,
+            "ErrorLo": -0.115,
+            "StatHi": 0.092,
             "StatLo": -0.091,
-            "SystHi": 0.045,
-            "SystLo": -0.038,
-            "TheoryHi": 0.078,
-            "TheoryLo": -0.060,
+            "SystHi": 0.038,
+            "SystLo": -0.033,
+            "TheoryHi": 0.074,
+            "TheoryLo": -0.061,
             "Val": 1.000
         },
         "r_VBF":{
-            "ErrorHi": 0.295,
-            "ErrorLo": -0.279,
-            "StatHi": 0.270,
-            "StatLo": -0.261,
-            "SystHi": 0.078,
-            "SystLo": -0.055,
-            "TheoryHi": 0.089,
-            "TheoryLo": -0.081,
+            "ErrorHi": 0.329,
+            "ErrorLo": -0.285,
+            "StatHi": 0.266,
+            "StatLo": -0.257,
+            "SystHi": 0.074,
+            "SystLo": -0.053,
+            "TheoryHi": 0.180,
+            "TheoryLo": -0.112,
             "Val": 1.000
         },
         "r_VH":{
-            "ErrorHi": 0.340,
-            "ErrorLo": -0.311,
-            "StatHi": 0.330,
-            "StatLo": -0.307,
-            "SystHi": 0.047,
-            "SystLo": -0.028,
-            "TheoryHi": 0.063,
-            "TheoryLo": -0.043,
+            "ErrorHi": 0.333,
+            "ErrorLo": -0.306,
+            "StatHi": 0.324,
+            "StatLo": -0.302,
+            "SystHi": 0.041,
+            "SystLo": -0.024,
+            "TheoryHi": 0.064,
+            "TheoryLo": -0.045,
             "Val": 1.000
         },
         "r_top":{
-            "ErrorHi": 0.304,
-            "ErrorLo": -0.262,
-            "StatHi": 0.274,
-            "StatLo": -0.254,
-            "SystHi": 0.050,
-            "SystLo": -0.034,
-            "TheoryHi": 0.122,
+            "ErrorHi": 0.301,
+            "ErrorLo": -0.258,
+            "StatHi": 0.267,
+            "StatLo": -0.249,
+            "SystHi": 0.060,
+            "SystLo": -0.040,
+            "TheoryHi": 0.125,
+            "TheoryLo": -0.058,
+            "Val": 1.000
+        }
+    },
+
+    "mu_extended":{
+        "r_inclusive":{
+            "ErrorHi": 0.098,
+            "ErrorLo": -0.090,
+            "StatHi": 0.065,
+            "StatLo": -0.064,
+            "SystHi": 0.037,
+            "SystLo": -0.033,
+            "TheoryHi": 0.063,
             "TheoryLo": -0.053,
             "Val": 1.000
-        }
-    },
-
-    "stage1p2_minimal":{
-        "r_ggH_0J_low":{
-            "TheoryHi":0.078,
-            "TheoryLo":-0.064,
-            "TheoryVal": 1.000,
-            "ErrorHi": 0.293,
-            "ErrorLo": -0.283,
-            "StatHi": 0.290,
-            "StatLo": -0.282,
-            "SystHi": 0.045,
+        },
+        "r_ggH":{
+            "ErrorHi": 0.125,
+            "ErrorLo": -0.114,
+            "StatHi": 0.090,
+            "StatLo": -0.090,
+            "SystHi": 0.037,
+            "SystLo": -0.033,
+            "TheoryHi": 0.078,
+            "TheoryLo": -0.061,
+            "Val": 1.000
+        },
+        "r_VBF":{
+            "ErrorHi": 0.329,
+            "ErrorLo": -0.284,
+            "StatHi": 0.265,
+            "StatLo": -0.256,
+            "SystHi": 0.076,
+            "SystLo": -0.060,
+            "TheoryHi": 0.180,
+            "TheoryLo": -0.107,
+            "Val": 1.000
+        },
+        "r_WH":{
+            "ErrorHi": 0.490,
+            "ErrorLo": -0.429,
+            "StatHi": 0.484,
+            "StatLo": -0.428,
+            "SystHi": 0.049,
             "SystLo": -0.024,
-
+            "TheoryHi": 0.058,
+            "TheoryLo": -0.030,
             "Val": 1.000
         },
-        "r_ggH_0J_high":{
-            "TheoryHi":0.066,
-            "TheoryLo":-0.066,
-            "TheoryVal": 1.000,
-            "ErrorHi": 0.189,
-            "ErrorLo": -0.181,
-            "StatHi": 0.182,
-            "StatLo": -0.176,
-            "SystHi": 0.052,
-            "SystLo": -0.041,
-
-            "Val": 1.000
-        },
-        "r_ggH_1J_low":{
-            "TheoryHi":0.139,
-            "TheoryLo":-0.139,
-            "TheoryVal": 1.000,
-            "ErrorHi": 0.501,
-            "ErrorLo": -0.382,
-            "StatHi": 0.493,
-            "StatLo": -0.380,
-            "SystHi": 0.084,
-            "SystLo": -0.033,
-
-            "Val": 1.000
-        },
-        "r_ggH_1J_med":{
-            "TheoryHi":0.140,
-            "TheoryLo":-0.139,
-            "TheoryVal": 1.000,
-            "ErrorHi": 0.302,
-            "ErrorLo": -0.294,
-            "StatHi": 0.293,
-            "StatLo": -0.289,
-            "SystHi": 0.071,
-            "SystLo": -0.051,
-
-            "Val": 1.000
-        },
-        "r_ggH_1J_high":{
-            "TheoryHi":0.194,
-            "TheoryLo":-0.193,
-            "TheoryVal": 1.000,
-            "ErrorHi": 0.487,
-            "ErrorLo": -0.470,
-            "StatHi": 0.479,
-            "StatLo": -0.467,
-            "SystHi": 0.088,
-            "SystLo": -0.057,
-
-            "Val": 1.000
-        },
-        "r_ggH_2J_low":{
-            "TheoryHi":0.236,
-            "TheoryLo":-0.236,
-            "TheoryVal": 1.000,
-            "ErrorHi": 1.522,
-            "ErrorLo": -1.000,
-            "StatHi": 1.509,
-            "StatLo": -1.000,
-            "SystHi": 0.202,
-            "SystLo": -0.000,
-
-            "Val": 1.000
-        },
-        "r_ggH_2J_med":{
-            "TheoryHi":0.227,
-            "TheoryLo":-0.227,
-            "TheoryVal": 1.000,
-            "ErrorHi": 0.627,
-            "ErrorLo": -0.596,
-            "StatHi": 0.619,
-            "StatLo": -0.594,
-            "SystHi": 0.097,
-            "SystLo": -0.055,
-
-            "Val": 1.000
-        },
-        "r_ggH_2J_high":{
-            "TheoryHi":0.254,
-            "TheoryLo":-0.254,
-            "TheoryVal": 1.000,
-            "ErrorHi": 0.534,
-            "ErrorLo": -0.524,
-            "StatHi": 0.529,
-            "StatLo": -0.523,
-            "SystHi": 0.072,
-            "SystLo": -0.033,
-
-            "Val": 1.000
-        },
-        "r_ggH_BSM_low":{
-            "TheoryHi":0.244,
-            "TheoryLo":-0.244,
-            "TheoryVal": 1.000,
-            "ErrorHi": 0.441,
-            "ErrorLo": -0.413,
-            "StatHi": 0.430,
-            "StatLo": -0.409,
-            "SystHi": 0.099,
-            "SystLo": -0.057,
-
-            "Val": 1.000
-        },
-        "r_ggH_BSM_high":{
-            "TheoryHi":0.324,
-            "TheoryLo":-0.324,
-            "TheoryVal": 1.000,
-            "ErrorHi": 0.635,
-            "ErrorLo": -0.584,
-            "StatHi": 0.619,
-            "StatLo": -0.580,
-            "SystHi": 0.142,
-            "SystLo": -0.069,
-
-            "Val": 1.000
-        },
-        "r_qqH_low_mjj_low_pthjj":{
-            "TheoryHi":0.104,
-            "TheoryLo":-0.104,
-            "TheoryVal": 1.000,
-            "ErrorHi": 0.740,
-            "ErrorLo": -0.698,
-            "StatHi": 0.733,
-            "StatLo": -0.698,
-            "SystHi": 0.105,
-            "SystLo": -0.031,
-
-            "Val": 1.000
-        },
-        "r_qqH_low_mjj_high_pthjj":{
-            "TheoryHi":0.156,
-            "TheoryLo":-0.155,
-            "TheoryVal": 1.000,
-            "ErrorHi": 1.359,
-            "ErrorLo": -1.000,
-            "StatHi": 1.345,
-            "StatLo": -1.000,
-            "SystHi": 0.193,
-            "SystLo": -0.000,
-
-            "Val": 1.000
-        },
-        "r_qqH_high_mjj_low_pthjj":{
-            "TheoryHi":0.059,
-            "TheoryLo":-0.058,
-            "TheoryVal": 1.000,
-            "ErrorHi": 0.466,
-            "ErrorLo": -0.435,
-            "StatHi": 0.458,
-            "StatLo": -0.432,
-            "SystHi": 0.085,
-            "SystLo": -0.050,
-
-            "Val": 1.000
-        },
-        "r_qqH_high_mjj_high_pthjj":{
-            "TheoryHi":0.112,
-            "TheoryLo":-0.112,
-            "TheoryVal": 1.000,
-            "ErrorHi": 1.300,
-            "ErrorLo": -1.000,
-            "StatHi": 1.282,
-            "StatLo": -1.000,
-            "SystHi": 0.217,
-            "SystLo": -0.000,
-
-            "Val": 1.000
-        },
-        "r_qqH_BSM":{
-            "TheoryHi":0.033,
-            "TheoryLo":-0.032,
-            "TheoryVal": 1.000,
-            "ErrorHi": 0.671,
-            "ErrorLo": -0.623,
-            "StatHi": 0.666,
-            "StatLo": -0.621,
-            "SystHi": 0.081,
-            "SystLo": -0.050,
-
-            "Val": 1.000
-        },
-        "r_qqH_VHhad":{
-            "TheoryHi":0.083,
-            "TheoryLo":-0.077,
-            "TheoryVal": 1.000,
-            "ErrorHi": 1.073,
-            "ErrorLo": -1.000,
-            "StatHi": 1.068,
-            "StatLo": -1.000,
-            "SystHi": 0.098,
-            "SystLo": -0.015,
-
-            "Val": 1.000
-        },
-        "r_WH_lep_low":{
-            "TheoryHi":0.029,
-            "TheoryLo":-0.028,
-            "TheoryVal": 1.000,
-            "ErrorHi": 1.248,
-            "ErrorLo": -1.000,
-            "StatHi": 1.245,
-            "StatLo": -1.000,
-            "SystHi": 0.081,
-            "SystLo": -0.000,
-
-            "Val": 1.000
-        },
-        "r_WH_lep_high":{
-            "TheoryHi":0.029,
-            "TheoryLo":-0.028,
-            "TheoryVal": 1.000,
-            "ErrorHi": 0.659,
-            "ErrorLo": -0.543,
-            "StatHi": 0.657,
-            "StatLo": -0.542,
-            "SystHi": 0.055,
-            "SystLo": -0.020,
-
-            "Val": 1.000
-        },
-        "r_ZH_lep":{
-            "TheoryHi":0.041,
-            "TheoryLo":-0.036,
-            "TheoryVal": 1.000,
-            "ErrorHi": 0.725,
-            "ErrorLo": -0.625,
-            "StatHi": 0.722,
-            "StatLo": -0.625,
-            "SystHi": 0.065,
-            "SystLo": -0.022,
-
-            "Val": 1.000
-        },
-        "r_ttH_low":{
-            "TheoryHi":0.071,
-            "TheoryLo":-0.100,
-            "TheoryVal": 1.000,
-            "ErrorHi": 0.941,
-            "ErrorLo": -0.790,
-            "StatHi": 0.937,
-            "StatLo": -0.790,
-            "SystHi": 0.079,
-            "SystLo": -0.019,
-
-            "Val": 1.000
-        },
-        "r_ttH_medlow":{
-            "TheoryHi":0.071,
-            "TheoryLo":-0.100,
-            "TheoryVal": 1.000,
-            "ErrorHi": 0.665,
-            "ErrorLo": -0.583,
-            "StatHi": 0.663,
-            "StatLo": -0.582,
+        "r_ZH":{
+            "ErrorHi": 0.686,
+            "ErrorLo": -0.592,
+            "StatHi": 0.674,
+            "StatLo": -0.589,
             "SystHi": 0.059,
-            "SystLo": -0.023,
-
+            "SystLo": -0.025,
+            "TheoryHi": 0.114,
+            "TheoryLo": -0.052,
             "Val": 1.000
         },
-        "r_ttH_medhigh":{
-            "TheoryHi":0.071,
-            "TheoryLo":-0.100,
-            "TheoryVal": 1.000,
-            "ErrorHi": 0.601,
-            "ErrorLo": -0.528,
-            "StatHi": 0.598,
-            "StatLo": -0.527,
-            "SystHi": 0.059,
-            "SystLo": -0.030,
 
-            "Val": 1.000
-        },
-        "r_ttH_high":{
-            "TheoryHi":0.071,
-            "TheoryLo":-0.100,
-            "TheoryVal": 1.000,
-            "ErrorHi": 0.663,
-            "ErrorLo": -0.670,
-            "StatHi": 0.658,
-            "StatLo": -0.667,
-            "SystHi": 0.079,
-            "SystLo": -0.065,
-
-            "Val": 1.000
-        },
-        "r_tH":{
-            "TheoryHi":0.066,
-            "TheoryLo":-0.129,
-            "TheoryVal": 1.000,
-            "ErrorHi": 3.806,
-            "ErrorLo": -1.000,
-            "StatHi": 3.775,
-            "StatLo": -1.000,
-            "SystHi": 0.481,
-            "SystLo": -0.000,
-
+        "r_top":{
+            "ErrorHi": 0.299,
+            "ErrorLo": -0.257,
+            "StatHi": 0.267,
+            "StatLo": -0.249,
+            "SystHi": 0.046,
+            "SystLo": -0.033,
+            "TheoryHi": 0.125,
+            "TheoryLo": -0.058,
             "Val": 1.000
         }
     },
 
-    "stage1p2_maximal":{
-        "r_ggH_0J_low":{
-            "TheoryHi":0.078,
-            "TheoryLo":-0.064,
-            "TheoryVal": 1.000,
-            "ErrorHi": 0.293,
-            "ErrorLo": -0.283,
-            "StatHi": 0.290,
-            "StatLo": -0.281,
-            "SystHi": 0.046,
-            "SystLo": -0.027,
-
-            "Val": 1.000
-        },
-        "r_ggH_0J_high":{
-            "TheoryHi":0.066,
+    "stage0":{
+        "r_ggH":{
+            "TheoryHi":0.067,
             "TheoryLo":-0.066,
             "TheoryVal": 1.000,
-            "ErrorHi": 0.189,
-            "ErrorLo": -0.181,
-            "StatHi": 0.182,
-            "StatLo": -0.176,
-            "SystHi": 0.051,
-            "SystLo": -0.042,
-
+            "ErrorHi": 0.101,
+            "ErrorLo": -0.098,
+            "StatHi": 0.094,
+            "StatLo": -0.093,
+            "SystHi": 0.038,
+            "SystLo": -0.0323,
             "Val": 1.000
         },
-        "r_ggH_1J_low":{
-            "TheoryHi":0.139,
-            "TheoryLo":-0.139,
+        "r_qqH":{
+            "TheoryHi":0.097,
+            "TheoryLo":-0.096,
             "TheoryVal": 1.000,
-            "ErrorHi": 0.502,
-            "ErrorLo": -0.381,
-            "StatHi": 0.493,
-            "StatLo": -0.380,
-            "SystHi": 0.092,
-            "SystLo": -0.029,
-
-            "Val": 1.000
-        },
-        "r_ggH_1J_med":{
-            "TheoryHi":0.140,
-            "TheoryLo":-0.140,
-            "TheoryVal": 1.000,
-            "ErrorHi": 0.301,
-            "ErrorLo": -0.294,
-            "StatHi": 0.293,
-            "StatLo": -0.289,
-            "SystHi": 0.070,
-            "SystLo": -0.054,
-
-            "Val": 1.000
-        },
-        "r_ggH_1J_high":{
-            "TheoryHi":0.194,
-            "TheoryLo":-0.193,
-            "TheoryVal": 1.000,
-            "ErrorHi": 0.487,
-            "ErrorLo": -0.470,
-            "StatHi": 0.479,
-            "StatLo": -0.466,
-            "SystHi": 0.087,
-            "SystLo": -0.056,
-
-            "Val": 1.000
-        },
-        "r_ggH_2J_low":{
-            "TheoryHi":0.236,
-            "TheoryLo":-0.236,
-            "TheoryVal": 1.000,
-            "ErrorHi": 1.526,
-            "ErrorLo": -1.000,
-            "StatHi": 1.458,
-            "StatLo": -1.000,
-            "SystHi": 0.232,
-            "SystLo": -0.000,
-
-            "Val": 1.000
-        },
-        "r_ggH_2J_med":{
-            "TheoryHi":0.227,
-            "TheoryLo":-0.227,
-            "TheoryVal": 1.000,
-            "ErrorHi": 0.628,
-            "ErrorLo": -0.596,
-            "StatHi": 0.620,
-            "StatLo": -0.594,
-            "SystHi": 0.099,
-            "SystLo": -0.050,
-
-            "Val": 1.000
-        },
-        "r_ggH_2J_high":{
-            "TheoryHi":0.254,
-            "TheoryLo":-0.254,
-            "TheoryVal": 1.000,
-            "ErrorHi": 0.533,
-            "ErrorLo": -0.523,
-            "StatHi": 0.529,
-            "StatLo": -0.522,
-            "SystHi": 0.070,
-            "SystLo": -0.033,
-
-            "Val": 1.000
-        },
-        "r_ggH_BSM":{
-            "TheoryHi":0.258,
-            "TheoryLo":-0.258,
-            "TheoryVal": 1.000,
-            "ErrorHi": 0.366,
-            "ErrorLo": -0.342,
-            "StatHi": 0.351,
-            "StatLo": -0.335,
-            "SystHi": 0.103,
-            "SystLo": -0.067,
-
-            "Val": 1.000
-        },
-        "r_ggH_VBFlike":{
-            "TheoryHi":0.228,
-            "TheoryLo":-0.227,
-            "TheoryVal": 1.000,
-            "ErrorHi": 1.377,
-            "ErrorLo": -1.000,
-            "StatHi": 1.357,
-            "StatLo": -1.000,
-            "SystHi": 0.234,
-            "SystLo": -0.000,
-
-            "Val": 1.000
-        },
-        "r_qqH_VBFlike":{
-            "TheoryHi":0.038,
-            "TheoryLo":-0.037,
-            "TheoryVal": 1.000,
-            "ErrorHi": 0.564,
-            "ErrorLo": -0.546,
-            "StatHi": 0.555,
-            "StatLo": -0.543,
-            "SystHi": 0.101,
-            "SystLo": -0.061,
-
-            "Val": 1.000
-        },
-        "r_qqH_BSM":{
-            "TheoryHi":0.033,
-            "TheoryLo":-0.032,
-            "TheoryVal": 1.000,
-            "ErrorHi": 0.666,
-            "ErrorLo": -0.616,
-            "StatHi": 0.661,
-            "StatLo": -0.614,
-            "SystHi": 0.079,
-            "SystLo": -0.048,
-
-            "Val": 1.000
-        },
-        "r_qqH_VHhad":{
-            "TheoryHi":0.083,
-            "TheoryLo":-0.077,
-            "TheoryVal": 1.000,
-            "ErrorHi": 1.072,
-            "ErrorLo": -1.000,
-            "StatHi": 1.067,
-            "StatLo": -1.000,
-            "SystHi": 0.097,
-            "SystLo": -0.015,
-
+            "ErrorHi": 0.264,
+            "ErrorLo": -0.252,
+            "StatHi": 0.253,
+            "StatLo": -0.245,
+            "SystHi": 0.075,
+            "SystLo": -0.059,
             "Val": 1.000
         },
         "r_WH_lep":{
-            "TheoryHi":0.029,
-            "TheoryLo":-0.028,
+            "TheoryHi":0.030,
+            "TheoryLo":-0.029,
             "TheoryVal": 1.000,
-            "ErrorHi": 0.522,
+            "ErrorHi": 0.513,
             "ErrorLo": -0.451,
-            "StatHi": 0.520,
-            "StatLo": -0.450,
-            "SystHi": 0.049,
-            "SystLo": -0.020,
-
+            "StatHi": 0.508,
+            "StatLo": -0.452,
+            "SystHi": 0.069,
+            "SystLo": -0.069,
             "Val": 1.000
         },
         "r_ZH_lep":{
-            "TheoryHi":0.041,
-            "TheoryLo":-0.036,
+            "TheoryHi":0.042,
+            "TheoryLo":-0.037,
             "TheoryVal": 1.000,
-            "ErrorHi": 0.723,
-            "ErrorLo": -0.622,
-            "StatHi": 0.720,
-            "StatLo": -0.622,
-            "SystHi": 0.065,
-            "SystLo": -0.017,
-
+            "ErrorHi": 0.721,
+            "ErrorLo": -0.613,
+            "StatHi": 0.718,
+            "StatLo": -0.613,
+            "SystHi": 0.059,
+            "SystLo": -0.015,
             "Val": 1.000
         },
         "r_ttH":{
             "TheoryHi":0.071,
             "TheoryLo":-0.100,
             "TheoryVal": 1.000,
-            "ErrorHi": 0.358,
-            "ErrorLo": -0.355,
-            "StatHi": 0.354,
-            "StatLo": -0.353,
-            "SystHi": 0.054,
-            "SystLo": -0.037,
-
+            "ErrorHi": 0.359,
+            "ErrorLo": -0.363,
+            "StatHi": 0.351,
+            "StatLo": -0.360,
+            "SystHi": 0.072,
+            "SystLo": -0.042,
             "Val": 1.000
         },
         "r_tH":{
-            "TheoryHi":0.066,
+            "TheoryHi":0.067,
+            "TheoryLo":-0.130,
+            "TheoryVal": 1.000,
+            "ErrorHi": 3.530,
+            "ErrorLo": -1.000,
+            "StatHi": 3.507,
+            "StatLo": -1.000,
+            "SystHi": 0.407,
+            "SystLo": -0.407,
+            "Val": 1.000
+        }
+    },
+
+
+    "stage1p2_minimal":{
+        "r_ggH_0J_low":{
+            "TheoryHi":0.251,
+            "TheoryLo":-0.254,
+            "TheoryVal": 1.000,
+            "ErrorHi": 0.289,
+            "ErrorLo": -0.282,
+            "StatHi": 0.287,
+            "StatLo": -0.281,
+            "SystHi": 0.032,
+            "SystLo": -0.022,
+            "Val": 1.000
+        },
+        "r_ggH_0J_high":{
+            "TheoryHi":0.103,
+            "TheoryLo":-0.098,
+            "TheoryVal": 1.000,
+            "ErrorHi": 0.189,
+            "ErrorLo": -0.188,
+            "StatHi": 0.184,
+            "StatLo": -0.184,
+            "SystHi": 0.042,
+            "SystLo": -0.037,
+            "Val": 1.000
+        },
+        "r_ggH_1J_low":{
+            "TheoryHi":0.144,
+            "TheoryLo":-0.145,
+            "TheoryVal": 1.000,
+            "ErrorHi": 0.502,
+            "ErrorLo": -0.381,
+            "StatHi": 0.493,
+            "StatLo": -0.380,
+            "SystHi": 0.094,
+            "SystLo": -0.022,
+            "Val": 1.000
+        },
+        "r_ggH_1J_med":{
+            "TheoryHi":0.140,
+            "TheoryLo":-0.140,
+            "TheoryVal": 1.000,
+            "ErrorHi": 0.297,
+            "ErrorLo": -0.289,
+            "StatHi": 0.290,
+            "StatLo": -0.285,
+            "SystHi": 0.064,
+            "SystLo": -0.048,
+            "Val": 1.000
+        },
+        "r_ggH_1J_high":{
+            "TheoryHi":0.201,
+            "TheoryLo":-0.201,
+            "TheoryVal": 1.000,
+            "ErrorHi": 0.472,
+            "ErrorLo": -0.454,
+            "StatHi": 0.463,
+            "StatLo": -0.451,
+            "SystHi": 0.093,
+            "SystLo": -0.055,
+            "Val": 1.000
+        },
+        "r_ggH_2J_low":{
+            "TheoryHi":0.243,
+            "TheoryLo":-0.243,
+            "TheoryVal": 1.000,
+            "ErrorHi": 1.442,
+            "ErrorLo": -1.000,
+            "StatHi": 1.419,
+            "StatLo": -1.000,
+            "SystHi": 0.257,
+            "SystLo": -0.257,
+            "Val": 1.000
+        },
+        "r_ggH_2J_med":{
+            "TheoryHi":0.235,
+            "TheoryLo":-0.235,
+            "TheoryVal": 1.000,
+            "ErrorHi": 0.621,
+            "ErrorLo": -0.584,
+            "StatHi": 0.608,
+            "StatLo": -0.584,
+            "SystHi": 0.123,
+            "SystLo": -0.123,
+            "Val": 1.000
+        },
+        "r_ggH_2J_high":{
+            "TheoryHi":0.261,
+            "TheoryLo":-0.260,
+            "TheoryVal": 1.000,
+            "ErrorHi": 0.520,
+            "ErrorLo": -0.511,
+            "StatHi": 0.515,
+            "StatLo": -0.510,
+            "SystHi": 0.068,
+            "SystLo": -0.029,
+            "Val": 1.000
+        },
+        "r_ggH_BSM_low":{
+            "TheoryHi":0.250,
+            "TheoryLo":-0.249,
+            "TheoryVal": 1.000,
+            "ErrorHi": 0.436,
+            "ErrorLo": -0.406,
+            "StatHi": 0.426,
+            "StatLo": -0.404,
+            "SystHi": 0.089,
+            "SystLo": -0.053,
+            "Val": 1.000
+        },
+        "r_ggH_BSM_high":{
+            "TheoryHi":0.330,
+            "TheoryLo":-0.330,
+            "TheoryVal": 1.000,
+            "ErrorHi": 0.598,
+            "ErrorLo": -0.561,
+            "StatHi": 0.591,
+            "StatLo": -0.552,
+            "SystHi": 0.092,
+            "SystLo": -0.103,
+            "Val": 1.000
+        },
+        "r_qqH_low_mjj_low_pthjj":{
+            "TheoryHi":0.250,
+            "TheoryLo":-0.236,
+            "TheoryVal": 1.000,
+            "ErrorHi": 0.719,
+            "ErrorLo": -0.679,
+            "StatHi": 0.712,
+            "StatLo": -0.677,
+            "SystHi": 0.100,
+            "SystLo": -0.047,
+            "Val": 1.000
+        },
+        "r_qqH_low_mjj_high_pthjj":{
+            "TheoryHi":0.225,
+            "TheoryLo":-0.190,
+            "TheoryVal": 1.000,
+            "ErrorHi": 1.223,
+            "ErrorLo": -1.000,
+            "StatHi": 1.211,
+            "StatLo": -1.000,
+            "SystHi": 0.168,
+            "SystLo": -0.168,
+            "Val": 1.000
+        },
+        "r_qqH_high_mjj_low_pthjj":{
+            "TheoryHi":0.249,
+            "TheoryLo":-0.292,
+            "TheoryVal": 1.000,
+            "ErrorHi": 0.481,
+            "ErrorLo": -0.448,
+            "StatHi": 0.474,
+            "StatLo": -0.446,
+            "SystHi": 0.084,
+            "SystLo": -0.041,
+            "Val": 1.000
+        },
+        "r_qqH_high_mjj_high_pthjj":{
+            "TheoryHi":0.216,
+            "TheoryLo":-0.216,
+            "TheoryVal": 1.000,
+            "ErrorHi": 1.322,
+            "ErrorLo": -1.000,
+            "StatHi": 1.299,
+            "StatLo": -1.000,
+            "SystHi": 0.246,
+            "SystLo": -0.246,
+            "Val": 1.000
+        },
+        "r_qqH_BSM":{
+            "TheoryHi":0.040,
+            "TheoryLo":-0.039,
+            "TheoryVal": 1.000,
+            "ErrorHi": 0.655,
+            "ErrorLo": -0.606,
+            "StatHi": 0.650,
+            "StatLo": -0.606,
+            "SystHi": 0.081,
+            "SystLo": -0.081,
+            "Val": 1.000
+        },
+        "r_qqH_VHhad":{
+            "TheoryHi":0.036,
+            "TheoryLo":-0.035,
+            "TheoryVal": 1.000,
+            "ErrorHi": 0.943,
+            "ErrorLo": -0.898,
+            "StatHi": 0.945,
+            "StatLo": -0.889,
+            "SystHi": 0.113,
+            "SystLo": -0.113,
+            "Val": 1.000
+        },
+        "r_WH_lep_low":{
+            "TheoryHi":0.033,
+            "TheoryLo":-0.032,
+            "TheoryVal": 1.000,
+            "ErrorHi": 1.219,
+            "ErrorLo": -1.000,
+            "StatHi": 1.216,
+            "StatLo": -1.000,
+            "SystHi": 0.063,
+            "SystLo": -0.063,
+            "Val": 1.000
+        },
+        "r_WH_lep_high":{
+            "TheoryHi":0.030,
+            "TheoryLo":-0.029,
+            "TheoryVal": 1.000,
+            "ErrorHi": 0.655,
+            "ErrorLo": -0.554,
+            "StatHi": 0.653,
+            "StatLo": -0.554,
+            "SystHi": 0.060,
+            "SystLo": -0.060,
+            "Val": 1.000
+        },
+        "r_ZH_lep":{
+            "TheoryHi":0.042,
+            "TheoryLo":-0.037,
+            "TheoryVal": 1.000,
+            "ErrorHi": 0.724,
+            "ErrorLo": -0.617,
+            "StatHi": 0.721,
+            "StatLo": -0.615,
+            "SystHi": 0.071,
+            "SystLo": -0.042,
+            "Val": 1.000
+        },
+        "r_ttH_low":{
+            "TheoryHi":0.095,
+            "TheoryLo":-0.119,
+            "TheoryVal": 1.000,
+            "ErrorHi": 0.897,
+            "ErrorLo": -0.763,
+            "StatHi": 0.901,
+            "StatLo": -0.756,
+            "SystHi": 0.101,
+            "SystLo": -0.101,
+            "Val": 1.000
+        },
+        "r_ttH_medlow":{
+            "TheoryHi":0.088,
+            "TheoryLo":-0.113,
+            "TheoryVal": 1.000,
+            "ErrorHi": 0.652,
+            "ErrorLo": -0.569,
+            "StatHi": 0.645,
+            "StatLo": -0.570,
+            "SystHi": 0.093,
+            "SystLo": -0.093,
+            "Val": 1.000
+        },
+        "r_ttH_medhigh":{
+            "TheoryHi":0.099,
+            "TheoryLo":-0.121,
+            "TheoryVal": 1.000,
+            "ErrorHi": 0.605,
+            "ErrorLo": -0.534,
+            "StatHi": 0.599,
+            "StatLo": -0.533,
+            "SystHi": 0.082,
+            "SystLo": -0.039,
+            "Val": 1.000
+        },
+        "r_ttH_high":{
+            "TheoryHi":0.108,
             "TheoryLo":-0.129,
             "TheoryVal": 1.000,
-            "ErrorHi": 3.289,
+            "ErrorHi": 0.653,
+            "ErrorLo": -0.716,
+            "StatHi": 0.646,
+            "StatLo": -0.711,
+            "SystHi": 0.096,
+            "SystLo": -0.080,
+            "Val": 1.000
+        },
+        "r_tH":{
+            "TheoryHi":0.067,
+            "TheoryLo":-0.130,
+            "TheoryVal": 1.000,
+            "ErrorHi": 4.326,
             "ErrorLo": -1.000,
-            "StatHi": 3.265,
+            "StatHi": 4.291,
             "StatLo": -1.000,
-            "SystHi": 0.397,
-            "SystLo": -0.000,
+            "SystHi": 0.545,
+            "SystLo": -0.545,
+            "Val": 1.000
+        }
+    },
 
+    "stage1p2_maximal":{
+        "r_ggH_0J_low":{
+            "TheoryHi":0.251,
+            "TheoryLo":-0.254,
+            "TheoryVal": 1.000,
+            "ErrorHi": 0.283,
+            "ErrorLo": -0.278,
+            "StatHi": 0.287,
+            "StatLo": -0.281,
+            "SystHi": 0.038,
+            "SystLo": -0.010,
+            "Val": 1.000
+        },
+        "r_ggH_0J_high":{
+            "TheoryHi":0.103,
+            "TheoryLo":-0.098,
+            "TheoryVal": 1.000,
+            "ErrorHi": 0.189,
+            "ErrorLo": -0.187,
+            "StatHi": 0.184,
+            "StatLo": -0.184,
+            "SystHi": 0.044,
+            "SystLo": -0.034,
+            "Val": 1.000
+        },
+        "r_ggH_1J_low":{
+            "TheoryHi":0.144,
+            "TheoryLo":-0.145,
+            "TheoryVal": 1.000,
+            "ErrorHi": 0.499,
+            "ErrorLo": -0.381,
+            "StatHi": 0.492,
+            "StatLo": -0.380,
+            "SystHi": 0.086,
+            "SystLo": -0.027,
+            "Val": 1.000
+        },
+        "r_ggH_1J_med":{
+            "TheoryHi":0.140,
+            "TheoryLo":-0.140,
+            "TheoryVal": 1.000,
+            "ErrorHi": 0.297,
+            "ErrorLo": -0.288,
+            "StatHi": 0.290,
+            "StatLo": -0.285,
+            "SystHi": 0.065,
+            "SystLo": -0.046,
+            "Val": 1.000
+        },
+        "r_ggH_1J_high":{
+            "TheoryHi":0.201,
+            "TheoryLo":-0.201,
+            "TheoryVal": 1.000,
+            "ErrorHi": 0.470,
+            "ErrorLo": -0.454,
+            "StatHi": 0.463,
+            "StatLo": -0.450,
+            "SystHi": 0.084,
+            "SystLo": -0.056,
+            "Val": 1.000
+        },
+        "r_ggH_2J_low":{
+            "TheoryHi":0.243,
+            "TheoryLo":-0.243,
+            "TheoryVal": 1.000,
+            "ErrorHi": 1.433,
+            "ErrorLo": -1.000,
+            "StatHi": 1.419,
+            "StatLo": -1.000,
+            "SystHi": 0.199,
+            "SystLo": -0.199,
+            "Val": 1.000
+        },
+        "r_ggH_2J_med":{
+            "TheoryHi":0.235,
+            "TheoryLo":-0.235,
+            "TheoryVal": 1.000,
+            "ErrorHi": 0.616,
+            "ErrorLo": -0.587,
+            "StatHi": 0.614,
+            "StatLo": -0.581,
+            "SystHi": 0.049,
+            "SystLo": -0.083,
+            "Val": 1.000
+        },
+        "r_ggH_2J_high":{
+            "TheoryHi":0.261,
+            "TheoryLo":-0.260,
+            "TheoryVal": 1.000,
+            "ErrorHi": 0.519,
+            "ErrorLo": -0.510,
+            "StatHi": 0.515,
+            "StatLo": -0.509,
+            "SystHi": 0.066,
+            "SystLo": -0.031,
+            "Val": 1.000
+        },
+        "r_ggH_BSM":{
+            "TheoryHi":0.263,
+            "TheoryLo":-0.263,
+            "TheoryVal": 1.000,
+            "ErrorHi": 0.356,
+            "ErrorLo": -0.331,
+            "StatHi": 0.343,
+            "StatLo": -0.325,
+            "SystHi": 0.095,
+            "SystLo": -0.062,
+            "Val": 1.000
+        },
+        "r_ggH_VBFlike":{
+            "TheoryHi":0.235,
+            "TheoryLo":-0.233,
+            "TheoryVal": 1.000,
+            "ErrorHi": 1.235,
+            "ErrorLo": -1.000,
+            "StatHi": 1.213,
+            "StatLo": -1.000,
+            "SystHi": 0.229,
+            "SystLo": -0.229,
+            "Val": 1.000
+        },
+        "r_qqH_VBFlike":{
+            "TheoryHi":0.143,
+            "TheoryLo":-0.142,
+            "TheoryVal": 1.000,
+            "ErrorHi": 0.536,
+            "ErrorLo": -0.512,
+            "StatHi": 0.527,
+            "StatLo": -0.508,
+            "SystHi": 0.098,
+            "SystLo": -0.059,
+            "Val": 1.000
+        },
+        "r_qqH_BSM":{
+            "TheoryHi":0.040,
+            "TheoryLo":-0.039,
+            "TheoryVal": 1.000,
+            "ErrorHi": 0.649,
+            "ErrorLo": -0.600,
+            "StatHi": 0.644,
+            "StatLo": -0.598,
+            "SystHi": 0.077,
+            "SystLo": -0.046,
+            "Val": 1.000
+        },
+        "r_qqH_VHhad":{
+            "TheoryHi":0.036,
+            "TheoryLo":-0.035,
+            "TheoryVal": 1.000,
+            "ErrorHi": 0.948,
+            "ErrorLo": -0.889,
+            "StatHi": 0.944,
+            "StatLo": -0.887,
+            "SystHi": 0.087,
+            "SystLo": -0.060,
+            "Val": 1.000
+        },
+        "r_WH_lep":{
+            "TheoryHi":0.030,
+            "TheoryLo":-0.029,
+            "TheoryVal": 1.000,
+            "ErrorHi": 0.513,
+            "ErrorLo": -0.453,
+            "StatHi": 0.511,
+            "StatLo": -0.453,
+            "SystHi": 0.043,
+            "SystLo": -0.020,
+            "Val": 1.000
+        },
+        "r_ZH_lep":{
+            "TheoryHi":0.042,
+            "TheoryLo":-0.037,
+            "TheoryVal": 1.000,
+            "ErrorHi": 0.722,
+            "ErrorLo": -0.613,
+            "StatHi": 0.718,
+            "StatLo": -0.613,
+            "SystHi": 0.068,
+            "SystLo": -0.020,
+            "Val": 1.000
+        },
+        "r_ttH":{
+            "TheoryHi":0.071,
+            "TheoryLo":-0.100,
+            "TheoryVal": 1.000,
+            "ErrorHi": 0.359,
+            "ErrorLo": -0.364,
+            "StatHi": 0.351,
+            "StatLo": -0.362,
+            "SystHi": 0.073,
+            "SystLo": -0.044,
+            "Val": 1.000
+        },
+        "r_tH":{
+            "TheoryHi":0.067,
+            "TheoryLo":-0.130,
+            "TheoryVal": 1.000,
+            "ErrorHi": 3.584,
+            "ErrorLo": -1.000,
+            "StatHi": 3.559,
+            "StatLo": -1.000,
+            "SystHi": 0.426,
+            "SystLo": -0.426,
             "Val": 1.000
         }
 
