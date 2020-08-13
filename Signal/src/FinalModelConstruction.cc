@@ -42,7 +42,7 @@ template<class ResultT, class SourceT, class PredicateT> typename ResultT::itera
 }
 
 // the FinalModelConstruction class takes the fits from the fitting/interpolation classes and adds the systematic nuisances and figures out the normalisation.
-FinalModelConstruction::FinalModelConstruction( std::vector<int> massList, RooRealVar *massVar, RooRealVar *MHvar, RooRealVar *intL,int mhLow, int mhHigh, string proc, string cat, bool doSecMods, string systematicsFileName, vector<int> skipMasses, int verbosity,std::vector<std::string> procList, std::vector<std::string> flashggCats , string outDir, bool isProblemCategory ,bool isCB, int sqrts, int year, bool quadraticSigmaSum)	:
+FinalModelConstruction::FinalModelConstruction( std::vector<int> massList, RooRealVar *massVar, RooRealVar *MHvar, RooRealVar *intL,int mhLow, int mhHigh, string proc, string cat, bool doSecMods, string systematicsFileName, vector<int> skipMasses, int verbosity,std::vector<std::string> procList, std::vector<std::string> flashggCats , string outDir, bool isProblemCategory ,bool isCB, int sqrts, int year, bool quadraticSigmaSum, string FinalState)	:
   mass(massVar),
   MH(MHvar),
   intLumi(intL),
@@ -62,7 +62,8 @@ FinalModelConstruction::FinalModelConstruction( std::vector<int> massList, RooRe
   verbosity_(verbosity),
   systematicsSet_(false),
   rvFractionSet_(false),
-	procs_(procList)
+	procs_(procList),
+  FinalState_(FinalState)
 {
   setTDRStyle();
   writeExtraText = true;       // if extra text
@@ -84,7 +85,7 @@ FinalModelConstruction::FinalModelConstruction( std::vector<int> massList, RooRe
   // load xs and br info from Normalization_8TeV
   //norm = new Normalization_8TeV();
   norm = new Normalization_13TeV();
-  if(!norm->Init(sqrts_)){
+  if(!norm->Init(sqrts_,FinalState_)){
 	  std::cout << "[ERROR] Normalization Initiation failed, exit." << std::endl;
 	  exit(1);
 	}

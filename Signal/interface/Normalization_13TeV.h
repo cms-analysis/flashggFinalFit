@@ -21,7 +21,7 @@ class Normalization_13TeV {
   public:
 	Normalization_13TeV();
 
-	int Init(int sqrtS);
+	int Init(int sqrtS, string FinalState);
 
 	double GetBR(double);
 	double GetXsection(double,TString);

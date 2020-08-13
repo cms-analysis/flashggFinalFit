@@ -18,7 +18,7 @@ using namespace std;
 using namespace RooFit;
 
 Packager::Packager(WSTFileWrapper *ws, RooWorkspace *wsSave  , vector<string> procs, int nCats, int mhLow, int mhHigh, vector<int> skipMasses, int sqrts, int year, bool skipPlots, string outDir, 
-		   RooWorkspace *wsMerge, const vector<int>& cats, const vector<string>& flashggCats):
+		   RooWorkspace *wsMerge, const vector<int>& cats, const vector<string>& flashggCats, string FinalState):
   WS(ws),
   mergeWS(wsMerge),
   saveWS(wsSave),
@@ -32,11 +32,12 @@ Packager::Packager(WSTFileWrapper *ws, RooWorkspace *wsSave  , vector<string> pr
   outDir_(outDir),
   sqrts_(sqrts),
   year_(year),
-  skipMasses_(skipMasses)
+  skipMasses_(skipMasses),
+  FinalState_(FinalState)
 {
 	//normalization = new Normalization_8TeV();
 	normalization = new Normalization_13TeV();
-	normalization->Init(sqrts_);
+	normalization->Init(sqrts_,FinalState_);
 }
 
 Packager::~Packager(){}

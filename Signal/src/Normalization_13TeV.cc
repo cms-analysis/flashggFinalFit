@@ -4,7 +4,7 @@
 
 Normalization_13TeV::Normalization_13TeV(){}
 
-int Normalization_13TeV::Init(int sqrtS){
+int Normalization_13TeV::Init(int sqrtS, string FinalState){
 
     TPython::Exec("import os,imp");
     const char * env = gSystem->Getenv("CMSSW_BASE");
@@ -19,7 +19,14 @@ int Normalization_13TeV::Init(int sqrtS){
     TPython::Eval(Form("buildSMHiggsSignalXSBR.Init%dTeV()", sqrtS));
     
     for (double mH=120;mH<130.05;mH+=0.1){ // breaks when extended beyond 130
-        double valBR           = 1.; // for HHWWgg 
+        double valBR           = 1.; 
+
+        // FinalState used for HHWWgg
+        if(FinalState=="qqlnu") valBR = 0.44;
+        else if(FinalState=="qqqq") valBR = 0.454;
+        else if(FinalState=="lnulnu") valBR = 0.107;
+        else valBR = (double)TPython::Eval(Form("buildSMHiggsSignalXSBR.getBR(%f)",mH)); // H->gg
+
         // double valBR           = (double)TPython::Eval(Form("buildSMHiggsSignalXSBR.getBR(%f)",mH));
         double valXSggH        = (double)TPython::Eval(Form("buildSMHiggsSignalXSBR.getXS(%f,'%s')",mH,"ggH"));
         double valXSqqH        = (double)TPython::Eval(Form("buildSMHiggsSignalXSBR.getXS(%f,'%s')",mH,"qqH"));

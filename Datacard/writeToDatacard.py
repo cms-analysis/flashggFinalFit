@@ -35,11 +35,11 @@ def writeProcesses(f,d,options):
           model = model.replace('hggpdfsmrel_13TeV','hggpdfsmrel_%s_13TeV'%yr) # HHWWgg fix for running 2017 only
         if r['type']=='data' or r['type']=='bkg':
           yr = r['year']
-          model = model.replace('_%s_'%yr,'_') # HHWWgg fix for running 2017 only
+          # model = model.replace('_%s_'%yr,'_') # HHWWgg fix for running 2017 only
 
         yr = r['year']
         thiscat = r['cat']
-        thiscat.replace('%s'%yr,'13TeV')
+        # thiscat.replace('%s'%yr,'13TeV')
         f.write("shapes      %-55s %-40s %s %s\n"%(r['proc'],thiscat,r['modelWSFile'],model))
       else: 
         f.write("shapes      %-55s %-40s %s %s\n"%(r['proc'],r['cat'],r['modelWSFile'],r['model']))
@@ -52,12 +52,12 @@ def writeProcesses(f,d,options):
   lproc = '%-30s'%"process"
   lprocid = '%-30s'%"process"
   lrate = '%-30s'%"rate"     
-  # yr = r['year']   
-  yr='2017'
+  yr = r['year']   
+  # yr='2017'
   # Loop over categories
   for cat in d.cat.unique():
-    if(options.analysis=="HHWWgg"):
-      cat.replace('_%s'%yr,'_13TeV')
+    # if(options.analysis=="HHWWgg"):
+      # cat.replace('_%s'%yr,'_13TeV')
       # print'cat:',cat 
     lbin_cat += "%-55s "%cat
     lobs_cat += "%-55s "%"-1"
@@ -186,11 +186,13 @@ def writePdfIndex(f,d,options):
   f.write("\n")
   for cat in d[~d['cat'].str.contains("NOTAG")].cat.unique(): 
     indexStr = "pdfindex_%s_13TeV"%cat
-    print'indexStr:',indexStr
-    if(options.analysis=="HHWWgg"): 
-      print'replace'
-      indexStr = indexStr.replace("_2017_","_")
-    print'indexStr:',indexStr
+    # print'indexStr:',indexStr
+    # if(options.analysis=="HHWWgg"): 
+      # print'replace'
+      # indexStr = indexStr.replace("_2016_","_")
+      # indexStr = indexStr.replace("_2017_","_")
+      # indexStr = indexStr.replace("_2018_","_")
+    # print'indexStr:',indexStr
     # else: indexStr = "pdfindex_%s_13TeV"%cat
       # yr = r['year']
       # yr='2017'

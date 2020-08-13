@@ -28,7 +28,7 @@ class FinalModelConstruction {
 
   public:
     
-    FinalModelConstruction( std::vector<int> massList, RooRealVar *massVar, RooRealVar *MHvar, RooRealVar *intL, int mhLow, int mhHigh, std::string proc, std::string cat, bool doSecMods, std::string systematicsFileName, std::vector<int> skipMasses, int verbosity, std::vector<std::string> procsList, std::vector<std::string> flashggCats , string outDir,bool isProblemCategory,bool isCB=false, int sqrts=13, int year=2016, bool quadraticSigmaSum=false);
+    FinalModelConstruction( std::vector<int> massList, RooRealVar *massVar, RooRealVar *MHvar, RooRealVar *intL, int mhLow, int mhHigh, std::string proc, std::string cat, bool doSecMods, std::string systematicsFileName, std::vector<int> skipMasses, int verbosity, std::vector<std::string> procsList, std::vector<std::string> flashggCats , string outDir,bool isProblemCategory,bool isCB=false, int sqrts=13, int year=2016, bool quadraticSigmaSum=false, std::string FinalState="");
     ~FinalModelConstruction();
 
 		void loadSignalSystematics(std::string filename);
@@ -98,6 +98,7 @@ class FinalModelConstruction {
     //Normalization_8TeV *norm;
     Normalization_13TeV *norm;
     ofstream paramDump_;
+    string FinalState_;
 
     std::map<std::string,RooSpline1D*> stdSplines;
     std::map<std::string,RooSpline1D*> rvSplines;

@@ -742,16 +742,18 @@ int main(int argc, char* argv[]){
 	std::string ext = is2011 ? "7TeV" : "8TeV";
         if( isFlashgg_ ){
           if( year_ == "all" ){ ext = "13TeV"; }
-          else if (year_ == "2017" ) {ext = "13TeV"; }
+          // else if (year_ == "2016" ) {ext = "13TeV"; }  
+          // else if (year_ == "2017" ) {ext = "13TeV"; }
+          // else if (year_ == "2018" ) {ext = "13TeV"; }
           // else if( year_ == "2017" ){ ext = "13TeV"; }
           //else{ ext = "13TeV"; } //FIXME 
-          else{ ext = Form("%s_13TeV",year_); }
+          else{ ext = Form("%s_13TeV",year_.c_str()); }
         }
 	//if (isFlashgg_) ext = "13TeV";
         //FIXME trying to remove duplicated names for 2016+2017 combination
 	//if (isFlashgg_) ext = Form("13TeV_%d",year_);
 	for (int cat=startingCategory; cat<ncats; cat++){
-
+// CMS_hgg_HHWWggTag_0_@*J�_13TeV_bkgshape_norm
 		map<string,int> choices;
 		map<string,std::vector<int> > choices_envelope;
 		map<string,RooAbsPdf*> pdfs;
@@ -960,11 +962,15 @@ int main(int argc, char* argv[]){
 				catname = Form("cat%d",cat);
 			}
 			RooCategory catIndex(catindexname.c_str(),"c");
+			// RooMultiPdf *pdf = new RooMultiPdf(Form("CMS_hgg_%s_%s_bkgshape",catname.c_str(),ext.c_str()),"all pdfs",catIndex,storedPdfs);
 			RooMultiPdf *pdf = new RooMultiPdf(Form("CMS_hgg_%s_%s_bkgshape",catname.c_str(),ext.c_str()),"all pdfs",catIndex,storedPdfs);
 			//RooRealVar nBackground(Form("CMS_hgg_%s_%s_bkgshape_norm",catname.c_str(),ext.c_str()),"nbkg",data->sumEntries(),0,10E8);
 			RooRealVar nBackground(Form("CMS_hgg_%s_%s_bkgshape_norm",catname.c_str(),ext.c_str()),"nbkg",data->sumEntries(),0,3*data->sumEntries());
 			//nBackground.removeRange(); // bug in roofit will break combine until dev branch brought in
 			//double check the best pdf!
+      std::cout << "*********" << std::endl;
+      std::cout << Form("CMS_hgg_%s_%s_bkgshape",catname.c_str(),ext.c_str()) << std::endl;
+      std::cout << "*********" << std::endl;
 			int bestFitPdfIndex = getBestFitFunction(pdf,data,&catIndex,!verbose);
 			catIndex.setIndex(bestFitPdfIndex);
 			std::cout << "// ------------------------------------------------------------------------- //" <<std::endl; 

@@ -461,6 +461,8 @@ int main(int argc, char *argv[]){
     else replacementProcWV = "ggF";
   }
 
+  
+
   // isFlashgg should now be the only option.
 	if (isFlashgg_){ 
     nCats_= flashggCats_.size();
@@ -1215,7 +1217,7 @@ int main(int argc, char *argv[]){
     if (isFlashgg_){
         
       outWS->import(*intLumi_);
-      FinalModelConstruction finalModel(massList_, mass_,MH,intLumi_,mhLow_,mhHigh_,proc,cat,doSecondaryModels_,systfilename_,skipMasses_,verbose_,procs_, flashggCats_,plotDir_, isProblemCategory,isCutBased_,sqrts_,year_,doQuadraticSigmaSum_);
+      FinalModelConstruction finalModel(massList_, mass_,MH,intLumi_,mhLow_,mhHigh_,proc,cat,doSecondaryModels_,systfilename_,skipMasses_,verbose_,procs_, flashggCats_,plotDir_, isProblemCategory,isCutBased_,sqrts_,year_,doQuadraticSigmaSum_,FinalState_);
     
       finalModel.setSecondaryModelVars(MH_SM,DeltaM,MH_2,higgsDecayWidth);
       finalModel.setRVsplines(splinesRV);
@@ -1253,7 +1255,7 @@ int main(int argc, char *argv[]){
 
     WSTFileWrapper *outWSWrapper = new WSTFileWrapper(outFile, outWS);
     // for (unsigned int i = 0; i < procs_.size(); i++) cout << "procs_[" << i << "]: " << procs_[i] << endl;
-    Packager packager(outWSWrapper, outWS,procs_,nCats_,mhLow_,mhHigh_,skipMasses_,sqrts_,year_,skipPlots_,plotDir_,mergeWS,cats_,flashggCats_);
+    Packager packager(outWSWrapper, outWS,procs_,nCats_,mhLow_,mhHigh_,skipMasses_,sqrts_,year_,skipPlots_,plotDir_,mergeWS,cats_,flashggCats_,FinalState_);
     
     // if we are doing jobs for each proc/tag, want to do the split.
     bool split =0;
@@ -1272,9 +1274,14 @@ int main(int argc, char *argv[]){
     // else if (analysis_type_ == "EFT") HHWWggProc = "GluGluToHHTo";
     // else if (analysis_type_ == "NMSSM") HHWWggProc = "ggF";
 
+
+
     // packager.packageOutput(/*split*/split, /*proc*/split_[0], /*tag*/ split_[1] );
     if(analysis_ == "HHWWgg"){
-      if(analysis_type_ == "EFT") packager.packageOutput(/*split*/split, /*proc*/"GluGluToHHTo", /*tag*/ "HHWWggTag_0" ); // HHWWgg. Does this need to be done for each tag? Is one just chosen?
+      string tag = "";
+      if(FinalState_ == "qqlnu") tag = "HHWWggTag_0";
+      else if (FinalState_ == "qqqq") tag = "HHWWggTag_2";
+      if(analysis_type_ == "EFT") packager.packageOutput(/*split*/split, /*proc*/"GluGluToHHTo", /*tag*/ tag ); // HHWWgg. Does this need to be done for each tag? Is one just chosen?
       else packager.packageOutput(/*split*/split, /*proc*/"ggF", /*tag*/ "HHWWggTag_0" ); // HHWWgg
     }
     else{

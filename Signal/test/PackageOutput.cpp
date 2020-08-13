@@ -64,6 +64,7 @@ string procStr_;
 string basePathStr_;
 int sqrts_=13;
 int year_=2016;
+string FinalState_;
 //int year_=2017;
 
 vector<int> getAllMH(){
@@ -95,6 +96,7 @@ void OptionParser(int argc, char *argv[]){
 		("flashggCats,f", po::value<string>(&flashggCatsStr_)->default_value("UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,UntaggedTag_4,VBFTag_0,VBFTag_1,VBFTag_2,TTHHadronicTag,TTHLeptonicTag,VHHadronicTag,VHTightTag,VHLooseTag,VHEtTag"),       "Flashgg categories if used")
     ("ncats,n", po::value<int>(&ncats_)->default_value(9),                                    "Number of categories")
     ("html,w", po::value<string>(&webdir_),                                                   "Make html in this directory")
+    ("FinalState", po::value<string>(&FinalState_)->default_value(""),                     "Output workspace name")
   ;
 
   po::variables_map vm;
@@ -188,7 +190,7 @@ int main (int argc, char *argv[]){
     cout << "[INFO] Starting to combine fits..." << endl;
     // this guy packages everything up
 	  RooWorkspace *mergeWS = 0;
-    Packager packager(mergedWS, saveWS ,procs_,ncats_,mhLow_,mhHigh_,skipMasses_,/*sqrts*/sqrts_,/*year*/year_,/*skipPlots_*/true,plotDir_,mergeWS,cats_,flashggCats_);
+    Packager packager(mergedWS, saveWS ,procs_,ncats_,mhLow_,mhHigh_,skipMasses_,/*sqrts*/sqrts_,/*year*/year_,/*skipPlots_*/true,plotDir_,mergeWS,cats_,flashggCats_,FinalState_);
     cout << "[INFO] Finished initalising packager." << endl;
     packager.packageOutput(/*split*/ false);
     cout << "[INFO] Combination complete." << endl;
