@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 # Script for submitting signal fitting jobs for flashggFinalFit
-
 import os, sys
 from optparse import OptionParser
 
@@ -10,7 +9,7 @@ lumi = {'2016':'35.9', '2017':'41.5', '2018':'59.8'}
 def get_options():
   parser = OptionParser()
 
-  # Take inputs from a config file: if this is used then ignore all other options
+  # Takes inputs from a config file: if this is used then ignore all other options
   parser.add_option('--inputConfig', dest='inputConfig', default='', help="Name of input config file (if specified will ignore other options)")
 
   # Setup
@@ -167,6 +166,9 @@ else:
       if 'M125' not in fileName: continue
       procs += "%s,"%fileName.split('pythia8_')[1].split('.root')[0]
     procs = procs[:-1]
+
+  #if cats == "auto":
+    # Extract list of cats
 
   # Extract low and high MH values
   mps = []
