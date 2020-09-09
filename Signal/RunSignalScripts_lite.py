@@ -148,7 +148,6 @@ print "  --> Finished writing submission scripts"
 # Submit scripts to batch system
 if not options['printOnly']: 
   submitFiles(options)
-  print "  --> Finished submitting files"
 else:
   print "  --> Running with printOnly option. Will not submit scripts"
 

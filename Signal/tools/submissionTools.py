@@ -41,15 +41,12 @@ def writeSubFiles(_opts):
   if not os.path.isdir("%s/outdir_%s/%s"%(cwd__,_opts['ext'],_opts['mode'])): os.system("mkdir %s/outdir_%s/%s"%(cwd__,_opts['ext'],_opts['mode']))
   if not os.path.isdir("%s/outdir_%s/%s/jobs"%(cwd__,_opts['ext'],_opts['mode'])): os.system("mkdir %s/outdir_%s/%s/jobs"%(cwd__,_opts['ext'],_opts['mode']))
 
-  # Job directory 
   _jobdir = "%s/outdir_%s/%s/jobs"%(cwd__,_opts['ext'],_opts['mode'])
   
-  # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # For condor...
+  # CONDOR
   if _opts['batch'] == "condor":
     _executable = "condor_%s_%s"%(_opts['mode'],_opts['ext'])
-    # Single .sh file split into separate jobs
-    _f = open("%s/%s.sh"%(_jobdir,_executable),"w")
+    _f = open("%s/%s.sh"%(_jobdir,_executable),"w") # single .sh script split into separate jobs
     writePreamble(_f)
 
     # Write details depending on mode
@@ -76,12 +73,11 @@ def writeSubFiles(_opts):
     elif _opts['mode'] == "getEffAcc": writeCondorSub(_fsub,_executable,_opts['queue'],1,_opts['jobOpts'])
     _fsub.close()
     
-  # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # For SGE...
+  # SGE...
   if (_opts['batch'] == "IC")|(_opts['batch'] == "SGE")|(_opts['batch'] == "local" ):
     _executable = "sub_%s_%s"%(_opts['mode'],_opts['ext'])
 
-    # Details depending on mode
+    # Write details depending on mode
 
     # For separate submission file per category
     if _opts['mode'] == "calcPhotonSyst":
@@ -104,16 +100,15 @@ def writeSubFiles(_opts):
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Function for submitting files to batch system
 def submitFiles(_opts):
-  # Job directory 
   _jobdir = "%s/outdir_%s/%s/jobs"%(cwd__,_opts['ext'],_opts['mode'])
-  # For condor...
+  # CONDOR
   if _opts['batch'] == "condor":
     _executable = "condor_%s_%s"%(_opts['mode'],_opts['ext'])
     cmdLine = "cd %s; condor_submit %s.sub; cd %s"%(_jobdir,_executable,cwd__)
     run(cmdLine)
     print "  --> Finished submitting files"
 
-  # For SGE
+  # SGE
   elif _opts['batch'] in ['IC','SGE']:
     _executable = "sub_%s_%s"%(_opts['mode'],_opts['ext'])
     # Separate submission per category  

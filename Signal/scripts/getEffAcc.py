@@ -114,7 +114,7 @@ if opt.doSTXSFractions:
 
   # Loop over mass points
   for _mp in opt.massPoints.split(","):
-    fout = open("/outdir_%s/getEffAcc/fractions/STXS_fractions_M%s.txt"%(cwd__,opt.ext,_mp),"w")
+    fout = open("%s/outdir_%s/getEffAcc/fractions/STXS_fractions_M%s.txt"%(cwd__,opt.ext,_mp),"w")
     fout.write(" --> STXS fractions:\n") 
     for proc_s0 in ['GG2H','VBF','WH2HQQ','ZH2HQQ','QQ2HLNU','QQ2HLL',"GG2HQQ","GG2HLL","GG2HNUNU",'TTH','THQ','THW','BBH']:
       mask = (data.apply( lambda x: x['proc'].split("_")[0] == proc_s0, axis=1))&(data['massPoint']==_mp)
