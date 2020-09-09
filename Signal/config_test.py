@@ -5,7 +5,7 @@ signalScriptCfg = {
   # Setup
   'inputWSDir':'/vols/cms/jl2117/hgg/ws/Jul20/ws/pass0_final/signal_2016', 
   'procs':'auto', # if auto: inferred automatically from filenames
-  'cats':'RECO_0J_PTH_0_10_Tag0', # if auto: inferred automatically from (0) workspace
+  'cats':'auto', # if auto: inferred automatically from (0) workspace
   'ext':'test',
   'analysis':'stage1_2', # To specify which replacement dataset mapping (defined in ./python/replacementMap.py)
   'year':'2016', 
@@ -23,6 +23,6 @@ signalScriptCfg = {
   'smears':'HighR9EBPhi,HighR9EBRho,HighR9EEPhi,HighR9EERho,LowR9EBPhi,LowR9EBRho,LowR9EEPhi,LowR9EERho',
 
   # Job submission options
-  'batch':'IC',
+  'batch':'IC', # ['condor','SGE','IC','local']
   'queue':'hep.q',
 }

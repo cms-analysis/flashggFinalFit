@@ -1,11 +1,15 @@
-import os
+import os, sys
 import glob
 import re
 import ROOT
 from collections import OrderedDict as od
 from commonStrings import *
 
-def extractWSFileNames( _inputWSDir ): return glob.glob("%s/output_*.root"%_inputWSDir)
+def extractWSFileNames( _inputWSDir ): 
+  if not os.path.isdir(_inputWSDir):
+    print " --> [ERROR] No such directory (%s)"
+    return False
+  return glob.glob("%s/output_*.root"%_inputWSDir)
 
 def extractListOfProcs( _listOfWSFileNames ):
   procs = []
@@ -29,6 +33,14 @@ def extractListOfCats( _listOfWSFileNames ):
   ws.Delete()
   f0.Close()
   return ",".join(cats)
+
+def containsNOTAG( _listOfWSFileNames ):
+  f0 = ROOT.TFile(_listOfWSFileNames[0]) 
+  ws = f0.Get(inputWSName__)
+  allData = ws.allData()
+  for d in allData:
+    if "NOTAG" in d.GetName(): return True
+  return False
 
 # Function for converting STXS process to production mode in dataset name
 procToDataMap = od()

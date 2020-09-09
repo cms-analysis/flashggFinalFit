@@ -30,7 +30,7 @@ def writeCondorSub(_file,_exec,_queue,_nJobs,_jobOpts,doHoldOnFailure=True,doPer
     _file.write("on_exit_hold = (ExitBySignal == True) || (ExitCode != 0)\n\n")
   if doPeriodicRetry:
     _file.write("# Periodically retry the jobs every 10 minutes, up to a maximum of 5 retries.\n")
-    _file.write("periodic_release =  (NumJobStarts < 3) && ((CurrentTime - EnteredCurrentStatus) > 600\n\n")
+    _file.write("periodic_release =  (NumJobStarts < 3) && ((CurrentTime - EnteredCurrentStatus) > 600)\n\n")
   _file.write("+JobFlavour = \"%s\"\n"%_queue)
   _file.write("queue %g"%_nJobs)
 
@@ -53,30 +53,38 @@ def writeSubFiles(_opts):
     writePreamble(_f)
 
     # Write details depending on mode
+
+    # For looping over categories
     if _opts['mode'] == "calcPhotonSyst":
-      # Loop over categories
       for cidx in range(_opts['nCats']):
         c = _opts['cats'].split(",")[cidx]
         _f.write("if [ $1 -eq %g ]; then\n"%cidx)
         _f.write("  python %s/scripts/calcPhotonSyst.py --cat %s --procs %s --ext %s --inputWSDir %s --scales %s --scalesCorr %s --scalesGlobal %s --smears %s %s\n"%(cwd__,c,_opts['procs'],_opts['ext'],_opts['inputWSDir'],_opts['scales'],_opts['scalesCorr'],_opts['scalesGlobal'],_opts['smears'],_opts['modeOpts']))
         _f.write("fi\n")
 
+    # For single script
+    elif _opts['mode'] == 'getEffAcc':
+      _f.write("python %s/scripts/getEffAcc.py --inputWSDir %s --ext %s --procs %s --massPoints %s %s\n"%(cwd__,_opts['inputWSDir'],_opts['ext'],_opts['procs'],_opts['massPoints'],_opts['modeOpts']))
+      
     # Close .sh file
     _f.close()
     os.system("chmod 775 %s/%s.sh"%(_jobdir,_executable))
 
     # Condor submission file
     _fsub = open("%s/%s.sub"%(_jobdir,_executable),"w")
-    writeCondorSub(_fsub,_executable,_opts['queue'],_opts['nCats'],_opts['jobOpts'])
+    if _opts['mode'] == "calcPhotonSyst": writeCondorSub(_fsub,_executable,_opts['queue'],_opts['nCats'],_opts['jobOpts'])
+    elif _opts['mode'] == "getEffAcc": writeCondorSub(_fsub,_executable,_opts['queue'],1,_opts['jobOpts'])
     _fsub.close()
     
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # For SGE...
-  if (_opts['batch'] == "IC")|(_opts['batch'] == "SGE"):
+  if (_opts['batch'] == "IC")|(_opts['batch'] == "SGE")|(_opts['batch'] == "local" ):
     _executable = "sub_%s_%s"%(_opts['mode'],_opts['ext'])
+
     # Details depending on mode
+
+    # For separate submission file per category
     if _opts['mode'] == "calcPhotonSyst":
-      # Separate submission file per category
       for cidx in range(_opts['nCats']):
         c = _opts['cats'].split(",")[cidx]
         _f = open("%s/%s_%s.sh"%(_jobdir,_executable,c),"w")
@@ -84,6 +92,14 @@ def writeSubFiles(_opts):
         _f.write("python %s/scripts/calcPhotonSyst.py --cat %s --procs %s --ext %s --inputWSDir %s --scales %s --scalesCorr %s --scalesGlobal %s --smears %s %s\n"%(cwd__,c,_opts['procs'],_opts['ext'],_opts['inputWSDir'],_opts['scales'],_opts['scalesCorr'],_opts['scalesGlobal'],_opts['smears'],_opts['modeOpts']))
         _f.close()
         os.system("chmod 775 %s/%s_%s.sh"%(_jobdir,_executable,c))
+
+    # For single submission file
+    elif _opts['mode'] == "getEffAcc":
+      _f = open("%s/%s.sh"%(_jobdir,_executable),"w")
+      writePreamble(_f)
+      _f.write("python %s/scripts/getEffAcc.py --inputWSDir %s --ext %s --procs %s --massPoints %s %s\n"%(cwd__,_opts['inputWSDir'],_opts['ext'],_opts['procs'],_opts['massPoints'],_opts['modeOpts']))
+      _f.close()
+      os.system("chmod 775 %s/%s.sh"%(_jobdir,_executable))
          
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Function for submitting files to batch system
@@ -93,23 +109,44 @@ def submitFiles(_opts):
   # For condor...
   if _opts['batch'] == "condor":
     _executable = "condor_%s_%s"%(_opts['mode'],_opts['ext'])
-    # Details depending on mode
-    if _opts['mode'] == "calcPhotonSyst":
-      cmdLine = "cd %s; condor_submit %s.sub; cd %s"%(_jobdir,_executable,cwd__)
-      run(cmdLine)
+    cmdLine = "cd %s; condor_submit %s.sub; cd %s"%(_jobdir,_executable,cwd__)
+    run(cmdLine)
+    print "  --> Finished submitting files"
 
   # For SGE
-  if _opts['batch'] in ['IC','SGE']:
+  elif _opts['batch'] in ['IC','SGE']:
     _executable = "sub_%s_%s"%(_opts['mode'],_opts['ext'])
-    # Details depending on mode
+    # Separate submission per category  
     if _opts['mode'] == "calcPhotonSyst":
-      # Separate submission per category  
       for cidx in range(_opts['nCats']):
         c = _opts['cats'].split(",")[cidx]
         _subfile = "%s/%s_%s"%(_jobdir,_executable,c)
         cmdLine = "qsub -q hep.q %s -o %s.log -e %s.err %s.sh"%(_opts['jobOpts'],_subfile,_subfile,_subfile)
         run(cmdLine)
+    # Single submission
+    elif _opts['mode'] == "getEffAcc":
+      _subfile = "%s/%s"%(_jobdir,_executable)
+      cmdLine = "qsub -q hep.q %s -o %s.log -e %s.err %s.sh"%(_opts['jobOpts'],_subfile,_subfile,_subfile)
+      run(cmdLine)
+    print "  --> Finished submitting files"
   
+  # Running locally
+  elif _opts['batch'] == 'local':
+    _executable = "sub_%s_%s"%(_opts['mode'],_opts['ext'])
+    # Separate submission per category  
+    if _opts['mode'] == "calcPhotonSyst":
+      for cidx in range(_opts['nCats']):
+        c = _opts['cats'].split(",")[cidx]
+        _subfile = "%s/%s_%s"%(_jobdir,_executable,c)
+        cmdLine = "bash %s.sh"%_subfile
+        run(cmdLine)
+    # Single submission
+    elif _opts['mode'] == "getEffAcc":
+      _subfile = "%s/%s"%(_jobdir,_executable)
+      cmdLine = "bash %s.sh"%_subfile
+      run(cmdLine)
+    print "  --> Finished running files"
+
     
   
   
