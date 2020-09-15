@@ -35,22 +35,22 @@ fi
 #-- Signal
 if [ $step == "signal" ]; then 
     cd Signal
-    # python RunSignalScripts.py --inputConfig HHWWgg_SMqqqq${year}_Config.py # signal models 
-    python RunSignalScripts.py --inputConfig HHWWgg_SM${year}_Config.py # signal models 
+    python RunSignalScripts.py --inputConfig HHWWgg_SMqqqq${year}_Config.py # signal models 
+    # python RunSignalScripts.py --inputConfig HHWWgg_SM${year}_Config.py # signal models 
     # python RunSignalScripts.py --inputConfig HHWWgg_v2-7_Config.py # signal models 
     cd .. 
 fi
 
 #-- Datacards
 if [ $step == "datacard" ]; then 
-    # python RunCombineScripts.py datacard --inputConfig HHWWgg_SMqqqq${year}_Config.py # Make datacard 
+    #python RunCombineScripts.py datacard --inputConfig HHWWgg_SMqqqq${year}_Config.py # Make datacard 
     python RunCombineScripts.py datacard --inputConfig HHWWgg_SM${year}_Config.py # Make datacard 
     # python RunCombineScripts.py datacard --inputConfig HHWWgg_v2-7_Config.py # Make datacard 
 fi
 
 #-- Combine 
 if [ $step == "combine" ]; then 
-    # python RunCombineScripts.py combine --inputConfig HHWWgg_SMqqqq${year}_Config.py
+    #python RunCombineScripts.py combine --inputConfig HHWWgg_SMqqqq${year}_Config.py
     python RunCombineScripts.py combine --inputConfig HHWWgg_SM${year}_Config.py
     # python RunCombineScripts.py combine --inputConfig HHWWgg_SMRun2_Config.py
     # python RunCombineScripts.py combine --inputConfig HHWWgg_v2-7_Config.py 
@@ -65,9 +65,9 @@ if [ $step == "plot" ]; then
     # tagLabel="2TotCatsbothcombinedWithSyst"
     # SecondTagLabel="2TotCatsbothcombinedWithoutSyst"
     tagLabel="2TotCatsbothcombined"
-    campaignOne="HHWWgg_SM"
+    #campaignOne="HHWWgg_SM"
     # campaignTwo="HHWWgg_SM"
-    # campaignOne="HHWWgg_v2-7"
+    campaignOne="HHWWgg_v2-7"
     # campaignTwo="HHWWgg_v2-3"
     
     ##- Grid 
@@ -79,7 +79,7 @@ if [ $step == "plot" ]; then
     # python plot_limits.py -a -r -SM --HHWWggCatLabel $tagLabel --SecondHHWWggCatLabel $SecondTagLabel --campaignOne $campaignOne --campaignTwo $campaignTwo --yboost 1 --ymin 0.1 --ymax 1 --unit fb --resultType HH --year Run2 # ratio of all points
     
     ##- Comparison plots 
-    python plot_limits.py -SM --HHWWggCatLabel $tagLabel --systematics --year ${year} --campaign $campaignOne --resultType HH --unit pb --ymin 1.001 --ymax 100 --yboost 0.09 # standard model  
+    #python plot_limits.py -SM --HHWWggCatLabel $tagLabel --systematics --year ${year} --campaign $campaignOne --resultType HH --unit pb --ymin 1.001 --ymax 100 --yboost 0.09 # standard model  
 
     # python plot_limits.py -SM --HHWWggCatLabel $tagLabel --systematics --campaign $campaignOne --resultType HH --unit fb --ymin 10 --ymax 1e6 --yboost -0.32 # standard model 
     # python plot_limits.py -SM --HHWWggCatLabel $tagLabel --systematics --year 2016 --campaign $campaignOne --resultType HH --unit pb --ymin 1.001 --ymax 100 --yboost 0.09 # standard model  
@@ -88,7 +88,7 @@ if [ $step == "plot" ]; then
     # python plot_limits.py -SM --HHWWggCatLabel $tagLabel --systematics --year Run2 --campaign $campaignOne --resultType HH --unit pb --ymin 1.001 --ymax 100 --yboost 0.09 # standard model  
     # python plot_limits.py -SM --HHWWggCatLabel $tagLabel --systematics --year Run2 --campaign $campaignOne --resultType HH --unit pb --ymin 1.001 --ymax 100 --yboost 0.09 # standard model  
 
-    # python plot_limits.py -CMSC --HHWWggCatLabel  $tagLabel --systematics --campaign $campaignOne --resultType WWgg --unit fb --ymin 1.001 --ymax 700 --yboost 0.09 --year 2017 # atlas compare 
+    python plot_limits.py -CMSC --HHWWggCatLabel  $tagLabel --systematics --campaign $campaignOne --resultType WWgg --unit fb --ymin 1.001 --ymax 700 --yboost 0.09 --year 2017 # atlas compare 
     # python plot_limits.py -AC --HHWWggCatLabel  $tagLabel --systematics --campaign $campaignOne --resultType HH --unit pb --ymin 1.001 --ymax 700 --yboost 0.09 --lumiRescale 2017_2016 # atlas compare 
     # python plot_limits.py -CMSC --HHWWggCatLabel  $tagLabel --systematics --campaign $campaignOne --resultType HH --unit fb --ymin 10 --ymax 1e5 --yboost -0.2
     # python plot_limits.py -CMSC --HHWWggCatLabel  $tagLabel --systematics --campaign $campaignOne --resultType HH --unit fb --ymin 10 --ymax 1e5 --yboost -0.2 --lumiRescale 2017_2016

@@ -335,11 +335,12 @@ else
   cp ../../Signal/$OUTDIR/CMS-HGG_sigfit_${EXT}.root ./Models/${EXT}/CMS-HGG_mva_13TeV_sigfit.root
 fi 
 cp ../../Background/CMS-HGG_multipdf_${EXT}${FAKE}.root ./Models/${EXT}/CMS-HGG_mva_13TeV_multipdf${FAKE}.root
+
+echo "datacard location: Datacard/${DatacardLocation}"
 cp ../../Datacard/${DatacardLocation} CMS-HGG_mva_13TeV_datacard_${EXT}.txt
 
 if [ $ANALYSIS == "HHWWgg" ]; then 
   combine CMS-HGG_mva_13TeV_datacard_${EXT}.txt -m 125 -M AsymptoticLimits --run=blind
-  
   mv higgsCombineTest.AsymptoticLimits.mH125.root ${HHWWGGCATLABEL}_limits/${shorterEXT}_${HHWWggmass}_${HHWWGGCATLABEL}_HHWWgg_${FINALSTATE}.root
   # mv higgsCombineTest.AsymptoticLimits.mH125.root # save for mass point, category 
 fi

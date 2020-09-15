@@ -2,9 +2,8 @@
 # Abraham Tishelman-Charny
 # 11 March 2020
 #
-# The purpose of this python module is to plot limits vs Radion mass for the HHWWgg analysis 
+# The purpose of this python module is to plot limits for the HHWWgg analysis 
 ############################################################################## 
-
 
 # Example usage:
 #
@@ -22,7 +21,7 @@ import argparse
 
 # ol = '/afs/cern.ch/work/a/atishelm/private/ecall1algooptimization/PileupMC_v2/Plot/ntuples/'
 #ol = '/eos/user/a/atishelm/www/EcalL1Optimization/BX-1/'
-ol = '/eos/user/a/atishelm/www/HHWWgg/fggfinalfit/limits2'
+ol = '/eos/user/a/atishelm/www/HHWWgg/fggfinalfit/limits3/'
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-AC","--atlas_compare", action="store_true", default=False, help="Display limits in way to compare to ATLAS HHWWgg limits", required=False)
@@ -43,6 +42,8 @@ parser.add_argument("--ymax",type=float, default=0, help="Y maximum", required=T
 parser.add_argument("--yboost",type=float, default=0, help="Y boost of legend. Ex: -0.2, 0.090", required=True)
 parser.add_argument("--EFT",action="store_true", default=False, help="EFT results", required=False)
 parser.add_argument("--NMSSM",action="store_true", default=False, help="NMSSM results", required=False)
+parser.add_argument("--lumiRescale",type=str, default="", help="Rescale limit by luminosity", required=False)
+parser.add_argument("--year",type=str, default="", help="Year. 2016, 2017, 2018 or Run2", required=True) 
 
 parser.add_argument("--campaignOne",type=str, default="UnLabeled", help="Campaign of first limits in ratio", required=False)
 parser.add_argument("--campaignTwo",type=str, default="UnLabeled", help="Campaign of second limits in ratio", required=False)
@@ -56,6 +57,16 @@ CMS_lumi.cmsText = "CMS"
 CMS_lumi.extraText = "Preliminary"
 CMS_lumi.cmsTextSize = 0.65
 CMS_lumi.outOfFrame = True
+
+year = args.year 
+
+if(year=="2016"): CMS_lumi.lumi_sqrtS = "35.9 fb^{-1}"
+elif(year=="2017"): CMS_lumi.lumi_sqrtS = "41.5 fb^{-1}"
+elif(year=="2018"): CMS_lumi.lumi_sqrtS = "59.8 fb^{-1}"
+elif(year=="Run2"): CMS_lumi.lumi_sqrtS = "137.2 fb^{-1}"
+else: CMS_lumi.lumi_sqrtS = "XXXX fb^{-1}"
+
+# cmsLumiIndex = 0
 # tdrstyle.setTDRStyle()
 # tdrStyle.cd()
 
@@ -145,48 +156,60 @@ def plotUpperLimits(labels,values,resultType):
     yellow = TGraph(2*N)    # yellow band
     green = TGraph(2*N)     # green band
     median = TGraph(N)      # median line
+
+    year = args.year
+
+    vals = []
  
     up2s = [ ]
+    nonBRvals = [] 
     for i in range(N):
-        # file_name = "higgsCombine"+labels[i]+"AsymptoticLimits.mH125.root"
-        #file_name = "higgsCombine.AsymptoticLimits.mH125." + labels[i] +  ".root"
         direc = args.HHWWggCatLabel
-        # file_name = direc + "_limits/HHWWgg_v2-3_2017_" + labels[i] + "_HHWWgg_qqlnu.root"
-        file_name = direc + "_limits/HHWWgg_v2-6_2017_" + labels[i] + "_HHWWgg_qqlnu.root"
+        file_name = "%s_limits/%s_%s_%s_HHWWgg_qqlnu.root"%(direc,args.campaign,year,labels[i])
         print"file: ",file_name
-        #print'file_name:',file_name
         limit = getLimits(file_name)
-        # print'limit = ',limit
-        # print'values[i] = ',values[i] 
-        #print'limit = ',limit
         up2s.append(limit[4])
-        # HHWWgg_qqlnu_factor = 6.983 # 1 / branching ratio of qqlnugg including electron and muon channels. Need to multiply measured XS by this to get measured XS of HH->WWgg production
-        # HHWWgg_qqlnu_factor = 3.4916 # electron and muon channels ONLY
-        # HHWWgg_WWgg_factor = 2061.43 # (1 / 0.0004851), 0.0004851 is BR of HH->WWgg
 
+        campaignBRdict = {
+            "HHWWgg_v2-3": 3.4916, # (1 / BR) of qqlnu. Electron and Muon decays only 
+            "HHWWgg_v2-7": 2.3079 # (1 / BR) of qqlnu. Electron, Muon, all Tau decays INCLUDED
+            # "HHWWgg_v2-7": 2.2779 # (1 / BR) of qqlnu. Electron, Muon, all Tau decays INCLUDED
+        }
 
-        ##
-        # HHWWgg_qqlnu_factor = 2.2779 ## (1 / BR) with Electron, Muon, all Tau decays INCLUDED 
-        HHWWgg_qqlnu_factor = 2.3079 ## (1 / BR) with Electron, Muon, all Tau decays INCLUDED 
-
+        HHWWgg_qqlnu_factor = campaignBRdict[args.campaign]
         HHWWgg_WWgg_factor = 1030.7153 
-        if(resultType == "WWgg"): HHWWgg_factor = HHWWgg_qqlnu_factor
-        elif(resultType == "HH"): HHWWgg_factor = HHWWgg_qqlnu_factor*HHWWgg_WWgg_factor
-        # HHWWgg_qqlnu_factor = 2061.43 # 1 / branching ratio of qqlnugg including electron and muon channels. Need to multiply measured XS by this to get measured XS of HH production
-        # HHWWgg_qqlnu_factor = 2.06143 # 1 / SM BR of HH->WWgg 
-        # HHWWgg_qqlnu_factor = 1 # 1 / SM BR of HH->WWgg 
-        #if(args.SM_Radion): 
+
+        lumiRescaledict = {
+            "": 1,
+            "2017_2016": 1.07517  # rescale from 2017 to 2016 
+        }
+
+        HHWWgg_lumiRescaleFactor = lumiRescaledict[args.lumiRescale]
+
+        if(resultType == "WWgg"): HHWWgg_factor = HHWWgg_qqlnu_factor*HHWWgg_lumiRescaleFactor
+        elif(resultType == "HH"): HHWWgg_factor = HHWWgg_qqlnu_factor*HHWWgg_WWgg_factor*HHWWgg_lumiRescaleFactor
+
         yellow.SetPoint(    i,    values[i], limit[4]*HHWWgg_factor ) # + 2 sigma
         green.SetPoint(     i,    values[i], limit[3]*HHWWgg_factor ) # + 1 sigma
         median.SetPoint(    i,    values[i], limit[2]*HHWWgg_factor ) # median
         green.SetPoint(  2*N-1-i, values[i], limit[1]*HHWWgg_factor ) # - 1 sigma
         yellow.SetPoint( 2*N-1-i, values[i], limit[0]*HHWWgg_factor ) # - 2 sigma
+        print"limit without HHWWgg_factor:",limit[2]
+        print"HHWWgg_factor:",HHWWgg_factor
+        nonBRvals.append(limit[2])
         print"limit[2]*HHWWgg_factor:",limit[2]*HHWWgg_factor
+        vals.append(limit[2]*HHWWgg_factor)
 
- 
-    # print"limit[2]*HHWWgg_factor:",limit[2]*HHWWgg_factor
-    # print"limit[2]:",limit[2]
-    # print"limit[2]*HHWWgg_qqlnu_factor:",limit[2]*HHWWgg_qqlnu_factor
+    #print(vals)
+    massvals = labels[:]
+    mvals = []
+    for m in massvals: 
+      massval = m.split('_')[0]
+      massval = massval.replace("X","")
+      mvals.append(massval)
+      
+    print("masses:",mvals)
+    print("nonBR vals:",nonBRvals)
 
     W = 800
     H  = 600
@@ -247,19 +270,6 @@ def plotUpperLimits(labels,values,resultType):
     # frame.SetMaximum(1000.)
 
     frame.SetMaximum(args.ymax)
-
-    # if(args.unit == "pb"):
-    #     frame.SetMaximum(1)
-    # elif(args.unit == "fb"):
-    #     frame.SetMaximum(8*1e4) # CMS HH 
-
-
-    # if(args.atlas_compare):
-    #     frame.SetMaximum(7*1e2) # ATLAS
-    # elif(args.CMS_compare) or (args.All_Points):
-    #     frame.SetMaximum(8*1e4) # CMS HH 
-    # elif(args.SM_Point):
-    #     frame.SetMaximum(55.)
     frame.GetXaxis().SetLimits(min(values),max(values))
     # frame.SetLogy()
     # frame.GetXaxis().SetLimits(min(values)-10,max(values)+10)
@@ -278,18 +288,13 @@ def plotUpperLimits(labels,values,resultType):
     median.SetLineWidth(2)
     median.SetLineStyle(2)
     median.SetMarkerStyle(8)
-    # median.
     median.Draw('PLsame')
  
     CMS_lumi.CMS_lumi(c,4,11)
     ROOT.gPad.SetTicks(1,1)
     frame.Draw('sameaxis')
  
-    # yboost = 0.075
-    # yboost = 0.090
     yboost = args.yboost
-    # yboost = -0.2
-
     x1 = 0.15
     x2 = x1 + 0.24
     y2 = 0.76 + yboost
@@ -318,7 +323,6 @@ def plotUpperLimits(labels,values,resultType):
     else: label.DrawLatex(0.7,0.7 + yboost,"STAT ONLY")
     
     print " "
-    # c.SaveAs("UpperLimit.png")
     
     outFile = ''
     outFile += ol + '/'
@@ -329,14 +333,14 @@ def plotUpperLimits(labels,values,resultType):
     if(args.atlas_compare):
         outFile += "atlas_Compare_"
 
-
     if args.SM_Point: outFile += "SM_"
 
     outFile += args.HHWWggCatLabel + "_"
 
-    c.SaveAs(outFile + "UpperLimit.pdf")
-    c.SaveAs(outFile + "UpperLimit.png")
-    c.SaveAs(outFile + "UpperLimit.C")
+    # args.lumiRescale
+    c.SaveAs("%s_%s_UpperLimit.pdf"%(outFile,args.lumiRescale))
+    c.SaveAs("%s_%s_UpperLimit.png"%(outFile,args.lumiRescale))
+    c.SaveAs("%s_%s_UpperLimit.C"%(outFile,args.lumiRescale))
     c.Close()
  
 def plotRatio(values, labels1, labels2):
@@ -352,10 +356,40 @@ def plotRatio(values, labels1, labels2):
     campaignOne = args.campaignOne
     campaignTwo = args.campaignTwo
 
+    factor_1, factor_2 = 1, 1 
+
+    campaignBRdict = {
+        "HHWWgg_v2-3": 3.4916,
+        "HHWWgg_v2-7": 2.3079,
+        "HHWWgg_SM"  : 2.3079 
+    }
+
+    factor_1 *= campaignBRdict[campaignOne]
+    factor_2 *= campaignBRdict[campaignTwo]
+
+    if(args.resultType == "HH"):
+        factor_1 *= 2.3079
+        factor_2 *= 2.3079       
+
+    factor_ratio = factor_1 / factor_2 
+
+    year = args.year
+
+    # HHWWgg_v2-3: 
+    # HHWWgg_qqlnu_factor = 3.4916 # e, mu semileptonic channels only 
+
+    # HHWWgg_v2-7: 
+    # HHWWgg_qqlnu_factor = 2.3079 ## (1 / BR) with Electron, Muon, all Tau decays INCLUDED 
+
+    # HH result 
+    # HHWWgg_WWgg_factor = 1030.7153     
+
     # up2s = [ ]
     for i in range(N):
-        file_name_1 = "%s_limits/%s_2017_%s_HHWWgg_qqlnu.root"%(Label_1,campaignOne,labels1[i]) 
-        file_name_2 = "%s_limits/%s_2017_%s_HHWWgg_qqlnu.root"%(Label_2,campaignTwo,labels2[i]) 
+        file_name_1 = "%s_limits/%s_%s_%s_HHWWgg_qqlnu.root"%(Label_1,campaignOne,year,labels1[i]) 
+        file_name_2 = "%s_limits/%s_%s_%s_HHWWgg_qqlnu.root"%(Label_2,campaignTwo,year,labels2[i]) 
+        # print"file_name_1:",file_name_1
+        # print"file_name_2:",file_name_2
         # file_name_2 = Label_1 + "_limits/HHWWgg_v2-3_2017_" + labels1[i] + "_HHWWgg_qqlnu.root"
         # file_name_1 = Label_1 + "_limits/HHWWgg_v2-3_2017_" + labels1[i] + "_HHWWgg_qqlnu.root"
         # file_name_2 = Label_2 + "_limits/HHWWgg_v2-3_2017_" + labels2[i] + "_HHWWgg_qqlnu.root"
@@ -366,12 +400,14 @@ def plotRatio(values, labels1, labels2):
         # if(campaignTwo=="HHWWgg_v2-6"): limit_2[2] *= 2.3079
 	    # yellow.SetPoint(    i,    values[i], limit[4] ) # + 2 sigma
         # green.SetPoint(     i,    values[i], limit[3] ) # + 1 sigma
-        median.SetPoint(    i,    values[i], limit_1[2]/limit_2[2] ) # median
+        median.SetPoint(    i,    values[i], (limit_1[2]/limit_2[2])*(factor_ratio) ) # median
         # green.SetPoint(  2*N-1-i, values[i], limit[1] ) # - 1 sigma
         # yellow.SetPoint( 2*N-1-i, values[i], limit[0] ) # - 2 sigma
         # print'setting point:'
         # print values[i] 
         # print limit_1[2]/limit_2[2] 
+
+        print"ratio",(limit_1[2]/limit_2[2])*(factor_ratio)
 
     W = 800
     H  = 600
@@ -396,7 +432,12 @@ def plotRatio(values, labels1, labels2):
     c.cd()
     # ROOT.gPad.SetLogy()
     # c.SetLogy()
+    # frame.GetYaxis().SetTitle("%s / %s"%(campaignOne,campaignTwo))
+
     frame = c.DrawFrame(1.4,0.001, 4.1, 10)
+    # frame.SetTitle("test")
+
+    # frame.SetTitle("Median 95%% CL #sigma_{%s} Limits"%(args.resultType))
     frame.GetYaxis().CenterTitle()
     frame.GetYaxis().SetTitleSize(0.05)
     frame.GetXaxis().SetTitleSize(0.05)
@@ -405,63 +446,37 @@ def plotRatio(values, labels1, labels2):
     frame.GetYaxis().SetTitleOffset(0.9)
     frame.GetXaxis().SetNdivisions(508)
     frame.GetYaxis().CenterTitle(True)
-    # frame.GetYaxis().SetTitle("95% upper limit on #sigma / #sigma_{SM}")
 
-    frame.GetYaxis().SetTitle(Label_1 + " / " + Label_2)
-    # frame.GetYaxis().SetRangeUser(0.8,1.2)
+    label1, label2 = "", "" 
+    campaignLabelDict = {
+        "HHWWgg_v2-3": "noTaus",
+        "HHWWgg_v2-7": "fullTauDecays",
+        "HHWWgg_SM"  : "fullTauDecays"
+    }
+
+    for icamp,campaign in enumerate([campaignOne, campaignTwo]):
+        exec("label%s = campaignLabelDict[campaign]"%(icamp+1))
+    yTitle = "%s / %s"%(label1,label2)
+
+    frame.GetYaxis().SetTitle(yTitle)
     frame.GetYaxis().SetRangeUser(0.5,1.2)
-    # frame.GetYaxis().SetTitle("95% CL limits ratio: " + Label_1 + " / " + Label_2)
-
-    # if(args.atlas_compare):
-    #     frame.GetYaxis().SetTitle("95% CL limits on #sigma(gg#rightarrow X)#times B(X#rightarrow HH) [pb]")
-    # elif(args.CMS_compare) or (args.All_Points):
-    #     frame.GetYaxis().SetTitle("95% CL limit on #sigma(gg#rightarrow X#rightarrow HH) (fb)")
-    # elif(args.SM_Point):
-    #     frame.GetYaxis().SetTitle("95% CL limit on #sigma(gg#rightarrow X#rightarrow HH) (pb)")
 	
-    #frame.GetXaxis().Set
-#    frame.GetYaxis().SetTitle("95% upper limit on #sigma #times BR / (#sigma #times BR)_{SM}")
-    # frame.GetXaxis().SetTitle("background systematic uncertainty [%]")
     if(args.SM_Point): frame.GetXaxis().SetTitle("Standard Model")
     else: frame.GetXaxis().SetTitle("Radion Mass (GeV)")
-    # frame.SetMinimum(0)
-    # frame.SetMinimum(1) # need Minimum > 0 for log scale 
-    
-    # frame.SetMinimum(1.000001) # need Minimum > 0 for log scale 
-
-    # frame.SetMaximum(max(up2s)*1.05)
-    # frame.SetMaximum(max(up2s)*2)
-    # frame.SetMaximum(1000.)
-    
-    # if(args.atlas_compare):
-    #     frame.SetMaximum(7*1e2) # ATLAS
-    # elif(args.CMS_compare) or (args.All_Points):
-    #     frame.SetMaximum(8*1e4) # CMS HH 
 
     frame.GetXaxis().SetLimits(min(values),max(values))
-
-    # frame.SetLogy()
-    # frame.GetXaxis().SetLimits(min(values)-10,max(values)+10)
- 
-    # yellow.SetFillColor(ROOT.kOrange)
-    # yellow.SetLineColor(ROOT.kOrange)
-    # yellow.SetFillStyle(1001)
-    # yellow.Draw('F')
- 
-    # green.SetFillColor(ROOT.kGreen+1)
-    # green.SetLineColor(ROOT.kGreen+1)
-    # green.SetFillStyle(1001)
-    # green.Draw('Fsame')
  
     median.SetLineColor(1)
     median.SetLineWidth(2)
     median.SetLineStyle(2)
     median.SetMarkerStyle(8)
     median.SetMarkerColor(ROOT.kBlack)
+    median.SetTitle("Median 95%% CL #sigma_{%s} Limits"%(args.resultType))
     median.Draw('LP')
  
     CMS_lumi.CMS_lumi(c,4,11)
     ROOT.gPad.SetTicks(1,1)
+    frame.SetTitle("test")
     frame.Draw('sameaxis')
  
     # yboost = 0.075
@@ -478,14 +493,6 @@ def plotRatio(values, labels1, labels2):
     legend.SetTextFont(42)
     legend.AddEntry(median, "Ratio: AsymptoticLimits CL_{s} expected",'L')
 
-    # legend.AddEntry(green, "#pm 1 std. deviation",'f')
-#    legend.AddEntry(green, "AsymptoticLimits CL_{s} #pm 1 std. deviation",'f')
-    # legend.AddEntry(yellow,"#pm 2 std. deviation",'f')
-    # legend.AddEntry("","STAT Only","")
-#    legend.AddEntry(green, "AsymptoticLimits CL_{s} #pm 2 std. deviation",'f')
-
-    # legend.Draw()
-
     label = TLatex()
     label.SetNDC()
     label.SetTextAngle(0)
@@ -494,12 +501,6 @@ def plotRatio(values, labels1, labels2):
     label.SetTextSize(0.045)
     label.SetLineWidth(2)
 
-    # if(args.systematics): label.DrawLatex(0.7,0.7 + yboost,"SYST + STAT")
-    # else: label.DrawLatex(0.7,0.7 + yboost,"STAT ONLY")
-    
-    print " "
-    # c.SaveAs("UpperLimit.png")
-    
     outFile = ''
     outFile += ol + '/'
     if(args.CMS_compare):
@@ -509,6 +510,16 @@ def plotRatio(values, labels1, labels2):
     if(args.atlas_compare):
         outFile += "atlas_Compare_"
 
+    label = TLatex()
+    label.SetNDC()
+    label.SetTextAngle(0)
+    label.SetTextColor(kBlack)
+    label.SetTextFont(42)
+    label.SetTextSize(0.045)
+    label.SetLineWidth(2)
+    label.DrawLatex(0.32,0.95,"Median 95%% CL #sigma_{%s} Limits"%(args.resultType))
+    # if(args.systematics): label.DrawLatex(0.7,0.7 + yboost,"SYST + STAT")
+    # else: label.DrawLatex(0.7,0.7 + yboost,"STAT ONLY")
 
     if args.SM_Point: outFile += "SM_"
 
@@ -549,19 +560,34 @@ def plotNonResUpperLimits(campaign,labels,resultType,plotLabels):
     # HHWWgg_WWgg_factor = 2061.43 # (1 / 0.0004851), 0.0004851 is BR of HH->WWgg
     # e, mu (no tau), qq (assuming negligible b quark BR): 3.4916 
     # 1030.7153 
-    HHWWgg_qqlnu_factor = 3.4916 # e, mu semileptonic channels only 
+
+    campaignBRdict = {
+        "HHWWgg_v2-3": 3.4916, # (1 / BR) of qqlnu. Electron and Muon decays only 
+        "HHWWgg_v2-7": 2.3079, # (1 / BR) of qqlnu. Electron, Muon, all Tau decays INCLUDED
+        "HHWWgg_SM" : 2.3079,
+        # "HHWWgg_v2-7": 2.2779 # (1 / BR) of qqlnu. Electron, Muon, all Tau decays INCLUDED
+    }
+
+    HHWWgg_qqlnu_factor = campaignBRdict[args.campaign]
     HHWWgg_WWgg_factor = 1030.7153 
+
+    # HHWWgg_qqlnu_factor = 3.4916 # e, mu semileptonic channels only 
+    # HHWWgg_WWgg_factor = 1030.7153 
     if(resultType == "WWgg"): HHWWgg_factor = HHWWgg_qqlnu_factor
     elif(resultType == "HH"): HHWWgg_factor = HHWWgg_qqlnu_factor*HHWWgg_WWgg_factor
+
+    year = args.year
 
     # green_h = TH1F("")
     xvalues = []
     for i in range(N):
         xvalues.append(i)
+    nonBRvals = [] 
     for i in range(N):
         direc = args.HHWWggCatLabel
 
-        file_name = "%s_limits/%s_%s_HHWWgg_qqlnu.root"%(direc,campaign,labels[i])
+        # file_name = "%s_limits/%s_%s_HHWWgg_qqlnu.root"%(direc,campaign,labels[i])
+        file_name = "%s_limits/%s_%s_%s_HHWWgg_qqlnu.root"%(direc,campaign,year,labels[i])
         print"file name:",file_name
         # file_name = direc + "_limits/HHWWgg_v2-3_2017_" + labels[i] + "_HHWWgg_qqlnu.root"
         #print'file_name:',file_name
@@ -573,6 +599,8 @@ def plotNonResUpperLimits(campaign,labels,resultType,plotLabels):
         green.SetPoint(  2*N-1-i, xvalues[i], limit[1]*HHWWgg_factor ) # - 1 sigma
         yellow.SetPoint( 2*N-1-i, xvalues[i], limit[0]*HHWWgg_factor ) # - 2 sigma
 
+        print("limit without HHWWgg factor:",limit[2])
+        nonBRvals.append(limit[2])
         median_val = limit[2]*HHWWgg_factor
         # x.append(median_h.GetXaxis().GetBinCenter(i+1))
         x.append(median_h.GetXaxis().GetBinLowEdge(i+1))
@@ -590,6 +618,9 @@ def plotNonResUpperLimits(campaign,labels,resultType,plotLabels):
         median_h.Fill(x[i],median_val)
 
         print"median_val:",median_val
+
+    print("masses:",xvalues)
+    print("nonBR limits:",nonBRvals)
 
     median_h.Draw("a")
     gr = TGraphAsymmErrors(N,x,y,xerrorLow,xerrorHigh,lowerOneSig,upperOneSig)
@@ -848,7 +879,6 @@ def frange(start, stop, step):
         yield i
         i += step
  
- 
 # MAIN
 def main():
     campaign = args.campaign 
@@ -859,12 +889,9 @@ def main():
         # values.append(1)   
     # else: 
     masses = []
-    # if(args.CMS_compare): masses = [250, 260, 270, 280, 300, 320, 350, 400, 500, 550, 600, 650, 700, 800, 850, 900, 1000] 
-    if(args.CMS_compare): masses = [260,1000] 
-    # if(args.All_Points): masses = [250, 260, 270, 280, 300, 320, 350, 400, 500, 550, 600, 650, 700, 800, 850, 900, 1000, 1250]
-    if(args.All_Points): masses = [260,1000]
-    # if(args.atlas_compare): masses = [250, 260, 270, 280, 300, 320, 350, 400, 500]
-    if(args.atlas_compare): masses = [260,1000]
+    if(args.CMS_compare): masses = [250, 260, 270, 280, 300, 320, 350, 400, 500, 550, 600, 650, 700, 800, 850, 900, 1000] 
+    if(args.All_Points): masses = [250, 260, 270, 280, 300, 320, 350, 400, 500, 550, 600, 650, 700, 800, 850, 900, 1000]
+    if(args.atlas_compare): masses = [250, 260, 270, 300, 320, 350, 400, 500]
     for m in masses: 
         values.append(m)
 
@@ -877,10 +904,10 @@ def main():
         labels1_ = [] 
         labels2_ = []
         if args.SM_Point: 
-            labels1_.append("SM_" + args.HHWWggCatLabel)
-            labels1_.append("SM_" + args.HHWWggCatLabel)
-            labels2_.append("SM_" + args.SecondHHWWggCatLabel)
-            labels2_.append("SM_" + args.SecondHHWWggCatLabel)     
+            labels1_.append("nodeSM_" + args.HHWWggCatLabel)
+            labels1_.append("nodeSM_" + args.HHWWggCatLabel)
+            labels2_.append("nodeSM_" + args.SecondHHWWggCatLabel)
+            labels2_.append("nodeSM_" + args.SecondHHWWggCatLabel)     
         else: 
             for m in masses:
                 labels1_.append("X" + str(m) + '_' + str(args.HHWWggCatLabel))
@@ -898,7 +925,7 @@ def main():
         for m in masses:
             mLabel = "X%s"%str(m)
             massLabels.append(mLabel)
-        massLabels.append("SM")
+        massLabels.append("nodeSM")
         # print args.GridLabels
         nGridLabels = len(args.GridLabels)
         print'nGridLabels:',nGridLabels
@@ -984,7 +1011,7 @@ def main():
         labels = [ ]
         if args.SM_Point: 
             labels = []
-            labels.append("SM_" + args.HHWWggCatLabel)
+            labels.append("nodeSM_" + args.HHWWggCatLabel)
             values = [] 
             plotLabels = ["SM Non-Res"]
             # labels.append("SM_" + args.HHWWggCatLabel)
@@ -1010,8 +1037,5 @@ def main():
         else: 
             plotUpperLimits(labels,values,resultType)
     
- 
- 
- 
 if __name__ == '__main__':
     main()

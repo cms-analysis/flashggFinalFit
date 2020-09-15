@@ -19,15 +19,17 @@ int Normalization_13TeV::Init(int sqrtS, string FinalState){
     TPython::Eval(Form("buildSMHiggsSignalXSBR.Init%dTeV()", sqrtS));
     
     for (double mH=120;mH<130.05;mH+=0.1){ // breaks when extended beyond 130
-        double valBR           = 1.; 
+        double valBR_HHWWgg           = 1.; 
 
         // FinalState used for HHWWgg
-        if(FinalState=="qqlnu") valBR = 0.44;
-        else if(FinalState=="qqqq") valBR = 0.454;
-        else if(FinalState=="lnulnu") valBR = 0.107;
-        else valBR = (double)TPython::Eval(Form("buildSMHiggsSignalXSBR.getBR(%f)",mH)); // H->gg
+        if(FinalState=="qqlnu") valBR_HHWWgg = 0.44;
+        else if(FinalState=="qqqq") valBR_HHWWgg = 0.454;
+        else if(FinalState=="lnulnu") valBR_HHWWgg = 0.107;
+        else valBR_HHWWgg = 1; // H->gg
 
-        // double valBR           = (double)TPython::Eval(Form("buildSMHiggsSignalXSBR.getBR(%f)",mH));
+        double BR1 = 1.; 
+
+        double valBR_Hgg       = (double)TPython::Eval(Form("buildSMHiggsSignalXSBR.getBR(%f)",mH));
         double valXSggH        = (double)TPython::Eval(Form("buildSMHiggsSignalXSBR.getXS(%f,'%s')",mH,"ggH"));
         double valXSqqH        = (double)TPython::Eval(Form("buildSMHiggsSignalXSBR.getXS(%f,'%s')",mH,"qqH"));
         double valXSttH        = (double)TPython::Eval(Form("buildSMHiggsSignalXSBR.getXS(%f,'%s')",mH,"ttH"));
@@ -43,7 +45,9 @@ int Normalization_13TeV::Init(int sqrtS, string FinalState){
         double valXSWH2HQQ     = valXSWH*(67.41*0.01)/*BR(W to hadrons)*/;
         double valXSZH2HQQ     = valXSZH*(69.91*0.01)/*BR(Z to hadrons)*/;  
 
-        BranchingRatioMap[mH] = valBR;
+        BranchingRatioMap[mH] = BR1;
+
+        // std::cout << "valBR:" << valBR << std::endl;
 
         XSectionMap_ggh[mH] = valXSggH;   
         XSectionMap_vbf[mH] = valXSqqH;   
@@ -153,7 +157,8 @@ int Normalization_13TeV::Init(int sqrtS, string FinalState){
         XSectionMap_THW[mH]                      = 0.98 * valXStHW;
 
         // HHWWgg 
-        XSectionMap_HHWWgg[mH] = 0.001; // arbitrary, same as one used in flashgg
+        XSectionMap_HHWWgg[mH] = 0.001; // arbitrary HHWWgg cross section 
+        // XSectionMap_HHWWgg[mH] = 0.001*valBR_HHWWgg; // arbitrary fgg cross section * branching ratio of process: qqlnu, lnulnu or qqqq for normalization 
 
     }
 }

@@ -1362,7 +1362,7 @@ void FinalModelConstruction::getNormalization(){
     sumEntries =0; //negative eff*acc makes no sense...
     fitToConstant=1;
     }
-    effAcc = (sumEntries/(intLumi->getVal()*norm->GetXsection(mh,procLowerCase_)*norm->GetBR(mh)));
+    effAcc = (sumEntries/(intLumi->getVal()*norm->GetXsection(mh,procLowerCase_)*norm->GetBR(mh))); // eff * acc normalized to branching ratio 
 		if(verbosity_)std::cout << "[INFO] (FinalModelConstruction) intLumi " << intLumi->getVal() <<", effAcc " << effAcc << std::endl;
 		if(verbosity_)std::cout << "[INFO] (FinalModelConstruction) data " << *data << std::endl;
 		if(verbosity_)std::cout << "[INFO] (FinalModelConstruction) sumEntries " << sumEntries <<", norm->GetXsection(mh,procLowerCase_) " << norm->GetXsection(mh,procLowerCase_) << " norm->GetBR(mh) " << norm->GetBR(mh)<< std::endl;
@@ -1455,6 +1455,8 @@ void FinalModelConstruction::getNormalization(){
 	} else {
      if (verbosity_>1) std::cout << "[INFO] xs " << xs->getVal() << ", brSpline " << brSpline->getVal() << ", eaSpline " << eaSpline->getVal() << ", rateNuisTerm " << rateNuisTerm->getVal() << ", intLumi " << intLumi->getVal() << std::endl;
   }
+  std::cout << "[INFO] xs " << xs->getVal() << ", brSpline " << brSpline->getVal() << ", eaSpline " << eaSpline->getVal() << ", rateNuisTerm " << rateNuisTerm->getVal() << ", intLumi " << intLumi->getVal() << std::endl;
+
 	finalNorm = new RooFormulaVar(Form("%s_norm",finalPdf->GetName()),Form("%s_norm",finalPdf->GetName()),"@0*@1*@2*@3",RooArgList(*xs,*brSpline,*eaSpline,*rateNuisTerm));
   // make some debug checks
   for (int m =120; m<131; m=m+5){

@@ -19,7 +19,7 @@ replacementCatWV = {
   "stage1":"RECO_0J_Tag1",
   "stage1_1":"RECO_0J_PTH_GT10_Tag1",
   "stage1_2":"RECO_0J_PTH_GT10_Tag1",
-  "HHWWgg":"HHWWggTag_0"
+  "HHWWgg":"HHWWggTag_2"
   # "HHWWgg":"HHWWggTag_1"
   # "HHWWgg_qqlnu" : "HHWWggTag_0",
   # "HHWWgg_qqqq" : "HHWWggTag_2"

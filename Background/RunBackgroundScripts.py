@@ -27,6 +27,7 @@ def get_options():
   parser.add_option('--printOnly', dest='printOnly', default=0, type='int', help="Dry run: print command only")
   
   parser.add_option('--analysis', dest='analysis', default="", type='str', help="Analysis to run on. Currently just configuring for HHWWgg")
+  parser.add_option('--FinalState', dest='FinalState', default="", type='str', help="Final state particles for HHWWgg: qqlnu, lnulnu, or qqqq")
 
 
   return parser.parse_args()
@@ -56,6 +57,7 @@ if opt.inputConfig != '':
     mode         = _cfg['mode']
     printOnly    = opt.printOnly
     analysis     = _cfg['analysis']
+    FinalState   = _cfg['FinalState']
 
     # Delete copy of file
     os.system("rm config.py")
@@ -77,6 +79,7 @@ else:
   mode         = opt.mode
   printOnly    = opt.printOnly
   analysis     = opt.analysis
+  FinalState   = opt.FinalState
 
 # Check if mode is allowed in options
 if mode not in ['std','fTestOnly','bkgPlotsOnly']:
@@ -107,11 +110,20 @@ if len(procs)==0: procs = 'arbitrary'
 
 # Extract data file name and signal fit workspace filename
 dataFile = "%s/allData.root"%inputWSDir
-signalFitWSFile = "%s/../Signal/outdir_%s/CMS-HGG_sigfit_%s.root"%(os.environ['PWD'],ext,ext)
+# signalFitWSFile = "%s/../Signal/outdir_%s/CMS-HGG_sigfit_%s.root"%(os.environ['PWD'],ext,ext)
+if(analysis == "HHWWgg"): 
+  HHWWgg_SigExt = "%s_nodeSM_HHWWgg_%s"%(ext,FinalState) # SM --> more general eventually 
+  signalFitWSFile = "%s/../Signal/outdir_%s/CMS-HGG_sigfit_%s.root"%(os.environ['PWD'],HHWWgg_SigExt,HHWWgg_SigExt)
+else: 
+  signalFitWSFile = "%s/../Signal/outdir_%s/CMS-HGG_sigfit_%s.root"%(os.environ['PWD'],ext,ext)
 
-if(analysis != "HHWWgg"):
-  if not os.path.exists( signalFitWSFile ):
-    print " --> [ERROR] signal fit workspace (%s) does not exists. Please run signal fitting first. Leaving..."%signalFitWSFile
+# want: sigFileName -s : Signal/outdir_HHWWgg_SM-SL_2016_AllCats_nodeSM_HHWWgg_qqnlu/CMS-HGG_sigfit_HHWWgg_SM-SL_2016_AllCats_nodeSM_HHWWgg_qqlnu.root
+
+
+if not os.path.exists( signalFitWSFile ):
+  print " --> [ERROR] signal fit workspace (%s) does not exists. Please run signal fitting first. Leaving..."%signalFitWSFile
+  print " --> [ERROR] Exiting"
+  exit(1) 
 
 # Print info to user
 print " --> Input flashgg ws dir: %s"%inputWSDir

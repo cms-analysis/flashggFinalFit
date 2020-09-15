@@ -30,8 +30,8 @@ class LinearInterp {
     bool doSecondaryModels;
     bool secondaryModelVarsSet;
     std::vector<int> skipMasses_;
-    int verbosity_;
     std::vector<int> allMH_;
+    int verbosity_;
     std::vector<int> getAllMH();
     bool skipMass(int mh);
     std::map<std::string,RooSpline1D*> splines;

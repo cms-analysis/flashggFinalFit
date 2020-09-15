@@ -54,7 +54,7 @@ void LinearInterp::interpolate(){
    }
     
   // next loop through each param name template and for each MH, in order to make a spline.
-  for (int iParam =0; iParam < paramNameTemplates.size() ; iParam++){
+  for (unsigned int iParam =0; iParam < paramNameTemplates.size() ; iParam++){
     //fill the x,y values of the parameter 
     vector<double> mhValues;
     vector<double> paramValues;
