@@ -1,0 +1,42 @@
+combineScriptCfg = {
+  
+  # Setup
+  'analysis':'HHWWgg',
+  'analysis_type':'{analysis_type}',
+  # 'analysis_type':'NMSSM',
+  # 'analysis_type':'Res',
+  'FinalState':'{FinalStateParticles}', # for HHWWgg. qqlnu, lnulnu, or qqqq. Will add combined eventually.
+  'mode':'{mode}',
+  # 'mode':'combine',
+  'doSystematics':1, # 0: do not include systematics in datacard. 1: include systematics in datacard
+  #'inputWSDir':'/eos/user/a/atishelm/ntuples/HHWWgg/HHWWgg_SL_SM_2017/HHWWgg_SM2017_Signal_Hadded', ##-- Note: should NOT end with /
+  'inputWSDir':'{inputWSDir}', ##-- Note: should NOT end with /
+  #Procs will be inferred automatically from filenames
+  #'HHWWggCatLabel':'2TotCatsCOMBINEDWithSyst', # for name of combine output files 
+  'HHWWggCatLabel':'{note}',
+  'cats':'{cats}',
+  'ext':'{ext}',
+  'year':'{year}', 
+  'signalProcs':'{usrprocs}',
+  #'signalProcs':'GluGluToHHTo',
+  # 'signalProcs':'ggF',
+ 
+  # Add UE/PS systematics to datacard (only relevant if mode == datacard)
+  'doUEPS':0,
+
+  #Photon shape systematics  
+  'scales':'HighR9EB,HighR9EE,LowR9EB,LowR9EE,Gain1EB,Gain6EB',
+  'scalesCorr':'MaterialCentralBarrel,MaterialOuterBarrel,MaterialForward,FNUFEE,FNUFEB,ShowerShapeHighR9EE,ShowerShapeHighR9EB,ShowerShapeLowR9EE,ShowerShapeLowR9EB',
+  'scalesGlobal':'NonLinearity:UntaggedTag_0:2,Geant4',
+  'smears':'HighR9EBPhi,HighR9EBRho,HighR9EEPhi,HighR9EERho,LowR9EBPhi,LowR9EBRho,LowR9EEPhi,LowR9EERho',
+
+  # Job submission options
+  # 'batch':'HTCONDOR',
+  # 'queue':'workday',
+
+  'batch':'',
+  'queue':'',
+
+  'printOnly':0, # For dry-run: print command only
+  
+}

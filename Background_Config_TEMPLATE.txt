@@ -1,0 +1,24 @@
+# Config file: options for background fitting
+
+backgroundScriptCfg = {
+  
+  # Setup
+  'inputWSDir':"{inputWSDir}",
+  #Procs will be inferred automatically from filenames
+  'cats':"{cats}",
+  'ext':"{ext}",
+  'year':"{year}",
+  'unblind':0,  
+
+  # Job submission options
+  'batch':'HTCONDOR',
+  'queue':'espresso',
+  'analysis':'HHWWgg',
+  'FinalState':'{FinalStateParticles}', # For HHWWgg. Should choose qqlnu, lnulnu, or qqqq for final state. Will look for this in expected name formats. When we combine channels, and they're defined by tags, we'll add "combined" here and naming format in file will be something like "combined" instead of qqlnu, etc.
+
+  # Mode allows script to carry out single function
+  'mode':"{mode}",
+  #'mode':'fTestOnly', # Options: [std,fTestOnly,bkgPlotsOnly]
+  #'mode':'bkgPlotsOnly', # Options: [std,fTestOnly,bkgPlotsOnly]
+  
+}
