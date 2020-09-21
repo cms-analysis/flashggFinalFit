@@ -102,11 +102,11 @@ if(args.Step!="Plot"):
             os.system('cp ../Datacard/%s_%s_datacards/Datacard_13TeV_%s_nodeSM_HHWWgg_%s_cleaned.txt CMS-HGG_mva_13TeV_datacard_%s.txt'%(ext,args.note,ext,FinalStateParticles,ext))
             
             ##-- Add branching ratios to data card in form of rateParam
-            # https://pdglive.lbl.gov/Particle.action?node=S043&init=0
-            SL_BR = 0.4411
-            FH_BR = 0.4544
-            FL_BR = 0.1071
-            datacardName = "CMS-HGG_mva_13TeV_datacard_%s.txt"%(ext)
+            SL_BR = GetBR("SL")
+	    FH_BR = GetBR("FH")
+            FL_BR = GetBR("FL")
+            
+	    datacardName = "CMS-HGG_mva_13TeV_datacard_%s.txt"%(ext)
             print "Creating datacard: ",datacardName
             datacard = open(datacardName,'a')
             datacard.write('\n')

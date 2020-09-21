@@ -3,6 +3,37 @@ from array import array
 import Combine.CMS_lumi as CMS_lumi
 import Combine.tdrstyle as tdrstyle 
 
+def GetBR(finalState_):
+  # https://pdglive.lbl.gov/Particle.action?node=S043&init=0
+  WW_BR_ndigits = 3 # Rounding precision of final state branching ratios 
+  HH_BR_ndigits = 6 # For HH->WWgg BR (expect a few zeroes)
+  BR_W_qq = 0.6741 
+  BR_W_enu = 0.1071
+  BR_W_munu = 0.1063
+  BR_W_taunu = 0.1138
+  BR_Wlnu = BR_W_enu + BR_W_munu + BR_W_taunu
+
+  BR_WW_qqlnu = round(2 * BR_Wlnu * BR_W_qq, WW_BR_ndigits)
+  BR_WW_lnulnu = round(BR_Wlnu * BR_Wlnu, WW_BR_ndigits)
+  BR_WW_qqqq = round(BR_W_qq * BR_W_qq, WW_BR_ndigits) 
+
+  # HH BR
+  # CMS Higgs BRs: https://twiki.cern.ch/twiki/bin/view/LHCPhysics/CERNYellowReportPageBR
+  # Higgs mass: https://pdglive.lbl.gov/Particle.action?node=S126&init=0
+  BR_H_gammagamma = 0.00227
+  BR_H_WW = 0.2154 
+
+  BR_HH_WWgammagamma = round(2 * BR_H_gammagamma * BR_H_WW, HH_BR_ndigits)
+
+  BR_dict = {
+    "SL" : BR_WW_qqlnu,
+    "FL" : BR_WW_lnulnu,
+    "FH" : BR_WW_qqqq,
+    "HH_WWgg" : BR_HH_WWgammagamma
+  }
+
+  return BR_dict[finalState_]
+
 def FinalStateCats(FS_):
   fsCatDict = {
     "SL" : "HHWWggTag_0,HHWWggTag_1",
