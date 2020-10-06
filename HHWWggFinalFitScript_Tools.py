@@ -34,11 +34,20 @@ def GetBR(finalState_):
 
   return BR_dict[finalState_]
 
+# def FinalStateCats(FS_):
+#   fsCatDict = {
+#     "SL" : "HHWWggTag_0,HHWWggTag_1",
+#     "FH" : "HHWWggTag_2",
+#     "FL" : "HHWWggTag_3"
+#   }
+#   return fsCatDict[FS_]
+
 def FinalStateCats(FS_):
   fsCatDict = {
-    "SL" : "HHWWggTag_0,HHWWggTag_1",
-    "FH" : "HHWWggTag_2",
-    "FL" : "HHWWggTag_3"
+    "SL" : "HHWWggTag_0,HHWWggTag_1"
+    # "SL" : "HHWWggTag_0,HHWWggTag_1,HHWWggTag_2" # DNN cats 
+    # "FH" : "HHWWggTag_2",
+    # "FL" : "HHWWggTag_3"
   }
   return fsCatDict[FS_]
 
@@ -46,7 +55,10 @@ def GetPlotDir(mode_):
     plotDirDict = {
         "fTestOnly" : ["bkgfTest-Data"],
         "bkgPlotsOnly" : ["bkgPlots-Data"],
-        "std" : ["sigfTest","sigfit","sigplots"] ##-- signal std  ##-- sigfit sigplots 
+        "std" : ["sigfTest","sigfit","sigplots"], ##-- signal std  ##-- sigfit sigplots
+        "sigFitOnly" : ["sigfit"],
+        "packageOnly" : ["sigfit"],
+        "sigPlotsOnly" : ["sigplots"]
     }
     return plotDirDict[mode_]
 
@@ -61,6 +73,7 @@ def GetFitDirec(dirType_):
 
 def GetConfigParams(dirType_):
     configParamsDict = {
+        # "Signal" : ["systematics","inputWSDir","cats","ext","year","mode","FinalStateParticles","usrprocs","analysis_type"],
         "Signal" : ["inputWSDir","cats","ext","year","mode","FinalStateParticles","usrprocs","analysis_type"],
         "Data" : ["inputWSDir","cats","ext","year","mode","FinalStateParticles"],
         "Datacard" : ["inputWSDir","cats","ext","year","mode","FinalStateParticles","usrprocs","analysis_type","note"]
@@ -114,7 +127,8 @@ def getLimits(file_name):
 def CreateLimitTable(HH_limit):
     ROOT.gROOT.SetBatch(ROOT.kTRUE) # do not output upon draw statement 
     print'Creating grid of limit values'
-    ol = '/eos/user/a/atishelm/www/HHWWgg/Combination/'
+    # ol = '/eos/user/a/atishelm/www/HHWWgg/Combination/'
+    ol = '/eos/user/a/atishelm/www/HHWWgg/Combination2/'
     
     xLabels = ['2016','2017','2018','Run2']
     yLabels = ['SL','FH','FL']
@@ -165,7 +179,7 @@ def CreateLimitTable(HH_limit):
     c_tmp.SaveAs(outNamepng)
     c_tmp.SaveAs(outNamepdf)
 
-def PlotLimitBands():
+def PlotLimitBands(log_):
     # CMS style
     CMS_lumi.cmsText = "CMS"
     CMS_lumi.extraText = "Preliminary"
@@ -186,15 +200,16 @@ def PlotLimitBands():
     # tdrStyle.cd()
 
     # TDR style 
-
     
     thistdrstyle = tdrstyle.setTDRStyle()
-    thistdrstyle.SetOptLogy(0)
+    # thistdrstyle.SetOptLogy(0)
     # if(args.Ratio) or (args.Grid): thistdrstyle.SetOptLogy(0)
     # else: thistdrstyle.SetOptLogy(1)
+    if(log_): thistdrstyle.SetOptLogy(1)
+    else: thistdrstyle.SetOptLogy(0)
 
     thistdrstyle.cd()    
-    ol = '/eos/user/a/atishelm/www/HHWWgg/Combination/'
+    ol = '/eos/user/a/atishelm/www/HHWWgg/Combination2/'
     # labelTitle= args.HHWWggCatLabel
     # see CMS plot guidelines: https://ghm.web.cern.ch/ghm/plots/
     labels = []
@@ -366,9 +381,15 @@ def PlotLimitBands():
     # frame.SetMinimum(1) # need Minimum > 0 for log scale 
     
     # frame.SetMinimum(args.ymin) # need Minimum > 0 for log scale 
-    frame.SetMinimum(0.1) # need Minimum > 0 for log scale 
+    
+    if(log_): 
+        frame.SetMinimum(1) # need Minimum > 0 for log scale 
+        frame.SetMaximum(5e4)
+    else: 
+        frame.SetMinimum(0) # need Minimum > 0 for log scale 
+        frame.SetMaximum(3000)
 
-    frame.SetMaximum(1000)
+    # frame.SetMaximum(1000)
     frame.GetXaxis().SetLimits(-0.5,N-0.5)
     # frame.GetXaxis().CenterLabels(True)
 
@@ -398,6 +419,8 @@ def PlotLimitBands():
     gr_yellow.Draw("P2")
 
     gr.SetFillColor(ROOT.kGreen+1)
+    # gr.Draw("P2same")
+    gr.SetLineStyle(3)
     gr.Draw("P2same")
 
     CMS_lumi.CMS_lumi(c,4,11)
@@ -454,7 +477,8 @@ def PlotLimitBands():
 
     # outFile += "%s_"%("testestest")
 
-    outFile = "%s/limitBands_"%(ol)
+    if(log_): outFile = "%s/limitBands_log_"%(ol)
+    else: outFile = "%s/limitBands_nonlog_"%(ol)
 
     c.SaveAs(outFile + "UpperLimit.pdf")
     c.SaveAs(outFile + "UpperLimit.png")

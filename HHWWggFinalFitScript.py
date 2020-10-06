@@ -16,18 +16,35 @@
 #
 # Datacard:
 # python HHWWggFinalFitScript.py --Step Datacard --mode datacard --physics SM --finalStates SL,FH,FL --years 2016,2017,2018 --note AllCats --dirTypes Datacard
-#
-# Combine: 
+# 
+# Combine:
+# ##--individuals
 # python HHWWggFinalFitScript.py --Step Combine --mode combine --physics SM --finalStates SL,FL,FH --years 2016,2017,2018 --note AllCats --dirTypes Combine --combineInd
 # python HHWWggFinalFitScript.py --Step Combine --mode combine --physics SM --finalStates FH,SL --years 2018 --note AllCats --dirTypes Combine --combineInd
-# 
+#
+# ##-- Run 2 
 # python HHWWggFinalFitScript.py --Step Combine --mode combine --physics SM --finalStates SL,FL,FH --years 2016,2017,2018 --note AllCats --dirTypes Combine --Run2
 # python HHWWggFinalFitScript.py --Step Combine --mode combine --physics SM --finalStates FH,SL --years 2016,2017,2018 --note AllCats --dirTypes Combine --Run2
+# 
+##-- Everything
+# python HHWWggFinalFitScript.py --Step Combine --mode combine --physics SM --finalStates SL,FL,FH --years 2016,2017,2018 --note AllCats --dirTypes Combine --combineAll
 #
 # Plot:
-# python HHWWggFinalFitScript.py --Step Plot --physicsCases SM --finalStates SL --years all --note Plot
+# python HHWWggFinalFitScript.py --Step Plot --physicsCases SM --finalStates SL --years all --note Plot --HH_limit
 # python HHWWggFinalFitScript.py --Step Plot --mode Plot --physicsCases Plot --finalStates Plot --years Plot --note Plot
 #
+# 
+# ##-- DNN 
+# python HHWWggFinalFitScript.py --Step Signal --mode std --physics SM --finalStates SL --years 2017 --dirTypes Signal --note DNNaddWJets
+# python HHWWggFinalFitScript.py --Step Signal --mode sigFitOnly --physics SM --finalStates SL --years 2017 --dirTypes Signal --note DNNaddWJets
+# python HHWWggFinalFitScript.py --Step Signal --mode packageOnly --physics SM --finalStates SL --years 2017 --dirTypes Signal --note DNNaddWJets
+# python HHWWggFinalFitScript.py --Step Signal --mode sigPlotsOnly --physics SM --finalStates SL --years 2017 --dirTypes Signal --note DNNaddWJets
+#
+# python HHWWggFinalFitScript.py --Step Background --mode fTestOnly --physics SM --finalStates SL --years 2017 --dirTypes Data --note DNNaddWJets 
+# python HHWWggFinalFitScript.py --Step Background --mode bkgPlotsOnly --physics SM --finalStates SL --years 2017 --dirTypes Data --note DNNaddWJets 
+# 
+# python HHWWggFinalFitScript.py --Step Datacard --mode datacard --physics SM --finalStates SL --years 2017 --note DNNaddWJets --dirTypes Datacard
+# python HHWWggFinalFitScript.py --Step Combine --mode combine --physics SM --finalStates SL --years 2017 --note DNNaddWJets --dirTypes Combine --combineInd
 ###################################################################################################
 
 import os 
@@ -41,6 +58,7 @@ parser = argparse.ArgumentParser()
 
 parser.add_argument("--Step",type=str, default="", help="Fggfinalfit step to run", required=False)
 parser.add_argument("--mode",type=str, default="", help="Fggfinalfit mode to run", required=False)
+parser.add_argument("--systematics", action="store_true", default=False, help="Include systematics", required=False)
 parser.add_argument("--physicsCases",type=str, default="", help="Comma separated list of physics cases to run. Ex: SM", required=False)
 parser.add_argument("--finalStates",type=str, default="", help="Comma separated list of physics cases to run. Ex: SL,FH,FL", required=False)
 parser.add_argument("--years",type=str, default="", help="Comma separated list of years to run. Ex: 2016,2017,2018", required=False)
@@ -54,10 +72,14 @@ parser.add_argument("--combineInd", action="store_true", default=False, help="Co
 args = parser.parse_args()
 
 ntupleDirec = "/eos/user/a/atishelm/ntuples"
-baseDirec = "HHWWgg_Combination"
-outputDirec = "/eos/user/a/atishelm/www/HHWWgg/Combination"
+# baseDirec = "HHWWgg_Combination"
+# baseDirec = "HHWWgg_DNNResult"
+baseDirec = "HHWWgg_DNNResultAddWJets"
+# outputDirec = "/eos/user/a/atishelm/www/HHWWgg/DNN_Results"
+outputDirec = "/eos/user/a/atishelm/www/HHWWgg/DNN_Result_AddWJets"
 note = args.note 
 mode = args.mode 
+systematics = int(args.systematics)
 
 ##-- Get Loop params 
 loopParams = ["physicsCases","finalStates","years","dirTypes"]
@@ -68,8 +90,8 @@ for loopParam in loopParams:
 ##-- Setup For Combine Step
 if(args.Step=="Combine"): 
   # For each case X finalState X year, setup datacard, signal and background model locations
-  os.system('mkdir -p Combine/%s'%(args.note))
-  os.system('mkdir -p Combine/%s/Models'%(args.note))
+  os.system('mkdir -p Combine2/%s'%(args.note))
+  os.system('mkdir -p Combine2/%s/Models'%(args.note))
 
 ##-- Run steps for each case 
 if(args.Step!="Plot"):
@@ -95,7 +117,10 @@ if(args.Step!="Plot"):
             ext = "HHWWgg_%s-%s_%s_%s"%(physicsCase,finalState,year,note)
             FinalStateParticles = GetFinalStateParticles(finalState)
             # print"FinalStateParticles:",FinalStateParticles
-            os.chdir('Combine')
+            # os.chdir('Combine')
+            os.chdir('Combine2')
+
+            ##-- Copy models from this fggfinalfit repo 
             os.system('mkdir -p Models/%s'%(ext))
             os.system('cp ../Signal/outdir_%s_nodeSM_HHWWgg_%s/CMS-HGG_mva_13TeV_sigfit.root ./Models/%s/CMS-HGG_mva_13TeV_sigfit.root'%(ext,FinalStateParticles,ext))
             os.system('cp ../Background/CMS-HGG_multipdf_%s.root ./Models/%s/CMS-HGG_mva_13TeV_multipdf.root'%(ext,ext))
@@ -103,16 +128,17 @@ if(args.Step!="Plot"):
             
             ##-- Add branching ratios to data card in form of rateParam
             SL_BR = GetBR("SL")
-	    FH_BR = GetBR("FH")
+            FH_BR = GetBR("FH")
             FL_BR = GetBR("FL")
             
-	    datacardName = "CMS-HGG_mva_13TeV_datacard_%s.txt"%(ext)
+            datacardName = "CMS-HGG_mva_13TeV_datacard_%s.txt"%(ext)
             print "Creating datacard: ",datacardName
             datacard = open(datacardName,'a')
             datacard.write('\n')
-            if(finalState == "SL"):
+            if(finalState == "SL"):       
               datacard.write("br_WW_qqlnu rateParam HHWWggTag_0_%s GluGluToHHTo %s\n"%(year,SL_BR))
               datacard.write("br_WW_qqlnu rateParam HHWWggTag_1_%s GluGluToHHTo %s\n"%(year,SL_BR))
+              # datacard.write("br_WW_qqlnu rateParam HHWWggTag_2_%s GluGluToHHTo %s\n"%(year,SL_BR)) # DNN only..3 cats (not always...)
               datacard.write("nuisance edit freeze br_WW_qqlnu\n")
             elif(finalState == "FL"):
               datacard.write("br_WW_lnulnu rateParam HHWWggTag_3_%s GluGluToHHTo %s\n"%(year,FL_BR))
@@ -124,6 +150,7 @@ if(args.Step!="Plot"):
               print "Final state is not SL FL or FH. It's: %s"%(finalState)
               os.chdir('..')
               exit(1)
+            
             os.chdir('..')
 
           else: 
@@ -138,8 +165,10 @@ if(args.Step!="Plot"):
               usrprocs = GetUsrProcs(physicsCase)
 
             for param in configParams:
+              # print"param:",param
+              # if(param=='systematics'): exec("script = script.replace('{systematics}',%d)"%(systematics))
               exec("script = script.replace('{%s}',%s)"%(param,param))
-
+              
             # print"script:"
             # print script
 
@@ -181,7 +210,8 @@ if(args.Step=="Combine"):
   # run all possible combine combinations 
   # Columns: year --> Run 2 
   # Rows: SL, FH, FL --> Combine 
-  os.chdir('Combine')
+  # os.chdir('Combine')
+  os.chdir('Combine2')
   command = "combineCards.py "
   datacards = []
   
@@ -203,17 +233,28 @@ if(args.Step=="Combine"):
           dCardWorkspace = "%s.root"%(dCardName)
           datacards.append(dCardtxt)
           print "Computing limits for %s ..."%(ext)
+
+          ##-- With datacard.txt 
+          # combineCommand = 'combine %s -m 125 -M AsymptoticLimits --run=blind'%(dCardtxt)
+          # os.system(combineCommand)
+          # os.system('mv higgsCombineTest.AsymptoticLimits.mH125.root Limits/%s_limits.root'%(ext))
+
+          ##-- With text2workspace
+
           # print "Using datacard: %s"%(dCardWorkspace)
-          # os.system('text2workspace.py %s'%(dCardtxt))
-          # os.system('combine -M AsymptoticLimits -m 125 --freezeParameters allConstrainedNuisances --expectSignal 1 --cminDefaultMinimizerStrategy 0 -d %s --run blind -t -1'%(dCardWorkspace))
+          os.system('text2workspace.py %s'%(dCardtxt))
+          os.system('combine -M AsymptoticLimits -m 125 --freezeParameters allConstrainedNuisances --expectSignal 1 --cminDefaultMinimizerStrategy 0 -d %s --run blind -t -1'%(dCardWorkspace))
+          os.system('mv higgsCombineTest.AsymptoticLimits.mH125.root Limits/%s_limits.root'%(ext))
           # os.system('combine %s -m 125 -M AsymptoticLimits --run=blind'%(dCardWorkspace))
-          combineCommand = 'combine %s -m 125 -M AsymptoticLimits --run=blind'%(dCardtxt)
+
+
           # combineCommands.append(combineCommand)
           # print "combine Command: ",combineCommand
-          os.system(combineCommand)
+
+
           # os.system('rm higgsCombineTest.AsymptoticLimits.mH125.root')
           # subprocess.call(combineCommand, shell=True)
-          os.system('mv higgsCombineTest.AsymptoticLimits.mH125.root Limits/%s_limits.root'%(ext))
+
 
   # for com in combineCommands:
     # os.chdir('..')
@@ -252,9 +293,15 @@ if(args.Step=="Combine"):
         os.system('rm %s'%(run2_datacardName_root))
         os.system(run2_command)
         os.system('text2workspace.py %s'%(run2_datacardName_txt))
-        # os.system('combine -M AsymptoticLimits -m 125 --freezeParameters allConstrainedNuisances --expectSignal 1 --cminDefaultMinimizerStrategy 0 -d %s --run blind -t -1'%(run2_datacardName_root))
-        os.system('combine %s -m 125 -M AsymptoticLimits --run=blind'%(run2_datacardName_root))
+        
+        ##-- With text2workspace 
+        # need to use freezeparameters method to BR's can't change
+        os.system('combine -M AsymptoticLimits -m 125 --freezeParameters allConstrainedNuisances --expectSignal 1 --cminDefaultMinimizerStrategy 0 -d %s --run blind -t -1'%(run2_datacardName_root))
         os.system('mv higgsCombineTest.AsymptoticLimits.mH125.root Limits/%s_limits.root'%(run2_ext))
+        
+        ##-- not sure - previous strategy:
+        # os.system('combine %s -m 125 -M AsymptoticLimits --run=blind'%(run2_datacardName_root))
+        # os.system('mv higgsCombineTest.AsymptoticLimits.mH125.root Limits/%s_limits.root'%(run2_ext))
 
           # print "Computing limits for %s ..."%(ext)
           # os.system('text2workspace.py %s'%(dCardtxt))
@@ -292,7 +339,9 @@ if(args.Step=="Combine"):
     print "1) cd Combine"
     print "2)",command 
     print "3) text2workspace.py Datacard_Combined.txt"
-    print "4) combine Datacard_Combined.txt -m 125 -M AsymptoticLimits --run=blind"
+    # print "4) combine Datacard_Combined.txt -m 125 -M AsymptoticLimits --run=blind"
+    print "4) combine -M AsymptoticLimits -m 125 --freezeParameters allConstrainedNuisances --expectSignal 1 --cminDefaultMinimizerStrategy 0 -d Datacard_Combined.root --run blind -t -1"
+    print "5) mv higgsCombineTest.AsymptoticLimits.mH125.root Limits/HHWWgg_SM-All_Run2_AllCats_limits.root"
     # print "Command: ",command
     # print "Computing combined limit..."
     # print "Command: ",command
@@ -316,8 +365,10 @@ if(args.Step=="Combine"):
   # os.chdir('..')
 
 if(args.Step=="Plot"): 
-  os.chdir('Combine')
+  # os.chdir('Combine')
+  os.chdir('Combine2')
   print "Creating limit table ..."
   CreateLimitTable(args.HH_limit)
-  PlotLimitBands()
+  PlotLimitBands(0)
+  PlotLimitBands(1)
   os.chdir('..')
