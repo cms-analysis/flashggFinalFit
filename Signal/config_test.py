@@ -7,9 +7,9 @@ signalScriptCfg = {
   'procs':'auto', # if auto: inferred automatically from filenames
   'cats':'auto', # if auto: inferred automatically from (0) workspace
   'ext':'test',
-  'analysis':'stage1_2', # To specify which replacement dataset mapping (defined in ./python/replacementMap.py)
+  'analysis':'STXS', # To specify which replacement dataset mapping (defined in ./python/replacementMap.py)
   'year':'2016', 
-  'beamspot':'3.4',
+  'beamspot':'3.4', # Beamspot in data
   'numberOfBins':'320',
   'massPoints':'120,125,130',
 
@@ -24,5 +24,8 @@ signalScriptCfg = {
 
   # Job submission options
   'batch':'IC', # ['condor','SGE','IC','local']
-  'queue':'hep.q',
+  'queue':'hep.q'
+  #'batch':'condor', # ['condor','SGE','IC','local']
+  #'queue':'espresso',
+
 }

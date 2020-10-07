@@ -51,8 +51,19 @@ def writeSubFiles(_opts):
 
     # Write details depending on mode
 
+    # FIXME: option for running each cat on different cluster
+    # For looping over proc x cat
+    if _opts['mode'] == "signalFit":
+      for pidx in range(_opts['nProcs']):
+        for cidx in range(_opts['nCats']):
+          pcidx = pidx*_opts['nCats']+cidx
+          p,c = _opts['procs'].split(",")[pidx], _opts['cats'].split(",")[cidx]
+          _f.write("if [ $1 -eq %g ]; then\n"%pcidx)
+          _f.write("  python %s/scripts/signalFit.py --inputWSDir %s --ext %s --proc %s --cat %s --analysis %s --massPoints %s %s\n"%(cwd__,_opts['inputWSDir'],_opts['ext'],p,c,_opts['analysis'],_opts['massPoints'],_opts['modeOpts']))
+          _f.write("fi\n")
+   
     # For looping over categories
-    if _opts['mode'] == "calcPhotonSyst":
+    elif _opts['mode'] == "calcPhotonSyst":
       for cidx in range(_opts['nCats']):
         c = _opts['cats'].split(",")[cidx]
         _f.write("if [ $1 -eq %g ]; then\n"%cidx)
@@ -69,7 +80,8 @@ def writeSubFiles(_opts):
 
     # Condor submission file
     _fsub = open("%s/%s.sub"%(_jobdir,_executable),"w")
-    if _opts['mode'] == "calcPhotonSyst": writeCondorSub(_fsub,_executable,_opts['queue'],_opts['nCats'],_opts['jobOpts'])
+    if _opts['mode'] == "signalFit": writeCondorSub(_fsub,_executable,_opts['queue'],_opts['nCats']*_opts['nProcs'],_opts['jobOpts'])
+    elif _opts['mode'] == "calcPhotonSyst": writeCondorSub(_fsub,_executable,_opts['queue'],_opts['nCats'],_opts['jobOpts'])
     elif _opts['mode'] == "getEffAcc": writeCondorSub(_fsub,_executable,_opts['queue'],1,_opts['jobOpts'])
     _fsub.close()
     
@@ -79,8 +91,21 @@ def writeSubFiles(_opts):
 
     # Write details depending on mode
 
+    # FIXME: option for running single file for each category
+    # For separate submission file per process x category
+    if _opts['mode'] == "signalFit":
+      for pidx in range(_opts['nProcs']):
+        for cidx in range(_opts['nCats']):
+          pcidx = pidx*_opts['nCats']+cidx
+          p,c = _opts['procs'].split(",")[pidx], _opts['cats'].split(",")[cidx]
+          _f = open("%s/%s_%g.sh"%(_jobdir,_executable,pcidx),"w")
+          writePreamble(_f)
+          _f.write("python %s/scripts/signalFit.py --inputWSDir %s --ext %s --proc %s --cat %s --analysis %s --massPoints %s %s\n"%(cwd__,_opts['inputWSDir'],_opts['ext'],p,c,_opts['analysis'],_opts['massPoints'],_opts['modeOpts']))
+          _f.close()
+          os.system("chmod 775 %s/%s_%g.sh"%(_jobdir,_executable,pcidx))
+
     # For separate submission file per category
-    if _opts['mode'] == "calcPhotonSyst":
+    elif _opts['mode'] == "calcPhotonSyst":
       for cidx in range(_opts['nCats']):
         c = _opts['cats'].split(",")[cidx]
         _f = open("%s/%s_%s.sh"%(_jobdir,_executable,c),"w")
@@ -111,8 +136,16 @@ def submitFiles(_opts):
   # SGE
   elif _opts['batch'] in ['IC','SGE']:
     _executable = "sub_%s_%s"%(_opts['mode'],_opts['ext'])
+    # For separate submission file per process x category
+    if _opts['mode'] == "signalFit":
+      for pidx in range(_opts['nProcs']):
+        for cidx in range(_opts['nCats']):
+          pcidx = pidx*_opts['nCats']+cidx
+          _subfile = "%s/%s_%g"%(_jobdir,_executable,pcidx)
+          cmdLine = "qsub -q hep.q %s -o %s.log -e %s.err %s.sh"%(_opts['jobOpts'],_subfile,_subfile,_subfile)
+          run(cmdLine)
     # Separate submission per category  
-    if _opts['mode'] == "calcPhotonSyst":
+    elif _opts['mode'] == "calcPhotonSyst":
       for cidx in range(_opts['nCats']):
         c = _opts['cats'].split(",")[cidx]
         _subfile = "%s/%s_%s"%(_jobdir,_executable,c)
@@ -128,6 +161,14 @@ def submitFiles(_opts):
   # Running locally
   elif _opts['batch'] == 'local':
     _executable = "sub_%s_%s"%(_opts['mode'],_opts['ext'])
+    # For separate submission file per process x category
+    if _opts['mode'] == "signalFit":
+      for pidx in range(_opts['nProcs']):
+        for cidx in range(_opts['nCats']):
+          pcidx = pidx*_opts['nCats']+cidx
+          _subfile = "%s/%s_%g"%(_jobdir,_executable,pcidx)
+          cmdLine = "bash %s.sh"%(_subfile)
+          run(cmdLine)
     # Separate submission per category  
     if _opts['mode'] == "calcPhotonSyst":
       for cidx in range(_opts['nCats']):

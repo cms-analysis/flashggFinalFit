@@ -16,7 +16,7 @@ def get_options():
   parser = OptionParser()
   # Take inputs from config file
   parser.add_option('--inputConfig', dest='inputConfig', default='', help="Name of input config file (if specified will ignore other options)")
-  parser.add_option('--mode', dest='mode', default='', help="Which script to run. Options: ['fTest','getEffAcc','calcPhotonSyst','sigFit','packageOnly','sigPlotsOnly']")
+  parser.add_option('--mode', dest='mode', default='', help="Which script to run. Options: ['fTest','getEffAcc','calcPhotonSyst','signalFit','packageOnly','sigPlotsOnly']")
   parser.add_option('--modeOpts', dest='modeOpts', default='', help="Additional options to add to command line when running scripts (specify all within quotes e.g. \"--XYZ ABC\")")
   parser.add_option('--jobOpts', dest='jobOpts', default='', help="Additional options to add to job submission. Separate individual options with colon (specify all within quotes e.g. \"option_xyz = abc:option_123 = 456\")")
   parser.add_option('--printOnly', dest='printOnly', default=False, action="store_true", help="Dry run: print submission files only")
@@ -77,8 +77,8 @@ else:
 # Check all processes and mass points exist
 
 # Check if mode in allowed options
-if options['mode'] not in ['fTest','getEffAcc','calcPhotonSyst','sigFit','packageOnly']:
-  print " --> [ERROR] mode %s not allowed. Please use one of the following: ['fTest','getEffAcc','calcPhotonSyst','sigFit','packageOnly','sigPlotsOnly']. Leaving..."%options['mode']
+if options['mode'] not in ['fTest','getEffAcc','calcPhotonSyst','signalFit','packageOnly']:
+  print " --> [ERROR] mode %s not allowed. Please use one of the following: ['fTest','getEffAcc','calcPhotonSyst','signalFit','packageOnly','sigPlotsOnly']. Leaving..."%options['mode']
   leave()
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -133,7 +133,7 @@ if options['printOnly']:
 if options['mode'] == "fTest": print " --> Running signal fit fTest (determine number of gaussians for proc x cat x vertex scenario)..."
 elif options['mode'] == "getEffAcc": print " --> Getting efficiency x acceptance fractions (requires NOTAG dataset)..."
 elif options['mode'] == "calcPhotonSyst": print " --> Calculating photon shape systematics..."
-elif options['mode'] == "sigFit": print " --> Performing signal fit..."
+elif options['mode'] == "signalFit": print " --> Performing signal fit..."
 elif options['mode'] == "packageOnly": print " --> Packaging signal fits (one file per category)..."
 print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 
