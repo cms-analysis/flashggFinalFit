@@ -13,7 +13,7 @@ import re
 
 # From tools
 from commonTools import *
-from commonStrings import *
+from commonObjects import *
 
 def leave():
   print "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG PHOTON SYST CALCULATOR (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ "

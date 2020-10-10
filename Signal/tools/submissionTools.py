@@ -1,5 +1,5 @@
 import os
-from commonStrings import *
+from commonObjects import *
 
 def run(cmd):
   print "%s\n\n"%cmd

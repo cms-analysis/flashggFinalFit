@@ -11,10 +11,12 @@ import re
 from collections import OrderedDict as od
 
 from commonTools import *
-from commonStrings import *
+from commonObjects import *
 from replacementMap import globalReplacementMap
-from XSBRMap import globalXSBRMap
+from XSBRMap import *
 from simultaneousFit import *
+from finalModel import *
+from plottingTools import *
 
 # Constant
 MHLow, MHHigh = '115', '135'
@@ -30,6 +32,7 @@ def get_options():
   parser.add_option("--ext", dest='ext', default='', help="Extension")
   parser.add_option("--proc", dest='proc', default='', help="Signal process")
   parser.add_option("--cat", dest='cat', default='', help="RECO category")
+  parser.add_option("--year", dest='year', default='2016', help="Year")
   parser.add_option("--analysis", dest='analysis', default='STXS', help="Analysis handle: used to specify replacement map and XS*BR normalisations")
   parser.add_option('--massPoints', dest='massPoints', default='120,125,130', help="Mass points to fit")
   parser.add_option('--doEffAccFromJson', dest='doEffAccFromJson', default=False, action="store_true", help="Extract eff x acc from json (produced by getEffAcc). Else, extract from nominal weights in flashgg workspaces")
@@ -52,6 +55,7 @@ def get_options():
 (opt,args) = get_options()
 
 ROOT.gStyle.SetOptStat(0)
+ROOT.gROOT.SetBatch(True)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Functions for signal fitting
@@ -88,9 +92,9 @@ def beamspotReweigh(d,widthData,widthMC,_xvar,_dZ):
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # SETUP: signal fit
 print " --> Running fit for (proc,cat) = (%s,%s)"%(opt.proc,opt.cat)
-#if( len(opt.massPoints.split(",")) == 1 )&( opt.MHPolyOrder > 0 ):
-#  print " --> [WARNING] Attempting to fit polynomials of O(MH^%g) for single mass point. Setting order to 0"%opt.MHPolyOrder
-#  opt.MHPolyOrder=0
+if( len(opt.massPoints.split(",")) == 1 )&( opt.MHPolyOrder > 0 ):
+  print " --> [WARNING] Attempting to fit polynomials of O(MH^%g) for single mass point. Setting order to 0"%opt.MHPolyOrder
+  opt.MHPolyOrder=0
 
 # Add stopwatch function
 
@@ -134,6 +138,7 @@ procNorm, catNorm = opt.proc, opt.cat
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # EXTRACT DATASETS TO FIT (for each mass point)
+nominalDatasets = od()
 # For RV (or if skipping vertex scenario split)
 datasetRVForFit = od()
 for mp in opt.massPoints.split(","):
@@ -141,6 +146,7 @@ for mp in opt.massPoints.split(","):
   f = ROOT.TFile(WSFileName,"read")
   inputWS = f.Get(inputWSName__)
   d = reduceDataset(inputWS.data("%s_%s_%s_%s"%(procToData(procRVFit.split("_")[0]),mp,sqrts__,catRVFit)),aset)
+  nominalDatasets[mp] = d.Clone()
   if opt.skipVertexScenarioSplit: datasetRVForFit[mp] = d
   else: datasetRVForFit[mp] = splitRVWV(d,aset,mode="RV")
   inputWS.Delete()
@@ -243,6 +249,7 @@ if not opt.useDCB:
   else: print " --> Fitting function: convolution of nGaussians (RV=%g,WV=%g)"%(nRV,nWV)
 else:
   print " --> Fitting function: DCB + 1 Gaussian"
+nRV, nWV = 3,3
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # NORMALISATION
@@ -250,9 +257,41 @@ else:
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # FIT: simultaneous signal fit (ssf)
-nRV = 4
-ssfRV = SimultaneousFit(opt.proc,opt.cat,datasetRVForFit,xvar,MH,MHLow,MHHigh,opt.massPoints,opt.nBins,opt.MHPolyOrder,opt.minimizerMethod,opt.minimizerTolerance,"%s/outdir_%s/signalFit/Plots/rv",_doPlots=opt.doPlots)
+ssfMap = od()
+name = "Total" if opt.skipVertexScenarioSplit else "RV"
+ssfRV = SimultaneousFit(name,opt.proc,opt.cat,datasetRVForFit,xvar,MH,MHLow,MHHigh,opt.massPoints,opt.nBins,opt.MHPolyOrder,opt.minimizerMethod,opt.minimizerTolerance)
 if opt.useDCB: ssfRV.buildDCBplusGaussian()
 else: ssfRV.buildNGaussians(nRV)
-#print " --> Building chi2 function and running fit"
 ssfRV.runFit()
+ssfRV.buildSplines()
+ssfMap[name] = ssfRV
+
+if not opt.skipVertexScenarioSplit:
+  name = "WV"
+  ssfWV = SimultaneousFit(name,opt.proc,opt.cat,datasetWVForFit,xvar,MH,MHLow,MHHigh,opt.massPoints,opt.nBins,opt.MHPolyOrder,opt.minimizerMethod,opt.minimizerTolerance)
+  if opt.useDCB: ssfWV.buildDCBplusGaussian()
+  else: ssfWV.buildNGaussians(nWV)
+  ssfWV.runFit()
+  ssfWV.buildSplines()
+  ssfMap[name] = ssfWV
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# FINAL MODEL CONSTRUCTION:
+fm = FinalModel(ssfMap,opt.proc,opt.cat,opt.ext,opt.year,sqrts__,nominalDatasets,xvar,MH,MHLow,MHHigh,opt.massPoints,xsbrMap,opt.skipSystematics,opt.doEffAccFromJson)
+
+
+  
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# PLOTTING
+if opt.doPlots:
+  print " --> Making plots..."
+  if not os.path.isdir("%s/outdir_%s/signalFit/Plots"%(cwd__,opt.ext)): os.system("mkdir %s/outdir_%s/signalFit/Plots"%(cwd__,opt.ext))
+  if opt.skipVertexScenarioSplit:
+    #plotModel(ssfRV,_outdir="%s/outdir_%s/signalFit/Plots"%(cwd__,opt.ext),_extension="total_")
+    plotPdfComponents(ssfRV,_outdir="%s/outdir_%s/signalFit/Plots"%(cwd__,opt.ext),_extension="total_") 
+  if not opt.skipVertexScenarioSplit:
+    #plotModel(ssfRV,_outdir="%s/outdir_%s/signalFit/Plots"%(cwd__,opt.ext),_extension="RV_")
+    plotPdfComponents(ssfRV,_outdir="%s/outdir_%s/signalFit/Plots"%(cwd__,opt.ext),_extension="RV_") 
+    #plotModel(ssfWV,_outdir="%s/outdir_%s/signalFit/Plots"%(cwd__,opt.ext),_extension="WV_")
+    plotPdfComponents(ssfWV,_outdir="%s/outdir_%s/signalFit/Plots"%(cwd__,opt.ext),_extension="WV_") 

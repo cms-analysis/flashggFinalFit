@@ -14,7 +14,7 @@ import json
 from collections import OrderedDict as od
 
 from commonTools import *
-from commonStrings import *
+from commonObjects import *
 
 def leave():
   print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG GET FRACTIONS RUN II (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ "

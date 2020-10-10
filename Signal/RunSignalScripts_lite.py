@@ -7,7 +7,7 @@ from collections import OrderedDict as od
 
 # Import tools from ./tools
 from tools.commonTools import *
-from tools.commonStrings import *
+from tools.commonObjects import *
 from tools.submissionTools import *
 
 lumi = {'2016':'35.92', '2017':'41.53', '2018':'59.74'}

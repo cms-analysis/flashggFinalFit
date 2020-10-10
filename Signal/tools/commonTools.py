@@ -3,7 +3,7 @@ import glob
 import re
 import ROOT
 from collections import OrderedDict as od
-from commonStrings import *
+from commonObjects import *
 
 def extractWSFileNames( _inputWSDir ): 
   if not os.path.isdir(_inputWSDir):
@@ -61,3 +61,5 @@ def procToData( _proc ):
   k = _proc.split("_")[0]
   if k in procToDataMap: _proc = re.sub( k, procToDataMap[k], _proc )
   return _proc
+
+#def graphToSpline(_name,_gr,_xvar):
