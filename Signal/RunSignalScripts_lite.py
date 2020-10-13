@@ -10,7 +10,6 @@ from tools.commonTools import *
 from tools.commonObjects import *
 from tools.submissionTools import *
 
-lumi = {'2016':'35.92', '2017':'41.53', '2018':'59.74'}
 
 def get_options():
   parser = OptionParser()
@@ -108,7 +107,7 @@ print " --> Categories: %s"%options['cats']
 print " --> Mass points: %s --> Low = %s, High = %s"%(options['massPoints'],options['massLow'],options['massHigh'])
 print " --> Extension: %s"%options['ext']
 print " --> Analysis: %s"%options['analysis']
-print " --> Year: %s ::: Corresponds to intLumi = %s fb^-1"%(options['year'],lumi[options['year']])
+print " --> Year: %s ::: Corresponds to intLumi = %.2f fb^-1"%(options['year'],lumiMap[options['year']])
 if options['useDCB']: print " --> Using DCB in signal model"
 print ""
 if options['mode'] in ['calcPhotonSyst','writePhotonSyst']:

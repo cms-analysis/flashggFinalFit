@@ -8,7 +8,7 @@ signalScriptCfg = {
   'cats':'auto', # if auto: inferred automatically from (0) workspace
   'ext':'test',
   'analysis':'STXS', # To specify which replacement dataset mapping (defined in ./python/replacementMap.py)
-  'year':'2016', 
+  'year':'2016', # Use 'combined' if merging all years: not recommended
   'beamspot':'3.4', # Beamspot in data
   'numberOfBins':'320',
   'massPoints':'120,125,130',
@@ -17,10 +17,10 @@ signalScriptCfg = {
   'useDCB':0,
 
   #Photon shape systematics  
-  'scales':'HighR9EB,HighR9EE,LowR9EB,LowR9EE,Gain1EB,Gain6EB',
-  'scalesCorr':'MaterialCentralBarrel,MaterialOuterBarrel,MaterialForward,FNUFEE,FNUFEB,ShowerShapeHighR9EE,ShowerShapeHighR9EB,ShowerShapeLowR9EE,ShowerShapeLowR9EB',
-  'scalesGlobal':'NonLinearity:UntaggedTag_0:2,Geant4',
-  'smears':'HighR9EBPhi,HighR9EBRho,HighR9EEPhi,HighR9EERho,LowR9EBPhi,LowR9EBRho,LowR9EEPhi,LowR9EERho',
+  'scales':'HighR9EB,HighR9EE,LowR9EB,LowR9EE,Gain1EB,Gain6EB', # separate nuisance per year
+  'scalesCorr':'MaterialCentralBarrel,MaterialOuterBarrel,MaterialForward,FNUFEE,FNUFEB,ShowerShapeHighR9EE,ShowerShapeHighR9EB,ShowerShapeLowR9EE,ShowerShapeLowR9EB', # correlated across years
+  'scalesGlobal':'NonLinearity,Geant4', # affect all processes equally, correlated across years
+  'smears':'HighR9EBPhi,HighR9EBRho,HighR9EEPhi,HighR9EERho,LowR9EBPhi,LowR9EBRho,LowR9EEPhi,LowR9EERho', # separate nuisance per year
 
   # Job submission options
   'batch':'IC', # ['condor','SGE','IC','local']

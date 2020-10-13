@@ -36,10 +36,6 @@ def get_options():
   return parser.parse_args()
 (opt,args) = get_options()
 
-# Dictionary to store additional string for each syst type
-inExtSyst = {'scales':'MCScale','scalesCorr':'','smears':'MCSmear'}
-outExtSyst = {'scales':'%sscale'%sqrts__,'scalesCorr':'scale','smears':'%ssmear'%sqrts__,'scalesGlobal':'%sscale'%sqrts__}
-
 # RooRealVar to fill histograms
 mgg = ROOT.RooRealVar("CMS_hgg_mass","CMS_hgg_mass",125)
 
@@ -162,7 +158,7 @@ for stype in ['scales','scalesCorr','smears']:
   systs = getattr( opt, stype )
   for s in systs.split(","):
     if s == '': continue
-    for x in ['mean','sigma','rate']: columns_data.append("%s_%s_%s"%(s,outExtSyst[stype],x))
+    for x in ['mean','sigma','rate']: columns_data.append("%s_%s_%s"%(s,outputNuisanceExtMap[stype],x))
 data = pd.DataFrame( columns=columns_data ) 
 
 # Loop over processes and add row to dataframe
@@ -185,7 +181,7 @@ for ir,r in data.iterrows():
   for stype in ['scales','scalesCorr','smears']:
     for s in getattr(opt,stype).split(","):
       if s == '': continue
-      sname = "%s%s"%(inExtSyst[stype],s)
+      sname = "%s%s"%(inputNuisanceExtMap[stype],s)
       #print "    * Systematic = %s (%s)"%(sname,stype)
       hists = getHistograms(inputWS,r['nominalDataName'],sname)
       # If nominal yield = 0:
@@ -195,9 +191,9 @@ for ir,r in data.iterrows():
 	_sigmaVar = getSigmaVar(hists)
 	_rateVar = getRateVar(hists)
       # Add values to dataFrame
-      data.at[ir,'%s_%s_mean'%(s,outExtSyst[stype])] = _meanVar
-      data.at[ir,'%s_%s_sigma'%(s,outExtSyst[stype])] = _sigmaVar
-      data.at[ir,'%s_%s_rate'%(s,outExtSyst[stype])] = _rateVar
+      data.at[ir,'%s_%s_mean'%(s,outputNuisanceExtMap[stype])] = _meanVar
+      data.at[ir,'%s_%s_sigma'%(s,outputNuisanceExtMap[stype])] = _sigmaVar
+      data.at[ir,'%s_%s_rate'%(s,outputNuisanceExtMap[stype])] = _rateVar
 
       # Delete histograms
       for h in hists.itervalues(): h.Delete()

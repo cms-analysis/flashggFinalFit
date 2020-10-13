@@ -53,9 +53,8 @@ pLUT['FracGaussian']['p2'] = [0.00001,-0.00001,0.00001]
 
 # Function to calc chi2 for binned fit given pdf, RooDataHist and xvar as inputs
 def calcChi2(x,pdf,d,errorType="SumW2",_verbose=False):
-  # Use Kahan's algorithm to prevent loss of precision
-  #result, carry = 0., 0.
   result = 0.
+  k = 0. # number of non empty bins
   normFactor = d.sumEntries()
   for i in range(d.numEntries()):
     p = d.get(i)
@@ -84,8 +83,9 @@ def calcChi2(x,pdf,d,errorType="SumW2",_verbose=False):
     term = diff*diff/(e*e)
     if _verbose: print " --> [DEBUG] Bin %g : nPdf = %.6f, nData = %.6f, e = %.6f --> term = %.6f"%(i,nPdf,nData,e,term)
     result += term
-  # Output value 
-  return result
+    k += 1
+  # Return value + number of non empty bins 
+  return result, k
   
 # Function to add chi2 for multiple mass points
 def nChi2Addition(X,ssf):
@@ -94,10 +94,17 @@ def nChi2Addition(X,ssf):
   for i in range(len(X)): ssf.FitParameters[i].setVal(X[i])
   # Loop over datasets: adding chi2 for each mass point
   chi2sum = 0
+  K = 0 # number of non empty bins
+  C = len(X)-1 # number of fit params (-1 for MH)
   for mp,d in ssf.DataHists.iteritems():
     ssf.MH.setVal(int(mp))
-    chi2sum += calcChi2(ssf.xvar,ssf.Pdfs['final'],d)
-  return chi2sum 
+    chi2, k  = calcChi2(ssf.xvar,ssf.Pdfs['final'],d)
+    chi2sum += chi2
+    K += k
+  # N degrees of freedom
+  ndof = K-C
+  ssf.setNdof(ndof)
+  return chi2sum
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
 class SimultaneousFit:
@@ -125,6 +132,7 @@ class SimultaneousFit:
     self.xvar.setVal(125)
     self.xvar.setBins(self.nBins)
     # Dicts to store all fit vars, polynomials, pdfs and splines
+    self.nGaussians = 1
     self.Vars = od()
     self.Varlists = od()
     self.Polynomials = od()
@@ -136,9 +144,14 @@ class SimultaneousFit:
     self.prepareDataHists()
     # Fit containers
     self.FitParameters = None
+    self.Ndof = None
     self.Chi2 = None
     self.FitResult = None
 
+  # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
+  # Function for setting N degrees of freedom
+  def setNdof(self,_ndof): self.Ndof = _ndof  
+  
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
   # Function to extract param bounds
   def extractXBounds(self):
@@ -221,6 +234,9 @@ class SimultaneousFit:
     
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
   def buildNGaussians(self,nGaussians,_recursive=True):
+
+    # Set number of gaussians
+    self.nGaussians = nGaussians
 
     # Loop over NGaussians
     for g in range(0,nGaussians):
@@ -314,7 +330,7 @@ class SimultaneousFit:
     # Skip MH
     for i in range(1,len(self.FitParameters)): print "    * %-20s = %.6f"%(self.FitParameters[i].GetName(),self.FitParameters[i].getVal())
     print "    ~~~~~~~~~~~~~~~~"
-    print "    * chi2 = %.6f"%self.getChi2()
+    print "    * chi2 = %.6f, n(dof) = %g --> chi2/n(dof) = %.3f"%(self.getChi2(),int(self.Ndof),self.getChi2()/int(self.Ndof))
     print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   

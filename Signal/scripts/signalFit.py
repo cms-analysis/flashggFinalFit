@@ -19,7 +19,7 @@ from finalModel import *
 from plottingTools import *
 
 # Constant
-MHLow, MHHigh = '115', '135'
+MHLow, MHHigh = '120', '130'
 MHNominal = '125'
 
 def leave():
@@ -40,8 +40,13 @@ def get_options():
   parser.add_option('--doPlots', dest='doPlots', default=False, action="store_true", help="Produce Signal Fitting plots")
   parser.add_option("--useDCB", dest='useDCB', default=False, action="store_true", help="Use DCB in signal fitting")
   parser.add_option("--useDiagonalShape", dest='useDiagonalShape', default=False, action="store_true", help="Use shape of diagonal process, keeping normalisation (requires diagonal mapping produced by getDiagonalProc script)")
-  parser.add_option('--skipSystematics', dest='skipSystematics', default=False, action="store_true", help="Skip shape systematics in signal model")
   parser.add_option('--skipVertexScenarioSplit', dest='skipVertexScenarioSplit', default=False, action="store_true", help="Skip vertex scenario split")
+  # For systematics
+  parser.add_option('--skipSystematics', dest='skipSystematics', default=False, action="store_true", help="Skip shape systematics in signal model")
+  parser.add_option("--scales", dest='scales', default='', help="Photon shape systematics: scales")
+  parser.add_option("--scalesCorr", dest='scalesCorr', default='', help='Photon shape systematics: scalesCorr')
+  parser.add_option("--scalesGlobal", dest='scalesGlobal', default='', help='Photon shape systematics: scalesGlobal')
+  parser.add_option("--smears", dest='smears', default='', help='Photon shape systematics: smears')
   # Parameter values
   parser.add_option('--replacementThreshold', dest='replacementThreshold', default=200, type='int', help="Nevent threshold to trigger replacement dataset")
   parser.add_option('--beamspotWidthData', dest='beamspotWidthData', default=3.4, type='float', help="Width of beamspot in data [cm]")
@@ -49,46 +54,14 @@ def get_options():
   parser.add_option('--MHPolyOrder', dest='MHPolyOrder', default=1, type='int', help="Order of polynomial for MH dependence")
   parser.add_option('--nBins', dest='nBins', default=80, type='int', help="Number of bins for fit")
   # Minimizer options
-  parser.add_option('--minimizerMethod', dest='minimizerMethod', default='L-BFGS-B', help="(Scipy) Minimizer method")
-  parser.add_option('--minimizerTolerance', dest='minimizerTolerance', default=1e-6, type='float', help="(Scipy) Minimizer toleranve")
+  parser.add_option('--minimizerMethod', dest='minimizerMethod', default='TNC', help="(Scipy) Minimizer method")
+  parser.add_option('--minimizerTolerance', dest='minimizerTolerance', default=1e-8, type='float', help="(Scipy) Minimizer toleranve")
   return parser.parse_args()
 (opt,args) = get_options()
 
 ROOT.gStyle.SetOptStat(0)
 ROOT.gROOT.SetBatch(True)
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Functions for signal fitting
-def reduceDataset(_d,_argset): return _d.reduce(_argset)
-
-def splitRVWV(_d,_argset,mode="RV"):
-  # Split into RV/WV senario at dZ = 1cm
-  if mode == "RV": return _d.reduce(_argset,"abs(dZ)<=1.")
-  elif mode == "WV": return _d.reduce(_argset,"abs(dZ)>1.")
-  else:
-    print " --> [ERROR] unrecognised mode (%s) in splitRVWV function"%mode
-    return 0
-
-def beamspotReweigh(d,widthData,widthMC,_xvar,_dZ):
-  drw = d.emptyClone()
-  rw = ROOT.RooRealVar("weight","weight",-100000,1000000)
-  for i in range(0,d.numEntries()):
-    x, dz = d.get(i).getRealValue("CMS_hgg_mass"), d.get(i).getRealValue("dZ")
-    f = 1.
-    if abs(dz) < 0.1: f = 1.
-    else:
-      mcBeamspot = ROOT.TMath.Gaus(dz,0,math.sqrt(2)*widthMC,True)
-      dataBeamspot = ROOT.TMath.Gaus(dz,0,math.sqrt(2)*widthData,True)
-      f = dataBeamspot/mcBeamspot
-    # Set weights and vars
-    rw.setVal(f*d.weight())
-    _xvar.setVal(x)
-    _dZ.setVal(dz)
-    # Add point to dataset
-    drw.add( ROOT.RooArgSet(_xvar,_dZ), rw.getVal() )
-  # Return reweighted dataset
-  return drw
-    
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # SETUP: signal fit
 print " --> Running fit for (proc,cat) = (%s,%s)"%(opt.proc,opt.cat)
@@ -115,6 +88,7 @@ nominalWSFileName = glob.glob("%s/output*M%s*%s*"%(opt.inputWSDir,MHNominal,opt.
 f0 = ROOT.TFile(nominalWSFileName,"read")
 inputWS0 = f0.Get(inputWSName__)
 xvar = inputWS0.var("CMS_hgg_mass")
+xvarFit = xvar.Clone()
 dZ = inputWS0.var("dZ")
 aset = ROOT.RooArgSet(xvar,dZ)
 f0.Close()
@@ -132,6 +106,7 @@ else:
   procWVFit, catWVFit = opt.proc, opt.cat
 
 # FIXME: if opt.useDiagonalShape then change to diagonal proc for given cat (lookup json)
+procDiag = opt.proc
 
 # Define process with which to extract normalisation: nominal
 procNorm, catNorm = opt.proc, opt.cat
@@ -175,18 +150,22 @@ if( datasetRVForFit[MHNominal].numEntries() < opt.replacementThreshold  )|( data
     procRVFit, catRVFit = procReplacementFit, catReplacementFit
     if opt.skipVertexScenarioSplit: 
       print " --> Too few entries in nominal dataset (%g < %g). Using replacement (proc,cat) = (%s,%s) for extracting shape"%(nominal_numEntries,opt.replacementThreshold,procRVFit,catRVFit)
-      print "     * MH = %s: numEntries = %g, sumEntries = %.6f"%(MHNominal,datasetRVForFit[MHNominal].numEntries(),datasetRVForFit[MHNominal].sumEntries())
+      for mp in opt.massPoints.split(","):
+        print "     * MH = %s GeV: numEntries = %g, sumEntries = %.6f"%(mp,datasetRVForFit[mp].numEntries(),datasetRVForFit[mp].sumEntries())
     else: 
       print " --> RV: Too few entries in nominal dataset (%g < %g). Using replacement (proc,cat) = (%s,%s) for extracting shape"%(nominal_numEntries,opt.replacementThreshold,procRVFit,catRVFit)
-      print "     * MH = %s: numEntries = %g, sumEntries = %.6f"%(MHNominal,datasetRVForFit[MHNominal].numEntries(),datasetRVForFit[MHNominal].sumEntries())
+      for mp in opt.massPoints.split(","):
+        print "     * MH = %s: numEntries = %g, sumEntries = %.6f"%(mp,datasetRVForFit[mp].numEntries(),datasetRVForFit[mp].sumEntries())
 
 else:
   if opt.skipVertexScenarioSplit: 
     print " --> Using (proc,cat) = (%s,%s) for extracting shape"%(procRVFit,catRVFit)
-    print "     * MH = %s: numEntries = %g, sumEntries = %.6f"%(MHNominal,datasetRVForFit[MHNominal].numEntries(),datasetRVForFit[MHNominal].sumEntries())
+    for mp in opt.massPoints.split(","):
+      print "     * MH = %s: numEntries = %g, sumEntries = %.6f"%(mp,datasetRVForFit[mp].numEntries(),datasetRVForFit[mp].sumEntries())
   else: 
     print " --> RV: Using (proc,cat) = (%s,%s) for extracting shape"%(procRVFit,catRVFit)
-    print "     * MH = %s: numEntries = %g, sumEntries = %.6f"%(MHNominal,datasetRVForFit[MHNominal].numEntries(),datasetRVForFit[MHNominal].sumEntries())
+    for mp in opt.massPoints.split(","):
+      print "     * MH = %s: numEntries = %g, sumEntries = %.6f"%(mp,datasetRVForFit[mp].numEntries(),datasetRVForFit[mp].sumEntries())
 
 # Repeat for WV scenario
 if not opt.skipVertexScenarioSplit:
@@ -219,10 +198,12 @@ if not opt.skipVertexScenarioSplit:
     else:
       procWVFit, catWVFit = procReplacementFit, catReplacementFit
       print " --> WV: Too few entries in nominal dataset (%g < %g). Using replacement (proc,cat) = (%s,%s) for extracting shape"%(nominal_numEntries,opt.replacementThreshold,procWVFit,catWVFit)
-      print "     * MH = %s: numEntries = %g, sumEntries = %.6f"%(MHNominal,datasetWVForFit[MHNominal].numEntries(),datasetWVForFit[MHNominal].sumEntries())
+      for mp in opt.massPoints.split(","):
+        print "     * MH = %s: numEntries = %g, sumEntries = %.6f"%(mp,datasetWVForFit[mp].numEntries(),datasetWVForFit[mp].sumEntries())
   else:
     print " --> WV: Using (proc,cat) = (%s,%s) for extracting shape"%(procWVFit,catRVFit)
-    print "     * MH = %s: numEntries = %g, sumEntries = %.6f"%(MHNominal,datasetWVForFit[MHNominal].numEntries(),datasetWVForFit[MHNominal].sumEntries())
+    for mp in opt.massPoints.split(","):
+      print "     * MH = %s: numEntries = %g, sumEntries = %.6f"%(mp,datasetWVForFit[mp].numEntries(),datasetWVForFit[mp].sumEntries())
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # BEAMSPOT REWEIGH
@@ -244,9 +225,10 @@ if opt.doBeamspotReweigh:
 if not opt.useDCB:
   with open("%s/outdir_%s/fTest/json/nGauss_%s.json"%(cwd__,opt.ext,opt.ext)) as jf: ngauss = json.load(jf)
   nRV = ngauss["%s__%s"%(procRVFit,catRVFit)]['nRV']
-  nWV = ngauss["%s__%s"%(procWVFit,catWVFit)]['nWV']
   if opt.skipVertexScenarioSplit: print " --> Fitting function: convolution of nGaussians (%g)"%nRV
-  else: print " --> Fitting function: convolution of nGaussians (RV=%g,WV=%g)"%(nRV,nWV)
+  else: 
+    nWV = ngauss["%s__%s"%(procWVFit,catWVFit)]['nWV']
+    print " --> Fitting function: convolution of nGaussians (RV=%g,WV=%g)"%(nRV,nWV)
 else:
   print " --> Fitting function: DCB + 1 Gaussian"
 nRV, nWV = 3,3
@@ -276,16 +258,26 @@ if not opt.skipVertexScenarioSplit:
   ssfMap[name] = ssfWV
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# FINAL MODEL CONSTRUCTION:
-fm = FinalModel(ssfMap,opt.proc,opt.cat,opt.ext,opt.year,sqrts__,nominalDatasets,xvar,MH,MHLow,MHHigh,opt.massPoints,xsbrMap,opt.skipSystematics,opt.doEffAccFromJson)
+# FINAL MODEL: construction
+print "\n --> Constructing final model"
+fm = FinalModel(ssfMap,opt.proc,opt.cat,opt.ext,opt.year,sqrts__,nominalDatasets,xvar,MH,MHLow,MHHigh,opt.massPoints,xsbrMap,procDiag,opt.scales,opt.scalesCorr,opt.scalesGlobal,opt.smears,opt.useDCB,opt.skipVertexScenarioSplit,opt.skipSystematics,opt.doEffAccFromJson)
 
-
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# SAVE: to output workspace
+foutDir = "%s/outdir_test/signalFit/output"%cwd__
+foutName = "%s/outdir_test/signalFit/output/CMS-HGG_sigfit_%s_%s_%s_%s.root"%(cwd__,opt.ext,opt.proc,opt.year,opt.cat)
+print "\n --> Saving output workspace to file: %s"%foutName
+if not os.path.isdir(foutDir): os.system("mkdir %s"%foutDir)
+fout = ROOT.TFile(foutName,"RECREATE")
+outWS = ROOT.RooWorkspace("%s_%s"%(outputWSName__,sqrts__),"%s_%s"%(outputWSName__,sqrts__))
+fm.save(outWS)
+outWS.Write()
+fout.Close()
   
-
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # PLOTTING
 if opt.doPlots:
-  print " --> Making plots..."
+  print "\n --> Making plots..."
   if not os.path.isdir("%s/outdir_%s/signalFit/Plots"%(cwd__,opt.ext)): os.system("mkdir %s/outdir_%s/signalFit/Plots"%(cwd__,opt.ext))
   if opt.skipVertexScenarioSplit:
     #plotModel(ssfRV,_outdir="%s/outdir_%s/signalFit/Plots"%(cwd__,opt.ext),_extension="total_")

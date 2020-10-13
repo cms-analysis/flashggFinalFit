@@ -59,7 +59,7 @@ def writeSubFiles(_opts):
           pcidx = pidx*_opts['nCats']+cidx
           p,c = _opts['procs'].split(",")[pidx], _opts['cats'].split(",")[cidx]
           _f.write("if [ $1 -eq %g ]; then\n"%pcidx)
-          _f.write("  python %s/scripts/signalFit.py --inputWSDir %s --ext %s --proc %s --cat %s --analysis %s --massPoints %s %s\n"%(cwd__,_opts['inputWSDir'],_opts['ext'],p,c,_opts['analysis'],_opts['massPoints'],_opts['modeOpts']))
+          _f.write("  python %s/scripts/signalFit.py --inputWSDir %s --ext %s --proc %s --cat %s --analysis %s --massPoints %s --scales \'%s\' --scalesCorr \'%s\' --scalesGlobal \'%s\' --smears \'%s\' %s\n"%(cwd__,_opts['inputWSDir'],_opts['ext'],p,c,_opts['analysis'],_opts['massPoints'],_opts['scales'],_opts['scalesCorr'],_opts['scalesGlobal'],_opts['smears'],_opts['modeOpts']))
           _f.write("fi\n")
    
     # For looping over categories
@@ -67,7 +67,7 @@ def writeSubFiles(_opts):
       for cidx in range(_opts['nCats']):
         c = _opts['cats'].split(",")[cidx]
         _f.write("if [ $1 -eq %g ]; then\n"%cidx)
-        _f.write("  python %s/scripts/calcPhotonSyst.py --cat %s --procs %s --ext %s --inputWSDir %s --scales %s --scalesCorr %s --scalesGlobal %s --smears %s %s\n"%(cwd__,c,_opts['procs'],_opts['ext'],_opts['inputWSDir'],_opts['scales'],_opts['scalesCorr'],_opts['scalesGlobal'],_opts['smears'],_opts['modeOpts']))
+        _f.write("  python %s/scripts/calcPhotonSyst.py --cat %s --procs %s --ext %s --inputWSDir %s --scales \'%s\' --scalesCorr \'%s\' --scalesGlobal \'%s\' --smears \'%s\' %s\n"%(cwd__,c,_opts['procs'],_opts['ext'],_opts['inputWSDir'],_opts['scales'],_opts['scalesCorr'],_opts['scalesGlobal'],_opts['smears'],_opts['modeOpts']))
         _f.write("fi\n")
 
     # For single script
@@ -100,7 +100,7 @@ def writeSubFiles(_opts):
           p,c = _opts['procs'].split(",")[pidx], _opts['cats'].split(",")[cidx]
           _f = open("%s/%s_%g.sh"%(_jobdir,_executable,pcidx),"w")
           writePreamble(_f)
-          _f.write("python %s/scripts/signalFit.py --inputWSDir %s --ext %s --proc %s --cat %s --analysis %s --massPoints %s %s\n"%(cwd__,_opts['inputWSDir'],_opts['ext'],p,c,_opts['analysis'],_opts['massPoints'],_opts['modeOpts']))
+          _f.write("python %s/scripts/signalFit.py --inputWSDir %s --ext %s --proc %s --cat %s --analysis %s --massPoints %s --scales \'%s\' --scalesCorr \'%s\' --scalesGlobal \'%s\' --smears \'%s\' %s\n"%(cwd__,_opts['inputWSDir'],_opts['ext'],p,c,_opts['analysis'],_opts['massPoints'],_opts['scales'],_opts['scalesCorr'],_opts['scalesGlobal'],_opts['smears'],_opts['modeOpts']))
           _f.close()
           os.system("chmod 775 %s/%s_%g.sh"%(_jobdir,_executable,pcidx))
 
@@ -110,7 +110,7 @@ def writeSubFiles(_opts):
         c = _opts['cats'].split(",")[cidx]
         _f = open("%s/%s_%s.sh"%(_jobdir,_executable,c),"w")
         writePreamble(_f)
-        _f.write("python %s/scripts/calcPhotonSyst.py --cat %s --procs %s --ext %s --inputWSDir %s --scales %s --scalesCorr %s --scalesGlobal %s --smears %s %s\n"%(cwd__,c,_opts['procs'],_opts['ext'],_opts['inputWSDir'],_opts['scales'],_opts['scalesCorr'],_opts['scalesGlobal'],_opts['smears'],_opts['modeOpts']))
+        _f.write("python %s/scripts/calcPhotonSyst.py --cat %s --procs %s --ext %s --inputWSDir %s --scales \'%s\' --scalesCorr \'%s\' --scalesGlobal \'%s\' --smears \'%s\' %s\n"%(cwd__,c,_opts['procs'],_opts['ext'],_opts['inputWSDir'],_opts['scales'],_opts['scalesCorr'],_opts['scalesGlobal'],_opts['smears'],_opts['modeOpts']))
         _f.close()
         os.system("chmod 775 %s/%s_%s.sh"%(_jobdir,_executable,c))
 
