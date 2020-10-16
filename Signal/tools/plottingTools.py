@@ -1,23 +1,11 @@
 # Functions for plotting 
 import ROOT
 from collections import OrderedDict as od
+from commonObjects import *
 
-# Plot final pdf + data for each mass point
-def plotModel(ssf,_outdir='./',_extension=''):
-  canv = ROOT.TCanvas()
-  LineColorMap = {'120':ROOT.kRed,'125':ROOT.kGreen+1,'130':ROOT.kAzure+1}
-  MarkerColorMap = {'120':ROOT.kRed+3,'125':ROOT.kGreen+3,'130':ROOT.kAzure+3}
-  pl = ssf.xvar.frame()
-  for k, d in ssf.DataHists.iteritems():
-    ssf.MH.setVal(int(k))
-    ssf.Pdfs['final'].plotOn(pl,ROOT.RooFit.LineColor(LineColorMap[k]))
-    d.plotOn(pl,ROOT.RooFit.MarkerColor(MarkerColorMap[k]))
-  pl.Draw()
-  canv.SaveAs("%s/%sshape_vs_mH_%s_%s.png"%(_outdir,_extension,ssf.proc,ssf.cat))
-  canv.SaveAs("%s/%sshape_vs_mH_%s_%s.pdf"%(_outdir,_extension,ssf.proc,ssf.cat))
 
 # Plot final pdf at MH = 125 (with data) + individual Pdf components
-def plotPdfComponents(ssf,_outdir='./',_extension=''):
+def plotPdfComponents(ssf,_outdir='./',_extension='',_proc='',_cat=''):
   canv = ROOT.TCanvas()
   canv.SetLeftMargin(0.15)
   ssf.MH.setVal(125)
@@ -90,14 +78,165 @@ def plotPdfComponents(ssf,_outdir='./',_extension=''):
   lat.SetTextAlign(31)
   lat.SetNDC()
   lat.SetTextSize(0.03)
-  lat.DrawLatex(0.9,0.92,"( %s , %s , %s )"%(ssf.name,ssf.proc,ssf.cat))
+  lat.DrawLatex(0.9,0.92,"( %s , %s , %s )"%(ssf.name,_proc,_cat))
   lat1 = ROOT.TLatex()
   lat1.SetTextFont(42)
   lat1.SetTextAlign(11)
   lat1.SetNDC()
-  lat1.SetTextSize(0.04)
-  lat1.DrawLatex(0.65,0.3,"#chi^{2} = %.4f"%ssf.getChi2())
+  lat1.SetTextSize(0.035)
+  lat1.DrawLatex(0.65,0.3,"#chi^{2}/n(dof) = %.4f"%(ssf.getChi2()/ssf.Ndof))
 
   canv.Update()
-  canv.SaveAs("%s/%spdf_components_%s_%s.png"%(_outdir,_extension,ssf.proc,ssf.cat))
-  canv.SaveAs("%s/%spdf_components_%s_%s.pdf"%(_outdir,_extension,ssf.proc,ssf.cat))
+  canv.SaveAs("%s/%sshape_pdf_components_%s_%s.png"%(_outdir,_extension,_proc,_cat))
+  canv.SaveAs("%s/%sshape_pdf_components_%s_%s.pdf"%(_outdir,_extension,_proc,_cat))
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Plot final pdf for each mass point
+def plotInterpolation(_finalModel,_outdir='./',_massPoints='120,121,122,123,124,125,126,127,128,129,130'):
+
+  canv = ROOT.TCanvas()
+  colors = [ROOT.kRed,ROOT.kCyan,ROOT.kBlue+1,ROOT.kOrange-3,ROOT.kMagenta-7,ROOT.kGreen+1,ROOT.kYellow-7,ROOT.kViolet+6,ROOT.kTeal+1,ROOT.kPink+1,ROOT.kAzure+1]
+  colorMap = {}
+  for i, mp in enumerate(_massPoints.split(",")): colorMap[mp] = colors[i]
+  # Set luminosity
+  _finalModel.intLumi.setVal(float(lumiMap[_finalModel.year]))
+  # Total pdf histograms
+  dh = od()
+  hists = od()
+  hmax = 0.1 
+  for mp in _massPoints.split(","):
+    _finalModel.MH.setVal(int(mp))
+    hists[mp] = _finalModel.Pdfs['final'].createHistogram("h_%s"%mp,_finalModel.xvar,ROOT.RooFit.Binning(3200))
+    norm = _finalModel.Functions['final_normThisLumi'].getVal()
+    if norm == 0.: hists[mp].Scale(0.)
+    else: hists[mp].Scale((norm*3200)/(hists[mp].Integral()*_finalModel.xvar.getBins()))
+    if mp in _finalModel.Datasets:
+      hists[mp].SetLineWidth(2)
+    else:
+      hists[mp].SetLineWidth(1)
+      hists[mp].SetLineStyle(2)
+    hists[mp].SetLineColor(colorMap[mp])
+    hists[mp].SetTitle("")
+    if hists[mp].GetMaximum() > hmax: hmax = hists[mp].GetMaximum()
+
+    # Create ROOT datahists and then histograms
+    if mp in _finalModel.Datasets:
+      dh[mp] = ROOT.RooDataHist("dh_%s"%mp,"dh_%s"%mp,ROOT.RooArgSet(_finalModel.xvar),_finalModel.Datasets[mp])
+      hists['data_%s'%mp] = _finalModel.xvar.createHistogram("h_data_%s"%mp,ROOT.RooFit.Binning(_finalModel.xvar.getBins()))
+      dh[mp].fillHistogram(hists['data_%s'%mp],ROOT.RooArgList(_finalModel.xvar))
+      if norm == 0.: hists['data_%s'%mp].Scale(0)
+      else: hists['data_%s'%mp].Scale(norm/(hists['data_%s'%mp].Integral()))
+      hists['data_%s'%mp].SetMarkerStyle(20)
+      hists['data_%s'%mp].SetMarkerColor(colorMap[mp])
+      hists['data_%s'%mp].SetLineColor(colorMap[mp])
+
+  # Extract first hist and clone for axes
+  haxes = hists[hists.keys()[0]].Clone()
+  haxes.GetXaxis().SetTitle("m_{#gamma#gamma} [GeV]")
+  haxes.GetYaxis().SetTitle("Events / %.2f GeV"%((_finalModel.xvar.getMax()-_finalModel.xvar.getMin())/_finalModel.xvar.getBins()))
+  haxes.SetMinimum(0)
+  haxes.SetMaximum(hmax*1.2)
+  haxes.GetXaxis().SetRangeUser(100,150)
+  haxes.Draw("AXIS")
+
+  # Draw rest of histograms
+  for k,h in hists.iteritems(): 
+    if "data" in k: h.Draw("Same EP")
+    else: 
+      h.Draw("Same HIST")
+
+  # Add Latex
+  lat = ROOT.TLatex()
+  lat.SetTextFont(42)
+  lat.SetTextAlign(31)
+  lat.SetNDC()
+  lat.SetTextSize(0.03)
+  lat.DrawLatex(0.9,0.92,"%s"%(_finalModel.name))
+
+
+  canv.Update()
+  canv.SaveAs("%s/%s_model_vs_mH.png"%(_outdir,_finalModel.name))
+  canv.SaveAs("%s/%s_model_vs_mH.pdf"%(_outdir,_finalModel.name))
+
+
+
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Plot splines
+def plotSplines(_finalModel,_outdir="./",_nominalMass='125',splinesToPlot=['xs','br','ea','fracRV']):
+  canv = ROOT.TCanvas()
+  colorMap = {'xs':ROOT.kRed-4,'br':ROOT.kAzure+1,'ea':ROOT.kGreen+1,'fracRV':ROOT.kMagenta-7,'norm':ROOT.kBlack}
+  grs = od()
+  grs['norm'] = ROOT.TGraph()
+  for sp in splinesToPlot: grs[sp] = ROOT.TGraph()
+  # Get value at nominal mass
+  xnom = od()
+  _finalModel.MH.setVal(float(_nominalMass))
+  for sp in splinesToPlot: xnom[sp] = _finalModel.Splines[sp].getVal()
+  _finalModel.intLumi.setVal(float(lumiMap[_finalModel.year]))
+  xnom['norm'] = _finalModel.Functions['final_normThisLumi'].getVal()
+  # Loop over mass points
+  p = 0
+  xmax, xmin = 0,0.5
+  for mh in range(int(_finalModel.MHLow),int(_finalModel.MHHigh)+1):
+    _finalModel.MH.setVal(float(mh))
+    for sp in splinesToPlot:
+      x = _finalModel.Splines[sp].getVal()
+      if xnom[sp] == 0.: r = 1.
+      else: r = x/xnom[sp]
+      grs[sp].SetPoint(p,int(mh),r)
+      if r > xmax: xmax = r
+      if r < xmin: xmin = r
+    # Overall norm
+    x = _finalModel.Functions['final_normThisLumi'].getVal()
+    if xnom['norm'] == 0.: r = 1.
+    else: r = x/xnom['norm']
+    grs['norm'].SetPoint(p,int(mh),r)
+    if r > xmax: xmax = r
+    if r < xmin: xmin = r
+    p += 1
+  # Draw axes
+  haxes = ROOT.TH1F("h_axes_spl","h_axes_spl",int(_finalModel.MHHigh)-int(_finalModel.MHLow),int(_finalModel.MHLow),int(_finalModel.MHHigh))
+  haxes.SetTitle("")
+  haxes.GetXaxis().SetTitle("m_{H} [GeV]")
+  haxes.GetXaxis().SetTitleSize(0.05)
+  haxes.GetXaxis().SetTitleOffset(0.85)
+  haxes.GetXaxis().SetLabelSize(0.035)
+  haxes.GetYaxis().SetTitle("X/X(m_{H}=125)")
+  haxes.GetYaxis().SetTitleOffset(0.85)
+  haxes.GetYaxis().SetTitleSize(0.05)
+  haxes.SetMaximum(1.2*xmax)
+  haxes.SetMinimum(xmin)
+  haxes.Draw()
+  # Define legend
+  leg = ROOT.TLegend(0.15,0.15,0.4,0.4)
+  leg.SetFillStyle(0)
+  leg.SetLineColor(0)
+  leg.SetTextSize(0.04)
+  # Draw graphs
+  for x, gr in grs.iteritems(): 
+    gr.SetLineColor(colorMap[x])
+    gr.SetMarkerColor(colorMap[x])
+    gr.SetMarkerStyle(20)
+    gr.Draw("Same PL")
+    if x == "norm": leg.AddEntry(gr,"N_{exp}: @%s = %.2f"%(_nominalMass,xnom['norm']))
+    if x == "xs": leg.AddEntry(gr,"#sigma: @%s = %.2f pb"%(_nominalMass,xnom['xs']))
+    if x == "br": leg.AddEntry(gr,"#bf{#it{#Beta}}: @%s = %.2f%%"%(_nominalMass,100*xnom['br']))
+    if x == "ea": leg.AddEntry(gr,"#epsilon x #it{#Alpha}: @%s = %.2f%%"%(_nominalMass,100*xnom['ea']))
+    if x == "fracRV": leg.AddEntry(gr,"RV fraction: @%s = %.2f%%"%(_nominalMass,100*xnom['fracRV']))
+  leg.Draw("Same")
+  grs['norm'].Draw("Same PL")
+  # Add Latex
+  lat = ROOT.TLatex()
+  lat.SetTextFont(42)
+  lat.SetTextAlign(31)
+  lat.SetNDC()
+  lat.SetTextSize(0.03)
+  lat.DrawLatex(0.9,0.92,"%s"%(_finalModel.name))
+  canv.Update()
+  canv.SaveAs("%s/%s_splines.png"%(_outdir,_finalModel.name))
+  canv.SaveAs("%s/%s_splines.pdf"%(_outdir,_finalModel.name))
+
+
+  

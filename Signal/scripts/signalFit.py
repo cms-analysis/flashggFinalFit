@@ -39,10 +39,12 @@ def get_options():
   parser.add_option('--doBeamspotReweigh', dest='doBeamspotReweigh', default=False, action="store_true", help="Do beamspot reweigh to match beamspot distribution in data")
   parser.add_option('--doPlots', dest='doPlots', default=False, action="store_true", help="Produce Signal Fitting plots")
   parser.add_option("--useDCB", dest='useDCB', default=False, action="store_true", help="Use DCB in signal fitting")
-  parser.add_option("--useDiagonalShape", dest='useDiagonalShape', default=False, action="store_true", help="Use shape of diagonal process, keeping normalisation (requires diagonal mapping produced by getDiagonalProc script)")
+  parser.add_option("--useDiagonalProcForShape", dest='useDiagonalProcForShape', default=False, action="store_true", help="Use shape of diagonal process, keeping normalisation (requires diagonal mapping produced by getDiagProc script)")
   parser.add_option('--skipVertexScenarioSplit', dest='skipVertexScenarioSplit', default=False, action="store_true", help="Skip vertex scenario split")
+  parser.add_option('--skipZeroes', dest='skipZeroes', default=False, action="store_true", help="Skip proc x cat is numEntries = 0., or sumEntries < 0.")
   # For systematics
   parser.add_option('--skipSystematics', dest='skipSystematics', default=False, action="store_true", help="Skip shape systematics in signal model")
+  parser.add_option('--useDiagonalProcForSyst', dest='useDiagonalProcForSyst', default=False, action="store_true", help="Use diagonal process for systematics (requires diagonal mapping produced by getDiagProc script)")
   parser.add_option("--scales", dest='scales', default='', help="Photon shape systematics: scales")
   parser.add_option("--scalesCorr", dest='scalesCorr', default='', help='Photon shape systematics: scalesCorr')
   parser.add_option("--scalesGlobal", dest='scalesGlobal', default='', help='Photon shape systematics: scalesGlobal')
@@ -98,6 +100,18 @@ MH = ROOT.RooRealVar("MH","m_{H}", int(MHLow), int(MHHigh))
 MH.setUnit("GeV")
 MH.setConstant(True)
 
+if opt.skipZeroes:
+  # Extract nominal mass dataset and see if entries == 0
+  WSFileName = glob.glob("%s/output*M%s*%s*"%(opt.inputWSDir,MHNominal,opt.proc))[0]
+  f = ROOT.TFile(WSFileName,"read")
+  inputWS = f.Get(inputWSName__)
+  d = reduceDataset(inputWS.data("%s_%s_%s_%s"%(procToData(opt.proc.split("_")[0]),MHNominal,sqrts__,opt.cat)),aset)
+  if( d.numEntries() == 0. )|( d.sumEntries <= 0. ):
+    print " --> (%s,%s) has zero events. Will not construct signal model"%(opt.proc,opt.cat)
+    sys.exit(1)
+  inputWS.Delete()
+  f.Close()
+ 
 # Define proc x cat with which to extract shape: if skipVertexScenarioSplit label all events as "RV"
 procRVFit, catRVFit = opt.proc, opt.cat
 if opt.skipVertexScenarioSplit: 
@@ -105,8 +119,25 @@ if opt.skipVertexScenarioSplit:
 else:
   procWVFit, catWVFit = opt.proc, opt.cat
 
-# FIXME: if opt.useDiagonalShape then change to diagonal proc for given cat (lookup json)
-procDiag = opt.proc
+# Options for using diagonal process from getDiagProc output json
+if opt.useDiagonalProcForShape:
+  if not os.path.exists("%s/outdir_%s/getDiagProc/json/diagonal_process.json"%(cwd__,opt.ext)):
+    print " --> [ERROR] Diagonal process json from getDiagProc does not exist. Using nominal proc x cat for shape"
+  else:
+    with open("%s/outdir_%s/getDiagProc/json/diagonal_process.json"%(cwd__,opt.ext),"r") as jf: dproc = json.load(jf)
+    procRVFit = dproc[opt.cat]
+    print " --> Using diagonal proc (%s,%s) for shape"%(procRVFit,opt.cat)
+    if not opt.skipVertexScenarioSplit: procWVFit = dproc[opt.cat]
+
+# Process for syst
+procSyst = opt.proc
+if opt.useDiagonalProcForSyst:
+  if not os.path.exists("%s/outdir_%s/getDiagProc/json/diagonal_process.json"%(cwd__,opt.ext)):
+    print " --> [ERROR] Diagonal process json from getDiagProc does not exist. Using nominal proc x cat for systematics"
+  else:
+    with open("%s/outdir_%s/getDiagProc/json/diagonal_process.json"%(cwd__,opt.ext),"r") as jf: dproc = json.load(jf)
+    procSyst = dproc[opt.cat]
+    print " --> Using diagonal proc (%s,%s) for systematics"%(procSyst,opt.cat)
 
 # Define process with which to extract normalisation: nominal
 procNorm, catNorm = opt.proc, opt.cat
@@ -234,14 +265,10 @@ else:
 nRV, nWV = 3,3
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# NORMALISATION
-
-
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # FIT: simultaneous signal fit (ssf)
 ssfMap = od()
 name = "Total" if opt.skipVertexScenarioSplit else "RV"
-ssfRV = SimultaneousFit(name,opt.proc,opt.cat,datasetRVForFit,xvar,MH,MHLow,MHHigh,opt.massPoints,opt.nBins,opt.MHPolyOrder,opt.minimizerMethod,opt.minimizerTolerance)
+ssfRV = SimultaneousFit(name,opt.proc,opt.cat,datasetRVForFit,xvar.Clone(),MH,MHLow,MHHigh,opt.massPoints,opt.nBins,opt.MHPolyOrder,opt.minimizerMethod,opt.minimizerTolerance)
 if opt.useDCB: ssfRV.buildDCBplusGaussian()
 else: ssfRV.buildNGaussians(nRV)
 ssfRV.runFit()
@@ -250,7 +277,7 @@ ssfMap[name] = ssfRV
 
 if not opt.skipVertexScenarioSplit:
   name = "WV"
-  ssfWV = SimultaneousFit(name,opt.proc,opt.cat,datasetWVForFit,xvar,MH,MHLow,MHHigh,opt.massPoints,opt.nBins,opt.MHPolyOrder,opt.minimizerMethod,opt.minimizerTolerance)
+  ssfWV = SimultaneousFit(name,opt.proc,opt.cat,datasetWVForFit,xvar.Clone(),MH,MHLow,MHHigh,opt.massPoints,opt.nBins,opt.MHPolyOrder,opt.minimizerMethod,opt.minimizerTolerance)
   if opt.useDCB: ssfWV.buildDCBplusGaussian()
   else: ssfWV.buildNGaussians(nWV)
   ssfWV.runFit()
@@ -260,7 +287,7 @@ if not opt.skipVertexScenarioSplit:
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # FINAL MODEL: construction
 print "\n --> Constructing final model"
-fm = FinalModel(ssfMap,opt.proc,opt.cat,opt.ext,opt.year,sqrts__,nominalDatasets,xvar,MH,MHLow,MHHigh,opt.massPoints,xsbrMap,procDiag,opt.scales,opt.scalesCorr,opt.scalesGlobal,opt.smears,opt.useDCB,opt.skipVertexScenarioSplit,opt.skipSystematics,opt.doEffAccFromJson)
+fm = FinalModel(ssfMap,opt.proc,opt.cat,opt.ext,opt.year,sqrts__,nominalDatasets,xvar,MH,MHLow,MHHigh,opt.massPoints,xsbrMap,procSyst,opt.scales,opt.scalesCorr,opt.scalesGlobal,opt.smears,opt.useDCB,opt.skipVertexScenarioSplit,opt.skipSystematics,opt.doEffAccFromJson)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # SAVE: to output workspace
@@ -280,10 +307,10 @@ if opt.doPlots:
   print "\n --> Making plots..."
   if not os.path.isdir("%s/outdir_%s/signalFit/Plots"%(cwd__,opt.ext)): os.system("mkdir %s/outdir_%s/signalFit/Plots"%(cwd__,opt.ext))
   if opt.skipVertexScenarioSplit:
-    #plotModel(ssfRV,_outdir="%s/outdir_%s/signalFit/Plots"%(cwd__,opt.ext),_extension="total_")
-    plotPdfComponents(ssfRV,_outdir="%s/outdir_%s/signalFit/Plots"%(cwd__,opt.ext),_extension="total_") 
+    plotPdfComponents(ssfRV,_outdir="%s/outdir_%s/signalFit/Plots"%(cwd__,opt.ext),_extension="total_",_proc=procRVFit,_cat=catRVFit) 
   if not opt.skipVertexScenarioSplit:
-    #plotModel(ssfRV,_outdir="%s/outdir_%s/signalFit/Plots"%(cwd__,opt.ext),_extension="RV_")
-    plotPdfComponents(ssfRV,_outdir="%s/outdir_%s/signalFit/Plots"%(cwd__,opt.ext),_extension="RV_") 
-    #plotModel(ssfWV,_outdir="%s/outdir_%s/signalFit/Plots"%(cwd__,opt.ext),_extension="WV_")
-    plotPdfComponents(ssfWV,_outdir="%s/outdir_%s/signalFit/Plots"%(cwd__,opt.ext),_extension="WV_") 
+    plotPdfComponents(ssfRV,_outdir="%s/outdir_%s/signalFit/Plots"%(cwd__,opt.ext),_extension="RV_",_proc=procRVFit,_cat=catRVFit) 
+    plotPdfComponents(ssfWV,_outdir="%s/outdir_%s/signalFit/Plots"%(cwd__,opt.ext),_extension="WV_",_proc=procWVFit,_cat=catRVFit) 
+  # Plot interpolation
+  plotInterpolation(fm,_outdir="%s/outdir_%s/signalFit/Plots"%(cwd__,opt.ext)) 
+  plotSplines(fm,_outdir="%s/outdir_%s/signalFit/Plots"%(cwd__,opt.ext),_nominalMass=MHNominal) 

@@ -67,14 +67,17 @@ def initialiseXSBR():
   for pm in productionModes: xsbr[pm] = np.asarray(xsbr[pm])
   xsbr[decayMode] = np.asarray(xsbr[decayMode])
   xsbr['constant'] = np.asarray(xsbr['constant'])
+  # If ggZH and ZH in production modes then make qqZH numpy array
+  if('ggZH' in productionModes)&('ZH' in productionModes): xsbr['qqZH'] = xsbr['ZH']-xsbr['ggZH']
   return xsbr
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
 class FinalModel:
   # Constructor
-  def __init__(self,_ssfMap,_proc,_cat,_ext,_year,_sqrts,_datasets,_xvar,_MH,_MHLow,_MHHigh,_massPoints,_xsbrMap,_procDiag,_scales,_scalesCorr,_scalesGlobal,_smears,_useDCB,_skipVertexScenarioSplit,_skipSystematics,_doEffAccFromJson):
+  def __init__(self,_ssfMap,_proc,_cat,_ext,_year,_sqrts,_datasets,_xvar,_MH,_MHLow,_MHHigh,_massPoints,_xsbrMap,_procSyst,_scales,_scalesCorr,_scalesGlobal,_smears,_useDCB,_skipVertexScenarioSplit,_skipSystematics,_doEffAccFromJson):
     self.ssfMap = _ssfMap
     self.proc = _proc
+    self.procSyst = _procSyst # Signal process used for systematics (useful for low stat cases)
     self.cat = _cat
     self.ext = _ext
     self.year = _year
@@ -89,7 +92,6 @@ class FinalModel:
     self.massPoints = _massPoints
     self.intLumi = ROOT.RooRealVar("intLumi","intLumi",1.,0.,999999999.)
     self.xsbrMap = _xsbrMap
-    self.procDiag = _procDiag
     # Systematics
     self.skipSystematics = _skipSystematics
     self.scales = _scales
@@ -187,7 +189,7 @@ class FinalModel:
     self.NuisanceMap[nuisanceType][nuisanceName]['param'].setConstant(True)
   
   # Function for building Nuisance param map:
-  def buildNuisanceMap(self,useDiagonalProc=True):
+  def buildNuisanceMap(self):
     # Dict to store nuisances of different type in map
     for sType in ['scales','scalesCorr','scalesGlobal','smears']:
       if getattr(self,sType) != '': self.NuisanceMap[sType] = od()
@@ -200,9 +202,7 @@ class FinalModel:
     with open(psname,"r") as fpkl: psdata = pickle.load(fpkl)
     
     # Get row for proc: option to use diagonal process
-    if useDiagonalProc: r = psdata[psdata['proc']==self.procDiag]
-    else: r = psdata[psdata['proc']==self.proc]
-    r = psdata[psdata['proc']==self.proc]
+    r = psdata[psdata['proc']==self.procSyst]
     if len(r) == 0:
       print " --> [WARNING] Process %s is not in systematics pkl (%s). Skipping systematics."%(self.proc,psname)
       self.skipSystematics = True
@@ -411,8 +411,3 @@ class FinalModel:
     wsout.imp(self.Pdfs['final_extend'],ROOT.RooFit.RecycleConflictNodes())
     wsout.imp(self.Pdfs['final_extendThisLumi'],ROOT.RooFit.RecycleConflictNodes())
     for d in self.Datasets.itervalues(): wsout.imp(d) 
-    
-
-
-  
-
