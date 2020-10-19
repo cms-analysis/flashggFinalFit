@@ -262,7 +262,7 @@ if not opt.useDCB:
     print " --> Fitting function: convolution of nGaussians (RV=%g,WV=%g)"%(nRV,nWV)
 else:
   print " --> Fitting function: DCB + 1 Gaussian"
-nRV, nWV = 3,3
+nRV, nWV = 3,1
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # FIT: simultaneous signal fit (ssf)
