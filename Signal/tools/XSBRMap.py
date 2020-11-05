@@ -15,7 +15,7 @@ globalXSBRMap['example'] = od()
 globalXSBRMap['example']['decay'] = {'mode':'hgg'}
 globalXSBRMap['example']['GG2H'] = {'mode':'ggH'}
 globalXSBRMap['example']['VBF'] = {'mode':'qqH'}
-globalXSBRMap['example']['WH2HQQ'] = {'mode':'WH','factor':0.1257*BR_W_qq}
+globalXSBRMap['example']['WH2HQQ'] = {'mode':'WH','factor':BR_W_qq}
 # ...
 
 # STXS analysis
