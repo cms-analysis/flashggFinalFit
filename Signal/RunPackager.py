@@ -9,6 +9,7 @@ def get_options():
   parser.add_option('--ext', dest='ext', default='test', help="Extension: dropping year tag")
   parser.add_option('--mergeYears', dest='mergeYears', default=False, action="store_true", help="Use if merging categories across years")
   parser.add_option('--years', dest='years', default='2016,2017,2018', help="Years")
+  parser.add_option('--skipMergingForCats', dest='skipMergingForCats', default='', help="Comma separated list of categories to skip year merging")
   parser.add_option('--dryRun', dest='dryRun', default=False, action="store_true", help="Dry run")
   parser.add_option('--batch', dest='batch', default='IC', help='Batch')
   return parser.parse_args()

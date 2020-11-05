@@ -74,7 +74,7 @@ def initialiseXSBR():
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
 class FinalModel:
   # Constructor
-  def __init__(self,_ssfMap,_proc,_cat,_ext,_year,_sqrts,_datasets,_xvar,_MH,_MHLow,_MHHigh,_massPoints,_xsbrMap,_procSyst,_scales,_scalesCorr,_scalesGlobal,_smears,_useDCB,_skipVertexScenarioSplit,_skipSystematics,_doEffAccFromJson):
+  def __init__(self,_ssfMap,_proc,_cat,_ext,_year,_sqrts,_datasets,_xvar,_MH,_MHLow,_MHHigh,_massPoints,_xsbrMap,_procSyst,_scales,_scalesCorr,_scalesGlobal,_smears,_doVoigtian,_useDCB,_skipVertexScenarioSplit,_skipSystematics,_doEffAccFromJson):
     self.ssfMap = _ssfMap
     self.proc = _proc
     self.procSyst = _procSyst # Signal process used for systematics (useful for low stat cases)
@@ -100,6 +100,8 @@ class FinalModel:
     self.smears = _smears
     # Options:
     self.useDCB = _useDCB
+    self.doVoigtian = _doVoigtian
+    if self.doVoigtian: self.GammaH = ROOT.RooRealVar("GammaH","GammaH",0.004,0.,5.)
     self.skipVertexScenarioSplit = _skipVertexScenarioSplit
     self.doEffAccFromJson = _doEffAccFromJson
     self.verbose = True
@@ -279,7 +281,10 @@ class FinalModel:
       self.Splines['sigma_gaus_%s'%extStr] = ssf.Splines['sigma_gaus'].Clone()
       self.Splines['sigma_gaus_%s'%extStr].SetName("sigma_fit_gaus_%s"%extStr)
       self.buildSigma('sigma_gaus_%s'%extStr,skipSystematics=self.skipSystematics)
-      self.Pdfs['gaus_%s'%extStr] = ROOT.RooGaussian("gaus_%s"%extStr,"gaus_%s"%extStr,self.xvar,self.Functions["mean_dcb_%s"%extStr],self.Functions["sigma_gaus_%s"%extStr])
+      if self.doVoigtian:
+        self.Pdfs['gaus_%s'%extStr] = ROOT.RooVoigtian("gaus_%s"%extStr,"gaus_%s"%extStr,self.xvar,self.Functions["mean_dcb_%s"%extStr],self.GammaH,self.Functions["sigma_gaus_%s"%extStr])
+      else:
+        self.Pdfs['gaus_%s'%extStr] = ROOT.RooGaussian("gaus_%s"%extStr,"gaus_%s"%extStr,self.xvar,self.Functions["mean_dcb_%s"%extStr],self.Functions["sigma_gaus_%s"%extStr])
 
       # Fraction
       self.Splines['frac_%s'%extStr] = ssf.Splines['frac_constrained'].Clone()
@@ -307,7 +312,10 @@ class FinalModel:
         self.buildMean('dm_g%g_%s'%(g,extStr),skipSystematics=self.skipSystematics)
         self.buildSigma('sigma_g%g_%s'%(g,extStr),skipSystematics=self.skipSystematics)
         # Build Gaussian
-        self.Pdfs['gaus_g%g_%s'%(g,extStr)] = ROOT.RooGaussian("gaus_g%g_%s"%(g,extStr),"gaus_g%g_%s"%(g,extStr),self.xvar,self.Functions["mean_g%g_%s"%(g,extStr)],self.Functions["sigma_g%g_%s"%(g,extStr)])
+        if self.doVoigtian: 
+          self.Pdfs['gaus_g%g_%s'%(g,extStr)] = ROOT.RooVoigtian("gaus_g%g_%s"%(g,extStr),"gaus_g%g_%s"%(g,extStr),self.xvar,self.Functions["mean_g%g_%s"%(g,extStr)],self.GammaH,self.Functions["sigma_g%g_%s"%(g,extStr)])
+        else: 
+          self.Pdfs['gaus_g%g_%s'%(g,extStr)] = ROOT.RooGaussian("gaus_g%g_%s"%(g,extStr),"gaus_g%g_%s"%(g,extStr),self.xvar,self.Functions["mean_g%g_%s"%(g,extStr)],self.Functions["sigma_g%g_%s"%(g,extStr)])
         _pdfs.add(self.Pdfs['gaus_g%g_%s'%(g,extStr)])
         
         # Fractions

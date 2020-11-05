@@ -24,7 +24,7 @@ MHNominal = '125'
 
 def leave():
   print "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG SIGNAL FITTER (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ "
-  sys.exit(1)
+  exit()
 
 def get_options():
   parser = OptionParser()
@@ -38,6 +38,7 @@ def get_options():
   parser.add_option('--doEffAccFromJson', dest='doEffAccFromJson', default=False, action="store_true", help="Extract eff x acc from json (produced by getEffAcc). Else, extract from nominal weights in flashgg workspaces")
   parser.add_option('--doBeamspotReweigh', dest='doBeamspotReweigh', default=False, action="store_true", help="Do beamspot reweigh to match beamspot distribution in data")
   parser.add_option('--doPlots', dest='doPlots', default=False, action="store_true", help="Produce Signal Fitting plots")
+  parser.add_option("--doVoigtian", dest='doVoigtian', default=False, action="store_true", help="Use Voigtians instead of Gaussians for signal models with Higgs width as parameter")
   parser.add_option("--useDCB", dest='useDCB', default=False, action="store_true", help="Use DCB in signal fitting")
   parser.add_option("--useDiagonalProcForShape", dest='useDiagonalProcForShape', default=False, action="store_true", help="Use shape of diagonal process, keeping normalisation (requires diagonal mapping produced by getDiagProc script)")
   parser.add_option('--skipVertexScenarioSplit', dest='skipVertexScenarioSplit', default=False, action="store_true", help="Skip vertex scenario split")
@@ -50,7 +51,7 @@ def get_options():
   parser.add_option("--scalesGlobal", dest='scalesGlobal', default='', help='Photon shape systematics: scalesGlobal')
   parser.add_option("--smears", dest='smears', default='', help='Photon shape systematics: smears')
   # Parameter values
-  parser.add_option('--replacementThreshold', dest='replacementThreshold', default=200, type='int', help="Nevent threshold to trigger replacement dataset")
+  parser.add_option('--replacementThreshold', dest='replacementThreshold', default=150, type='int', help="Nevent threshold to trigger replacement dataset")
   parser.add_option('--beamspotWidthData', dest='beamspotWidthData', default=3.4, type='float', help="Width of beamspot in data [cm]")
   parser.add_option('--beamspotWidthMC', dest='beamspotWidthMC', default=5.14, type='float', help="Width of beamspot in MC [cm]")
   parser.add_option('--MHPolyOrder', dest='MHPolyOrder', default=1, type='int', help="Order of polynomial for MH dependence")
@@ -108,7 +109,7 @@ if opt.skipZeroes:
   d = reduceDataset(inputWS.data("%s_%s_%s_%s"%(procToData(opt.proc.split("_")[0]),MHNominal,sqrts__,opt.cat)),aset)
   if( d.numEntries() == 0. )|( d.sumEntries <= 0. ):
     print " --> (%s,%s) has zero events. Will not construct signal model"%(opt.proc,opt.cat)
-    sys.exit(1)
+    exit()
   inputWS.Delete()
   f.Close()
  
@@ -255,14 +256,16 @@ if opt.doBeamspotReweigh:
 # If using nGaussian fit then extract nGaussians from fTest json file
 if not opt.useDCB:
   with open("%s/outdir_%s/fTest/json/nGauss_%s.json"%(cwd__,opt.ext,opt.ext)) as jf: ngauss = json.load(jf)
-  nRV = ngauss["%s__%s"%(procRVFit,catRVFit)]['nRV']
+  nRV = int(ngauss["%s__%s"%(procRVFit,catRVFit)]['nRV'])
   if opt.skipVertexScenarioSplit: print " --> Fitting function: convolution of nGaussians (%g)"%nRV
   else: 
-    nWV = ngauss["%s__%s"%(procWVFit,catWVFit)]['nWV']
+    nWV = int(ngauss["%s__%s"%(procWVFit,catWVFit)]['nWV'])
     print " --> Fitting function: convolution of nGaussians (RV=%g,WV=%g)"%(nRV,nWV)
 else:
   print " --> Fitting function: DCB + 1 Gaussian"
-nRV, nWV = 3,1
+
+if opt.doVoigtian:
+  print " --> Will add natural Higgs width as parameter in Pdf (Gaussians -> Voigtians)"
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # FIT: simultaneous signal fit (ssf)
@@ -287,12 +290,12 @@ if not opt.skipVertexScenarioSplit:
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # FINAL MODEL: construction
 print "\n --> Constructing final model"
-fm = FinalModel(ssfMap,opt.proc,opt.cat,opt.ext,opt.year,sqrts__,nominalDatasets,xvar,MH,MHLow,MHHigh,opt.massPoints,xsbrMap,procSyst,opt.scales,opt.scalesCorr,opt.scalesGlobal,opt.smears,opt.useDCB,opt.skipVertexScenarioSplit,opt.skipSystematics,opt.doEffAccFromJson)
+fm = FinalModel(ssfMap,opt.proc,opt.cat,opt.ext,opt.year,sqrts__,nominalDatasets,xvar,MH,MHLow,MHHigh,opt.massPoints,xsbrMap,procSyst,opt.scales,opt.scalesCorr,opt.scalesGlobal,opt.smears,opt.doVoigtian,opt.useDCB,opt.skipVertexScenarioSplit,opt.skipSystematics,opt.doEffAccFromJson)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # SAVE: to output workspace
-foutDir = "%s/outdir_test/signalFit/output"%cwd__
-foutName = "%s/outdir_test/signalFit/output/CMS-HGG_sigfit_%s_%s_%s_%s.root"%(cwd__,opt.ext,opt.proc,opt.year,opt.cat)
+foutDir = "%s/outdir_%s/signalFit/output"%(cwd__,opt.ext)
+foutName = "%s/outdir_%s/signalFit/output/CMS-HGG_sigfit_%s_%s_%s_%s.root"%(cwd__,opt.ext,opt.ext,opt.proc,opt.year,opt.cat)
 print "\n --> Saving output workspace to file: %s"%foutName
 if not os.path.isdir(foutDir): os.system("mkdir %s"%foutDir)
 fout = ROOT.TFile(foutName,"RECREATE")

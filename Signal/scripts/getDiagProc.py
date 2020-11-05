@@ -23,8 +23,11 @@ def get_options():
   parser.add_option('--inputWSDir', dest='inputWSDir', default='', help='Input WS directory')
   parser.add_option('--ext', default='test', help='Extension (to define analysis)')
   parser.add_option('--MH', dest='MH', default='125', help='MH')
+  parser.add_option('--makeSimpleFTest', dest='makeSimpleFTest', default=False, action="store_true", help='Produce simple fTest json with diagonal proc values set to nRV,nWV (else=1,1)')
+  parser.add_option('--nRV', dest='nRV', default='3', help='Number of gaussians for diag proc (RV)')
+  parser.add_option('--nWV', dest='nWV', default='1', help='Number of gaussians for diag proc (WV)')
   return parser.parse_args()
-(opt,args) = get_options()
+(opt,args) = get_options() 
 
 # Extract all processed analysis categories
 WSFileNames = extractWSFileNames(opt.inputWSDir)
@@ -64,3 +67,22 @@ for proc in allProcs.split(","):
 print " --> Writing diagonal processes to json file\n"
 if not os.path.isdir("%s/outdir_%s/getDiagProc/json"%(cwd__,opt.ext)): os.system("mkdir %s/outdir_%s/getDiagProc/json"%(cwd__,opt.ext))
 with open("%s/outdir_%s/getDiagProc/json/diagonal_process.json"%(cwd__,opt.ext),"w") as jf: json.dump(dproc,jf)
+
+if opt.makeSimpleFTest:
+  print " --> Making simple fTest config json using diagonal procs (nRV,nWV) = (%s,%s)"%(opt.nRV,opt.nWV)
+  if not os.path.isdir("%s/outdir_%s/fTest"%(cwd__,opt.ext)): os.system("mkdir %s/outdir_%s/fTest"%(cwd__,opt.ext))
+  if not os.path.isdir("%s/outdir_%s/fTest/json"%(cwd__,opt.ext)): os.system("mkdir %s/outdir_%s/fTest/json"%(cwd__,opt.ext))
+  ff = open("%s/outdir_%s/fTest/json/nGauss_%s.json"%(cwd__,opt.ext,opt.ext),"w")
+  ff.write("{\n")
+  for cidx, cat in enumerate(allCats.split(",")):
+    for pidx, proc in enumerate(allProcs.split(",")):
+      k = "\"%s__%s\""%(proc,cat)
+      if proc == dproc[cat]: ff.write("    %-90s : {\"nRV\":%s,\"nWV\":%s}"%(k,opt.nRV,opt.nWV))
+      else: ff.write("    %-90s : {\"nRV\":1,\"nWV\":1}"%k)
+      # Drop comma for last entry
+      if(cidx == len(allCats.split(","))-1)&(pidx == len(allProcs.split(","))-1): ff.write("\n")
+      else: ff.write(",\n")
+  ff.write("}")
+  ff.close()
+
+    

@@ -23,7 +23,7 @@ MHPolyOrder = 0 # dependence of fit params on MH, set to 0 if using one mass poi
 minimizerMethod = 'TNC'
 minimizerTolerance = 1e-8
 useDCB = True
-nGauss = 3 #nGaussians if not using DCB
+nGauss = 1 #nGaussians if not using DCB
 
 # MH var
 MH = ROOT.RooRealVar("MH","m_{H}", int(MHLow), int(MHHigh))

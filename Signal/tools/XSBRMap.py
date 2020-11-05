@@ -6,13 +6,17 @@ from commonObjects import *
 globalXSBRMap = od()
 
 # For case of fixed xs/br Use 'mode':constant 'factor':X e.g.
-# globalXSBRMap['example'] = od()
-# globalXSBRMap['example']['decay'] = {'mode':'constant','factor':1}
-# globalXSBRMap['example']['PROCNAME'] = {'mode':'constant','factor':0.001}
+#globalXSBRMap['example'] = od()
+#globalXSBRMap['example']['decay'] = {'mode':'constant','factor':1}
+#globalXSBRMap['example']['PROCNAME'] = {'mode':'constant','factor':0.001}
 
 # For case of inclusive production mode then drop factor e.g.
-# globalXSBRMap['example']['GG2H'] = {'mode':'ggH'}
-# globalXSBRMap['example']['VBF'] = {'mode':'qqH'}
+globalXSBRMap['example'] = od()
+globalXSBRMap['example']['decay'] = {'mode':'hgg'}
+globalXSBRMap['example']['GG2H'] = {'mode':'ggH'}
+globalXSBRMap['example']['VBF'] = {'mode':'qqH'}
+globalXSBRMap['example']['WH2HQQ'] = {'mode':'WH','factor':0.1257*BR_W_qq}
+# ...
 
 # STXS analysis
 globalXSBRMap['STXS'] = od()

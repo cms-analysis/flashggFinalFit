@@ -4,6 +4,26 @@ from collections import OrderedDict as od
 # Add analyses to globalReplacementMap. See "STXS" as an example
 globalReplacementMap = od()
 
+# Example analysis which with processes GG2H, VBF and cats Untagged_Tag0,VBF_Tag0
+globalReplacementMap['example'] = od()
+# For WRONG VERTEX SCENARIO:
+#  * single proc x cat for wrong vertex since for dZ > 1cm shape independent of proc x cat
+#  * use proc x cat with highest number of WV events
+globalReplacementMap['example']['procWV'] = "GG2H"
+globalReplacementMap['example']['catWV'] = "Untagged_Tag0"
+# For RIGHT VERTEX SCENARIO:
+#  * default mapping is to use diagonal process from given category 
+#  * if few events in diagonal process then may need to change the category aswell (see catRVMap)
+#  * map must contain entry for all cats being processed (for replacement proc and cat)
+globalReplacementMap['example']['procRVMap'] = od()
+globalReplacementMap["example"]["procRVMap"]["Untagged_Tag0"] = "GG2H"
+globalReplacementMap["example"]["procRVMap"]["VBF_Tag0"] = "VBF"
+# Replacement category for RV fit
+globalReplacementMap["example"]["catRVMap"] = od()
+globalReplacementMap["example"]["catRVMap"]["Untagged_Tag0"] = "Untagged_Tag0"
+globalReplacementMap["example"]["catRVMap"]["VBF_Tag0"] = "VBF_Tag0"
+
+
 # STXS analysis
 globalReplacementMap['STXS'] = od()
 # For WRONG VERTEX SCENARIO:

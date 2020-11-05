@@ -3,11 +3,11 @@
 signalScriptCfg = {
   
   # Setup
-  'inputWSDir':'/vols/cms/jl2117/hgg/ws/Jul20/ws/pass0_final/signal_2016', 
+  'inputWSDir':'/vols/cms/jl2117/hgg/ws/UL/Sept20/MC_final/signal_2016',
   'procs':'auto', # if auto: inferred automatically from filenames
   'cats':'auto', # if auto: inferred automatically from (0) workspace
   'ext':'test',
-  'analysis':'STXS', # To specify which replacement dataset mapping (defined in ./python/replacementMap.py)
+  'analysis':'STXS', # To specify which replacement dataset mapping (defined in ./tools/replacementMap.py)
   'year':'2016', # Use 'combined' if merging all years: not recommended
   'beamspot':'3.4', # Beamspot in data
   'numberOfBins':'320',
