@@ -5,7 +5,8 @@ _year = "{year}"
 signalScriptCfg = {
   
   # Setup
-  'systematics':1, # (0): Use empty systematics dat file. (1): Use generated systematics dat file 
+  'systematics':{systematics}, # (0): Use empty systematics dat file. (1): Use generated systematics dat file 
+  #'systematics':0, # (0): Use empty systematics dat file. (1): Use generated systematics dat file 
   'inputWSDir':'{inputWSDir}', ##-- Note: should NOT end with /
   'usrprocs':'{usrprocs}', # if you want user input production categories 
   # 'usrprocs':'GluGluToHHTo', # if you want user input production categories 

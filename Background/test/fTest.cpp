@@ -101,6 +101,7 @@ double getProbabilityFtest(double chi2, int ndof,RooAbsPdf *pdfNull, RooAbsPdf *
   if (!runFtestCheckWithToys) return prob_asym;
 
   int ndata = data->sumEntries();
+  cout << "ndata * 0.88674 = " << ndata * 0.88674 << endl;
   
   // fit the pdfs to the data and keep this fit Result (for randomizing)
   RooFitResult *fitNullData = pdfNull->fitTo(*data,RooFit::Save(1),RooFit::Strategy(1)
@@ -307,9 +308,28 @@ double getGoodnessOfFit(RooRealVar *mass, RooAbsPdf *mpdf, RooDataSet *data, std
 void plot(RooRealVar *mass, RooAbsPdf *pdf, RooDataSet *data, string name,vector<string> flashggCats_, int status, double *prob){
   
   // Chi2 taken from full range fit
+  // cout << ""
+  // cout << "mass:" << mass << endl;
+  // cout << "nBinsForMass: " << nBinsForMass << endl;
+  // cout << "MANUAL EXIT " << endl;
+  // exit(0);
+
+
+  // cout << "mass->getMin() " << mass->getMin() << endl;
+  // cout << "mass->getMax() " << mass->getMax() << endl;
+  // mass->setMin(100);
+  // mass->setMax(180);
   RooPlot *plot_chi2 = mass->frame();
+  // cout << "plot_chi2: " << plot_chi2 << endl;
+  // cout << "MANUAL EXIT " << endl;
+  // exit(0);  
   data->plotOn(plot_chi2,Binning(nBinsForMass));
   pdf->plotOn(plot_chi2);
+  
+
+
+  // cout << "MANUAL EXIT " << endl;
+  // exit(0);
 
   int np = pdf->getParameters(*data)->getSize()+1; //Because this pdf has no extend
   double chi2 = plot_chi2->chiSquare(np);
@@ -786,7 +806,8 @@ int main(int argc, char* argv[]){
 		if (verbose) std::cout << "[INFO] opened data for  "  << Form("data_mass_%s",catname.c_str()) <<" - " << dataFull <<std::endl;
     }
 
-
+    mass->setMin(100);
+    mass->setMax(180);
 		mass->setBins(nBinsForMass);
 		RooDataSet *data;
 		//	RooDataHist thisdataBinned(Form("roohist_data_mass_cat%d",cat),"data",*mass,*dataFull);
@@ -821,6 +842,7 @@ int main(int argc, char* argv[]){
 
 			double thisNll=0.; double prevNll=0.; double chi2=0.; double prob=0.; 
 			int order=1; int prev_order=0; int cache_order=0;
+			// int order=2; int prev_order=1; int cache_order=0;
 
 			RooAbsPdf *prev_pdf=NULL;
 			RooAbsPdf *cache_pdf=NULL;
@@ -910,6 +932,7 @@ int main(int argc, char* argv[]){
 
 						// Calculate goodness of fit for the thing to be included (will use toys for lowstats)!
 						double gofProb =0; 
+            cout << "before plot: mass: " << mass << endl;
 						plot(mass,bkgPdf,data,Form("%s/%s%d_cat%d.pdf",outDir.c_str(),funcType->c_str(),order,cat),flashggCats_,fitStatus,&gofProb);
 
 						if ((prob < upperEnvThreshold) ) { // Looser requirements for the envelope

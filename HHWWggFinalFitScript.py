@@ -3,6 +3,42 @@
 # Abe Tishelman-Charny 
 #
 # The purpose of this module is to run fggfinalfit steps 
+# pdfindex_HHWWggTag_0_2017_13TeV
+#
+# DNN 14 November 2020 
+# 
+# example directory strucure: /eos/user/a/atishelm/ntuples/HHWWgg_flashgg/TaggerOutput/HHWWgg-SL-SM-NLO-Run2/SM/SL
+# Signal
+# python HHWWggFinalFitScript.py --Step Signal --mode std --physics SM --finalStates SL --years 2018 --dirTypes Signal --baseDirec ForFggFinalfit --note SLSMNLODNN --DNN --outputDirec /eos/user/a/atishelm/www/HHWWgg/SM-NLO-DNN-Results/
+# python HHWWggFinalFitScript.py --Step Signal --mode sigFitOnly --physics SM --finalStates SL --years 2018 --dirTypes Signal --baseDirec ForFggFinalfit --note SLSMNLODNN --DNN --outputDirec /eos/user/a/atishelm/www/HHWWgg/SM-NLO-DNN-Results/
+# python HHWWggFinalFitScript.py --Step Signal --mode packageOnly --physics SM --finalStates SL --years 2018 --dirTypes Signal --baseDirec ForFggFinalfit --note SLSMNLODNN --DNN --outputDirec /eos/user/a/atishelm/www/HHWWgg/SM-NLO-DNN-Results/
+# python HHWWggFinalFitScript.py --Step Signal --mode sigPlotsOnly --physics SM --finalStates SL --years 2018 --dirTypes Signal --baseDirec ForFggFinalfit --note SLSMNLODNN --DNN --outputDirec /eos/user/a/atishelm/www/HHWWgg/SM-NLO-DNN-Results/
+
+# Background
+# python HHWWggFinalFitScript.py --Step Background --mode fTestOnly --physics SM --finalStates SL --years 2016 --dirTypes Data --baseDirec ForFggFinalfit --note SLSMNLODNN --DNN --outputDirec /eos/user/a/atishelm/www/HHWWgg/SM-NLO-DNN-Results/
+
+
+# Datacards and combine 
+# python HHWWggFinalFitScript.py --Step Datacard --mode datacard --physics SM --finalStates SL --years 2017 --note SLSMNLODNN --DNN --dirTypes Datacard --baseDirec ForFggFinalfit
+# python HHWWggFinalFitScript.py --Step Combine --mode combine --physics SM --finalStates SL --years 2016 --note SLSMNLODNN --DNN --dirTypes Datacard --baseDirec ForFggFinalfit
+# combine CMS-HGG_mva_13TeV_datacard_HHWWgg_SM-SL_2017_SLNLOstatOnly.txt -m 125 -M AsymptoticLimits --run=blind -t -1
+
+# Combine 
+# python HHWWggFinalFitScript.py --Step Combine --mode combine --physics SM --finalStates SL --years 2017 --note SLSMNLODNN --dirTypes Combine --combineInd --DNN
+
+# python /eos/user/a/atishelm/www/HHWWgg/SM-NLO-Results//SM/SL/2016/python HHWWggFinalFitScript.py --Step Signal --mode sigFitOnly --physics SM --finalStates SL --years 2016 --dirTypes Signal --baseDirec HHWWgg-SL-SM-NLO-Run2 --note SLNLOstatOnly
+# ForFggFinalfit
+# python HHWWggFinalFitScript.py --Step Signal --mode std --physics SM --finalStates SL --years 2018 --dirTypes Signal --baseDirec HHWWgg-SL-SM-NLO-Run2 --note SLNLOstatOnly
+# python HHWWggFinalFitScript.py --Step Signal --mode sigFitOnly --physics SM --finalStates SL --years 2018 --dirTypes Signal --baseDirec HHWWgg-SL-SM-NLO-Run2 --note SLNLOstatOnly
+# python HHWWggFinalFitScript.py --Step Signal --mode packageOnly --physics SM --finalStates SL --years 2018 --dirTypes Signal --baseDirec HHWWgg-SL-SM-NLO-Run2 --note SLNLOstatOnly
+# python HHWWggFinalFitScript.py --Step Signal --mode sigPlotsOnly --physics SM --finalStates SL --years 2018 --dirTypes Signal --baseDirec HHWWgg-SL-SM-NLO-Run2 --note SLNLOstatOnly
+#
+# python HHWWggFinalFitScript.py --Step Background --mode fTestOnly --physics SM --finalStates SL --years 2016 --dirTypes Data --baseDirec HHWWgg-SL-SM-NLO-Run2 --note SLNLOstatOnly
+# python HHWWggFinalFitScript.py --Step Background --mode bkgPlotsOnly --physics SM --finalStates SL --years 2016 --dirTypes Data --baseDirec HHWWgg-SL-SM-NLO-Run2 --note SLNLOstatOnly
+#
+# python HHWWggFinalFitScript.py --Step Datacard --mode datacard --physics SM --finalStates SL --years 2017 --note SLNLOstatOnly --dirTypes Datacard --baseDirec HHWWgg-SL-SM-NLO-Run2
+# python HHWWggFinalFitScript.py --Step Combine --mode combine --physics SM --finalStates SL --years 2017 --note SLNLOstatOnly --dirTypes Combine --combineInd
+# 
 #
 # Example Usage:
 # 
@@ -63,20 +99,32 @@ parser.add_argument("--physicsCases",type=str, default="", help="Comma separated
 parser.add_argument("--finalStates",type=str, default="", help="Comma separated list of physics cases to run. Ex: SL,FH,FL", required=False)
 parser.add_argument("--years",type=str, default="", help="Comma separated list of years to run. Ex: 2016,2017,2018", required=False)
 parser.add_argument("--dirTypes",type=str, default="", help="Comma separated list of dirTypes to run. Ex: Signal,Data", required=False)
+parser.add_argument("--baseDirec",type=str, default="", help="Location of ntuples with proper subdirectoy structure.", required=False)
 parser.add_argument("--note",type=str, default="HHWWggAnalysis", help="Note for ext variable", required=False)
 parser.add_argument("--HH_limit", action="store_true", default=False, help="Plot HH limits", required=False)
 parser.add_argument("--Run2", action="store_true", default=False, help="Compute combined Run 2 limits ", required=False)
 parser.add_argument("--combineAll", action="store_true", default=False, help="Compute limits from all inputs combined", required=False)
 parser.add_argument("--combineInd", action="store_true", default=False, help="Compute limits for individual cases", required=False)
+parser.add_argument("--DNN", action="store_true", default=False, help="Use DNN cats", required=False)
+parser.add_argument("--outputDirec",type=str,default="/eos/user/a/atishelm/www/HHWWgg/fggfinalfit/",help="output location for plots",required=False)
 
 args = parser.parse_args()
 
-ntupleDirec = "/eos/user/a/atishelm/ntuples"
+# ntupleDirec = "/eos/user/a/atishelm/ntuples/HHWWgg_flashgg/TaggerOutput/" # HHWWgg-SL-SM-NLO-Run2/"
+ntupleDirec = "/eos/user/a/atishelm/ntuples/HHWWgg_DNN_Categorization/WeightsExp/" 
 # baseDirec = "HHWWgg_Combination"
 # baseDirec = "HHWWgg_DNNResult"
-baseDirec = "HHWWgg_DNNResultAddWJets"
+# baseDirec = "HHWWgg_DNNResultAddWJets"
+baseDirec = args.baseDirec
 # outputDirec = "/eos/user/a/atishelm/www/HHWWgg/DNN_Results"
-outputDirec = "/eos/user/a/atishelm/www/HHWWgg/DNN_Result_AddWJets"
+# outputDirec = "/eos/user/a/atishelm/www/HHWWgg/DNN_Result_AddWJets"
+# outputDirec = "/eos/user/a/atishelm/www/HHWWgg/DNN_Result_AddWJets"
+# outputDirec = "/afs/cern.ch/work/a/atishelm/private/HHWWgg-AN-WorkingDirectory/AN-20-165/Images/"
+outputDirec = args.outputDirec
+# outputDirec = "/eos/user/a/atishelm/www/HHWWgg/SM-NLO-Results/"
+
+# outputDirec2 = "/afs/cern.ch/work/a/atishelm/private/HHWWgg-AN-WorkingDirectory/AN-20-165/Images/"
+
 note = args.note 
 mode = args.mode 
 systematics = int(args.systematics)
@@ -130,7 +178,7 @@ if(args.Step!="Plot"):
             SL_BR = GetBR("SL")
             FH_BR = GetBR("FH")
             FL_BR = GetBR("FL")
-            
+
             datacardName = "CMS-HGG_mva_13TeV_datacard_%s.txt"%(ext)
             print "Creating datacard: ",datacardName
             datacard = open(datacardName,'a')
@@ -138,8 +186,23 @@ if(args.Step!="Plot"):
             if(finalState == "SL"):       
               datacard.write("br_WW_qqlnu rateParam HHWWggTag_0_%s GluGluToHHTo %s\n"%(year,SL_BR))
               datacard.write("br_WW_qqlnu rateParam HHWWggTag_1_%s GluGluToHHTo %s\n"%(year,SL_BR))
+              datacard.write("xs_HH rateParam HHWWggTag_0_%s GluGluToHHTo 31.049\n"%(year))
+              datacard.write("xs_HH rateParam HHWWggTag_1_%s GluGluToHHTo 31.049\n"%(year))
+              datacard.write("br_HH_WWgg rateParam HHWWggTag_0_%s GluGluToHHTo 0.000970198\n"%(year))
+              datacard.write("br_HH_WWgg rateParam HHWWggTag_1_%s GluGluToHHTo 0.000970198\n"%(year))
+               
+              if(args.DNN):
+                datacard.write("br_WW_qqlnu rateParam HHWWggTag_2_%s GluGluToHHTo %s\n"%(year,SL_BR))
+                datacard.write("br_WW_qqlnu rateParam HHWWggTag_3_%s GluGluToHHTo %s\n"%(year,SL_BR))
+                datacard.write("xs_HH rateParam HHWWggTag_2_%s GluGluToHHTo 31.049\n"%(year))
+                datacard.write("xs_HH rateParam HHWWggTag_3_%s GluGluToHHTo 31.049\n"%(year))    
+                datacard.write("br_HH_WWgg rateParam HHWWggTag_2_%s GluGluToHHTo 0.000970198\n"%(year))
+                datacard.write("br_HH_WWgg rateParam HHWWggTag_3_%s GluGluToHHTo 0.000970198\n"%(year))                            
+
               # datacard.write("br_WW_qqlnu rateParam HHWWggTag_2_%s GluGluToHHTo %s\n"%(year,SL_BR)) # DNN only..3 cats (not always...)
               datacard.write("nuisance edit freeze br_WW_qqlnu\n")
+              datacard.write("nuisance edit freeze xs_HH\n")
+              datacard.write("nuisance edit freeze br_HH_WWgg\n")
             elif(finalState == "FL"):
               datacard.write("br_WW_lnulnu rateParam HHWWggTag_3_%s GluGluToHHTo %s\n"%(year,FL_BR))
               datacard.write("nuisance edit freeze br_WW_lnulnu\n")            
@@ -155,7 +218,7 @@ if(args.Step!="Plot"):
 
           else: 
             script = open('%s_Config_TEMPLATE.txt'%(FitDir)).read()
-            cats = FinalStateCats(finalState)
+            cats = FinalStateCats(finalState,args.DNN)
             ext = "HHWWgg_%s-%s_%s_%s"%(physicsCase,finalState,year,note)
             configParams = GetConfigParams(dirType)
             FinalStateParticles = GetFinalStateParticles(finalState)
@@ -165,13 +228,10 @@ if(args.Step!="Plot"):
               usrprocs = GetUsrProcs(physicsCase)
 
             for param in configParams:
-              # print"param:",param
-              # if(param=='systematics'): exec("script = script.replace('{systematics}',%d)"%(systematics))
+              systematics = str(systematics)
+              if(param=='systematics'): exec("script = script.replace('{systematics}',systematics)")
               exec("script = script.replace('{%s}',%s)"%(param,param))
               
-            # print"script:"
-            # print script
-
             scriptName = "%s_Config.py"%(ext)
 
             with open(scriptName, "w") as outScript:
@@ -186,10 +246,16 @@ if(args.Step!="Plot"):
               os.system('python Run%sScripts.py --inputConfig Configs/%s'%(FitDir,scriptName))
 
             if(args.Step != "Datacard"):
-              outDirec = '%s/%s/%s'%(outputDirec,ext,mode)
+              # outDirec = '%s/%s/%s'%(outputDirec,ext,mode)
+              # outDirec = '%s/AnalyticFitting/%s/%s/%s/'%(outputDirec,physicsCase,finalState,year)
+              outDirec = '%s/%s/%s/%s/'%(outputDirec,physicsCase,finalState,year)
+              print "Outputting plots to: %s"%(outDirec)
               os.system('mkdir -p %s'%(outDirec))
-              os.system('cp %s/index.php %s/%s '%(outputDirec,outputDirec,ext))
-              os.system('cp %s/index.php %s'%(outputDirec,outDirec))          
+              os.system('cp %s/index.php %s/%s'%(outputDirec,outputDirec,physicsCase))
+              os.system('cp %s/index.php %s/%s/%s'%(outputDirec,outputDirec,physicsCase,finalState))
+              os.system('cp %s/index.php %s/%s/%s/%s'%(outputDirec,outputDirec,physicsCase,finalState,year))
+              # os.system('cp %s/index.php %s/%s '%(outputDirec,outputDirec,ext))
+              # os.system('cp %s/index.php %s'%(outputDirec,outDirec))          
               plotDirs = GetPlotDir(mode)
               for plotDir in plotDirs: 
                 if(dirType=="Signal"):

@@ -1071,7 +1071,7 @@ int main(int argc, char* argv[]){
 			oneSigmaBand_r->SetFillColor(kGreen);
 			oneSigmaBand_r->SetMarkerColor(kGreen);
 		}
-
+			doSignal = 0;
 		if (doSignal){
       int SignalType=0;
 			TFile *sigFile = TFile::Open(sigFileName.c_str());

@@ -34,15 +34,13 @@ def GetBR(finalState_):
 
   return BR_dict[finalState_]
 
-# def FinalStateCats(FS_):
-#   fsCatDict = {
-#     "SL" : "HHWWggTag_0,HHWWggTag_1",
-#     "FH" : "HHWWggTag_2",
-#     "FL" : "HHWWggTag_3"
-#   }
-#   return fsCatDict[FS_]
+# def GetNtupleDirec(Analysis_):
+#     nTupleLocDict = {
+#         "DNN" : ""
+#     }
 
-def FinalStateCats(FS_):
+def FinalStateCats(FS_,DNN_):
+  if(DNN_): return "HHWWggTag_0,HHWWggTag_1,HHWWggTag_2,HHWWggTag_3" # hardcoded :) 
   fsCatDict = {
     "SL" : "HHWWggTag_0,HHWWggTag_1"
     # "SL" : "HHWWggTag_0,HHWWggTag_1,HHWWggTag_2" # DNN cats 
@@ -74,9 +72,9 @@ def GetFitDirec(dirType_):
 def GetConfigParams(dirType_):
     configParamsDict = {
         # "Signal" : ["systematics","inputWSDir","cats","ext","year","mode","FinalStateParticles","usrprocs","analysis_type"],
-        "Signal" : ["inputWSDir","cats","ext","year","mode","FinalStateParticles","usrprocs","analysis_type"],
+        "Signal" : ["inputWSDir","cats","ext","year","mode","FinalStateParticles","usrprocs","analysis_type","systematics"],
         "Data" : ["inputWSDir","cats","ext","year","mode","FinalStateParticles"],
-        "Datacard" : ["inputWSDir","cats","ext","year","mode","FinalStateParticles","usrprocs","analysis_type","note"]
+        "Datacard" : ["inputWSDir","cats","ext","year","mode","FinalStateParticles","usrprocs","analysis_type","note","systematics"]
         # "Combine" : ["inputWSDir","cats","ext","year","mode","FinalStateParticles","usrprocs","analysis_type","note"]
     }
     return configParamsDict[dirType_]

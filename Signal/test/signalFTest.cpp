@@ -157,8 +157,8 @@ double getMyNLL(RooRealVar *var, RooAbsPdf *pdf, RooDataHist *data){
 
 void fTest(string analysis_, string filename, string outdir_, vector<string> procs, string procString_, int nBins, float rangeLow, float rangeHigh, string website, string datfilename_){
 
-	WSTFileWrapper *inWS 
-    = new WSTFileWrapper(filename,"tagsDumper/cms_hgg_13TeV");
+        cout << "file name: " << filename << endl;
+	WSTFileWrapper *inWS = new WSTFileWrapper(filename,"tagsDumper/cms_hgg_13TeV");
   if(verbose_) std::cout << "[INFO] Opened files OK!" << std::endl;
 	RooRealVar *mass = (RooRealVar*)inWS->var("CMS_hgg_mass");
   if(verbose_) std::cout << "[INFO] Got mass variable " << mass << std::endl;
@@ -863,6 +863,13 @@ int main(int argc, char *argv[]){
 			std::cout << " [INFO] considering only " << considerOnly_[j]<<std::endl;
 	}
   
+    cout << "analysis: " << analysis_ << endl;
+	cout << "filename: " << filename_ << endl;
+	// cout << "procs: " << procs << endl;
+	cout << "procString_: " << procString_ << endl;
+	// cout << "nBins: " << nBins << endl;
+	cout << "datfilename_: " << datfilename_ << endl;
+	
 	fTest(analysis_,filename_,outdir_,procs,procString_,nBins,rangeLow,rangeHigh,website,datfilename_);
 
   // open input files using WS wrapper.

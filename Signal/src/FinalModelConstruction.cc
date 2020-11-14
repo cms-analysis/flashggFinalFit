@@ -1419,7 +1419,8 @@ void FinalModelConstruction::getNormalization(){
 
   //turn that graph into a spline!
   TGraph *eaGraph = new TGraph(pol);
-  RooSpline1D *eaSpline = graphToSpline(Form("fea_%s_%s_%dTeV",proc_.c_str(),catname.c_str(),sqrts_),eaGraph);
+  // RooSpline1D *eaSpline = graphToSpline(Form("fea_%s_%s_%dTeV",proc_.c_str(),catname.c_str(),sqrts_),eaGraph);
+  RooSpline1D *eaSpline = graphToSpline(Form("fea_%s_%s_%dTeV_%d",proc_.c_str(),catname.c_str(),sqrts_,year_),eaGraph);
   RooSpline1D *xs = xsSplines[proc_];
   TGraph *  xsGraph = new TGraph();
   TGraph *  brGraph = new TGraph();
