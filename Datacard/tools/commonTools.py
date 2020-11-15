@@ -71,6 +71,28 @@ def procToData( _proc ):
   if k in procToDataMap: _proc = re.sub( k, procToDataMap[k], _proc )
   return _proc
 
+procToDatacardNameMap = od()
+procToDatacardNameMap['GG2H'] = "ggH"
+procToDatacardNameMap['VBF'] = "qqH"
+procToDatacardNameMap['WH2HQQ'] = "WH_had"
+procToDatacardNameMap["ZH2HQQ"] = "ZH_had"
+procToDatacardNameMap["QQ2HLNU"] = "WH_lep"
+procToDatacardNameMap["QQ2HLL"] = "ZH_lep"
+procToDatacardNameMap["TTH"] = "ttH"
+procToDatacardNameMap["BBH"] = "bbH"
+procToDatacardNameMap["THQ"] = "tHq"
+procToDatacardNameMap["THW"] = "tHW"
+procToDatacardNameMap["TH"] = "tHq"
+procToDatacardNameMap["GG2HQQ"] = "ggZH_had"
+procToDatacardNameMap["GG2HLL"] = "ggZH_ll"
+procToDatacardNameMap["GG2HNUNU"] = "ggZH_nunu"
+
+def procToDatacardName( _proc ):
+  k = _proc.split("_")[0]
+  if k in procToDatacardNameMap: _proc = re.sub( k, procToDatacardNameMap[k], _proc )
+  return _proc
+
+
 # Functions for manip RooDataSets
 def reduceDataset(_d,_argset): return _d.reduce(_argset)
 

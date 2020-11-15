@@ -68,21 +68,29 @@ print " --> Writing diagonal processes to json file\n"
 if not os.path.isdir("%s/outdir_%s/getDiagProc/json"%(cwd__,opt.ext)): os.system("mkdir %s/outdir_%s/getDiagProc/json"%(cwd__,opt.ext))
 with open("%s/outdir_%s/getDiagProc/json/diagonal_process.json"%(cwd__,opt.ext),"w") as jf: json.dump(dproc,jf)
 
+# One json file for each cat: diagonal proc first line in file
 if opt.makeSimpleFTest:
   print " --> Making simple fTest config json using diagonal procs (nRV,nWV) = (%s,%s)"%(opt.nRV,opt.nWV)
   if not os.path.isdir("%s/outdir_%s/fTest"%(cwd__,opt.ext)): os.system("mkdir %s/outdir_%s/fTest"%(cwd__,opt.ext))
   if not os.path.isdir("%s/outdir_%s/fTest/json"%(cwd__,opt.ext)): os.system("mkdir %s/outdir_%s/fTest/json"%(cwd__,opt.ext))
-  ff = open("%s/outdir_%s/fTest/json/nGauss_%s.json"%(cwd__,opt.ext,opt.ext),"w")
-  ff.write("{\n")
   for cidx, cat in enumerate(allCats.split(",")):
+    ff = open("%s/outdir_%s/fTest/json/nGauss_%s.json"%(cwd__,opt.ext,cat),"w")
+    ff.write("{\n")
+    pitr = 1
+    # First write diagonal proc
+    k = "\"%s__%s\""%(dproc[cat],cat)
+    ff.write("    %-90s : {\"nRV\":%s,\"nWV\":%s}"%(k,opt.nRV,opt.nWV))
+    if pitr = len(allProcs.split(",")): ff.write("\n")
+    else: ff.write(",\n")
+    pitr += 1
+    # Then other process
     for pidx, proc in enumerate(allProcs.split(",")):
       k = "\"%s__%s\""%(proc,cat)
-      if proc == dproc[cat]: ff.write("    %-90s : {\"nRV\":%s,\"nWV\":%s}"%(k,opt.nRV,opt.nWV))
+      if proc == dproc[cat]: continue
       else: ff.write("    %-90s : {\"nRV\":1,\"nWV\":1}"%k)
       # Drop comma for last entry
-      if(cidx == len(allCats.split(","))-1)&(pidx == len(allProcs.split(","))-1): ff.write("\n")
+      if pitr == len(allProcs.split(","))-1): ff.write("\n")
       else: ff.write(",\n")
-  ff.write("}")
-  ff.close()
-
-    
+      pitr += 1
+    ff.write("}")
+    ff.close()

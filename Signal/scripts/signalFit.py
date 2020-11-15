@@ -28,6 +28,7 @@ def leave():
 
 def get_options():
   parser = OptionParser()
+  parser.add_option("--xvar", dest='xvar', default='CMS_hgg_mass', help="Observable to fit")
   parser.add_option("--inputWSDir", dest='inputWSDir', default='', help="Input flashgg WS directory")
   parser.add_option("--ext", dest='ext', default='', help="Extension")
   parser.add_option("--proc", dest='proc', default='', help="Signal process")
@@ -36,7 +37,7 @@ def get_options():
   parser.add_option("--analysis", dest='analysis', default='STXS', help="Analysis handle: used to specify replacement map and XS*BR normalisations")
   parser.add_option('--massPoints', dest='massPoints', default='120,125,130', help="Mass points to fit")
   parser.add_option('--doEffAccFromJson', dest='doEffAccFromJson', default=False, action="store_true", help="Extract eff x acc from json (produced by getEffAcc). Else, extract from nominal weights in flashgg workspaces")
-  parser.add_option('--doBeamspotReweigh', dest='doBeamspotReweigh', default=False, action="store_true", help="Do beamspot reweigh to match beamspot distribution in data")
+  parser.add_option('--skipBeamspotReweigh', dest='skipBeamspotReweigh', default=False, action="store_true", help="Skip beamspot reweigh to match beamspot distribution in data")
   parser.add_option('--doPlots', dest='doPlots', default=False, action="store_true", help="Produce Signal Fitting plots")
   parser.add_option("--doVoigtian", dest='doVoigtian', default=False, action="store_true", help="Use Voigtians instead of Gaussians for signal models with Higgs width as parameter")
   parser.add_option("--useDCB", dest='useDCB', default=False, action="store_true", help="Use DCB in signal fitting")
@@ -51,7 +52,7 @@ def get_options():
   parser.add_option("--scalesGlobal", dest='scalesGlobal', default='', help='Photon shape systematics: scalesGlobal')
   parser.add_option("--smears", dest='smears', default='', help='Photon shape systematics: smears')
   # Parameter values
-  parser.add_option('--replacementThreshold', dest='replacementThreshold', default=150, type='int', help="Nevent threshold to trigger replacement dataset")
+  parser.add_option('--replacementThreshold', dest='replacementThreshold', default=100, type='int', help="Nevent threshold to trigger replacement dataset")
   parser.add_option('--beamspotWidthData', dest='beamspotWidthData', default=3.4, type='float', help="Width of beamspot in data [cm]")
   parser.add_option('--beamspotWidthMC', dest='beamspotWidthMC', default=5.14, type='float', help="Width of beamspot in MC [cm]")
   parser.add_option('--MHPolyOrder', dest='MHPolyOrder', default=1, type='int', help="Order of polynomial for MH dependence")
@@ -90,7 +91,7 @@ else: xsbrMap = globalXSBRMap[opt.analysis]
 nominalWSFileName = glob.glob("%s/output*M%s*%s*"%(opt.inputWSDir,MHNominal,opt.proc))[0]
 f0 = ROOT.TFile(nominalWSFileName,"read")
 inputWS0 = f0.Get(inputWSName__)
-xvar = inputWS0.var("CMS_hgg_mass")
+xvar = inputWS0.var(opt.xvar)
 xvarFit = xvar.Clone()
 dZ = inputWS0.var("dZ")
 aset = ROOT.RooArgSet(xvar,dZ)
@@ -239,26 +240,32 @@ if not opt.skipVertexScenarioSplit:
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # BEAMSPOT REWEIGH
-# FIXME: normalisation should come first?
-if opt.doBeamspotReweigh:
+if not opt.skipBeamspotReweigh:
+  # Datasets for fit
   for mp,d in datasetRVForFit.iteritems(): 
-    drw = beamspotReweigh(datasetRVForFit[mp],opt.beamspotWidthData,opt.beamspotWidthMC,xvar,dZ)
+    drw = beamspotReweigh(datasetRVForFit[mp],opt.beamspotWidthData,opt.beamspotWidthMC,xvar,dZ,_x=opt.xvar)
     datasetRVForFit[mp] = drw
   if not opt.skipVertexScenarioSplit:
     for mp,d in datasetWVForFit.iteritems(): 
-      drw = beamspotReweigh(datasetWVForFit[mp],opt.beamspotWidthData,opt.beamspotWidthMC,xvar,dZ)
+      drw = beamspotReweigh(datasetWVForFit[mp],opt.beamspotWidthData,opt.beamspotWidthMC,xvar,dZ,_x=opt.xvar)
       datasetWVForFit[mp] = drw
     print " --> Beamspot reweigh: RV(sumEntries) = %.6f, WV(sumEntries) = %.6f"%(datasetRVForFit[mp].sumEntries(),datasetWVForFit[mp].sumEntries())
   else:
     print " --> Beamspot reweigh: sumEntries = %.6f"%datasetRVForFit[mp].sumEntries()
 
+  # Nominal datasets for saving to output Workspace: preserve norm for eff * acc calculation
+  for mp,d in nominalDatasets.iteritems():
+    drw = beamspotReweigh(d,opt.beamspotWidthData,opt.beamspotWidthMC,xvar,dZ,_x=opt.xvar,preserveNorm=True)
+    nominalDatasets[mp] = drw
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # If using nGaussian fit then extract nGaussians from fTest json file
 if not opt.useDCB:
-  with open("%s/outdir_%s/fTest/json/nGauss_%s.json"%(cwd__,opt.ext,opt.ext)) as jf: ngauss = json.load(jf)
+  with open("%s/outdir_%s/fTest/json/nGauss_%s.json"%(cwd__,opt.ext,catRVFit)) as jf: ngauss = json.load(jf)
   nRV = int(ngauss["%s__%s"%(procRVFit,catRVFit)]['nRV'])
   if opt.skipVertexScenarioSplit: print " --> Fitting function: convolution of nGaussians (%g)"%nRV
   else: 
+    with open("%s/outdir_%s/fTest/json/nGauss_%s.json"%(cwd__,opt.ext,catWVFit)) as jf: ngauss = json.load(jf)
     nWV = int(ngauss["%s__%s"%(procWVFit,catWVFit)]['nWV'])
     print " --> Fitting function: convolution of nGaussians (RV=%g,WV=%g)"%(nRV,nWV)
 else:

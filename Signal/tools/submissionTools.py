@@ -82,6 +82,20 @@ def writeSubFiles(_opts):
         _f.write("  python %s/scripts/calcPhotonSyst.py --cat %s --procs %s --ext %s --inputWSDir %s --scales \'%s\' --scalesCorr \'%s\' --scalesGlobal \'%s\' --smears \'%s\' %s\n"%(cwd__,c,_opts['procs'],_opts['ext'],_opts['inputWSDir'],_opts['scales'],_opts['scalesCorr'],_opts['scalesGlobal'],_opts['smears'],_opts['modeOpts']))
         _f.write("fi\n")
 
+    elif _opts['mode'] == "fTest":
+      for cidx in range(_opts['nCats']):
+        c = _opts['cats'].split(",")[cidx]
+        _f.write("if [ $1 -eq %g ]; then\n"%cidx)
+        _f.write("  python %s/scripts/fTest.py --cat %s --procs %s --ext %s --inputWSDir %s %s\n"%(cwd__,c,_opts['procs'],_opts['ext'],_opts['inputWSDir'],_opts['modeOpts']))
+        _f.write("fi\n")
+
+    elif _opts['mode'] == "packageSignal":
+      for cidx in range(_opts['nCats']):
+        c = _opts['cats'].split(",")[cidx]
+        _f.write("if [ $1 -eq %g ]; then\n"%cidx)
+        _f.write("  python %s/scripts/packageSignal.py --cat %s --outputExt %s --massPoints %s %s\n"%(cwd__,c,_opts['ext'],_opts['massPoints'],_opts['modeOpts']))
+        _f.write("fi\n")
+
     # For single script
     elif _opts['mode'] == 'getEffAcc':
       _f.write("python %s/scripts/getEffAcc.py --inputWSDir %s --ext %s --procs %s --massPoints %s %s\n"%(cwd__,_opts['inputWSDir'],_opts['ext'],_opts['procs'],_opts['massPoints'],_opts['modeOpts']))
@@ -94,8 +108,10 @@ def writeSubFiles(_opts):
 
     # Condor submission file
     _fsub = open("%s/%s.sub"%(_jobdir,_executable),"w")
-    if _opts['mode'] == "signalFit": writeCondorSub(_fsub,_executable,_opts['queue'],_opts['nCats']*_opts['nProcs'],_opts['jobOpts'])
-    elif _opts['mode'] == "calcPhotonSyst": writeCondorSub(_fsub,_executable,_opts['queue'],_opts['nCats'],_opts['jobOpts'])
+    if _opts['mode'] == "signalFit": 
+      if( not _opts['groupSignalFitJobsByCat'] ): writeCondorSub(_fsub,_executable,_opts['queue'],_opts['nCats']*_opts['nProcs'],_opts['jobOpts'])
+      else: writeCondorSub(_fsub,_executable,_opts['queue'],_opts['nCats'],_opts['jobOpts'])
+    elif( _opts['mode'] == "calcPhotonSyst" )|( _opts['mode'] == "fTest" )|( _opts['mode'] == "packageSignal" ): writeCondorSub(_fsub,_executable,_opts['queue'],_opts['nCats'],_opts['jobOpts'])
     elif( _opts['mode'] == "getEffAcc" )|( _opts['mode'] == "getDiagProc" ): writeCondorSub(_fsub,_executable,_opts['queue'],1,_opts['jobOpts'])
     _fsub.close()
     
@@ -135,6 +151,24 @@ def writeSubFiles(_opts):
         _f = open("%s/%s_%s.sh"%(_jobdir,_executable,c),"w")
         writePreamble(_f)
         _f.write("python %s/scripts/calcPhotonSyst.py --cat %s --procs %s --ext %s --inputWSDir %s --scales \'%s\' --scalesCorr \'%s\' --scalesGlobal \'%s\' --smears \'%s\' %s\n"%(cwd__,c,_opts['procs'],_opts['ext'],_opts['inputWSDir'],_opts['scales'],_opts['scalesCorr'],_opts['scalesGlobal'],_opts['smears'],_opts['modeOpts']))
+        _f.close()
+        os.system("chmod 775 %s/%s_%s.sh"%(_jobdir,_executable,c))
+
+    elif _opts['mode'] == "fTest":
+      for cidx in range(_opts['nCats']):
+        c = _opts['cats'].split(",")[cidx]
+        _f = open("%s/%s_%s.sh"%(_jobdir,_executable,c),"w")
+        writePreamble(_f)
+        _f.write("python %s/scripts/fTest.py --cat %s --procs %s --ext %s --inputWSDir %s %s\n"%(cwd__,c,_opts['procs'],_opts['ext'],_opts['inputWSDir'],_opts['modeOpts']))
+        _f.close()
+        os.system("chmod 775 %s/%s_%s.sh"%(_jobdir,_executable,c))
+
+    elif _opts['mode'] == "packageSignal":
+      for cidx in range(_opts['nCats']):
+        c = _opts['cats'].split(",")[cidx]
+        _f = open("%s/%s_%s.sh"%(_jobdir,_executable,c),"w")
+        writePreamble(_f)
+        _f.write("python %s/scripts/packageSignal.py --cat %s --outputExt %s --massPoints %s %s\n"%(cwd__,c,_opts['ext'],_opts['massPoints'],_opts['modeOpts']))
         _f.close()
         os.system("chmod 775 %s/%s_%s.sh"%(_jobdir,_executable,c))
 
@@ -180,7 +214,7 @@ def submitFiles(_opts):
           cmdLine = "qsub -q hep.q %s -o %s.log -e %s.err %s.sh"%(jobOptsStr,_subfile,_subfile,_subfile)
           run(cmdLine)
     # Separate submission per category  
-    elif( _opts['mode'] == "calcPhotonSyst" )|(( _opts['mode'] == "signalFit" )&( _opts['groupSignalFitJobsByCat'] )):
+    elif( _opts['mode'] == "packageSignal" )|( _opts['mode'] == "fTest" )|( _opts['mode'] == "calcPhotonSyst" )|(( _opts['mode'] == "signalFit" )&( _opts['groupSignalFitJobsByCat'] )):
       for cidx in range(_opts['nCats']):
         c = _opts['cats'].split(",")[cidx]
         _subfile = "%s/%s_%s"%(_jobdir,_executable,c)
@@ -205,7 +239,7 @@ def submitFiles(_opts):
           cmdLine = "bash %s.sh"%(_subfile)
           run(cmdLine)
     # Separate submission per category  
-    elif( _opts['mode'] == "calcPhotonSyst" )|(( _opts['mode'] == "signalFit" )&( _opts['groupSignalFitJobsByCat'] )):
+    elif( _opts['mode'] == "packageSignal" )|( _opts['mode'] == "fTest" )|( _opts['mode'] == "calcPhotonSyst" )|(( _opts['mode'] == "signalFit" )&( _opts['groupSignalFitJobsByCat'] )):
       for cidx in range(_opts['nCats']):
         c = _opts['cats'].split(",")[cidx]
         _subfile = "%s/%s_%s"%(_jobdir,_executable,c)
@@ -218,8 +252,4 @@ def submitFiles(_opts):
       run(cmdLine)
     print "  --> Finished running files"
 
-    
-  
-  
-
-
+ 

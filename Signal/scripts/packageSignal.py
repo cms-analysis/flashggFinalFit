@@ -10,7 +10,7 @@ def get_options():
   parser = OptionParser()
   parser.add_option("--cat", dest='cat', default='RECO_0J_PTH_0_10_Tag0', help="RECO category to package")
   parser.add_option("--exts", dest='exts', default='', help="Comma separate list of extensions")
-  parser.add_option("--outputExt", dest='outputExt', default='merged', help="Output extension")
+  parser.add_option("--outputExt", dest='outputExt', default='packaged', help="Output extension")
   parser.add_option("--massPoints", dest='massPoints', default='120,125,130', help="Comma separated list of mass points")
   parser.add_option("--mergeYears", dest='mergeYears', default=False, action="store_true", help="Merge specified categories across years")
   parser.add_option("--year", dest="year", default="2016", help="If not merging, then specify year for output file name")

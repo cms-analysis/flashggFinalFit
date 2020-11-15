@@ -12,6 +12,7 @@ import glob
 import re
 
 # From tools
+from plottingTools import * #getEffSigma function
 from commonTools import *
 from commonObjects import *
 
@@ -21,6 +22,7 @@ def leave():
 
 def get_options():
   parser = OptionParser()
+  parser.add_option("--xvar", dest='xvar', default='cms_hgg_mass', help="Observable")
   parser.add_option("--cat", dest='cat', default='', help="RECO category")
   parser.add_option("--procs", dest='procs', default='', help="Signal processes")
   parser.add_option("--ext", dest='ext', default='', help="Extension")
@@ -37,7 +39,7 @@ def get_options():
 (opt,args) = get_options()
 
 # RooRealVar to fill histograms
-mgg = ROOT.RooRealVar("CMS_hgg_mass","CMS_hgg_mass",125)
+mgg = ROOT.RooRealVar(opt.xvar,opt.xvar,125)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Function to extact histograms from WS
@@ -65,59 +67,6 @@ def getHistograms( _ws, _nominalDataName, _sname ):
     print " --> [ERROR] Could not extract RooDataHist (%s,down) for %s. Leaving"%(_sname,_nominalDataName)
     sys,exit(1) 
   return _hists
-
-# Function to extract the sigma effective of a histogram
-def effSigma(_h):
-  nbins, binw, xmin = _h.GetXaxis().GetNbins(), _h.GetXaxis().GetBinWidth(1), _h.GetXaxis().GetXmin()
-  mu, rms, total = _h.GetMean(), _h.GetRMS(), _h.Integral()
-  # Scan round window of mean: window RMS/binWidth (cannot be bigger than 0.1*number of bins)
-  nWindow = int(rms/binw) if (rms/binw) < 0.1*nbins else int(0.1*nbins)
-  # Determine minimum width of distribution which holds 0.693 of total
-  rlim = 0.683*total
-  wmin, iscanmin = 9999999, -999
-  for iscan in range(-1*nWindow,nWindow+1):
-    # Find bin idx in scan: iscan from mean
-    i_centre = int((mu-xmin)/binw+1+iscan)
-    x_centre = (i_centre-0.5)*binw+xmin # * 0.5 for bin centre
-    x_up, x_down = x_centre, x_centre
-    i_up, i_down = i_centre, i_centre
-    # Define counter for yield in bins: stop when counter > rlim
-    y = _h.GetBinContent(i_centre) # Central bin height
-    r = y
-    reachedLimit = False
-    for j in range(1,nbins):
-      if reachedLimit: continue
-      # Up:
-      if(i_up < nbins)&(not reachedLimit):
-        i_up+=1
-        x_up+=binw
-        y = _h.GetBinContent(i_up) # Current bin height
-        r+=y
-        if r>rlim: reachedLimit = True
-      else: 
-        print " --> Reach nBins in effSigma calc: %s. Returning 0 for effSigma"%_h.GetName()
-        return 0
-      # Down:
-      if( not reachedLimit ):
-	if(i_down > 0):
-	  i_down-=1
-	  x_down-=binw
-          y = _h.GetBinContent(i_down) #Current bin height
-	  r+=y
-	  if r>rlim: reachedLimit = True
-	else:
-	  print " --> Reach 0 in effSigma calc: %s. Returning 0 for effSigma"%_h.GetName()
-	  return 0
-    # Calculate fractional width in bin takes above limt (assume linear)
-    if y == 0.: dx = 0.
-    else: dx = (r-rlim)*(binw/y)
-    # Total width: half of peak
-    w = (x_up-x_down+binw-dx)*0.5
-    if w < wmin: 
-      wmin = w
-      iscanmin = iscan
-  # Return effSigma
-  return wmin  
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Functions to extract mean, sigma and rate variations

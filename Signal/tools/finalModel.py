@@ -90,7 +90,7 @@ class FinalModel:
     self.MHLow = _MHLow
     self.MHHigh = _MHHigh
     self.massPoints = _massPoints
-    self.intLumi = ROOT.RooRealVar("intLumi","intLumi",1.,0.,999999999.)
+    self.intLumi = ROOT.RooRealVar("IntLumi","IntLumi",1.,0.,999999999.) # in pb^-1
     self.xsbrMap = _xsbrMap
     # Systematics
     self.skipSystematics = _skipSystematics
@@ -405,7 +405,7 @@ class FinalModel:
   # Function to build extended Pdfs and normalisation with luminosity
   def buildExtended(self):
     finalPdfName = self.Pdfs['final'].GetName()
-    self.Functions['final_normThisLumi'] = ROOT.RooFormulaVar("%s_normThisLumi"%finalPdfName,"%s_normThisLumi"%finalPdfName,"@0*@1*@2*@3*(%.2f*@4)"%lumiScaleFactor,ROOT.RooArgList(self.Splines['xs'],self.Splines['br'],self.Splines['ea'],self.Functions['rate_%s'%self.name],self.intLumi))
+    self.Functions['final_normThisLumi'] = ROOT.RooFormulaVar("%s_normThisLumi"%finalPdfName,"%s_normThisLumi"%finalPdfName,"@0*@1*@2*@3*@4",ROOT.RooArgList(self.Splines['xs'],self.Splines['br'],self.Splines['ea'],self.Functions['rate_%s'%self.name],self.intLumi))
     self.Pdfs['final_extend'] = ROOT.RooExtendPdf("extend%s"%finalPdfName,"extend%s"%finalPdfName,self.Pdfs['final'],self.Functions['final_norm'])
     self.Pdfs['final_extendThisLumi'] = ROOT.RooExtendPdf("extend%sThisLumi"%finalPdfName,"extend%sThisLumi"%finalPdfName,self.Pdfs['final'],self.Functions['final_normThisLumi'])
  

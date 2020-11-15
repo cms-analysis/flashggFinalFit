@@ -22,8 +22,7 @@ nBins = 80 #nBins for fit
 MHPolyOrder = 0 # dependence of fit params on MH, set to 0 if using one mass point
 minimizerMethod = 'TNC'
 minimizerTolerance = 1e-8
-useDCB = True
-nGauss = 1 #nGaussians if not using DCB
+useDCB = False
 
 # MH var
 MH = ROOT.RooRealVar("MH","m_{H}", int(MHLow), int(MHHigh))
@@ -32,13 +31,22 @@ MH = ROOT.RooRealVar("MH","m_{H}", int(MHLow), int(MHHigh))
 datasets = od()
 datasets['125'] = ws.data("ggh_125_13TeV_RECO_0J_PTH_0_10_Tag0")
 
+nGauss = [1,2,3,4,5]
+ssfs = {}
+for ng in nGauss:
+  ssfs[ng] = SimultaneousFit("name",processName,categoryName,datasets,xvar.Clone(),MH,MHLow,MHHigh,massPoints,nBins,MHPolyOrder,minimizerMethod,minimizerTolerance)
+  ssfs[ng].buildNGaussians(ng)
+  ssfs[ng].runFit()
+  ssfs[ng].buildSplines()
+
+
 # Build ssf object + pdfs
-ssf = SimultaneousFit("name",processName,categoryName,datasets,xvar.Clone(),MH,MHLow,MHHigh,massPoints,nBins,MHPolyOrder,minimizerMethod,minimizerTolerance)
-if useDCB: ssf.buildDCBplusGaussian()
-else: ssf.buildNGaussians(nGauss)
+#ssf = SimultaneousFit("name",processName,categoryName,datasets,xvar.Clone(),MH,MHLow,MHHigh,massPoints,nBins,MHPolyOrder,minimizerMethod,minimizerTolerance)
+#if useDCB: ssf.buildDCBplusGaussian()
+#else: ssf.buildNGaussians(nGauss)
 # Run fits and build mean + sigma splines
-ssf.runFit()
-ssf.buildSplines()
+#ssf.runFit()
+#ssf.buildSplines()
 
 # Plot pdf
-plotPdfComponents(ssf,_outdir="./",_extension='total_',_proc=ssf.proc,_cat=ssf.cat)
+#plotPdfComponents(ssf,_outdir="./",_extension='total_',_proc=ssf.proc,_cat=ssf.cat)

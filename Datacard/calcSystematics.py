@@ -1,10 +1,12 @@
 # Hold defs of functions for calculating systematics and adding to dataframe
 import os, sys, re, json
 import ROOT
+from tools.commonTools import *
+from tools.commonObjects import *
 
 # sd = "systematics dataframe"
 
-# For constant systematics: FIXME add functionality to choose only some procs
+# For constant systematics:
 def addConstantSyst(sd,_syst,options):
 
   # Read json file into dict and set flag
@@ -40,9 +42,9 @@ def addConstantSyst(sd,_syst,options):
 
 def getValueFromJson(row,uncertainties,sname):
   # uncertainties is a dict of the form proc:{sname:X}
-  p = re.sub("_2016_hgg","",row['proc'])
-  p = re.sub("_2017_hgg","",p)
-  p = re.sub("_2018_hgg","",p)
+  p = re.sub("_2016_%s"%decayMode,"",row['proc'])
+  p = re.sub("_2017_%s"%decayMode,"",p)
+  p = re.sub("_2018_%s"%decayMode,"",p)
   if p in uncertainties: 
     if type(uncertainties[p][sname])==list: return uncertainties[p][sname]
     else: return [uncertainties[p][sname]]
@@ -55,39 +57,49 @@ def getValueFromJson(row,uncertainties,sname):
 # c) Anti-symmetric shifts in RooDataHist: "a_h"
 def factoryType(d,s):
 
-  #Fix for pdfWeight (as > 10)
-  if('pdfWeight' in s['name'])|('alphaSWeight' in s['name']): return "s_w"
+  #Fix for pdfWeight (as Nweights > 10)
+  if('pdfWeight' in s['name']): return "s_w"
+  #if('pdfWeight' in s['name'])|('alphaSWeight' in s['name']): return "s_w"
 
-  # Extract first signal entry of dataFrame
-  r0 = d[d['type']=='sig'].iloc[0]
-  # Extract workspace
-  f = ROOT.TFile(r0.inputWSFile)
-  ws = f.Get("tagsDumper/cms_hgg_13TeV")
-  f.Close()
-  # Check if syst is var (weight) in workspace
-  if ws.allVars().selectByName("%s*"%(s['name'])).getSize():
-    nWeights = ws.allVars().selectByName("%s*"%(s['name'])).getSize()
-    ws.Delete()
-    if nWeights == 2: return "a_w"
-    elif nWeights == 1: return "s_w"
+  # Loop over rows in dataframe: until syst is found
+  for ir, r in d[d['type']=='sig'].iterrows():
+    f = ROOT.TFile(r.inputWSFile)
+    ws = f.Get(inputWSName__)
+    dataHistUp = "%s_%sUp01sigma"%(r.nominalDataName,s['name'])
+    dataHistDown = "%s_%sDown01sigma"%(r.nominalDataName,s['name'])
+
+    # Check if syst is var (i.e. weight) in workspace
+    if ws.allVars().selectByName("%s*"%(s['name'])).getSize():
+      nWeights = ws.allVars().selectByName("%s*"%(s['name'])).getSize()
+      ws.Delete()
+      f.Close()
+      if nWeights == 2: return "a_w"
+      elif nWeights == 1: return "s_w"
+      else:
+        print " --> [ERROR] systematic %s: > 2 weights in workspace. Leaving..."%s['name']
+        sys.exit(1)
+
+    # Check if RooDataHist exists for syst
+    elif(ws.data(dataHistUp)!=None)&(ws.data(dataHistDown)!=None):
+      ws.Delete()
+      f.Close()
+      return "a_h"
+
+    # If not found then move onto next entry in dataframe
     else:
-      print " --> [ERROR] systematic %s: > 2 weights in workspace. Leaving..."%s['name']
-      sys.exit(1)
-  
-  # Else: check if RooDataHist exist
-  dataHistUp = "%s_%sUp01sigma"%(r0.nominalDataName,s['name'])
-  dataHistDown = "%s_%sDown01sigma"%(r0.nominalDataName,s['name'])
-  if(ws.data(dataHistUp)!=None)&(ws.data(dataHistDown)!=None): 
-    ws.Delete()
-    return "a_h"
+      ws.Delete()
+      f.Close()
 
-  
+  # If never found:
   print " --> [ERROR] systematic %s: cannot extract type in factoryType function. Doesn't match requirement for (anti)-symmetric weights or anti-symmetric histograms. Leaving..."
   sys.exit(1)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Function to extract yield variations for signal row in dataFrame
-def calcSystYields(_nominalDataName,_inputWS,_systFactoryTypes,skipCOWCorr=True,year='2016'):
+def calcSystYields(_nominalDataName,_nominalDataContents,_inputWS,_systFactoryTypes,skipCOWCorr=True,proc="ggH",year='2016',ignoreWarnings=False):
+
+  errMessage = "WARNING" if ignoreWarnings else "ERROR"
+  errString = "Using nominal yield" if ignoreWarnings else ""
 
   # Define dictionary to store systematic yield counters
   systYields = {}
@@ -101,13 +113,31 @@ def calcSystYields(_nominalDataName,_inputWS,_systFactoryTypes,skipCOWCorr=True,
       systYields[s] = 0
       if not skipCOWCorr: systYields["%s_COWCorr"%s] = 0
 
-  # For systematics stored as weights (a_w,s_w)...
+  # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # For systematics stored as weights (a_w,s_w) in nominal RooDataSets
   # Extract nominal dataset
-  rdata_nominal = _inputWS.data(_nominalDataName)
+  data_nominal = _inputWS.data(_nominalDataName)
+  # CHECK: is weight in contents: if not then add syst to systToSkip container + print warning
+  systToSkip = []
+  for s,f in _systFactoryTypes.iteritems():
+    if f == "a_h": continue
+    elif f == "a_w":
+      if( "%sUp01sigma"%s not in _nominalDataContents )|( "%sDown01sigma"%s not in _nominalDataContents ):
+	systToSkip.append(s)
+	print " --> [%s] Weight in nominal RooDataSet for systematic (%s) does not exist for (%s,%s). %s"%(errMessage,s,proc,year,errString)
+	if not ignoreWarnings: sys.exit(1) 
+    else:
+      if s not in _nominalDataContents:
+	systToSkip.append(s)
+	print " --> [%s] Weight in nominal RooDataSet for systematic (%s) does not exist for (%s,%s). %s"%(errMessage,s,proc,year,errString)
+	if not ignoreWarnings: sys.exit(1)
+
   # Loop over events and extract reweighted yields
-  for i in range(0,rdata_nominal.numEntries()):
-    p = rdata_nominal.get(i)
-    w = rdata_nominal.weight()
+  for i in range(0,data_nominal.numEntries()):
+    p = data_nominal.get(i)
+    w = data_nominal.weight()
+    f_COWCorr = p.getRealValue("centralObjectWeight") if "centralObjectWeight" in _nominalDataContents else 1.
+    f_NNLOPS = abs(p.getRealValue("NNLOPSweight")) if "NNLOPSweight" in _nominalDataContents else 1.
     # Loop over systematics:
     for s, f in _systFactoryTypes.iteritems():
 
@@ -115,74 +145,82 @@ def calcSystYields(_nominalDataName,_inputWS,_systFactoryTypes,skipCOWCorr=True,
 
       # If asymmetric weights:
       elif f == "a_w":
-        centralWeightStr = "centralObjectWeight"
-        f_central = p.getRealValue(centralWeightStr)
-        f_up, f_down = p.getRealValue("%sUp01sigma"%s), p.getRealValue("%sDown01sigma"%s)
-        # Checks:
-        # 1) if central weights are zero then skip event
-        if f_central == 0: continue
-        # 2) if up weight is equal to down weight (=1) then set to nominal
-        elif f_up == f_down: w_up, w_down = w, w
+
+        if s in systToSkip: 
+          systYields["%s_up"%s] += w
+          systYields["%s_down"%s] += w
+          if not skipCOWCorr:
+            if f_COWCorr != 0:
+              systYields["%s_up_COWCorr"%s] += w*(f_NNLOPS/f_COWCorr)
+              systYields["%s_down_COWCorr"%s] += w*(f_NNLOPS/f_COWCorr)
+
         else:
-          w_up, w_down = w*(f_up/f_central), w*(f_down/f_central)
-        # Add weights to counters
-        systYields["%s_up"%s] += w_up        
-        systYields["%s_down"%s] += w_down
-        if not skipCOWCorr:
-          f_COWCorr, f_NNLOPS = p.getRealValue("centralObjectWeight"), abs(p.getRealValue("NNLOPSweight"))
-          if f_COWCorr == 0: continue
-          else: 
-            systYields["%s_up_COWCorr"%s] += w_up*(f_NNLOPS/f_COWCorr)
-            systYields["%s_down_COWCorr"%s] += w_down*(f_NNLOPS/f_COWCorr)
+          centralWeightStr = "centralObjectWeight"
+          f_central = p.getRealValue(centralWeightStr) if centralWeightStr in _nominalDataContents else 1.
+          f_up, f_down = p.getRealValue("%sUp01sigma"%s), p.getRealValue("%sDown01sigma"%s)
+          # Checks:
+          # 1) if central weights are zero then skip event
+          if f_central == 0: continue
+          # 2) if up weight is equal to down weight (=1) then set to nominal
+          elif f_up == f_down: w_up, w_down = w, w
+          else:
+            w_up, w_down = w*(f_up/f_central), w*(f_down/f_central)
+          # Add weights to counters
+          systYields["%s_up"%s] += w_up        
+          systYields["%s_down"%s] += w_down
+          if not skipCOWCorr:
+            if f_COWCorr != 0:
+	      systYields["%s_up_COWCorr"%s] += w_up*(f_NNLOPS/f_COWCorr)
+	      systYields["%s_down_COWCorr"%s] += w_down*(f_NNLOPS/f_COWCorr)
 
       # If symmetric weights
       else:
-        if "scaleWeight" in s: centralWeightStr = "scaleWeight_0"
-        elif "alphaSWeight" in s: centralWeightStr = "scaleWeight_0" 
-        elif "pdfWeight" in s: centralWeightStr = "pdfWeight_0"
-        else: centralWeightStr = "centralObjectWeight"
 
-        # No theory weights for tH, bbH
-        if("thq" in _nominalDataName)|("thw" in _nominalDataName)|("bbh" in _nominalDataName): 
+        if s in systToSkip:
           systYields[s] += w
-          if not skipCOWCorr: 
-            f_COWCorr, f_NNLOPS = p.getRealValue("centralObjectWeight"), abs(p.getRealValue("NNLOPSweight"))
-            if f_COWCorr == 0: continue
-            else: systYields["%s_COWCorr"%s] += w*(f_NNLOPS/f_COWCorr)
+          if not skipCOWCorr:
+            if f_COWCorr != 0:
+              systYields["%s_COWCorr"%s] += w*(f_NNLOPS/f_COWCorr)
+
         else:
-	  f_central = p.getRealValue(centralWeightStr)
+          if "scaleWeight" in s: centralWeightStr = "scaleWeight_0"
+          elif "alphaSWeight" in s: centralWeightStr = "scaleWeight_0" 
+          elif "pdfWeight" in s: centralWeightStr = "pdfWeight_0"
+          else: centralWeightStr = "centralObjectWeight"
+	  f_central = p.getRealValue(centralWeightStr) if centralWeightStr in _nominalDataContents else 1.
 	  f = p.getRealValue(s)
-          # Check 1) if both central weight and shifted weight are 0 then add nominal weight
+          # Checks:
+          # 1) if both central weight and shifted weight are 0 then add nominal weight
           if( f_central == 0 )&( f == 0 ):
             systYields[s] += w
             if not skipCOWCorr:
-	      f_COWCorr, f_NNLOPS = p.getRealValue("centralObjectWeight"), abs(p.getRealValue("NNLOPSweight"))
-	      if f_COWCorr == 0: continue
-	      else: systYields["%s_COWCorr"%s] += w*(f_NNLOPS/f_COWCorr)
-	  # Check: only central weight is zero
+	      if f_COWCorr != 0:
+	        systYields["%s_COWCorr"%s] += w*(f_NNLOPS/f_COWCorr)
+	  # 2) only central weight is zero then skip event
 	  elif f_central == 0: continue
 	  else:
 	    # Add weights to counter
 	    systYields[s] += w*(f/f_central)
 	    if not skipCOWCorr:
-              f_COWCorr, f_NNLOPS = p.getRealValue("centralObjectWeight"), abs(p.getRealValue("NNLOPSweight"))
-              if f_COWCorr == 0: continue
-              else: systYields["%s_COWCorr"%s] += w*(f_NNLOPS/f_COWCorr)*(f/f_central)
+              if f_COWCorr != 0:
+                systYields["%s_COWCorr"%s] += w*(f_NNLOPS/f_COWCorr)*(f/f_central)
 
-  # For systematics stored as RooDataHist
+  # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # For systematics stored as separate RooDataHists
   for s, f in _systFactoryTypes.iteritems():
     if f == "a_h":
-      if s == 'JetHEM':
-        if (year == '2018')&("thw" not in _nominalDataName)&("ggzh" not in _nominalDataName)&("bbh" not in _nominalDataName):
-          systYields["%s_up"%s] = _inputWS.data("%s_%sUp01sigma"%(_nominalDataName,s)).sumEntries()
-          systYields["%s_down"%s] = _inputWS.data("%s_%sDown01sigma"%(_nominalDataName,s)).sumEntries()
-        else:
-          systYields["%s_up"%s] = _inputWS.data(_nominalDataName).sumEntries()
-          systYields["%s_down"%s] = _inputWS.data(_nominalDataName).sumEntries()
+      data_hist_up, data_hist_down = _inputWS.data("%s_%sUp01sigma"%(_nominalDataName,s)), _inputWS.data("%s_%sDown01sigma"%(_nominalDataName,s))
+      # Check if datasets exist: if not print warning message and set to nominal weight
+      if( data_hist_up == None )|( data_hist_down == None ):
+        print " --> [%s] RooDataHist for systematic (%s) does not exist for (%s,%s). %s"%(errMessage,s,proc,year,errString)
+        if not ignoreWarnings: sys.exit(1)
+        systYields["%s_up"%s] = data_nominal.sumEntries()
+        systYields["%s_down"%s] = data_nominal.sumEntries()
       else:
-        systYields["%s_up"%s] = _inputWS.data("%s_%sUp01sigma"%(_nominalDataName,s)).sumEntries()
-        systYields["%s_down"%s] = _inputWS.data("%s_%sDown01sigma"%(_nominalDataName,s)).sumEntries()
+        systYields["%s_up"%s] = data_hist_up.sumEntries()
+        systYields["%s_down"%s] = data_hist_down.sumEntries()
 
+        
   # Add variations to dataFrame
   return systYields
   

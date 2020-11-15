@@ -109,7 +109,7 @@ def nChi2Addition(X,ssf):
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
 class SimultaneousFit:
   # Constructor
-  def __init__(self,_name,_proc,_cat,_datasetForFit,_xvar,_MH,_MHLow,_MHHigh,_massPoints,_nBins,_MHPolyOrder,_minimizerMethod,_minimizerTolerance):
+  def __init__(self,_name,_proc,_cat,_datasetForFit,_xvar,_MH,_MHLow,_MHHigh,_massPoints,_nBins,_MHPolyOrder,_minimizerMethod,_minimizerTolerance,verbose=True):
     self.name = _name
     self.proc = _proc
     self.cat = _cat
@@ -123,7 +123,7 @@ class SimultaneousFit:
     self.MHPolyOrder = _MHPolyOrder
     self.minimizerMethod = _minimizerMethod
     self.minimizerTolerance = _minimizerTolerance
-    self.verbose = True
+    self.verbose = verbose
     # Prepare vars
     self.MH.setConstant(False)
     self.MH.setVal(125)
@@ -290,7 +290,7 @@ class SimultaneousFit:
     self.FitParameters = ROOT.RooArgList(fv)
     
     # Create initial vector of parameters and calculate initial Chi2
-    print "\n --> (%s) Initialising fit parameters"%self.name
+    if self.verbose: print "\n --> (%s) Initialising fit parameters"%self.name
     x0 = self.extractX0()
     xbounds = self.extractXBounds()
     self.Chi2 = self.getChi2()
@@ -298,7 +298,7 @@ class SimultaneousFit:
     if self.verbose: self.printFitParameters(title="Pre-fit")
 
     # Run fit
-    print " --> (%s) Running fit"%self.name
+    if self.verbose: print " --> (%s) Running fit"%self.name
     self.FitResult = minimize(nChi2Addition,x0,args=self,bounds=xbounds,method=self.minimizerMethod)
     self.Chi2 = self.getChi2()
     #self.Chi2 = nChi2Addition(self.FitResult['x'],self)
@@ -345,5 +345,13 @@ class SimultaneousFit:
     x = self.extractX0()
     self.Chi2 = nChi2Addition(x,self)
     return self.Chi2
+
+  # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
+  # Function to re-calculate chi2/ndof after setting vars
+  def getReducedChi2(self):
+    x = self.extractX0()
+    self.Chi2 = nChi2Addition(x,self)
+    return self.Chi2/int(self.Ndof)
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  
 
