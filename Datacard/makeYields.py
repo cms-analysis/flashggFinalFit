@@ -10,6 +10,7 @@ import ROOT
 import pandas as pd
 import glob
 import pickle
+import math
 from collections import OrderedDict
 #from systematics import theory_systematics, experimental_systematics, signal_shape_systematics
 from systematics_STXS import theory_systematics, experimental_systematics, signal_shape_systematics
@@ -115,7 +116,7 @@ for year in years:
     if opt.cat == "NOTAG": _modelWSFile, _model = '-', '-'
     else:
       _modelWSFile = "%s/CMS-HGG_sigfit_%s_%s.root"%(opt.sigModelWSDir,opt.sigModelExt,_cat)
-      _model = "%s:%s_%s"%(outputWSName__,outputWSObjectTitle__,_id)
+      _model = "%s_%s:%s_%s"%(outputWSName__,sqrts__,outputWSObjectTitle__,_id)
 
     # Extract rate from lumi
     _rate = float(lumiMap[year])*1000
@@ -162,15 +163,16 @@ if( not opt.skipBkg)&( opt.cat != "NOTAG" ):
 # Yields: for each signal row in dataFrame extract the yield
 print " .........................................................................................."
 #   * if systematics=True: also extract reweighted yields for each uncertainty source
-from calcSystematics import factoryType, calcSystYields
+from tools.calcSystematics import factoryType, calcSystYields
 
 # Create columns in dataFrame to store yields
 data['nominal_yield'] = '-'
+data['mc_stat_uncertainty'] = '-'
 if not opt.skipCOWCorr: data['nominal_yield_COWCorr'] = '-'
 
 # Add columns in dataFrame for systematic yield variations
 if opt.doSystematics:
-  # Extract type of systematic using factoryType function (defined in calcSystematics)
+  # Extract type of systematic using factoryType function (defined in tools.calcSystematics)
   #  * a_h: anti-symmetric RooDataHist (2 columns in dataframe)
   #  * a_w: anti-symmetric weight in nominal RooDataSet (2 columns in dataframe)
   #  * s_w: symmetric (single) weight in nominal RooDataSet (1 column in dataframe)
@@ -211,22 +213,26 @@ for ir,r in data[data['type']=='sig'].iterrows():
   inputWS = f_in.Get(inputWSName__)
   # Extract nominal RooDataSet and yield
   rdata_nominal = inputWS.data(r.nominalDataName)
-  data.at[ir,'nominal_yield'] = rdata_nominal.sumEntries()
 
-  # Calculate nominal yield with COW correction for in acceptance events
+  # Calculate nominal yield, sumw2 and add COW correction for in acceptance events
   contents = ""
-  if not opt.skipCOWCorr:
-    y_COWCorr = 0
-    for i in range(0,rdata_nominal.numEntries()):
-      p = rdata_nominal.get(i)
-      w = rdata_nominal.weight()
-      # Extract contents from first event
-      if i == 0: contents = p.contentsString()
+  y, y_COWCorr = 0, 0
+  sumw2 = 0
+  for i in range(0,rdata_nominal.numEntries()):
+    p = rdata_nominal.get(i)
+    w = rdata_nominal.weight()
+    y += w
+    sumw2 += w*w
+    # Extract contents from first event
+    if i == 0: contents = p.contentsString()
+    if not opt.skipCOWCorr:
       f_COWCorr = p.getRealValue("centralObjectWeight") if "centralObjectWeight" in contents else 1.
       f_NNLOPS = abs(p.getRealValue("NNLOPSweight")) if "NNLOPSweight" in contents else 1.
       if f_COWCorr == 0: continue
       else: y_COWCorr += w*(f_NNLOPS/f_COWCorr)
-    data.at[ir,'nominal_yield_COWCorr'] = y_COWCorr
+  data.at[ir,'nominal_yield'] = y
+  data.at[ir,'sumw2'] = sumw2
+  if not opt.skipCOWCorr: data['nominal_yield_COWCorr'] = y_COWCorr
 
   # Systematics: loop over systematics and use function to extract yield variations
   if opt.doSystematics:
@@ -260,6 +266,7 @@ for ir,r in data[data['type']=='sig'].iterrows():
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # SAVE YIELDS DATAFRAME
 print " .........................................................................................."
-print " --> Saving yields dataframe: ./yields%s/%s.pkl"%(opt.ext,opt.cat)
-if not os.path.isdir("./yields%s"%opt.ext): os.system("mkdir ./yields%s"%opt.ext)
-with open("./yields%s/%s.pkl"%(opt.ext,opt.cat),"wb") as fD: pickle.dump(data,fD)
+extStr = "_%s"%opt.ext if opt.ext != '' else ''
+print " --> Saving yields dataframe: ./yields%s/%s.pkl"%(extStr,opt.cat)
+if not os.path.isdir("./yields%s"%extStr): os.system("mkdir ./yields%s"%extStr)
+with open("./yields%s/%s.pkl"%(extStr,opt.cat),"wb") as fD: pickle.dump(data,fD)

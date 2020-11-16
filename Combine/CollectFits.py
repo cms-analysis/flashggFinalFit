@@ -7,13 +7,6 @@ import glob
 import json
 
 print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG COLLECT FITS RUN II ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ "
-def leave():
-  print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG COLLECT FITS RUN II (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ "
-  sys.exit(1)
-
-def run(cmd):
-  #print "%s\n"%cmd
-  os.system(cmd)
 
 def get_options():
   parser = OptionParser()
@@ -23,6 +16,15 @@ def get_options():
   parser.add_option('--doObserved', dest='doObserved', action="store_true", default=False, help="Fit to data")
   return parser.parse_args()
 (opt,args) = get_options()
+
+def leave():
+  print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG COLLECT FITS RUN II (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ "
+  sys.exit(1)
+
+def run(cmd):
+  #print "%s\n"%cmd
+  os.system(cmd)
+
 
 # Read json file
 with open( opt.inputJson ) as jsonfile: inputs = json.load(jsonfile)[opt.mode]

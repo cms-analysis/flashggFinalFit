@@ -1,8 +1,8 @@
 # Hold defs of functions for calculating systematics and adding to dataframe
 import os, sys, re, json
 import ROOT
-from tools.commonTools import *
-from tools.commonObjects import *
+from commonTools import *
+from commonObjects import *
 
 # sd = "systematics dataframe"
 
@@ -293,7 +293,7 @@ def theorySystFactory(d,systs,ftype,options,stxsMergeScheme=None,_removal=False)
 	d.loc[mask,'proc_%s_yield'%s['name']] = d[mask]['%s_yield%s'%(s['name'],corrExt)].sum()
 
   # For merging STXS bins in parameter scheme:
-  if options.doSTXSBinMerging:
+  if options.doSTXSMerging:
     for mergeName, mergeBins in stxsMergeScheme.iteritems():
       for year in options.years.split(","):
         mBins = [] # add full name (inc year and and decay)
@@ -316,7 +316,7 @@ def theorySystFactory(d,systs,ftype,options,stxsMergeScheme=None,_removal=False)
     if s['type'] == 'constant': continue
     for tier in s['tiers']: 
       if tier == 'mnorm': 
-        if options.doSTXSBinMerging:
+        if options.doSTXSMerging:
           for mergeName in stxsMergeScheme: d["%s_%s_mnorm"%(s['name'],mergeName)] = '-'
       else: d["%s_%s"%(s['name'],tier)] = '-'
 
@@ -335,7 +335,7 @@ def theorySystFactory(d,systs,ftype,options,stxsMergeScheme=None,_removal=False)
 
   # For merging STXS bins in parameter scheme: calculate mnorm systematics (merged-STXS-normalisation)
   # One nuisance per merge
-  if options.doSTXSBinMerging:
+  if options.doSTXSMerging:
     for mergeName in stxsMergeScheme:
       for s in systs:
 	if s['type'] == 'constant': continue
@@ -348,7 +348,7 @@ def theorySystFactory(d,systs,ftype,options,stxsMergeScheme=None,_removal=False)
   # Removal: remove yield columns from dataFrame
   if _removal:
     ids_ = ['','proc_','proc_s0_']
-    if options.doSTXSBinMerging:
+    if options.doSTXSMerging:
       for mergeName in stxsMergeScheme: ids_.append("merge_%s_"%mergeName)
     # Loop over systematics
     for s in systs:
@@ -370,7 +370,7 @@ def theorySystFactory(d,systs,ftype,options,stxsMergeScheme=None,_removal=False)
   return d
   
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Function for comparing yields:
+# Function for extracting systematic factors:
 #   * mode == treatment of theory systematic  
 def compareYield(row,factoryType,sname,mode='default',mname=None):
 
@@ -389,7 +389,7 @@ def compareYield(row,factoryType,sname,mode='default',mname=None):
       if row["proc_%s_yield"%sname] == 0: return [1.]
 
   if( mode == 'default' )|( mode == 'ishape' ):
-    # FIXME: some a_h variations are not centred around nominal_yield, take symmetric
+    # FIX: some a_h variations are not centred around nominal_yield, take symmetric
     if factoryType == "a_h":
       midpoint_yield = 0.5*(row["%s_down_yield"%sname]+row["%s_up_yield"%sname])
       if midpoint_yield == 0: return [1.,1.]
@@ -455,14 +455,21 @@ def groupSystematics(d,systs,options,prefix="scaleWeight",groupings=[],stxsMerge
     gr = groupings[group_idx]
 
     # Extract systematic from systs
+    s0, s1 = None, None
     for s in systs:
       if s['name'] == "%s_%g"%(prefix,gr[0]): s0 = s
       elif s['name'] == "%s_%g"%(prefix,gr[1]): s1 = s
 
+    skipGroup = False
+    if( s0 == None )|( s1 == None ):
+      print " --> [WARNING] No systematic exists for prefix %s and group %s. Skipping"%(prefix,gr)
+      skipGroup = True
+    if skipGroup: continue
+
     # Loop over systematic tiers
     for tier in s0['tiers']:
       if tier == 'mnorm':
-        if options.doSTXSBinMerging:
+        if options.doSTXSMerging:
           # Loop over merging schemes
           for mergeName in stxsMergeScheme:
             s0_name = "%s_%s_%s"%(s0['name'],mergeName,tier)
@@ -529,7 +536,7 @@ def envelopeSystematics(d,systs,options,regexp=None,stxsMergeScheme=None,_remova
       print " --> [WARNING] Systematics in envelope have different tiers. Cannot form envelope"
   for tier in env['tiers']:
     if tier == 'mnorm':
-      if options.doSTXSBinMerging:
+      if options.doSTXSMerging:
         # Loop over merging schemes
         for mergeName in stxsMergeScheme:
           env_name = "%s_%s_%s"%(env['name'],mergeName,tier)
@@ -579,4 +586,3 @@ def compareSystForEnvelope(row,systs,stier,mname=None):
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Function to change syst title
 def renameSyst(t,oldexp,newexp): return re.sub(oldexp,newexp,t)
-

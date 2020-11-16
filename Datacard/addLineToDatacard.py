@@ -8,7 +8,7 @@ import json
 def get_options():
   parser = OptionParser()
   parser.add_option('--inputDatacard',dest='inputDatacard', default="", help="Input datacard")
-  parser.add_option('--systMap',dest='systMap', default="", help="Form name:mode:val,name2:mode2,val2 (e.g. CMS_hgg_tth_parton_shower:const_ggH_TTH:0.650/1.350)")
+  parser.add_option('--systMap',dest='systMap', default="", help="Form name:mode:val,name2:mode2:val2 (e.g. CMS_hgg_tth_parton_shower:const_ggH_TTH:0.650/1.350)")
   return parser.parse_args()
 (opt,args) = get_options()
 
