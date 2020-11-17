@@ -72,24 +72,51 @@ The final models are normalised according to the following equation:
 
 where `Nij` is the number of signal events of process, i in category j. The `(eff x acc)ij` defines the fraction of signal process, i falling in category, j. The default method for calculating this term is to use the sum of weights in the flashgg workspace and compare to the total `xs x BR`.
 
-We have introduced a second method for calculating the `(eff x acc)` which simply divides the sum of weights in a particular category by the total sum of weights for a given signal process. The benefit of this method is that you do not need to process all of the signal MC. However, this method strictly requires the `NOTAG` dataset to be included in the flashgg workspaces as you need to include out-of-acceptance events in the calculation. If the 'NOTAG' dataset is not present, then an error will be thrown.
+We have introduced a second method for calculating the `(eff x acc)ij` which simply divides the sum of weights in a particular category by the total sum of weights for a given signal process. The benefit of this method is that you do not need to process all of the signal MC. However, this method strictly requires the `NOTAG` dataset to be included in the flashgg workspaces as you need to include out-of-acceptance events in the calculation. If the 'NOTAG' dataset is not present, then an error will be thrown and you must use the default method.
 
 ```
 python RunSignalScripts.py --inputConfig config_test_2016.py --mode getEffAcc
 ```
-The output is a json file specifying the `(eff x acc) values for each signal processes in each analysis categories (`./outdir_{ext}/getEffAcc/json`). This json file is then read directly in the final model construction step.
+The output is a json file specifying the `(eff x acc)` values for each signal processes in each analysis categories (`./outdir_{ext}/getEffAcc/json`). This json file is then read directly in the final model construction step.
+
 
 ## Extracting the diagonal process for a given category
 
-
-
-
+There are two options in the final model construction which require the knowledge of the diagonal process (i.e. highest sum of weights) in the analysis categories. The following mode determines the diagonal proc and outputs this info in a json file to be read by the final model construction:
+```
+python RunSignalScripts.py --inputConfig config_test_2016.py --mode getDiagProc
+```
 
 ## Final model construction
 
-Add details about replacementMap and XSBRMap
+Before you build the final models you MUST define the replacement dataset and the `xs x BR` mappings. 
 
+ * In `tools/replacementMap.py` you need to specify the replacement (process,category) to use when the number of events is below a threshold (defined by by the `--replacementThreshold` option, where the default threshold is 100 events). The mapping is selected by the `analysis` option in the input config file. For a thorough example see the `STXS` mapping. You will need to produce a similar map, configured for your analysis.
+
+ * In `tools/XSBRMap.py` you need to specify the normalisation of your signal processes. We use the [data files]{https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit/tree/102x/data/lhc-hxswg/sm} in combine to build MH-dependent cross sections and branching ratios for the major Higgs boson production modes and decay channels. You then need to specify in the mapping how each of your signal processes are normalised according to these cross sections/branching ratios (see `factor` in `STXS` map for an example). If your signal process has an arbitrary normalisation e.g. 0.001 pb with a branching ratio of 1 then you can use the `'mode':'constant'` feature (see lines 10 and 11). Again the mapping is selected by the `analysis` option in the input config file.
+
+You are now ready to run the actual fit:
+```
+python RunSignalScripts.py -inputConfig config_test_2016.py --mode signalFit --groupSignalFitJobsByCat
+```
+The `groupSignalFitJobsByCat` option will create a submission script per category. If removed the default is to have a single script per process x category (which can be a very large number!). The output is a separate ROOT file for each process x category containing the signal fit workspace.
+
+There are many different options for running the `signalFit` which can be added to the `--modeOpts` string. These are defined in `./scripts/signalFit`:
+
+ * `--useDiagonalProcForShape`: use the shape of the diagonal process in the category (requires running the `getDiagProc` mode first.
+ * `--doEffAccFromJson`: extract the `(eff x acc)ij` values from the output of the `getEffAcc` script. If not selected then will use the default method for calculating `(eff x acc)ij` using the sum of weights and comparing to the total signal process `xs x BR`.
+ * `--beamspotWidthMC X` and `--beamspotWidthData Y`: change the beamspot width values for MC and data [cm] for when reweighting the MC to match the data beamspot distribution. You can skip this reweighting using the option `--skipBeamspotReweigh'.
+ * `--useDCB`: use DCB + 1Gaussian as pdf instead of N Gaussians.
+ * `--doVoigtian`: replace all Gaussians in the signal model with Voigtians (used for Higgs total width studies).
+ * `--skipVertexScenarioSplit`: skip splitting the pdf into the RV and WV scenario and instead fit all events together.
+ * `--skipZeroes`: skip generating signal models for (proc,cat) with 0 events.
+ * `--skipSystematics`: skip adding photon systematics to signal models. Use if have not ran the `calcPhotonSyst` mode.
+ * `--useDiagonalProcForSyst`: takes the systematic constants from diagonal process (requires running the `getDiagProc` mode first. Useful if the statistics are low which can lead to dubious values for systematics constants.
+ * `--replacementThreshold`: change the threshold number of entries with which to use replacement dataset. Default = 100
+ * `--MHPolyOrder`: change the order of the polynomial which defines the MH dependence of fit parameters. Default is a linear interpolation (1). If using only one mass point then this is automatically set to 0.
+ * `minimizerMethod` and `minimizerTolerance`: options for scipy minimize, used for fit
 
 ## Packaging the output
+
 
 ## Signal model plots
