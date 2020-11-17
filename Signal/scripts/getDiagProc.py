@@ -44,7 +44,7 @@ for cat in allCats.split(","):
 for proc in allProcs.split(","):
   print " --> Processing: %s"%proc
   # Open workspace
-  _WSFileName = glob.glob("%s/output*M%s*%s*"%(opt.inputWSDir,opt.MH,proc))[0]
+  _WSFileName = glob.glob("%s/output*M%s*%s.root"%(opt.inputWSDir,opt.MH,proc))[0]
   f = ROOT.TFile(_WSFileName,'read')
   inputWS = f.Get(inputWSName__)
 

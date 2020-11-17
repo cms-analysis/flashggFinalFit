@@ -57,6 +57,7 @@ if opt.batch == 'condor':
 
 # Submit
 if opt.batch == "condor": subcmd = "condor_submit ./t2w_jobs/t2w_%s%s.sub"%(opt.mode,opt.ext)
+elif opt.batch == 'local': subcmd = "bash ./t2w_jobs/t2w_%s%s.sub"%(opt.mode,opt.ext)
 else: subcmd = "qsub -q hep.q -l h_rt=3:0:0 -l h_vmem=24G ./t2w_jobs/t2w_%s%s.sh"%(opt.mode,opt.ext)
 if opt.dryRun: print "[DRY RUN] %s"%subcmd
 else: run(subcmd)

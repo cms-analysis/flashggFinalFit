@@ -52,7 +52,7 @@ for _mp in opt.massPoints.split(","):
   for _proc in opt.procs.split(","):
     print "    * proc = %s"%_proc
     # Find corresponding file
-    _WSFileName = glob.glob("%s/output*M%s*%s*"%(opt.inputWSDir,_mp,_proc))[0]
+    _WSFileName = glob.glob("%s/output*M%s*%s.root"%(opt.inputWSDir,_mp,_proc))[0]
     f = ROOT.TFile(_WSFileName,'read')
     inputWS = f.Get(inputWSName__)
 

@@ -15,6 +15,7 @@ from collections import OrderedDict as od
 
 from commonTools import *
 from commonObjects import *
+from signalTools import *
 from simultaneousFit import *
 from plottingTools import *
 
@@ -67,7 +68,7 @@ MH.setConstant(True)
 df = pd.DataFrame(columns=['proc','sumEntries','nRV','nWV'])
 procYields = od()
 for proc in opt.procs.split(","):
-  WSFileName = glob.glob("%s/output*M%s*%s*"%(opt.inputWSDir,opt.mass,proc))[0]
+  WSFileName = glob.glob("%s/output*M%s*%s.root"%(opt.inputWSDir,opt.mass,proc))[0]
   f = ROOT.TFile(WSFileName,"read")
   inputWS = f.Get(inputWSName__)
   d = reduceDataset(inputWS.data("%s_%s_%s_%s"%(procToData(proc.split("_")[0]),opt.mass,sqrts__,opt.cat)),aset)
@@ -84,7 +85,7 @@ for pidx, proc in enumerate(procsToFTest):
 
   # Split dataset to RV/WV: ssf requires input as dict (with mass point as key)
   datasets_RV, datasets_WV = od(), od()
-  WSFileName = glob.glob("%s/output*M%s*%s*"%(opt.inputWSDir,opt.mass,proc))[0]
+  WSFileName = glob.glob("%s/output*M%s*%s.root"%(opt.inputWSDir,opt.mass,proc))[0]
   f = ROOT.TFile(WSFileName,"read")
   inputWS = f.Get(inputWSName__)
   d = reduceDataset(inputWS.data("%s_%s_%s_%s"%(procToData(proc.split("_")[0]),opt.mass,sqrts__,opt.cat)),aset)

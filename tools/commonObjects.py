@@ -2,7 +2,12 @@ import os
 
 # Paths and directory
 cmsswbase__ = os.environ['CMSSW_BASE']
-cwd__ = os.environ['CMSSW_BASE']+"/src/flashggFinalFit/Signal"
+cwd__ = os.environ['CMSSW_BASE']+"/src/flashggFinalFit"
+swd__ = "%s/Signal"%cwd__
+bwd__ = "%s/Background"%cwd__
+dwd__ = "%s/Datacard"%cwd__
+fwd__ = "%s/Combine"%cwd__
+pwd__ = "%s/Plots"%cwd__
 
 # Centre of mass energy string
 sqrts__ = "13TeV"
@@ -18,7 +23,7 @@ BR_Z_nunu = 20.00*0.01
 BR_Z_qq = 69.91*0.01
 BR_W_qq = 67.41*0.01
 
-# Production modes and decay channel
+# Production modes and decay channel: for extract XS from combine
 productionModes = ['ggH','qqH','ttH','tHq','tHW','ggZH','WH','ZH','bbH']
 decayMode = 'hgg'
 

@@ -167,7 +167,7 @@ from tools.calcSystematics import factoryType, calcSystYields
 
 # Create columns in dataFrame to store yields
 data['nominal_yield'] = '-'
-data['mc_stat_uncertainty'] = '-'
+data['sumw2'] = '-'
 if not opt.skipCOWCorr: data['nominal_yield_COWCorr'] = '-'
 
 # Add columns in dataFrame for systematic yield variations
@@ -230,9 +230,10 @@ for ir,r in data[data['type']=='sig'].iterrows():
       f_NNLOPS = abs(p.getRealValue("NNLOPSweight")) if "NNLOPSweight" in contents else 1.
       if f_COWCorr == 0: continue
       else: y_COWCorr += w*(f_NNLOPS/f_COWCorr)
+  print "(%-50s) y = %.5f, y_COWCorr = %.5f, sumw2 = %.5f"%(r['proc'],y,y_COWCorr,sumw2)
   data.at[ir,'nominal_yield'] = y
   data.at[ir,'sumw2'] = sumw2
-  if not opt.skipCOWCorr: data['nominal_yield_COWCorr'] = y_COWCorr
+  if not opt.skipCOWCorr: data.at[ir,'nominal_yield_COWCorr'] = y_COWCorr
 
   # Systematics: loop over systematics and use function to extract yield variations
   if opt.doSystematics:

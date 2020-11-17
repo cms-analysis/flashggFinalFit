@@ -56,7 +56,7 @@ if opt.batch == 'condor':
   job_opts = "--job-mode condor %s"%sub_opts
 elif( opt.batch == 'SGE' )|( opt.batch == 'IC' ):
   sub_opts = "--sub-opts=\'-q %s"%opt.queue
-  if opt.subOpts != "": sub_opts += " %s"opt.subOpts
+  if opt.subOpts != "": sub_opts += " %s"%opt.subOpts
   sub_opts += "\'"
   job_opts = "--job-mode SGE %s"%sub_opts
 else:
