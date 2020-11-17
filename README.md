@@ -26,19 +26,22 @@ git clone -b dev_runII_102x git@github.com:cms-analysis/flashggFinalFit.git
 cd flashggFinalFit/
 ```
 
-In every new shell please run the following to add commonTools and commonObjects to PYTHONPATH:
+In every new shell run the following to add `tools/commonTools` and `tools/commonObjects` to your `${PYTHONPATH}`:
 ```
 ./setup.sh
 ```
 
 ## Contents
-
 The FLASHgg Finals Fits package contains several subfolders which are used for the following steps:
 
 * Create the Signal Model (see `Signal` dir)
 * Create the Background Model (see `Background` dir)
 * Generate a Datacard (see `Datacard` dir)
 * Running fits with combine (see `Combine` dir)
-* Run `combine` and generate statistical interpretation plots. (see `Plots/FinalResults` dir)
+* Scripts to produce plots (see `Plots` dir)
+
+In addition, the scripts in the `Trees2WS` dir are a series of lightweight scripts for converting standard ROOT trees into a RooWorkspace that can be read by the Final Fits package.
+
+Finally, the objects and tools which are common to all subfolders are defined in the `tools` directory. If your input workspaces differ from the flashgg output workspace structure, then you may need to change the options here.
 
 Each of the relevant folders are documented with specific `README.md` files. Some (temporary) instructions can be found in this [google docs](https://docs.google.com/document/d/1NwUrPvOZ2bByaHNqt_Fr6oYcP7icpbw1mPlw_3lHhEE/edit)
