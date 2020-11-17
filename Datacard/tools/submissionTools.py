@@ -15,8 +15,8 @@ def writePreamble(_file):
   _file.write("export SCRAM_ARCH=%s\n"%os.environ['SCRAM_ARCH'])
   _file.write("source /cvmfs/cms.cern.ch/cmsset_default.sh\n")
   _file.write("eval `scramv1 runtime -sh`\n")
-  _file.write("cd %s\n"%cwd__)
-  _file.write("export PYTHONPATH=$PYTHONPATH:%s/tools\n\n"%cwd__)
+  _file.write("cd %s\n"%dwd__)
+  _file.write("export PYTHONPATH=$PYTHONPATH:%s/tools:%s/tools\n\n"%(cwd__,dwd__))
 
 def writeCondorSub(_file,_exec,_queue,_nJobs,_jobOpts,doHoldOnFailure=True,doPeriodicRetry=True):
   _file.write("executable = %s.sh\n"%_exec)
@@ -39,10 +39,10 @@ def writeCondorSub(_file,_exec,_queue,_nJobs,_jobOpts,doHoldOnFailure=True,doPer
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 def writeSubFiles(_opts):
   # Make directory to store sub files
-  if not os.path.isdir("%s/yields_%s"%(cwd__,_opts['ext'])): os.system("mkdir %s/yields_%s"%(cwd__,_opts['ext']))
-  if not os.path.isdir("%s/yields_%s/jobs"%(cwd__,_opts['ext'])): os.system("mkdir %s/yields_%s/jobs"%(cwd__,_opts['ext']))
+  if not os.path.isdir("%s/yields_%s"%(dwd__,_opts['ext'])): os.system("mkdir %s/yields_%s"%(dwd__,_opts['ext']))
+  if not os.path.isdir("%s/yields_%s/jobs"%(dwd__,_opts['ext'])): os.system("mkdir %s/yields_%s/jobs"%(dwd__,_opts['ext']))
 
-  _jobdir = "%s/yields_%s/jobs"%(cwd__,_opts['ext'])
+  _jobdir = "%s/yields_%s/jobs"%(dwd__,_opts['ext'])
   # Remove current job files
   if len(glob.glob("%s/*"%_jobdir)): os.system("rm %s/*"%_jobdir)
   
@@ -56,7 +56,7 @@ def writeSubFiles(_opts):
     for cidx in range(_opts['nCats']):
       c = _opts['cats'].split(",")[cidx]
       _f.write("if [ $1 -eq %g ]; then\n"%cidx)
-      _f.write("  python %s/makeYields.py --cat %s --procs %s --ext %s --mass %s --inputWSDirMap %s %s\n"%(cwd__,c,_opts['procs'],_opts['ext'],_opts['mass'],_opts['inputWSDirMap'],_opts['modeOpts']))
+      _f.write("  python %s/makeYields.py --cat %s --procs %s --ext %s --mass %s --inputWSDirMap %s %s\n"%(dwd__,c,_opts['procs'],_opts['ext'],_opts['mass'],_opts['inputWSDirMap'],_opts['modeOpts']))
       _f.write("fi\n")
       
     # Close .sh file
@@ -76,18 +76,18 @@ def writeSubFiles(_opts):
       c = _opts['cats'].split(",")[cidx]
       _f = open("%s/%s_%s.sh"%(_jobdir,_executable,c),"w")
       writePreamble(_f)
-      _f.write("python %s/makeYields.py --cat %s --procs %s --ext %s --mass %s --inputWSDirMap %s --sigModelWSDir %s --sigModelExt %s --bkgModelWSDir %s --bkgModelExt %s %s\n"%(cwd__,c,_opts['procs'],_opts['ext'],_opts['mass'],_opts['inputWSDirMap'],_opts['sigModelWSDir'],_opts['sigModelExt'],_opts['bkgModelWSDir'],_opts['bkgModelExt'],_opts['modeOpts']))
+      _f.write("python %s/makeYields.py --cat %s --procs %s --ext %s --mass %s --inputWSDirMap %s --sigModelWSDir %s --sigModelExt %s --bkgModelWSDir %s --bkgModelExt %s %s\n"%(dwd__,c,_opts['procs'],_opts['ext'],_opts['mass'],_opts['inputWSDirMap'],_opts['sigModelWSDir'],_opts['sigModelExt'],_opts['bkgModelWSDir'],_opts['bkgModelExt'],_opts['modeOpts']))
       _f.close()
       os.system("chmod 775 %s/%s_%s.sh"%(_jobdir,_executable,c))
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Function for submitting files to batch system
 def submitFiles(_opts):
-  _jobdir = "%s/yields_%s/jobs"%(cwd__,_opts['ext'])
+  _jobdir = "%s/yields_%s/jobs"%(dwd__,_opts['ext'])
   # CONDOR
   if _opts['batch'] == "condor":
     _executable = "condor_yields_%s"%_opts['ext']
-    cmdLine = "cd %s; condor_submit %s.sub; cd %s"%(_jobdir,_executable,cwd__)
+    cmdLine = "cd %s; condor_submit %s.sub; cd %s"%(_jobdir,_executable,dwd__)
     run(cmdLine)
     print "  --> Finished submitting files"
 

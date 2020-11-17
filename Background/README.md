@@ -1,5 +1,14 @@
 # Background Scripts
-This is where the background model is determined. Either true data can be used or pseudodata can be generated using the simulation samples available.
+This is where the background model is determined. Either true data can be used or pseudodata can be generated using the simulation samples available. This is the only section of Final Fits which is yet to be pythonized!
+
+## Setup
+
+The background modelling package needs to be built with it's own makefiles, if needed. Please note that there will be verbose warnings from BOOST etc, which can be ignored. So long as the `make` commands finish without error, then the compilation happened fine.:
+
+```
+cd ${CMSSW_BASE}/src/flashggFinalFit/Background
+make
+```
 
 ## Background workflow
 

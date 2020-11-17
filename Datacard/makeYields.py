@@ -15,8 +15,8 @@ from collections import OrderedDict
 #from systematics import theory_systematics, experimental_systematics, signal_shape_systematics
 from systematics_STXS import theory_systematics, experimental_systematics, signal_shape_systematics
 
-from tools.commonObjects import *
-from tools.commonTools import *
+from commonObjects import *
+from commonTools import *
 
 print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG DATACARD MAKER RUN II ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ "
 def leave():

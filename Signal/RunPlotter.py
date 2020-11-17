@@ -5,8 +5,8 @@ import re, glob
 import json
 from optparse import OptionParser
 
-from tools.commonTools import *
-from tools.commonObjects import *
+from commonTools import *
+from commonObjects import *
 from tools.plottingTools import *
 
 def get_options():
@@ -36,7 +36,7 @@ ROOT.gStyle.SetOptStat(0)
 inputFiles = od()
 citr = 0
 if opt.cats in ['all','wall']:
-  fs = glob.glob("%s/outdir_%s/CMS-HGG_sigfit_%s_*.root"%(cwd__,opt.ext,opt.ext))
+  fs = glob.glob("%s/outdir_%s/CMS-HGG_sigfit_%s_*.root"%(swd__,opt.ext,opt.ext))
   for f in fs:
     cat = re.sub(".root","",f.split("/")[-1].split("_%s_"%opt.ext)[-1])
     inputFiles[cat] = f
@@ -49,7 +49,7 @@ if opt.cats in ['all','wall']:
     citr += 1
 else:
   for cat in opt.cats.split(","):
-    f = "%s/outdir_%s/CMS-HGG_sigfit_%s_%s.root"%(cwd__,opt.ext,opt.ext,cat)
+    f = "%s/outdir_%s/CMS-HGG_sigfit_%s_%s.root"%(swd__,opt.ext,opt.ext,cat)
     inputFiles[cat] = f
     if citr == 0:
       w = ROOT.TFile(f).Get("wsig_13TeV")
@@ -162,5 +162,5 @@ for cat,f in inputFiles.iteritems():
   fin.Close()
 
 # Make plot
-if not os.path.isdir("%s/outdir_%s/Plots"%(cwd__,opt.ext)): os.system("mkdir %s/outdir_%s/Plots"%(cwd__,opt.ext))
-plotSignalModel(hists,opt,_outdir="%s/outdir_%s/Plots"%(cwd__,opt.ext))
+if not os.path.isdir("%s/outdir_%s/Plots"%(swd__,opt.ext)): os.system("mkdir %s/outdir_%s/Plots"%(swd__,opt.ext))
+plotSignalModel(hists,opt,_outdir="%s/outdir_%s/Plots"%(swd__,opt.ext))

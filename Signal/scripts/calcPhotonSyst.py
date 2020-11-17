@@ -22,7 +22,7 @@ def leave():
 
 def get_options():
   parser = OptionParser()
-  parser.add_option("--xvar", dest='xvar', default='cms_hgg_mass', help="Observable")
+  parser.add_option("--xvar", dest='xvar', default='CMS_hgg_mass', help="Observable")
   parser.add_option("--cat", dest='cat', default='', help="RECO category")
   parser.add_option("--procs", dest='procs', default='', help="Signal processes")
   parser.add_option("--ext", dest='ext', default='', help="Extension")
@@ -82,7 +82,7 @@ def getMeanVar(_hists):
 
 def getSigmaVar(_hists):
   sigma, sigmaVar = {}, {}
-  for htype,h in _hists.iteritems(): sigma[htype] = effSigma(h)
+  for htype,h in _hists.iteritems(): sigma[htype] = getEffSigma(h)
   if sigma['nominal']==0: return 0
   for htype in ['up','down']: sigmaVar[htype] = (sigma[htype]-sigma['nominal'])/sigma['nominal']
   x = (abs(sigmaVar['up'])+abs(sigmaVar['down']))/2
@@ -153,8 +153,8 @@ for ir,r in data.iterrows():
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Output dataFrame as pickle file to be read in by signalFit.py
-if not os.path.isdir("%s/outdir_%s"%(cwd__,opt.ext)): os.system("mkdir %s/outdir_%s"%(cwd__,opt.ext))
-if not os.path.isdir("%s/outdir_%s/calcPhotonSyst"%(cwd__,opt.ext)): os.system("mkdir %s/outdir_%s/calcPhotonSyst"%(cwd__,opt.ext))
-if not os.path.isdir("%s/outdir_%s/calcPhotonSyst/pkl"%(cwd__,opt.ext)): os.system("mkdir %s/outdir_%s/calcPhotonSyst/pkl"%(cwd__,opt.ext))
-with open("%s/outdir_%s/calcPhotonSyst/pkl/%s.pkl"%(cwd__,opt.ext,opt.cat),"wb") as f: pickle.dump(data,f) 
-print " --> Successfully saved photon systematics as pkl file: %s/outdir_%s/calcPhotonSyst/pkl/%s.pkl"%(cwd__,opt.ext,opt.cat)
+if not os.path.isdir("%s/outdir_%s"%(swd__,opt.ext)): os.system("mkdir %s/outdir_%s"%(swd__,opt.ext))
+if not os.path.isdir("%s/outdir_%s/calcPhotonSyst"%(swd__,opt.ext)): os.system("mkdir %s/outdir_%s/calcPhotonSyst"%(swd__,opt.ext))
+if not os.path.isdir("%s/outdir_%s/calcPhotonSyst/pkl"%(swd__,opt.ext)): os.system("mkdir %s/outdir_%s/calcPhotonSyst/pkl"%(swd__,opt.ext))
+with open("%s/outdir_%s/calcPhotonSyst/pkl/%s.pkl"%(swd__,opt.ext,opt.cat),"wb") as f: pickle.dump(data,f) 
+print " --> Successfully saved photon systematics as pkl file: %s/outdir_%s/calcPhotonSyst/pkl/%s.pkl"%(swd__,opt.ext,opt.cat)

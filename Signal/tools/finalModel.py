@@ -154,7 +154,7 @@ class FinalModel:
     for mp in self.massPoints.split(","):
       mh.append(float(mp))
       if self.doEffAccFromJson:
-        jfname = "%s/outdir_%s/getEffAcc/json/effAcc_M%s_%s.json"%(cwd__,self.ext,mp,self.ext)
+        jfname = "%s/outdir_%s/getEffAcc/json/effAcc_M%s_%s.json"%(swd__,self.ext,mp,self.ext)
         if not os.path.exists(jfname):
           print " --> [ERROR] effAcc json file (%s) does not exist for mass point = %s. Run getEffAcc first."%(jfname,mp)
           sys.exit(1)
@@ -198,7 +198,7 @@ class FinalModel:
       if getattr(self,sType) != '': self.NuisanceMap[sType] = od()
 
     # Extract calcPhotonSyst output
-    psname = "%s/outdir_%s/calcPhotonSyst/pkl/%s.pkl"%(cwd__,self.ext,self.cat)
+    psname = "%s/outdir_%s/calcPhotonSyst/pkl/%s.pkl"%(swd__,self.ext,self.cat)
     if not os.path.exists(psname):
       print " --> [ERROR] Photon systematics do not exist (%s). Please run calcPhotonSyst mode first or skip systematics (--skipSystematics)"%psname
       sys.exit(1)

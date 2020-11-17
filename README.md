@@ -1,5 +1,5 @@
-# FLASHgg Final Fits
-The Final Fits package is a series of scripts which are used to run the final stages of the CMS Hgg analysis: signal modelling, background modelling, datacard creation and final statistical interpretation and final result plots.
+# FLASHgg Final Fits (lite)
+Welcome to the new Final Fits package. Here lies a a series of scripts which are used to run the final stages of the CMS Hgg analysis: signal modelling, background modelling, datacard creation and final statistical interpretation and final result plots.
 
 ## Download and setup instructions
 
@@ -26,19 +26,19 @@ git clone -b dev_runII_102x git@github.com:cms-analysis/flashggFinalFit.git
 cd flashggFinalFit/
 ```
 
-The background modelling package needs to be built with it's own makefiles, if needed. Please note that there will be verbose warnings from BOOST etc, which can be ignored. So long as the `make` commands finish without error, then the compilation happened fine.:
-
+In every new shell please run the following to add commonTools and commonObjects to PYTHONPATH:
 ```
-cd ${CMSSW_BASE}/src/flashggFinalFit/Background
-make
+./setup.sh
 ```
 
 ## Contents
+
 The FLASHgg Finals Fits package contains several subfolders which are used for the following steps:
 
 * Create the Signal Model (see `Signal` dir)
 * Create the Background Model (see `Background` dir)
 * Generate a Datacard (see `Datacard` dir)
+* Running fits with combine (see `Combine` dir)
 * Run `combine` and generate statistical interpretation plots. (see `Plots/FinalResults` dir)
 
 Each of the relevant folders are documented with specific `README.md` files. Some (temporary) instructions can be found in this [google docs](https://docs.google.com/document/d/1NwUrPvOZ2bByaHNqt_Fr6oYcP7icpbw1mPlw_3lHhEE/edit)

@@ -124,10 +124,10 @@ else:
 
 # Options for using diagonal process from getDiagProc output json
 if opt.useDiagonalProcForShape:
-  if not os.path.exists("%s/outdir_%s/getDiagProc/json/diagonal_process.json"%(cwd__,opt.ext)):
+  if not os.path.exists("%s/outdir_%s/getDiagProc/json/diagonal_process.json"%(swd__,opt.ext)):
     print " --> [ERROR] Diagonal process json from getDiagProc does not exist. Using nominal proc x cat for shape"
   else:
-    with open("%s/outdir_%s/getDiagProc/json/diagonal_process.json"%(cwd__,opt.ext),"r") as jf: dproc = json.load(jf)
+    with open("%s/outdir_%s/getDiagProc/json/diagonal_process.json"%(swd__,opt.ext),"r") as jf: dproc = json.load(jf)
     procRVFit = dproc[opt.cat]
     print " --> Using diagonal proc (%s,%s) for shape"%(procRVFit,opt.cat)
     if not opt.skipVertexScenarioSplit: procWVFit = dproc[opt.cat]
@@ -135,10 +135,10 @@ if opt.useDiagonalProcForShape:
 # Process for syst
 procSyst = opt.proc
 if opt.useDiagonalProcForSyst:
-  if not os.path.exists("%s/outdir_%s/getDiagProc/json/diagonal_process.json"%(cwd__,opt.ext)):
+  if not os.path.exists("%s/outdir_%s/getDiagProc/json/diagonal_process.json"%(swd__,opt.ext)):
     print " --> [ERROR] Diagonal process json from getDiagProc does not exist. Using nominal proc x cat for systematics"
   else:
-    with open("%s/outdir_%s/getDiagProc/json/diagonal_process.json"%(cwd__,opt.ext),"r") as jf: dproc = json.load(jf)
+    with open("%s/outdir_%s/getDiagProc/json/diagonal_process.json"%(swd__,opt.ext),"r") as jf: dproc = json.load(jf)
     procSyst = dproc[opt.cat]
     print " --> Using diagonal proc (%s,%s) for systematics"%(procSyst,opt.cat)
 
@@ -262,11 +262,11 @@ if not opt.skipBeamspotReweigh:
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # If using nGaussian fit then extract nGaussians from fTest json file
 if not opt.useDCB:
-  with open("%s/outdir_%s/fTest/json/nGauss_%s.json"%(cwd__,opt.ext,catRVFit)) as jf: ngauss = json.load(jf)
+  with open("%s/outdir_%s/fTest/json/nGauss_%s.json"%(swd__,opt.ext,catRVFit)) as jf: ngauss = json.load(jf)
   nRV = int(ngauss["%s__%s"%(procRVFit,catRVFit)]['nRV'])
   if opt.skipVertexScenarioSplit: print " --> Fitting function: convolution of nGaussians (%g)"%nRV
   else: 
-    with open("%s/outdir_%s/fTest/json/nGauss_%s.json"%(cwd__,opt.ext,catWVFit)) as jf: ngauss = json.load(jf)
+    with open("%s/outdir_%s/fTest/json/nGauss_%s.json"%(swd__,opt.ext,catWVFit)) as jf: ngauss = json.load(jf)
     nWV = int(ngauss["%s__%s"%(procWVFit,catWVFit)]['nWV'])
     print " --> Fitting function: convolution of nGaussians (RV=%g,WV=%g)"%(nRV,nWV)
 else:
@@ -302,8 +302,8 @@ fm = FinalModel(ssfMap,opt.proc,opt.cat,opt.ext,opt.year,sqrts__,nominalDatasets
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # SAVE: to output workspace
-foutDir = "%s/outdir_%s/signalFit/output"%(cwd__,opt.ext)
-foutName = "%s/outdir_%s/signalFit/output/CMS-HGG_sigfit_%s_%s_%s_%s.root"%(cwd__,opt.ext,opt.ext,opt.proc,opt.year,opt.cat)
+foutDir = "%s/outdir_%s/signalFit/output"%(swd__,opt.ext)
+foutName = "%s/outdir_%s/signalFit/output/CMS-HGG_sigfit_%s_%s_%s_%s.root"%(swd__,opt.ext,opt.ext,opt.proc,opt.year,opt.cat)
 print "\n --> Saving output workspace to file: %s"%foutName
 if not os.path.isdir(foutDir): os.system("mkdir %s"%foutDir)
 fout = ROOT.TFile(foutName,"RECREATE")
@@ -316,12 +316,12 @@ fout.Close()
 # PLOTTING
 if opt.doPlots:
   print "\n --> Making plots..."
-  if not os.path.isdir("%s/outdir_%s/signalFit/Plots"%(cwd__,opt.ext)): os.system("mkdir %s/outdir_%s/signalFit/Plots"%(cwd__,opt.ext))
+  if not os.path.isdir("%s/outdir_%s/signalFit/Plots"%(swd__,opt.ext)): os.system("mkdir %s/outdir_%s/signalFit/Plots"%(swd__,opt.ext))
   if opt.skipVertexScenarioSplit:
-    plotPdfComponents(ssfRV,_outdir="%s/outdir_%s/signalFit/Plots"%(cwd__,opt.ext),_extension="total_",_proc=procRVFit,_cat=catRVFit) 
+    plotPdfComponents(ssfRV,_outdir="%s/outdir_%s/signalFit/Plots"%(swd__,opt.ext),_extension="total_",_proc=procRVFit,_cat=catRVFit) 
   if not opt.skipVertexScenarioSplit:
-    plotPdfComponents(ssfRV,_outdir="%s/outdir_%s/signalFit/Plots"%(cwd__,opt.ext),_extension="RV_",_proc=procRVFit,_cat=catRVFit) 
-    plotPdfComponents(ssfWV,_outdir="%s/outdir_%s/signalFit/Plots"%(cwd__,opt.ext),_extension="WV_",_proc=procWVFit,_cat=catRVFit) 
+    plotPdfComponents(ssfRV,_outdir="%s/outdir_%s/signalFit/Plots"%(swd__,opt.ext),_extension="RV_",_proc=procRVFit,_cat=catRVFit) 
+    plotPdfComponents(ssfWV,_outdir="%s/outdir_%s/signalFit/Plots"%(swd__,opt.ext),_extension="WV_",_proc=procWVFit,_cat=catRVFit) 
   # Plot interpolation
-  plotInterpolation(fm,_outdir="%s/outdir_%s/signalFit/Plots"%(cwd__,opt.ext)) 
-  plotSplines(fm,_outdir="%s/outdir_%s/signalFit/Plots"%(cwd__,opt.ext),_nominalMass=MHNominal) 
+  plotInterpolation(fm,_outdir="%s/outdir_%s/signalFit/Plots"%(swd__,opt.ext)) 
+  plotSplines(fm,_outdir="%s/outdir_%s/signalFit/Plots"%(swd__,opt.ext),_nominalMass=MHNominal) 

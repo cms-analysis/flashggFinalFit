@@ -47,7 +47,7 @@ def get_options():
 ROOT.gStyle.SetOptStat(0)
 ROOT.gROOT.SetBatch(True)
 if opt.doPlots: 
-  if not os.path.isdir("%s/outdir_%s/fTest/Plots"%(cwd__,opt.ext)): os.system("mkdir %s/outdir_%s/fTest/Plots"%(cwd__,opt.ext))
+  if not os.path.isdir("%s/outdir_%s/fTest/Plots"%(swd__,opt.ext)): os.system("mkdir %s/outdir_%s/fTest/Plots"%(swd__,opt.ext))
 
 # Load xvar to fit
 nominalWSFileName = glob.glob("%s/output*"%(opt.inputWSDir))[0]
@@ -114,8 +114,8 @@ for pidx, proc in enumerate(procsToFTest):
     df.loc[df['proc']==proc,'nRV'] = nGauss_opt
     # Make plots
     if opt.doPlots:
-      plotFTest(ssfs,_opt=nGauss_opt,_outdir="%s/outdir_%s/fTest/Plots"%(cwd__,opt.ext),_extension="RV",_proc=proc,_cat=opt.cat,_mass=opt.mass)
-      plotFTestResults(ssfs,_opt=nGauss_opt,_outdir="%s/outdir_%s/fTest/Plots"%(cwd__,opt.ext),_extension="RV",_proc=proc,_cat=opt.cat,_mass=opt.mass)
+      plotFTest(ssfs,_opt=nGauss_opt,_outdir="%s/outdir_%s/fTest/Plots"%(swd__,opt.ext),_extension="RV",_proc=proc,_cat=opt.cat,_mass=opt.mass)
+      plotFTestResults(ssfs,_opt=nGauss_opt,_outdir="%s/outdir_%s/fTest/Plots"%(swd__,opt.ext),_extension="RV",_proc=proc,_cat=opt.cat,_mass=opt.mass)
 
   # Run fTest: WV
   # If numEntries below threshold then keep as n = 1
@@ -139,16 +139,16 @@ for pidx, proc in enumerate(procsToFTest):
     df.loc[df['proc']==proc,'nWV'] = nGauss_opt
     # Make plots
     if opt.doPlots:
-      plotFTest(ssfs,_opt=nGauss_opt,_outdir="%s/outdir_%s/fTest/Plots"%(cwd__,opt.ext),_extension="WV",_proc=proc,_cat=opt.cat,_mass=opt.mass)
-      plotFTestResults(ssfs,_opt=nGauss_opt,_outdir="%s/outdir_%s/fTest/Plots"%(cwd__,opt.ext),_extension="WV",_proc=proc,_cat=opt.cat,_mass=opt.mass)
+      plotFTest(ssfs,_opt=nGauss_opt,_outdir="%s/outdir_%s/fTest/Plots"%(swd__,opt.ext),_extension="WV",_proc=proc,_cat=opt.cat,_mass=opt.mass)
+      plotFTestResults(ssfs,_opt=nGauss_opt,_outdir="%s/outdir_%s/fTest/Plots"%(swd__,opt.ext),_extension="WV",_proc=proc,_cat=opt.cat,_mass=opt.mass)
 
   # Close ROOT file
   inputWS.Delete()
   f.Close()
 
 # Make output
-if not os.path.isdir("%s/outdir_%s/fTest/json"%(cwd__,opt.ext)): os.system("mkdir %s/outdir_%s/fTest/json"%(cwd__,opt.ext))
-ff = open("%s/outdir_%s/fTest/json/nGauss_%s.json"%(cwd__,opt.ext,opt.cat),"w")
+if not os.path.isdir("%s/outdir_%s/fTest/json"%(swd__,opt.ext)): os.system("mkdir %s/outdir_%s/fTest/json"%(swd__,opt.ext))
+ff = open("%s/outdir_%s/fTest/json/nGauss_%s.json"%(swd__,opt.ext,opt.cat),"w")
 ff.write("{\n")
 # Iterate over rows in dataframe: sorted by sumEntries
 pitr = 1

@@ -5,8 +5,8 @@ from optparse import OptionParser
 from collections import OrderedDict as od
 
 # Import tools from ./tools
-from tools.commonTools import *
-from tools.commonObjects import *
+from commonTools import *
+from commonObjects import *
 from tools.submissionTools import *
 
 def get_options():
@@ -57,7 +57,7 @@ print " --> For analysis categories: %s"%options['cats']
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Make directory to store job scripts and output
-if not os.path.isdir("%s/outdir_%s"%(cwd__,options['ext'])): os.system("mkdir %s/outdir_%s"%(cwd__,options['ext']))
+if not os.path.isdir("%s/outdir_%s"%(swd__,options['ext'])): os.system("mkdir %s/outdir_%s"%(swd__,options['ext']))
 
 # Write submission files: style depends on batch system
 writeSubFiles(options)

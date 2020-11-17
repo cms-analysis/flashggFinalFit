@@ -85,9 +85,9 @@ for _mp in opt.massPoints.split(","):
     f.Close()
 
 # Calculate eff x Acc for each mass point and store in json files
-if not os.path.isdir("%s/outdir_%s"%(cwd__,opt.ext)): os.system("mkdir %s/outdir_%s"%(cwd__,opt.ext))
-if not os.path.isdir("%s/outdir_%s/getEffAcc"%(cwd__,opt.ext)): os.system("mkdir %s/outdir_%s/getEffAcc"%(cwd__,opt.ext))
-if not os.path.isdir("%s/outdir_%s/getEffAcc/json"%(cwd__,opt.ext)): os.system("mkdir %s/outdir_%s/getEffAcc/json"%(cwd__,opt.ext))
+if not os.path.isdir("%s/outdir_%s"%(swd__,opt.ext)): os.system("mkdir %s/outdir_%s"%(swd__,opt.ext))
+if not os.path.isdir("%s/outdir_%s/getEffAcc"%(swd__,opt.ext)): os.system("mkdir %s/outdir_%s/getEffAcc"%(swd__,opt.ext))
+if not os.path.isdir("%s/outdir_%s/getEffAcc/json"%(swd__,opt.ext)): os.system("mkdir %s/outdir_%s/getEffAcc/json"%(swd__,opt.ext))
 # Loop over mass points
 for _mp in opt.massPoints.split(","):
   df = data[data['massPoint']==_mp]
@@ -101,8 +101,8 @@ for _mp in opt.massPoints.split(","):
     effAcc[r['granular_key']] = ea
   
   # Write to file
-  if opt.skipCOWCorr: outfileName = "%s/outdir_%s/getEffAcc/json/effAcc_M%s_%s_skipCOWCorr.json"%(cwd__,opt.ext,_mp,opt.ext)
-  else: outfileName = "%s/outdir_%s/getEffAcc/json/effAcc_M%s_%s.json"%(cwd__,opt.ext,_mp,opt.ext)
+  if opt.skipCOWCorr: outfileName = "%s/outdir_%s/getEffAcc/json/effAcc_M%s_%s_skipCOWCorr.json"%(swd__,opt.ext,_mp,opt.ext)
+  else: outfileName = "%s/outdir_%s/getEffAcc/json/effAcc_M%s_%s.json"%(swd__,opt.ext,_mp,opt.ext)
   with open(outfileName,'w') as jsonfile: json.dump(effAcc,jsonfile)
 
 # Calculate fractional cross section of each STXS bin (in terms of stage0 bin) for normalisation: output in txt file
@@ -110,11 +110,11 @@ if opt.doSTXSFractions:
   if opt.skipCOWCorr:
     print " --> [ERROR] Must include centralObjectWeight corrections for signal normalisation fractions"
     leave()
-  if not os.path.isdir("%s/outdir_%s/getEffAcc/fractions"%(cwd__,opt.ext)): os.system("mkdir %s/outdir_%s/getEffAcc/fractions"%(cwd__,opt.ext))
+  if not os.path.isdir("%s/outdir_%s/getEffAcc/fractions"%(swd__,opt.ext)): os.system("mkdir %s/outdir_%s/getEffAcc/fractions"%(swd__,opt.ext))
 
   # Loop over mass points
   for _mp in opt.massPoints.split(","):
-    fout = open("%s/outdir_%s/getEffAcc/fractions/STXS_fractions_M%s.txt"%(cwd__,opt.ext,_mp),"w")
+    fout = open("%s/outdir_%s/getEffAcc/fractions/STXS_fractions_M%s.txt"%(swd__,opt.ext,_mp),"w")
     fout.write(" --> STXS fractions:\n") 
     for proc_s0 in ['GG2H','VBF','WH2HQQ','ZH2HQQ','QQ2HLNU','QQ2HLL',"GG2HQQ","GG2HLL","GG2HNUNU",'TTH','THQ','THW','BBH']:
       mask = (data.apply( lambda x: x['proc'].split("_")[0] == proc_s0, axis=1))&(data['massPoint']==_mp)
