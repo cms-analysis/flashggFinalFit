@@ -1,4 +1,4 @@
-# FLASHgg Final Fits (lite)
+# Final Fits (lite)
 Welcome to the new Final Fits package. Here lies a a series of scripts which are used to run the final stages of the CMS Hgg analysis: signal modelling, background modelling, datacard creation and final statistical interpretation and final result plots.
 
 ## Download and setup instructions
@@ -12,8 +12,10 @@ git cms-init
 
 # Install the GBRLikelihood package which contains the RooDoubleCBFast implementation
 git clone git@github.com:jonathon-langford/HiggsAnalysis.git
+
 # Install Combine as per the documentation here: cms-analysis.github.io/HiggsAnalysis-CombinedLimit/
 git clone git@github.com:cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit
+
 # Install Combine Harvester for parallelizing fits
 git clone https://github.com/cms-analysis/CombineHarvester.git CombineHarvester
 
@@ -22,17 +24,18 @@ cmsenv
 scram b -j 9
 
 # Install Flashgg Final Fit packages
-git clone -b dev_runII_102x git@github.com:cms-analysis/flashggFinalFit.git
+git clone -b dev_fggfinalfits_lite git@github.com:cms-analysis/flashggFinalFit.git
 cd flashggFinalFit/
 ```
 
 In every new shell run the following to add `tools/commonTools` and `tools/commonObjects` to your `${PYTHONPATH}`:
 ```
-./setup.sh
+cmsenv
+source setup.sh
 ```
 
 ## Contents
-The FLASHgg Finals Fits package contains several subfolders which are used for the following steps:
+The Finals Fits package contains several subfolders which are used for the following steps:
 
 * Create the Signal Model (see `Signal` dir)
 * Create the Background Model (see `Background` dir)

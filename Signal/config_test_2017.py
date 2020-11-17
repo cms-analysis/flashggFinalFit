@@ -11,12 +11,7 @@ signalScriptCfg = {
   'ext':'test_%s'%_year,
   'analysis':'STXS', # To specify which replacement dataset mapping (defined in ./python/replacementMap.py)
   'year':'%s'%_year, # Use 'combined' if merging all years: not recommended
-  'beamspot':'3.4', # Beamspot in data
-  'numberOfBins':'320',
   'massPoints':'120,125,130',
-
-  # Use DCB in fit
-  'useDCB':0,
 
   #Photon shape systematics  
   'scales':'HighR9EB,HighR9EE,LowR9EB,LowR9EE,Gain1EB,Gain6EB', # separate nuisance per year

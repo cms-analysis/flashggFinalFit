@@ -65,8 +65,17 @@ def writeSystematic(f,d,s,options,stxsMergeScheme=None,scaleCorrScheme=None):
 
   # For signal shape systematics add simple line
   if s['type'] == 'signal_shape':
-    lsyst = "%-50s  param    %-6s %-6s"%(s['title'],s['mean'],s['sigma'])
-    f.write("%s\n"%lsyst)
+    stitle = "%s_%s"%(outputWSNuisanceTitle__,s['title'])
+    if s['mode'] != 'other': stitle += "_%s"%outputNuisanceExtMap[s['mode']]
+    # If not correlated: separate nuisance per year
+    if s['mode'] in ['scales','smears']:
+      for year in options.years.split(","):
+        stitle_y = "%s_%s"%(stitle,year) 
+        lsyst = "%-70s  param    %-6s %-6s"%(stitle_y,s['mean'],s['sigma'])
+        f.write("%s\n"%lsyst)
+    else:
+      lsyst = "%-70s  param    %-6s %-6s"%(stitle,s['mean'],s['sigma'])
+      f.write("%s\n"%lsyst)
     return True
  
   # Else: for yield variation uncertainties...

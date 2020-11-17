@@ -45,9 +45,6 @@ if opt.inputConfig != '':
     options['ext']          = _cfg['ext']
     options['analysis']     = _cfg['analysis']
     options['year']         = _cfg['year']
-    options['beamspot']     = _cfg['beamspot']
-    options['numberOfBins'] = _cfg['numberOfBins']
-    options['useDCB']       = _cfg['useDCB']
     options['massPoints']   = _cfg['massPoints']
     options['scales']       = _cfg['scales']
     options['scalesCorr']   = _cfg['scalesCorr']
@@ -77,8 +74,8 @@ else:
 # Check all processes and mass points exist
 
 # Check if mode in allowed options
-if options['mode'] not in ['fTest','getEffAcc','getDiagProc','calcPhotonSyst','signalFit','packageOnly']:
-  print " --> [ERROR] mode %s not allowed. Please use one of the following: ['fTest','getEffAcc','getDiagProc','calcPhotonSyst','signalFit','packageOnly','sigPlotsOnly']. Leaving..."%options['mode']
+if options['mode'] not in ['fTest','getEffAcc','getDiagProc','calcPhotonSyst','signalFit']:
+  print " --> [ERROR] mode %s not allowed. Please use one of the following: ['fTest','getEffAcc','getDiagProc','calcPhotonSyst','signalFit']. Leaving..."%options['mode']
   leave()
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -109,8 +106,6 @@ print " --> Mass points: %s --> Low = %s, High = %s"%(options['massPoints'],opti
 print " --> Extension: %s"%options['ext']
 print " --> Analysis: %s"%options['analysis']
 print " --> Year: %s ::: Corresponds to intLumi = %.2f fb^-1"%(options['year'],lumiMap[options['year']])
-if options['useDCB']: print " --> Using DCB in signal model"
-print ""
 if options['mode'] in ['calcPhotonSyst','writePhotonSyst']:
   print " --> Photon shape systematics:"
   print "     * scales       = %s"%options['scales']

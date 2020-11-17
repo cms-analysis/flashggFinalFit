@@ -10,15 +10,25 @@ globalXSBRMap = od()
 #globalXSBRMap['example']['decay'] = {'mode':'constant','factor':1}
 #globalXSBRMap['example']['PROCNAME'] = {'mode':'constant','factor':0.001}
 
-# For case of inclusive production mode then drop factor e.g.
+# For case of inclusive production mode then have no additional factor beyond V branching ratios
 globalXSBRMap['example'] = od()
 globalXSBRMap['example']['decay'] = {'mode':'hgg'}
 globalXSBRMap['example']['GG2H'] = {'mode':'ggH'}
 globalXSBRMap['example']['VBF'] = {'mode':'qqH'}
 globalXSBRMap['example']['WH2HQQ'] = {'mode':'WH','factor':BR_W_qq}
+globalXSBRMap['example']['ZH2HQQ'] = {'mode':'qqZH','factor':BR_Z_qq}
+globalXSBRMap['example']['QQ2HLNU'] = {'mode':'WH','factor':BR_W_lnu}
+globalXSBRMap['example']['QQ2HLL'] = {'mode':'qqZH','factor':(BR_Z_ll+BR_Z_nunu)}
+globalXSBRMap['example']['GG2HQQ'] = {'mode':'ggZH','factor':BR_Z_qq}
+globalXSBRMap['example']['GG2HLL'] = {'mode':'ggZH','factor':BR_Z_ll}
+globalXSBRMap['example']['GG2HNUNU'] = {'mode':'ggZH','factor':BR_Z_nunu}
+globalXSBRMap['example']['TTH'] = {'mode':'ttH'}
+globalXSBRMap['example']['BBH'] = {'mode':'bbH'}
+globalXSBRMap['example']['THQ'] = {'mode':'tHq'}
+globalXSBRMap['example']['THW'] = {'mode':'tHW'}
 # ...
 
-# STXS analysis
+# STXS analysis: add factor for bin composition
 globalXSBRMap['STXS'] = od()
 globalXSBRMap['STXS']['decay'] = {'mode':'hgg'}
 # ggH STXS stage 1.2 bins
