@@ -16,7 +16,7 @@ signalScriptCfg = {
   'ext':'test_2016', # output directory extension
   'analysis':'example', # To specify replacement dataset and XS*BR mapping (defined in ./tools/replacementMap.py and ./tools/XSBRMap.py respectively)
   'year':'2016', # Use 'combined' if merging all years: not recommended
-  'massPoints':'120,125,130',
+  'massPoints':'120,125,130', # You can now run with a single mass point if necessary
 
   #Photon shape systematics  
   'scales':'HighR9EB,HighR9EE,LowR9EB,LowR9EE,Gain1EB,Gain6EB', # separate nuisance per year
@@ -93,13 +93,13 @@ Before you build the final models you MUST define the replacement dataset and th
 
  * In `tools/replacementMap.py` you need to specify the replacement (process,category) to use when the number of events is below a threshold (defined by by the `--replacementThreshold` option, where the default threshold is 100 events). The mapping is selected by the `analysis` option in the input config file. For a thorough example see the `STXS` mapping. You will need to produce a similar map, configured for your analysis.
 
- * In `tools/XSBRMap.py` you need to specify the normalisation of your signal processes. We use the [data files]{https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit/tree/102x/data/lhc-hxswg/sm} in combine to build MH-dependent cross sections and branching ratios for the major Higgs boson production modes and decay channels. You then need to specify in the mapping how each of your signal processes are normalised according to these cross sections/branching ratios (see `factor` in `STXS` map for an example). If your signal process has an arbitrary normalisation e.g. 0.001 pb with a branching ratio of 1 then you can use the `'mode':'constant'` feature (see lines 10 and 11). Again the mapping is selected by the `analysis` option in the input config file.
+ * In `tools/XSBRMap.py` you need to specify the normalisation of your signal processes. We use the [data files](https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit/tree/102x/data/lhc-hxswg/sm) in combine to build MH-dependent cross sections and branching ratios for the major Higgs boson production modes and decay channels. You then need to specify in the mapping how each of your signal processes are normalised according to these cross sections/branching ratios (see `factor` in `STXS` map for an example). If your signal process has an arbitrary normalisation e.g. 0.001 pb with a branching ratio of 1 then you can use the `'mode':'constant'` feature (see lines 10 and 11). Again the mapping is selected by the `analysis` option in the input config file.
 
 You are now ready to run the actual fit:
 ```
 python RunSignalScripts.py -inputConfig config_test_2016.py --mode signalFit --groupSignalFitJobsByCat
 ```
-The `groupSignalFitJobsByCat` option will create a submission script per category. If removed the default is to have a single script per process x category (which can be a very large number!). The output is a separate ROOT file for each process x category containing the signal fit workspace.
+The `groupSignalFitJobsByCat` option will create a submission script per category. If removed, the default is to have a single script per process x category (which can be a very large number!). The output is a separate ROOT file for each process x category containing the signal fit workspace.
 
 There are many different options for running the `signalFit` which can be added to the `--modeOpts` string. These are defined in `./scripts/signalFit`:
 
@@ -118,5 +118,25 @@ There are many different options for running the `signalFit` which can be added 
 
 ## Packaging the output
 
+Package the individual ROOT files from the `signalFit` into a single file per category. Here you can also merge across years to package all years into a single file. For example, packaging 2016, 2017 and 2018 models for categories `cat0` and `cat1`:
+``` 
+python RunPackager.py --cats cat0,cat1 --exts test_2016,test_2017,test_2018 --mergeYears
+```
+where `exts` are the `outdir` extensions that you want to merge. To automatically infer the categories from an input flashgg workspace use:
+```
+--cats auto --inputWSDir {path to flashgg workspace dir}
+```
+The output are the packaged signal models ready for the final fits!
 
 ## Signal model plots
+
+Run on the packaged signal models to produce this kind of [plot](http://cms-results.web.cern.ch/cms-results/public-results/preliminary-results/HIG-19-015/CMS-PAS-HIG-19-015_Figure_012-a.pdf). 
+```
+python RunPlotter.py --procs all --years 2016,2017,2018 --cats cat0 --ext packaged
+```
+The options are defined in `RunPlotter.py`. Use `--cats all` to plot the sum of all analysis categories in `./outdir_{ext}` directory.
+
+To weight the categories according to their respective (S/S+B) then you can use the --loadCatWeight X` option, where X is the output json file of `../Plots/getCatInfo.py`.
+
+
+
