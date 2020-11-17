@@ -2,9 +2,8 @@
 
 Add some intro details here.
 
-There are a number of steps to perform when constructing the signal model (described below). It is recommended to construct a signal model for each year separately. This allows to keep track of both the year-dependent resolution effects and the year-dependent systematic uncertainties. Each step up to the packaging is ran using the `RunSignalScripts.py` script, which takes as input a config file to specify the options for the signal modelling.
+There are a number of steps to perform when constructing the signal model (described below). It is recommended to construct a signal model for each year separately. This allows to keep track of both the year-dependent resolution effects and the year-dependent systematic uncertainties. Each step up to the packaging is ran using the `RunSignalScripts.py` script, which takes as input a config file e.g.:
 
-For example: this config file corresponds to running over 2016 signal workspaces:
 ```
 # Config file: options for signal fitting
 
@@ -33,22 +32,26 @@ signalScriptCfg = {
 ```
 The basic command for using `RunSignalScripts.py` is the following:
 ```
-python RunSignalScripts.py --inputConfig config_{}.py --mode {mode} --modeOpts "{list of options for specific mode}" --jobOpts "{list of options for job submission}"
+python RunSignalScripts.py --inputConfig {config_file}.py --mode {mode} --modeOpts "{list of options for specific mode}" --jobOpts "{list of options for job submission}"
 ```
-The available modes are:
-
- * fTest
- * calcPhotonSyst
- * getDiagProc
- * getEffAcc
- * signalFit
+To simply print the job scripts without submitting then add the option: `--printOnly`
 
 ## Signal F-test
 
-Test for determining the optimal number of gaussians to use in signal model. If using Double Crystall Ball + Gaussian function for model then you can skip the F-test.
+Test for determining the optimal number of gaussians to use in signal model. If you want to use Double Crystal Ball (DCB) + Gaussian function for the models then you can skip the F-test.
 
 ```
-python RunSignalScripts.py
+python RunSignalScripts.py --inputConfig config_test_2016.py --mode fTest
+```
+This will create a separate job per analysis category, which outputs a json file (`./outdir_{ext}/fTest/json`) specifying the optimal number of Gaussians for each signal process for both the RV (right-vertex) and WV (wrong-vertex) scenarios. The optimal number of gaussians is chosen as the number which minimises the reduced chi2.
+
+In general, we only need to know the shape for the signal processes which have a sizeable contribution in a given category. By default the fTest script will only calculate the optimal number of Gaussians for the 5 signal processes in a category with the highest sum of weights. The other signal processes are set to (nRV,nWV)=(1,1). To toggle this number add the option `--nProcsToFTest X` into the `--modeOpts` string, where X will replace 5. To determine the optimum for all signal processes then set X = -1.
+```
+python RunSignalScripts.py --inputConfig config_test_2016.py --mode fTest --modeOpts "--nProcsToFTest X"
+```
+To produce the fTest plots then add `--doPlots` to the `--modeOpts` string.
+
+For other options when running `fTest`, see `./scripts/fTest`
 
 ## Photon systematics
 
