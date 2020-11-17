@@ -34,11 +34,11 @@ The basic command for using `RunSignalScripts.py` is the following:
 ```
 python RunSignalScripts.py --inputConfig {config_file}.py --mode {mode} --modeOpts "{list of options for specific mode}" --jobOpts "{list of options for job submission}"
 ```
-To simply print the job scripts without submitting then add the option: `--printOnly`
+To simply print the job scripts without submitting then add the option: `--printOnly`. You can then go to the respective `outdir_{ext}/{mode}/jobs` directory to run the individual scripts locally (great for testing and debugging!)
 
 ## Signal F-test
 
-Test for determining the optimal number of gaussians to use in signal model. If you want to use Double Crystal Ball (DCB) + Gaussian function for the models then you can skip the F-test.
+Test for determining the optimal number of gaussians to use in signal model. If you want to use the Double Crystal Ball (DCB) + Gaussian function for the models then you can skip the F-test.
 
 ```
 python RunSignalScripts.py --inputConfig config_test_2016.py --mode fTest
@@ -55,9 +55,35 @@ For other options when running `fTest`, see `./scripts/fTest`
 
 ## Photon systematics
 
+For calculating the effect of the photon systematics on the mean, width and rate of the signal spectrum.
+```
+python RunSignalScripts.py --inputConfig config_test_2016.py --mode calcPhotonSyst
+```
+This will again create a separate job per category, where the output is a pandas dataframe stored as a `.pkl` file. The dataframe contains the constants which describe how the systematics (specified in the `config` file) affect the mean, sigma and rate of each signal process. The final model construction will lift these constants directly from the `.pkl` files (replaced the monolithic `.dat` files in the old Final Fits).
+
+If you do not wish to account for the photon systematics then this step can be skipped completely.
+
+For other options when running `calcPhotonSyst`, see `./scripts/calcPhotonSyst` and add whatever you need to the `--modeOpts` string.
+
 ## Extracting the efficiency x acceptance
 
+The final models are normalised according to the following equation:
+![equation](https://latex.codecogs.com/gif.latex?N_{ij}&space;=&space;(\sigma&space;\cdot&space;BR)_i&space;\times&space;(\epsilon&space;\cdot&space;\mathcal{A})_{ij}&space;\times&space;\mathcal{L})
+
+where `Nij` is the number of signal events of process, i in category j. The `(eff x acc)ij` defines the fraction of signal process, i falling in category, j. The default method for calculating this term is to use the sum of weights in the flashgg workspace and compare to the total `xs x BR`.
+
+We have introduced a second method for calculating the `(eff x acc)` which simply divides the sum of weights in a particular category by the total sum of weights for a given signal process. The benefit of this method is that you do not need to process all of the signal MC. However, this method strictly requires the `NOTAG` dataset to be included in the flashgg workspaces as you need to include out-of-acceptance events in the calculation. If the 'NOTAG' dataset is not present, then an error will be thrown.
+
+```
+python RunSignalScripts.py --inputConfig config_test_2016.py --mode getEffAcc
+```
+The output is a json file specifying the `(eff x acc) values for each signal processes in each analysis categories (`./outdir_{ext}/getEffAcc/json`). This json file is then read directly in the final model construction step.
+
 ## Extracting the diagonal process for a given category
+
+
+
+
 
 ## Final model construction
 
