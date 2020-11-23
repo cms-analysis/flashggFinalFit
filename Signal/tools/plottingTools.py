@@ -204,6 +204,10 @@ def plotPdfComponents(ssf,_outdir='./',_extension='',_proc='',_cat=''):
   # Create data histogram
   hists['data'] = ssf.xvar.createHistogram("h_data%s"%_extension,ROOT.RooFit.Binning(ssf.nBins))
   ssf.DataHists['125'].fillHistogram(hists['data'],ROOT.RooArgList(ssf.xvar))
+  hists['data'].SetTitle("")
+  hists['data'].GetXaxis().SetTitle("m_{#gamma#gamma} [GeV]")
+  hists['data'].SetMinimum(0)
+  hists['data'].GetXaxis().SetRangeUser(115,140)
   hists['data'].Scale(float(ssf.nBins)/1600)
   hists['data'].SetMarkerStyle(20)
   hists['data'].SetMarkerColor(1)
@@ -211,10 +215,10 @@ def plotPdfComponents(ssf,_outdir='./',_extension='',_proc='',_cat=''):
   if hists['data'].GetMaximum()>hmax: hmax = hists['data'].GetMaximum()
   if hists['data'].GetMinimum()<hmin: hmin = hists['data'].GetMinimum()
   # Draw histograms
-  hists['final'].SetMaximum(1.2*hmax)
-  hists['final'].SetMinimum(1.2*hmin)
-  hists['final'].Draw("HIST")
-  hists['data'].Draw("Same PE")
+  hists['data'].SetMaximum(1.2*hmax)
+  hists['data'].SetMinimum(1.2*hmin)
+  hists['data'].Draw("PE")
+  hists['final'].Draw("Same HIST")
   # Individual Gaussian histograms
   for k,v in ssf.Pdfs.iteritems():
     if k == 'final': continue
@@ -276,11 +280,11 @@ def plotInterpolation(_finalModel,_outdir='./',_massPoints='120,121,122,123,124,
   colorMap = {}
   for i, mp in enumerate(_massPoints.split(",")): colorMap[mp] = colors[i]
   # Set luminosity
-  _finalModel.intLumi.setVal(float(lumiMap[_finalModel.year]))
+  _finalModel.intLumi.setVal(lumiScaleFactor*float(lumiMap[_finalModel.year]))
   # Total pdf histograms
   dh = od()
   hists = od()
-  hmax = 0.1 
+  hmax = 0.0001 
   for mp in _massPoints.split(","):
     _finalModel.MH.setVal(int(mp))
     hists[mp] = _finalModel.Pdfs['final'].createHistogram("h_%s"%mp,_finalModel.xvar,ROOT.RooFit.Binning(3200))

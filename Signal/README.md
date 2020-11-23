@@ -103,6 +103,8 @@ The `groupSignalFitJobsByCat` option will create a submission script per categor
 
 There are many different options for running the `signalFit` which can be added to the `--modeOpts` string. These are defined in `./scripts/signalFit`:
 
+ * `--doPlots`: plot interpolation of signal model, the various normalisation inputs and the shape pdf split into its individual components.
+ * `--nBins`: number of bins to use in fit. Default = 80.
  * `--useDiagonalProcForShape`: use the shape of the diagonal process in the category (requires running the `getDiagProc` mode first.
  * `--doEffAccFromJson`: extract the `(eff x acc)ij` values from the output of the `getEffAcc` script. If not selected then will use the default method for calculating `(eff x acc)ij` using the sum of weights and comparing to the total signal process `xs x BR`.
  * `--beamspotWidthMC X` and `--beamspotWidthData Y`: change the beamspot width values for MC and data [cm] for when reweighting the MC to match the data beamspot distribution. You can skip this reweighting using the option `--skipBeamspotReweigh'.
@@ -136,7 +138,7 @@ python RunPlotter.py --procs all --years 2016,2017,2018 --cats cat0 --ext packag
 ```
 The options are defined in `RunPlotter.py`. Use `--cats all` to plot the sum of all analysis categories in `./outdir_{ext}` directory.
 
-To weight the categories according to their respective (S/S+B) then you can use the --loadCatWeight X` option, where X is the output json file of `../Plots/getCatInfo.py`.
+To weight the categories according to their respective (S/S+B) then you can use the `--loadCatWeight X` option, where X is the output json file of `../Plots/getCatInfo.py`.
 
 
 
