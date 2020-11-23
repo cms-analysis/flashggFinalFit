@@ -22,12 +22,11 @@ Then you are ready to build the `RooWorkspace` from the `.txt` datacard i.e. con
 
  * `mu`: per-production mode signal strength. This uses the `multiSignalModel` in combine to define the mapping between the parameter of interest (poi) and each signal process. The mapping is of the format `--PO \"map={cat}/{proc}:poi[nominal,min,max]\"`, where you can use wildcards to scale all processes which match the input string by the same poi. See also STXS `stage0`, `stage1p2_maximal` and `stage1p2_minimal` for example. You will need to write your own entry in the `models.py` file for a specific mapping.
 
- * `kappas`: an example of using a pre-defined `PhysicsModel` in combine. You can find the full list [here](https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit/tree/102x/python). If needed, you will need to add the an entry into the `models.py` file.
+ * `kappas`: an example of using a pre-defined `PhysicsModel` in combine. You can find the full list [here](https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit/tree/102x/python). If needed, you will need to add an entry into the `models.py` file.
 
 Once you have decided/defined your signal parametrization you can run: 
 ```
 python RunText2Workspace.py --mode {model} --dryRun
-
 ```
 where `{model}` matches the key in `models.py`. For the simplest case, where you scale all signal processes equally then use `--mode mu_inclusive`.
 
@@ -59,19 +58,19 @@ This script uses the functionalities of [combineHarvester](https://cms-analysis.
 
  * `fits`: mapping for fit details with options deliminated using `:`. The first string specifies the type of fit e.g. `profile1D` corresponds to a 1D likelihood scan, where the other parameters of interest are profiled. Other options for this include `bestfit`, `singles`, `fixed`, `AsymptoticLimit`, `scan1D`, `profile2D`, `scan2D` and `robustHesse` (see bottom of this page for details). The second string is the user specified name of the fit. If this string contains `statonly` then the option `--freezeParameters allConstrainedNuisances` will be added to the combine command. The last string specifies the pois (comma-separated list) to run the fit for. Use `all` to run over all parameters of interest. You can define multiple fits using the `+` deliminator. In the example above there are two types of fit defined, one named `syst` and one named `statonly`.
 
- *  `points`: number of points in the likelihood scan, followed by the number of points per job. In this example you have 20 points and one point per job. Again, if multiple fits are defined, specify the different options using the `+` deliminator. 
+ *  `points`: number of points in the likelihood scan, followed by the number of points per job. In this example you have 20 points and one point per job. Again, if multiple fits are defined, specify the respective `points` using the `+` deliminator. 
 
  * `fit_opts`: this is where you specify the combine options you want to use. For example `--setParameters`, `--setParameterRanges`, `--freezeParameters` etc. Separate options for multiple fits using the `+` deliminator. 
 
 For tips, please refer to `example_inputs` directory for a set of example input jsons. 
 
-There are also a bunch of additional options when using the `RunFits.py` script:
+Thereis also a bunch of additional options when using the `RunFits.py` script:
 
- * `--ext`: running over a datacard with an extension in the name e.g. for `Datacard_LEPTONIC_mu.root" you would use `--ext _LEPTONIC`.
- * `--setPdfIndices`: set the pdfindex parameters to values specified in `pdfindex.json` when throwing the asimov toy in the expected scan. This can help to obtain closure in the expected scans: the prefit (B-only) pdf indices can differ from the postfit (S+B) pdf indices, which means you can extract a different signal strength to that put in. Firt run a `bestfit` adding `--saveSpecifiedIndex pdfindex_cat0,pdfindex_cat1,...,pdfindex_catN` to the `fit_opts` of the json file (see `example_inputs/inputs_bestfit.json`). Then make a `pdfindex.json` file using the post-fit values of the pdf indices.
+ * `--ext`: running over a datacard with an extension in the name e.g. for `Datacard_LEPTONIC_mu.root` you would use `--ext _LEPTONIC`.
+ * `--setPdfIndices`: set the pdfindex parameters to values specified in `pdfindex.json` when throwing the asimov toy in the expected scan. This can help to obtain closure in the expected scans: the prefit (B-only) pdf indices can differ from the postfit (S+B) pdf indices, which means you can extract a different signal strength to that put in. First run a `bestfit` adding `--saveSpecifiedIndex pdfindex_cat0,pdfindex_cat1,...,pdfindex_catN` to the `fit_opts` of the json file (see `example_inputs/inputs_bestfit.json`). Then make a `pdfindex.json` file using the post-fit values of the pdf indices.
  * `--doObserved`: run the observed fit (unblinding)
  * `--snapshotWSFile`: path to post-fit workspace created using the `--saveWorkspace` option in `fit-opts`. The initial value of the fit parameters will be set to their post-fit values. Useful when running stat-only observed scans, to fix nuisance parameters to their post-fit values (and hence obtain the same central value).
- * `--commonOpts`: combine specific options to add to all commands
+ * `--commonOpts`: combine options to add to all commands
  * `--batch`: batch system e.g. condor
  * `--queue`: batch queue e.g. workday
  * `--dryRun`: do not submit jobs, only create submission scripts
@@ -87,7 +86,7 @@ python CollectFits.py --inputJson inputs.json --mode {model} (--doObserved)
 
 The hadded output will be of the format: `runFits_mu/profile1D_syst_r_ggH.root` for e.g. using the model `mu`, a `profile1D` fit with name `syst` for poi `r_ggH`. This contains the `limit` tree with all of the fit results plus any nuisance parameters that you have specified to save. The tree can then be used to plot the results with whatever fancy plots you can make e.g. for `profile2D` scans you can use the `../Plots/make2DPlot.py` for a smooth 2D likelihood contour.
 
-For the 1D likelihood scans (`profile1D`) and (`scan1D`) fit types, the `CollectFits.py` script will execute `plot1DScan.py` of `combineTools` and the output stored in `runFits_mu/Plots` directory. You can also use this script to produce plots with overlapping likelihood scans e.g.:
+For the 1D likelihood scans (`profile1D`) and (`scan1D`) fit types, the `CollectFits.py` script will execute `plot1DScan.py` of `combineTools` and the output is stored in `runFits_mu/Plots` directory. You can also use this script to produce plots with overlapping likelihood scans e.g.:
 ```
 plot1DScan.py runFits_mu/profile1D_syst_r_ggH.root --y-cut 20 --y-max 20 --output r_ggH_statsyst --POI r_ggH --translate ../Plots/pois_mu.json --main-label "Expected" --main-color 1 --others runFits_mu/profile1D_statonly_r_ggH.root:"Stat only":2 --logo-sub "Preliminary"
 ```

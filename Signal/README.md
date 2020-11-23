@@ -70,14 +70,14 @@ For other options when running `calcPhotonSyst`, see `./scripts/calcPhotonSyst` 
 The final models are normalised according to the following equation:
 ![equation](https://latex.codecogs.com/gif.latex?N_{ij}&space;=&space;(\sigma&space;\cdot&space;BR)_i&space;\times&space;(\epsilon&space;\cdot&space;\mathcal{A})_{ij}&space;\times&space;\mathcal{L})
 
-where `Nij` is the number of signal events of process, i in category j. The `(eff x acc)ij` defines the fraction of signal process, i falling in category, j. The default method for calculating this term is to use the sum of weights in the flashgg workspace and compare to the total `xs x BR`.
+where `Nij` is the number of signal events of process, i in category j. The `(eff x acc)ij` defines the fraction of signal process, i falling in category, j. The default method for calculating this term is to use the sum of weights in the flashgg workspace and compare to the total `xs x BR` (done automatically in the final model construction step).
 
 We have introduced a second method for calculating the `(eff x acc)ij` which simply divides the sum of weights in a particular category by the total sum of weights for a given signal process. The benefit of this method is that you do not need to process all of the signal MC. However, this method strictly requires the `NOTAG` dataset to be included in the flashgg workspaces as you need to include out-of-acceptance events in the calculation. If the 'NOTAG' dataset is not present, then an error will be thrown and you must use the default method.
 
 ```
 python RunSignalScripts.py --inputConfig config_test_2016.py --mode getEffAcc
 ```
-The output is a json file specifying the `(eff x acc)` values for each signal processes in each analysis categories (`./outdir_{ext}/getEffAcc/json`). This json file is then read directly in the final model construction step.
+The output is a json file specifying the `(eff x acc)` values for each signal processes in each analysis category (`./outdir_{ext}/getEffAcc/json`). This json file can then be read directly in the final model construction step.
 
 
 ## Extracting the diagonal process for a given category
@@ -108,7 +108,7 @@ There are many different options for running the `signalFit` which can be added 
  * `--useDiagonalProcForShape`: use the shape of the diagonal process in the category (requires running the `getDiagProc` mode first.
  * `--doEffAccFromJson`: extract the `(eff x acc)ij` values from the output of the `getEffAcc` script. If not selected then will use the default method for calculating `(eff x acc)ij` using the sum of weights and comparing to the total signal process `xs x BR`.
  * `--beamspotWidthMC X` and `--beamspotWidthData Y`: change the beamspot width values for MC and data [cm] for when reweighting the MC to match the data beamspot distribution. You can skip this reweighting using the option `--skipBeamspotReweigh'.
- * `--useDCB`: use DCB + 1Gaussian as pdf instead of N Gaussians.
+ * `--useDCB`: use DCB + 1 Gaussian as pdf instead of N Gaussians.
  * `--doVoigtian`: replace all Gaussians in the signal model with Voigtians (used for Higgs total width studies).
  * `--skipVertexScenarioSplit`: skip splitting the pdf into the RV and WV scenario and instead fit all events together.
  * `--skipZeroes`: skip generating signal models for (proc,cat) with 0 events.

@@ -12,8 +12,7 @@ import glob
 import pickle
 import math
 from collections import OrderedDict
-#from systematics import theory_systematics, experimental_systematics, signal_shape_systematics
-from systematics_STXS import theory_systematics, experimental_systematics, signal_shape_systematics
+from systematics import theory_systematics, experimental_systematics, signal_shape_systematics
 
 from commonObjects import *
 from commonTools import *
