@@ -1,89 +1,143 @@
-# Script to convert flashgg trees to RooWorkspace (compatible for finalFits)
+# Script to convert data trees to RooWorkspace (compatible for finalFits)
+# Assumes tree names of the format:
+# * Data_<sqrts>_category
 
-print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG TREES 2 WS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ "
+print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG TREES 2 WS (DATA) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ "
 import os, sys
 import re
 from optparse import OptionParser
 import ROOT
 import uproot
 from root_numpy import array2tree
+from collections import OrderedDict as od
+
+from commonTools import *
+from commonObjects import *
 
 def get_options():
   parser = OptionParser()
+  parser.add_option('--inputConfig',dest='inputConfig', default="", help='Input config: specify list of variables/analysis categories')
   parser.add_option('--inputTreeFile',dest='inputTreeFile', default=None, help='Input tree file')
   parser.add_option('--inputTreeDir',dest='inputTreeDir', default="tagsDumper/trees", help='Input tree file')
-  parser.add_option('--outputWSPath',dest='outputWSPath', default=None, help="Output workspace folder")
   return parser.parse_args()
 (opt,args) = get_options()
 
-cats = ['RECO_0J_PTH_0_10_Tag0', 'RECO_0J_PTH_0_10_Tag1', 'RECO_0J_PTH_0_10_Tag2', 'RECO_0J_PTH_GT10_Tag0', 'RECO_0J_PTH_GT10_Tag1', 'RECO_0J_PTH_GT10_Tag2', 'RECO_1J_PTH_0_60_Tag0', 'RECO_1J_PTH_0_60_Tag1', 'RECO_1J_PTH_0_60_Tag2', 'RECO_1J_PTH_120_200_Tag0', 'RECO_1J_PTH_120_200_Tag1', 'RECO_1J_PTH_120_200_Tag2', 'RECO_1J_PTH_60_120_Tag0', 'RECO_1J_PTH_60_120_Tag1', 'RECO_1J_PTH_60_120_Tag2', 'RECO_GE2J_PTH_0_60_Tag0', 'RECO_GE2J_PTH_0_60_Tag1', 'RECO_GE2J_PTH_0_60_Tag2', 'RECO_GE2J_PTH_120_200_Tag0', 'RECO_GE2J_PTH_120_200_Tag1', 'RECO_GE2J_PTH_120_200_Tag2', 'RECO_GE2J_PTH_60_120_Tag0', 'RECO_GE2J_PTH_60_120_Tag1', 'RECO_GE2J_PTH_60_120_Tag2', 'RECO_PTH_200_300_Tag0', 'RECO_PTH_200_300_Tag1', 'RECO_PTH_300_450_Tag0', 'RECO_PTH_300_450_Tag1', 'RECO_PTH_450_650_Tag0', 'RECO_PTH_GT650_Tag0', 'RECO_THQ_LEP', 'RECO_TTH_HAD_PTH_0_60_Tag0', 'RECO_TTH_HAD_PTH_0_60_Tag1', 'RECO_TTH_HAD_PTH_0_60_Tag2', 'RECO_TTH_HAD_PTH_0_60_Tag3', 'RECO_TTH_HAD_PTH_120_200_Tag0', 'RECO_TTH_HAD_PTH_120_200_Tag1', 'RECO_TTH_HAD_PTH_120_200_Tag2', 'RECO_TTH_HAD_PTH_120_200_Tag3', 'RECO_TTH_HAD_PTH_60_120_Tag0', 'RECO_TTH_HAD_PTH_60_120_Tag1', 'RECO_TTH_HAD_PTH_60_120_Tag2', 'RECO_TTH_HAD_PTH_60_120_Tag3', 'RECO_TTH_HAD_PTH_GT200_Tag0', 'RECO_TTH_HAD_PTH_GT200_Tag1', 'RECO_TTH_HAD_PTH_GT200_Tag2', 'RECO_TTH_HAD_PTH_GT200_Tag3', 'RECO_TTH_LEP_PTH_0_60_Tag0', 'RECO_TTH_LEP_PTH_0_60_Tag1', 'RECO_TTH_LEP_PTH_0_60_Tag2', 'RECO_TTH_LEP_PTH_0_60_Tag3', 'RECO_TTH_LEP_PTH_120_200_Tag0', 'RECO_TTH_LEP_PTH_120_200_Tag1', 'RECO_TTH_LEP_PTH_60_120_Tag0', 'RECO_TTH_LEP_PTH_60_120_Tag1', 'RECO_TTH_LEP_PTH_GT200_Tag0', 'RECO_TTH_LEP_PTH_GT200_Tag1', 'RECO_VBFLIKEGGH_Tag0', 'RECO_VBFLIKEGGH_Tag1', 'RECO_VBFTOPO_BSM_Tag0', 'RECO_VBFTOPO_BSM_Tag1', 'RECO_VBFTOPO_JET3VETO_HIGHMJJ_Tag0', 'RECO_VBFTOPO_JET3VETO_HIGHMJJ_Tag1', 'RECO_VBFTOPO_JET3VETO_LOWMJJ_Tag0', 'RECO_VBFTOPO_JET3VETO_LOWMJJ_Tag1', 'RECO_VBFTOPO_JET3_HIGHMJJ_Tag0', 'RECO_VBFTOPO_JET3_HIGHMJJ_Tag1', 'RECO_VBFTOPO_JET3_LOWMJJ_Tag0', 'RECO_VBFTOPO_JET3_LOWMJJ_Tag1', 'RECO_VBFTOPO_VHHAD_Tag0', 'RECO_VBFTOPO_VHHAD_Tag1', 'RECO_VH_MET_Tag0', 'RECO_VH_MET_Tag1', 'RECO_WH_LEP_HIGH_Tag0', 'RECO_WH_LEP_HIGH_Tag1', 'RECO_WH_LEP_HIGH_Tag2', 'RECO_WH_LEP_LOW_Tag0', 'RECO_WH_LEP_LOW_Tag1', 'RECO_WH_LEP_LOW_Tag2', 'RECO_ZH_LEP_Tag0', 'RECO_ZH_LEP_Tag1']
-
-# Dict of vars to add to final workspace
-ws_vars = [ # [name,default value, min value, max value, bins]
-  {'name':"IntLumi", 'default':0, 'minValue':0, 'maxValue':999999999, 'constant':True},
-  {'name':"CMS_hgg_mass", 'default':125., 'minValue':100., 'maxValue':180., 'bins':160}
-]
-
-# Define argsets to enter different levels of RooDataSets
-argSets = {
-  'nominal':'weight,CMS_hgg_mass'
-}
+def leave():
+  print "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG TREES 2 WS (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+  sys.exit(1)
 
 # Function to add vars to workspace
-def add_vars_to_workspace(_ws=None):
-  # Add weight var
-  weight = ROOT.RooRealVar("weight","weight",0)
-  getattr(ws, 'import')(weight)
-  # Loop over vars to enter workspace
-  _vars = {}
-  for var in ws_vars:
-    _vars[var['name']] = ROOT.RooRealVar( var['name'], var['name'], var['default'], var['minValue'], var['maxValue'] )
-    if 'constant' in var:
-      if var['constant']: _vars[var['name']].setConstant(True)
-    if 'bins' in var: _vars[var['name']].setBins(var['bins'])
-    getattr(_ws, 'import')( _vars[var['name']], ROOT.RooFit.Silence())
+def add_vars_to_workspace(_ws=None,_dataVars=None):
+  # Add intLumi var
+  intLumi = ROOT.RooRealVar("intLumi","intLumi",1000.,0.,999999999.)
+  intLumi.setConstant(True)
+  getattr(_ws,'import')(intLumi)
+  _vars = od()
+  for var in _dataVars:
+    if var == "CMS_hgg_mass":
+      _vars[var] = ROOT.RooRealVar(var,var,125.,100.,180.)
+      _vars[var].setBins(160)
+    elif var == "dZ":
+      _vars[var] = ROOT.RooRealVar(var,var,0.,-20.,20.)
+      _vars[var].setBins(40)
+    elif var == "weight":
+      _vars[var] = ROOT.RooRealVar(var,var,0.)
+    else:
+      _vars[var] = ROOT.RooRealVar(var,var,1.,-999999,999999)
+      _vars[var].setBins(1)
+    getattr(_ws,'import')(_vars[var],ROOT.RooFit.Silence())
+  return _vars.keys()
 
-# Function to create arg list depending on Data type
-def make_argSet( _ws, _argSets, _type ):
-  argSet = ROOT.RooArgSet()
-  aset = _argSets[_type]
-  args = aset.split(",")
-  for arg in args: argSet.add( _ws.var(arg) )
-  return argSet
-    
-# Input file:
-f = ROOT.TFile( opt.inputTreeFile )
+# Function to make RooArgSet
+def make_argset(_ws=None,_varNames=None):
+  _aset = ROOT.RooArgSet()
+  for v in _varNames: _aset.add(_ws.var(v))
+  return _aset
 
-# Define output workspace to store RooDataSet
-ws = ROOT.RooWorkspace("cms_hgg_13TeV","cms_hgg_13TeV")
-# Add variables to workspace and create argset
-add_vars_to_workspace(ws)
-argset = make_argSet( ws, argSets, 'nominal')
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Extract options from config file:
+options = od()
+if opt.inputConfig != '':
+  if os.path.exists( opt.inputConfig ):
 
-# Loop over categoires
+    #copy file to have common name and then import cfg options (dict)
+    os.system("cp %s config.py"%opt.inputConfig)
+    from config import trees2wsCfg
+    _cfg = trees2wsCfg
+
+    #Extract options
+    dataVars         = _cfg['dataVars']
+    cats             = _cfg['cats']
+
+    #Delete copy of file
+    os.system("rm config.py")
+
+  else:
+    print "[ERROR] %s config file does not exist. Leaving..."%opt.inputConfig
+    leave()
+else:
+  print "[ERROR] Please specify config file to run from. Leaving..."%opt.inputConfig
+  leave()
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# UPROOT file
+f = uproot.open(opt.inputTreeFile)
+listOfTreeNames = f[opt.inputTreeDir].keys()
+# If cats = 'auto' then determine from list of trees
+if cats == 'auto':
+  cats = []
+  for tn in listOfTreeNames:
+    if "sigma" in tn: continue
+    elif "NOTAG" in tn: continue
+    elif "ERROR" in tn: continue
+    c = tn.split("_%s_"%sqrts__)[-1].split(";")[0]
+    cats.append(c)
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Open input ROOT file
+f = ROOT.TFile(opt.inputTreeFile)
+
+# Open output ROOT file and initiate workspace to store RooDataSets
+outputWSDir = "/".join(opt.inputTreeFile.split("/")[:-1])+"/ws"
+if not os.path.exists(outputWSDir): os.system("mkdir %s"%outputWSDir)
+outputWSFile = outputWSDir+"/"+opt.inputTreeFile.split("/")[-1]
+print " --> Creating output workspace: (%s)"%outputWSFile
+fout = ROOT.TFile(outputWSFile,"RECREATE")
+foutdir = fout.mkdir(inputWSName__.split("/")[0])
+foutdir.cd()
+ws = ROOT.RooWorkspace(inputWSName__.split("/")[1],inputWSName__.split("/")[1])
+
+# Add variables to workspace
+varNames = add_vars_to_workspace(ws,dataVars)
+
+# Make argset
+aset = make_argset(ws,varNames)
+
+# Loop over categories and 
 for cat in cats:
-  print " --> [VERBOSE] Extracting events from category %s and storing in dataset"%cat
-  treeName = "%s/Data_13TeV_%s"%(opt.inputTreeDir,cat)
-  # Extract tree from uproot
+  print " --> Extracting events from category: %s"%cat
+  treeName = "%s/Data_%s_%s"%(opt.inputTreeDir,sqrts__,cat)
+  print "    * tree: %s"%treeName
   t = f.Get(treeName)
+
   # Define dataset for cat
-  dname = "Data_13TeV_%s"%cat
-  d = ROOT.RooDataSet(dname,dname,argset,'weight')
-  # Loop over events in tree and add to dataset with weight of 1
+  dname = "Data_%s_%s"%(sqrts__,cat)  
+  d = ROOT.RooDataSet(dname,dname,aset,'weight')
+
+  # Loop over events in tree and add to dataset with weight 1
   for ev in t:
-    ws.var("CMS_hgg_mass").setVal(ev.CMS_hgg_mass)
-    d.add(argset,1.)
-  # Add dataset to workspace
+    for var in dataVars: 
+      if var == "weight": continue
+      ws.var(var).setVal(getattr(ev,var))
+    d.add(aset,1.)
+
+  # Add dataset to worksapce
   getattr(ws,'import')(d)
   
-# Define outputfile
-outputWSFile = "%s/%s"%(opt.outputWSPath,opt.inputTreeFile.split("/")[-1])
-fout = ROOT.TFile( outputWSFile, "RECREATE" )
-foutdir = fout.mkdir("tagsDumper")
-foutdir.cd()
-# Export ws to file
+# Write workspace to file
 ws.Write()
 
+# Close file
 fout.Close()
 ws.Delete()
 fout.Delete()

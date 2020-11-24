@@ -33,7 +33,6 @@ where `{model}` matches the key in `models.py`. For the simplest case, where you
 The `--dryRun` option means the script (produced in `t2w_jobs`) will not be submitted. You can then go and run this script locally (recommend for analyses with a small number of categories as this step should not take too long). For bigger analyses you will want to submit the job to your favourite batch system e.g.
 ```
 python RunText2Workspace.py --mode {model} --batch condor --queue workday
-
 ```
 The output will be a compiled `RooWorkspace` with the name `Datacard_{model}.root`.
 
@@ -64,7 +63,7 @@ This script uses the functionalities of [combineHarvester](https://cms-analysis.
 
 For tips, please refer to `example_inputs` directory for a set of example input jsons. 
 
-Thereis also a bunch of additional options when using the `RunFits.py` script:
+There's a bunch of additional options when using the `RunFits.py` script:
 
  * `--ext`: running over a datacard with an extension in the name e.g. for `Datacard_LEPTONIC_mu.root` you would use `--ext _LEPTONIC`.
  * `--setPdfIndices`: set the pdfindex parameters to values specified in `pdfindex.json` when throwing the asimov toy in the expected scan. This can help to obtain closure in the expected scans: the prefit (B-only) pdf indices can differ from the postfit (S+B) pdf indices, which means you can extract a different signal strength to that put in. First run a `bestfit` adding `--saveSpecifiedIndex pdfindex_cat0,pdfindex_cat1,...,pdfindex_catN` to the `fit_opts` of the json file (see `example_inputs/inputs_bestfit.json`). Then make a `pdfindex.json` file using the post-fit values of the pdf indices.

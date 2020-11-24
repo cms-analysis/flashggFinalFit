@@ -64,6 +64,27 @@ def containsNOTAG( _listOfWSFileNames ):
     if "NOTAG" in d.GetName(): return True
   return False
 
+# Function to return signal production (and decay extension if required) from input file name
+def signalFromFileName(_fileName):
+  p, d = None, None
+  if "ggZH" in _fileName:
+    p = "ggzh"
+    if "ZToLL" in _fileName: d = "_ZToLL"
+    elif "ZToNuNu" in _fileName: d = "_ZToNuNu"
+    else: d = "_ZToQQ"
+  elif "GluGlu" in _fileName: p = "ggh"
+  elif "VBF" in _fileName: p = "vbf"
+  elif "WH" in _fileName: p = "wh"
+  elif "ZH" in _fileName: p = "zh"
+  elif "ttH" in _fileName: p = "tth"
+  elif "THQ" in _fileName: p = "thq"
+  elif "THW" in _fileName: p = "thw"
+  elif "bbH" in _fileName: p = "bbh"
+  else:
+    print " --> [ERROR]: cannot extract production mode from input file name. Please update tools.commonTools.signalFromFileName"
+    exit(1)
+  return p,d
+
 # Function for converting STXS process to production mode in dataset name
 procToDataMap = od()
 procToDataMap['GG2H'] = 'ggh'
@@ -83,6 +104,11 @@ def procToData( _proc ):
   k = _proc.split("_")[0]
   if k in procToDataMap: _proc = re.sub( k, procToDataMap[k], _proc )
   return _proc
+
+def dataToProc( _d ):
+  dataToProcMap = {v:k for k,v in procToDataMap.iteritems()}
+  if _d in dataToProcMap: return dataToProcMap[_d]
+  else: return _d
 
 # Mapping of process to name in datacard
 procToDatacardNameMap = od()

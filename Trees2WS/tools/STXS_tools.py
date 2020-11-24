@@ -1,10 +1,6 @@
 # Hold common objects used for Trees2WS scripts
 from collections import OrderedDict as od
 
-sqrts__ = "13TeV"
-outputWSROOTDir__ = "tagsDumper"
-outputWSTitle__ = "cms_hgg_%s"%sqrts__
-
 flashggSTXSDict = od()
 flashggSTXSDict[0] = "UNKNOWN"
 flashggSTXSDict[-1] = "GG2H_FWDH"

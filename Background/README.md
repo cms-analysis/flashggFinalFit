@@ -1,6 +1,6 @@
 # Background Modelling
 
-This is where the background model is determined. This is the only package yet to be updated for the new Final Fits i.e. converted to python. We have introduced a new mode for running the fTest `fTestParallel` which creates a separate job per analysis category. These jobs can then be submitted in parallel, greatly speeding up the process!
+This is where the background model is determined. This is the only package yet to be pythonised for the new Final Fits. We have introduced a new mode for running the fTest `fTestParallel` which creates a separate job per analysis category. These jobs can then be submitted in parallel, greatly speeding up the process!
 
 The S+B plotting functionalities in this package have for now been depleted. You can produce the traditional blinded signal + bkg model plots using the `../Plots/makeSplusBModelPlot.py` script (see the `Plots` package for mode details). The `fTestParallel` will by default still produce the standard multipdf style plots.
 
@@ -45,9 +45,11 @@ backgroundScriptCfg = {
 }
 ```
 
-The output is a ROOT file containing the `RooMultiPdf`'s for each analysis category in `outdir_{ext}`. These are your background models (which must be copied across to the `Combine` directory when you get to this step). In addition the standard fTest plots are produced in the `outdir_{ext}/bkgfTest-Data` directory, where the numbering matches the `catOffset` for each category (see the submission scripts).
+The output is a ROOT file containing the `RooMultiPdf`'s for each analysis category in `outdir_{ext}`. These are your background models (which must be copied across to the `Combine` directory when you get to the final fits step). In addition the standard fTest plots are produced in the `outdir_{ext}/bkgfTest-Data` directory, where the numbering matches the `catOffset` for each category (see the submission scripts).
 
 ### To do list
+
+ * Pseudodata functionality
 
  * As mentioned above you can now plot the blinded S+B model plots from the compiled datacard using `../Plots/makeSplusBModelPlot.py` script. We should add a dedicated plotting script in the `Background` package ASAP.
 

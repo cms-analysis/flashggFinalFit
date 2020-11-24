@@ -4,6 +4,7 @@ trees2wsCfg = {
 
   # Variables to be added to dataframe: use wildcard * for common strings
   'mainVars':["CMS_hgg_mass","weight","centralObjectWeight","dZ","*sigma"], # Vars to add to nominal RooDatasets
+  'dataVars':["CMS_hgg_mass","weight"], # Vars for data workspace (trees2ws_data.py script)
   'stxsVar':'stage1p2bin', # Var for STXS splitting: if using option doSTXSSplitting
   'notagVars':["weight","*sigma"], # Vars to add to NOTAG RooDataset
   'systematicsVars':["CMS_hgg_mass","weight"], # Variables to add to sytematic RooDataHists

@@ -8,6 +8,7 @@ bwd__ = "%s/Background"%cwd__
 dwd__ = "%s/Datacard"%cwd__
 fwd__ = "%s/Combine"%cwd__
 pwd__ = "%s/Plots"%cwd__
+twd__ = "%s/Trees2WS"%cwd__
 
 # Centre of mass energy string
 sqrts__ = "13TeV"

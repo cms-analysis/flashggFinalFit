@@ -1,7 +1,5 @@
 # Signal modelling
 
-Add some intro details here.
-
 There are a number of steps to perform when constructing the signal model (described below). It is recommended to construct a signal model for each year separately. This allows to keep track of both the year-dependent resolution effects and the year-dependent systematic uncertainties. Each step up to the packaging is ran using the `RunSignalScripts.py` script, which takes as input a config file e.g.:
 
 ```
@@ -11,7 +9,7 @@ signalScriptCfg = {
   
   # Setup
   'inputWSDir':'/vols/cms/jl2117/hgg/ws/UL/Sept20/MC_final/signal_2016', # dir storing flashgg workspaces
-  'procs':'auto', # if auto: inferred automatically from filenames
+  'procs':'auto', # if auto: inferred automatically from filenames (requires names to be of from *pythia8_{PROC}.root)
   'cats':'auto', # if auto: inferred automatically from (0) workspace
   'ext':'test_2016', # output directory extension
   'analysis':'example', # To specify replacement dataset and XS*BR mapping (defined in ./tools/replacementMap.py and ./tools/XSBRMap.py respectively)
@@ -35,6 +33,8 @@ The basic command for using `RunSignalScripts.py` is the following:
 python RunSignalScripts.py --inputConfig {config_file}.py --mode {mode} --modeOpts "{list of options for specific mode}" --jobOpts "{list of options for job submission}"
 ```
 To simply print the job scripts without submitting then add the option: `--printOnly`. You can then go to the respective `outdir_{ext}/{mode}/jobs` directory to run the individual scripts locally (great for testing and debugging!)
+
+In this new final fits package we have introduced a number of additional options which were not previously available. Firstly, you can now run the signal model for a single mass point: the polynominal defining the mass dependence on the fit parameters is set to a constant. Additionally, you can skip the splitting into the right vertex (RV) and wrong vertex (WV) scenarios (in fact the fraction of WV events for anything but ggH 0J is ~0, so the general rule of thumb is that it is okay to skip the splitting). In the new package the minimizer has been replaced with `scipy.minimize`, which means we no longer require the specialised ROOT class for the simultaneous signal fit for different mass points. For developers of this package you can find the Python class which performs the signal fit in `tools.simultaneousFit`. A simple application of this is shown in `simpleFit.py`. The construction of the final signal model is done using the Python class in `tools.finalModel.py`
 
 ## Signal F-test
 
@@ -105,7 +105,7 @@ There are many different options for running the `signalFit` which can be added 
 
  * `--doPlots`: plot interpolation of signal model, the various normalisation inputs and the shape pdf split into its individual components.
  * `--nBins`: number of bins to use in fit. Default = 80.
- * `--useDiagonalProcForShape`: use the shape of the diagonal process in the category (requires running the `getDiagProc` mode first.
+ * `--useDiagonalProcForShape`: use the shape of the diagonal process in the category (requires running the `getDiagProc` mode first).
  * `--doEffAccFromJson`: extract the `(eff x acc)ij` values from the output of the `getEffAcc` script. If not selected then will use the default method for calculating `(eff x acc)ij` using the sum of weights and comparing to the total signal process `xs x BR`.
  * `--beamspotWidthMC X` and `--beamspotWidthData Y`: change the beamspot width values for MC and data [cm] for when reweighting the MC to match the data beamspot distribution. You can skip this reweighting using the option `--skipBeamspotReweigh'.
  * `--useDCB`: use DCB + 1 Gaussian as pdf instead of N Gaussians.
@@ -113,7 +113,7 @@ There are many different options for running the `signalFit` which can be added 
  * `--skipVertexScenarioSplit`: skip splitting the pdf into the RV and WV scenario and instead fit all events together.
  * `--skipZeroes`: skip generating signal models for (proc,cat) with 0 events.
  * `--skipSystematics`: skip adding photon systematics to signal models. Use if have not ran the `calcPhotonSyst` mode.
- * `--useDiagonalProcForSyst`: takes the systematic constants from diagonal process (requires running the `getDiagProc` mode first. Useful if the statistics are low which can lead to dubious values for systematics constants.
+ * `--useDiagonalProcForSyst`: takes the systematic constants from diagonal process (requires running the `getDiagProc` mode first). Useful if the MC statistics are low which can lead to dubious values for systematics constants.
  * `--replacementThreshold`: change the threshold number of entries with which to use replacement dataset. Default = 100
  * `--MHPolyOrder`: change the order of the polynomial which defines the MH dependence of fit parameters. Default is a linear interpolation (1). If using only one mass point then this is automatically set to 0.
  * `minimizerMethod` and `minimizerTolerance`: options for scipy minimize, used for fit

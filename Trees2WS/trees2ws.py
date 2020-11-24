@@ -5,18 +5,14 @@
 #  * <productionMode>_<MH>_<sqrts>_<category>_<syst>Up01sigma e.g. ggh_125_13TeV_RECO_0J_PTH_0_10_Tag0_JECUp01sigma
 #  * <productionMode>_<MH>_<sqrts>_<category>_<syst>Down01sigma e.g. ggh_125_13TeV_RECO_0J_PTH_0_10_Tag0_JECDown01sigma
 
-print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG TREES 2 WS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ "
 import os, sys
 import re
 from optparse import OptionParser
-import ROOT
-import pandas
-import numpy as np
-import uproot
-from root_numpy import array2tree
 from collections import OrderedDict as od
 
+from commonTools import *
 from commonObjects import *
+from tools.STXS_tools import *
 
 def get_options():
   parser = OptionParser()
@@ -34,6 +30,14 @@ def get_options():
   return parser.parse_args()
 (opt,args) = get_options()
 
+import ROOT
+import pandas
+import numpy as np
+import uproot
+from root_numpy import array2tree
+
+
+print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG TREES 2 WS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ "
 def leave():
   print "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG TREES 2 WS (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
   sys.exit(1)
@@ -232,7 +236,7 @@ for stxsId in data[stxsVar].unique():
     elif opt.productionMode == 'thw': stxsBin = re.sub("TH","THW",stxsBin)
 
     # Define output workspace file
-    outputWSDir = "/".join(opt.inputTreeFile.split("/")[:-1])+"/ws_%s_%s"%(opt.productionMode,stxsBin)
+    outputWSDir = "/".join(opt.inputTreeFile.split("/")[:-1])+"/ws_%s"%stxsBin
     if not os.path.exists(outputWSDir): os.system("mkdir %s"%outputWSDir)
     outputWSFile = outputWSDir+"/"+re.sub(".root","_%s.root"%stxsBin,opt.inputTreeFile.split("/")[-1])
     print " --> Creating output workspace for STXS bin: %s (%s)"%(stxsBin,outputWSFile)
@@ -242,16 +246,16 @@ for stxsId in data[stxsVar].unique():
     if opt.doSystematics: sdf = df
 
     # Define output workspace file
-    outputWSDir = "/".join(opt.inputTreeFile.split("/")[:-1])+"/ws_%s"%opt.productionMode
+    outputWSDir = "/".join(opt.inputTreeFile.split("/")[:-1])+"/ws_%s"%dataToProc(opt.productionMode)
     if not os.path.exists(outputWSDir): os.system("mkdir %s"%outputWSDir)
-    outputWSFile = outputWSDir+"/"+opt.inputTreeFile.split("/")[-1]
+    outputWSFile = outputWSDir+"/"+re.sub(".root","_%s.root"%dataToProc(opt.productionMode),opt.inputTreeFile.split("/")[-1])
     print " --> Creating output workspace: (%s)"%outputWSFile
     
   # Open file and initiate workspace
   fout = ROOT.TFile(outputWSFile,"RECREATE")
-  foutdir = fout.mkdir(outputWSROOTDir__)
+  foutdir = fout.mkdir(inputWSName__.split("/")[0])
   foutdir.cd()
-  ws = ROOT.RooWorkspace(outputWSTitle__,outputWSTitle__)
+  ws = ROOT.RooWorkspace(inputWSName__.split("/")[1],inputWSName__.split("/")[1])
   
   # Add variables to workspace
   varNames = add_vars_to_workspace(ws,df,stxsVar)
