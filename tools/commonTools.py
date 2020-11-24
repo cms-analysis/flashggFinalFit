@@ -43,6 +43,19 @@ def extractListOfCats( _listOfWSFileNames ):
   f0.Close()
   return ",".join(cats)
 
+def extractListOfCatsFromData( _fileName ):
+  f = ROOT.TFile(_fileName)
+  ws = f.Get(inputWSName__)
+  allData = ws.allData()
+  cats = []
+  for d in allData:
+    c = d.GetName().split("Data_%s_"%sqrts__)[-1]
+    cats.append(c)
+  cats.sort()
+  ws.Delete()
+  f.Close()
+  return ",".join(cats)
+
 def containsNOTAG( _listOfWSFileNames ):
   f0 = ROOT.TFile(_listOfWSFileNames[0]) 
   ws = f0.Get(inputWSName__)

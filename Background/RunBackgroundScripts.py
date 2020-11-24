@@ -1,167 +1,108 @@
 # Script for running background fitting jobs for flashggFinalFit
-
 import os, sys
 from optparse import OptionParser
+from collections import OrderedDict as od
 
-lumi = {'2016':'35.9', '2017':'41.5', '2018':'59.8', 'all':'137.2'}
+# Import tools
+from tools.submissionTools import *
+from commonTools import *
+from commonObjects import *
 
 def get_options():
   parser = OptionParser()
-
-  # Take inputs from a config file: if this is used then ignore all other options
+  # Take inputs from a config file
   parser.add_option('--inputConfig', dest='inputConfig', default='', help="Name of input config file (if specified will ignore other options)")
-
-  # Setup
-  parser.add_option('--inputWSDir', dest='inputWSDir', default='/vols/cms/es811/FinalFits/ws_ReweighAndNewggHweights', help="Directory storing flashgg workspaces" )
-  parser.add_option('--cats', dest='cats', default='UntaggedTag_0,VBFTag_0', help="Define categories")
-  parser.add_option('--ext', dest='ext', default='test', help="Extension: defines output dir which must matche xtension used for signal model building")
-  parser.add_option('--catOffset', dest='catOffset', default=0, type='int', help="Dataset year")
-  parser.add_option('--year', dest='year', default='2016', help="Dataset year")
-  parser.add_option('--unblind', dest='unblind', default=0, type='int', help="Unblind")
-  
-  # Options for running on the batch
-  parser.add_option('--batch', dest='batch', default='IC', help="Batch")
-  parser.add_option('--queue', dest='queue', default='hep.q', help="Queue")
-
-  # Miscellaneous options: only performing single function
-  parser.add_option('--mode', dest='mode', default='std', help="For performing single functions [std,fTestOnly,fTestParallel,bkgPlotsOnly]")
-  parser.add_option('--printOnly', dest='printOnly', default=0, type='int', help="Dry run: print command only")
-  
+  parser.add_option('--mode', dest='mode', default='std', help="Which script to run. Options: ['fTestOnly','fTestParallel','bkgPlotsOnly']")
+  parser.add_option('--jobOpts', dest='jobOpts', default='', help="Additional options to add to job submission. For Condor separate individual options with a colon (specify all within quotes e.g. \"option_xyz = abc+option_123 = 456\")")
+  parser.add_option('--printOnly', dest='printOnly', default=False, action="store_true", help="Dry run: print submission files only") 
   return parser.parse_args()
 
 (opt,args) = get_options()
 
 print "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ RUNNING BACKGROUND SCRIPTS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+def leave():
+  print "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ RUNNING BACKGROUND SCRIPTS (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+  sys.exit(1)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# IF using config file then extract options:
+# Extract options from config file
+options = od()
 if opt.inputConfig != '':
   if os.path.exists( opt.inputConfig ):
 
-    # copy file to have common name and then import cfg options (dict)
+    #copy file to have common name and then import cfg options (dict)
     os.system("cp %s config.py"%opt.inputConfig)
     from config import backgroundScriptCfg
     _cfg = backgroundScriptCfg
 
-    # Extract options
-    inputWSDir   = _cfg['inputWSDir']
-    cats         = _cfg['cats']
-    ext          = _cfg['ext']
-    catOffset    = _cfg['catOffset']
-    year         = _cfg['year']
-    unblind      = _cfg['unblind']
-    batch        = _cfg['batch']
-    queue        = _cfg['queue']
-    mode         = _cfg['mode']
-    printOnly    = opt.printOnly
+    #Extract options
+    options['dataFile']     = "%s/allData.root"%_cfg['inputWSDir']
+    options['cats']         = _cfg['cats']
+    options['catOffset']    = _cfg['catOffset']
+    options['ext']          = _cfg['ext']
+    options['year']         = _cfg['year']
+    options['lumi']         = lumiMap[_cfg['year']]
+    options['batch']        = _cfg['batch']
+    options['queue']        = _cfg['queue']
+
+    # Options from command line
+    options['mode']                    = opt.mode
+    options['jobOpts']                 = opt.jobOpts
+    options['printOnly']               = opt.printOnly
 
     # Delete copy of file
     os.system("rm config.py")
 
-  else: 
-    print " --> [ERROR] %s config file does not exist. Leaving..."%opt.inputConfig
-    print "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ RUNNING BACKGROUND SCRIPTS (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-    sys.exit(1)
-
-# ELSE extract from the option parser
+  else:
+    print "[ERROR] %s config file does not exist. Leaving..."%opt.inputConfig
+    leave()
 else:
-  inputWSDir   = opt.inputWSDir
-  cats         = opt.cats
-  ext          = opt.ext
-  catOffset    = opt.catOffset
-  year         = opt.year
-  unblind      = opt.unblind
-  batch        = opt.batch
-  queue        = opt.queue
-  mode         = opt.mode
-  printOnly    = opt.printOnly
+  print "[ERROR] Please specify config file to run from. Leaving..."%opt.inputConfig
+  leave()
 
 # Check if mode is allowed in options
-if mode not in ['std','fTestOnly','fTestParallel','bkgPlotsOnly']:
-  print " --> [ERROR] mode %s is not allowed. Please use one of the following: [std,fTestOnly,fTestParallel,bkgPlotsOnly]. Leaving..."%mode 
+if options['mode'] not in ['fTestParallel']:
+  print " --> [ERROR] mode %s is not allowed. The only current supported mode is: [fTestParallel]. Leaving..."%options['mode']
   print "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ RUNNING BACKGROUND SCRIPTS (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
   sys.exit(1)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Extrct list of input ws filenames
-ws_fileNames = []
-for root, dirs, files in os.walk( inputWSDir ):
-  for fileName in files:
-    if not fileName.startswith('output_'): continue
-    if not fileName.endswith('.root'): continue
-    ws_fileNames.append( fileName )
-# concatenate with input dir to get full list of complete file names
-ws_fullFileNames = ''
-for fileName in ws_fileNames: ws_fullFileNames+="%s/%s,"%(inputWSDir,fileName)
-ws_fullFileNames = ws_fullFileNames[:-1]
+# If cat == auto: extract list of categories from datafile
+if options['cats'] == 'auto':
+  options['cats'] = extractListOfCatsFromData(options['dataFile'])
+options['nCats'] = len(options['cats'].split(","))
 
-# Extract list of procs
-procs = ''
-for fileName in ws_fileNames:
-  if 'M125' not in fileName: continue
-  procs += "%s,"%fileName.split('pythia8_')[1].split('.root')[0]
-procs = procs[:-1]
-if len(procs)==0: procs = 'arbitrary'
-
-# Extract data file name and signal fit workspace filename
-dataFile = "%s/allData.root"%inputWSDir
-signalFitWSFile = "%s/../Signal/outdir_%s/CMS-HGG_sigfit_%s.root"%(os.environ['PWD'],ext,ext)
-
-if not os.path.exists( signalFitWSFile ):
-  print " --> [ERROR] signal fit workspace (%s) does not exists. Please run signal fitting first. Leaving..."%signalFitWSFile
+# Add dummy entries for procs and signalFitWSFile (used in old plotting script)
+options['signalFitWSFile'] = 'none'
+options['procs'] = 'none'
 
 # Print info to user
-print " --> Input flashgg ws dir: %s"%inputWSDir
-print " --> Processes: %s"%procs
-print " --> Categories: %s"%cats
-print " --> Extension: %s"%ext
-print " --> Category offset: %g"%catOffset
-print " --> Year: %s ::: Corresponds to intLumi = %s fb^-1"%(year,lumi[year])
+print " --> Input data file: %s"%options['dataFile']
+print " --> Categories: %s"%options['cats']
+print " --> Extension: %s"%options['ext']
+print " --> Category offset: %g"%options['catOffset']
+print " --> Year: %s ::: Corresponds to intLumi = %s fb^-1"%(options['year'],options['lumi'])
 print ""
 print " --> Job information:"
-print "     * Batch: %s"%batch
-print "     * Queue: %s"%queue
+print "     * Batch: %s"%options['batch']
+print "     * Queue: %s"%options['queue']
 print ""
-if mode == "fTestOnly": print " --> Running background fTest only..."
-elif mode == "fTestParallel": print " --> Running background fTest only (in parallel)..."
-elif mode == "bkgPlotsOnly": print " --> Running background plots only..."
+if options['mode'] == "fTestParallel": print " --> Running background fTest (in parallel)..."
 print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 
-if mode == "fTestParallel":
-  # Write scripts for parallel fTest
-  if not os.path.isdir("./outdir_%s"%ext): os.system("mkdir ./outdir_%s"%ext)
-  if not os.path.isdir("./outdir_%s/fTestParallel"%ext): os.system("mkdir ./outdir_%s/fTestParallel"%ext)
-  if not os.path.isdir("./outdir_%s/fTestParallel/jobs"%ext): os.system("mkdir ./outdir_%s/fTestParallel/jobs"%ext)
-  for cat_idx in range(len(cats.split(","))):
-    cat = cats.split(",")[cat_idx]
-    f = open("./outdir_%s/fTestParallel/jobs/sub%g.sh"%(ext,cat_idx),"w")
-    f.write("#!/bin/bash\n\n")
-    f.write("cd %s/src/flashggFinalFit/Background\n\n"%os.environ['CMSSW_BASE'])
-    f.write("eval `scramv1 runtime -sh`\n\n")
-    co = catOffset+cat_idx  
-    cmdLine = "./runBackgroundScripts.sh -i %s -p %s -f %s --ext %s --catOffset %g --intLumi %s --year %s --batch %s --queue %s --sigFile %s --isData --fTestOnly"%(dataFile,procs,cat,ext,co,lumi[year],year,batch,queue,signalFitWSFile)
-    f.write("%s\n"%cmdLine)
-    f.close()
-  # Change permission fo scripts
-  os.system("chmod 775 ./outdir_%s/fTestParallel/jobs/sub*.sh"%ext)
-  # If not printOnly: submit scripts
-  if not printOnly:
-    for cat_idx in range(len(cats.split(","))):
-      cat = cats.split(",")[cat_idx]
-      print " --> Category: %s (sub%g.sh)"%(cat,cat_idx)
-      os.system("qsub -q hep.q -l h_rt=0:20:0 ./outdir_%s/fTestParallel/jobs/sub%g.sh"%(ext,cat_idx))
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Make directory to store job scripts and output
+if not os.path.isdir("%s/outdir_%s"%(bwd__,options['ext'])): os.system("mkdir %s/outdir_%s"%(bwd__,options['ext']))
 
+# Write submission files: style depends on batch system
+writeSubFiles(options)
+print "  --> Finished writing submission scripts"
+
+# Submit scripts to batch system
+if not options['printOnly']:
+  submitFiles(options)
 else:
-  # Construct input command
-  print " --> Constructing input command..."
+  print "  --> Running with printOnly option. Will not submit scripts"
 
-  cmdLine = "./runBackgroundScripts.sh -i %s -p %s -f %s --ext %s --catOffset %g --intLumi %s --year %s --batch %s --queue %s --sigFile %s --isData "%(dataFile,procs,cats,ext,catOffset,lumi[year],year,batch,queue,signalFitWSFile)
-  if mode == "fTestOnly": cmdLine += '--fTestOnly '
-  elif mode == "bkgPlotsOnly": cmdLine += '--bkgPlotsOnly '
-  if unblind and not fTestOnly: cmdLine += '--undblind '
-
-  # Either print command to screen or run
-  if printOnly: print "\n%s"%cmdLine
-  else: os.system( cmdLine )
-
-print "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ RUNNING BACKGROUND SCRIPTS (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+leave()
