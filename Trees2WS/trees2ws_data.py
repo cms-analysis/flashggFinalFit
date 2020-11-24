@@ -18,7 +18,6 @@ def get_options():
   parser = OptionParser()
   parser.add_option('--inputConfig',dest='inputConfig', default="", help='Input config: specify list of variables/analysis categories')
   parser.add_option('--inputTreeFile',dest='inputTreeFile', default=None, help='Input tree file')
-  parser.add_option('--inputTreeDir',dest='inputTreeDir', default="tagsDumper/trees", help='Input tree file')
   return parser.parse_args()
 (opt,args) = get_options()
 
@@ -66,6 +65,7 @@ if opt.inputConfig != '':
     _cfg = trees2wsCfg
 
     #Extract options
+    inputTreeDir     = _cfg['inputTreeDir']
     dataVars         = _cfg['dataVars']
     cats             = _cfg['cats']
 
@@ -82,7 +82,7 @@ else:
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # UPROOT file
 f = uproot.open(opt.inputTreeFile)
-listOfTreeNames = f[opt.inputTreeDir].keys()
+listOfTreeNames = f[inputTreeDir].keys()
 # If cats = 'auto' then determine from list of trees
 if cats == 'auto':
   cats = []
@@ -116,7 +116,7 @@ aset = make_argset(ws,varNames)
 # Loop over categories and 
 for cat in cats:
   print " --> Extracting events from category: %s"%cat
-  treeName = "%s/Data_%s_%s"%(opt.inputTreeDir,sqrts__,cat)
+  treeName = "%s/Data_%s_%s"%(inputTreeDir,sqrts__,cat)
   print "    * tree: %s"%treeName
   t = f.Get(treeName)
 

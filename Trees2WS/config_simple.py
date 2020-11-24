@@ -2,9 +2,12 @@
 
 trees2wsCfg = {
 
+  # Name of RooDirectory storing input tree
+  'inputTreeDir':'tagsDumper/trees',
+
   # Variables to be added to dataframe: use wildcard * for common strings
-  'mainVars':["CMS_hgg_mass","weight","dZ"],
-  'dataVars':["CMS_hgg_mass","weight"],
+  'mainVars':["CMS_hgg_mass","weight","dZ"], # Var for the nominal RooDataSets
+  'dataVars':["CMS_hgg_mass","weight"], # Vars to be added for data
   'stxsVar':'',
   'notagVars':["weight"], # Vars to add to NOTAG RooDataset
   'systematicsVars':["CMS_hgg_mass","weight"], # Variables to add to sytematic RooDataHists
