@@ -91,6 +91,25 @@ plot1DScan.py runFits_mu/profile1D_syst_r_ggH.root --y-cut 20 --y-max 20 --outpu
 ```
 Will overlay the systematic and stat-only fit results for the `r_ggH` parameter. 
 
+## Impacts
+
+See [combine manual](https://cms-analysis.github.io/HiggsAnalysis-CombinedLimit/part3/nonstandard/#nuisance-parameter-impacts) for details. Method for calculating the impact of nuisance parameters on the parameters of interest. Using your compiled `RooWorkspace` as input (e.g. `Datacard_mu.root`). The first step is to run an initial fit for each POI (as below), where the options in brackets are added for the calculating the expected impacts, setting the POIs to their SM values:
+```
+combineTool.py -M Impacts -d Datacard_mu.root -m 125 --doInitialFit --robustFit 1 (-t -1 --setParameters r_ggH=1,r_VBF=1,r_VH=1,r_top=1)
+```
+Then you perform a similar scan for each nuisance parameter:
+```
+combineTool.py -M Impacts -d Datacard_mu.root -m 125 --robustFit 1 --doFits (-t -1 --setParameters r_ggH=1,r_VBF=1,r_VH=1,r_top=1)
+```
+This command will run approximately 60 scans, and to speed things up the option `--parallel X` can be given to run `X` combine jobs simultaneously. When all jobs are finished you can collect the output and write to a json file and then plot the standard impacts plots using:
+```
+combineTool.py -M Impacts -d Datacard_mu.root -m 125 -o impacts.json
+plotImpacts.py -i impacts.json -o impacts
+```
+
+Be careful: if you are running the observed impacts, the unblinded value of the POI will be displayed in the top right of the plot!
+
+
 ## Supported types of fit
 
  * `profile1D`: 1D likelihood scan where other pois are profiled
