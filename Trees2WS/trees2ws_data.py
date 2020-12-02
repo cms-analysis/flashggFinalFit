@@ -82,7 +82,8 @@ else:
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # UPROOT file
 f = uproot.open(opt.inputTreeFile)
-listOfTreeNames = f[inputTreeDir].keys()
+if inputTreeDir == '': listOfTreeNames == f.keys()
+else: listOfTreeNames = f[inputTreeDir].keys()
 # If cats = 'auto' then determine from list of trees
 if cats == 'auto':
   cats = []
@@ -116,7 +117,8 @@ aset = make_argset(ws,varNames)
 # Loop over categories and 
 for cat in cats:
   print " --> Extracting events from category: %s"%cat
-  treeName = "%s/Data_%s_%s"%(inputTreeDir,sqrts__,cat)
+  if inputTreeDir == '': treeName = "Data_%s_%s"%(sqrts__,cat)
+  else: treeName = "%s/Data_%s_%s"%(inputTreeDir,sqrts__,cat)
   print "    * tree: %s"%treeName
   t = f.Get(treeName)
 

@@ -114,7 +114,8 @@ for ts, nWeights in theoryWeightContainers.iteritems(): theoryWeightColumns[ts] 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # UPROOT file
 f = uproot.open(opt.inputTreeFile)
-listOfTreeNames = f[inputTreeDir].keys()
+if inputTreeDir == '': listOfTreeNames == f.keys()
+else: listOfTreeNames = f[inputTreeDir].keys()
 # If cats = 'auto' then determine from list of trees
 if cats == 'auto':
   cats = []
@@ -142,7 +143,8 @@ if opt.doSystematics: sdata = pandas.DataFrame()
 # Loop over categories: fill dataframe
 for cat in cats:
   print " --> Extracting events from category: %s"%cat
-  treeName = "%s/%s_%s_%s_%s"%(inputTreeDir,opt.productionMode,opt.inputMass,sqrts__,cat)
+  if inputTreeDir == '': treeName = "%s_%s_%s_%s"%(opt.productionMode,opt.inputMass,sqrts__,cat)
+  else: treeName = "%s/%s_%s_%s_%s"%(inputTreeDir,opt.productionMode,opt.inputMass,sqrts__,cat)
   print "    * tree: %s"%treeName
   # Extract tree from uproot
   t = f[treeName]
