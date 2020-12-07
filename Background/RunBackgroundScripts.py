@@ -75,6 +75,7 @@ options['nCats'] = len(options['cats'].split(","))
 # Add dummy entries for procs and signalFitWSFile (used in old plotting script)
 options['signalFitWSFile'] = 'none'
 options['procs'] = 'none'
+if options['year'] == 'combined': options['year'] = 'all'
 
 # Print info to user
 print " --> Input data file: %s"%options['dataFile']
