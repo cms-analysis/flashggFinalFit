@@ -226,7 +226,7 @@ def submitFiles(_opts):
 
     elif( _opts['mode'] == 'haddMC' ):
       wsdirs = glob.glob("%s/ws_*"%_opts['inputDir'])
-      for widx in range(len(ws)):
+      for widx in range(len(wsdirs)):
         _subfile = "%s/%s_%g"%(_jobdir,_executable,widx)
         cmdLine = "qsub -q %s %s -o %s.log -e %s.err %s.sh"%(_opts['queue'],jobOptsStr,_subfile,_subfile,_subfile)
         run(cmdLine)
@@ -258,7 +258,7 @@ def submitFiles(_opts):
 
     elif( _opts['mode'] == 'haddMC' ):
       wsdirs = glob.glob("%s/ws_*"%_opts['inputDir'])
-      for widx in range(len(ws)):
+      for widx in range(len(wsdirs)):
         _subfile = "%s/%s_%g"%(_jobdir,_executable,widx)
         cmdLine = "bash %s.sh"%(_subfile)
         run(cmdLine)

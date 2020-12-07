@@ -2,10 +2,21 @@
 # Assumes tree names of the format:
 # * Data_<sqrts>_category
 
-print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG TREES 2 WS (DATA) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ "
 import os, sys
 import re
 from optparse import OptionParser
+
+def get_options():
+  parser = OptionParser()
+  parser.add_option('--inputConfig',dest='inputConfig', default="", help='Input config: specify list of variables/analysis categories')
+  parser.add_option('--inputTreeFile',dest='inputTreeFile', default=None, help='Input tree file')
+  parser.add_option('--outputWSDir',dest='outputWSDir', default=None, help='Output dir (default is same as input dir)')
+  return parser.parse_args()
+(opt,args) = get_options()
+
+from collections import OrderedDict as od
+from importlib import import_module
+
 import ROOT
 import uproot
 from root_numpy import array2tree
@@ -14,13 +25,8 @@ from collections import OrderedDict as od
 from commonTools import *
 from commonObjects import *
 
-def get_options():
-  parser = OptionParser()
-  parser.add_option('--inputConfig',dest='inputConfig', default="", help='Input config: specify list of variables/analysis categories')
-  parser.add_option('--inputTreeFile',dest='inputTreeFile', default=None, help='Input tree file')
-  return parser.parse_args()
-(opt,args) = get_options()
 
+print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG TREES 2 WS (DATA) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ "
 def leave():
   print "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG TREES 2 WS (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
   sys.exit(1)
@@ -59,18 +65,13 @@ options = od()
 if opt.inputConfig != '':
   if os.path.exists( opt.inputConfig ):
 
-    #copy file to have common name and then import cfg options (dict)
-    os.system("cp %s config.py"%opt.inputConfig)
-    from config import trees2wsCfg
-    _cfg = trees2wsCfg
+    # Import config options
+    _cfg = import_module(re.sub(".py","",opt.inputConfig)).trees2wsCfg
 
     #Extract options
     inputTreeDir     = _cfg['inputTreeDir']
     dataVars         = _cfg['dataVars']
     cats             = _cfg['cats']
-
-    #Delete copy of file
-    os.system("rm config.py")
 
   else:
     print "[ERROR] %s config file does not exist. Leaving..."%opt.inputConfig
@@ -99,7 +100,8 @@ if cats == 'auto':
 f = ROOT.TFile(opt.inputTreeFile)
 
 # Open output ROOT file and initiate workspace to store RooDataSets
-outputWSDir = "/".join(opt.inputTreeFile.split("/")[:-1])+"/ws"
+if opt.outputWSDir is not None: outputWSDir = opt.outputWSDir+"/ws"
+else: outputWSDir = "/".join(opt.inputTreeFile.split("/")[:-1])+"/ws"
 if not os.path.exists(outputWSDir): os.system("mkdir %s"%outputWSDir)
 outputWSFile = outputWSDir+"/"+opt.inputTreeFile.split("/")[-1]
 print " --> Creating output workspace: (%s)"%outputWSFile

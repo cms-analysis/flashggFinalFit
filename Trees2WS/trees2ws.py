@@ -8,11 +8,6 @@
 import os, sys
 import re
 from optparse import OptionParser
-from collections import OrderedDict as od
-
-from commonTools import *
-from commonObjects import *
-from tools.STXS_tools import *
 
 def get_options():
   parser = OptionParser()
@@ -29,12 +24,18 @@ def get_options():
   return parser.parse_args()
 (opt,args) = get_options()
 
+from collections import OrderedDict as od
+from importlib import import_module
+
 import ROOT
 import pandas
 import numpy as np
 import uproot
 from root_numpy import array2tree
 
+from commonTools import *
+from commonObjects import *
+from tools.STXS_tools import *
 
 print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG TREES 2 WS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ "
 def leave():
@@ -81,10 +82,8 @@ options = od()
 if opt.inputConfig != '':
   if os.path.exists( opt.inputConfig ):
 
-    #copy file to have common name and then import cfg options (dict)
-    os.system("cp %s config.py"%opt.inputConfig)
-    from config import trees2wsCfg
-    _cfg = trees2wsCfg
+    # Import config options
+    _cfg = import_module(re.sub(".py","",opt.inputConfig)).trees2wsCfg
 
     #Extract options
     inputTreeDir     = _cfg['inputTreeDir']
@@ -95,9 +94,6 @@ if opt.inputConfig != '':
     theoryWeightContainers = _cfg['theoryWeightContainers']
     systematics      = _cfg['systematics']
     cats             = _cfg['cats']
-
-    #Delete copy of file
-    os.system("rm config.py")
 
   else:
     print "[ERROR] %s config file does not exist. Leaving..."%opt.inputConfig
@@ -110,6 +106,10 @@ else:
 # For theory weights: create vars for each weight
 theoryWeightColumns = {}
 for ts, nWeights in theoryWeightContainers.iteritems(): theoryWeightColumns[ts] = ["%s_%g"%(ts[:-1],i) for i in range(0,nWeights)] # drop final s from container name
+
+# If year == 2018, add HET
+if opt.year == '2018': systematics.append("JetHEM")
+
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # UPROOT file
@@ -198,7 +198,7 @@ for cat in cats:
     if cat == "NOTAG": continue
     sdf = pandas.DataFrame()
     for s in systematics:
-      print "    --> Systematic: %s"%s
+      print "    --> Systematic: %s"%re.sub("YEAR",opt.year,s)
       for direction in ['Up','Down']:
         streeName = "%s_%s%s01sigma"%(treeName,s,direction)
         # If year in streeName then replace by year being processed
@@ -300,8 +300,11 @@ for stxsId in data[stxsVar].unique():
           # Define RooDataHist
           hName = "%s_%s_%s_%s_%s%s01sigma"%(opt.productionMode,opt.inputMass,sqrts__,cat,s,direction)
 
-          # Make argset
-          aset = make_argset(ws,systematicsVars)
+          # Make argset 
+          systematicsVarsDropWeight = []
+          for var in systematicsVars:
+            if var != "weight": systematicsVarsDropWeight.append(var)
+          aset = make_argset(ws,systematicsVarsDropWeight)
           
           h = ROOT.RooDataHist(hName,hName,aset)
           for ev in t:

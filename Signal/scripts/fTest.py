@@ -36,8 +36,9 @@ def get_options():
   parser.add_option('--mass', dest='mass', default='125', help="Mass point to fit")
   parser.add_option('--doPlots', dest='doPlots', default=False, action="store_true", help="Produce Signal fTest plots")
   parser.add_option('--nBins', dest='nBins', default=80, type='int', help="Number of bins for fit")
-  parser.add_option('--threshold', dest='threshold', default=20, type='int', help="Threshold number of events")
+  parser.add_option('--threshold', dest='threshold', default=30, type='int', help="Threshold number of events")
   parser.add_option('--nGaussMax', dest='nGaussMax', default=5, type='int', help="Max number of gaussians to test")
+  parser.add_option('--skipWV', dest='skipWV', default=False, action="store_true", help="Skip processing of WV case")
   # Minimizer options
   parser.add_option('--minimizerMethod', dest='minimizerMethod', default='TNC', help="(Scipy) Minimizer method")
   parser.add_option('--minimizerTolerance', dest='minimizerTolerance', default=1e-8, type='float', help="(Scipy) Minimizer toleranve")
@@ -113,13 +114,13 @@ for pidx, proc in enumerate(procsToFTest):
     # Set optimum
     df.loc[df['proc']==proc,'nRV'] = nGauss_opt
     # Make plots
-    if opt.doPlots:
+    if( opt.doPlots )&( len(ssfs.keys())!=0 ):
       plotFTest(ssfs,_opt=nGauss_opt,_outdir="%s/outdir_%s/fTest/Plots"%(swd__,opt.ext),_extension="RV",_proc=proc,_cat=opt.cat,_mass=opt.mass)
       plotFTestResults(ssfs,_opt=nGauss_opt,_outdir="%s/outdir_%s/fTest/Plots"%(swd__,opt.ext),_extension="RV",_proc=proc,_cat=opt.cat,_mass=opt.mass)
 
   # Run fTest: WV
   # If numEntries below threshold then keep as n = 1
-  if datasets_WV[opt.mass].numEntries() < opt.threshold: continue
+  if( datasets_WV[opt.mass].numEntries() < opt.threshold )|( opt.skipWV ): continue
   else:
     ssfs = od()
     min_reduced_chi2, nGauss_opt = 999, 1
@@ -138,7 +139,7 @@ for pidx, proc in enumerate(procsToFTest):
     # Set optimum
     df.loc[df['proc']==proc,'nWV'] = nGauss_opt
     # Make plots
-    if opt.doPlots:
+    if( opt.doPlots )&( len(ssfs.keys())!=0 ):
       plotFTest(ssfs,_opt=nGauss_opt,_outdir="%s/outdir_%s/fTest/Plots"%(swd__,opt.ext),_extension="WV",_proc=proc,_cat=opt.cat,_mass=opt.mass)
       plotFTestResults(ssfs,_opt=nGauss_opt,_outdir="%s/outdir_%s/fTest/Plots"%(swd__,opt.ext),_extension="WV",_proc=proc,_cat=opt.cat,_mass=opt.mass)
 
