@@ -745,7 +745,7 @@ int main(int argc, char* argv[]){
         if( isFlashgg_ ){
           if( year_ == "all" ){ ext = "13TeV"; }
           //else{ ext = "13TeV"; } //FIXME 
-          else{ ext = Form("%s_13TeV",year_); }
+          else{ ext = Form("%s_13TeV",year_.c_str()); }
         }
 	//if (isFlashgg_) ext = "13TeV";
         //FIXME trying to remove duplicated names for 2016+2017 combination
