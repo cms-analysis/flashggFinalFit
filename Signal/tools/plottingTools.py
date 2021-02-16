@@ -200,14 +200,16 @@ def plotPdfComponents(ssf,_outdir='./',_extension='',_proc='',_cat=''):
   hists['final'].SetMinimum(0)
   if hists['final'].GetMaximum()>hmax: hmax = hists['final'].GetMaximum()
   if hists['final'].GetMinimum()<hmin: hmin = hists['final'].GetMinimum()
-  hists['final'].GetXaxis().SetRangeUser(115,140)
+  #hists['final'].GetXaxis().SetRangeUser(115,140)
+  hists['final'].GetXaxis().SetRangeUser(100,150)
   # Create data histogram
   hists['data'] = ssf.xvar.createHistogram("h_data%s"%_extension,ROOT.RooFit.Binning(ssf.nBins))
   ssf.DataHists['125'].fillHistogram(hists['data'],ROOT.RooArgList(ssf.xvar))
   hists['data'].SetTitle("")
   hists['data'].GetXaxis().SetTitle("m_{#gamma#gamma} [GeV]")
   hists['data'].SetMinimum(0)
-  hists['data'].GetXaxis().SetRangeUser(115,140)
+  #hists['data'].GetXaxis().SetRangeUser(115,140)
+  hists['data'].GetXaxis().SetRangeUser(100,150)
   hists['data'].Scale(float(ssf.nBins)/1600)
   hists['data'].SetMarkerStyle(20)
   hists['data'].SetMarkerColor(1)
@@ -561,6 +563,13 @@ def plotSignalModel(_hists,_opt,_outdir=".",offset=0.02):
   lat1.DrawLatex(0.83,0.8,"%s %s"%(procStr,yearStr))
 
   canv.Update()
+
+  # Write effSigma to file
+  if len(_opt.years.split(",")) >1:
+    es = {}
+    es['combined'] = effSigma
+    for year in _opt.years.split(","): es[year] = getEffSigma(_hists['pdf_%s'%year])
+    with open("%s/effSigma_%s.json"%(_outdir,catExt),"w") as jf: json.dump(es,jf)
 
   # Save canvas
   canv.SaveAs("%s/smodel_%s%s%s.pdf"%(_outdir,catExt,procExt,yearExt))

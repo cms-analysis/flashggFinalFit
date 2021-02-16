@@ -3,6 +3,7 @@ import ROOT
 import json
 import numpy as np
 from scipy.optimize import minimize
+import scipy.stats
 from collections import OrderedDict as od
 from array import array
 
@@ -40,7 +41,7 @@ pLUT['Frac']['p0'] = [0.25,0.01,0.99]
 pLUT['Frac']['p1'] = [0.,-0.05,0.05]
 pLUT['Frac']['p2'] = [0.,-0.0001,0.0001]
 pLUT['Gaussian'] = od()
-pLUT['Gaussian']['dm_p0'] = [0.1,-1.5,1.5]
+pLUT['Gaussian']['dm_p0'] = [0.1,-5.,5.]
 pLUT['Gaussian']['dm_p1'] = [0.0,-0.01,0.01]
 pLUT['Gaussian']['dm_p2'] = [0.0,-0.01,0.01]
 pLUT['Gaussian']['sigma_p0'] = ['func',0.5,10.0]
@@ -51,44 +52,83 @@ pLUT['FracGaussian']['p0'] = ['func',0.01,0.99]
 pLUT['FracGaussian']['p1'] = [0.01,-0.005,0.005]
 pLUT['FracGaussian']['p2'] = [0.00001,-0.00001,0.00001]
 
+# Function to convert sumw2 variance to poisson interval
+def poisson_interval(x,eSumW2,level=0.68):
+  neff = x**2/(eSumW2**2)
+  scale = abs(x)/neff
+  l = scipy.stats.gamma.interval(level, neff, scale=scale,)[0]
+  u = scipy.stats.gamma.interval(level, neff+1, scale=scale,)[1]
+  # protect against no effective entries
+  l[neff==0] = 0.
+  # protect against no variance
+  l[eSumW2==0.] = 0.
+  u[eSumW2==0.] = np.inf
+  # convert to upper and lower errors
+  eLo, eHi = abs(l-x),abs(u-x)
+  return eLo, eHi
+
 # Function to calc chi2 for binned fit given pdf, RooDataHist and xvar as inputs
-def calcChi2(x,pdf,d,errorType="SumW2",_verbose=False):
-  result = 0.
-  k = 0. # number of non empty bins
+#def calcChi2(x,pdf,d,errorType="Sumw2",_verbose=False,fitRange=[100,180]):
+#def calcChi2(x,pdf,d,errorType="Poisson",_verbose=False,fitRange=[110,140]):
+def calcChi2(x,pdf,d,errorType="Poisson",_verbose=False,fitRange=[105,150]):
+
+  k = 0. # number of non empty bins (for calc degrees of freedom)
   normFactor = d.sumEntries()
+  
+  # Using numpy and poisson error
+  bins, nPdf, nData, eDataSumW2 = [], [],[],[]
   for i in range(d.numEntries()):
     p = d.get(i)
     x.setVal(p.getRealValue(x.GetName()))
-    # Calc number of events in bin
-    nData = d.weight()
-    # If dataEntries == 0 then skip point
-    if nData*nData == 0: continue
-    nPdf = pdf.getVal(ROOT.RooArgSet(x))*normFactor*d.binVolume()
-    diff = nPdf-nData
-    # Calc error depending on input option
-    if errorType != 'Expected':
-      eLo, eHi = ROOT.Double(), ROOT.Double()
-      if errorType == 'Poisson': d.weightError(eLo,eHi,ROOT.RooAbsData.Poisson)
-      elif errorType == 'SumW2': d.weightError(eLo,eHi,ROOT.RooAbsData.SumW2)
-      else: 
-        print " --> [ERROR] errorType (%s) not recognised in calcChi2 function. Use [Poisson,SumW2,Expected]"
-        sys.exit(1)
-      e = eHi if diff > 0 else eLo
-    else: e = math.sqrt(nPdf)
-    # Raise Error if error is 0 (FIX to something more appropriate)
-    if e*e == 0.:
-      print " --> [ERROR] Error = 0 for bin %g. Try a different errorType option."%i
-      sys.exit(1)
-    # Calculate term and sum to chi2
-    term = diff*diff/(e*e)
-    if _verbose: print " --> [DEBUG] Bin %g : nPdf = %.6f, nData = %.6f, e = %.6f --> term = %.6f"%(i,nPdf,nData,e,term)
-    result += term
+    if( x.getVal() < fitRange[0] )|( x.getVal() > fitRange[1] ): continue
+    ndata = d.weight()
+    if ndata*ndata == 0: continue
+    npdf = pdf.getVal(ROOT.RooArgSet(x))*normFactor*d.binVolume()
+    eLo, eHi = ROOT.Double(), ROOT.Double()
+    d.weightError(eLo,eHi,ROOT.RooAbsData.SumW2)
+    bins.append(i)
+    nPdf.append(npdf)
+    nData.append(ndata)
+    eDataSumW2.append(eHi) if npdf>ndata else eDataSumW2.append(eLo)
     k += 1
-  # Return value + number of non empty bins 
-  return result, k
-  
+
+  # Convert to numpy array
+  nPdf = np.asarray(nPdf)
+  nData = np.asarray(nData)
+  eDataSumW2 = np.asarray(eDataSumW2)
+
+  if errorType == 'Poisson':
+    # Change error to poisson intervals: take max interval as error
+    eLo,eHi = poisson_interval(nData,eDataSumW2,level=0.68)
+    #eDataPoisson = 0.5*(eHi+eLo)
+    eDataPoisson = np.maximum(eHi,eLo) 
+    #eDataPoisson = (nPdf>nData)*eHi + (nPdf<=nData)*eLo 
+    e = eDataPoisson
+    # Calculate chi2 terms
+    terms = (nPdf-nData)**2/(eDataPoisson**2)
+  elif errorType == "Expected":
+    # Change error to sqrt pdf entries
+    eExpected = np.sqrt(nPdf)
+    e = eExpected
+    # Calculate chi2 terms
+    terms = (nPdf-nData)**2/(eExpected**2)
+  else:
+    # Use SumW2 terms to calculate chi2
+    e = eDataSumW2
+    terms = (nPdf-nData)**2/(eDataSumW2**2)
+   
+  # If verbose: print to screen
+  if _verbose:
+    for i in range(len(terms)):
+      print " --> [DEBUG] Bin %g : nPdf = %.6f, nData = %.6f, e(%s) = %.6f --> chi2 term = %.6f"%(bins[i],nPdf[i],nData[i],errorType,e[i],terms[i])
+
+  # Sum terms
+  result = terms.sum()
+
+  return result,k
+
 # Function to add chi2 for multiple mass points
-def nChi2Addition(X,ssf):
+def nChi2Addition(X,ssf,verbose=False):
   # X: vector of param values (updated with minimise function)
   # Loop over parameters and set RooVars
   for i in range(len(X)): ssf.FitParameters[i].setVal(X[i])
@@ -98,7 +138,7 @@ def nChi2Addition(X,ssf):
   C = len(X)-1 # number of fit params (-1 for MH)
   for mp,d in ssf.DataHists.iteritems():
     ssf.MH.setVal(int(mp))
-    chi2, k  = calcChi2(ssf.xvar,ssf.Pdfs['final'],d)
+    chi2, k  = calcChi2(ssf.xvar,ssf.Pdfs['final'],d,_verbose=verbose)
     chi2sum += chi2
     K += k
   # N degrees of freedom
@@ -331,6 +371,8 @@ class SimultaneousFit:
     for i in range(1,len(self.FitParameters)): print "    * %-20s = %.6f"%(self.FitParameters[i].GetName(),self.FitParameters[i].getVal())
     print "    ~~~~~~~~~~~~~~~~"
     print "    * chi2 = %.6f, n(dof) = %g --> chi2/n(dof) = %.3f"%(self.getChi2(),int(self.Ndof),self.getChi2()/int(self.Ndof))
+    print "    ~~~~~~~~~~~~~~~~"
+    print "    * [VERBOSE] chi2 = %.6f"%(self.getChi2(verbose=True))
     print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
@@ -341,9 +383,9 @@ class SimultaneousFit:
 
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
   # Function to re-calculate chi2 after setting vars
-  def getChi2(self):
+  def getChi2(self,verbose=False):
     x = self.extractX0()
-    self.Chi2 = nChi2Addition(x,self)
+    self.Chi2 = nChi2Addition(x,self,verbose=verbose)
     return self.Chi2
 
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
