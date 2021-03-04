@@ -341,22 +341,24 @@ class FinalModel:
       # Add systematics
       formula += "*(1."
       # Global
-      for sName, sInfo in self.NuisanceMap['scalesGlobal'].iteritems():
-        formula += "+@%g"%dependents.getSize()
-        # For adding additional factor
-        for so in sInfo['opts']: 
-          if "factor_%s"%self.cat in so:
-            additionalFactor = float(so.split("=")[-1])
-            formula += "*%3.1f"%additionalFactor
-        dependents.add(sInfo['param'])
+      if 'scalesGlobal' in self.NuisanceMap:
+        for sName, sInfo in self.NuisanceMap['scalesGlobal'].iteritems():
+          formula += "+@%g"%dependents.getSize()
+          # For adding additional factor
+          for so in sInfo['opts']: 
+            if "factor_%s"%self.cat in so:
+              additionalFactor = float(so.split("=")[-1])
+              formula += "*%3.1f"%additionalFactor
+          dependents.add(sInfo['param'])
       # Other systs: scales, scalesCorr, smears
       for sType in ['scales','scalesCorr','smears']:
-        for sName, sInfo in self.NuisanceMap[sType].iteritems():
-          c = sInfo['meanConst'].getVal()
-          if abs(c)>=5.e-5:
-            formula += "+@%g*@%g"%(dependents.getSize(),dependents.getSize()+1)
-            dependents.add(sInfo['meanConst'])
-            dependents.add(sInfo['param'])
+        if sType in self.NuisanceMap:
+          for sName, sInfo in self.NuisanceMap[sType].iteritems():
+            c = sInfo['meanConst'].getVal()
+            if abs(c)>=5.e-5:
+              formula += "+@%g*@%g"%(dependents.getSize(),dependents.getSize()+1)
+              dependents.add(sInfo['meanConst'])
+              dependents.add(sInfo['param'])
       formula += ")"
     self.Functions[meanName] = ROOT.RooFormulaVar(meanName,meanName,formula,dependents)
 
@@ -370,12 +372,13 @@ class FinalModel:
       # Add systematics
       formula += "*TMath::Max(1.e-2,(1."
       for sType in ['scales','scalesCorr','smears']:
-        for sName, sInfo in self.NuisanceMap[sType].iteritems():
-          c = sInfo['sigmaConst'].getVal()
-          if c>=1e-4:
-            formula += "+@%g*@%g"%(dependents.getSize(),dependents.getSize()+1)
-            dependents.add(sInfo['sigmaConst'])
-            dependents.add(sInfo['param'])
+        if sType in self.NuisanceMap:
+          for sName, sInfo in self.NuisanceMap[sType].iteritems():
+            c = sInfo['sigmaConst'].getVal()
+            if c>=1e-4:
+              formula += "+@%g*@%g"%(dependents.getSize(),dependents.getSize()+1)
+              dependents.add(sInfo['sigmaConst'])
+              dependents.add(sInfo['param'])
       formula += "))"
     self.Functions[sigmaName] = ROOT.RooFormulaVar(sigmaName,sigmaName,formula,dependents)
 
@@ -386,12 +389,13 @@ class FinalModel:
     if not skipSystematics:
       # Add systematics
       for sType in ['scales','scalesCorr','smears']:
-        for sName, sInfo in self.NuisanceMap[sType].iteritems():
-          c = sInfo['rateConst'].getVal()
-          if c>=5.e-4:
-            formula += "+@%g*@%g"%(dependents.getSize(),dependents.getSize()+1)
-            dependents.add(sInfo['rateConst'])
-            dependents.add(sInfo['param'])
+        if sType in self.NuisanceMap:
+          for sName, sInfo in self.NuisanceMap[sType].iteritems():
+            c = sInfo['rateConst'].getVal()
+            if c>=5.e-4:
+              formula += "+@%g*@%g"%(dependents.getSize(),dependents.getSize()+1)
+              dependents.add(sInfo['rateConst'])
+              dependents.add(sInfo['param'])
     formula += ")"
     self.Functions[rateName] = ROOT.RooFormulaVar(rateName,rateName,formula,dependents)
 
