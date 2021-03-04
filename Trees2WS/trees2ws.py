@@ -245,7 +245,7 @@ for stxsId in data[stxsVar].unique():
     
   else:
     df = data
-    if opt.doSystematics: sdf = df
+    if opt.doSystematics: sdf = sdata
 
     # Define output workspace file
     outputWSDir = "/".join(opt.inputTreeFile.split("/")[:-1])+"/ws_%s"%dataToProc(opt.productionMode)
