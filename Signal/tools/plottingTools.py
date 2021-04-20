@@ -536,7 +536,7 @@ def plotSignalModel(_hists,_opt,_outdir=".",offset=0.02):
   lat0.SetTextSize(0.045)
   lat0.DrawLatex(0.15,0.92,"#bf{CMS} #it{%s}"%_opt.label)
   lat0.DrawLatex(0.77,0.92,"%s TeV"%(sqrts__.split("TeV")[0]))
-  lat0.DrawLatex(0.16+offset,0.83,"H#rightarrow#gamma#gamma")
+  lat0.DrawLatex(0.16+offset,0.83,"H #rightarrow #gamma#gamma")
 
   # Load translations
   translateCats = {} if _opt.translateCats is None else LoadTranslations(_opt.translateCats)
@@ -555,7 +555,7 @@ def plotSignalModel(_hists,_opt,_outdir=".",offset=0.02):
   else: yearStr, yearExt = _opt.years, "_%s"%_opt.years
 
   if _opt.cats == 'all': catStr, catExt = "All categories", "all"
-  elif _opt.cats == 'wall': catStr, catExt = "#splitline{All Categories}{S/(S+B) weighted}", "wall"
+  elif _opt.cats == 'wall': catStr, catExt = "#splitline{All categories}{S/(S+B) weighted}", "wall"
   elif len(_opt.cats.split(","))>1: procStr, procExt = "Multiple categories", "multipleCats"
   else: catStr, catExt = Translate(_opt.cats,translateCats), _opt.cats
  
