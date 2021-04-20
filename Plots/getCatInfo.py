@@ -29,6 +29,7 @@ def get_options():
   parser.add_option("--loadSnapshot", dest="loadSnapshot", default=None, help="Load best-fit snapshot name")
   parser.add_option("--inputEffSigma", dest="inputEffSigma", default=None, help="Load eff sigma from json")
   parser.add_option("--cats", dest="cats", default=None, help="Analysis categories. all = loop over cats and plot sum")
+  parser.add_option("--parameterMap", dest="parameterMap", default=None, help="Comma separated pairs of model parameters:values,...")
   parser.add_option("--doBkgRenormalization", dest="doBkgRenormalization", default=False, action="store_true", help="Do Bkg renormalization")
   parser.add_option("--saveCatInfo", dest="saveCatInfo", default=False, action='store_true', help="Save category info to pkl file")
   parser.add_option("--ext", dest="ext", default='', help="Extension for saving")
@@ -46,6 +47,12 @@ if opt.inputWSFile is not None:
   if opt.loadSnapshot is not None: 
     print "    * Loading snapshot: %s"%opt.loadSnapshot
     w.loadSnapshot(opt.loadSnapshot)
+  # Set parameters
+  if opt.parameterMap is not None:
+    print "    * Setting values of parameters: %s"%opt.parameterMap
+    for kv in opt.parameterMap.split(","):
+      k, v = kv.split(":")[0], kv.split(":")[1]
+      w.var(k).setVal(float(v))
 
 if opt.inputEffSigma is not None:
   with open(opt.inputEffSigma,"r") as jsonfile: effSigmaVals = json.load(jsonfile)

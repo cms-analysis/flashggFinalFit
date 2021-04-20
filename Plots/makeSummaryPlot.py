@@ -41,16 +41,19 @@ default_bar_styles = {
     'ggH_Error': {
         'LineWidth': 3,
         'LineColor': ROOT.kAzure+7,
+        #'LineColor': ROOT.kAzure-9,
         'MarkerSize': 0
     },
     'VBF_Error': {
         'LineWidth': 3,
         'LineColor': ROOT.kOrange-3,
+        #'LineColor': ROOT.kOrange-4,
         'MarkerSize': 0
     },
     'VH_Error': {
         'LineWidth': 3,
         'LineColor': ROOT.kGreen+2,
+        #'LineColor': ROOT.kGreen-6,
         'MarkerSize': 0
     },
     'WH_Error': {
@@ -66,6 +69,7 @@ default_bar_styles = {
     'top_Error': {
         'LineWidth': 3,
         'LineColor': ROOT.kPink+6,
+        #'LineColor': ROOT.kMagenta-9,
         'MarkerSize': 0
     },
     'inclusive_Error': {
@@ -92,16 +96,19 @@ default_bar_styles = {
     'ggH_Stat': {
         'LineWidth': 3,
         'LineColor': ROOT.kAzure+7,
+        #'LineColor': ROOT.kAzure-9,
         'MarkerSize': 0
     },
     'VBF_Stat': {
         'LineWidth': 3,
         'LineColor': ROOT.kOrange-3,
+        #'LineColor': ROOT.kOrange-4,
         'MarkerSize': 0
     },
     'VH_Stat': {
         'LineWidth': 3,
         'LineColor': ROOT.kGreen+2,
+        #'LineColor': ROOT.kGreen-6,
         'MarkerSize': 0
     },
     'WH_Stat': {
@@ -117,6 +124,7 @@ default_bar_styles = {
     'top_Stat': {
         'LineWidth': 3,
         'LineColor': ROOT.kPink+6,
+        #'LineColor': ROOT.kMagenta-9,
         'MarkerSize': 0
     },
     'inclusive_Stat': {
@@ -482,18 +490,18 @@ if __name__ == "__main__":
     if "extended" in args.input[0].split(":")[1]: 
       xinset = 0.15
       yshift = 1.2
-      pval = "59"
+      pval = "50"
     else: 
       xinset = 0.4
       yshift = 1
-      pval = "53"
+      pval = "50"
     if "observed" in args.input[0].split(":")[0]: 
-      hggtxt.DrawLatex(xinset, YEntryHeight(N, hframe) * (N+yshift), "H#rightarrow#gamma#gamma, 137 fb^{-1} (13 TeV)")
+      hggtxt.DrawLatex(xinset, YEntryHeight(N, hframe) * (N+yshift), "H #rightarrow #gamma#gamma, 137 fb^{-1} (13 TeV)")
       #pvaltxt.DrawLatex(xinset, YEntryHeight(N, hframe) * (N+0.4), "#it{p}_{SM} = 50%")
       pvaltxt.DrawLatex(xinset, YEntryHeight(N, hframe) * (N+0.4), "m_{H} = 125.38 GeV,  #it{p}_{SM} = %s%%"%pval)
-      pvaltxt.DrawLatex(xinset, YEntryHeight(N, hframe) * 0.5, "#it{p}_{SM} = 74%")
+      pvaltxt.DrawLatex(xinset, YEntryHeight(N, hframe) * 0.5, "#it{p}_{SM} = 17%")
     else: 
-      hggtxt.DrawLatex(xinset, YEntryHeight(N, hframe) * (N+yshift), "H#rightarrow#gamma#gamma, 137 fb^{-1} (13 TeV)")
+      hggtxt.DrawLatex(xinset, YEntryHeight(N, hframe) * (N+yshift), "H #rightarrow #gamma#gamma, 137 fb^{-1} (13 TeV)")
       pvaltxt.DrawLatex(xinset, YEntryHeight(N, hframe) * (N+0.4), "m_{H} = 125.38 GeV")
     #stxstxt.DrawLatex( 1.1, YEntryHeight(N, hframe) * (N+0.5), "STXS stage 1.2 (reduced)")
 
