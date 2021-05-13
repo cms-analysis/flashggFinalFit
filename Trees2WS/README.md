@@ -103,4 +103,4 @@ The output is a mass shifted workspace in the same directory as the input worksp
 
 ## Renaming
 
-Finally, there is a light weight script to rename workspace ROOT files and make them suitable for the FinalFits package. This is the `renamer.py` script which takes as input the path to the input workspaces. Before using this, you must first change the script to match your particular analysis... should be pretty clear from the examples in the script how it can work.
+Finally, there is a light weight script to rename workspace ROOT files and make them suitable for the FinalFits package. This is the `WSRenamer.py` script which takes as input the path to the input workspaces. Before using this, you must first change the script to match your particular analysis... should be pretty clear from the examples in the script how it can work.

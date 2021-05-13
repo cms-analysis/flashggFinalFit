@@ -22,6 +22,7 @@ for fidx in range(len(fileNames)):
   fw.write("#!/bin/bash\n\n")
   fw.write("cd %s/src/flashggFinalFit/Datacard\n\n"%os.environ['CMSSW_BASE'])
   fw.write("eval `scramv1 runtime -sh`\n\n")
+  fw.write("export PYTHONPATH=${PYTHONPATH}:%s/src/flashggFinalFit/tools\n\n"%os.environ['CMSSW_BASE'])
   fw.write("python extractUEPS.py --inputTreeFile %s --year %s --mode %s --ext _%s_%s\n\n"%(fname,opt.year,opt.mode,opt.mode,fidx))
   fw.close()
 

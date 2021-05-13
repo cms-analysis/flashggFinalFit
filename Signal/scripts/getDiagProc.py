@@ -89,7 +89,8 @@ if opt.makeSimpleFTest:
       if proc == dproc[cat]: continue
       else: ff.write("    %-90s : {\"nRV\":1,\"nWV\":1}"%k)
       # Drop comma for last entry
-      if pitr == (len(allProcs.split(","))-1): ff.write("\n")
+      #if pitr == (len(allProcs.split(","))-1): ff.write("\n")
+      if pitr == len(allProcs.split(",")): ff.write("\n")
       else: ff.write(",\n")
       pitr += 1
     ff.write("}")

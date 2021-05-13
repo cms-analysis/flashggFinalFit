@@ -16,10 +16,18 @@ def get_options():
   parser.add_option("--inputExpJson", dest="inputExpJson", default='', help="Input json file from expected impacts")   
   parser.add_option("--pois", dest="pois", default='r_ggH', help="POIs to include in plot")
   parser.add_option("--translatePOIs", dest="translatePOIs", default=None, help="JSON to store poi translations")
+  parser.add_option("--doRelative", dest="doRelative", default=False, action="store_true", help="Do relative uncertainty")
   return parser.parse_args()
 (opt,args) = get_options()
 
 ROOT.gROOT.SetBatch(True)
+
+# Mu vals
+poiVals = od()
+poiVals['r_ggH'] = 1.07
+poiVals['r_VBF'] = 1.04
+poiVals['r_VH'] = 1.34
+poiVals['r_top'] = 1.35
 
 # Open json to read from
 with open("%s"%opt.inputJson,"r") as jsonfile: impacts = json.load(jsonfile)['params']
@@ -40,24 +48,25 @@ ExpSystGroups_rgx['Integrated luminosity'] = ['lumi_13TeV_*']
 ExpSystGroups_rgx['Photon identification'] = ['CMS_hgg_phoIdMva']
 ExpSystGroups_rgx['Photon energy scale and smearing'] = ['CMS_hgg_nuisance_*scale','CMS_hgg_nuisance_*smear']
 ExpSystGroups_rgx['Per photon energy resolution estimate'] = ['CMS_hgg_SigmaEOverEShift_*']
-ExpSystGroups_rgx['Jet energy scale and resolution'] = ['CMS_scale_j_*','CMS_res_j_*','CMS_scale_RelativeBal'] 
+ExpSystGroups_rgx['Jet energy scale and resolution'] = ['CMS_scale_j_*','CMS_res_j_*'] 
 ExpSystGroups_rgx['Lepton ID and reconstruction'] = ['CMS_hgg_ElectronID_*','CMS_hgg_ElectronReco_*','CMS_hgg_MuonID_*','CMS_hgg_MuonIso_*']
-ExpSystGroups_rgx['B Tagging'] = ['CMS_hgg_BTagCut_*','CMS_hgg_BTagReshape_*','CMS_hgg_BTagReshapeNorm']
+ExpSystGroups_rgx['b tagging'] = ['CMS_hgg_BTagCut_*','CMS_hgg_BTagReshape_*','CMS_hgg_BTagReshapeNorm']
 ExpSystGroups_rgx['MET'] = ['CMS_hgg_MET_*']
 #ExpSystGroups_rgx['Prefiring'] = ['CMS_hgg_prefire_*']
-ExpSystGroups_rgx['Other experimental uncertainties'] = ['CMS_hgg_PreselSF','CMS_hgg_electronVetoSF_*','CMS_hgg_TriggerWeight_*','CMS_hgg_PUJIDShift_*','CMS_hgg_nuisance_deltafracright','CMS_hgg_prefire_*']
+ExpSystGroups_rgx['Other experimental uncertainties'] = ['CMS_hgg_PreselSF','CMS_hgg_electronVetoSF_*','CMS_hgg_TriggerWeight_*','CMS_hgg_PUJIDShift_*','CMS_hgg_nuisance_deltafracright','CMS_hgg_prefire_*','CMS_hgg_JetHEM_2018']
 
 TheorySystGroups_rgx = od()
-TheorySystGroups_rgx['Branching ratio'] = ['BR_hgg']
-TheorySystGroups_rgx['ggH QCD scale'] = ['THU_ggH_Mu','THU_ggH_Res']
-TheorySystGroups_rgx['ggH p_{T}^{H} modelling'] = ['THU_ggH_PT60','THU_ggH_PT120']
-TheorySystGroups_rgx['ggH jet multiplicity'] = ['THU_ggH_Mig01','THU_ggH_Mig12']
-TheorySystGroups_rgx['ggH VBF region and m_{t}'] = ['THU_ggH_VBF2j','THU_ggH_VBF3j','THU_ggH_qmtop']
-TheorySystGroups_rgx['qqH QCD scale'] = ['THU_qqH_Yield']
-TheorySystGroups_rgx['qqH migration'] = ['THU_qqH_PTH*','THU_qqH_MJJ*','THU_qqH_JET01']
-TheorySystGroups_rgx['Other processes QCD scale'] = ['QCDscale_*']
+TheorySystGroups_rgx['Branching fraction'] = ['BR_hgg']
+TheorySystGroups_rgx['ggH scales'] = ['THU_ggH_stxs_Yield','THU_ggH_stxs_Res']
+TheorySystGroups_rgx['ggH p_{T}^{H} modelling'] = ['THU_ggH_stxs_Boosted','THU_ggH_stxs_PTH*','THU_ggH_stxs_0J_PTH10','THU_ggH_stxs_1J_PTH*','THU_ggH_stxs_GE2J_PTH*']
+TheorySystGroups_rgx['ggH jet multiplicity'] = ['THU_ggH_stxs_Mig01','THU_ggH_stxs_Mig12']
+TheorySystGroups_rgx['ggH VBF-like region'] = ['THU_ggH_stxs_GE2J_MJJ*','THU_ggH_stxs_GE2J_*_PTHJJ*']
+TheorySystGroups_rgx['qqH scales and migrations'] = ['THU_qqH_Yield', 'THU_qqH_PTH*','THU_qqH_MJJ*','THU_qqH_JET01']
+TheorySystGroups_rgx['VH lep scales and migrations'] = ['THU_WH_*','THU_ZH_*','THU_ggZH*']
+TheorySystGroups_rgx['Top associated scales and migrations'] = ['THU_ttH*','QCDscale_tHq','QCDscale_tHW','QCDscale_bbH']
+TheorySystGroups_rgx['ggH in top associated categories'] = ['CMS_hgg_tth*']
 TheorySystGroups_rgx['PDF and  #alpha_{s} normalisation'] = ['pdf_Higgs_*','alphaS_*']
-TheorySystGroups_rgx['QCD scale, PDF and  #alpha_{s} shape'] = ['CMS_hgg_*_scale_*shape','CMS_hgg_alphaSWeight_shape','CMS_hgg_pdfWeight_*shape']
+TheorySystGroups_rgx['Scales, PDF and  #alpha_{s} shape'] = ['CMS_hgg_*_scale_*shape','CMS_hgg_alphaSWeight_shape','CMS_hgg_pdfWeight_*shape']
 TheorySystGroups_rgx['Underlying event and parton shower'] = ['UnderlyingEvent_norm','PartonShower_norm']
 
 OtherSystGroups_rgx = od()
@@ -323,11 +332,12 @@ if opt.inputExpJson != '':
 
 
 # Make plot
-colorMap = {'r_ggH':ROOT.kAzure+7,'r_VBF':ROOT.kOrange-3,'r_VH':ROOT.kGreen+2,'r_top':ROOT.kPink+6}
+colorMap = {'r_ggH':ROOT.kAzure-9,'r_VBF':ROOT.kOrange-4,'r_VH':ROOT.kGreen-6,'r_top':ROOT.kMagenta-9}
 ROOT.gStyle.SetOptStat(0)
 nPOIs = len(opt.pois.split(","))
 nGroups = len(ExpSystGroups.keys())+len(TheorySystGroups.keys())+len(OtherSystGroups.keys())
-chunk_width = 150
+chunk_width = 175
+#chunk_width = 150
 canv_width = chunk_width*(nPOIs+3)
 pad_width = (0.9-2*(float(chunk_width)/canv_width))/nPOIs
 canv = ROOT.TCanvas("canv","canv",canv_width,800)
@@ -340,10 +350,12 @@ binLabels.extend(OtherSystGroups.keys())
 binLabels_rev = list(binLabels)
 binLabels_rev.reverse()
 for bidx in range(2,haxes_canv.GetNbinsY()+1): haxes_canv.GetYaxis().SetBinLabel(bidx,binLabels_rev[bidx-2])
-haxes_canv.GetYaxis().SetLabelSize(0.03)
-haxes_canv.GetYaxis().SetLabelOffset(0.006)
+haxes_canv.GetYaxis().SetLabelSize(0.04)
+#haxes_canv.GetYaxis().SetLabelOffset(0.006)
+haxes_canv.GetYaxis().SetLabelOffset(0.003)
 haxes_canv.GetYaxis().SetTickSize(0.)
-haxes_canv.GetXaxis().SetTitle("Uncertainty in  #mu_{i}")
+if opt.doRelative: haxes_canv.GetXaxis().SetTitle("Relative uncertainty in #mu_{i} [%]")
+else: haxes_canv.GetXaxis().SetTitle("Uncertainty in  #mu_{i}")
 haxes_canv.GetXaxis().SetTitleSize(0.04)
 haxes_canv.GetXaxis().SetLabelSize(0.)
 haxes_canv.GetXaxis().SetTickSize(0.)
@@ -367,13 +379,14 @@ max_vals = {}
 max_val = 0
 for pidx in range(nPOIs):
   poi = opt.pois.split(",")[pidx]
+  f = 1./poiVals[poi] if opt.doRelative else 1.
   max_vals[poi] = 0
   for systVals in [ExpSystVals,TheorySystVals,OtherSystVals]:
     for gr,vals in systVals.iteritems():
-      if abs(vals['%s_up'%poi]) > max_val: max_val = abs(vals['%s_up'%poi])
-      if abs(vals['%s_down'%poi]) > max_val: max_val = abs(vals['%s_down'%poi])
-      if abs(vals['%s_up'%poi]) > max_vals[poi]: max_vals[poi] = abs(vals['%s_up'%poi])
-      if abs(vals['%s_down'%poi]) > max_vals[poi]: max_vals[poi] = abs(vals['%s_down'%poi])
+      if abs(vals['%s_up'%poi])*f > max_val: max_val = abs(vals['%s_up'%poi])*f
+      if abs(vals['%s_down'%poi])*f > max_val: max_val = abs(vals['%s_down'%poi])*f
+      if abs(vals['%s_up'%poi])*f > max_vals[poi]: max_vals[poi] = abs(vals['%s_up'%poi])*f
+      if abs(vals['%s_down'%poi])*f > max_vals[poi]: max_vals[poi] = abs(vals['%s_down'%poi])*f
   if opt.inputExpJson != '':
     for systVals in [ExpSystVals_exp,TheorySystVals_exp,OtherSystVals_exp]:
       for gr,vals in systVals.iteritems():
@@ -386,13 +399,15 @@ for pidx in range(nPOIs):
 haxes = {}
 for pidx in range(nPOIs):
   poi = opt.pois.split(",")[pidx]
-  haxes[poi] = ROOT.TH2F("haxes_%s"%poi,"",1000,0,1.12*max_vals[poi],nGroups+1,0,nGroups+1)
+  if opt.doRelative: haxes[poi] = ROOT.TH2F("haxes_%s"%poi,"",1000,0.001,100*1.06*max_vals[poi],nGroups+1,0,nGroups+1)
+  else: haxes[poi] = ROOT.TH2F("haxes_%s"%poi,"",1000,0,1.06*max_vals[poi],nGroups+1,0,nGroups+1)
   haxes[poi].GetYaxis().SetLabelSize(0.)
   haxes[poi].GetYaxis().SetTickSize(0.)
   haxes[poi].GetXaxis().SetTickSize(0.01)
   haxes[poi].GetXaxis().SetNdivisions(305) 
   haxes[poi].GetXaxis().SetLabelSize(0.1) 
-  haxes[poi].GetXaxis().SetLabelOffset(-0.06) 
+  #haxes[poi].GetXaxis().SetLabelOffset(-0.06) 
+  haxes[poi].GetXaxis().SetLabelOffset(-0.05) 
   haxes[poi].GetXaxis().SetRangeUser(0.001,haxes[poi].GetXaxis().GetXmax()) 
   pads[poi].cd()
   haxes[poi].Draw()
@@ -405,11 +420,13 @@ for pidx in range(nPOIs):
   graphs[poi].SetMarkerSize(0)
   graphs[poi].SetLineWidth(0)
   graphs[poi].SetFillColor(colorMap[poi])
+  #graphs[poi].SetFillColor(ROOT.kGray)
   binidx = 1
   for systVals in [ExpSystVals,TheorySystVals,OtherSystVals]:
     for gr,vals in systVals.iteritems():
       graphs[poi].SetPoint(binidx-1,0.001,nGroups-binidx+1.5)
-      graphs[poi].SetPointError(binidx-1,0,max(abs(vals['%s_down'%poi]),abs(vals['%s_up'%poi])),0.25,0.25)
+      if opt.doRelative: graphs[poi].SetPointError(binidx-1,0,(100./poiVals[poi])*max(abs(vals['%s_down'%poi]),abs(vals['%s_up'%poi])),0.25,0.25)
+      else: graphs[poi].SetPointError(binidx-1,0,max(abs(vals['%s_down'%poi]),abs(vals['%s_up'%poi])),0.25,0.25)
       binidx += 1
 if opt.inputExpJson != '':
   graphs_exp = {}
@@ -425,7 +442,8 @@ if opt.inputExpJson != '':
     for systVals in [ExpSystVals_exp,TheorySystVals_exp,OtherSystVals_exp]:
       for gr,vals in systVals.iteritems():
         graphs_exp[poi].SetPoint(binidx-1,0.001,nGroups-binidx+1.5)
-        graphs_exp[poi].SetPointError(binidx-1,0,max(abs(vals['%s_down'%poi]),abs(vals['%s_up'%poi])),0.25,0.25)
+        if opt.doRelative: graphs_exp[poi].SetPointError(binidx-1,0,100*max(abs(vals['%s_down'%poi]),abs(vals['%s_up'%poi])),0.25,0.25)
+        else: graphs_exp[poi].SetPointError(binidx-1,0,max(abs(vals['%s_down'%poi]),abs(vals['%s_up'%poi])),0.25,0.25)
         binidx += 1
 
 # Draw graphs
@@ -458,7 +476,8 @@ for pidx in range(nPOIs):
       lines["%s_%s"%(poi,lidx)].SetLineWidth(1)
     lines["%s_%s"%(poi,lidx)].Draw("Same")
   for lidx in range(1,10):
-    xval = 0.02*lidx
+    if opt.doRelative: xval = 100*0.02*lidx
+    else: xval = 0.02*lidx
     if xval < haxes[poi].GetXaxis().GetXmax():
       lines["v_%s_%s"%(poi,lidx)] = ROOT.TLine(xval,0,xval,nGroups+1)
       lines["v_%s_%s"%(poi,lidx)].SetLineColorAlpha(ROOT.kGray,0.5)
@@ -498,9 +517,9 @@ lat = ROOT.TLatex()
 lat.SetTextFont(42)
 lat.SetTextAlign(11)
 lat.SetNDC()
-lat.SetTextSize(0.04)
-lat.DrawLatex(2*(float(chunk_width)/canv_width),0.92,"#bf{CMS} #it{Preliminary}")
-#lat.DrawLatex(2*(float(chunk_width)/canv_width),0.92,"#bf{CMS}")
+lat.SetTextSize(0.045)
+#lat.DrawLatex(2*(float(chunk_width)/canv_width),0.92,"#bf{CMS} #it{Preliminary}")
+lat.DrawLatex(2*(float(chunk_width)/canv_width),0.92,"#bf{CMS}  H #rightarrow #gamma#gamma")
 lat2 = ROOT.TLatex()
 lat2.SetTextFont(42)
 lat2.SetTextAlign(31)
@@ -508,5 +527,6 @@ lat2.SetNDC()
 lat2.SetTextSize(0.04)
 lat2.DrawLatex(0.9,0.92,"137 fb^{-1} (13 TeV)")
 
-canv.Print("/eos/home-j/jlangfor/www/CMS/hgg/stxs_runII/Jul20/pass0/checks/syst_new.png")
-canv.Print("/eos/home-j/jlangfor/www/CMS/hgg/stxs_runII/Jul20/pass0/checks/syst_new.pdf")
+extStr = "_relative" if opt.doRelative else ""
+canv.Print("/eos/home-j/jlangfor/www/CMS/hgg/stxs_runII/Dec20/final_new/checks/FR/syst%s.png"%extStr)
+canv.Print("/eos/home-j/jlangfor/www/CMS/hgg/stxs_runII/Dec20/final_new/checks/FR/syst%s.pdf"%extStr)

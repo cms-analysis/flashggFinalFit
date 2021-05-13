@@ -25,7 +25,7 @@ def leave():
 
 ROOT.gROOT.SetBatch(True)
 ROOT.gStyle.SetOptStat(0)
-ROOT.gStyle.SetLineStyleString(2,"5 5")
+ROOT.gStyle.SetLineStyleString(2,"4 10")
 
 def get_options():
   parser = OptionParser()
@@ -81,6 +81,7 @@ grid_vals = griddata(points,dnll,(grid_x,grid_y), method=opt.interpolation)
 grid_x = grid_x[grid_vals==grid_vals]
 grid_y = grid_y[grid_vals==grid_vals]
 grid_vals = grid_vals[grid_vals==grid_vals]
+
 min_val = np.min(grid_vals)
 
 # Define Profile2D histogram
@@ -117,7 +118,8 @@ h2D.GetYaxis().SetTitle(Translate(y,translatePOIs))
 h2D.GetYaxis().SetTitleSize(0.05)
 h2D.GetYaxis().SetTitleOffset(0.9)
 h2D.GetYaxis().SetRangeUser(y_range[0]+yw,y_range[1]-yw)
-h2D.GetZaxis().SetTitle("-2 #Delta ln L")
+#h2D.GetZaxis().SetTitle("-2 #Delta ln L")
+h2D.GetZaxis().SetTitle("q(%s,%s)"%(Translate(x,translatePOIs),Translate(y,translatePOIs)))
 h2D.GetZaxis().SetTitleSize(0.05)
 h2D.GetZaxis().SetTitleOffset(0.8)
 #h2D.SetMaximum(10)
@@ -161,11 +163,11 @@ lat.SetLineWidth(2)
 lat.SetTextAlign(11)
 lat.SetNDC()
 lat.SetTextSize(0.042)
-lat.DrawLatex(0.115,0.92,"#bf{CMS} #it{Preliminary}")
-#lat.DrawLatex(0.115,0.92,"#bf{CMS}")
+#lat.DrawLatex(0.115,0.92,"#bf{CMS} #it{Preliminary}")
+lat.DrawLatex(0.115,0.92,"#bf{CMS}")
 lat.DrawLatex(0.62,0.92,"137 fb^{-1} (13#scale[0.75]{ }TeV)")
-if "kappa_gam" in opt.inputTreeFile: lat.DrawLatex(0.17,0.2,"#scale[0.75]{m_{H} = 125.38 GeV}")
-else: lat.DrawLatex(0.17,0.8,"#scale[0.75]{m_{H} = 125.38 GeV}")
+if "kappa_gam" in opt.inputTreeFile: lat.DrawLatex(0.17,0.2,"#scale[0.7]{H #rightarrow #gamma#gamma, m_{H} = 125.38 GeV}")
+else: lat.DrawLatex(0.17,0.8,"#scale[0.7]{H #rightarrow #gamma#gamma, m_{H} = 125.38 GeV}")
 
 # Add legend
 if opt.placeLegend == "bottom_right": leg = ROOT.TLegend(0.55,0.16,0.8,0.36)

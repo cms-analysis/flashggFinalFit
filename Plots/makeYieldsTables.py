@@ -90,42 +90,41 @@ target_procs_top["RECO_THQ_LEP"] = ['tHq']
 target_procs_top["RECO_TTH_LEP_PTH_0_60_Tag0"] = ['ttH_PTH_0_60']
 target_procs_top["RECO_TTH_LEP_PTH_0_60_Tag1"] = ['ttH_PTH_0_60']
 target_procs_top["RECO_TTH_LEP_PTH_0_60_Tag2"] = ['ttH_PTH_0_60']
-target_procs_top["RECO_TTH_LEP_PTH_0_60_Tag3"] = ['ttH_PTH_0_60']
 target_procs_top["RECO_TTH_LEP_PTH_60_120_Tag0"] = ['ttH_PTH_60_120']
 target_procs_top["RECO_TTH_LEP_PTH_60_120_Tag1"] = ['ttH_PTH_60_120']
+target_procs_top["RECO_TTH_LEP_PTH_60_120_Tag2"] = ['ttH_PTH_60_120']
 target_procs_top["RECO_TTH_LEP_PTH_120_200_Tag0"] = ['ttH_PTH_120_200']
 target_procs_top["RECO_TTH_LEP_PTH_120_200_Tag1"] = ['ttH_PTH_120_200']
-target_procs_top["RECO_TTH_LEP_PTH_GT200_Tag0"] = ['ttH_PTH_200_300','ttH_PTH_GT300']
-target_procs_top["RECO_TTH_LEP_PTH_GT200_Tag1"] = ['ttH_PTH_200_300','ttH_PTH_GT300']
+target_procs_top["RECO_TTH_LEP_PTH_200_300_Tag0"] = ['ttH_PTH_200_300']
+target_procs_top["RECO_TTH_LEP_PTH_GT300_Tag0"] = ['ttH_PTH_GT300']
 target_procs_top["RECO_TTH_HAD_PTH_0_60_Tag0"] = ['ttH_PTH_0_60']
 target_procs_top["RECO_TTH_HAD_PTH_0_60_Tag1"] = ['ttH_PTH_0_60']
 target_procs_top["RECO_TTH_HAD_PTH_0_60_Tag2"] = ['ttH_PTH_0_60']
-target_procs_top["RECO_TTH_HAD_PTH_0_60_Tag3"] = ['ttH_PTH_0_60']
 target_procs_top["RECO_TTH_HAD_PTH_60_120_Tag0"] = ['ttH_PTH_60_120']
 target_procs_top["RECO_TTH_HAD_PTH_60_120_Tag1"] = ['ttH_PTH_60_120']
 target_procs_top["RECO_TTH_HAD_PTH_60_120_Tag2"] = ['ttH_PTH_60_120']
-target_procs_top["RECO_TTH_HAD_PTH_60_120_Tag3"] = ['ttH_PTH_60_120']
 target_procs_top["RECO_TTH_HAD_PTH_120_200_Tag0"] = ['ttH_PTH_120_200']
 target_procs_top["RECO_TTH_HAD_PTH_120_200_Tag1"] = ['ttH_PTH_120_200']
 target_procs_top["RECO_TTH_HAD_PTH_120_200_Tag2"] = ['ttH_PTH_120_200']
 target_procs_top["RECO_TTH_HAD_PTH_120_200_Tag3"] = ['ttH_PTH_120_200']
-target_procs_top["RECO_TTH_HAD_PTH_GT200_Tag0"] = ['ttH_PTH_200_300','ttH_PTH_GT300']
-target_procs_top["RECO_TTH_HAD_PTH_GT200_Tag1"] = ['ttH_PTH_200_300','ttH_PTH_GT300']
-target_procs_top["RECO_TTH_HAD_PTH_GT200_Tag2"] = ['ttH_PTH_200_300','ttH_PTH_GT300']
-target_procs_top["RECO_TTH_HAD_PTH_GT200_Tag3"] = ['ttH_PTH_200_300','ttH_PTH_GT300']
+target_procs_top["RECO_TTH_HAD_PTH_200_300_Tag0"] = ['ttH_PTH_200_300']
+target_procs_top["RECO_TTH_HAD_PTH_200_300_Tag1"] = ['ttH_PTH_200_300']
+target_procs_top["RECO_TTH_HAD_PTH_200_300_Tag2"] = ['ttH_PTH_200_300']
+target_procs_top["RECO_TTH_HAD_PTH_GT300_Tag0"] = ['ttH_PTH_GT300']
+target_procs_top["RECO_TTH_HAD_PTH_GT300_Tag1"] = ['ttH_PTH_GT300']
 
 # VH tags
 target_procs_vh = od()
 target_procs_vh["RECO_ZH_LEP_Tag0"] = ['ZH_lep_PTV_0_75','ZH_lep_PTV_75_150','ZH_lep_PTV_150_250_0J','ZH_lep_PTV_150_250_GE1J','ZH_lep_PTV_GT250','ggZH_ll_PTV_0_75','ggZH_ll_PTV_75_150','ggZH_ll_PTV_150_250_0J','ggZH_ll_PTV_150_250_GE1J','ggZH_ll_PTV_GT250','ggZH_nunu_PTV_0_75','ggZH_nunu_PTV_75_150','ggZH_nunu_PTV_150_250_0J','ggZH_nunu_PTV_150_250_GE1J','ggZH_nunu_PTV_GT250']
 target_procs_vh["RECO_ZH_LEP_Tag1"] = ['ZH_lep_PTV_0_75','ZH_lep_PTV_75_150','ZH_lep_PTV_150_250_0J','ZH_lep_PTV_150_250_GE1J','ZH_lep_PTV_GT250','ggZH_ll_PTV_0_75','ggZH_ll_PTV_75_150','ggZH_ll_PTV_150_250_0J','ggZH_ll_PTV_150_250_GE1J','ggZH_ll_PTV_GT250','ggZH_nunu_PTV_0_75','ggZH_nunu_PTV_75_150','ggZH_nunu_PTV_150_250_0J','ggZH_nunu_PTV_150_250_GE1J','ggZH_nunu_PTV_GT250']
-target_procs_vh["RECO_WH_LEP_LOW_Tag0"] = ['WH_lep_PTV_0_75']
-target_procs_vh["RECO_WH_LEP_LOW_Tag1"] = ['WH_lep_PTV_0_75']
-target_procs_vh["RECO_WH_LEP_LOW_Tag2"] = ['WH_lep_PTV_0_75']
-target_procs_vh["RECO_WH_LEP_HIGH_Tag0"] = ['WH_lep_PTV_75_150','WH_lep_PTV_150_250_0J','WH_lep_PTV_150_250_GE1J','WH_lep_PTV_GT250']
-target_procs_vh["RECO_WH_LEP_HIGH_Tag1"] = ['WH_lep_PTV_75_150','WH_lep_PTV_150_250_0J','WH_lep_PTV_150_250_GE1J','WH_lep_PTV_GT250']
-target_procs_vh["RECO_WH_LEP_HIGH_Tag2"] = ['WH_lep_PTV_75_150','WH_lep_PTV_150_250_0J','WH_lep_PTV_150_250_GE1J','WH_lep_PTV_GT250']
+target_procs_vh["RECO_WH_LEP_PTV_0_75_Tag0"] = ['WH_lep_PTV_0_75']
+target_procs_vh["RECO_WH_LEP_PTV_0_75_Tag1"] = ['WH_lep_PTV_0_75']
+target_procs_vh["RECO_WH_LEP_PTV_75_150_Tag0"] = ['WH_lep_PTV_75_150']
+target_procs_vh["RECO_WH_LEP_PTV_75_150_Tag1"] = ['WH_lep_PTV_75_150']
+target_procs_vh["RECO_WH_LEP_PTV_GT150_Tag0"] = ['WH_lep_PTV_150_250_0J','WH_lep_PTV_150_250_GE1J','WH_lep_PTV_GT250']
 target_procs_vh["RECO_VH_MET_Tag0"] = ['WH_lep_PTV_0_75','WH_lep_PTV_75_150','WH_lep_PTV_150_250_0J','WH_lep_PTV_150_250_GE1J','WH_lep_PTV_GT250','ZH_lep_PTV_0_75','ZH_lep_PTV_75_150','ZH_lep_PTV_150_250_0J','ZH_lep_PTV_150_250_GE1J','ZH_lep_PTV_GT250','ggZH_ll_PTV_0_75','ggZH_ll_PTV_75_150','ggZH_ll_PTV_150_250_0J','ggZH_ll_PTV_150_250_GE1J','ggZH_ll_PTV_GT250','ggZH_nunu_PTV_0_75','ggZH_nunu_PTV_75_150','ggZH_nunu_PTV_150_250_0J','ggZH_nunu_PTV_150_250_GE1J','ggZH_nunu_PTV_GT250']
 target_procs_vh["RECO_VH_MET_Tag1"] = ['WH_lep_PTV_0_75','WH_lep_PTV_75_150','WH_lep_PTV_150_250_0J','WH_lep_PTV_150_250_GE1J','WH_lep_PTV_GT250','ZH_lep_PTV_0_75','ZH_lep_PTV_75_150','ZH_lep_PTV_150_250_0J','ZH_lep_PTV_150_250_GE1J','ZH_lep_PTV_GT250','ggZH_ll_PTV_0_75','ggZH_ll_PTV_75_150','ggZH_ll_PTV_150_250_0J','ggZH_ll_PTV_150_250_GE1J','ggZH_ll_PTV_GT250','ggZH_nunu_PTV_0_75','ggZH_nunu_PTV_75_150','ggZH_nunu_PTV_150_250_0J','ggZH_nunu_PTV_150_250_GE1J','ggZH_nunu_PTV_GT250']
+target_procs_vh["RECO_VH_MET_Tag2"] = ['WH_lep_PTV_0_75','WH_lep_PTV_75_150','WH_lep_PTV_150_250_0J','WH_lep_PTV_150_250_GE1J','WH_lep_PTV_GT250','ZH_lep_PTV_0_75','ZH_lep_PTV_75_150','ZH_lep_PTV_150_250_0J','ZH_lep_PTV_150_250_GE1J','ZH_lep_PTV_GT250','ggZH_ll_PTV_0_75','ggZH_ll_PTV_75_150','ggZH_ll_PTV_150_250_0J','ggZH_ll_PTV_150_250_GE1J','ggZH_ll_PTV_GT250','ggZH_nunu_PTV_0_75','ggZH_nunu_PTV_75_150','ggZH_nunu_PTV_150_250_0J','ggZH_nunu_PTV_150_250_GE1J','ggZH_nunu_PTV_GT250']
 
 # qqH tags
 target_procs_qqh = od()
@@ -150,9 +149,9 @@ def get_options():
   parser.add_option("--loadCatInfo", dest="loadCatInfo", default='', help="Load eff sigma, B and S/S+B from pickle file")
   parser.add_option("--group", dest="group", default='ggh', help="Group of cats")
   parser.add_option("--ext", dest="ext", default='', help="Extension for saving")
+  parser.add_option("--yieldVar", dest="yieldVar", default='nominal_yield', help="Name of yield column in dataframe")
   parser.add_option("--translateCats", dest="translateCats", default=None, help="JSON to store cat translations")
   parser.add_option("--translateStage0", dest="translateStage0", default=None, help="JSON to store stage 0 translations")
-  parser.add_option("--translateTargets", dest="translateTargets", default=None, help="JSON to store target bin translations")
   return parser.parse_args()
 (opt,args) = get_options()
 
@@ -163,7 +162,6 @@ def LoadTranslations(jsonfilename):
         return json.load(jsonfile)
 translateCats = {} if opt.translateCats is None else LoadTranslations(opt.translateCats)
 translateStage0 = {} if opt.translateStage0 is None else LoadTranslations(opt.translateStage0)
-translateTargets = {} if opt.translateTargets is None else LoadTranslations(opt.translateTargets)
 
 if opt.group == "ggh": 
   stage0 = stage0_ggh
@@ -201,12 +199,11 @@ tab_data = pd.DataFrame(columns=_columns)
 
 # Fill frame
 for cat in target_procs:
-  _target_bins_str = Translate(cat,translateTargets)
-  mask = data['cat']==cat
-  _nominal_yield = data[mask].nominal_yield.sum()
-  _target_yield = data[mask][data[mask].apply(lambda x: "_".join(x['proc'].split("_")[:-2]) in target_procs[cat], axis=1)].nominal_yield.sum()
+  mask = (data['cat']==cat)&(data['type']=='sig')
+  _nominal_yield = data[mask][opt.yieldVar].sum()
+  _target_yield = data[mask][data[mask].apply(lambda x: "_".join(x['proc'].split("_")[:-2]) in target_procs[cat], axis=1)][opt.yieldVar].sum()
   _s0_yields = od()
-  for s0 in stage0: _s0_yields[s0] = data[mask][data[mask].apply(lambda x: "_".join(x['proc'].split("_")[:-2]) in stage0[s0], axis=1)].nominal_yield.sum()
+  for s0 in stage0: _s0_yields[s0] = data[mask][data[mask].apply(lambda x: "_".join(x['proc'].split("_")[:-2]) in stage0[s0], axis=1)][opt.yieldVar].sum()
 
   if opt.loadCatInfo != '':
     catdata_mask = catinfo_data['cat']==cat
@@ -215,6 +212,7 @@ for cat in target_procs:
     _SoverSplusB = catinfo_data[catdata_mask]['SoverSplusB'].values[0]
 
   # Add values to dataframe
+  _target_bins_str = '-'
   vals = [cat,_target_bins_str,_nominal_yield,_target_yield]
   for _ys0 in _s0_yields.itervalues(): vals.append(_ys0)
   if opt.loadCatInfo != '': vals.extend( [_effSigma,_bkg,_SoverSplusB] )
@@ -222,13 +220,13 @@ for cat in target_procs:
 
 # Make table
 nColumns = 5+len(stage0.keys())
-fout = open("./yields_table_lite_%s%s.txt"%(opt.group,opt.ext),"w")
+fout = open("Tables/yields_table_lite_%s%s.txt"%(opt.group,opt.ext),"w")
 fout.write("\\begin{tabular}{%s}\n"%("l|"+("c"*(nColumns-1))))
 #fout.write("    \\hline \\hline \n")
 #fout.write("    \\multirow{3}{*}{Analysis categories} & \\multicolumn{%g}{c|}{SM 125 GeV Higgs boson expected signal} & \\multirow{3}{*}{S/S+B} \\\\ \\cline{2-%g}\n"%(3+len(stage0.keys()),nColumns-1))
 fout.write("    \\multirow{3}{*}{Analysis categories} & \\multicolumn{%g}{c}{SM 125 GeV Higgs boson expected signal} & \\multirow{3}{*}{S/S+B} \\\\ \n"%(3+len(stage0.keys())))
 #fout.write("     & \\multirow{2}{*}{\\begin{tabular}[c]{@{}c@{}}Total\\\\Yield\\end{tabular}} & \\multirow{2}{*}{\\begin{tabular}[c]{@{}c@{}}Target\\\\Fraction\\end{tabular}} & \\multicolumn{%g}{c|}{Production Mode Fractions} & \\multirow{2}{*}{\\begin{tabular}[c]{@{}c@{}}$\\sigma_{\\rm{eff}}$\\\\(GeV)\\end{tabular}} & \\\\ \\cline{4-%g}\n"%(len(stage0.keys()),nColumns-2))
-fout.write("     & \\multirow{2}{*}{\\begin{tabular}[c]{@{}c@{}}Total\\\\Yield\\end{tabular}} & \\multirow{2}{*}{\\begin{tabular}[c]{@{}c@{}}Target\\\\Fraction\\end{tabular}} & \\multicolumn{%g}{c}{Production Mode Fractions} & \\multirow{2}{*}{\\begin{tabular}[c]{@{}c@{}}$\\sigma_{\\rm{eff}}$\\\\(GeV)\\end{tabular}} & \\\\ \n"%(len(stage0.keys())))
+fout.write("     & \\multirow{2}{*}{Total} & \\multirow{2}{*}{\\begin{tabular}[c]{@{}c@{}}Target\\\\STXS bin(s)\\end{tabular}} & \\multicolumn{%g}{c}{Production Mode Fractions} & \\multirow{2}{*}{\\begin{tabular}[c]{@{}c@{}}$\\sigma_{\\rm{eff}}$\\\\(GeV)\\end{tabular}} & \\\\ \n"%(len(stage0.keys())))
 s0_str = Translate(stage0.keys()[0],translateStage0)
 for s0 in stage0.keys()[1:]: s0_str += " & %s"%Translate(s0,translateStage0)
 #fout.write("     & & & %s & & \\\\ \\hline \\hline \n"%s0_str)
@@ -244,7 +242,7 @@ for ir,r in tab_data.iterrows():
   for s0 in stage0:
     pcs0 = 100*(r['%s_yield'%s0]/r['nominal_yield'])
     #if pcs0 < 0.1: catline += " & $<$0.1\\%"
-    if pcs0 == 0.: catline += " & -"
+    if pcs0 <= 0.: catline += " & -"
     else: catline += " & %.1f\\%%"%pcs0
   catline += " & %.2f & %.2f"%(r['effSigma'],r['SoverSplusB'])
   fout.write("%s \\\\ \n"%catline)

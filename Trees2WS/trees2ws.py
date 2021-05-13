@@ -173,12 +173,19 @@ for cat in cats:
   # For NOTAG: fix extract centralObjectWeight from theory weights if available
   if cat == 'NOTAG':
     df['type'] = 'NOTAG'
-    if "centralObjectWeight" in mainVars: 
-      if 'THU_ggH_qmtopUp01sigma' in df: df['centralObjectWeight'] = df.apply(lambda x: 0.5*(x['THU_ggH_qmtopUp01sigma']+x['THU_ggH_qmtopDown01sigma']), axis=1)
-      else: df['centralObjectWeight'] = 1.
-    if opt.doNNLOPS: 
-      if 'THU_ggH_qmtopUp01sigma' in df: df['NNLOPSweight'] = df.apply(lambda x: 0.5*(x['THU_ggH_qmtopUp01sigma']+x['THU_ggH_qmtopDown01sigma']), axis=1)
-      else: df['NNLOPSweight'] = 1.
+    if opt.doNNLOPS:
+      if opt.productionMode == 'ggh':
+        if 'THU_ggH_VBF2jUp01sigma' in df:
+          df['centralObjectWeight'] = df.apply(lambda x: 0.5*(x['THU_ggH_VBF2jUp01sigma']+x['THU_ggH_VBF2jDown01sigma']), axis=1)
+          df['NNLOPSweight'] = df.apply(lambda x: 0.5*(x['THU_ggH_VBF2jUp01sigma']+x['THU_ggH_VBF2jDown01sigma']), axis=1)
+        else:
+          df['centralObjectWeight'] = 1.
+          df['NNLOPSweight'] = 1.
+      else:
+        df['centralObjectWeight'] = 1.
+        df['NNLOPSweight'] = 1.
+    else:
+      if "centralObjectWeight" in mainVars: df['centralObjectWeight'] = 1.
 
   # For experimental phase space (not NOTAG)
   else:
@@ -229,8 +236,12 @@ for stxsId in data[stxsVar].unique():
 
     # Extract stxsBin
     stxsBin = flashggSTXSDict[int(stxsId)]
+    if opt.productionMode == "wh": 
+      if "QQ2HQQ" in stxsBin: stxsBin = re.sub("QQ2HQQ","WH2HQQ",stxsBin)
+    elif opt.productionMode == "zh": 
+      if "QQ2HQQ" in stxsBin: stxsBin = re.sub("QQ2HQQ","ZH2HQQ",stxsBin)
     # ggZH: split by decay mode
-    if opt.productionMode == "ggzh":
+    elif opt.productionMode == "ggzh":
       if opt.decayExt == "_ZToQQ": stxsBin = re.sub("GG2H","GG2HQQ",stxsBin)
       elif opt.decayExt == "_ZToNuNu": stxsBin = re.sub("GG2HLL","GG2HNUNU",stxsBin)
     # For tHL split into separate bins for tHq and tHW

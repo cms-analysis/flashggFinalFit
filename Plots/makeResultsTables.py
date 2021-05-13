@@ -20,6 +20,7 @@ params = od()
 params['stage0'] = ['r_ggH', 'r_qqH', 'r_WH_lep', 'r_ZH_lep', 'r_ttH', 'r_tH']
 params['stage1p2_maximal'] = ['r_ggH_0J_low', 'r_ggH_0J_high', 'r_ggH_1J_low', 'r_ggH_1J_med', 'r_ggH_1J_high', 'r_ggH_2J_low', 'r_ggH_2J_med', 'r_ggH_2J_high', 'r_ggH_VBFlike', 'r_ggH_BSM', 'r_qqH_VBFlike', 'r_qqH_VHhad', 'r_qqH_BSM', 'r_WH_lep', 'r_ZH_lep', 'r_ttH', 'r_tH']
 params['stage1p2_minimal'] = ['r_ggH_0J_low', 'r_ggH_0J_high', 'r_ggH_1J_low', 'r_ggH_1J_med', 'r_ggH_1J_high', 'r_ggH_2J_low', 'r_ggH_2J_med', 'r_ggH_2J_high', 'r_ggH_BSM_low', 'r_ggH_BSM_high', 'r_qqH_low_mjj_low_pthjj', 'r_qqH_low_mjj_high_pthjj', 'r_qqH_high_mjj_low_pthjj', 'r_qqH_high_mjj_high_pthjj', 'r_qqH_VHhad', 'r_qqH_BSM', 'r_WH_lep_low', 'r_WH_lep_high', 'r_ZH_lep', 'r_ttH_low', 'r_ttH_medlow', 'r_ttH_medhigh', 'r_ttH_high', 'r_tH']
+params['stage1p2_extended'] = ['r_ggH_0J_low', 'r_ggH_0J_high', 'r_ggH_1J_low', 'r_ggH_1J_med', 'r_ggH_1J_high', 'r_ggH_2J_low', 'r_ggH_2J_med', 'r_ggH_2J_high', 'r_ggH_BSM_low', 'r_ggH_BSM_med', 'r_ggH_BSM_high', 'r_qqH_low_mjj_low_pthjj', 'r_qqH_low_mjj_high_pthjj', 'r_qqH_high_mjj_low_pthjj', 'r_qqH_high_mjj_high_pthjj', 'r_qqH_VHhad', 'r_qqH_BSM', 'r_WH_lep_low', 'r_WH_lep_med', 'r_WH_lep_high', 'r_ZH_lep', 'r_ttH_low', 'r_ttH_medlow', 'r_ttH_medhigh', 'r_ttH_high', 'r_ttH_veryhigh', 'r_tH']
 
 def get_options():
   parser = OptionParser()
@@ -45,11 +46,11 @@ def CopyDataFromJsonFile(jsonfilename='observed.json', model=None, pois=[]):
 
 # Load xsbr values
 with open(opt.inputXSBRjson,"r") as jsonfile: xsbr_theory = json.load(jsonfile)
-observed = CopyDataFromJsonFile('observed.json',opt.mode,params[opt.mode])
-expected = CopyDataFromJsonFile('expected.json',opt.mode,params[opt.mode])
+observed = CopyDataFromJsonFile('observed_UL_redo.json',opt.mode,params[opt.mode])
+expected = CopyDataFromJsonFile('expected_UL_redo.json',opt.mode,params[opt.mode])
 mh = float(re.sub("p",".",opt.inputXSBRjson.split("_")[-1].split(".json")[0]))
 
-fout = open("./Summary_table_%s.txt"%opt.mode,"w")
+fout = open("Tables/Summary_table_%s.txt"%opt.mode,"w")
 fout.write("\\begin{table}[htb]\n")
 fout.write("    \\centering\n")
 fout.write("    \\footnotesize\n")
