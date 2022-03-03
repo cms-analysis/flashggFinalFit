@@ -13,8 +13,10 @@ twd__ = "%s/Trees2WS"%cwd__
 # Centre of mass energy string
 sqrts__ = "13TeV"
 
-# Luminosity map in fb^-1
-lumiMap = {'2016':36.33, '2017':41.48, '2018':59.35, 'combined':137.17, 'merged':137.17}
+# Luminosity map in fb^-1: for using UL 2018
+lumiMap = {'2016':36.33, '2017':41.48, '2018':59.83, 'combined':137.65, 'merged':137.65}
+# If using ReReco samples then switch to lumiMap below (missing data in 2018 EGamma data set)
+#lumiMap = {'2016':36.33, '2017':41.48, '2018':59.35, 'combined':137.17, 'merged':137.17}
 lumiScaleFactor = 1000. # Converting from pb to fb
 
 # Constants
