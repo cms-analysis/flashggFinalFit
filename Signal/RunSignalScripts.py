@@ -52,6 +52,7 @@ if opt.inputConfig != '':
     options['smears']       = _cfg['smears']
     options['batch']        = _cfg['batch']
     options['queue']        = _cfg['queue']
+    options['xvar']         = _cfg['xvar']
     # Options from command line
     options['mode']                    = opt.mode
     options['modeOpts']                = opt.modeOpts
@@ -103,6 +104,7 @@ print " --> Input flashgg ws dir: %s"%options['inputWSDir']
 print " --> Processes: %s"%options['procs']
 print " --> Categories: %s"%options['cats']
 print " --> Mass points: %s --> Low = %s, High = %s"%(options['massPoints'],options['massLow'],options['massHigh'])
+print " --> Variable to fit: %s"%options['xvar']
 print " --> Extension: %s"%options['ext']
 print " --> Analysis: %s"%options['analysis']
 print " --> Year: %s ::: Corresponds to intLumi = %.2f fb^-1"%(options['year'],lumiMap[options['year']])
