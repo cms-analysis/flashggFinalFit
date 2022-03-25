@@ -86,7 +86,7 @@ def writeSubFiles(_opts):
       for cidx in range(_opts['nCats']):
         c = _opts['cats'].split(",")[cidx]
         _f.write("if [ $1 -eq %g ]; then\n"%cidx)
-        _f.write("  python %s/scripts/fTest.py --cat %s --procs %s --ext %s --inputWSDir %s %s\n"%(swd__,c,_opts['procs'],_opts['ext'],_opts['inputWSDir'],_opts['modeOpts']))
+        _f.write("  python %s/scripts/fTest.py --cat %s --procs %s --xvar %s --ext %s --inputWSDir %s --outdir %s %s\n"%(swd__,c,_opts['procs'],_opts['xvar'],_opts['ext'],_opts['inputWSDir'],_opts['outdir'],_opts['modeOpts']))
         _f.write("fi\n")
 
     elif _opts['mode'] == "packageSignal":
