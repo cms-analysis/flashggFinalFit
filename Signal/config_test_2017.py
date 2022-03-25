@@ -6,14 +6,17 @@ signalScriptCfg = {
   
     # Setup
     'inputWSDir':'cards/cards_fithgg/%s' % _year,
-    'procs':'ggh_120_13TeV,ggh_125_13TeV,ggh_130_13TeV', # if auto: inferred automatically from filenames
+    #'procs':'ggh_120_13TeV,ggh_125_13TeV,ggh_130_13TeV,vbf_120_13TeV,vbf_125_13TeV,vbf_130_13TeV', # if auto: inferred automatically from filenames
+    'procs':'ggh_125_13TeV,vbf_125_13TeV', # if auto: inferred automatically from filenames
     'cats':'auto', # if auto: inferred automatically from (0) workspace
     'ext':'test1_%s'%_year,
     'analysis':'STXS', # To specify which replacement dataset mapping (defined in ./python/replacementMap.py)
     'year':'%s'%_year, # Use 'combined' if merging all years: not recommended
-    'massPoints': '120,125,130',
-    'xvar': 'M2G',
-    
+    #'massPoints': '120,125,130',
+    'massPoints': '125',
+    'xvar': 'dipho_mass',
+    'outdir': 'plots',
+
     #Photon shape systematics  
     'scales':'HighR9EB,HighR9EE,LowR9EB,LowR9EE,Gain1EB,Gain6EB', # separate nuisance per year
     'scalesCorr':'MaterialCentralBarrel,MaterialOuterBarrel,MaterialForward,FNUFEE,FNUFEB,ShowerShapeHighR9EE,ShowerShapeHighR9EB,ShowerShapeLowR9EE,ShowerShapeLowR9EB', # correlated across years

@@ -53,6 +53,7 @@ if opt.inputConfig != '':
     options['batch']        = _cfg['batch']
     options['queue']        = _cfg['queue']
     options['xvar']         = _cfg['xvar']
+    options['outdir']       = _cfg['outdir'] if 'outdir' in _cfg else swd__
     # Options from command line
     options['mode']                    = opt.mode
     options['modeOpts']                = opt.modeOpts
@@ -137,7 +138,7 @@ print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Make directory to store job scripts and output
-if not os.path.isdir("%s/outdir_%s"%(swd__,options['ext'])): os.system("mkdir %s/outdir_%s"%(swd__,options['ext']))
+if not os.path.isdir("%s/%s"%(options['outdir'],options['ext'])): os.system("mkdir %s/%s"%(options['outdir'],options['ext']))
 
 # Write submission files: style depends on batch system
 writeSubFiles(options)
