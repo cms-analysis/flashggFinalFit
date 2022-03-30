@@ -70,7 +70,6 @@ ROOT.gROOT.SetBatch(True)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # SETUP: signal fit
-print " --> Running fit for (proc,cat) = (%s,%s)"%(opt.proc,opt.cat)
 if( len(opt.massPoints.split(",")) == 1 )&( opt.MHPolyOrder > 0 ):
   print " --> [WARNING] Attempting to fit polynomials of O(MH^%g) for single mass point. Setting order to 0"%opt.MHPolyOrder
   opt.MHPolyOrder=0
@@ -90,7 +89,6 @@ if opt.analysis not in globalXSBRMap:
 else: xsbrMap = globalXSBRMap[opt.analysis]
 
 # Load RooRealVars
-print "===> ",opt.inputWSDir, "   ",MHNominal,"   ",opt.proc
 nominalWSFileName = glob.glob("%s/output*%s*.root"%(opt.inputWSDir,MHNominal))[0]
 f0 = ROOT.TFile(nominalWSFileName,"read")
 inputWS0 = f0.Get(inputWSName__)
@@ -154,11 +152,8 @@ nominalDatasets = od()
 datasetRVForFit = od()
 for mp in opt.massPoints.split(","):
   WSFileName = glob.glob("%s/output*%s*%s.root"%(opt.inputWSDir,mp,procRVFit))[0]
-  print "Opened file = ",WSFileName
   f = ROOT.TFile(WSFileName,"read")
   inputWS = f.Get(inputWSName__)
-  print "inputWS = ",inputWS
-  print "megastringa = %s_%s_%s_%s"%(procToData(procRVFit.split("_")[0]),mp,sqrts__,catRVFit)
   d = reduceDataset(inputWS.data("%s_%s_%s_%s"%(procToData(procRVFit.split("_")[0]),mp,sqrts__,catRVFit)),aset)
   nominalDatasets[mp] = d.Clone()
   if opt.skipVertexScenarioSplit: datasetRVForFit[mp] = d
@@ -223,6 +218,7 @@ if not opt.skipVertexScenarioSplit:
     nominal_numEntries = datasetWVForFit[MHNominal].numEntries()
     procReplacementFit, catReplacementFit = rMap['procWV'], rMap['catWV']
     for mp in opt.massPoints.split(","):
+      print "====    ", procReplacementFit,"   ",catReplacementFit
       WSFileName = glob.glob("%s/output*%s*%s.root"%(opt.inputWSDir,mp,procReplacementFit))[0]
       f = ROOT.TFile(WSFileName,"read")
       inputWS = f.Get(inputWSName__)
@@ -322,8 +318,8 @@ fout.Close()
 if opt.doPlots:
   print "\n --> Making plots..."
   outdir="%s/%s/signalFit/Plots"%(opt.outdir,opt.ext)
+  if not os.path.isdir(outdir): os.system("mkdir -p %s"%outdir)
   if os.path.exists("/afs/cern.ch"): os.system("cp /afs/cern.ch/user/g/gpetrucc/php/index.php "+outdir)
-  if not os.path.isdir(outdir): os.system("mkdir %s"%outdir)
   if opt.skipVertexScenarioSplit:
     plotPdfComponents(ssfRV,_outdir=outdir,_extension="total_",_proc=procRVFit,_cat=catRVFit) 
   if not opt.skipVertexScenarioSplit:
