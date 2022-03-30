@@ -9,7 +9,7 @@ signalScriptCfg = {
     'procs':'gg,vbf', # if auto: inferred automatically from filenames
     'cats':'auto', # if auto: inferred automatically from (0) workspace
     'ext':'test1_%s'%_year,
-    'analysis':'STXS', # To specify which replacement dataset mapping (defined in ./python/replacementMap.py)
+    'analysis':'AC', # To specify which replacement dataset mapping (defined in ./python/replacementMap.py)
     'year':'%s'%_year, # Use 'combined' if merging all years: not recommended
     'massPoints': '120,125,130',
     'xvar': 'dipho_mass',

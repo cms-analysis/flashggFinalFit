@@ -31,6 +31,7 @@ def get_options():
   parser = OptionParser()
   parser.add_option("--xvar", dest='xvar', default='CMS_hgg_mass', help="Observable to fit")
   parser.add_option("--inputWSDir", dest='inputWSDir', default='', help="Input flashgg WS directory")
+  parser.add_option("--outdir", dest='outdir', default=swd__, help="Output directory (default is the current one)")
   parser.add_option("--ext", dest='ext', default='', help="Extension")
   parser.add_option("--proc", dest='proc', default='', help="Signal process")
   parser.add_option("--cat", dest='cat', default='', help="RECO category")
@@ -320,12 +321,14 @@ fout.Close()
 # PLOTTING
 if opt.doPlots:
   print "\n --> Making plots..."
-  if not os.path.isdir("%s/outdir_%s/signalFit/Plots"%(swd__,opt.ext)): os.system("mkdir %s/outdir_%s/signalFit/Plots"%(swd__,opt.ext))
+  outdir="%s/%s/signalFit/Plots"%(opt.outdir,opt.ext)
+  if os.path.exists("/afs/cern.ch"): os.system("cp /afs/cern.ch/user/g/gpetrucc/php/index.php "+outdir)
+  if not os.path.isdir(outdir): os.system("mkdir %s"%outdir)
   if opt.skipVertexScenarioSplit:
-    plotPdfComponents(ssfRV,_outdir="%s/outdir_%s/signalFit/Plots"%(swd__,opt.ext),_extension="total_",_proc=procRVFit,_cat=catRVFit) 
+    plotPdfComponents(ssfRV,_outdir=outdir,_extension="total_",_proc=procRVFit,_cat=catRVFit) 
   if not opt.skipVertexScenarioSplit:
-    plotPdfComponents(ssfRV,_outdir="%s/outdir_%s/signalFit/Plots"%(swd__,opt.ext),_extension="RV_",_proc=procRVFit,_cat=catRVFit) 
-    plotPdfComponents(ssfWV,_outdir="%s/outdir_%s/signalFit/Plots"%(swd__,opt.ext),_extension="WV_",_proc=procWVFit,_cat=catRVFit) 
+    plotPdfComponents(ssfRV,_outdir=outdir,_extension="RV_",_proc=procRVFit,_cat=catRVFit) 
+    plotPdfComponents(ssfWV,_outdir=outdir,_extension="WV_",_proc=procWVFit,_cat=catRVFit) 
   # Plot interpolation
-  plotInterpolation(fm,_outdir="%s/outdir_%s/signalFit/Plots"%(swd__,opt.ext)) 
-  plotSplines(fm,_outdir="%s/outdir_%s/signalFit/Plots"%(swd__,opt.ext),_nominalMass=MHNominal) 
+  plotInterpolation(fm,_outdir=outdir) 
+  plotSplines(fm,_outdir=outdir,_nominalMass=MHNominal) 
