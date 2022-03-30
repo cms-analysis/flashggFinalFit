@@ -143,3 +143,47 @@ globalXSBRMap['STXS']['THQ_FWDH'] = {'mode':'tHq','factor':0.0279}
 globalXSBRMap['STXS']['THQ'] = {'mode':'tHq','factor':0.9721}
 globalXSBRMap['STXS']['THW_FWDH'] = {'mode':'tHW','factor':0.0106}
 globalXSBRMap['STXS']['THW'] = {'mode':'tHW','factor':0.9894}
+
+
+
+# AC analysis: add factor for category composition
+globalXSBRMap['AC'] = od()
+globalXSBRMap['AC']['decay'] = {'mode':'hgg'}
+# non-optimized categories, just for testing
+globalXSBRMap['AC']['VBF_RECO_MJJ_250_350_DCP0_Tag0'] = {'mode':'qqH','factor':0.0041}
+globalXSBRMap['AC']['VBF_RECO_MJJ_250_350_DCP0_Tag1'] = {'mode':'qqH','factor':0.0057}
+globalXSBRMap['AC']['VBF_RECO_MJJ_250_350_DCP1_Tag0'] = {'mode':'qqH','factor':0.0054}
+globalXSBRMap['AC']['VBF_RECO_MJJ_250_350_DCP1_Tag1'] = {'mode':'qqH','factor':0.0079}
+globalXSBRMap['AC']['VBF_RECO_MJJ_250_350_DCP2_Tag0'] = {'mode':'qqH','factor':0.0074}
+globalXSBRMap['AC']['VBF_RECO_MJJ_250_350_DCP2_Tag1'] = {'mode':'qqH','factor':0.0094}
+globalXSBRMap['AC']['VBF_RECO_MJJ_350_700_DCP0_Tag0'] = {'mode':'qqH','factor':0.0606}
+globalXSBRMap['AC']['VBF_RECO_MJJ_350_700_DCP0_Tag1'] = {'mode':'qqH','factor':0.0394}
+globalXSBRMap['AC']['VBF_RECO_MJJ_350_700_DCP1_Tag0'] = {'mode':'qqH','factor':0.0817}
+globalXSBRMap['AC']['VBF_RECO_MJJ_350_700_DCP1_Tag1'] = {'mode':'qqH','factor':0.0255}
+globalXSBRMap['AC']['VBF_RECO_MJJ_350_700_DCP2_Tag0'] = {'mode':'qqH','factor':0.1188}
+globalXSBRMap['AC']['VBF_RECO_MJJ_350_700_DCP2_Tag1'] = {'mode':'qqH','factor':0.0323}
+globalXSBRMap['AC']['VBF_RECO_MJJ_GE700_DCP0_Tag0'] = {'mode':'qqH','factor':0.1655}
+globalXSBRMap['AC']['VBF_RECO_MJJ_GE700_DCP0_Tag1'] = {'mode':'qqH','factor':0.0225}
+globalXSBRMap['AC']['VBF_RECO_MJJ_GE700_DCP1_Tag0'] = {'mode':'qqH','factor':0.1545}
+globalXSBRMap['AC']['VBF_RECO_MJJ_GE700_DCP1_Tag1'] = {'mode':'qqH','factor':0.0101}
+globalXSBRMap['AC']['VBF_RECO_MJJ_GE700_DCP2_Tag0'] = {'mode':'qqH','factor':0.2232}
+globalXSBRMap['AC']['VBF_RECO_MJJ_GE700_DCP2_Tag1'] = {'mode':'qqH','factor':0.0260}
+
+globalXSBRMap['AC']['GG2H_RECO_MJJ_250_350_DCP0_Tag0'] = {'mode':'ggH','factor':0.0105}
+globalXSBRMap['AC']['GG2H_RECO_MJJ_250_350_DCP0_Tag1'] = {'mode':'ggH','factor':0.0264}
+globalXSBRMap['AC']['GG2H_RECO_MJJ_250_350_DCP1_Tag0'] = {'mode':'ggH','factor':0.0127}
+globalXSBRMap['AC']['GG2H_RECO_MJJ_250_350_DCP1_Tag1'] = {'mode':'ggH','factor':0.0134}
+globalXSBRMap['AC']['GG2H_RECO_MJJ_250_350_DCP2_Tag0'] = {'mode':'ggH','factor':0.0173}
+globalXSBRMap['AC']['GG2H_RECO_MJJ_250_350_DCP2_Tag1'] = {'mode':'ggH','factor':0.0218}
+globalXSBRMap['AC']['GG2H_RECO_MJJ_350_700_DCP0_Tag0'] = {'mode':'ggH','factor':0.0693}
+globalXSBRMap['AC']['GG2H_RECO_MJJ_350_700_DCP0_Tag1'] = {'mode':'ggH','factor':0.0983}
+globalXSBRMap['AC']['GG2H_RECO_MJJ_350_700_DCP1_Tag0'] = {'mode':'ggH','factor':0.0746}
+globalXSBRMap['AC']['GG2H_RECO_MJJ_350_700_DCP1_Tag1'] = {'mode':'ggH','factor':0.0411}
+globalXSBRMap['AC']['GG2H_RECO_MJJ_350_700_DCP2_Tag0'] = {'mode':'ggH','factor':0.1524}
+globalXSBRMap['AC']['GG2H_RECO_MJJ_350_700_DCP2_Tag1'] = {'mode':'ggH','factor':0.0963}
+globalXSBRMap['AC']['GG2H_RECO_MJJ_GE700_DCP0_Tag0'] = {'mode':'ggH','factor':0.0840}
+globalXSBRMap['AC']['GG2H_RECO_MJJ_GE700_DCP0_Tag1'] = {'mode':'ggH','factor':0.0437}
+globalXSBRMap['AC']['GG2H_RECO_MJJ_GE700_DCP1_Tag0'] = {'mode':'ggH','factor':0.0647}
+globalXSBRMap['AC']['GG2H_RECO_MJJ_GE700_DCP1_Tag1'] = {'mode':'ggH','factor':0.0103}
+globalXSBRMap['AC']['GG2H_RECO_MJJ_GE700_DCP2_Tag0'] = {'mode':'ggH','factor':0.1251}
+globalXSBRMap['AC']['GG2H_RECO_MJJ_GE700_DCP2_Tag1'] = {'mode':'ggH','factor':0.0382}

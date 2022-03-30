@@ -206,3 +206,57 @@ globalReplacementMap["STXS"]["catRVMap"]["RECO_WH_LEP_PTV_75_150_Tag1"] = "RECO_
 globalReplacementMap["STXS"]["catRVMap"]["RECO_WH_LEP_PTV_GT150_Tag0"] = "RECO_WH_LEP_PTV_GT150_Tag0"
 globalReplacementMap["STXS"]["catRVMap"]["RECO_ZH_LEP_Tag0"] = "RECO_ZH_LEP_Tag0"
 globalReplacementMap["STXS"]["catRVMap"]["RECO_ZH_LEP_Tag1"] = "RECO_ZH_LEP_Tag1"
+
+
+
+
+# AC analysis
+globalReplacementMap['AC'] = od()
+# For WRONG VERTEX SCENARIO:
+#  * single proc x cat for wrong vertex since for dZ > 1cm shape independent of proc x cat
+#  * use proc x cat with highest number of WV events
+globalReplacementMap['AC']['procWV'] = "vbf_125_13TeV"
+globalReplacementMap['AC']['catWV'] = "RECO_MJJ_GE700_DCP2_Tag0"
+# For RIGHT VERTEX SCENARIO:
+#  * default mapping is to use diagonal process from given category 
+#  * if few events in diagonal process then may need to change the category aswell (see catRVMap)
+#  * map must contain entry for all cats being processed (for replacement proc and cat)
+globalReplacementMap['AC']['procRVMap'] = od()
+globalReplacementMap["AC"]["procRVMap"]["RECO_MJJ_250_350_DCP0_Tag0"] = "ggh_125_13TeV"
+globalReplacementMap["AC"]["procRVMap"]["RECO_MJJ_250_350_DCP0_Tag1"] = "ggh_125_13TeV"
+globalReplacementMap["AC"]["procRVMap"]["RECO_MJJ_250_350_DCP1_Tag0"] = "ggh_125_13TeV"
+globalReplacementMap["AC"]["procRVMap"]["RECO_MJJ_250_350_DCP1_Tag1"] = "ggh_125_13TeV"
+globalReplacementMap["AC"]["procRVMap"]["RECO_MJJ_250_350_DCP2_Tag0"] = "ggh_125_13TeV"
+globalReplacementMap["AC"]["procRVMap"]["RECO_MJJ_250_350_DCP2_Tag1"] = "ggh_125_13TeV"
+globalReplacementMap["AC"]["procRVMap"]["RECO_MJJ_350_700_DCP0_Tag0"] = "ggh_125_13TeV"
+globalReplacementMap["AC"]["procRVMap"]["RECO_MJJ_350_700_DCP0_Tag1"] = "ggh_125_13TeV"
+globalReplacementMap["AC"]["procRVMap"]["RECO_MJJ_350_700_DCP1_Tag0"] = "ggh_125_13TeV"
+globalReplacementMap["AC"]["procRVMap"]["RECO_MJJ_350_700_DCP1_Tag1"] = "ggh_125_13TeV"
+globalReplacementMap["AC"]["procRVMap"]["RECO_MJJ_350_700_DCP2_Tag0"] = "ggh_125_13TeV"
+globalReplacementMap["AC"]["procRVMap"]["RECO_MJJ_350_700_DCP2_Tag1"] = "ggh_125_13TeV"
+globalReplacementMap["AC"]["procRVMap"]["RECO_MJJ_GE700_DCP0_Tag0"] = "vbf_125_13TeV"
+globalReplacementMap["AC"]["procRVMap"]["RECO_MJJ_GE700_DCP0_Tag1"] = "vbf_125_13TeV"
+globalReplacementMap["AC"]["procRVMap"]["RECO_MJJ_GE700_DCP1_Tag0"] = "vbf_125_13TeV"
+globalReplacementMap["AC"]["procRVMap"]["RECO_MJJ_GE700_DCP1_Tag1"] = "vbf_125_13TeV"
+globalReplacementMap["AC"]["procRVMap"]["RECO_MJJ_GE700_DCP2_Tag0"] = "vbf_125_13TeV"
+globalReplacementMap["AC"]["procRVMap"]["RECO_MJJ_GE700_DCP2_Tag1"] = "vbf_125_13TeV"
+# Replacement category for RV fit
+globalReplacementMap['AC']["catRVMap"] = od()
+globalReplacementMap["AC"]["catRVMap"]["RECO_MJJ_250_350_DCP0_Tag0"] = "RECO_MJJ_250_350_DCP0_Tag0"
+globalReplacementMap["AC"]["catRVMap"]["RECO_MJJ_250_350_DCP0_Tag1"] = "RECO_MJJ_250_350_DCP0_Tag1"
+globalReplacementMap["AC"]["catRVMap"]["RECO_MJJ_250_350_DCP1_Tag0"] = "RECO_MJJ_250_350_DCP1_Tag0"
+globalReplacementMap["AC"]["catRVMap"]["RECO_MJJ_250_350_DCP1_Tag1"] = "RECO_MJJ_250_350_DCP1_Tag1"
+globalReplacementMap["AC"]["catRVMap"]["RECO_MJJ_250_350_DCP2_Tag0"] = "RECO_MJJ_250_350_DCP2_Tag0"
+globalReplacementMap["AC"]["catRVMap"]["RECO_MJJ_250_350_DCP2_Tag1"] = "RECO_MJJ_250_350_DCP2_Tag1"
+globalReplacementMap["AC"]["catRVMap"]["RECO_MJJ_350_700_DCP0_Tag0"] = "RECO_MJJ_350_700_DCP0_Tag0"
+globalReplacementMap["AC"]["catRVMap"]["RECO_MJJ_350_700_DCP0_Tag1"] = "RECO_MJJ_350_700_DCP0_Tag1"
+globalReplacementMap["AC"]["catRVMap"]["RECO_MJJ_350_700_DCP1_Tag0"] = "RECO_MJJ_350_700_DCP1_Tag0"
+globalReplacementMap["AC"]["catRVMap"]["RECO_MJJ_350_700_DCP1_Tag1"] = "RECO_MJJ_350_700_DCP1_Tag1"
+globalReplacementMap["AC"]["catRVMap"]["RECO_MJJ_350_700_DCP2_Tag0"] = "RECO_MJJ_350_700_DCP2_Tag0"
+globalReplacementMap["AC"]["catRVMap"]["RECO_MJJ_350_700_DCP2_Tag1"] = "RECO_MJJ_350_700_DCP2_Tag1"
+globalReplacementMap["AC"]["catRVMap"]["RECO_MJJ_GE700_DCP0_Tag0"] = "RECO_MJJ_GE700_DCP0_Tag0"
+globalReplacementMap["AC"]["catRVMap"]["RECO_MJJ_GE700_DCP0_Tag1"] = "RECO_MJJ_GE700_DCP0_Tag1"
+globalReplacementMap["AC"]["catRVMap"]["RECO_MJJ_GE700_DCP1_Tag0"] = "RECO_MJJ_GE700_DCP1_Tag0"
+globalReplacementMap["AC"]["catRVMap"]["RECO_MJJ_GE700_DCP1_Tag1"] = "RECO_MJJ_GE700_DCP1_Tag1"
+globalReplacementMap["AC"]["catRVMap"]["RECO_MJJ_GE700_DCP2_Tag0"] = "RECO_MJJ_GE700_DCP2_Tag0"
+globalReplacementMap["AC"]["catRVMap"]["RECO_MJJ_GE700_DCP2_Tag1"] = "RECO_MJJ_GE700_DCP2_Tag1"

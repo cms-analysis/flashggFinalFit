@@ -6,14 +6,12 @@ signalScriptCfg = {
   
     # Setup
     'inputWSDir':'cards/cards_fithgg/%s' % _year,
-    #'procs':'ggh_120_13TeV,ggh_125_13TeV,ggh_130_13TeV,vbf_120_13TeV,vbf_125_13TeV,vbf_130_13TeV', # if auto: inferred automatically from filenames
-    'procs':'ggh_125_13TeV,vbf_125_13TeV', # if auto: inferred automatically from filenames
+    'procs':'gg,vbf', # if auto: inferred automatically from filenames
     'cats':'auto', # if auto: inferred automatically from (0) workspace
     'ext':'test1_%s'%_year,
     'analysis':'STXS', # To specify which replacement dataset mapping (defined in ./python/replacementMap.py)
     'year':'%s'%_year, # Use 'combined' if merging all years: not recommended
-    #'massPoints': '120,125,130',
-    'massPoints': '125',
+    'massPoints': '120,125,130',
     'xvar': 'dipho_mass',
     'outdir': 'plots',
 
