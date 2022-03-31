@@ -10,7 +10,8 @@ signalScriptCfg = {
     'cats':'auto', # if auto: inferred automatically from (0) workspace
     'ext':'test1_%s'%_year,
     'analysis':'AC', # To specify which replacement dataset mapping (defined in ./python/replacementMap.py)
-    'year':'%s'%_year, # Use 'combined' if merging all years: not recommended
+    #'year':'%s'%_year, # Use 'combined' if merging all years: not recommended
+    'year': 'combined',
     'massPoints': '120,125,130',
     'xvar': 'dipho_mass',
     'outdir': 'plots',
