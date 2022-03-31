@@ -358,7 +358,7 @@ def plotSplines(_finalModel,_outdir="./",_nominalMass='125',splinesToPlot=['xs',
   xnom = od()
   _finalModel.MH.setVal(float(_nominalMass))
   for sp in splinesToPlot: xnom[sp] = _finalModel.Splines[sp].getVal()
-  _finalModel.intLumi.setVal(float(lumiMap[_finalModel.year]))
+  _finalModel.intLumi.setVal(lumiScaleFactor*float(lumiMap[_finalModel.year]))
   xnom['norm'] = _finalModel.Functions['final_normThisLumi'].getVal()
   # Loop over mass points
   p = 0
