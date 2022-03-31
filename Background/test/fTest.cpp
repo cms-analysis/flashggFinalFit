@@ -608,6 +608,7 @@ int main(int argc, char* argv[]){
   int catOffset;
   string datfile;
   string outDir;
+  string plotDir;
   string outfilename;
   bool is2011=false;
   bool verbose=false;
@@ -624,7 +625,8 @@ int main(int argc, char* argv[]){
     ("ncats,c", po::value<int>(&ncats)->default_value(5),                                       "Number of categories")
     ("singleCat", po::value<int>(&singleCategory)->default_value(-1),                           "Run A single Category")
     ("datfile,d", po::value<string>(&datfile)->default_value("dat/fTest.dat"),                  "Right results to datfile for BiasStudy")
-    ("outDir,D", po::value<string>(&outDir)->default_value("plots/fTest"),                      "Out directory for plots")
+    ("outDir,D", po::value<string>(&outDir)->default_value("plots/fTest"),                      "Out directory for results")
+    ("plotDir,P", po::value<string>(&plotDir)->default_value("plots/fTest"),                    "Out directory for plots")
     ("saveMultiPdf", po::value<string>(&outfilename),         					"Save a MultiPdf model with the appropriate pdfs")
     ("runFtestCheckWithToys", 									"When running the F-test, use toys to calculate pvals (and make plots) ")
     ("is2011",                                                                                  "Run 2011 config")
@@ -676,6 +678,7 @@ int main(int argc, char* argv[]){
   }
 
   system(Form("mkdir -p %s",outDir.c_str()));
+  system(Form("mkdir -p %s",plotDir.c_str()));
   TFile *inFile = TFile::Open(fileName.c_str());
   RooWorkspace *inWS;
 	if(isFlashgg_){
@@ -733,7 +736,7 @@ int main(int argc, char* argv[]){
 	vector<map<string,RooAbsPdf*> > pdfs_vec;
 
 	PdfModelBuilder pdfsModel;
-	RooRealVar *mass = (RooRealVar*)inWS->var("CMS_hgg_mass");
+	RooRealVar *mass = (RooRealVar*)inWS->var("dipho_mass");
 	std:: cout << "[INFO] Got mass from ws " << mass << std::endl;
 	pdfsModel.setObsVar(mass);
 	double upperEnvThreshold = 0.1; // upper threshold on delta(chi2) to include function in envelope (looser than truth function)
@@ -845,14 +848,14 @@ int main(int argc, char* argv[]){
 					if (chi2<0. && order>1) chi2=0.;
 					if (prev_pdf!=NULL){
 						prob = getProbabilityFtest(chi2,order-prev_order,prev_pdf,bkgPdf,mass,data
-								,Form("%s/Ftest_from_%s%d_cat%d.pdf",outDir.c_str(),funcType->c_str(),order,(cat+catOffset)));
+                                                                           ,Form("%s/Ftest_from_%s%d_cat%d.pdf",plotDir.c_str(),funcType->c_str(),order,(cat+catOffset)));
 						std::cout << "[INFO]  F-test Prob(chi2>chi2(data)) == " << prob << std::endl;
 					} else {
 						prob = 0;
 					}
 					double gofProb=0;
 					// otherwise we get it later ...
-					if (!saveMultiPdf) plot(mass,bkgPdf,data,Form("%s/%s%d_cat%d.pdf",outDir.c_str(),funcType->c_str(),order,(cat+catOffset)),flashggCats_,fitStatus,&gofProb);
+					if (!saveMultiPdf) plot(mass,bkgPdf,data,Form("%s/%s%d_cat%d.pdf",plotDir.c_str(),funcType->c_str(),order,(cat+catOffset)),flashggCats_,fitStatus,&gofProb);
 					cout << "[INFO]\t " << *funcType << " " << order << " " << prevNll << " " << thisNll << " " << chi2 << " " << prob << endl;
 					//fprintf(resFile,"%15s && %d && %10.2f && %10.2f && %10.2f \\\\\n",funcType->c_str(),order,thisNll,chi2,prob);
 					prevNll=thisNll;
@@ -908,7 +911,7 @@ int main(int argc, char* argv[]){
 
 						// Calculate goodness of fit for the thing to be included (will use toys for lowstats)!
 						double gofProb =0; 
-						plot(mass,bkgPdf,data,Form("%s/%s%d_cat%d.pdf",outDir.c_str(),funcType->c_str(),order,(cat+catOffset)),flashggCats_,fitStatus,&gofProb);
+						plot(mass,bkgPdf,data,Form("%s/%s%d_cat%d.pdf",plotDir.c_str(),funcType->c_str(),order,(cat+catOffset)),flashggCats_,fitStatus,&gofProb);
 
 						if ((prob < upperEnvThreshold) ) { // Looser requirements for the envelope
 
@@ -944,7 +947,7 @@ int main(int argc, char* argv[]){
 		choices_envelope_vec.push_back(choices_envelope);
 		pdfs_vec.push_back(pdfs);
 
-		plot(mass,pdfs,data,Form("%s/truths_cat%d",outDir.c_str(),(cat+catOffset)),flashggCats_,cat);
+		plot(mass,pdfs,data,Form("%s/truths_cat%d",plotDir.c_str(),(cat+catOffset)),flashggCats_,cat);
 
 		if (saveMultiPdf){
 
@@ -983,7 +986,7 @@ int main(int argc, char* argv[]){
 			outputws->import(catIndex);
 			outputws->import(dataBinned);
 			outputws->import(*data);
-			plot(mass,pdf,&catIndex,data,Form("%s/multipdf_%s",outDir.c_str(),catname.c_str()),flashggCats_,cat,bestFitPdfIndex);
+			plot(mass,pdf,&catIndex,data,Form("%s/multipdf_%s",plotDir.c_str(),catname.c_str()),flashggCats_,cat,bestFitPdfIndex);
 
 		}
 
