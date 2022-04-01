@@ -106,6 +106,9 @@ for year in years:
       f = ROOT.TFile(_inputWSFile)
       w = f.Get(inputWSName__)
       sumw = w.data(_nominalDataName).sumEntries()
+      print "inputWSName__ = ",inputWSName__
+      print "===> _nominalDataName = ",_nominalDataName
+      print "sumw = ",sumw
       if sumw == 0.: skipProc = True
       w.Delete()
       f.Close()
@@ -205,7 +208,7 @@ if opt.doSystematics:
 totalSignalRows = float(data[data['type']=='sig'].shape[0])
 for ir,r in data[data['type']=='sig'].iterrows():
 
-  print " --> Extracting yields: (%s,%s) [%.1f%%]"%(r['proc'],r['cat'],100*(float(ir)/totalSignalRows))
+  print " --> Extracting yields: (%s,%s) [%.3f/%.3f = %.1f%%]"%(r['proc'],r['cat'],float(ir),totalSignalRows,100*(float(ir+1)/totalSignalRows))
 
   # Open input WS file and extract workspace
   f_in = ROOT.TFile(r.inputWSFile)
@@ -232,6 +235,7 @@ for ir,r in data[data['type']=='sig'].iterrows():
   data.at[ir,'nominal_yield'] = y
   data.at[ir,'sumw2'] = sumw2
   if not opt.skipCOWCorr: data.at[ir,'nominal_yield_COWCorr'] = y_COWCorr
+  print "\t\t ==> nominal_yield = %f " % (y*_rate/1000.)
 
   # Systematics: loop over systematics and use function to extract yield variations
   if opt.doSystematics:
