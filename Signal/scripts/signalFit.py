@@ -151,6 +151,8 @@ nominalDatasets = od()
 # For RV (or if skipping vertex scenario split)
 datasetRVForFit = od()
 for mp in opt.massPoints.split(","):
+  if 'ALT' in procRVFit and mp!=MHNominal: continue
+  print glob.glob("%s/output*%s*%s.root"%(opt.inputWSDir,mp,procRVFit))
   WSFileName = glob.glob("%s/output*%s*%s.root"%(opt.inputWSDir,mp,procRVFit))[0]
   f = ROOT.TFile(WSFileName,"read")
   inputWS = f.Get(inputWSName__)
@@ -166,6 +168,7 @@ if( datasetRVForFit[MHNominal].numEntries() < opt.replacementThreshold  )|( data
   nominal_numEntries = datasetRVForFit[MHNominal].numEntries()
   procReplacementFit, catReplacementFit = rMap['procRVMap'][opt.cat], rMap['catRVMap'][opt.cat]
   for mp in opt.massPoints.split(","):
+    if 'ALT' in procRVFit and mp!=MHNominal: continue
     WSFileName = glob.glob("%s/output*%s*%s.root"%(opt.inputWSDir,mp,procReplacementFit))[0]
     f = ROOT.TFile(WSFileName,"read")
     inputWS = f.Get(inputWSName__)
@@ -185,26 +188,31 @@ if( datasetRVForFit[MHNominal].numEntries() < opt.replacementThreshold  )|( data
     if opt.skipVertexScenarioSplit: 
       print " --> Too few entries in nominal dataset (%g < %g). Using replacement (proc,cat) = (%s,%s) for extracting shape"%(nominal_numEntries,opt.replacementThreshold,procRVFit,catRVFit)
       for mp in opt.massPoints.split(","):
+        if 'ALT' in procRVFit and mp!=MHNominal: continue
         print "     * MH = %s GeV: numEntries = %g, sumEntries = %.6f"%(mp,datasetRVForFit[mp].numEntries(),datasetRVForFit[mp].sumEntries())
     else: 
       print " --> RV: Too few entries in nominal dataset (%g < %g). Using replacement (proc,cat) = (%s,%s) for extracting shape"%(nominal_numEntries,opt.replacementThreshold,procRVFit,catRVFit)
       for mp in opt.massPoints.split(","):
+        if 'ALT' in procRVFit and mp!=MHNominal: continue
         print "     * MH = %s: numEntries = %g, sumEntries = %.6f"%(mp,datasetRVForFit[mp].numEntries(),datasetRVForFit[mp].sumEntries())
 
 else:
   if opt.skipVertexScenarioSplit: 
     print " --> Using (proc,cat) = (%s,%s) for extracting shape"%(procRVFit,catRVFit)
     for mp in opt.massPoints.split(","):
+      if 'ALT' in procRVFit and mp!=MHNominal: continue
       print "     * MH = %s: numEntries = %g, sumEntries = %.6f"%(mp,datasetRVForFit[mp].numEntries(),datasetRVForFit[mp].sumEntries())
   else: 
     print " --> RV: Using (proc,cat) = (%s,%s) for extracting shape"%(procRVFit,catRVFit)
     for mp in opt.massPoints.split(","):
+      if 'ALT' in procRVFit and mp!=MHNominal: continue
       print "     * MH = %s: numEntries = %g, sumEntries = %.6f"%(mp,datasetRVForFit[mp].numEntries(),datasetRVForFit[mp].sumEntries())
 
 # Repeat for WV scenario
 if not opt.skipVertexScenarioSplit:
   datasetWVForFit = od()
   for mp in opt.massPoints.split(","):
+    if 'ALT' in procWVFit and mp!=MHNominal: continue
     WSFileName = glob.glob("%s/output*%s*%s.root"%(opt.inputWSDir,mp,procWVFit))[0]
     f = ROOT.TFile(WSFileName,"read")
     inputWS = f.Get(inputWSName__)
@@ -218,7 +226,8 @@ if not opt.skipVertexScenarioSplit:
     nominal_numEntries = datasetWVForFit[MHNominal].numEntries()
     procReplacementFit, catReplacementFit = rMap['procWV'], rMap['catWV']
     for mp in opt.massPoints.split(","):
-      print "====    ", procReplacementFit,"   ",catReplacementFit
+      if 'ALT' in procReplacementFit and mp!=MHNominal: continue
+      print mp, "  ",procReplacementFit
       WSFileName = glob.glob("%s/output*%s*%s.root"%(opt.inputWSDir,mp,procReplacementFit))[0]
       f = ROOT.TFile(WSFileName,"read")
       inputWS = f.Get(inputWSName__)
@@ -234,10 +243,12 @@ if not opt.skipVertexScenarioSplit:
       procWVFit, catWVFit = procReplacementFit, catReplacementFit
       print " --> WV: Too few entries in nominal dataset (%g < %g). Using replacement (proc,cat) = (%s,%s) for extracting shape"%(nominal_numEntries,opt.replacementThreshold,procWVFit,catWVFit)
       for mp in opt.massPoints.split(","):
+        if 'ALT' in procWVFit and mp!=MHNominal: continue
         print "     * MH = %s: numEntries = %g, sumEntries = %.6f"%(mp,datasetWVForFit[mp].numEntries(),datasetWVForFit[mp].sumEntries())
   else:
     print " --> WV: Using (proc,cat) = (%s,%s) for extracting shape"%(procWVFit,catRVFit)
     for mp in opt.massPoints.split(","):
+      if 'ALT' in procWVFit and mp!=MHNominal: continue
       print "     * MH = %s: numEntries = %g, sumEntries = %.6f"%(mp,datasetWVForFit[mp].numEntries(),datasetWVForFit[mp].sumEntries())
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -245,15 +256,19 @@ if not opt.skipVertexScenarioSplit:
 if not opt.skipBeamspotReweigh:
   # Datasets for fit
   for mp,d in datasetRVForFit.iteritems(): 
+    if 'ALT' in d and mp!=MHNominal: continue
     drw = beamspotReweigh(datasetRVForFit[mp],opt.beamspotWidthData,opt.beamspotWidthMC,xvar,dZ,_x=opt.xvar)
     datasetRVForFit[mp] = drw
   if not opt.skipVertexScenarioSplit:
     for mp,d in datasetWVForFit.iteritems(): 
+      if mp!=MHNominal: continue
       drw = beamspotReweigh(datasetWVForFit[mp],opt.beamspotWidthData,opt.beamspotWidthMC,xvar,dZ,_x=opt.xvar)
       datasetWVForFit[mp] = drw
-    print " --> Beamspot reweigh: RV(sumEntries) = %.6f, WV(sumEntries) = %.6f"%(datasetRVForFit[mp].sumEntries(),datasetWVForFit[mp].sumEntries())
+      print " --> Beamspot reweigh: RV(sumEntries) = %.6f, WV(sumEntries) = %.6f"%(datasetRVForFit[mp].sumEntries(),datasetWVForFit[mp].sumEntries())
   else:
-    print " --> Beamspot reweigh: sumEntries = %.6f"%datasetRVForFit[mp].sumEntries()
+    for mp,d in datasetRVForFit.iteritems():
+      if mp!=MHNominal: continue
+      print " --> Beamspot reweigh: sumEntries = %.6f"%datasetRVForFit[mp].sumEntries()
 
   # Nominal datasets for saving to output Workspace: preserve norm for eff * acc calculation
   for mp,d in nominalDatasets.iteritems():
