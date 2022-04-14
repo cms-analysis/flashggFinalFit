@@ -20,10 +20,8 @@ files = args[:]
 #Extract all files to be merged                                                                                                                                                                                                          
 fNames = {}
 for year in opt.years.split(","): fNames[year] = glob.glob("%s/data_%s/output_Data_13TeV.root"%(opt.idir,year))
-print fNames
 
 cats = extractListOfCats(fNames[opt.years.split(",")[0]]).split(',')
-print "CATEGORIES = ",cats
 
 # Define ouput merged workspace
 print " --> Merging output workspaces"
