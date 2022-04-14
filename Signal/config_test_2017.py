@@ -8,10 +8,9 @@ signalScriptCfg = {
     'inputWSDir':'cards/cards_current/signal_%s' % _year,
     'procs':'auto', # if auto: inferred automatically from filenames
     'cats':'auto', # if auto: inferred automatically from (0) workspace
-    'ext':'fits2022-04-12_%s'%_year,
+    'ext':'2022-04-12_year%s'%_year,
     'analysis':'AC', # To specify which replacement dataset mapping (defined in ./python/replacementMap.py)
-    #'year':'%s'%_year, # Use 'combined' if merging all years: not recommended
-    'year': 'combined',
+    'year':'%s'%_year, # Use 'combined' if merging all years: not recommended
     'massPoints': '120,125,130',
     'xvar': 'dipho_mass',
     'outdir': 'plots',
