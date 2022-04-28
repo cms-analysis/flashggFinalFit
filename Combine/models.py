@@ -1,6 +1,19 @@
 models = {
   "mu_inclusive":"",
 
+  "mu_simple":"-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+--PO \"map=.*/ggh.*hgg:r_ggH[1,0,2]\" \
+--PO \"map=.*/vbfh.*hgg:r_VBF[1,0,3]\" \
+--PO \"map=.*/tth.*hgg:r_top[1,0,3]\" \
+--PO \"map=.*/wzh.*hgg:r_VH[1,0,3]\"",
+
+  "mu_simple_sm":"-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+--PO \"map=.*/ggh.*hgg:r_ggH[1,0,2]\" \
+--PO \"map=.*/vbfh.*hgg:r_VBF[1,0,3]\" \
+--PO \"map=.*/vbfALT.*hgg:r_VBFBSM[0]\" \
+--PO \"map=.*/tth.*hgg:r_top[1,0,3]\" \
+--PO \"map=.*/wzh.*hgg:r_VH[1,0,3]\"",
+
   "mu":"-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
 --PO \"map=.*/ggH.*:r_ggH[1,0,2]\" \
 --PO \"map=.*/bbH.*:r_ggH[1,0,2]\" \
@@ -15,6 +28,9 @@ models = {
 --PO \"map=.*/ttH.*:r_top[1,0,3]\" \
 --PO \"map=.*/tHq.*:r_top[1,0,3]\" \
 --PO \"map=.*/tHW.*:r_top[1,0,3]\"",
+
+  "cp":"-P HiggsAnalysis.CombinedLimit.HiggsJPC:twoHypothesisHiggs \
+--PO=muFloating", 
 
   "stage0":"-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
 --PO \"map=.*/ggH.*:r_ggH[1,0,2]\" \
