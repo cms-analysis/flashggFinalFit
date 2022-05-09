@@ -149,6 +149,8 @@ globalXSBRMap['STXS']['THW'] = {'mode':'tHW','factor':0.9894}
 # AC analysis: add factor for category composition
 globalXSBRMap['AC'] = od()
 globalXSBRMap['AC']['decay'] = {'mode':'hgg'}
-globalXSBRMap['AC']['gg'] = {'mode':'ggH'}
-globalXSBRMap['AC']['vbf'] = {'mode':'qqH'}
-
+globalXSBRMap['AC']['ggh'] = {'mode':'ggH'}
+globalXSBRMap['AC']['vbfh'] = {'mode':'qqH'}
+globalXSBRMap['AC']['tth'] = {'mode':'ttH'}
+globalXSBRMap['AC']['wzh'] = {'mode':'WH','factor':BR_W_qq} # not fully correct. Use the samples spli by W and Z
+globalXSBRMap['AC']['vbfALT0Mh'] = {'mode':'qqH'} # not sure it is correct. From the spline plot it seems OK: takes the MH=125 GeV value from JHU sample and then extrapolate with the relative ratio of qqH SM

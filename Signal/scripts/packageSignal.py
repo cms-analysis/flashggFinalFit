@@ -6,6 +6,8 @@ import glob
 import ROOT
 from optparse import OptionParser
 
+MHNominal = '125'
+
 def get_options():
   parser = OptionParser()
   parser.add_option("--cat", dest='cat', default='RECO_0J_PTH_0_10_Tag0', help="RECO category to package")
@@ -43,6 +45,7 @@ for mp in opt.massPoints.split(","):
 for ext, fNames_by_ext in fNames.iteritems():
   for fName in fNames_by_ext:
     for mp in opt.massPoints.split(","):
+      if 'ALT' in fName and mp!=MHNominal: continue
       d = ROOT.TFile(fName).Get("wsig_13TeV").data("sig_mass_m%s_%s"%(mp,opt.cat))
       for i in range(d.numEntries()):
         p = d.get(i)

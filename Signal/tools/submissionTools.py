@@ -3,6 +3,8 @@ import glob
 import re
 from commonObjects import *
 
+MHNominal = '125'
+
 def run(cmd):
   print "%s\n\n"%cmd
   os.system(cmd)
@@ -61,6 +63,7 @@ def writeSubFiles(_opts):
         for cidx in range(_opts['nCats']):
           pcidx = pidx*_opts['nCats']+cidx
           p,c = _opts['procs'].split(",")[pidx], _opts['cats'].split(",")[cidx]
+          if 'ALT' in p: _opts['massPoints'] = MHNominal
           _f.write("if [ $1 -eq %g ]; then\n"%pcidx)
           _f.write("  python %s/scripts/signalFit.py --inputWSDir %s --ext %s --proc %s --cat %s --year %s --analysis %s --massPoints %s --scales \'%s\' --scalesCorr \'%s\' --scalesGlobal \'%s\' --smears \'%s\' %s\n"%(swd__,_opts['inputWSDir'],_opts['ext'],p,c,_opts['year'],_opts['analysis'],_opts['massPoints'],_opts['scales'],_opts['scalesCorr'],_opts['scalesGlobal'],_opts['smears'],_opts['modeOpts']))
           _f.write("fi\n")
@@ -72,6 +75,7 @@ def writeSubFiles(_opts):
         _f.write("if [ $1 -eq %g ]; then\n"%cidx)
         for pidx in range(_opts['nProcs']):
           p = _opts['procs'].split(",")[pidx]
+          if 'ALT' in p: _opts['massPoints'] = MHNominal
           _f.write("  python %s/scripts/signalFit.py --inputWSDir %s --ext %s --proc %s --cat %s --year %s --analysis %s --massPoints %s --scales \'%s\' --scalesCorr \'%s\' --scalesGlobal \'%s\' --smears \'%s\' %s\n"%(swd__,_opts['inputWSDir'],_opts['ext'],p,c,_opts['year'],_opts['analysis'],_opts['massPoints'],_opts['scales'],_opts['scalesCorr'],_opts['scalesGlobal'],_opts['smears'],_opts['modeOpts']))
         _f.write("fi\n")
 
