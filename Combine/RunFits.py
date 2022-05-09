@@ -20,7 +20,7 @@ def get_options():
   parser.add_option('--snapshotWSFile', dest='snapshotWSFile', default='', help="Full path to snapshot WS file (use when running observed statonly as nuisances are froze at postfit values)")
   parser.add_option('--commonOpts', dest='commonOpts', default="--cminDefaultMinimizerStrategy 0 --X-rtd MINIMIZER_freezeDisassociatedParams --X-rtd MINIMIZER_multiMin_hideConstants --X-rtd MINIMIZER_multiMin_maskConstraints --X-rtd MINIMIZER_multiMin_maskChannels=2", help="Common combine options for running fits")
   parser.add_option('--batch', dest='batch', default='condor', help='Batch: [crab,condor/SGE/IC]')
-  parser.add_option('--queue', dest='queue', default='workday', help='Queue e.g. for condor=workday, for IC=hep.q')
+  parser.add_option('--queue', dest='queue', default='espresso', help='Queue e.g. for condor=workday, for IC=hep.q')
   parser.add_option('--subOpts', dest='subOpts', default="", help="Submission options")
   parser.add_option('--doCustomCrab', dest='doCustomCrab', default=False, action="store_true", help="Load crab options from custom_crab.py file")
   parser.add_option('--crabMemory', dest='crabMemory', default='5900', help="Memory for crab job")
@@ -32,9 +32,11 @@ def leave():
   print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG SUBMIT FITS RUN II (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ "
   exit(1)
 
-def run(cmd):
-  print "%s\n\n"%cmd
-  os.system(cmd)
+def run(cmd,opt):
+  if opt.dryRun:
+    print "%s\n\n"%cmd
+  else:
+    os.system(cmd)
 
 def getPdfIndicesFromJson(pdfjson):
   pdfStr = "--setParameters "
@@ -68,6 +70,8 @@ elif( opt.batch == 'SGE' )|( opt.batch == 'IC' ):
   if opt.subOpts != "": sub_opts += " %s"%opt.subOpts
   sub_opts += "\'"
   job_opts = "--job-mode SGE %s"%sub_opts
+elif opt.batch == "local":
+  print "--> Will print the commands to run combine without combineTool interactively\n\n"
 else:
   print " --> [ERROR] Batch mode (%s) not supported. Leaving"%opt.batch
   leave()
@@ -131,61 +135,89 @@ for fidx in range(len(fits)):
   if _fit.split(":")[0] == "bestfit":
     if( "statonly" in _fit.split(":")[1] )&( "freezeParameters" not in _fit_opts ): _fit_opts += " --freezeParameters allConstrainedNuisances"
     for poi in _fitpois:
-      fitcmd = "cd runFits%s_%s; source /cvmfs/cms.cern.ch/crab3/crab.sh; combineTool.py --task-name %s_%s -M MultiDimFit -m 125 %s --floatOtherPOIs 1 %s -n _%s_%s -P %s %s %s %s %s; cd .."%(opt.ext,opt.mode,_name,poi,d_opts,exp_opts,_name,poi,poi,_fit_opts,pdf_opts,common_opts,job_opts)
-      run(fitcmd)
+      if opt.batch == 'local':
+        fitcmd = "combine -M MultiDimFit -m 125 %s --floatOtherPOIs 1 %s -n _%s_%s -P %s %s %s %s"%(d_opts,exp_opts,_name,poi,poi,_fit_opts,pdf_opts,common_opts)
+      else:
+        fitcmd = "cd runFits%s_%s; source /cvmfs/cms.cern.ch/crab3/crab.sh; combineTool.py --task-name %s_%s -M MultiDimFit -m 125 %s --floatOtherPOIs 1 %s -n _%s_%s -P %s %s %s %s %s; cd .."%(opt.ext,opt.mode,_name,poi,d_opts,exp_opts,_name,poi,poi,_fit_opts,pdf_opts,common_opts,job_opts)
+      run(fitcmd,opt)
 
   # For singles point
   if _fit.split(":")[0] == "singles":
     if( "statonly" in _fit.split(":")[1] )&( "freezeParameters" not in _fit_opts ): _fit_opts += " --freezeParameters allConstrainedNuisances"
     for poi in _fitpois:
-      fitcmd = "cd runFits%s_%s; source /cvmfs/cms.cern.ch/crab3/crab.sh; combineTool.py --task-name %s_%s -M MultiDimFit -m 125 %s --floatOtherPOIs 1 %s -n _%s_%s -P %s --algo singles %s %s %s %s; cd .."%(opt.ext,opt.mode,_name,poi,d_opts,exp_opts,_name,poi,poi,_fit_opts,pdf_opts,common_opts,job_opts)
-      run(fitcmd)
+      if opt.batch == 'local':
+        fitcmd = "combine -M MultiDimFit -m 125 %s --floatOtherPOIs 1 %s -n _%s_%s -P %s --algo singles %s %s %s"%(d_opts,exp_opts,_name,poi,poi,_fit_opts,pdf_opts,common_opts)
+      else:
+        fitcmd = "cd runFits%s_%s; source /cvmfs/cms.cern.ch/crab3/crab.sh; combineTool.py --task-name %s_%s -M MultiDimFit -m 125 %s --floatOtherPOIs 1 %s -n _%s_%s -P %s --algo singles %s %s %s %s; cd .."%(opt.ext,opt.mode,_name,poi,d_opts,exp_opts,_name,poi,poi,_fit_opts,pdf_opts,common_opts,job_opts)
+      run(fitcmd,opt)
 
   # For fixed point
   if _fit.split(":")[0] == "fixed":
     if( "statonly" in _fit.split(":")[1] )&( "freezeParameters" not in _fit_opts ): _fit_opts += " --freezeParameters allConstrainedNuisances"
     for poi in _fitpois:
-      fitcmd = "cd runFits%s_%s; source /cvmfs/cms.cern.ch/crab3/crab.sh; combineTool.py --task-name %s_%s -M MultiDimFit -m 125 %s --floatOtherPOIs 1 %s -n _%s_%s --algo fixed %s %s %s %s; cd .."%(opt.ext,opt.mode,_name,poi,d_opts,exp_opts,_name,poi,_fit_opts,pdf_opts,common_opts,job_opts)
-      run(fitcmd)
+      if opt.batch == 'local':
+        fitcmd = "combine -M MultiDimFit -m 125 %s --floatOtherPOIs 1 %s -n _%s_%s -P %s --algo fixed %s %s %s"%(d_opts,exp_opts,_name,poi,poi,_fit_opts,pdf_opts,common_opts)
+      else:
+        fitcmd = "cd runFits%s_%s; source /cvmfs/cms.cern.ch/crab3/crab.sh; combineTool.py --task-name %s_%s -M MultiDimFit -m 125 %s --floatOtherPOIs 1 %s -n _%s_%s --algo fixed %s %s %s %s; cd .."%(opt.ext,opt.mode,_name,poi,d_opts,exp_opts,_name,poi,_fit_opts,pdf_opts,common_opts,job_opts)
+      run(fitcmd,opt)
 
   # For asymptotic limit
   if _fit.split(":")[0] == "AsymptoticLimit":
     if( "statonly" in _fit.split(":")[1] )&( "freezeParameters" not in _fit_opts ): _fit_opts += " --freezeParameters allConstrainedNuisances"
     for poi in _fitpois:
-      fitcmd = "cd runFits%s_%s; source /cvmfs/cms.cern.ch/crab3/crab.sh; combineTool.py --task-name %s_%s -M AsymptoticLimits -m 125 %s %s -n _%s_%s --redefineSignalPOI %s %s %s %s %s; cd .."%(opt.ext,opt.mode,_name,poi,d_opts,exp_opts,_name,poi,poi,_fit_opts,pdf_opts,common_opts,job_opts)
-      run(fitcmd)
+      if opt.batch == 'local':
+        fitcmd = "combine -M AsymptoticLimits -m 125 %s %s -n _%s_%s --redefineSignalPOI %s %s %s %s"%(d_opts,exp_opts,_name,poi,poi,_fit_opts,pdf_opts,common_opts)
+      else:
+        fitcmd = "cd runFits%s_%s; source /cvmfs/cms.cern.ch/crab3/crab.sh; combineTool.py --task-name %s_%s -M AsymptoticLimits -m 125 %s %s -n _%s_%s --redefineSignalPOI %s %s %s %s %s; cd .."%(opt.ext,opt.mode,_name,poi,d_opts,exp_opts,_name,poi,poi,_fit_opts,pdf_opts,common_opts,job_opts)
+      run(fitcmd,opt)
 
   # For 1D scan when profiling other pois
   elif _fit.split(":")[0] == "profile1D":
     if( "statonly" in _fit.split(":")[1] )&( "freezeParameters" not in _fit_opts ): _fit_opts += " --freezeParameters allConstrainedNuisances"
     for poi in _fitpois:
-      fitcmd = "cd runFits%s_%s; source /cvmfs/cms.cern.ch/crab3/crab.sh; combineTool.py --task-name %s_%s -M MultiDimFit -m 125 %s --floatOtherPOIs 1 %s -n _%s_%s -P %s --algo grid --points %s --alignEdges 1 --split-points %s %s %s %s %s; cd .."%(opt.ext,opt.mode,_name,poi,d_opts,exp_opts,_name,poi,poi,_points.split(":")[0],_points.split(":")[1],_fit_opts,pdf_opts,common_opts,job_opts)
-      run(fitcmd)
+      if opt.batch == 'local':
+        fitcmd = "combine -M MultiDimFit -m 125 %s --floatOtherPOIs 1 %s -n _%s_%s -P %s --algo grid --points %s --alignEdges 1 --split-points %s %s %s %s"%(d_opts,exp_opts,_name,poi,poi,_points.split(":")[0],_points.split(":")[1],_fit_opts,pdf_opts,common_opts)
+      else:
+        fitcmd = "cd runFits%s_%s; source /cvmfs/cms.cern.ch/crab3/crab.sh; combineTool.py --task-name %s_%s -M MultiDimFit -m 125 %s --floatOtherPOIs 1 %s -n _%s_%s -P %s --algo grid --points %s --alignEdges 1 --split-points %s %s %s %s %s; cd .."%(opt.ext,opt.mode,_name,poi,d_opts,exp_opts,_name,poi,poi,_points.split(":")[0],_points.split(":")[1],_fit_opts,pdf_opts,common_opts,job_opts)
+      run(fitcmd,opt)
 
   # For 1D scan when fixing other pois
   elif _fit.split(":")[0] == "scan1D":
     if( "statonly" in _fit.split(":")[1] )&( "freezeParameters" not in _fit_opts ): _fit_opts += " --freezeParameters allConstrainedNuisances"
     for poi in _fitpois:
-      fitcmd = "cd runFits%s_%s; source /cvmfs/cms.cern.ch/crab3/crab.sh; combineTool.py --task-name %s_%s -M MultiDimFit -m 125 %s --floatOtherPOIs 0 %s -n _%s_%s -P %s --algo grid --points %s --alignEdges 1 --split-points %s %s %s %s %s; cd .."%(opt.ext,opt.mode,_name,poi,d_opts,exp_opts,_name,poi,poi,_points.split(":")[0],_points.split(":")[1],_fit_opts,pdf_opts,common_opts,job_opts)
-      run(fitcmd)
+      if opt.batch == 'local':
+        fitcmd = "combine -M MultiDimFit -m 125 %s --floatOtherPOIs 0 %s -n _%s_%s -P %s --algo grid --points %s --alignEdges 1 --split-points %s %s %s %s"%(d_opts,exp_opts,_name,poi,poi,_points.split(":")[0],_points.split(":")[1],_fit_opts,pdf_opts,common_opts)
+      else:
+        fitcmd = "cd runFits%s_%s; source /cvmfs/cms.cern.ch/crab3/crab.sh; combineTool.py --task-name %s_%s -M MultiDimFit -m 125 %s --floatOtherPOIs 0 %s -n _%s_%s -P %s --algo grid --points %s --alignEdges 1 --split-points %s %s %s %s %s; cd .."%(opt.ext,opt.mode,_name,poi,d_opts,exp_opts,_name,poi,poi,_points.split(":")[0],_points.split(":")[1],_fit_opts,pdf_opts,common_opts,job_opts)
+      run(fitcmd,opt)
 
   # For 2D scan: fix other pois to 0
   elif _fit.split(":")[0] == "profile2D":
     if( "statonly" in _fit.split(":")[1] )&( "freezeParameters" not in _fit_opts ): _fit_opts += " --freezeParameters allConstrainedNuisances"
     _poisStr = "%s_vs_%s"%(_fitpois[0],_fitpois[1])
-    fitcmd = "cd runFits%s_%s; source /cvmfs/cms.cern.ch/crab3/crab.sh; combineTool.py --task-name %s_%s -M MultiDimFit -m 125 %s -P %s -P %s --floatOtherPOIs 1 %s -n _%s_%s --algo grid --points %s --alignEdges 1 --split-points %s %s %s %s %s; cd .."%(opt.ext,opt.mode,_name,_poisStr,d_opts,_fitpois[0],_fitpois[1],exp_opts,_name,_poisStr,_points.split(":")[0],_points.split(":")[1],_fit_opts,pdf_opts,common_opts,job_opts)
-    run(fitcmd)
+    if opt.batch == 'local':
+      fitcmd = "combine -M MultiDimFit -m 125 %s -P %s -P %s --floatOtherPOIs 1 %s -n _%s_%s --algo grid --points %s --alignEdges 1 --split-points %s %s %s %s"%(d_opts,_fitpois[0],_fitpois[1],exp_opts,_name,_poisStr,_points.split(":")[0],_points.split(":")[1],_fit_opts,pdf_opts,common_opts)
+    else:
+      fitcmd = "cd runFits%s_%s; source /cvmfs/cms.cern.ch/crab3/crab.sh; combineTool.py --task-name %s_%s -M MultiDimFit -m 125 %s -P %s -P %s --floatOtherPOIs 1 %s -n _%s_%s --algo grid --points %s --alignEdges 1 --split-points %s %s %s %s %s; cd .."%(opt.ext,opt.mode,_name,_poisStr,d_opts,_fitpois[0],_fitpois[1],exp_opts,_name,_poisStr,_points.split(":")[0],_points.split(":")[1],_fit_opts,pdf_opts,common_opts,job_opts)
+    run(fitcmd,opt)
 
   # For 2D scan: fix other pois to 0
   elif _fit.split(":")[0] == "scan2D":
     if( "statonly" in _fit.split(":")[1] )&( "freezeParameters" not in _fit_opts ): _fit_opts += " --freezeParameters allConstrainedNuisances"
     _poisStr = "%s_vs_%s"%(_fitpois[0],_fitpois[1])
-    fitcmd = "cd runFits%s_%s; source /cvmfs/cms.cern.ch/crab3/crab.sh; combineTool.py --task-name %s_%s -M MultiDimFit -m 125 %s -P %s -P %s --floatOtherPOIs 0 %s -n _%s_%s --algo grid --points %s --alignEdges 1 --split-points %s %s %s %s %s; cd .."%(opt.ext,opt.mode,_name,_poisStr,d_opts,_fitpois[0],_fitpois[1],exp_opts,_name,_poisStr,_points.split(":")[0],_points.split(":")[1],_fit_opts,pdf_opts,common_opts,job_opts)    
-    run(fitcmd)
+    if opt.batch == 'local':
+      fitcmd = "combine -M MultiDimFit -m 125 %s -P %s -P %s --floatOtherPOIs 0 %s -n _%s_%s --algo grid --points %s --alignEdges 1 --split-points %s %s %s %s"%(d_opts,_fitpois[0],_fitpois[1],exp_opts,_name,_poisStr,_points.split(":")[0],_points.split(":")[1],_fit_opts,pdf_opts,common_opts)
+    else:
+      fitcmd = "cd runFits%s_%s; source /cvmfs/cms.cern.ch/crab3/crab.sh; combineTool.py --task-name %s_%s -M MultiDimFit -m 125 %s -P %s -P %s --floatOtherPOIs 0 %s -n _%s_%s --algo grid --points %s --alignEdges 1 --split-points %s %s %s %s %s; cd .."%(opt.ext,opt.mode,_name,_poisStr,d_opts,_fitpois[0],_fitpois[1],exp_opts,_name,_poisStr,_points.split(":")[0],_points.split(":")[1],_fit_opts,pdf_opts,common_opts,job_opts)
+
+    run(fitcmd,opt)
 
   # Robust Hesse
   elif _fit.split(":")[0] == "robustHesse":
     if( "statonly" in _fit.split(":")[1] )&( "freezeParameters" not in _fit_opts ): _fit_opts += " --freezeParameters allConstrainedNuisances"
     _poi = _fitpois[0]
-    fitcmd = "cd runFits%s_%s; source /cvmfs/cms.cern.ch/crab3/crab.sh; combineTool.py --task-name %s -M MultiDimFit -m 125 %s -P %s --floatOtherPOIs 1 %s -n _%s --robustHesse 1 --robustHesseSave 1 --saveFitResult %s %s %s %s; cd .."%(opt.ext,opt.mode,_name,d_opts,_poi,exp_opts,_name,_fit_opts,pdf_opts,common_opts,job_opts)
-    run(fitcmd)
+    if opt.batch == 'local':
+      fitcmd = "combine -M MultiDimFit -m 125 %s -P %s --floatOtherPOIs 1 %s -n _%s --robustHesse 1 --robustHesseSave 1 --saveFitResult %s %s %s"%(d_opts,_poi,exp_opts,_name,_fit_opts,pdf_opts,common_opts)
+    else:
+      fitcmd = "cd runFits%s_%s; source /cvmfs/cms.cern.ch/crab3/crab.sh; combineTool.py --task-name %s -M MultiDimFit -m 125 %s -P %s --floatOtherPOIs 1 %s -n _%s --robustHesse 1 --robustHesseSave 1 --saveFitResult %s %s %s %s; cd .."%(opt.ext,opt.mode,_name,d_opts,_poi,exp_opts,_name,_fit_opts,pdf_opts,common_opts,job_opts)
+    run(fitcmd,opt)
