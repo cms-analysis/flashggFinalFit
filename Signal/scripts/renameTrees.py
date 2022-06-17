@@ -18,7 +18,7 @@ procmap = {"GluGluH":"GG2H", "VBFHToGG":"VBF", "VBFHiggs0": "VBF_ALT", "ttH":"TT
 for fname in glob.glob("%s/output*M*.root"%opt.inputWSDir):
     #print "changing name to ",fname
     basename = fname.split(".root")[0]
-    newbasename = basename.replace("-pythia8","_pythia8")
+    newbasename = basename.replace("-pythia8","_pythia8").replace("_M-","_M")
     pythiaver = newbasename.split("_pythia8")[1]
     if pythiaver!="": 
         newbasename = newbasename.replace("_pythia8"+pythiaver,"_pythia8")
