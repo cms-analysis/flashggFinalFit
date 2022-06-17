@@ -23,7 +23,7 @@ def extractWSFileNames( _inputWSDir ):
 def extractListOfProcs( _listOfWSFileNames ):
   procs = []
   for fName in _listOfWSFileNames:
-    p = fName.split("13TeV_")[1].split(".root")[0]
+    p = fName.split("pythia8_")[1].split(".root")[0]
     if p not in procs: procs.append(p)
   return ",".join(procs)
 
@@ -73,6 +73,7 @@ def signalFromFileName(_fileName):
     elif "ZToNuNu" in _fileName: d = "_ZToNuNu"
     else: d = "_ZToQQ"
   elif "GluGlu" in _fileName: p = "ggh"
+  elif "VBFHiggs0" in _fileName: p = "vbfALT"
   elif "VBF" in _fileName: p = "vbf"
   elif "WH" in _fileName: p = "wh"
   elif "ZH" in _fileName: p = "zh"
@@ -88,9 +89,11 @@ def signalFromFileName(_fileName):
 # Function for converting STXS process to production mode in dataset name
 procToDataMap = od()
 procToDataMap['GG2H'] = 'ggh'
-procToDataMap['VBF'] = 'vbf'
-procToDataMap['WH2HQQ'] = 'wh'
-procToDataMap['ZH2HQQ'] = 'zh'
+procToDataMap['VBF'] = 'vbfh'
+procToDataMap['VBF_ALT'] = 'vbfhALT'
+procToDataMap['VH'] = 'wzh'
+procToDataMap['WH'] = 'wh'
+procToDataMap['ZH'] = 'zh'
 procToDataMap['QQ2HLNU'] = 'wh'
 procToDataMap['QQ2HLL'] = 'zh'
 procToDataMap['TTH'] = 'tth'
@@ -101,9 +104,9 @@ procToDataMap['GG2HQQ'] = 'ggzh'
 procToDataMap['GG2HLL'] = 'ggzh'
 procToDataMap['GG2HNUNU'] = 'ggzh'
 def procToData( _proc ):
-  k = _proc.split("_")[0]
+  k = _proc.split("_")[0] if ("ALT" not in _proc) else "_".join(_proc.split("_"))
   if k in procToDataMap: _proc = re.sub( k, procToDataMap[k], _proc )
-  return _proc
+  return _proc.split("_")[0]
 
 def dataToProc( _d ):
   dataToProcMap = {v:k for k,v in procToDataMap.iteritems()}
@@ -114,6 +117,7 @@ def dataToProc( _d ):
 procToDatacardNameMap = od()
 procToDatacardNameMap['GG2H'] = "ggH"
 procToDatacardNameMap['VBF'] = "qqH"
+procToDatacardNameMap['VH'] = "vH"
 procToDatacardNameMap['WH2HQQ'] = "WH_had"
 procToDatacardNameMap["ZH2HQQ"] = "ZH_had"
 procToDatacardNameMap["QQ2HLNU"] = "WH_lep"
