@@ -45,9 +45,9 @@ if [[ $DR ]]; then
 fi
 
 if [[ $STEP == "fTest" ]]; then
-    python RunSignalScripts.py --inputConfig config_test_${YEAR}.py --mode fTest --modeOpts "--xvar dipho_mass --doPlots --outdir plots --nProcsToFTest -1" ${DROPT}
+    python RunSignalScripts.py --inputConfig config_test_${YEAR}.py --mode fTest --modeOpts "--doPlots --outdir plots --nProcsToFTest -1" ${DROPT}
 elif [[ $STEP == 'signalFit' ]]; then
-    python RunSignalScripts.py --inputConfig config_test_${YEAR}.py --mode signalFit --modeOpts="--skipSystematics --xvar dipho_mass --doPlots --outdir plots" ${DROPT}
+    python RunSignalScripts.py --inputConfig config_test_${YEAR}.py --mode signalFit --modeOpts="--doPlots --outdir plots" ${DROPT}
 elif [[ $STEP == 'packager' ]]; then
     python RunPackager.py --cats auto --inputWSDir cards/cards_current/signal_${YEAR} --exts 2022-04-12_year2016,2022-04-12_year2017,2022-04-12_year2018 --mergeYears ${DROPT}
 elif [[ $STEP == 'plotter' ]]; then
