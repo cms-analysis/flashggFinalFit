@@ -63,9 +63,9 @@ def writeSubFiles(_opts):
         for cidx in range(_opts['nCats']):
           pcidx = pidx*_opts['nCats']+cidx
           p,c = _opts['procs'].split(",")[pidx], _opts['cats'].split(",")[cidx]
-          if 'ALT' in p: _opts['massPoints'] = MHNominal
+          mps = MHNominal if 'ALT' in p else _opts['massPoints']
           _f.write("if [ $1 -eq %g ]; then\n"%pcidx)
-          _f.write("  python %s/scripts/signalFit.py --inputWSDir %s --ext %s --proc %s --cat %s --year %s --analysis %s --massPoints %s --scales \'%s\' --scalesCorr \'%s\' --scalesGlobal \'%s\' --smears \'%s\' %s\n"%(swd__,_opts['inputWSDir'],_opts['ext'],p,c,_opts['year'],_opts['analysis'],_opts['massPoints'],_opts['scales'],_opts['scalesCorr'],_opts['scalesGlobal'],_opts['smears'],_opts['modeOpts']))
+          _f.write("  python %s/scripts/signalFit.py --inputWSDir %s --ext %s --proc %s --cat %s --year %s --analysis %s --massPoints %s --scales \'%s\' --scalesCorr \'%s\' --scalesGlobal \'%s\' --smears \'%s\' %s\n"%(swd__,_opts['inputWSDir'],_opts['ext'],p,c,_opts['year'],_opts['analysis'],mps,_opts['scales'],_opts['scalesCorr'],_opts['scalesGlobal'],_opts['smears'],_opts['modeOpts']))
           _f.write("fi\n")
    
     # For looping over categories
@@ -75,8 +75,8 @@ def writeSubFiles(_opts):
         _f.write("if [ $1 -eq %g ]; then\n"%cidx)
         for pidx in range(_opts['nProcs']):
           p = _opts['procs'].split(",")[pidx]
-          if 'ALT' in p: _opts['massPoints'] = MHNominal
-          _f.write("  python %s/scripts/signalFit.py --inputWSDir %s --ext %s --proc %s --cat %s --year %s --analysis %s --massPoints %s --scales \'%s\' --scalesCorr \'%s\' --scalesGlobal \'%s\' --smears \'%s\' %s\n"%(swd__,_opts['inputWSDir'],_opts['ext'],p,c,_opts['year'],_opts['analysis'],_opts['massPoints'],_opts['scales'],_opts['scalesCorr'],_opts['scalesGlobal'],_opts['smears'],_opts['modeOpts']))
+          mps = MHNominal if 'ALT' in p else _opts['massPoints']
+          _f.write("  python %s/scripts/signalFit.py --inputWSDir %s --ext %s --proc %s --cat %s --year %s --analysis %s --massPoints %s --scales \'%s\' --scalesCorr \'%s\' --scalesGlobal \'%s\' --smears \'%s\' %s\n"%(swd__,_opts['inputWSDir'],_opts['ext'],p,c,_opts['year'],_opts['analysis'],mps,_opts['scales'],_opts['scalesCorr'],_opts['scalesGlobal'],_opts['smears'],_opts['modeOpts']))
         _f.write("fi\n")
 
     elif _opts['mode'] == "calcPhotonSyst":
@@ -133,7 +133,8 @@ def writeSubFiles(_opts):
           p,c = _opts['procs'].split(",")[pidx], _opts['cats'].split(",")[cidx]
           _f = open("%s/%s_%g.sh"%(_jobdir,_executable,pcidx),"w")
           writePreamble(_f)
-          _f.write("python %s/scripts/signalFit.py --inputWSDir %s --ext %s --proc %s --cat %s --year %s --analysis %s --massPoints %s --scales \'%s\' --scalesCorr \'%s\' --scalesGlobal \'%s\' --smears \'%s\' %s\n"%(swd__,_opts['inputWSDir'],_opts['ext'],p,c,_opts['year'],_opts['analysis'],_opts['massPoints'],_opts['scales'],_opts['scalesCorr'],_opts['scalesGlobal'],_opts['smears'],_opts['modeOpts']))
+          mps = MHNominal if 'ALT' in p else _opts['massPoints']
+          _f.write("python %s/scripts/signalFit.py --inputWSDir %s --ext %s --proc %s --cat %s --year %s --analysis %s --massPoints %s --scales \'%s\' --scalesCorr \'%s\' --scalesGlobal \'%s\' --smears \'%s\' %s\n"%(swd__,_opts['inputWSDir'],_opts['ext'],p,c,_opts['year'],_opts['analysis'],mps,_opts['scales'],_opts['scalesCorr'],_opts['scalesGlobal'],_opts['smears'],_opts['modeOpts']))
           _f.close()
           os.system("chmod 775 %s/%s_%g.sh"%(_jobdir,_executable,pcidx))
 
@@ -143,9 +144,10 @@ def writeSubFiles(_opts):
         c = _opts['cats'].split(",")[cidx]
         _f = open("%s/%s_%s.sh"%(_jobdir,_executable,c),"w")
         writePreamble(_f)
+        mps = MHNominal if 'ALT' in p else _opts['massPoints']
         for pidx in range(_opts['nProcs']):
           p = _opts['procs'].split(",")[pidx]
-          _f.write("python %s/scripts/signalFit.py --inputWSDir %s --ext %s --proc %s --cat %s --year %s --analysis %s --massPoints %s --scales \'%s\' --scalesCorr \'%s\' --scalesGlobal \'%s\' --smears \'%s\' %s\n\n"%(swd__,_opts['inputWSDir'],_opts['ext'],p,c,_opts['year'],_opts['analysis'],_opts['massPoints'],_opts['scales'],_opts['scalesCorr'],_opts['scalesGlobal'],_opts['smears'],_opts['modeOpts']))
+          _f.write("python %s/scripts/signalFit.py --inputWSDir %s --ext %s --proc %s --cat %s --year %s --analysis %s --massPoints %s --scales \'%s\' --scalesCorr \'%s\' --scalesGlobal \'%s\' --smears \'%s\' %s\n\n"%(swd__,_opts['inputWSDir'],_opts['ext'],p,c,_opts['year'],_opts['analysis'],mps,_opts['scales'],_opts['scalesCorr'],_opts['scalesGlobal'],_opts['smears'],_opts['modeOpts']))
         _f.close()
         os.system("chmod 775 %s/%s_%s.sh"%(_jobdir,_executable,c))
 

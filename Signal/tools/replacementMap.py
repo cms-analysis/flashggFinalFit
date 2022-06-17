@@ -215,28 +215,29 @@ globalReplacementMap['AC'] = od()
 # For WRONG VERTEX SCENARIO:
 #  * single proc x cat for wrong vertex since for dZ > 1cm shape independent of proc x cat
 #  * use proc x cat with highest number of WV events
-globalReplacementMap['AC']['procWV'] = "vbfh"
-globalReplacementMap['AC']['catWV'] = "RECO_DCP1_Bsm0_Tag0"
+globalReplacementMap['AC']['procWV'] = "VBF"
+globalReplacementMap['AC']['catWV'] = "VBFTag_1"
 # For RIGHT VERTEX SCENARIO:
 #  * default mapping is to use diagonal process from given category 
 #  * if few events in diagonal process then may need to change the category aswell (see catRVMap)
 #  * map must contain entry for all cats being processed (for replacement proc and cat)
 globalReplacementMap['AC']['procRVMap'] = od()
-globalReplacementMap["AC"]["procRVMap"]["RECO_DCP0_Bsm0_Tag0"] = "vbfh"
-globalReplacementMap["AC"]["procRVMap"]["RECO_DCP0_Bsm1_Tag0"] = "vbfh"
-globalReplacementMap["AC"]["procRVMap"]["RECO_DCP0_Bsm2_Tag0"] = "vbfh"
-globalReplacementMap["AC"]["procRVMap"]["RECO_DCP1_Bsm0_Tag0"] = "vbfh"
-globalReplacementMap["AC"]["procRVMap"]["RECO_DCP1_Bsm1_Tag0"] = "vbfh"
-globalReplacementMap["AC"]["procRVMap"]["RECO_DCP1_Bsm2_Tag0"] = "vbfh"
-globalReplacementMap["AC"]["procRVMap"]["RECO_DCP0_Tag1"] = "vbfh"
-globalReplacementMap["AC"]["procRVMap"]["RECO_DCP1_Tag1"] = "vbfh"
+globalReplacementMap["AC"]["procRVMap"]["VBFTag_0"] = "VBF"
+globalReplacementMap["AC"]["procRVMap"]["VBFTag_1"] = "VBF"
+globalReplacementMap["AC"]["procRVMap"]["VBFTag_2"] = "VBF"
+globalReplacementMap["AC"]["procRVMap"]["VBFTag_3"] = "VBF"
+globalReplacementMap["AC"]["procRVMap"]["VBFTag_4"] = "VBF"
+globalReplacementMap["AC"]["procRVMap"]["VBFTag_5"] = "VBF"
+globalReplacementMap["AC"]["procRVMap"]["VBFTag_6"] = "VBF"
+globalReplacementMap["AC"]["procRVMap"]["VBFTag_7"] = "VBF"
+
 # Replacement category for RV fit
 globalReplacementMap['AC']["catRVMap"] = od()
-globalReplacementMap["AC"]["catRVMap"]["RECO_DCP0_Bsm0_Tag0"] = "RECO_DCP1_Bsm0_Tag0"
-globalReplacementMap["AC"]["catRVMap"]["RECO_DCP0_Bsm1_Tag0"] = "RECO_DCP1_Bsm1_Tag0"
-globalReplacementMap["AC"]["catRVMap"]["RECO_DCP0_Bsm2_Tag0"] = "RECO_DCP1_Bsm2_Tag0"
-globalReplacementMap["AC"]["catRVMap"]["RECO_DCP1_Bsm0_Tag0"] = "RECO_DCP1_Bsm0_Tag0"
-globalReplacementMap["AC"]["catRVMap"]["RECO_DCP1_Bsm1_Tag0"] = "RECO_DCP1_Bsm1_Tag0"
-globalReplacementMap["AC"]["catRVMap"]["RECO_DCP1_Bsm2_Tag0"] = "RECO_DCP1_Bsm1_Tag0"
-globalReplacementMap["AC"]["catRVMap"]["RECO_DCP0_Tag1"] = "RECO_DCP0_Tag1"
-globalReplacementMap["AC"]["catRVMap"]["RECO_DCP1_Tag1"] = "RECO_DCP1_Tag1"
+globalReplacementMap["AC"]["catRVMap"]["VBFTag_0"] = "VBFTag_1"
+globalReplacementMap["AC"]["catRVMap"]["VBFTag_1"] = "VBFTag_1"
+globalReplacementMap["AC"]["catRVMap"]["VBFTag_2"] = "VBFTag_1"
+globalReplacementMap["AC"]["catRVMap"]["VBFTag_3"] = "VBFTag_1"
+globalReplacementMap["AC"]["catRVMap"]["VBFTag_4"] = "VBFTag_1"
+globalReplacementMap["AC"]["catRVMap"]["VBFTag_5"] = "VBFTag_1"
+globalReplacementMap["AC"]["catRVMap"]["VBFTag_6"] = "VBFTag_1"
+globalReplacementMap["AC"]["catRVMap"]["VBFTag_7"] = "VBFTag_1"
