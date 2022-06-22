@@ -221,22 +221,23 @@ globalReplacementMap['AC']['catWV'] = "RECO_DCP1_Bsm0_Tag0"
 #  * default mapping is to use diagonal process from given category 
 #  * if few events in diagonal process then may need to change the category aswell (see catRVMap)
 #  * map must contain entry for all cats being processed (for replacement proc and cat)
+print globalReplacementMap["AC"]
 globalReplacementMap['AC']['procRVMap'] = od()
 globalReplacementMap["AC"]["procRVMap"]["RECO_DCP0_Bsm0_Tag0"] = "vbfh"
-globalReplacementMap["AC"]["procRVMap"]["RECO_DCP0_Bsm1_Tag0"] = "vbfh"
-globalReplacementMap["AC"]["procRVMap"]["RECO_DCP0_Bsm2_Tag0"] = "vbfh"
-globalReplacementMap["AC"]["procRVMap"]["RECO_DCP1_Bsm0_Tag0"] = "vbfh"
+globalReplacementMap["AC"]["procRVMap"]["RECO_DCP0_Bsm1_Tag0"] = "vbfALT0Mh"
+globalReplacementMap["AC"]["procRVMap"]["RECO_DCP0_Bsm0_Tag1"] = "vbfh"
 globalReplacementMap["AC"]["procRVMap"]["RECO_DCP1_Bsm1_Tag0"] = "vbfh"
-globalReplacementMap["AC"]["procRVMap"]["RECO_DCP1_Bsm2_Tag0"] = "vbfh"
-globalReplacementMap["AC"]["procRVMap"]["RECO_DCP0_Tag1"] = "vbfh"
-globalReplacementMap["AC"]["procRVMap"]["RECO_DCP1_Tag1"] = "vbfh"
+globalReplacementMap["AC"]["procRVMap"]["RECO_DCP1_Bsm0_Tag1"] = "vbfh"
+globalReplacementMap["AC"]["procRVMap"]["RECO_DCP0_Bsm1_Tag1"] = "vbfh"
+globalReplacementMap["AC"]["procRVMap"]["RECO_DCP1_Bsm0_Tag0"] = "vbfh"
+globalReplacementMap["AC"]["procRVMap"]["RECO_DCP1_Bsm1_Tag1"] = "vbfh"
 # Replacement category for RV fit
 globalReplacementMap['AC']["catRVMap"] = od()
-globalReplacementMap["AC"]["catRVMap"]["RECO_DCP0_Bsm0_Tag0"] = "RECO_DCP1_Bsm0_Tag0"
-globalReplacementMap["AC"]["catRVMap"]["RECO_DCP0_Bsm1_Tag0"] = "RECO_DCP1_Bsm1_Tag0"
-globalReplacementMap["AC"]["catRVMap"]["RECO_DCP0_Bsm2_Tag0"] = "RECO_DCP1_Bsm2_Tag0"
-globalReplacementMap["AC"]["catRVMap"]["RECO_DCP1_Bsm0_Tag0"] = "RECO_DCP1_Bsm0_Tag0"
+globalReplacementMap["AC"]["catRVMap"]["RECO_DCP0_Bsm0_Tag0"] = "RECO_DCP0_Bsm0_Tag0"
+globalReplacementMap["AC"]["catRVMap"]["RECO_DCP0_Bsm1_Tag0"] = "RECO_DCP0_Bsm1_Tag0"
+globalReplacementMap["AC"]["catRVMap"]["RECO_DCP0_Bsm0_Tag1"] = "RECO_DCP0_Bsm0_Tag1"
 globalReplacementMap["AC"]["catRVMap"]["RECO_DCP1_Bsm1_Tag0"] = "RECO_DCP1_Bsm1_Tag0"
-globalReplacementMap["AC"]["catRVMap"]["RECO_DCP1_Bsm2_Tag0"] = "RECO_DCP1_Bsm1_Tag0"
-globalReplacementMap["AC"]["catRVMap"]["RECO_DCP0_Tag1"] = "RECO_DCP0_Tag1"
-globalReplacementMap["AC"]["catRVMap"]["RECO_DCP1_Tag1"] = "RECO_DCP1_Tag1"
+globalReplacementMap["AC"]["catRVMap"]["RECO_DCP0_Bsm1_Tag1"] = "RECO_DCP0_Bsm1_Tag1"
+globalReplacementMap["AC"]["catRVMap"]["RECO_DCP1_Bsm0_Tag1"] = "RECO_DCP1_Bsm0_Tag1"
+globalReplacementMap["AC"]["catRVMap"]["RECO_DCP1_Bsm0_Tag0"] = "RECO_DCP1_Bsm0_Tag0"
+globalReplacementMap["AC"]["catRVMap"]["RECO_DCP1_Bsm1_Tag1"] = "RECO_DCP1_Bsm1_Tag1"

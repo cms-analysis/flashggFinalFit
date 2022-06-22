@@ -68,6 +68,7 @@ def get_options():
 ROOT.gStyle.SetOptStat(0)
 ROOT.gROOT.SetBatch(True)
 
+print opt.massPoints
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # SETUP: signal fit
 if( len(opt.massPoints.split(",")) == 1 )&( opt.MHPolyOrder > 0 ):
@@ -152,7 +153,7 @@ nominalDatasets = od()
 datasetRVForFit = od()
 for mp in opt.massPoints.split(","):
   if 'ALT' in procRVFit and mp!=MHNominal: continue
-  print glob.glob("%s/output*%s*%s.root"%(opt.inputWSDir,mp,procRVFit))
+  print "##########",glob.glob("%s/output*%s*%s.root"%(opt.inputWSDir,mp,procRVFit))
   WSFileName = glob.glob("%s/output*%s*%s.root"%(opt.inputWSDir,mp,procRVFit))[0]
   f = ROOT.TFile(WSFileName,"read")
   inputWS = f.Get(inputWSName__)

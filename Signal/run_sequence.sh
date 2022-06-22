@@ -49,7 +49,7 @@ if [[ $STEP == "fTest" ]]; then
 elif [[ $STEP == 'signalFit' ]]; then
     python RunSignalScripts.py --inputConfig config_test_${YEAR}.py --mode signalFit --modeOpts="--skipSystematics --xvar dipho_mass --doPlots --outdir plots" ${DROPT}
 elif [[ $STEP == 'packager' ]]; then
-    python RunPackager.py --cats auto --inputWSDir cards/cards_current/signal_${YEAR} --exts 2022-04-12_year2016,2022-04-12_year2017,2022-04-12_year2018 --mergeYears ${DROPT}
+    python RunPackager.py --cats auto --inputWSDir /afs/cern.ch/user/f/fderiggi/CMSSW_10_2_13/src/flashggFinalFit/Signal/cards_fithgg/${YEAR}  --exts 2022-05-12_year2016,2022-05-12_year2017,2022-05-12_year2018 --mergeYears ${DROPT}
 elif [[ $STEP == 'plotter' ]]; then
     # just plot all the years together. Can be split with --year ${YEAR}
     python RunPlotter.py --procs all --cats all --year 2016,2017,2018 --ext packaged --outdir plots

@@ -22,7 +22,9 @@ def extractWSFileNames( _inputWSDir ):
 
 def extractListOfProcs( _listOfWSFileNames ):
   procs = []
+  print "hey ", _listOfWSFileNames
   for fName in _listOfWSFileNames:
+    print fName, "HEY"
     p = fName.split("13TeV_")[1].split(".root")[0]
     if p not in procs: procs.append(p)
   return ",".join(procs)

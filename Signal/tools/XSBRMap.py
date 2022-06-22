@@ -154,3 +154,5 @@ globalXSBRMap['AC']['vbfh'] = {'mode':'qqH'}
 globalXSBRMap['AC']['tth'] = {'mode':'ttH'}
 globalXSBRMap['AC']['wzh'] = {'mode':'WH','factor':BR_W_qq} # not fully correct. Use the samples spli by W and Z
 globalXSBRMap['AC']['vbfALT0Mh'] = {'mode':'qqH'} # not sure it is correct. From the spline plot it seems OK: takes the MH=125 GeV value from JHU sample and then extrapolate with the relative ratio of qqH SM
+globalXSBRMap['AC']['vbfALTL1h'] = {'mode':'qqH'} # not sure it is correct. From the spline plot it seems OK: takes the MH=125 GeV value from JHU sample and then extrapolate with the relative ratio of qqH SM
+globalXSBRMap['AC']['vbfALT0Ph'] = {'mode':'qqH'} # not sure it is correct. From the spline plot it seems OK: takes the MH=125 GeV value from JHU sample and then extrapolate with the relative ratio of qqH SM
