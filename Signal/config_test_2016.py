@@ -1,14 +1,14 @@
 # Config file: options for signal fitting
-
+#prova
 _year = '2016'
 
 signalScriptCfg = {
   
     # Setup
-    'inputWSDir':'cards/cards_current/signal_%s'%_year,
     'procs':'auto', # if auto: inferred automatically from filenames
+    'inputWSDir':'/afs/cern.ch/user/f/fderiggi/CMSSW_10_4_0/src/CMGTools/TTHAnalysis/python/plotter/cards/cards_fithgg/ROOT_ALT_%s' % _year,
     'cats':'auto', # if auto: inferred automatically from (0) workspace
-    'ext':'2022-04-12_year%s'%_year,
+    'ext':'2022-05-12_year%s'%_year,
     'analysis':'AC', # To specify which replacement dataset mapping (defined in ./python/replacementMap.py)
     'year':'%s'%_year, # Use 'combined' if merging all years: not recommended
     'massPoints':'120,125,130',
@@ -26,3 +26,8 @@ signalScriptCfg = {
     'queue':'espresso'
     
 }
+
+
+
+
+
