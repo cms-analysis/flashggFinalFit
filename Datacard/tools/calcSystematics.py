@@ -69,8 +69,8 @@ def factoryType(d,s):
     dataHistDown = "%s_%sDown01sigma"%(r.nominalDataName,s['name'])
 
     # Check if syst is var (i.e. weight) in workspace
-    if ws.allVars().selectByName("%s*"%(s['name'])).getSize():
-      nWeights = ws.allVars().selectByName("%s*"%(s['name'])).getSize()
+    if ws.allVars().selectByName("%s*sigma"%(s['name'])).getSize():
+      nWeights = ws.allVars().selectByName("%s*sigma"%(s['name'])).getSize()
       ws.Delete()
       f.Close()
       if nWeights == 2: return "a_w"

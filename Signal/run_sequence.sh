@@ -46,6 +46,8 @@ fi
 
 if [[ $STEP == "fTest" ]]; then
     python RunSignalScripts.py --inputConfig config_test_${YEAR}.py --mode fTest --modeOpts "--doPlots --outdir plots --nProcsToFTest -1" ${DROPT}
+elif [[ $STEP == "calcPhotonSyst" ]]; then
+    python RunSignalScripts.py --inputConfig config_test_${YEAR}.py --mode calcPhotonSyst ${DROPT}
 elif [[ $STEP == 'signalFit' ]]; then
     python RunSignalScripts.py --inputConfig config_test_${YEAR}.py --mode signalFit --modeOpts="--doPlots --outdir plots" ${DROPT}
 elif [[ $STEP == 'packager' ]]; then
