@@ -736,7 +736,7 @@ int main(int argc, char* argv[]){
 	vector<map<string,RooAbsPdf*> > pdfs_vec;
 
 	PdfModelBuilder pdfsModel;
-	RooRealVar *mass = (RooRealVar*)inWS->var("dipho_mass");
+	RooRealVar *mass = (RooRealVar*)inWS->var("CMS_hgg_mass");
 	std:: cout << "[INFO] Got mass from ws " << mass << std::endl;
 	pdfsModel.setObsVar(mass);
 	double upperEnvThreshold = 0.1; // upper threshold on delta(chi2) to include function in envelope (looser than truth function)
