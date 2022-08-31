@@ -143,6 +143,12 @@ target_procs_qqh["RECO_VBFTOPO_BSM_Tag1"] = ['qqH_GE2J_MJJ_GT350_PTH_GT200','WH_
 target_procs_qqh["RECO_VBFTOPO_VHHAD_Tag0"] = ['qqH_GE2J_MJJ_60_120','WH_had_GE2J_MJJ_60_120','ZH_had_GE2J_MJJ_60_120']
 target_procs_qqh["RECO_VBFTOPO_VHHAD_Tag1"] = ['qqH_GE2J_MJJ_60_120','WH_had_GE2J_MJJ_60_120','ZH_had_GE2J_MJJ_60_120']
 
+# qqH tags for anomalous couplings
+target_procs_qqh_ac = od()
+target_procs_qqh_ac["RECO_DCP0_Bsm0_Tag0"] = ['vbfALT0Mh_2016_hgg','vbfALT0Mh_2017_hgg','vbfALT0Mh_2018_hgg']
+target_procs_qqh_ac["RECO_DCP0_Bsm1_Tag0"] = ['vbfALT0Mh_2016_hgg','vbfALT0Mh_2017_hgg','vbfALT0Mh_2018_hgg','vbfh_2016_hgg','vbfh_2017_hgg','vbfh_2018_hgg']
+target_procs_qqh_ac["RECO_DCP0_Bsm0_Tag0"] = ['vbfALT0Mh_2016_hgg','vbfALT0Mh_2017_hgg','vbfALT0Mh_2018_hgg']
+
 def get_options():
   parser = OptionParser()
   parser.add_option("--inputPkl", dest="inputPkl", default='', help="Input pickle file")
@@ -175,6 +181,9 @@ elif opt.group == "vh":
 elif opt.group == "top": 
   stage0 = stage0_top
   target_procs = target_procs_top
+elif opt.group == "qqh_ac":
+  stage0 = od()
+  target_procs = 
 else:
   print " --> [ERROR] target group of categories %s does not exist"%opt.group
   leave()
