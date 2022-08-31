@@ -1,18 +1,11 @@
 models = {
-  "mu_inclusive":"",
-
-  "mu_simple":"-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
---PO \"map=.*/ggh.*hgg:r_ggH[1,0,2]\" \
---PO \"map=.*/vbfh.*hgg:r_VBF[1,0,3]\" \
---PO \"map=.*/tth.*hgg:r_top[1,0,3]\" \
---PO \"map=.*/wzh.*hgg:r_VH[1,0,3]\"",
-
-  "mu_simple_sm":"-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
---PO \"map=.*/ggh.*hgg:r_ggH[1,0,2]\" \
---PO \"map=.*/vbfh.*hgg:r_VBF[1,0,3]\" \
---PO \"map=.*/vbfALT.*hgg:r_VBFBSM[0]\" \
---PO \"map=.*/tth.*hgg:r_top[1,0,3]\" \
---PO \"map=.*/wzh.*hgg:r_VH[1,0,3]\"",
+    "mu_inclusive":"",
+    
+    "mu_simple":"-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+    --PO \"map=.*/ggH.*hgg:r_ggH[1,0,3]\" \
+    --PO \"map=.*/qqH.*hgg:r_VBF[1,0,3]\" \
+    --PO \"map=.*/ttH.*hgg:r_top[1,-1,2]\" \
+    --PO \"map=.*/vH.*hgg:r_VH[1,-1,2]\"",
 
   "mu":"-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
 --PO \"map=.*/ggH.*:r_ggH[1,0,2]\" \

@@ -51,12 +51,16 @@ elif [[ $STEP == "calcPhotonSyst" ]]; then
 elif [[ $STEP == 'signalFit' ]]; then
     python RunSignalScripts.py --inputConfig config_test_${YEAR}.py --mode signalFit --modeOpts="--doPlots --outdir plots" ${DROPT}
 elif [[ $STEP == 'packager' ]]; then
-    python RunPackager.py --cats auto --inputWSDir cards/cards_current/signal_${YEAR} --exts 2022-04-12_year2016,2022-04-12_year2017,2022-04-12_year2018 --mergeYears ${DROPT}
+    python RunPackager.py --cats auto --inputWSDir cards/cards_current/signal_${YEAR} --exts 2022-08-01_year2016,2022-08-01_year2017,2022-08-01_year2018 --mergeYears ${DROPT}
 elif [[ $STEP == 'plotter' ]]; then
     # just plot all the years together. Can be split with --year ${YEAR}
     python RunPlotter.py --procs all --cats all --year 2016,2017,2018 --ext packaged --outdir plots
     # the following doesn't work until one loads a JSON with the cat=>latex name translation via --translateCats option. TO BE DONE.
-    python RunPlotter.py --procs all --cats RECO_DCP0_Bsm0_Tag0,RECO_DCP0_Bsm1_Tag0,RECO_DCP0_Bsm2_Tag0,RECO_DCP0_Tag1,RECO_DCP1_Bsm0_Tag0,RECO_DCP1_Bsm1_Tag0,RECO_DCP1_Bsm2_Tag0,RECO_DCP1_Tag1 --year 2016,2017,2018 --ext packaged --outdir plots
+    python RunPlotter.py --procs all --cats all --year 2016,2017,2018 --ext packaged --outdir plots
+    for i in {0..7}
+    do
+        python RunPlotter.py --procs all --cats "VBFTag_$i" --year 2016,2017,2018 --ext packaged --outdir plots
+    done
 else
     echo "Step $STEP is not one among fTest, signalFit, packager, plotter. Exiting."
 fi

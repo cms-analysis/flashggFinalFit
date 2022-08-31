@@ -83,6 +83,7 @@ _columns = ['cat','effSigma','sig','bkg','bkg_per_GeV','SoverSplusB']
 catinfo_data = pd.DataFrame(columns=_columns)
 
 for c in cats:
+  print "--> processing cat: ",c
   sbpdf, bpdf = sb_model.getPdf(c), b_model.getPdf(c)
   h_sbpdf_tmp = sbpdf.createHistogram("h_sb_tmp_pdfNBins_%s"%c,xvar,ROOT.RooFit.Binning(opt.pdfNBins))
   h_bpdf_tmp = bpdf.createHistogram("h_b_tmp_pdfNBins_%s"%c,xvar,ROOT.RooFit.Binning(opt.pdfNBins))

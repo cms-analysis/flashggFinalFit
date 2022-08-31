@@ -557,7 +557,7 @@ def plotSignalModel(_hists,_opt,_outdir=".",offset=0.02):
 
   if _opt.cats == 'all': catStr, catExt = "All categories", "all"
   elif _opt.cats == 'wall': catStr, catExt = "#splitline{All categories}{S/(S+B) weighted}", "wall"
-  elif len(_opt.cats.split(","))>1: procStr, procExt = "Multiple categories", "multipleCats"
+  elif len(_opt.cats.split(","))>1: catStr, catExt = "Multiple categories", "multipleCats"
   else: catStr, catExt = Translate(_opt.cats,translateCats), _opt.cats
  
   lat1.DrawLatex(0.85,0.86,"%s"%catStr)
