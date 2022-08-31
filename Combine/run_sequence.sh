@@ -1,11 +1,16 @@
 python RunText2Workspace.py --ext CP --mode mu_simple_sm --batch local
-python RunFits.py --inputJson inputs.json --ext CP --mode mu_simple_sm --dryRun
 
-combine --floatOtherPOIs 1 --expectSignal 1 -t -1 -P r_VBF --algo grid --alignEdges 1 --saveSpecifiedNuis all --saveInactivePOI 1 --cminApproxPreFitTolerance=10 --cminDefaultMinimizerStrategy 0 --X-rtd MINIMIZER_freezeDisassociatedParams --X-rtd MINIMIZER_multiMin_hideConstants --X-rtd MINIMIZER_multiMin_maskConstraints --X-rtd MINIMIZER_multiMin_maskChannels=2 -M MultiDimFit -m 125 -d /afs/cern.ch/work/e/emanuele/hc/vbfhgg/fit/CMSSW_10_2_13/src/flashggFinalFit/Combine/Datacard_mu_simple.root -n _profile1D_syst_r_ggH
+# fit with all other mu's floating (simple combine command)
+combine -M MultiDimFit -m 125 -d Datacard_sm_mu_simple.root --floatOtherPOIs 1 -t -1 -n _profile1D_syst_r_VBF_exp -P r_VBF --algo grid --points 40 --alignEdges 1 --setParameters r_ggH=1,r_top=1,r_VH=1 --setParameterRanges r_VBF=0,3 --saveSpecifiedNuis all --saveInactivePOI 1 --freezeParameters MH --cminDefaultMinimizerStrategy 0 --autoBoundsPOIs "*" --autoMaxPOIs "*" --fastScan
+plot1DScan.py higgsCombine_profile1D_syst_r_VBF_exp.MultiDimFit.mH125.root --y-cut 40 --y-max 40 --output plots/fits2022-08-30_mu/scan_r_VBF_exp --POI r_VBF --logo-sub "Super-Preliminary"
 
-combine --floatOtherPOIs 1 --expectSignal 1 -t -1 -P r_ggH --algo grid --alignEdges 1 --saveSpecifiedNuis all --saveInactivePOI 1 --cminApproxPreFitTolerance=10 --cminDefaultMinimizerStrategy 0 --X-rtd MINIMIZER_freezeDisassociatedParams --X-rtd MINIMIZER_multiMin_hideConstants --X-rtd MINIMIZER_multiMin_maskConstraints --X-rtd MINIMIZER_multiMin_maskChannels=2 -M MultiDimFit -m 125 -d /afs/cern.ch/work/e/emanuele/hc/vbfhgg/fit/CMSSW_10_2_13/src/flashggFinalFit/Combine/Datacard_mu_simple.root -n _profile1D_syst_r_VBF
+# or with the RunFits automatic tool
+python RunFits.py --inputJson inputs.json --mode sm_mu_simple --batch local [--doObserved]
 
-plot1DScan.py higgsCombine_profile1D_syst_r_VBF.MultiDimFit.mH125.root --y-cut 20 --y-max 20 --output plots/fits/output_r_VBF --POI r_VBF --translate ../Plots/pois_mu.json --logo-sub "Preliminary"
+# then plot the scans and save the best fits
+python PlotScans.py --inputJson inputs.json --mode sm_mu_simple --outdir 2022-08-31-fits [--doObserved]
+
+
 
 
 ### CP part
