@@ -51,7 +51,7 @@ elif [[ $STEP == "links" ]]; then
     ln -s ../../Background/outdir_2022-08-01 background
     cd -
 else
-    echo "Step $STEP is not one among fTest, signalFit, packager, plotter. Exiting."
+    echo "Step $STEP is not one among yields,datacard,links. Exiting."
 fi
 
 
