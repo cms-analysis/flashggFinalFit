@@ -1,5 +1,5 @@
 {
-    "sm_mu_simple":{
+    "mu_simple":{
         "pois":"r_ggH,r_VBF,r_top,r_VH",
         "fits":"profile1D:syst:all+scan1D:syst:all+bestfit:syst:all",
         "points":"20:1+20:1+:",

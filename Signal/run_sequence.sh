@@ -13,7 +13,7 @@ usage(){
     echo "-d|--dryRun) "
 }
 # options may be followed by one colon to indicate they have a required argument
-if ! options=$(getopt -u -o s:y:d -l help,step:,year:,dryRun -- "$@")
+if ! options=$(getopt -u -o s:y:dh -l help,step:,year:,dryRun -- "$@")
 then
 # something went wrong, getopt will put out an error message for us
 exit 1
@@ -51,15 +51,19 @@ elif [[ $STEP == "calcPhotonSyst" ]]; then
 elif [[ $STEP == 'signalFit' ]]; then
     python RunSignalScripts.py --inputConfig config_test_${YEAR}.py --mode signalFit --modeOpts="--doPlots --outdir plots" ${DROPT}
 elif [[ $STEP == 'packager' ]]; then
-    python RunPackager.py --cats auto --inputWSDir cards/cards_current/signal_${YEAR} --exts 2022-08-01_year2016,2022-08-01_year2017,2022-08-01_year2018 --mergeYears ${DROPT}
+    python RunPackager.py --cats "VBFTag_1,VBFTag_3,VBFTag_5,VBFTag_6,VBFTag_7" --inputWSDir cards/cards_current/signal_${YEAR} --exts 2022-08-01_year2016,2022-08-01_year2017,2022-08-01_year2018 --mergeYears ${DROPT}
 elif [[ $STEP == 'plotter' ]]; then
-    # just plot all the years together. Can be split with --year ${YEAR}
-    python RunPlotter.py --procs all --cats all --year 2016,2017,2018 --ext packaged --outdir plots
-    # the following doesn't work until one loads a JSON with the cat=>latex name translation via --translateCats option. TO BE DONE.
-    python RunPlotter.py --procs all --cats all --year 2016,2017,2018 --ext packaged --outdir plots
-    for i in {0..7}
+    # just plot all the processes, all the categories, all the years together. Can be split with --year ${YEAR}
+    python RunPlotter.py --procs all --cats "VBFTag_1,VBFTag_3,VBFTag_5,VBFTag_6,VBFTag_7" --year 2016,2017,2018 --ext packaged --outdir plots
+    # split by category, all processes together
+    for i in 1 3 5 6 7
     do
-        python RunPlotter.py --procs all --cats "VBFTag_$i" --year 2016,2017,2018 --ext packaged --outdir plots
+        python RunPlotter.py --procs all --cats "VBFTag_$i" --year 2016,2017,2018 --ext packaged --outdir plots --translateCats ../Plots/cats.json
+    done
+    # split by process, all the categories together
+    for proc in "GG2H" "VBF" "VH" "VBF_ALTL1" "VBF_ALT0PH" "VBF_ALT0PM"
+    do
+        python RunPlotter.py --procs $proc --cats "VBFTag_1,VBFTag_3,VBFTag_5,VBFTag_6,VBFTag_7" --year 2016,2017,2018 --ext packaged --outdir plots --translateProcs ../Plots/jcp.json
     done
 else
     echo "Step $STEP is not one among fTest, signalFit, packager, plotter. Exiting."

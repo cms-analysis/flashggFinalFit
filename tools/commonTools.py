@@ -90,7 +90,9 @@ def signalFromFileName(_fileName):
 procToDataMap = od()
 procToDataMap['GG2H'] = 'ggh'
 procToDataMap['VBF'] = 'vbfh'
-procToDataMap['VBF_ALT'] = 'vbfhALT'
+procToDataMap['VBF_ALT0PH'] = 'vbfhALT'
+procToDataMap['VBF_ALT0PM'] = 'vbfhALT'
+procToDataMap['VBF_ALTL1'] = 'vbfhALT'
 procToDataMap['VH'] = 'wzh'
 procToDataMap['WH'] = 'wh'
 procToDataMap['ZH'] = 'zh'
@@ -105,6 +107,7 @@ procToDataMap['GG2HLL'] = 'ggzh'
 procToDataMap['GG2HNUNU'] = 'ggzh'
 def procToData( _proc ):
   k = _proc.split("_")[0] if ("ALT" not in _proc) else "_".join(_proc.split("_"))
+  print " KKKKKKKKKKKKKKKKKKKKK = ",k, "    ",_proc
   if k in procToDataMap: _proc = re.sub( k, procToDataMap[k], _proc )
   return _proc.split("_")[0]
 
