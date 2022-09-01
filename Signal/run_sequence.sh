@@ -13,7 +13,7 @@ usage(){
     echo "-d|--dryRun) "
 }
 # options may be followed by one colon to indicate they have a required argument
-if ! options=$(getopt -u -o s:y:d -l help,step:,year:,dryRun -- "$@")
+if ! options=$(getopt -u -o s:y:dh -l help,step:,year:,dryRun -- "$@")
 then
 # something went wrong, getopt will put out an error message for us
 exit 1
