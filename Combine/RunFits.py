@@ -117,6 +117,9 @@ for fidx in range(len(fits)):
     pdf_opts = getPdfIndicesFromJson("pdfindex%s_observed.json"%opt.ext) if opt.setPdfIndices else ''
   else: pdf_opts = getPdfIndicesFromJson("pdfindex%s.json"%opt.ext) if opt.setPdfIndices else ''
 
+  # add this to distinguish different fits with same POI
+  _name += opt.ext
+
   # File to load workspace
   if opt.snapshotWSFile != '': d_opts = '-d %s --snapshotName MultiDimFit'%opt.snapshotWSFile
   else:
