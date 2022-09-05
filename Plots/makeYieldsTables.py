@@ -14,6 +14,9 @@ from collections import OrderedDict as od
 from usefulStyle import setCanvas, drawCMS, drawEnPu, drawEnYear, formatHisto
 from shanePalette import set_color_palette
 
+from commonObjects import *
+from commonTools import *
+
 print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG YIELDS TABLES RUN II ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ "
 def leave():
   print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG YIELDS TABLES RUN II (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ "
@@ -50,6 +53,11 @@ stage0_top["ttH"] = ['ttH_PTH_0_60','ttH_PTH_60_120','ttH_PTH_120_200','ttH_PTH_
 stage0_top["tHq"] = ['tHq']
 stage0_top["tHW"] = ['tHW']
 
+cp_vbf = od()
+cp_vbf["ggH"] = ['ggH']
+cp_vbf["qqH"] = ['qqH']
+cp_vbf["ttH"] = ['ttH']
+cp_vbf["vH"] = ['vH']
 
 # ggH tags
 target_procs_ggh = od()
@@ -145,9 +153,12 @@ target_procs_qqh["RECO_VBFTOPO_VHHAD_Tag1"] = ['qqH_GE2J_MJJ_60_120','WH_had_GE2
 
 # qqH tags for anomalous couplings
 target_procs_qqh_ac = od()
-target_procs_qqh_ac["RECO_DCP0_Bsm0_Tag0"] = ['vbfALT0Mh_2016_hgg','vbfALT0Mh_2017_hgg','vbfALT0Mh_2018_hgg']
-target_procs_qqh_ac["RECO_DCP0_Bsm1_Tag0"] = ['vbfALT0Mh_2016_hgg','vbfALT0Mh_2017_hgg','vbfALT0Mh_2018_hgg','vbfh_2016_hgg','vbfh_2017_hgg','vbfh_2018_hgg']
-target_procs_qqh_ac["RECO_DCP0_Bsm0_Tag0"] = ['vbfALT0Mh_2016_hgg','vbfALT0Mh_2017_hgg','vbfALT0Mh_2018_hgg']
+target_procs_qqh_ac["VBFTag_1"] = ['qqh']
+target_procs_qqh_ac["VBFTag_3"] = ['qqh']
+target_procs_qqh_ac["VBFTag_5"] = ['qqh']
+target_procs_qqh_ac["VBFTag_6"] = ['qqh']
+target_procs_qqh_ac["VBFTag_7"] = ['qqh']
+
 
 def get_options():
   parser = OptionParser()
@@ -182,8 +193,8 @@ elif opt.group == "top":
   stage0 = stage0_top
   target_procs = target_procs_top
 elif opt.group == "qqh_ac":
-  stage0 = od()
-  target_procs = 
+  stage0 = cp_vbf
+  target_procs = target_procs_qqh_ac
 else:
   print " --> [ERROR] target group of categories %s does not exist"%opt.group
   leave()
@@ -208,11 +219,22 @@ tab_data = pd.DataFrame(columns=_columns)
 
 # Fill frame
 for cat in target_procs:
-  mask = (data['cat']==cat)&(data['type']=='sig')
-  _nominal_yield = data[mask][opt.yieldVar].sum()
-  _target_yield = data[mask][data[mask].apply(lambda x: "_".join(x['proc'].split("_")[:-2]) in target_procs[cat], axis=1)][opt.yieldVar].sum()
+  print "cat = ",cat
   _s0_yields = od()
-  for s0 in stage0: _s0_yields[s0] = data[mask][data[mask].apply(lambda x: "_".join(x['proc'].split("_")[:-2]) in stage0[s0], axis=1)][opt.yieldVar].sum()
+  _nominal_yield = 0
+  _target_yield = 0
+  for year in ['2016','2017','2018']:
+    mask = (data['cat']==cat)&(data['type']=='sig')&(data['year']==year)
+    # Extract rate from lumi
+    _rate = float(lumiMap[year])
+    _nominal_yield += data[mask][opt.yieldVar].sum()*_rate
+    _target_yield += data[mask][data[mask].apply(lambda x: "_".join(x['proc'].split("_")[:-2]) in target_procs[cat], axis=1)][opt.yieldVar].sum()*_rate
+    for s0 in stage0: 
+      s0_y = data[mask][data[mask].apply(lambda x: "_".join(x['proc'].split("_")[:-2]) in stage0[s0], axis=1)][opt.yieldVar].sum()*_rate
+      if s0 in _s0_yields.keys():
+        _s0_yields[s0] += s0_y
+      else:
+        _s0_yields[s0] = s0_y
 
   if opt.loadCatInfo != '':
     catdata_mask = catinfo_data['cat']==cat
@@ -235,7 +257,7 @@ fout.write("\\begin{tabular}{%s}\n"%("l|"+("c"*(nColumns-1))))
 #fout.write("    \\multirow{3}{*}{Analysis categories} & \\multicolumn{%g}{c|}{SM 125 GeV Higgs boson expected signal} & \\multirow{3}{*}{S/S+B} \\\\ \\cline{2-%g}\n"%(3+len(stage0.keys()),nColumns-1))
 fout.write("    \\multirow{3}{*}{Analysis categories} & \\multicolumn{%g}{c}{SM 125 GeV Higgs boson expected signal} & \\multirow{3}{*}{S/S+B} \\\\ \n"%(3+len(stage0.keys())))
 #fout.write("     & \\multirow{2}{*}{\\begin{tabular}[c]{@{}c@{}}Total\\\\Yield\\end{tabular}} & \\multirow{2}{*}{\\begin{tabular}[c]{@{}c@{}}Target\\\\Fraction\\end{tabular}} & \\multicolumn{%g}{c|}{Production Mode Fractions} & \\multirow{2}{*}{\\begin{tabular}[c]{@{}c@{}}$\\sigma_{\\rm{eff}}$\\\\(GeV)\\end{tabular}} & \\\\ \\cline{4-%g}\n"%(len(stage0.keys()),nColumns-2))
-fout.write("     & \\multirow{2}{*}{Total} & \\multirow{2}{*}{\\begin{tabular}[c]{@{}c@{}}Target\\\\STXS bin(s)\\end{tabular}} & \\multicolumn{%g}{c}{Production Mode Fractions} & \\multirow{2}{*}{\\begin{tabular}[c]{@{}c@{}}$\\sigma_{\\rm{eff}}$\\\\(GeV)\\end{tabular}} & \\\\ \n"%(len(stage0.keys())))
+fout.write("     & \\multirow{2}{*}{Total} & \\multirow{2}{*}{\\begin{tabular}[c]{@{}c@{}}Target production\\end{tabular}} & \\multicolumn{%g}{c}{Production Mode Fractions} & \\multirow{2}{*}{\\begin{tabular}[c]{@{}c@{}}$\\sigma_{\\rm{eff}}$\\\\(GeV)\\end{tabular}} & \\\\ \n"%(len(stage0.keys())))
 s0_str = Translate(stage0.keys()[0],translateStage0)
 for s0 in stage0.keys()[1:]: s0_str += " & %s"%Translate(s0,translateStage0)
 #fout.write("     & & & %s & & \\\\ \\hline \\hline \n"%s0_str)

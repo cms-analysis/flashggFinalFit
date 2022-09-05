@@ -13,6 +13,7 @@ def get_options():
   parser.add_option('--inputJson', dest='inputJson', default='inputs.json', help="Input json file to define fits")
   parser.add_option('--mode', dest='mode', default='mu_inclusive', help="Type of fit")
   parser.add_option('--outdir', dest='outdir', default='', help="name of the output directory in plots/")
+  parser.add_option('--ext', dest='ext', default='', help="Running over Datacard with extension")
   parser.add_option('--doObserved', dest='doObserved', action="store_true", default=False, help="Fit to data")
   return parser.parse_args()
 (opt,args) = get_options()
@@ -49,6 +50,9 @@ for fidx in range(len(fits)):
   else:
     mainlabel = "Expected"
 
+  # add this to distinguish different fits with same POI
+  _name += opt.ext
+
   if( _fit.split(":")[0] == "bestfit" ):
     for poi in _fitpois:
       mvcmd = "mv higgsCombine_%s_%s.MultiDimFit.mH125.root %s/%s_%s.root"%(_name,poi,pdir,_name,poi)
@@ -65,6 +69,15 @@ for fidx in range(len(fits)):
     for poi in _fitpois:
       mvcmd = "mv higgsCombine_%s_%s.MultiDimFit.mH125.root %s/higgsCombine_%s_%s.root"%(_name,poi,pdir,_name,poi)
       run(mvcmd)
-      plotcmd = "cd %s; plot1DScan.py higgsCombine_%s_%s.root --y-cut 30 --y-max 30 -o %s_%s --POI %s --main-label %s --translate %s/src/flashggFinalFit/Plots/pois_mu.json; cd .."%(pdir,_name,poi,_name,poi,poi,mainlabel,os.environ['CMSSW_BASE'])
+      if poi=='r':
+        translate_json = "pois_mu.json" 
+      elif poi=='x':
+        if 'ALT0PM' in opt.ext: translate_json = "pois_fa3.json"
+        if 'ALT0PH' in opt.ext: translate_json = "pois_fa2.json"
+        if 'ALTL1' in opt.ext: translate_json = "pois_flambda1.json"
+      else:
+        print "Warning: unknown poi. Use r as default"
+        translate_json = "pois_mu.json"
+      plotcmd = "cd %s; plot1DScan.py higgsCombine_%s_%s.root --y-cut 30 --y-max 30 -o %s_%s --POI %s --main-label %s --translate %s/src/flashggFinalFit/Plots/%s; cd .."%(pdir,_name,poi,_name,poi,poi,mainlabel,os.environ['CMSSW_BASE'],translate_json)
       run(plotcmd)
 
