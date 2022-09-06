@@ -272,7 +272,7 @@ for ir,r in tab_data.iterrows():
     tag_itr = len(tab_data[tab_data['cat'].str.contains(r['cat'].split("_Tag")[0])])-1
     doRow = True
   else: doRow = False
-  catline = "     %s & %.1f\\%%"%(Translate(r['cat'],translateCats),r['nominal_yield'])
+  catline = "     %s & %.1f"%(Translate(r['cat'],translateCats),r['nominal_yield'])
   for s0 in stage0:
     pcs0 = 100*(r['%s_yield'%s0]/r['nominal_yield'])
     #if pcs0 < 0.1: catline += " & $<$0.1\\%"
@@ -281,7 +281,7 @@ for ir,r in tab_data.iterrows():
   catline += " & %.2f & %.2f"%(r['effSigma'],r['SoverSplusB'])
   fout.write("%s \\\\ \n"%catline)
   #if tag_itr == 0: fout.write("     \\hline\n")
-  if tag_itr == 0: fout.write("     [\\cmsTabSkip]\n")
+  #if tag_itr == 0: fout.write("     [\\cmsTabSkip]\n")
   tag_itr -= 1
 #fout.write("     \\hline \n")
 fout.write("\\end{tabular}\n")
