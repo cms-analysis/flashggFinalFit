@@ -153,16 +153,16 @@ target_procs_qqh["RECO_VBFTOPO_VHHAD_Tag1"] = ['qqH_GE2J_MJJ_60_120','WH_had_GE2
 
 # qqH tags for anomalous couplings
 target_procs_qqh_ac = od()
-target_procs_qqh_ac["VBFTag_1"] = ['qqh']
-target_procs_qqh_ac["VBFTag_3"] = ['qqh']
-target_procs_qqh_ac["VBFTag_5"] = ['qqh']
-target_procs_qqh_ac["VBFTag_6"] = ['qqh']
-target_procs_qqh_ac["VBFTag_7"] = ['qqh']
+target_procs_qqh_ac["VBFTag_1"] = ['qqH']
+target_procs_qqh_ac["VBFTag_3"] = ['qqH']
+target_procs_qqh_ac["VBFTag_5"] = ['qqH']
+target_procs_qqh_ac["VBFTag_6"] = ['qqH']
+target_procs_qqh_ac["VBFTag_7"] = ['qqH']
 
 
 def get_options():
   parser = OptionParser()
-  parser.add_option("--inputPkl", dest="inputPkl", default='', help="Input pickle file")
+  parser.add_option("--inputPklDir", dest="inputPklDir", default='', help="Directory in Datacard with Input pickle files for each category")
   parser.add_option("--loadCatInfo", dest="loadCatInfo", default='', help="Load eff sigma, B and S/S+B from pickle file")
   parser.add_option("--group", dest="group", default='ggh', help="Group of cats")
   parser.add_option("--ext", dest="ext", default='', help="Extension for saving")
@@ -200,10 +200,13 @@ else:
   leave()
 
 # Load input dataFrame from pickle file
-if not os.path.exists( opt.inputPkl ): 
-  print " --> [ERROR] Input pickle file does not exist. Leaving"
+if not os.path.exists( opt.inputPklDir ): 
+  print " --> [ERROR] Input directory with pickle files does not exist. Leaving"
   leave()
-with open( opt.inputPkl, "rb" ) as fin: data = pickle.load(fin)
+yfiles = glob.glob("%s/*.pkl" % opt.inputPklDir)
+data = pd.concat([pd.read_pickle(f) for f in yfiles])
+#with open( opt.inputPkl, "rb" ) as fin: data = pickle.load(fin)
+
 # Load cat info dataframe
 if opt.loadCatInfo != '':
   if not os.path.exists( opt.loadCatInfo ):
@@ -219,7 +222,6 @@ tab_data = pd.DataFrame(columns=_columns)
 
 # Fill frame
 for cat in target_procs:
-  print "cat = ",cat
   _s0_yields = od()
   _nominal_yield = 0
   _target_yield = 0
@@ -250,18 +252,19 @@ for cat in target_procs:
   tab_data.loc[len(tab_data)] = vals
 
 # Make table
-nColumns = 5+len(stage0.keys())
-fout = open("Tables/yields_table_lite_%s%s.txt"%(opt.group,opt.ext),"w")
+nColumns = 4+len(stage0.keys())
+foutname = "Tables/yields_table_lite_%s%s.txt"%(opt.group,opt.ext)
+fout = open(foutname,"w")
 fout.write("\\begin{tabular}{%s}\n"%("l|"+("c"*(nColumns-1))))
 #fout.write("    \\hline \\hline \n")
 #fout.write("    \\multirow{3}{*}{Analysis categories} & \\multicolumn{%g}{c|}{SM 125 GeV Higgs boson expected signal} & \\multirow{3}{*}{S/S+B} \\\\ \\cline{2-%g}\n"%(3+len(stage0.keys()),nColumns-1))
-fout.write("    \\multirow{3}{*}{Analysis categories} & \\multicolumn{%g}{c}{SM 125 GeV Higgs boson expected signal} & \\multirow{3}{*}{S/S+B} \\\\ \n"%(3+len(stage0.keys())))
+fout.write("    \\multirow{3}{*}{Analysis categories} & \\multicolumn{%g}{c}{SM 125 GeV Higgs boson expected signal} & \\multirow{3}{*}{S/S+B} \\\\ \n"%(2+len(stage0.keys())))
 #fout.write("     & \\multirow{2}{*}{\\begin{tabular}[c]{@{}c@{}}Total\\\\Yield\\end{tabular}} & \\multirow{2}{*}{\\begin{tabular}[c]{@{}c@{}}Target\\\\Fraction\\end{tabular}} & \\multicolumn{%g}{c|}{Production Mode Fractions} & \\multirow{2}{*}{\\begin{tabular}[c]{@{}c@{}}$\\sigma_{\\rm{eff}}$\\\\(GeV)\\end{tabular}} & \\\\ \\cline{4-%g}\n"%(len(stage0.keys()),nColumns-2))
-fout.write("     & \\multirow{2}{*}{Total} & \\multirow{2}{*}{\\begin{tabular}[c]{@{}c@{}}Target production\\end{tabular}} & \\multicolumn{%g}{c}{Production Mode Fractions} & \\multirow{2}{*}{\\begin{tabular}[c]{@{}c@{}}$\\sigma_{\\rm{eff}}$\\\\(GeV)\\end{tabular}} & \\\\ \n"%(len(stage0.keys())))
+fout.write("     & \\multirow{2}{*}{Total}  & \\multicolumn{%g}{c}{Production Mode Fractions} & \\multirow{2}{*}{\\begin{tabular}[c]{@{}c@{}}$\\sigma_{\\rm{eff}}$\\\\(GeV)\\end{tabular}} & \\\\ \n"%(len(stage0.keys())))
 s0_str = Translate(stage0.keys()[0],translateStage0)
 for s0 in stage0.keys()[1:]: s0_str += " & %s"%Translate(s0,translateStage0)
 #fout.write("     & & & %s & & \\\\ \\hline \\hline \n"%s0_str)
-fout.write("     & & & %s & & \\\\ \\hline \n"%s0_str)
+fout.write("     & & %s & & \\\\ \\hline \n"%s0_str)
 # Add numbers
 tag_itr = -1
 for ir,r in tab_data.iterrows():
@@ -269,7 +272,7 @@ for ir,r in tab_data.iterrows():
     tag_itr = len(tab_data[tab_data['cat'].str.contains(r['cat'].split("_Tag")[0])])-1
     doRow = True
   else: doRow = False
-  catline = "     %s & %.1f & %.1f\\%%"%(Translate(r['cat'],translateCats),r['nominal_yield'],100*(r['target_yield']/r['nominal_yield']))
+  catline = "     %s & %.1f"%(Translate(r['cat'],translateCats),r['nominal_yield'])
   for s0 in stage0:
     pcs0 = 100*(r['%s_yield'%s0]/r['nominal_yield'])
     #if pcs0 < 0.1: catline += " & $<$0.1\\%"
@@ -278,7 +281,9 @@ for ir,r in tab_data.iterrows():
   catline += " & %.2f & %.2f"%(r['effSigma'],r['SoverSplusB'])
   fout.write("%s \\\\ \n"%catline)
   #if tag_itr == 0: fout.write("     \\hline\n")
-  if tag_itr == 0: fout.write("     [\\cmsTabSkip]\n")
+  #if tag_itr == 0: fout.write("     [\\cmsTabSkip]\n")
   tag_itr -= 1
 #fout.write("     \\hline \n")
 fout.write("\\end{tabular}\n")
+print "Written latex table in ",foutname
+
