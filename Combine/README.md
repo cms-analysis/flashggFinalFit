@@ -121,3 +121,7 @@ Be careful: if you are running the observed impacts, the unblinded value of the 
  * `AsymptoticLimits`: use for limits e.g. rare/BSM analyses
  * `profile2D`: 2D likelihood scan, where other pois are profiled. Separate the two pois in the `fits` option options of the input json using a comma.
  * `scan2D`: 2D likelihood scan, where other pois are fixed. Separate the two pois in the `fits` option options of the input json using a comma.
+
+## Bias studies
+
+Scripts/instructions for bias studies are in `Checks` folder.
