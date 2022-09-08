@@ -5,9 +5,9 @@ _year = '2016'
 signalScriptCfg = {
     # Setup
     'inputWSDir':'cards/cards_current/signal_%s'%_year,
-    'procs':'GG2H,VBF,VBF_ALTL1,VBF_ALT0PH,VBF_ALT0PM,VH,TTH', # if auto: inferred automatically from filenames
+    'procs':'GG2H,VBF,VBF_ALT0M,VBF_ALT0Mf05,VBF_ALT0PH,VBF_ALT0PHf05,VBF_ALTL1,VBF_ALTL1f05,VBF_ALTL1Zg,VBF_ALTL1Zgf05,VH,TTH', # if auto: inferred automatically from filenames
     'cats':'auto', # if auto: inferred automatically from (0) workspace
-    'ext':'2022-08-01_year%s'%_year,
+    'ext':'2022-09-08_year%s'%_year,
     'analysis':'AC', # To specify which replacement dataset mapping (defined in ./python/replacementMap.py)
     'year':'%s'%_year, # Use 'combined' if merging all years: not recommended
     'massPoints':'120,125,130',
