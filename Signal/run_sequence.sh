@@ -51,17 +51,17 @@ elif [[ $STEP == "calcPhotonSyst" ]]; then
 elif [[ $STEP == 'signalFit' ]]; then
     python RunSignalScripts.py --inputConfig config_test_${YEAR}.py --mode signalFit --modeOpts="--doPlots --outdir plots" ${DROPT}
 elif [[ $STEP == 'packager' ]]; then
-    python RunPackager.py --cats "VBFTag_1,VBFTag_3,VBFTag_5,VBFTag_6,VBFTag_7" --inputWSDir cards/cards_current/signal_${YEAR} --exts 2022-08-01_year2016,2022-08-01_year2017,2022-08-01_year2018 --mergeYears ${DROPT}
+    python RunPackager.py --cats "VBFTag_1,VBFTag_3,VBFTag_5,VBFTag_6,VBFTag_7" --inputWSDir cards/cards_current/signal_${YEAR} --exts 2022-09-09_year2016,2022-09-09_year2017,2022-09-09_year2018 --mergeYears ${DROPT}
 elif [[ $STEP == 'plotter' ]]; then
-    # just plot all the processes, all the categories, all the years together. Can be split with --year ${YEAR}
-    python RunPlotter.py --procs all --cats "VBFTag_1,VBFTag_3,VBFTag_5,VBFTag_6,VBFTag_7" --year 2016,2017,2018 --ext packaged --outdir plots
+    # just plot all the (SM) processes, all the categories, all the years together. Can be split with --year ${YEAR}. Do not include BSM to maintain the expected total yield for SM
+    python RunPlotter.py --procs "GG2H,VBF,VH,TTH" --cats "VBFTag_1,VBFTag_3,VBFTag_5,VBFTag_6,VBFTag_7" --year 2016,2017,2018 --ext packaged --outdir plots
     # split by category, all processes together
     for i in 1 3 5 6 7
     do
-        python RunPlotter.py --procs all --cats "VBFTag_$i" --year 2016,2017,2018 --ext packaged --outdir plots --translateCats ../Plots/cats.json
+        python RunPlotter.py --procs "GG2H,VBF,VH,TTH" --cats "VBFTag_$i" --year 2016,2017,2018 --ext packaged --outdir plots --translateCats ../Plots/cats.json
     done
     # split by process, all the categories together
-    for proc in "GG2H" "VBF" "VH" "VBF_ALTL1" "VBF_ALT0PH" "VBF_ALT0PM"
+    for proc in "GG2H" "VBF" "VBF_ALT0M" "VBF_ALT0Mf05" "VBF_ALT0PH" "VBF_ALT0PHf05" "VBF_ALTL1" "VBF_ALTL1f05" "VBF_ALTL1Zg" "VBF_ALTL1Zgf05" "VH" "TTH"
     do
         python RunPlotter.py --procs $proc --cats "VBFTag_1,VBFTag_3,VBFTag_5,VBFTag_6,VBFTag_7" --year 2016,2017,2018 --ext packaged --outdir plots --translateProcs ../Plots/jcp.json
     done
