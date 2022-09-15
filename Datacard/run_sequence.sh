@@ -33,12 +33,15 @@ if [[ $STEP == "yields" ]]; then
     python RunYields.py --cats "VBFTag_1,VBFTag_3,VBFTag_5,VBFTag_6,VBFTag_7" --inputWSDirMap 2016=cards/cards_current/signal_2016,2017=cards/cards_current/signal_2017,2018=cards/cards_current/signal_2018 --procs "GG2H,TTH,VBF,VH" --mergeYears --doSystematics --ext ${ext}_xsec --batch condor --queue espresso
     
     # for the single fai fits: include one ALT sample at a time
-    for altproc in "VBF_ALTL1" "VBF_ALT0PH" "VBF_ALT0PM"
+    for altproc in "ALTL1" "ALTL1Zg" "ALT0PH" "ALT0M"
+    # to get the interference correctly need the SM (fa1=0), the pure BSM (fai=1) and the mixed one (fai=0.5)
+    # temporary approx: only the VBF is BSM
     do
-        python RunYields.py --cats "VBFTag_1,VBFTag_3,VBFTag_5,VBFTag_6,VBFTag_7" --inputWSDirMap 2016=cards/cards_current/signal_2016,2017=cards/cards_current/signal_2017,2018=cards/cards_current/signal_2018 --procs "GG2H,TTH,VBF,VH,$altproc" --mergeYears --doSystematics --ext ${ext}_${altproc} --batch condor --queue espresso
+        vbfsamples="VBF,VBF_${altproc},VBF_${altproc}f05"
+        python RunYields.py --cats "VBFTag_1,VBFTag_3,VBFTag_5,VBFTag_6,VBFTag_7" --inputWSDirMap 2016=cards/cards_current/signal_2016,2017=cards/cards_current/signal_2017,2018=cards/cards_current/signal_2018 --procs "GG2H,TTH,VH,$vbfsamples" --mergeYears --doSystematics --ext ${ext}_${altproc} --batch condor --queue espresso
     done
 elif [[ $STEP == "datacards" ]]; then
-    for fit in "xsec" "VBF_ALTL1" "VBF_ALT0PH" "VBF_ALT0PM"
+    for fit in "mu_simple" "ALTL1" "ALTL1Zg" "ALT0PH" "ALT0M"
     do
         python makeDatacard.py --years 2016,2017,2018 --ext ${ext}_${fit} --prune --doSystematics --output "Datacard_${fit}"
     done

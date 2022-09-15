@@ -27,28 +27,28 @@ esac
 shift
 done
 
+fits=("mu_simple" "ALTL1" "ALTL1Zg" "ALT0PH" "ALT0M")
+
 if [[ $STEP == "t2w" ]]; then
-    python RunText2Workspace.py --ext "_xsec" --mode "mu_simple" --batch local
-    for cpfit in "_VBF_ALTL1" "_VBF_ALT0PH" "_VBF_ALT0PM"
+    for fit in ${fits[*]}
     do
-        python RunText2Workspace.py --ext $cpfit --mode "cp" --batch local
+        python RunText2Workspace.py --ext $fit --mode $fit --batch local
     done
 elif [[ $STEP == "fit" ]]; then
     for obs in " " " --doObserved "
     do
-        python RunFits.py --inputJson inputs.json --ext "_xsec" --mode mu_simple --batch local $obs
-        for cpfit in "_VBF_ALTL1" "_VBF_ALT0PH" "_VBF_ALT0PM"
+        for fit in ${fits[*]}
         do
-            python RunFits.py --inputJson inputs.json --ext $cpfit --mode cp --batch local $obs
+            python RunFits.py --inputJson inputs.json --ext $fit --mode $fit --batch local $obs
         done
     done
 elif [[ $STEP == "plot" ]]; then
-    for obs in " " " --doObserved "
+    #for obs in " " " --doObserved "
+    for obs in " --doObserved "
     do
-        python PlotScans.py --inputJson inputs.json --mode mu_simple --outdir $outdate-fits $obs
-        for cpfit in "_VBF_ALTL1" "_VBF_ALT0PH" "_VBF_ALT0PM"
+        for fit in ${fits[*]}
         do
-            python PlotScans.py --inputJson inputs.json --mode cp --ext $cpfit --outdir $outdate-fits
+            python PlotScans.py --inputJson inputs.json --mode $fit  --ext $fit --outdir $outdate-fits $obs
         done
     done
 else

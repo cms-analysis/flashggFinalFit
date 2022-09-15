@@ -10,6 +10,18 @@ models = {
     "cp":"-P HiggsAnalysis.CombinedLimit.HiggsJPC:twoHypothesisHiggs \
     --PO=muFloating", 
 
+    "ALT0M":"-P HiggsAnalysis.CombinedLimit.HiggsSingleAnomalousCoupling:FA3_Interference_JHU_ggHSyst_rw_MengsMuV_HeshyXsec_ggHInt_ggHphase \
+    --PO altSignal=ALT0M",
+
+    "ALT0PH":"-P HiggsAnalysis.CombinedLimit.HiggsSingleAnomalousCoupling:FA3_Interference_JHU_ggHSyst_rw_MengsMuV_HeshyXsec_ggHInt_ggHphase \
+    --PO altSignal=ALT0PH",
+
+    "ALTL1":"-P HiggsAnalysis.CombinedLimit.HiggsSingleAnomalousCoupling:FA3_Interference_JHU_ggHSyst_rw_MengsMuV_HeshyXsec_ggHInt_ggHphase \
+    --PO \"altSignal=ALTL1\"",
+
+    "ALTL1Zg":"-P HiggsAnalysis.CombinedLimit.HiggsSingleAnomalousCoupling:FA3_Interference_JHU_ggHSyst_rw_MengsMuV_HeshyXsec_ggHInt_ggHphase \
+    --PO altSignal=ALTL1Zg",
+
     "mu":"-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
     --PO \"map=.*/ggH.*:r_ggH[1,0,2]\" \
     --PO \"map=.*/bbH.*:r_ggH[1,0,2]\" \

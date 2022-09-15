@@ -47,7 +47,7 @@ def getPdfIndicesFromJson(pdfjson):
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Options:
 # Expected/Observed
-exp_opts = '' if opt.doObserved else '--expectSignal 1 -t -1'
+exp_opts = '' if opt.doObserved else '-t -1'
 
 # Common opts for combine jobs
 common_opts = opt.commonOpts
@@ -98,9 +98,11 @@ for fidx in range(len(fits)):
   _points = points[fidx]
   _fit_opts = fit_opts[fidx]
 
+  if _fit.split(":")[0] != "bestfit": continue
+
   # If ALL in fit_opts: replace by list of constrained nuisances in workspace
   if "ALL" in _fit_opts: 
-    fd = ROOT.TFile("Datacard%s_%s.root"%(opt.ext,opt.mode))
+    fd = ROOT.TFile("Datacard_%s.root"%(opt.ext))
     ws = fd.Get("w")
     nuisances = ws.obj("ModelConfig").GetNuisanceParameters().contentsString()
     _fit_opts = re.sub("ALL",nuisances,_fit_opts)
@@ -118,13 +120,13 @@ for fidx in range(len(fits)):
   else: pdf_opts = getPdfIndicesFromJson("pdfindex%s.json"%opt.ext) if opt.setPdfIndices else ''
 
   # add this to distinguish different fits with same POI
-  _name += opt.ext
+  _name += "_"+opt.ext
 
   # File to load workspace
   if opt.snapshotWSFile != '': d_opts = '-d %s --snapshotName MultiDimFit'%opt.snapshotWSFile
   else:
     #d_opts = '-d ../Datacard%s_%s.root'%(opt.ext,opt.mode)
-    d_opts = '-d %s/src/flashggFinalFit/Combine/Datacard%s_%s.root'%(os.environ['CMSSW_BASE'],opt.ext,opt.mode)
+    d_opts = '-d %s/src/flashggFinalFit/Combine/Datacard_%s.root'%(os.environ['CMSSW_BASE'],opt.ext)
 
   # If setParameters already in _fit_opts then add to fit opts and set pdfOpts = ''
   if( "setParameters" in _fit_opts )&( pdf_opts != '' ):
