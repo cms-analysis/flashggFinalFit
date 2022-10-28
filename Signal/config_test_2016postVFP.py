@@ -1,6 +1,6 @@
 # Config file: options for signal fitting
 
-_year = '2017'
+_year = '2016postVFP'
 
 signalScriptCfg = {
     # Setup
