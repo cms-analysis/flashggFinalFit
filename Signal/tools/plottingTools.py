@@ -425,7 +425,7 @@ def plotSplines(_finalModel,_outdir="./",_nominalMass='125',splinesToPlot=['xs',
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Function for plotting final signal model: neat
 def plotSignalModel(_hists,_opt,_outdir=".",offset=0.02):
-  colorMap = {'2016':38,'2017':30,'2018':46}
+  colorMap = {'2016':38,'2016preVFP': 38, '2016postVFP': 35,'2017':30,'2018':46}
   canv = ROOT.TCanvas("c","c",650,600)
   canv.SetBottomMargin(0.12)
   canv.SetLeftMargin(0.15)
