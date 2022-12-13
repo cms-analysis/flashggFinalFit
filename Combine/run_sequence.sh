@@ -27,7 +27,7 @@ esac
 shift
 done
 
-fits=("mu_simple" "ALTL1" "ALTL1Zg" "ALT0PH" "ALT0M")
+fits=("xsec" "ALT0L1" "ALT0L1Zg" "ALT0PH" "ALT0M")
 
 if [[ $STEP == "t2w" ]]; then
     for fit in ${fits[*]}
