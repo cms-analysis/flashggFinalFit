@@ -98,8 +98,6 @@ for fidx in range(len(fits)):
   _points = points[fidx]
   _fit_opts = fit_opts[fidx]
 
-  if _fit.split(":")[0] != "bestfit": continue
-
   # If ALL in fit_opts: replace by list of constrained nuisances in workspace
   if "ALL" in _fit_opts: 
     fd = ROOT.TFile("Datacard_%s.root"%(opt.ext))

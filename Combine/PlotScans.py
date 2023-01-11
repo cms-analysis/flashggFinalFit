@@ -69,15 +69,15 @@ for fidx in range(len(fits)):
     for poi in _fitpois:
       resfile = "higgsCombine_%s_%s.MultiDimFit.mH125.root"%(_name,poi)
       if os.path.isfile(resfile): 
-        print " --> Storing ",_fit.split(":")[0],": %s/higgsCombine_%s_%s.root"%(resfile,pdir,_name,poi)
+        print " --> Storing ",_fit.split(":")[0],": %s/higgsCombine_%s_%s.root"%(pdir,_name,poi)
         run("mv %s %s/higgsCombine_%s_%s.root"%(resfile,pdir,_name,poi))
       if poi in ["r_ggH","r_VBF","r_top","r_VH"]:
         translate_json = "pois_mu.json" 
       elif poi=='CMS_zz4l_fai1':
         if 'ALT0M' in opt.ext: translate_json = "pois_fa3.json"
         if 'ALT0PH' in opt.ext: translate_json = "pois_fa2.json"
-        if 'ALTL1' in opt.ext: translate_json = "pois_flambda1.json"
-        if 'ALTL1Zg' in opt.ext: translate_json = "pois_flambda1zgamma.json"
+        if 'ALT0L1' in opt.ext: translate_json = "pois_flambda1.json"
+        if 'ALT0L1Zg' in opt.ext: translate_json = "pois_flambda1zgamma.json"
       else:
         print "Warning: unknown poi. Use r as default"
         translate_json = "pois_mu.json"

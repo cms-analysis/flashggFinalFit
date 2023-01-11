@@ -44,7 +44,7 @@ elif [[ $STEP == "fit" ]]; then
     done
 elif [[ $STEP == "plot" ]]; then
     #for obs in " " " --doObserved "
-    for obs in " --doObserved "
+    for obs in " "
     do
         for fit in ${fits[*]}
         do

@@ -124,5 +124,5 @@ elif opt.batch == 'condor':
 
   # Submission
   os.system("chmod 775 ./SplusBModels%s/toys/jobs/sub_toys.sh"%opt.ext)
-  if not opt.dryRun: os.system("cd ./SplusBModels%s/toys/jobs; source /cvmfs/cms.cern.ch/cmsset_default.csh; eval `scramv1 runtime -csh`; condor_submit sub_toys.sub; cd ../../.."%opt.ext)
+  if not opt.dryRun: os.system("cd ./SplusBModels%s/toys/jobs; source /cvmfs/cms.cern.ch/cmsset_default.sh; eval `scramv1 runtime -sh`; condor_submit sub_toys.sub; cd ../../.."%opt.ext)
   else: print " --> [DRY-RUN] jobs have not been submitted"  
