@@ -76,6 +76,8 @@ def signalFromFileName(_fileName):
   elif "VBFHiggs0" in _fileName: p = "vbfALT"
   elif "VBF" in _fileName: p = "vbf"
   elif "WH" in _fileName: p = "wh"
+  elif "Wminus" in _fileName: p = "wh"
+  elif "Wplus" in _fileName: p = "wh"
   elif "ZH" in _fileName: p = "zh"
   elif "ttH" in _fileName: p = "tth"
   elif "THQ" in _fileName: p = "thq"
