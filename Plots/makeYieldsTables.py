@@ -225,7 +225,7 @@ for cat in target_procs:
   _s0_yields = od()
   _nominal_yield = 0
   _target_yield = 0
-  for year in ['2016','2017','2018']:
+  for year in ['2016preVFP','2016postVFP','2017','2018']:
     mask = (data['cat']==cat)&(data['type']=='sig')&(data['year']==year)
     # Extract rate from lumi
     _rate = float(lumiMap[year])

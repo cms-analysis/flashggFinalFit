@@ -1,14 +1,38 @@
 {
-    "mu_simple":{
-        "pois":"r_ggH,r_VBF,r_top,r_VH",
-        "fits":"profile1D:syst:all+scan1D:syst:all+bestfit:syst:all",
-        "points":"20:1+20:1+:",
-        "fit_opts":"--setParameters r_ggH=1,r_top=1,r_VH=1 --setParameterRanges r_VBF=0,3:r_ggH=0,3:r_top=-5,5:r_VH=-5,5 --saveSpecifiedNuis all --saveInactivePOI 1 --freezeParameters MH  --autoBoundsPOIs 'r_VBF' --autoMaxPOIs 'r_VBF' --fastScan+--setParameters r_ggH=1,r_top=1,r_VH=1 --setParameterRanges r_VBF=0,3:r_ggH=0,3:r_top=-5,5:r_VH=-5,5 --saveSpecifiedNuis all --saveInactivePOI 1 --freezeParameters MH --autoBoundsPOIs 'r_VBF' --autoMaxPOIs 'r_VBF' --fastScan+--setParameters r_ggH=1,r_top=1,r_VH=1 --setParameterRanges r_VBF=0,3:r_ggH=0,3:r_top=-5,5:r_VH=-5,5 --saveSpecifiedNuis all --saveInactivePOI 1 --freezeParameters MH --saveWorkspace"
+    "xsec":{
+        "pois":"r_VBF",
+        "fits":"profile1D:syst:all+bestfit:syst:all",
+        "points":"20:1+:",
+        "fit_opts":"--setParameters r_ggH=1,r_top=1,r_VH=1 --setParameterRanges r_VBF=0,3:r_ggH=0.99,1.01:r_top=0.99,1.01:r_VH=0.99,1.01 --saveSpecifiedNuis all --saveInactivePOI 1 --freezeParameters MH,r_ggH,r_top,r_VH  --autoBoundsPOIs 'r_VBF' --autoMaxPOIs 'r_VBF' --fastScan+--setParameters r_ggH=1,r_top=1,r_VH=1 --setParameterRanges r_VBF=0,3:r_ggH=0.99,1.01:r_top=0.99,1.01:r_VH=0.99,1.01 --saveSpecifiedNuis all --saveInactivePOI 1 --freezeParameters MH,r_ggH,r_top,r_VH --saveWorkspace"
     },
     "cp":{
         "pois":"x",
         "fits":"profile1D:syst:all",
         "points":"20:1",
         "fit_opts":"--saveSpecifiedNuis all --saveInactivePOI 1 --cminApproxPreFitTolerance=10 --freezeParameters MH --fastScan --setParameters r=1 --setParameterRanges x=0,0.5"
+    },
+    "ALT0M":{
+        "pois":"CMS_zz4l_fai1",
+        "fits":"profile1D:syst:all",
+        "points":"200:1",
+        "fit_opts":"--saveSpecifiedNuis all --saveInactivePOI 1 --cminApproxPreFitTolerance=10  --setParameterRanges CMS_zz4l_fai1=-0.003,0.003 --freezeParameters MH,fa3_ggH,muf --fastScan --setParameters muV=1,muf=1,fa3_ggH=1 --autoMaxPOIs 'CMS_zz4l_fai1' --autoBoundsPOIs 'CMS_zz4l_fai1' "
+    },
+    "ALT0PH":{
+        "pois":"CMS_zz4l_fai1",
+        "fits":"profile1D:syst:all",
+        "points":"200:1",
+        "fit_opts":"--saveSpecifiedNuis all --saveInactivePOI 1 --cminApproxPreFitTolerance=10  --setParameterRanges CMS_zz4l_fai1=-0.003,0.003 --freezeParameters MH,fa3_ggH,muf --fastScan --setParameters muV=1,muf=1,fa3_ggH=1 --autoMaxPOIs 'CMS_zz4l_fai1' --autoBoundsPOIs 'CMS_zz4l_fai1' "
+    },
+    "ALT0L1":{
+        "pois":"CMS_zz4l_fai1",
+        "fits":"profile1D:syst:all",
+        "points":"200:1",
+        "fit_opts":"--saveSpecifiedNuis all --saveInactivePOI 1 --cminApproxPreFitTolerance=10  --setParameterRanges CMS_zz4l_fai1=-0.003,0.003 --freezeParameters MH,fa3_ggH,muf --fastScan --setParameters muV=1,muf=1,fa3_ggH=1 --autoMaxPOIs 'CMS_zz4l_fai1' --autoBoundsPOIs 'CMS_zz4l_fai1' "
+    },
+    "ALT0L1Zg":{
+        "pois":"CMS_zz4l_fai1",
+        "fits":"profile1D:syst:all",
+        "points":"200:1",
+        "fit_opts":"--saveSpecifiedNuis all --saveInactivePOI 1 --cminApproxPreFitTolerance=10  --setParameterRanges CMS_zz4l_fai1=-0.003,0.003 --freezeParameters MH,fa3_ggH,muf --fastScan --setParameters muV=1,muf=1,fa3_ggH=1 --autoMaxPOIs 'CMS_zz4l_fai1' --autoBoundsPOIs 'CMS_zz4l_fai1' "
     }
 }

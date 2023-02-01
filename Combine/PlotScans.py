@@ -51,7 +51,7 @@ for fidx in range(len(fits)):
     mainlabel = "Expected"
 
   # add this to distinguish different fits with same POI
-  _name += opt.ext
+  _name += "_"+opt.ext
 
   if( _fit.split(":")[0] == "bestfit" ):
     for poi in _fitpois:
@@ -67,14 +67,17 @@ for fidx in range(len(fits)):
 
   elif( _fit.split(":")[0] == "profile1D")|( _fit.split(":")[0] == "scan1D" ):
     for poi in _fitpois:
-      mvcmd = "mv higgsCombine_%s_%s.MultiDimFit.mH125.root %s/higgsCombine_%s_%s.root"%(_name,poi,pdir,_name,poi)
-      run(mvcmd)
-      if poi=='r':
+      resfile = "higgsCombine_%s_%s.MultiDimFit.mH125.root"%(_name,poi)
+      if os.path.isfile(resfile): 
+        print " --> Storing ",_fit.split(":")[0],": %s/higgsCombine_%s_%s.root"%(pdir,_name,poi)
+        run("mv %s %s/higgsCombine_%s_%s.root"%(resfile,pdir,_name,poi))
+      if poi in ["r_ggH","r_VBF","r_top","r_VH"]:
         translate_json = "pois_mu.json" 
-      elif poi=='x':
-        if 'ALT0PM' in opt.ext: translate_json = "pois_fa3.json"
+      elif poi=='CMS_zz4l_fai1':
+        if 'ALT0M' in opt.ext: translate_json = "pois_fa3.json"
         if 'ALT0PH' in opt.ext: translate_json = "pois_fa2.json"
-        if 'ALTL1' in opt.ext: translate_json = "pois_flambda1.json"
+        if 'ALT0L1' in opt.ext: translate_json = "pois_flambda1.json"
+        if 'ALT0L1Zg' in opt.ext: translate_json = "pois_flambda1zgamma.json"
       else:
         print "Warning: unknown poi. Use r as default"
         translate_json = "pois_mu.json"

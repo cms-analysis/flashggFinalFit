@@ -76,6 +76,8 @@ def signalFromFileName(_fileName):
   elif "VBFHiggs0" in _fileName: p = "vbfALT"
   elif "VBF" in _fileName: p = "vbf"
   elif "WH" in _fileName: p = "wh"
+  elif "Wminus" in _fileName: p = "wh"
+  elif "Wplus" in _fileName: p = "wh"
   elif "ZH" in _fileName: p = "zh"
   elif "ttH" in _fileName: p = "tth"
   elif "THQ" in _fileName: p = "thq"
@@ -90,15 +92,38 @@ def signalFromFileName(_fileName):
 procToDataMap = od()
 procToDataMap['GG2H'] = 'ggh'
 procToDataMap['VBF'] = 'vbfh'
-procToDataMap['VBF_ALT0PH'] = 'vbfhALT'
-procToDataMap['VBF_ALT0PM'] = 'vbfhALT'
-procToDataMap['VBF_ALTL1'] = 'vbfhALT'
+procToDataMap['VBF_ALT0PM'] = 'vbfh_ALT_0PM'
+procToDataMap['VBF_ALT0PH'] = 'vbfh_ALT_0PH'
+procToDataMap['VBF_ALT0PHf05ph0'] = 'vbfh_ALT_0PHf05'
+procToDataMap['VBF_ALT0M'] = 'vbfh_ALT_0M'
+procToDataMap['VBF_ALT0Mf05ph0'] = 'vbfh_ALT_0Mf05'
+procToDataMap['VBF_ALT0L1'] = 'vbfh_ALT_L1'
+procToDataMap['VBF_ALT0L1f05ph0'] = 'vbfh_ALT_L1f05'
+procToDataMap['VBF_ALT0L1Zg'] = 'vbfh_ALT_L1Zg'
+procToDataMap['VBF_ALT0L1Zgf05ph0'] = 'vbfh_ALT_L1Zgf05'
 procToDataMap['VH'] = 'wzh'
-procToDataMap['WH'] = 'wh'
+procToDataMap['WH_WM'] = 'wh'
+procToDataMap['WH_WP'] = 'wh'
+procToDataMap['WH_ALT0L1f05ph0'] = 'wh_ALT_L1f05'
+procToDataMap['WH_ALT0PHf05ph0'] = 'wh_ALT_0PHf05'
+procToDataMap['WH_ALT0PH'] = 'wh_ALT_0PH'
+procToDataMap['WH_ALT0PM'] = 'wh_ALT_0PM'
 procToDataMap['ZH'] = 'zh'
+procToDataMap['ZH_ALT0L1f05ph0'] = 'zh_ALT_L1f05'
+procToDataMap['ZH_ALT0L1'] = 'zh_ALT_L1'
+procToDataMap['ZH_ALT0L1Zgf05ph0'] = 'zh_ALT_L1Zgf05'
+procToDataMap['ZH_ALT0L1Zg'] = 'zh_ALT_L1Zg'
+procToDataMap['ZH_ALT0Mf05ph0'] = 'zh_ALT_0Mf05'
+procToDataMap['ZH_ALT0M'] = 'zh_ALT_0M'
+procToDataMap['ZH_ALT0PHf05ph0'] = 'zh_ALT_0PHf05'
+procToDataMap['ZH_ALT0PH'] = 'zh_ALT_0PH'
+procToDataMap['ZH_ALT0PM'] = 'zh_ALT_0PM'
 procToDataMap['QQ2HLNU'] = 'wh'
 procToDataMap['QQ2HLL'] = 'zh'
 procToDataMap['TTH'] = 'tth'
+procToDataMap['TTH_ALT0Mf05ph0'] = 'tth_ALT_0Mf05'
+procToDataMap['TTH_ALT0M'] = 'tth_ALT_0M'
+procToDataMap['TTH_ALT0PM'] = 'tth_ALT_0PM'
 procToDataMap['BBH'] = 'bbh'
 procToDataMap['THQ'] = 'thq'
 procToDataMap['THW'] = 'thw'
@@ -106,10 +131,9 @@ procToDataMap['GG2HQQ'] = 'ggzh'
 procToDataMap['GG2HLL'] = 'ggzh'
 procToDataMap['GG2HNUNU'] = 'ggzh'
 def procToData( _proc ):
-  k = _proc.split("_")[0] if ("ALT" not in _proc) else "_".join(_proc.split("_"))
-  print " KKKKKKKKKKKKKKKKKKKKK = ",k, "    ",_proc
+  k = _proc
   if k in procToDataMap: _proc = re.sub( k, procToDataMap[k], _proc )
-  return _proc.split("_")[0]
+  return _proc
 
 def dataToProc( _d ):
   dataToProcMap = {v:k for k,v in procToDataMap.iteritems()}

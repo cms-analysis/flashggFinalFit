@@ -1,6 +1,6 @@
 # script to append a simple name of the process to the ROOT files from flashgg
 
-import os, sys
+import os, sys, re
 from optparse import OptionParser
 import glob
 
@@ -13,21 +13,22 @@ def get_options():
 
 cmds = []
 
-procmap = {"GluGluH":"GG2H", "VBFHToGG":"VBF", "VBFHiggs0": "VBF_ALT", "ttH":"TTH", "ggZH":"ZH", "WminusH":"WH_WM2ALL", "WplusH": "WH_WP2ALL", "VHToGG":"VH_V2ALL"}
+procmap = {"GluGluH":"GG2H", "VBFHToGG":"VBF", "VBFHiggs0": "VBF_ALT", "ttHJet":"TTH", "ttHiggs0":"TTH_ALT", "ZH_HToGG":"ZH", "ZHiggs0":"ZH_ALT", "WminusH":"WH_WM", "WplusH": "WH_WP", "WHiggs0":"WH_ALT"}
 
 for fname in glob.glob("%s/output*M*.root"%opt.inputWSDir):
     #print "changing name to ",fname
     basename = fname.split(".root")[0]
     newbasename = basename.replace("-pythia8","_pythia8").replace("_M-","_M")
-    pythiaver = newbasename.split("_pythia8")[1]
-    if pythiaver!="": 
-        newbasename = newbasename.replace("_pythia8"+pythiaver,"_pythia8")
+    p = re.compile("\S+Higgs(\S+)ToGG\S+")
+    m = p.match(newbasename)
+    altmodel = m.group(1) if m else ""
+    #print newbasename, "  altmodel = ",altmodel
     proc = ""
     for prefix,suffix in procmap.iteritems():
         if prefix in fname:
             proc = suffix
             break
-    newname = "%s_%s.root" % (newbasename,suffix)
+    newname = "%s_%s%s.root" % (newbasename,proc,altmodel)
     cmds.append("mv -i %s %s" % (fname,newname))
     if opt.dryRun:
         print cmds[-1]

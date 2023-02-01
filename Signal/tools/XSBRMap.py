@@ -152,5 +152,12 @@ globalXSBRMap['AC']['decay'] = {'mode':'hgg'}
 globalXSBRMap['AC']['GG2H'] = {'mode':'ggH'}
 globalXSBRMap['AC']['VBF'] = {'mode':'qqH'}
 globalXSBRMap['AC']['TTH'] = {'mode':'ttH'}
+globalXSBRMap['AC']['WH'] = {'mode':'WH'} 
+globalXSBRMap['AC']['WH_WM'] = {'mode':'WH','factor':0.5}
+globalXSBRMap['AC']['WH_WP'] = {'mode':'WH','factor':0.5}
+globalXSBRMap['AC']['ZH'] = {'mode':'qqZH'}
 globalXSBRMap['AC']['VH'] = {'mode':'WH','factor':BR_W_qq} # not fully correct. Use the samples spli by W and Z
 globalXSBRMap['AC']['VBF_ALT'] = {'mode':'qqH'} # not sure it is correct. From the spline plot it seems OK: takes the MH=125 GeV value from JHU sample and then extrapolate with the relative ratio of qqH SM
+globalXSBRMap['AC']['TTH_ALT'] = {'mode':'ttH'}
+globalXSBRMap['AC']['WH_ALT'] = {'mode':'WH'}
+globalXSBRMap['AC']['ZH_ALT'] = {'mode':'qqZH'}
