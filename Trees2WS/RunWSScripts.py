@@ -26,8 +26,8 @@ def get_options():
   parser.add_option('--inputMass', dest='inputMass', default='125', help="Input mass of workspace")
   parser.add_option('--targetMasses', dest='targetMasses', default='120,130', help="Comma separated list of target masses")
   # Job submission options
-  parser.add_option('--batch', dest='batch', default='IC', help='Batch')
-  parser.add_option('--queue', dest='queue', default='hep.q', help='Queue: can take a while if including all systematics for many categories')
+  parser.add_option('--batch', dest='batch', default='condor', help='Batch')
+  parser.add_option('--queue', dest='queue', default='longlunch', help='Queue: can take a while if including all systematics for many categories')
   parser.add_option('--jobOpts', dest='jobOpts', default='', help="Additional options to add to job submission. For Condor separate individual options with a colon (specify all within quotes e.g. \"option_xyz = abc+option_123 = 456\")")
   parser.add_option('--printOnly', dest='printOnly', default=False, action="store_true", help="Dry run: print submission files only")
   return parser.parse_args()
