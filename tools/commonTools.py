@@ -73,7 +73,6 @@ def signalFromFileName(_fileName):
     elif "ZToNuNu" in _fileName: d = "_ZToNuNu"
     else: d = "_ZToQQ"
   elif "GluGlu" in _fileName: p = "ggh"
-  elif "VBFHiggs0" in _fileName: p = "vbfALT"
   elif "VBF" in _fileName: p = "vbf"
   elif "WH" in _fileName: p = "wh"
   elif "Wminus" in _fileName: p = "wh"
@@ -86,6 +85,22 @@ def signalFromFileName(_fileName):
   else:
     print " --> [ERROR]: cannot extract production mode from input file name. Please update tools.commonTools.signalFromFileName"
     exit(1)
+  if "JHUGen" in _fileName:
+    if "0L1" in _fileName:
+      p += "_ALT_L1"
+    elif "0L1Zg" in _fileName:
+      p += "_ALT_L1Zg"
+    elif "0M" in _fileName:
+      p += "_ALT_0M"
+    elif "0PH" in _fileName:
+      p += "_ALT_0PH"
+    elif "0PM" in _fileName:
+      p += "_ALT_0PM"
+    else:
+      print " --> [ERROR]: cannot extract production mode from input file name. Please update tools.commonTools.signalFromFileName"
+      exit(1)
+    if "f05ph0" in _fileName:
+      p += "f05"
   return p,d
 
 # Function for converting STXS process to production mode in dataset name
