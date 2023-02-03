@@ -86,10 +86,10 @@ def signalFromFileName(_fileName):
     print " --> [ERROR]: cannot extract production mode from input file name. Please update tools.commonTools.signalFromFileName"
     exit(1)
   if "JHUGen" in _fileName:
-    if "0L1" in _fileName:
-      p += "_ALT_L1"
-    elif "0L1Zg" in _fileName:
+    if "0L1Zg" in _fileName:
       p += "_ALT_L1Zg"
+    elif "0L1" in _fileName:
+      p += "_ALT_L1"
     elif "0M" in _fileName:
       p += "_ALT_0M"
     elif "0PH" in _fileName:
