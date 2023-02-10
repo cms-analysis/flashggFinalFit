@@ -8,7 +8,7 @@ usage(){
     echo "options:"
     
     echo "-h|--help) "
-    echo "-y|--year) "
+    echo "-y|--year): can be the yearId or all"
     echo "-s|--step) "
     echo "-d|--dryRun) "
     echo "-i|--interactive) "
@@ -35,6 +35,8 @@ esac
 shift
 done
 
+fggDir="/cmshome/dimarcoe/vbfac/flashgg/CMSSW_10_6_29/src/"
+
 DROPT=""
 if [[ $DR ]]; then
     DROPT=" --printOnly "
@@ -44,14 +46,25 @@ QUEUE=""
 if [[ $I ]]; then
     QUEUE=" --batch local "
 else
-    QUEUE=" --batch condor --queue longlunch "
+    QUEUE=" --batch Rome --queue cmsan "
 fi
 
-if [[ $STEP == "mc" ]]; then
-    python RunWSScripts.py --inputConfig config.py --inputDir trees/allSTXScats_signal_IA_UL${YEAR} --mode trees2ws --modeOpts "--doSystematics" --year ${YEAR} --ext ${YEAR} ${QUEUE} ${DROPT}
-elif [[ $STEP == "data" ]]; then
-    python RunWSScripts.py --inputConfig config.py --inputDir trees/allSTXScats_signal_IA_UL${YEAR} --mode trees2ws_data --year ${YEAR} --ext ${YEAR} ${QUEUE} ${DROPT}    
-else
-    echo "Step $STEP is not one among mc, data. Exiting."
-fi
+years=("2016preVFP" "2016postVFP" "2017" "2018")
+ 
+for year in ${years[*]}
+do
+    if [[ $year == $YEAR ]] || [[ $YEAR == "all" ]]; then
+	if [[ $STEP == "t2ws-mc" ]]; then
+	    python RunWSScripts.py --inputConfig config.py --inputDir trees/merged/signal_${year} --mode trees2ws --modeOpts "--doSystematics" --year ${year} --ext GGH_${year} ${QUEUE} ${DROPT}
+	elif [[ $STEP == "t2ws-data" ]]; then
+	    python RunWSScripts.py --inputConfig config.py --inputDir trees/merged/data_${year} --mode trees2ws_data --year ${year} --ext ${year} ${QUEUE} ${DROPT}    
+	elif [[ $STEP == "hadd-mc" ]]; then
+	    python RunWSScripts.py --inputDir trees/signal_${year} --mode haddMC --year ${year} --ext ${year} --flashggPath ${fggDir} ${QUEUE} ${DROPT}
+	elif [[ $STEP == "hadd-data" ]]; then
+	    python RunWSScripts.py --inputDir trees/data_${year} --mode haddData --year ${year} --ext ${year} --flashggPath ${fggDir} ${QUEUE} ${DROPT}
+	else
+	    echo "Step $STEP is not one among mc, data. Exiting."
+	fi
+    fi
+done
 
