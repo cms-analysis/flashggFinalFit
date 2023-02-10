@@ -63,7 +63,8 @@ def writeSubFiles(_opts):
       for tfidx,tf in enumerate(tfiles):
         # Extract production mode (and decay extension if required)
         p, d = signalFromFileName(tf)
-        _cmd = "python %s/trees2ws.py --inputConfig %s --inputTreeFile %s --productionMode %s --year %s"%(twd__,_opts['inputConfig'],tf,p,_opts['year'])
+        m = massFromFileName(tf)
+        _cmd = "python %s/trees2ws.py --inputConfig %s --inputTreeFile %s --productionMode %s --year %s --inputMass %d"%(twd__,_opts['inputConfig'],tf,p,_opts['year'],m)
         if d is not None: _cmd += " --decayExt %s"%d
         if _opts['modeOpts'] != '': _cmd += " %s"%_opts['modeOpts']
         _f.write("if [ $1 -eq %g ]; then\n"%tfidx)
@@ -139,7 +140,8 @@ def writeSubFiles(_opts):
         writePreamble(_f)
         # Extract production mode (and decay extension if required)
         p, d = signalFromFileName(tf)
-        _cmd = "python %s/trees2ws.py --inputConfig %s --inputTreeFile %s --productionMode %s --year %s"%(twd__,_opts['inputConfig'],tf,p,_opts['year'])
+        m = massFromFileName(tf)
+        _cmd = "python %s/trees2ws.py --inputConfig %s --inputTreeFile %s --productionMode %s --year %s --inputMass %d"%(twd__,_opts['inputConfig'],tf,p,_opts['year'],m)
         if d is not None: _cmd += " --decayExt %s"%d
         if _opts['modeOpts'] != '': _cmd += " %s"%_opts['modeOpts'] 
         _f.write("%s\n"%_cmd)
