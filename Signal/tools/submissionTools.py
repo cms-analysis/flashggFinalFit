@@ -120,7 +120,7 @@ def writeSubFiles(_opts):
     _fsub.close()
     
   # SGE...
-  if (_opts['batch'] == "IC")|(_opts['batch'] == "SGE")|(_opts['batch'] == "local" ):
+  if (_opts['batch'] == "IC")|(_opts['batch'] == "SGE")|(_opts['batch'] == "Rome")|(_opts['batch'] == "local" ):
     _executable = "sub_%s_%s"%(_opts['mode'],_opts['ext'])
 
     # Write details depending on mode
@@ -205,8 +205,9 @@ def submitFiles(_opts):
     print "  --> Finished submitting files"
 
   # SGE
-  elif _opts['batch'] in ['IC','SGE']:
+  elif _opts['batch'] in ['IC','SGE','Rome']:
     _executable = "sub_%s_%s"%(_opts['mode'],_opts['ext'])
+    _subcmd = 'bsub' if _opts['batch']=='Rome' else 'qsub'
 
     # Extract job opts
     jobOptsStr = _opts['jobOpts']
@@ -217,19 +218,19 @@ def submitFiles(_opts):
         for cidx in range(_opts['nCats']):
           pcidx = pidx*_opts['nCats']+cidx
           _subfile = "%s/%s_%g"%(_jobdir,_executable,pcidx)
-          cmdLine = "qsub -q hep.q %s -o %s.log -e %s.err %s.sh"%(jobOptsStr,_subfile,_subfile,_subfile)
+          cmdLine = "%s -q %s %s -o %s.log -e %s.err %s.sh"%(_subcmd,_opts['queue'],jobOptsStr,_subfile,_subfile,_subfile)
           run(cmdLine)
     # Separate submission per category  
     elif( _opts['mode'] == "packageSignal" )|( _opts['mode'] == "fTest" )|( _opts['mode'] == "calcPhotonSyst" )|(( _opts['mode'] == "signalFit" )&( _opts['groupSignalFitJobsByCat'] )):
       for cidx in range(_opts['nCats']):
         c = _opts['cats'].split(",")[cidx]
         _subfile = "%s/%s_%s"%(_jobdir,_executable,c)
-        cmdLine = "qsub -q hep.q %s -o %s.log -e %s.err %s.sh"%(jobOptsStr,_subfile,_subfile,_subfile)
+        cmdLine = "%s -q %s %s -o %s.log -e %s.err %s.sh"%(_subcmd,_opts['queue'],jobOptsStr,_subfile,_subfile,_subfile)
         run(cmdLine)
     # Single submission
     elif(_opts['mode'] == "getEffAcc")|(_opts['mode'] == "getDiagProc"):
       _subfile = "%s/%s"%(_jobdir,_executable)
-      cmdLine = "qsub -q hep.q %s -o %s.log -e %s.err %s.sh"%(jobOptsStr,_subfile,_subfile,_subfile)
+      cmdLine = "%s -q %s %s -o %s.log -e %s.err %s.sh"%(_subcmd,_opts['queue'],jobOptsStr,_subfile,_subfile,_subfile)
       run(cmdLine)
     print "  --> Finished submitting files"
   
