@@ -73,6 +73,7 @@ for proc in opt.procs.split(","):
   WSFileName = glob.glob("%s/output*M%s*%s.root"%(opt.inputWSDir,opt.mass,proc))[0]
   f = ROOT.TFile(WSFileName,"read")
   inputWS = f.Get(inputWSName__)
+  # print "===> In file ",WSFileName," look for roodataset = ","%s_%s_%s_%s"%(procToData(proc),opt.mass,sqrts__,opt.cat)
   d = reduceDataset(inputWS.data("%s_%s_%s_%s"%(procToData(proc),opt.mass,sqrts__,opt.cat)),aset)
   df.loc[len(df)] = [proc,d.sumEntries(),1,1]
   inputWS.Delete()
