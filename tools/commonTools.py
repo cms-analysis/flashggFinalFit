@@ -73,7 +73,6 @@ def signalFromFileName(_fileName):
     elif "ZToNuNu" in _fileName: d = "_ZToNuNu"
     else: d = "_ZToQQ"
   elif "GluGlu" in _fileName: p = "ggh"
-  elif "VBFHiggs0" in _fileName: p = "vbfALT"
   elif "VBF" in _fileName: p = "vbf"
   elif "WH" in _fileName: p = "wh"
   elif "Wminus" in _fileName: p = "wh"
@@ -86,24 +85,51 @@ def signalFromFileName(_fileName):
   else:
     print " --> [ERROR]: cannot extract production mode from input file name. Please update tools.commonTools.signalFromFileName"
     exit(1)
+  if "JHUGen" in _fileName:
+    if "0L1Zg" in _fileName:
+      p += "_ALT_L1Zg"
+    elif "0L1" in _fileName:
+      p += "_ALT_L1"
+    elif "0M" in _fileName:
+      p += "_ALT_0M"
+    elif "0PH" in _fileName:
+      p += "_ALT_0PH"
+    elif "0PM" in _fileName:
+      p += "_ALT_0PM"
+    else:
+      print " --> [ERROR]: cannot extract production mode from input file name. Please update tools.commonTools.signalFromFileName"
+      exit(1)
+    if "f05ph0" in _fileName:
+      p += "f05"
   return p,d
+
+# Function to return mass from input file name
+def massFromFileName(_fileName):
+  m = None
+  # to be done with regexp
+  if "_M120_" in _fileName: m = 120
+  elif "_M125_" in _fileName: m = 125
+  elif "_M130_" in _fileName: m = 130
+  else: 
+    print " ---> [ERROR]: cannot extract mass from input file name. Please update tools.commonTools.massFromFileName"
+  return m
 
 # Function for converting STXS process to production mode in dataset name
 procToDataMap = od()
 procToDataMap['GG2H'] = 'ggh'
-procToDataMap['VBF'] = 'vbfh'
-procToDataMap['VBF_ALT0PM'] = 'vbfh_ALT_0PM'
-procToDataMap['VBF_ALT0PH'] = 'vbfh_ALT_0PH'
-procToDataMap['VBF_ALT0PHf05ph0'] = 'vbfh_ALT_0PHf05'
-procToDataMap['VBF_ALT0M'] = 'vbfh_ALT_0M'
-procToDataMap['VBF_ALT0Mf05ph0'] = 'vbfh_ALT_0Mf05'
-procToDataMap['VBF_ALT0L1'] = 'vbfh_ALT_L1'
-procToDataMap['VBF_ALT0L1f05ph0'] = 'vbfh_ALT_L1f05'
-procToDataMap['VBF_ALT0L1Zg'] = 'vbfh_ALT_L1Zg'
-procToDataMap['VBF_ALT0L1Zgf05ph0'] = 'vbfh_ALT_L1Zgf05'
+procToDataMap['VBF'] = 'vbf'
+procToDataMap['VBF_ALT_0PM'] = 'vbf_ALT_0PM'
+procToDataMap['VBF_ALT_0PH'] = 'vbf_ALT_0PH'
+procToDataMap['VBF_ALT_0PHf05'] = 'vbf_ALT_0PHf05'
+procToDataMap['VBF_ALT_0M'] = 'vbf_ALT_0M'
+procToDataMap['VBF_ALT_0Mf05'] = 'vbf_ALT_0Mf05'
+procToDataMap['VBF_ALT_L1'] = 'vbf_ALT_L1'
+procToDataMap['VBF_ALT_L1f05'] = 'vbf_ALT_L1f05'
+procToDataMap['VBF_ALT_L1Zg'] = 'vbf_ALT_L1Zg'
+procToDataMap['VBF_ALT_L1Zgf05'] = 'vbf_ALT_L1Zgf05'
 procToDataMap['VH'] = 'wzh'
-procToDataMap['WH_WM'] = 'wh'
-procToDataMap['WH_WP'] = 'wh'
+procToDataMap['WMINUSH2HQQ'] = 'wh'
+procToDataMap['WPLUSH2HQQ'] = 'wh'
 procToDataMap['WH_ALT0L1f05ph0'] = 'wh_ALT_L1f05'
 procToDataMap['WH_ALT0PHf05ph0'] = 'wh_ALT_0PHf05'
 procToDataMap['WH_ALT0PH'] = 'wh_ALT_0PH'

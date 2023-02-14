@@ -167,4 +167,5 @@ for cat,f in inputFiles.iteritems():
 outdir="%s/%s/Plots"%(opt.outdir,opt.ext)
 if not os.path.isdir(outdir): os.system("mkdir -p %s"%outdir)
 if os.path.exists("/afs/cern.ch"): os.system("cp /afs/cern.ch/user/g/gpetrucc/php/index.php "+outdir)
+elif os.path.exists("/cmshome/dimarcoe"): s.system("cp /cmshome/dimarcoe/php/index.php "+outdir)
 plotSignalModel(hists,opt,_outdir=outdir)
