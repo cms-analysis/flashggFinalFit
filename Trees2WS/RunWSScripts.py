@@ -19,6 +19,7 @@ def get_options():
   parser.add_option('--year', dest='year', default='2016', help="Year of trees to process")
   parser.add_option('--mode', dest='mode', default='', help="Which mode to run. Options: ['trees2ws','trees2ws_data','haddMC','haddData','mass_shift']")
   parser.add_option('--modeOpts', dest='modeOpts', default='', help="Additional options to add to command line when running different scripts (specify all within quotes e.g. \"--XYZ ABC\")")
+  parser.add_option('--selectProcess', dest='selectProcess', action="append", default=[], help="select only these processes to be converted in workspaces (can be specified multiple times)")
   # Specifically for hadding
   parser.add_option('--flashggPath', dest='flashggPath', default='', help="Path to flashgg area required for hadding")
   parser.add_option('--outputWSDir', dest='outputWSDir', default='', help="Location to store output workspaces of hadding script")
@@ -47,6 +48,7 @@ options['ext']         = opt.ext
 options['year']        = opt.year
 options['mode']        = opt.mode
 options['modeOpts']    = opt.modeOpts
+options['selectProcess'] = opt.selectProcess
 options['flashggPath'] = opt.flashggPath
 options['outputWSDir'] = opt.outputWSDir if opt.outputWSDir != '' else "%s/outdir_%s/%s"%(twd__,opt.ext,opt.mode)
 options['inputMass']   = opt.inputMass
@@ -75,6 +77,8 @@ elif options['mode'] == "trees2ws_data": print " --> Converting ROOT Trees to Fi
 elif options['mode'] == "haddMC": print " --> Hadd MC workspaces..."
 elif options['mode'] == "haddData": print " --> Hadd data workspaces..."
 elif options['mode'] == "mass_shift": print " --> Ad-hoc shifting of mass in RooWorkspaces..."
+
+if options['mode'] == "trees2ws" and len(options['selectProcess']): print " ==> Chosen to convert only the processes in this list: ",options['selectProcess']
 print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

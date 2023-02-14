@@ -61,6 +61,12 @@ def writeSubFiles(_opts):
       tfiles = glob.glob("%s/*.root"%_opts['inputDir'])
       # Run separate command per file
       for tfidx,tf in enumerate(tfiles):
+        if len(_opts['selectProcess']):
+          skipMe = True
+          for p0 in _opts['selectProcess']:
+            for p in p0.split(","):
+              if os.path.basename(tf).split('.root')[0].replace('output_','') in p: skipMe = False
+          if skipMe: continue
         # Extract production mode (and decay extension if required)
         p, d = signalFromFileName(tf)
         m = massFromFileName(tf)
@@ -136,6 +142,12 @@ def writeSubFiles(_opts):
       tfiles = glob.glob("%s/*.root"%_opts['inputDir'])
       # Create separate submission file per script
       for tfidx,tf in enumerate(tfiles):
+        if len(_opts['selectProcess']):
+          skipMe = True
+          for p0 in _opts['selectProcess']:
+            for p in p0.split(","):
+              if os.path.basename(tf).split('.root')[0].replace('output_','') in p: skipMe = False
+          if skipMe: continue
         _f = open("%s/%s_%g.sh"%(_jobdir,_executable,tfidx),"w")
         writePreamble(_f)
         # Extract production mode (and decay extension if required)
@@ -223,6 +235,12 @@ def submitFiles(_opts):
     if( _opts['mode'] == "trees2ws" )|( _opts['mode'] == 'trees2ws_data' ):
       tfiles = glob.glob("%s/*.root"%_opts['inputDir'])
       for tfidx in range(len(tfiles)):
+        if len(_opts['selectProcess']):
+          skipMe = True
+          for p0 in _opts['selectProcess']:
+            for p in p0.split(","):
+              if os.path.basename(tfiles[tfidx]).split('.root')[0].replace('output_','') in p: skipMe = False
+          if skipMe: continue
         _subfile = "%s/%s_%g"%(_jobdir,_executable,tfidx)
         cmdLine = "%s -q %s %s -o %s.log -e %s.err %s.sh"%(_subcmd,_opts['queue'],jobOptsStr,_subfile,_subfile,_subfile)
         run(cmdLine)
