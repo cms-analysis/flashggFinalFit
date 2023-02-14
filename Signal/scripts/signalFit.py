@@ -108,7 +108,7 @@ if opt.skipZeroes:
   WSFileName = glob.glob("%s/output*%s*.root"%(opt.inputWSDir,MHNominal))[0]
   f = ROOT.TFile(WSFileName,"read")
   inputWS = f.Get(inputWSName__)
-  d = reduceDataset(inputWS.data("%s_%s_%s"%(procToData(opt.proc),sqrts__,opt.cat)),aset)
+  d = reduceDataset(inputWS.data("%s_%s_%s_%s"%(procToData(opt.proc),MHNominal,sqrts__,opt.cat)),aset)
   if( d.numEntries() == 0. )|( d.sumEntries <= 0. ):
     print " --> (%s,%s) has zero events. Will not construct signal model"%(opt.proc,opt.cat)
     exit()
@@ -156,7 +156,7 @@ for mp in opt.massPoints.split(","):
   WSFileName = glob.glob("%s/output*%s*%s.root"%(opt.inputWSDir,mp,procRVFit))[0]
   f = ROOT.TFile(WSFileName,"read")
   inputWS = f.Get(inputWSName__)
-  d = reduceDataset(inputWS.data("%s_%s_%s"%(procToData(procRVFit),sqrts__,catRVFit)),aset)
+  d = reduceDataset(inputWS.data("%s_%s_%s_%s"%(procToData(procRVFit),mp,sqrts__,catRVFit)),aset)
   nominalDatasets[mp] = d.Clone()
   if opt.skipVertexScenarioSplit: datasetRVForFit[mp] = d
   else: datasetRVForFit[mp] = splitRVWV(d,aset,mode="RV")
