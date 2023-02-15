@@ -48,8 +48,8 @@ years=("2016preVFP" "2016postVFP" "2017" "2018")
 
 for year in ${years[*]}
 do
-    echo "====> Running for year $year"
     if [[ $year == $YEAR ]] || [[ $YEAR == "all" ]]; then
+	echo "====> Running for year $year"
 	if [[ $STEP == "fTest" ]]; then
 	    python RunSignalScripts.py --inputConfig config_test_${year}.py --mode fTest --modeOpts "--doPlots --outdir plots --nProcsToFTest -1" ${DROPT}
 	elif [[ $STEP == "calcPhotonSyst" ]]; then
