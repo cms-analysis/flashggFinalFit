@@ -156,6 +156,7 @@ globalXSBRMap['AC']['WH'] = {'mode':'WH'}
 globalXSBRMap['AC']['WMINUSH2HQQ'] = {'mode':'WH','factor':0.5}
 globalXSBRMap['AC']['WPLUSH2HQQ'] = {'mode':'WH','factor':0.5}
 globalXSBRMap['AC']['ZH'] = {'mode':'qqZH'}
+globalXSBRMap['AC']['QQ2HLL'] = {'mode':'qqZH'}
 # not sure the following for the ALT modes is correct. From the spline plot it seems OK: takes the MH=125 GeV value from JHU sample and then extrapolate with the relative ratio of qqH SM. In any case the fit for the fai profiles mu
 globalXSBRMap['AC']['VBF_ALT_0PM'] = {'mode':'qqH'}
 globalXSBRMap['AC']['VBF_ALT_0PH'] = {'mode':'qqH'}

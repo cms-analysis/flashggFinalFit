@@ -295,8 +295,8 @@ globalReplacementMap["AC"]["procRVMap"]["RECO_WH_LEP_PTV_0_75_Tag1"] = "WPLUSH2H
 globalReplacementMap["AC"]["procRVMap"]["RECO_WH_LEP_PTV_75_150_Tag0"] = "WPLUSH2HQQ"
 globalReplacementMap["AC"]["procRVMap"]["RECO_WH_LEP_PTV_75_150_Tag1"] = "WPLUSH2HQQ"
 globalReplacementMap["AC"]["procRVMap"]["RECO_WH_LEP_PTV_GT150_Tag0"] = "WPLUSH2HQQ"
-globalReplacementMap["AC"]["procRVMap"]["RECO_ZH_LEP_Tag0"] = "ZH"
-globalReplacementMap["AC"]["procRVMap"]["RECO_ZH_LEP_Tag1"] = "ZH"
+globalReplacementMap["AC"]["procRVMap"]["RECO_ZH_LEP_Tag0"] = "QQ2HLL"
+globalReplacementMap["AC"]["procRVMap"]["RECO_ZH_LEP_Tag1"] = "QQ2HLL"
 
 # Replacement category for RV fit
 globalReplacementMap['AC']["catRVMap"] = od()
@@ -360,8 +360,8 @@ globalReplacementMap["AC"]["catRVMap"]["RECO_TTH_LEP_PTH_60_120_Tag0"] = "RECO_T
 globalReplacementMap["AC"]["catRVMap"]["RECO_TTH_LEP_PTH_60_120_Tag1"] = "RECO_TTH_LEP_PTH_60_120_Tag1"
 globalReplacementMap["AC"]["catRVMap"]["RECO_TTH_LEP_PTH_60_120_Tag2"] = "RECO_TTH_LEP_PTH_60_120_Tag2"
 globalReplacementMap["AC"]["catRVMap"]["RECO_TTH_LEP_PTH_GT300_Tag0"] = "RECO_TTH_LEP_PTH_GT300_Tag0"
-globalReplacementMap["AC"]["catRVMap"]["RECO_VBFLIKEGGH_Tag0"] = "RECO_VBFLIKEGGH_Tag0"
-globalReplacementMap["AC"]["catRVMap"]["RECO_VBFLIKEGGH_Tag1"] = "RECO_VBFLIKEGGH_Tag1"
+globalReplacementMap["AC"]["catRVMap"]["RECO_VBFLIKEGGH_Tag0"] = "RECO_VBFTOPO_ACGGH_Tag0"
+globalReplacementMap["AC"]["catRVMap"]["RECO_VBFLIKEGGH_Tag1"] = "RECO_VBFTOPO_ACGGH_Tag1"
 globalReplacementMap["AC"]["catRVMap"]["RECO_VBFTOPO_ACGGH_Tag0"] = "RECO_VBFTOPO_ACGGH_Tag0"
 globalReplacementMap["AC"]["catRVMap"]["RECO_VBFTOPO_ACGGH_Tag1"] = "RECO_VBFTOPO_ACGGH_Tag1"
 globalReplacementMap["AC"]["catRVMap"]["RECO_VBFTOPO_ACVBFBSM_Tag0"] = "RECO_VBFTOPO_ACVBFBSM_Tag0"
