@@ -34,23 +34,32 @@ if [[ $DR ]]; then
     DROPT=" --printOnly "
 fi
 
+smprocs=("GG2H" "VBF" "TTH" "WMINUSH2HQQ" "WPLUSH2HQQ" "QQ2HLL")
+smprocs_csv=$(IFS=, ; echo "${smprocs[*]}")
+
 if [[ $STEP == "yields" ]]; then
     # for mu-simple: exclude ALT processes
-    python RunYields.py --cats "VBFTag_1,VBFTag_3,VBFTag_5,VBFTag_6,VBFTag_7" --inputWSDirMap 2016preVFP=cards/cards_current/signal_2016preVFP,2016postVFP=cards/cards_current/signal_2016postVFP,2017=cards/cards_current/signal_2017,2018=cards/cards_current/signal_2018 --procs "GG2H,TTH,VBF,WH_WM,WH_WP,ZH" --mergeYears --doSystematics --ext ${ext}_xsec --batch condor --queue espresso ${DROPT}
+    python RunYields.py --cats "auto" --inputWSDirMap 2016preVFP=cards/signal_2016preVFP,2016postVFP=cards/signal_2016postVFP,2017=cards/signal_2017,2018=cards/signal_2018 --procs $smprocs_csv --mergeYears --doSystematics --ext ${ext}_xsec --batch Rome --queue cmsan ${DROPT}
     
     # for the single fai fits: include one ALT sample at a time
-    for altproc in "ALT0L1" "ALT0L1Zg" "ALT0PH" "ALT0M"
+    for altproc in "ALT_L1" "ALT_L1Zg" "ALT_0PH" "ALT_0M"
     # to get the interference correctly need the SM (fa1=0), the pure BSM (fai=1) and the mixed one (fai=0.5)
-    # temporary approx: only the VBF is BSM
     do
-        vbfsamples="VBF,VBF_${altproc},VBF_${altproc}f05ph0"
-        #whaltsamples="WH_ALT0L1f05ph0,WH_ALT0PH,WH_ALT0PHf05ph0" # not all are completed
-        if [[ $altproc == "ALT0M" ]]; then
-            zhsamples="ZH" # ZH alternative samples have some missing systematics
+	# for bookkeeping mistake, for VBF the files are called ALT_xxx for VBF and ALTxx for VH,TTH
+	altproc_nonvbf=`echo ${altproc} | sed 's|_||g'`
+        vbfsamples="VBF,VBF_${altproc},VBF_${altproc}f05"
+	zhsamples="QQ2HLL,ZH_${altproc_nonvbf},ZH_${altproc_nonvbf}f05ph0"
+        if [[ $altproc == "ALT_0PH" ]]; then # not all the WH alternative samples are available yet
+	    whsamples="WMINUSH2HQQ,WPLUSH2HQQ,WH_${altproc_nonvbf},WH_${altproc_nonvbf}f05ph0"
         else
-            zhsamples="ZH,ZH_${altproc},ZH_${altproc}f05ph0"
+            whsamples="WMINUSH2HQQ,WPLUSH2HQQ"
         fi
-        python RunYields.py --cats "VBFTag_1,VBFTag_3,VBFTag_5,VBFTag_6,VBFTag_7" --inputWSDirMap 2016preVFP=cards/cards_current/signal_2016preVFP,2016postVFP=cards/cards_current/signal_2016postVFP,2017=cards/cards_current/signal_2017,2018=cards/cards_current/signal_2018 --procs "GG2H,TTH,WH_WM,WH_WP,$vbfsamples,$zhsamples" --mergeYears --doSystematics --ext ${ext}_${altproc} --batch condor --queue espresso ${DROPT}
+	if [[ $altproc == "ALT_0M" ]]; then
+	    tthsamples="TTH,TTH_${altproc_nonvbf},TTH_${altproc_nonvbf}f05ph0"
+	else
+	    tthsamples="TTH"
+	fi
+        python RunYields.py --cats "auto" --inputWSDirMap 2016preVFP=cards/signal_2016preVFP,2016postVFP=cards/signal_2016postVFP,2017=cards/signal_2017,2018=cards/signal_2018 --procs "GG2H,$tthsamples,$vbfsamples,$whsamples,$zhsamples" --mergeYears --doSystematics --ext ${ext}_${altproc} --batch Rome --queue cmsan ${DROPT}
     done
 elif [[ $STEP == "datacards" ]]; then
     for fit in "xsec" "ALT0L1" "ALT0L1Zg" "ALT0PH" "ALT0M"
