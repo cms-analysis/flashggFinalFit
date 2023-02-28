@@ -92,7 +92,7 @@ done
 
 OUTDIR="outdir_${EXT}"
 if [[ $PLOTDIR == "" ]]; then
-    PLOTDIR=OUTDIR
+    PLOTDIR=$OUTDIR
 fi
 
 echo "[INFO] outdir is $OUTDIR, plotdir is $PLOTDIR INTLUMI $INTLUMI" 
