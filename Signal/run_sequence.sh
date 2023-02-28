@@ -46,7 +46,7 @@ fi
 
 years=("2016preVFP" "2016postVFP" "2017" "2018")
 
-if [[ $STEP == "fTest" ]] || [[ $STEP == "calcPhotonSyst" ]] || [[ $STEP == 'signalFit' ]] || [[ $STEP == 'packager' ]]; then
+if [[ $STEP == "fTest" ]] || [[ $STEP == "calcPhotonSyst" ]] || [[ $STEP == 'signalFit' ]]; then
     for year in ${years[*]}
     do
 	if [[ $year == $YEAR ]] || [[ $YEAR == "all" ]]; then
@@ -57,29 +57,29 @@ if [[ $STEP == "fTest" ]] || [[ $STEP == "calcPhotonSyst" ]] || [[ $STEP == 'sig
 		python RunSignalScripts.py --inputConfig config_test_${year}.py --mode calcPhotonSyst ${DROPT}
 	    elif [[ $STEP == 'signalFit' ]]; then
 		python RunSignalScripts.py --inputConfig config_test_${year}.py --mode signalFit --modeOpts="--doPlots --outdir plots" ${DROPT}
-	    elif [[ $STEP == 'packager' ]]; then
-		python RunPackager.py --cats "auto" --inputWSDir cards/signal_${year} --year ${year} --outputExt packaged_year${year} --exts 2023-02-13_year2016preVFP,2023-02-13_year2016postVFP,2023-02-13_year2017,2023-02-13_year2018 --batch Rome --queue cmsan ${DROPT}
 	    fi
 	fi
     done
-fi
-
-if [[ $STEP == 'plotter' ]]; then
-    smprocs = ("GG2H" "VBF" "TTH" "WMINUSH2HQQ" "WPLUSH2HQQ" "ZH")
+elif [[ $STEP == 'packager' ]]; then
+    python RunPackager.py --cats "auto" --inputWSDir cards/signal_2016preVFP --outputExt packaged --exts 2023-02-13_year2016preVFP,2023-02-13_year2016postVFP,2023-02-13_year2017,2023-02-13_year2018 --mergeYears --batch Rome --queue cmsan ${DROPT}
+elif [[ $STEP == 'plotter' ]]; then
+    smprocs=("GG2H" "VBF" "TTH" "WMINUSH2HQQ" "WPLUSH2HQQ" "QQ2HLL")
+    smprocs_csv=$(IFS=, ; echo "${smprocs[*]}")
     # just plot all the (SM) processes, all the categories, all the years together. Can be split with --year ${YEAR}. Do not include BSM to maintain the expected total yield for SM
-    python RunPlotter.py --procs "GG2H,VBF,TTH,WMINUSH2HQQ,WPLUSH2HQQ,ZH" --cats "all" --year 2016preVFP,2016postVFP,2017,2018 --ext packaged --outdir plots
+    echo "Now plotting all categories for these SM processes: $smprocs_csv"
+    python RunPlotter.py --procs $smprocs_csv --cats "all" --year 2016preVFP,2016postVFP,2017,2018 --ext packaged --outdir plots
     # split by category, all processes together
-    significantCats = ("RECO_VBFTOPO_ACGGH_Tag0" "RECO_VBFTOPO_ACGGH_Tag1" "RECO_VBFTOPO_ACVBFBSM_Tag0" "RECO_VBFTOPO_ACVBFBSM_Tag1" "RECO_VBFTOPO_ACVBFSM_Tag0" "RECO_VBFTOPO_VHHAD_Tag0" "RECO_VBFTOPO_VHHAD_Tag1")
+    significantCats=("RECO_VBFTOPO_ACGGH_Tag0" "RECO_VBFTOPO_ACGGH_Tag1" "RECO_VBFTOPO_ACVBFBSM_Tag0" "RECO_VBFTOPO_ACVBFBSM_Tag1" "RECO_VBFTOPO_ACVBFSM_Tag0" "RECO_VBFTOPO_VHHAD_Tag0" "RECO_VBFTOPO_VHHAD_Tag1")
+    significantCats_csv=$(IFS=, ; echo "${significantCats[*]}")
     for cat in ${significantCats[*]}
     do
-	python RunPlotter.py --procs "all" --cats cat --year 2016preVFP,2016postVFP,2017,2018 --outdir plots --ext packaged --outdir plots --translateCats ../Plots/cats.json
+    	echo "=> Now plotting all processes together for cat: $cat"
+    	python RunPlotter.py --procs $smprocs_csv --cats cat --year 2016preVFP,2016postVFP,2017,2018 --outdir plots --ext packaged --outdir plots --translateCats ../Plots/cats.json
     done
-    # split by process, all the categories together
-    for proc in "GG2H" "VBF" "VBF_ALT0M" "VBF_ALT0Mf05" "VBF_ALT0PH" "VBF_ALT0PHf05" "VBF_ALTL1" "VBF_ALTL1f05" "VBF_ALTL1Zg" "VBF_ALTL1Zgf05" "WH_WP" "WH_WM" "WH_ALT0L1f05ph0" "WH_ALT0PH" "WH_ALT0PHf05ph0" "WH_ALT0PM" "ZH_ALT0L1" "ZH_ALT0L1f05ph0" "ZH_ALT0L1Zg" "ZH_ALT0L1Zgf05ph0" "ZH_ALT0M" "ZH_ALT0Mf05ph0" "ZH_ALT0PH" "ZH_ALT0PHf05ph0" "ZH_ALT0PM" "ZH" "TTH" "TTH_ALT0M" "TTH_ALT0Mf05ph0" "TTH_ALT0PM"
+    # split by process, all the categories together (the SM + some alternatives)
+    for proc in ${smprocs[*]}
     do
-	python RunPlotter.py --procs $proc --cats "VBFTag_1,VBFTag_3,VBFTag_5,VBFTag_6,VBFTag_7" --year 2016preVFP,2016postVFP,2017,2018 --ext packaged --outdir plots --translateProcs ../Plots/jcp.json
+    	echo "=> Now plotting proc $proc for all categories"
+    	python RunPlotter.py --procs $proc --cats "all" --year 2016preVFP,2016postVFP,2017,2018 --ext packaged --outdir plots
     done
 fi
-
-
-
