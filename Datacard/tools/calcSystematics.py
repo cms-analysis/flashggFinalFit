@@ -62,6 +62,9 @@ def factoryType(d,s):
   if('pdfWeight' in s['name']): return "s_w"
   #if('pdfWeight' in s['name'])|('alphaSWeight' in s['name']): return "s_w"
 
+  #Fix for rare cases in which there is no signal for that category at all (and skipZeroes has been used)
+  if(d[d['type']=='sig'].size==0): return "-"
+
   # Loop over rows in dataframe: until syst is found
   for ir, r in d[d['type']=='sig'].iterrows():
     f = ROOT.TFile(r.inputWSFile)
@@ -92,7 +95,7 @@ def factoryType(d,s):
       f.Close()
 
   # If never found:
-  print " --> [ERROR] systematic %s: cannot extract type in factoryType function. Doesn't match requirement for (anti)-symmetric weights or anti-symmetric histograms. Leaving..."
+  print " --> [ERROR] systematic %s: cannot extract type in factoryType function. Doesn't match requirement for (anti)-symmetric weights or anti-symmetric histograms. Leaving..." % s['name']
   sys.exit(1)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
