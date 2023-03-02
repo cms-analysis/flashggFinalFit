@@ -59,8 +59,8 @@ def getValueFromJson(row,uncertainties,sname):
 def factoryType(d,s):
 
   #Fix for pdfWeight (as Nweights > 10)
-  if('pdfWeight' in s['name']): return "s_w"
-  #if('pdfWeight' in s['name'])|('alphaSWeight' in s['name']): return "s_w"
+  #if('pdfWeight' in s['name']): return "s_w"
+  if('pdfWeight' in s['name'])|('alphaSWeight' in s['name'])|('scaleWeight' in s['name']): return "s_w"
 
   #Fix for rare cases in which there is no signal for that category at all (and skipZeroes has been used)
   if(d[d['type']=='sig'].size==0): return "-"
@@ -87,6 +87,7 @@ def factoryType(d,s):
     elif(ws.data(dataHistUp)!=None)&(ws.data(dataHistDown)!=None):
       ws.Delete()
       f.Close()
+      print "Found a_h syst ",s['name']," in file ",r.inputWSFile
       return "a_h"
 
     # If not found then move onto next entry in dataframe
@@ -95,7 +96,7 @@ def factoryType(d,s):
       f.Close()
 
   # If never found:
-  print " --> [ERROR] systematic %s: cannot extract type in factoryType function. Doesn't match requirement for (anti)-symmetric weights or anti-symmetric histograms. Leaving..." % s['name']
+  print " --> [ERROR] systematic %s: cannot extract type in factoryType function. Doesn't match requirem5Cent for (anti)-symmetric weights or anti-symmetric histograms. Leaving..." % s['name']
   sys.exit(1)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
