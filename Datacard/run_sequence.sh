@@ -10,7 +10,7 @@ usage(){
     echo "-d|--dryRun) "
 }
 # options may be followed by one colon to indicate they have a required argument
-if ! options=$(getopt -u -o s:h -l help,step:,dryRun -- "$@")
+if ! options=$(getopt -u -o s:hd -l help,step:,dryRun -- "$@")
 then
 # something went wrong, getopt will put out an error message for us
 exit 1
@@ -39,7 +39,7 @@ smprocs_csv=$(IFS=, ; echo "${smprocs[*]}")
 
 if [[ $STEP == "yields" ]]; then
     # for mu-simple: exclude ALT processes
-    python RunYields.py --cats "auto" --inputWSDirMap 2016preVFP=cards/signal_2016preVFP,2016postVFP=cards/signal_2016postVFP,2017=cards/signal_2017,2018=cards/signal_2018 --procs $smprocs_csv --mergeYears --doSystematics --ext ${ext}_xsec --batch Rome --queue cmsan ${DROPT}
+    python RunYields.py --cats "auto" --inputWSDirMap 2016preVFP=cards/signal_2016preVFP,2016postVFP=cards/signal_2016postVFP,2017=cards/signal_2017,2018=cards/signal_2018 --procs $smprocs_csv --mergeYears --doSystematics --skipZeroes --ext ${ext}_xsec --batch Rome --queue cmsan ${DROPT}
     
     # for the single fai fits: include one ALT sample at a time
     for altproc in "ALT_L1" "ALT_L1Zg" "ALT_0PH" "ALT_0M"
@@ -59,7 +59,10 @@ if [[ $STEP == "yields" ]]; then
 	else
 	    tthsamples="TTH"
 	fi
-        python RunYields.py --cats "auto" --inputWSDirMap 2016preVFP=cards/signal_2016preVFP,2016postVFP=cards/signal_2016postVFP,2017=cards/signal_2017,2018=cards/signal_2018 --procs "GG2H,$tthsamples,$vbfsamples,$whsamples,$zhsamples" --mergeYears --doSystematics --ext ${ext}_${altproc} --batch Rome --queue cmsan ${DROPT}
+	if [[ $altproc == "ALT_L1" ]] || [[ $altproc == "ALT_L1Zg" ]]; then
+	    zhsamples=`echo ${zhsamples} | sed 's|L1|0L1|g'`
+	fi
+        python RunYields.py --cats "auto" --inputWSDirMap 2016preVFP=cards/signal_2016preVFP,2016postVFP=cards/signal_2016postVFP,2017=cards/signal_2017,2018=cards/signal_2018 --procs "GG2H,$tthsamples,$vbfsamples,$whsamples,$zhsamples" --mergeYears --doSystematics --skipZeroes --ext ${ext}_${altproc} --batch Rome --queue cmsan ${DROPT}
     done
 elif [[ $STEP == "datacards" ]]; then
     for fit in "xsec" "ALT0L1" "ALT0L1Zg" "ALT0PH" "ALT0M"
