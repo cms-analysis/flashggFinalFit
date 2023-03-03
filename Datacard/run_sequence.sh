@@ -1,4 +1,5 @@
-ext=`date +%F` 
+#ext=`date +%F` 
+ext='2023-03-02'
 
 STEP=0
 usage(){
@@ -65,9 +66,12 @@ if [[ $STEP == "yields" ]]; then
         python RunYields.py --cats "auto" --inputWSDirMap 2016preVFP=cards/signal_2016preVFP,2016postVFP=cards/signal_2016postVFP,2017=cards/signal_2017,2018=cards/signal_2018 --procs "GG2H,$tthsamples,$vbfsamples,$whsamples,$zhsamples" --mergeYears --doSystematics --skipZeroes --ext ${ext}_${altproc} --batch Rome --queue cmsan ${DROPT}
     done
 elif [[ $STEP == "datacards" ]]; then
-    for fit in "xsec" "ALT0L1" "ALT0L1Zg" "ALT0PH" "ALT0M"
+    for fit in "xsec" "ALT_L1" "ALT_L1Zg" "ALT_0PH" "ALT_0M"
     do
-        python makeDatacard.py --years 2016preVFP,2016postVFP,2017,2018 --ext ${ext}_${fit} --prune --doSystematics --output "Datacard_${fit}"
+	echo "making datacards for all years together for type of fit: $fit"
+        python makeDatacard.py --years 2016preVFP,2016postVFP,2017,2018 --ext ${ext}_${fit} --prune --doSystematics --output "Datacard_${fit}" --pruneCat RECO_VBFLIKEGGH_Tag1,RECO_VBFLIKEGGH_Tag0
+	python cleanDatacard.py --datacard "Datacard_${fit}" --factor 2 --removeDoubleSided
+	mv "Datacard_${fit}_cleaned.txt" "Datacard_${fit}.txt"
     done
 elif [[ $STEP == "links" ]]; then
     cd Models 

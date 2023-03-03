@@ -87,7 +87,6 @@ def factoryType(d,s):
     elif(ws.data(dataHistUp)!=None)&(ws.data(dataHistDown)!=None):
       ws.Delete()
       f.Close()
-      print "Found a_h syst ",s['name']," in file ",r.inputWSFile
       return "a_h"
 
     # If not found then move onto next entry in dataframe
@@ -319,11 +318,12 @@ def theorySystFactory(d,systs,ftype,options,stxsMergeScheme=None,_removal=False)
   # Loop over systematics and add new column in dataFrame for each tier
   for s in systs:
     if s['type'] == 'constant': continue
-    for tier in s['tiers']: 
-      if tier == 'mnorm': 
-        if options.doSTXSMerging:
-          for mergeName in stxsMergeScheme: d["%s_%s_mnorm"%(s['name'],mergeName)] = '-'
-      else: d["%s_%s"%(s['name'],tier)] = '-'
+    if 'tiers' in s:
+      for tier in s['tiers']: 
+        if tier == 'mnorm': 
+          if options.doSTXSMerging:
+            for mergeName in stxsMergeScheme: d["%s_%s_mnorm"%(s['name'],mergeName)] = '-'
+        else: d["%s_%s"%(s['name'],tier)] = '-'
 
   # Loop over systematics and fill entries for rows which satisfy mask
   for s in systs:
@@ -334,9 +334,10 @@ def theorySystFactory(d,systs,ftype,options,stxsMergeScheme=None,_removal=False)
     if "THU_ggH" in s['name']: mask = (d['type']=='sig')&(d['nominal_yield']!=0)&(d['proc'].str.contains('ggH'))
     else: mask = (d['type']=='sig')&(d['nominal_yield']!=0)
     # Loop over tiers and use appropriate mode for compareYield function: skip mnorm as treated separately below
-    for tier in s['tiers']: 
-      if tier == 'mnorm': continue
-      d.loc[mask,"%s_%s"%(s['name'],tier)] = d[mask].apply(lambda x: compareYield(x,f,s['name'],mode=tier), axis=1)
+    if 'tiers' in s:
+      for tier in s['tiers']: 
+        if tier == 'mnorm': continue
+        d.loc[mask,"%s_%s"%(s['name'],tier)] = d[mask].apply(lambda x: compareYield(x,f,s['name'],mode=tier), axis=1)
 
   # For merging STXS bins in parameter scheme: calculate mnorm systematics (merged-STXS-normalisation)
   # One nuisance per merge
@@ -344,7 +345,7 @@ def theorySystFactory(d,systs,ftype,options,stxsMergeScheme=None,_removal=False)
     for mergeName in stxsMergeScheme:
       for s in systs:
 	if s['type'] == 'constant': continue
-        elif 'mnorm' not in s['tiers']: continue
+        elif ('tiers' in s and 'mnorm' not in s['tiers']): continue
 	for year in options.years.split(","):
 	  # Remove NaN entries and require specific year
 	  mask = (d['merge_%s_nominal_yield'%mergeName]==d['merge_%s_nominal_yield'%mergeName])&(d['year']==year)&(d['nominal_yield']!=0)
