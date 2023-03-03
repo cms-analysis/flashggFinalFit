@@ -110,8 +110,10 @@ def writeSystematic(f,d,s,options,stxsMergeScheme=None,scaleCorrScheme=None):
 	for cat in d.cat.unique():
 	  for ir,r in d[d['cat']==cat].iterrows():
 	    if r['proc'] == "data_obs": continue
+            k = "%s%s%s"%(s['name'],mergeStr,tierStr)
+            if k not in r: continue 
 	    # Extract value and add to line (with checks)
-	    sval = r["%s%s%s"%(s['name'],mergeStr,tierStr)]
+	    sval = r[k]
 	    lsyst = addSyst(lsyst,sval,stitle,r['proc'],cat)
 	# Remove final space from line and add to file
 	f.write("%s\n"%lsyst[:-1])
