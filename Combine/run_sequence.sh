@@ -27,12 +27,12 @@ esac
 shift
 done
 
-fits=("xsec" "ALT0L1" "ALT0L1Zg" "ALT0PH" "ALT0M")
+fits=("xsec" "ALT_L1" "ALT_L1Zg" "ALT_0PH" "ALT_0M")
 
 if [[ $STEP == "t2w" ]]; then
     for fit in ${fits[*]}
     do
-        python RunText2Workspace.py --ext $fit --mode $fit --batch local
+        python RunText2Workspace.py --ext $fit --mode $fit --batch Rome
     done
 elif [[ $STEP == "fit" ]]; then
     for obs in " " " --doObserved "

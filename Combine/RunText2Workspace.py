@@ -37,7 +37,7 @@ fsub = open("./t2w_jobs/t2w_%s.sh"%(opt.ext),"w")
 fsub.write("#!/bin/bash\n\n")
 fsub.write("cd %s\n\n"%os.environ['PWD'])
 fsub.write("eval `scramv1 runtime -sh`\n\n")
-fsub.write("text2workspace.py Datacard_%s.txt -o Datacard_%s.root %s %s"%(opt.ext,opt.ext,opt.common_opts,models[opt.mode]))
+fsub.write("text2workspace.py Datacard_%s.txt -o Datacard_%s.root %s %s\n"%(opt.ext,opt.ext,opt.common_opts,models[opt.mode]))
 fsub.close()
 
 # Change permission for file
@@ -58,6 +58,6 @@ if opt.batch == 'condor':
 # Submit
 if opt.batch == "condor": subcmd = "condor_submit ./t2w_jobs/t2w_%s.sub"%(opt.ext)
 elif opt.batch == 'local': subcmd = "bash ./t2w_jobs/t2w_%s.sh"%(opt.ext)
-else: subcmd = "qsub -q hep.q -l h_rt=6:0:0 -l h_vmem=24G ./t2w_jobs/t2w_%s.sh"%(opt.ext)
+else: subcmd = "bsub -q cmsan -o ./t2w_jobs/t2w_%s.log -e ./t2w_jobs/t2w_%s.err ./t2w_jobs/t2w_%s.sh"%(opt.ext,opt.ext,opt.ext)
 if opt.dryRun: print "[DRY RUN] %s"%subcmd
 else: run(subcmd)
