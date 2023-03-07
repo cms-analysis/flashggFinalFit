@@ -18,6 +18,12 @@ git clone git@github.com:jonathon-langford/HiggsAnalysis.git
 # Install Combine as per the documentation here: cms-analysis.github.io/HiggsAnalysis-CombinedLimit/
 git clone git@github.com:cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit
 
+# Switch to combine v8.2.0
+cd $CMSSW_BASE/src/HiggsAnalysis/CombinedLimit
+git fetch origin
+git checkout v8.2.0
+cd $CMSSW_BASE/src
+
 # Install Combine Harvester for parallelizing fits
 git clone https://github.com/cms-analysis/CombineHarvester.git CombineHarvester
 
