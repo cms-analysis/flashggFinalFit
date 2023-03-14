@@ -1,7 +1,7 @@
 models = {
     "mu_inclusive":"",
     
-    "mu_simple":"-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+    "mu":"-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
     --PO \"map=.*/ggH.*hgg:r_ggH[1,0,3]\" \
     --PO \"map=.*/qqH.*hgg:r_VBF[1,0,3]\" \
     --PO \"map=.*/ttH.*hgg:r_top[1,-1,2]\" \
@@ -11,16 +11,16 @@ models = {
     "cp":"-P HiggsAnalysis.CombinedLimit.HiggsJPC:twoHypothesisHiggs \
     --PO=muFloating", 
 
-    "ALT_0M":"-P HiggsAnalysis.CombinedLimit.HiggsSingleAnomalousCoupling:FA3_Interference_JHU_ggHSyst_rw_MengsMuV_HeshyXsec_ggHInt_ggHphase \
+    "ALT_0M":"-P HiggsAnalysis.CombinedLimit.FA3_Interference_JHU_ggHSyst_rw_MengsMuV_HeshyXsec_ggHInt_ggHphase:FA3_Interference_JHU_ggHSyst_rw_MengsMuV_HeshyXsec_ggHInt_ggHphase \
     --PO altSignal=ALT_0M",
 
-    "ALT_0PH":"-P HiggsAnalysis.CombinedLimit.HiggsSingleAnomalousCoupling:FA3_Interference_JHU_ggHSyst_rw_MengsMuV_HeshyXsec_ggHInt_ggHphase \
+    "ALT_0PH":"-P HiggsAnalysis.CombinedLimit.FA2_Interference_JHU_rw_MengsMuV:FA2_Interference_JHU_rw_MengsMuV \
     --PO altSignal=ALT_0PH",
 
-    "ALT_L1":"-P HiggsAnalysis.CombinedLimit.HiggsSingleAnomalousCoupling:FA3_Interference_JHU_ggHSyst_rw_MengsMuV_HeshyXsec_ggHInt_ggHphase \
+    "ALT_L1":"-P HiggsAnalysis.CombinedLimit.FL1_Interference_JHU_rw_MengsMuV:FL1_Interference_JHU_rw_MengsMuV \
     --PO \"altSignal=ALT_L1\"",
 
-    "ALT_L1Zg":"-P HiggsAnalysis.CombinedLimit.HiggsSingleAnomalousCoupling:FA3_Interference_JHU_ggHSyst_rw_MengsMuV_HeshyXsec_ggHInt_ggHphase \
+    "ALT_L1Zg":"-P HiggsAnalysis.CombinedLimit.FL1Zg_Interference_JHU_rw_MengsMuV:FL1Zg_Interference_JHU_rw_MengsMuV \
     --PO altSignal=ALT_L1Zg",
 
     "xsec":"-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
