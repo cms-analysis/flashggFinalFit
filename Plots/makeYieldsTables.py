@@ -22,6 +22,7 @@ def leave():
   print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG YIELDS TABLES RUN II (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ "
   sys.exit(1)
 
+
 # Define STXS stage 0 mapping to procs
 stage0_ggh = od()
 stage0_ggh["ggH"] = ['ggH_0J_PTH_0_10','ggZH_had_0J_PTH_0_10','ggH_0J_PTH_GT10','ggZH_had_0J_PTH_GT10','ggH_1J_PTH_0_60','ggZH_had_1J_PTH_0_60','ggH_1J_PTH_60_120','ggZH_had_1J_PTH_60_120','ggH_1J_PTH_120_200','ggZH_had_1J_PTH_120_200','ggH_GE2J_MJJ_0_350_PTH_0_60','ggZH_had_GE2J_MJJ_0_350_PTH_0_60','ggH_GE2J_MJJ_0_350_PTH_60_120','ggZH_had_GE2J_MJJ_0_350_PTH_60_120','ggH_GE2J_MJJ_0_350_PTH_120_200','ggZH_had_GE2J_MJJ_0_350_PTH_120_200','ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','ggH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','ggH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','ggH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25','ggZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25','ggZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25','ggZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25','ggZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25','ggH_PTH_200_300','ggZH_had_PTH_200_300','ggH_PTH_300_450','ggH_PTH_450_650','ggH_PTH_GT650','ggZH_had_PTH_300_450','ggZH_had_PTH_450_650','ggZH_had_PTH_GT650']
@@ -53,11 +54,17 @@ stage0_top["ttH"] = ['ttH_PTH_0_60','ttH_PTH_60_120','ttH_PTH_120_200','ttH_PTH_
 stage0_top["tHq"] = ['tHq']
 stage0_top["tHW"] = ['tHW']
 
-cp_vbf = od()
-cp_vbf["ggH"] = ['ggH']
-cp_vbf["qqH"] = ['qqH']
-cp_vbf["ttH"] = ['ttH']
-cp_vbf["vH"] = ['vH']
+cp_ggh = od()
+cp_ggh["ggH"] = ['ggH']
+
+cp_qqh = od()
+cp_qqh["qqH"] = ['qqH']
+
+cp_top = od()
+cp_top["ttH"] = ['ttH']
+
+cp_vh = od()
+cp_vh["vH"] = ['WMINUSH2HQQ','WPLUSH2HQQ','ZH_lep']
 
 # ggH tags
 target_procs_ggh = od()
@@ -152,13 +159,81 @@ target_procs_qqh["RECO_VBFTOPO_VHHAD_Tag0"] = ['qqH_GE2J_MJJ_60_120','WH_had_GE2
 target_procs_qqh["RECO_VBFTOPO_VHHAD_Tag1"] = ['qqH_GE2J_MJJ_60_120','WH_had_GE2J_MJJ_60_120','ZH_had_GE2J_MJJ_60_120']
 
 # qqH tags for anomalous couplings
-target_procs_qqh_ac = od()
-target_procs_qqh_ac["VBFTag_1"] = ['qqH']
-target_procs_qqh_ac["VBFTag_3"] = ['qqH']
-target_procs_qqh_ac["VBFTag_5"] = ['qqH']
-target_procs_qqh_ac["VBFTag_6"] = ['qqH']
-target_procs_qqh_ac["VBFTag_7"] = ['qqH']
+target_procs_ggh_ac = od()
+target_procs_ggh_ac["RECO_0J_PTH_0_10_Tag0"] = ['ggH']
+target_procs_ggh_ac["RECO_0J_PTH_0_10_Tag1"] = ['ggH']
+target_procs_ggh_ac["RECO_0J_PTH_0_10_Tag2"] = ['ggH']
+target_procs_ggh_ac["RECO_0J_PTH_GT10_Tag0"] = ['ggH']
+target_procs_ggh_ac["RECO_0J_PTH_GT10_Tag1"] = ['ggH']
+target_procs_ggh_ac["RECO_0J_PTH_GT10_Tag2"] = ['ggH']
+target_procs_ggh_ac["RECO_1J_PTH_0_60_Tag0"] = ['ggH']
+target_procs_ggh_ac["RECO_1J_PTH_0_60_Tag1"] = ['ggH']
+target_procs_ggh_ac["RECO_1J_PTH_0_60_Tag2"] = ['ggH']
+target_procs_ggh_ac["RECO_1J_PTH_120_200_Tag0"] = ['ggH']
+target_procs_ggh_ac["RECO_1J_PTH_120_200_Tag1"] = ['ggH']
+target_procs_ggh_ac["RECO_1J_PTH_120_200_Tag2"] = ['ggH']
+target_procs_ggh_ac["RECO_1J_PTH_60_120_Tag0"] = ['ggH']
+target_procs_ggh_ac["RECO_1J_PTH_60_120_Tag1"] = ['ggH']
+target_procs_ggh_ac["RECO_1J_PTH_60_120_Tag2"] = ['ggH']
+target_procs_ggh_ac["RECO_GE2J_PTH_0_60_Tag0"] = ['ggH']
+target_procs_ggh_ac["RECO_GE2J_PTH_0_60_Tag1"] = ['ggH']
+target_procs_ggh_ac["RECO_GE2J_PTH_0_60_Tag2"] = ['ggH']
+target_procs_ggh_ac["RECO_GE2J_PTH_120_200_Tag0"] = ['ggH']
+target_procs_ggh_ac["RECO_GE2J_PTH_120_200_Tag1"] = ['ggH']
+target_procs_ggh_ac["RECO_GE2J_PTH_120_200_Tag2"] = ['ggH']
+target_procs_ggh_ac["RECO_GE2J_PTH_60_120_Tag0"] = ['ggH']
+target_procs_ggh_ac["RECO_GE2J_PTH_60_120_Tag1"] = ['ggH']
+target_procs_ggh_ac["RECO_GE2J_PTH_60_120_Tag2"] = ['ggH']
+target_procs_ggh_ac["RECO_PTH_200_300_Tag0"] = ['ggH']
+target_procs_ggh_ac["RECO_PTH_200_300_Tag1"] = ['ggH']
+target_procs_ggh_ac["RECO_PTH_300_450_Tag0"] = ['ggH']
+target_procs_ggh_ac["RECO_PTH_300_450_Tag1"] = ['ggH']
+target_procs_ggh_ac["RECO_PTH_450_650_Tag0"] = ['ggH']
+target_procs_ggh_ac["RECO_PTH_GT650_Tag0"] = ['ggH']
 
+target_procs_top_ac = od()
+target_procs_top_ac["RECO_THQ_LEP"] = ['ttH']
+target_procs_top_ac["RECO_TTH_HAD_PTH_0_60_Tag0"] = ['ttH']
+target_procs_top_ac["RECO_TTH_HAD_PTH_0_60_Tag1"] = ['ttH']
+target_procs_top_ac["RECO_TTH_HAD_PTH_0_60_Tag2"] = ['ttH']
+target_procs_top_ac["RECO_TTH_HAD_PTH_120_200_Tag0"] = ['ttH']
+target_procs_top_ac["RECO_TTH_HAD_PTH_120_200_Tag1"] = ['ttH']
+target_procs_top_ac["RECO_TTH_HAD_PTH_120_200_Tag2"] = ['ttH']
+target_procs_top_ac["RECO_TTH_HAD_PTH_120_200_Tag3"] = ['ttH']
+target_procs_top_ac["RECO_TTH_HAD_PTH_200_300_Tag0"] = ['ttH']
+target_procs_top_ac["RECO_TTH_HAD_PTH_200_300_Tag1"] = ['ttH']
+target_procs_top_ac["RECO_TTH_HAD_PTH_200_300_Tag2"] = ['ttH']
+target_procs_top_ac["RECO_TTH_HAD_PTH_60_120_Tag0"] = ['ttH']
+target_procs_top_ac["RECO_TTH_HAD_PTH_60_120_Tag1"] = ['ttH']
+target_procs_top_ac["RECO_TTH_HAD_PTH_60_120_Tag2"] = ['ttH']
+target_procs_top_ac["RECO_TTH_HAD_PTH_GT300_Tag0"] = ['ttH']
+target_procs_top_ac["RECO_TTH_HAD_PTH_GT300_Tag1"] = ['ttH']
+target_procs_top_ac["RECO_TTH_LEP_PTH_0_60_Tag0"] = ['ttH']
+target_procs_top_ac["RECO_TTH_LEP_PTH_0_60_Tag1"] = ['ttH']
+target_procs_top_ac["RECO_TTH_LEP_PTH_0_60_Tag2"] = ['ttH']
+target_procs_top_ac["RECO_TTH_LEP_PTH_120_200_Tag0"] = ['ttH']
+target_procs_top_ac["RECO_TTH_LEP_PTH_120_200_Tag1"] = ['ttH']
+target_procs_top_ac["RECO_TTH_LEP_PTH_200_300_Tag0"] = ['ttH']
+target_procs_top_ac["RECO_TTH_LEP_PTH_60_120_Tag0"] = ['ttH']
+target_procs_top_ac["RECO_TTH_LEP_PTH_60_120_Tag1"] = ['ttH']
+target_procs_top_ac["RECO_TTH_LEP_PTH_60_120_Tag2"] = ['ttH']
+target_procs_top_ac["RECO_TTH_LEP_PTH_GT300_Tag0"] = ['ttH']
+
+target_procs_qqh_ac = od()
+target_procs_qqh_ac["RECO_VBFTOPO_ACGGH_Tag0"] = ['qqH']
+target_procs_qqh_ac["RECO_VBFTOPO_ACGGH_Tag1"] = ['qqH']
+target_procs_qqh_ac["RECO_VBFTOPO_ACVBFBSM_Tag0"] = ['qqH']
+target_procs_qqh_ac["RECO_VBFTOPO_ACVBFBSM_Tag1"] = ['qqH']
+target_procs_qqh_ac["RECO_VBFTOPO_ACVBFSM_Tag0"] = ['qqH']
+
+target_procs_vh_ac = od()
+target_procs_vh_ac["RECO_VBFTOPO_VHHAD_Tag0"] = ['vH']
+target_procs_vh_ac["RECO_VBFTOPO_VHHAD_Tag1"] = ['vH']
+target_procs_vh_ac["RECO_VH_MET_Tag0"] = ['vH']
+target_procs_vh_ac["RECO_VH_MET_Tag1"] = ['vH']
+target_procs_vh_ac["RECO_VH_MET_Tag2"] = ['vH']
+target_procs_vh_ac["RECO_WH_LEP_PTV_0_75_Tag0"] = ['vH']
+target_procs_vh_ac["RECO_WH_LEP_PTV_0_75_Tag1"] = ['vH']
 
 def get_options():
   parser = OptionParser()
@@ -181,20 +256,17 @@ translateCats = {} if opt.translateCats is None else LoadTranslations(opt.transl
 translateStage0 = {} if opt.translateStage0 is None else LoadTranslations(opt.translateStage0)
 
 if opt.group == "ggh": 
-  stage0 = stage0_ggh
-  target_procs = target_procs_ggh
+  stage0 = cp_ggh
+  target_procs = target_procs_ggh_ac
 elif opt.group == "qqh": 
-  stage0 = stage0_qqh
-  target_procs = target_procs_qqh
-elif opt.group == "vh": 
-  stage0 = stage0_vh
-  target_procs = target_procs_vh
-elif opt.group == "top": 
-  stage0 = stage0_top
-  target_procs = target_procs_top
-elif opt.group == "qqh_ac":
-  stage0 = cp_vbf
+  stage0 = cp_qqh
   target_procs = target_procs_qqh_ac
+elif opt.group == "vh": 
+  stage0 = cp_vh
+  target_procs = target_procs_vh_ac
+elif opt.group == "top": 
+  stage0 = cp_top
+  target_procs = target_procs_top_ac
 else:
   print " --> [ERROR] target group of categories %s does not exist"%opt.group
   leave()
@@ -204,7 +276,7 @@ if not os.path.exists( opt.inputPklDir ):
   print " --> [ERROR] Input directory with pickle files does not exist. Leaving"
   leave()
 yfiles = glob.glob("%s/*.pkl" % opt.inputPklDir)
-data = pd.concat([pd.read_pickle(f) for f in yfiles])
+data = pd.concat([pd.read_pickle(f) for f in yfiles],sort=False)
 #with open( opt.inputPkl, "rb" ) as fin: data = pickle.load(fin)
 
 # Load cat info dataframe
@@ -254,6 +326,7 @@ for cat in target_procs:
 # Make table
 nColumns = 4+len(stage0.keys())
 foutname = "Tables/yields_table_lite_%s%s.txt"%(opt.group,opt.ext)
+if not os.path.isdir('Tables'): os.system("mkdir Tables")
 fout = open(foutname,"w")
 fout.write("\\begin{tabular}{%s}\n"%("l|"+("c"*(nColumns-1))))
 #fout.write("    \\hline \\hline \n")

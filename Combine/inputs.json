@@ -1,38 +1,32 @@
 {
     "xsec":{
-        "pois":"r_VBF",
+        "pois":"r_ggH,r_VBF,r_VH,r_top",
         "fits":"profile1D:syst:all+bestfit:syst:all",
-        "points":"20:1+:",
-        "fit_opts":"--setParameters r_ggH=1,r_top=1,r_VH=1 --setParameterRanges r_VBF=0,3:r_ggH=0.99,1.01:r_top=0.99,1.01:r_VH=0.99,1.01 --saveSpecifiedNuis all --saveInactivePOI 1 --freezeParameters MH,r_ggH,r_top,r_VH  --autoBoundsPOIs 'r_VBF' --autoMaxPOIs 'r_VBF' --fastScan+--setParameters r_ggH=1,r_top=1,r_VH=1 --setParameterRanges r_VBF=0,3:r_ggH=0.99,1.01:r_top=0.99,1.01:r_VH=0.99,1.01 --saveSpecifiedNuis all --saveInactivePOI 1 --freezeParameters MH,r_ggH,r_top,r_VH --saveWorkspace"
+        "points":"41:1+:",
+        "fit_opts":"--setParameters r_ggH=1,r_top=1,r_VH=1,r_VBF=1 --setParameterRanges r_ggH=0.0,2.0:r_VBF=0.0,2.0:r_VH=0.0,3.0:r_top=0.0,4.0 --X-rtd FITTER_NEW_CROSSING_ALGO --X-rtd FITTER_BOUND --saveSpecifiedNuis all --saveInactivePOI 1 --fastScan+--setParameters r_ggH=1,r_top=1,r_VH=1,r_VBF=1 --setParameterRanges r_ggH=0.0,2.0:r_VBF=0.0,2.0:r_VH=0.0,3.0:r_top=0.0,4.0 --robustFit=1 --setRobustFitAlgo=Minuit2,Migrad --X-rtd FITTER_NEW_CROSSING_ALGO --setRobustFitTolerance=0.1 --X-rtd FITTER_NEVER_GIVE_UP --X-rtd FITTER_BOUND --cminFallbackAlgo \"Minuit2,0:1.\" --saveSpecifiedNuis all --saveInactivePOI 1 --saveWorkspace"
     },
-    "cp":{
-        "pois":"x",
-        "fits":"profile1D:syst:all",
-        "points":"20:1",
-        "fit_opts":"--saveSpecifiedNuis all --saveInactivePOI 1 --cminApproxPreFitTolerance=10 --freezeParameters MH --fastScan --setParameters r=1 --setParameterRanges x=0,0.5"
-    },
-    "ALT0M":{
+    "ALT_0M":{
         "pois":"CMS_zz4l_fai1",
         "fits":"profile1D:syst:all",
-        "points":"200:1",
-        "fit_opts":"--saveSpecifiedNuis all --saveInactivePOI 1 --cminApproxPreFitTolerance=10  --setParameterRanges CMS_zz4l_fai1=-0.003,0.003 --freezeParameters MH,fa3_ggH,muf --fastScan --setParameters muV=1,muf=1,fa3_ggH=1 --autoMaxPOIs 'CMS_zz4l_fai1' --autoBoundsPOIs 'CMS_zz4l_fai1' "
+        "points":"41:1",
+        "fit_opts":"--saveSpecifiedNuis all --saveInactivePOI 1 --setParameterRanges muV=0.0,4.0:muf=0.0,10.0:fa3_ggH=0.,1.:CMS_zz4l_fai1=-0.003,0.003 --fastScan --setParameters muV=1.,CMS_zz4l_fai1=0.,muf=1.,fa3_ggH=0. --robustFit=1 --setRobustFitAlgo=Minuit2,Migrad --X-rtd FITTER_NEW_CROSSING_ALGO --setRobustFitTolerance=0.1 --X-rtd FITTER_NEVER_GIVE_UP --X-rtd FITTER_BOUND --cminFallbackAlgo \"Minuit2,0:1.\" "
     },
-    "ALT0PH":{
+    "ALT_0PH":{
         "pois":"CMS_zz4l_fai1",
         "fits":"profile1D:syst:all",
-        "points":"200:1",
-        "fit_opts":"--saveSpecifiedNuis all --saveInactivePOI 1 --cminApproxPreFitTolerance=10  --setParameterRanges CMS_zz4l_fai1=-0.003,0.003 --freezeParameters MH,fa3_ggH,muf --fastScan --setParameters muV=1,muf=1,fa3_ggH=1 --autoMaxPOIs 'CMS_zz4l_fai1' --autoBoundsPOIs 'CMS_zz4l_fai1' "
+        "points":"41:1",
+        "fit_opts":"--saveSpecifiedNuis all --saveInactivePOI 1 --setParameterRanges muV=0.0,4.0:muf=0.0,10.0:CMS_zz4l_fai1=-0.01,0.01   --fastScan --setParameters muV=1.,CMS_zz4l_fai1=0.,muf=1. --robustFit=1 --setRobustFitAlgo=Minuit2,Migrad --X-rtd FITTER_NEW_CROSSING_ALGO --setRobustFitTolerance=0.1 --X-rtd FITTER_NEVER_GIVE_UP --X-rtd FITTER_BOUND --cminFallbackAlgo \"Minuit2,0:1.\" "
     },
-    "ALT0L1":{
+    "ALT_L1":{
         "pois":"CMS_zz4l_fai1",
         "fits":"profile1D:syst:all",
-        "points":"200:1",
-        "fit_opts":"--saveSpecifiedNuis all --saveInactivePOI 1 --cminApproxPreFitTolerance=10  --setParameterRanges CMS_zz4l_fai1=-0.003,0.003 --freezeParameters MH,fa3_ggH,muf --fastScan --setParameters muV=1,muf=1,fa3_ggH=1 --autoMaxPOIs 'CMS_zz4l_fai1' --autoBoundsPOIs 'CMS_zz4l_fai1' "
+        "points":"41:1",
+        "fit_opts":"--saveSpecifiedNuis all --saveInactivePOI 1 --setParameterRanges muV=0.0,4.0:muf=0.0,10.0:CMS_zz4l_fai1=-0.001,0.001   --fastScan --setParameters muV=1.,CMS_zz4l_fai1=0.,muf=1. --robustFit=1 --setRobustFitAlgo=Minuit2,Migrad --X-rtd FITTER_NEW_CROSSING_ALGO --setRobustFitTolerance=0.1 --X-rtd FITTER_NEVER_GIVE_UP --X-rtd FITTER_BOUND --cminFallbackAlgo \"Minuit2,0:1.\" "
     },
-    "ALT0L1Zg":{
+    "ALT_L1Zg":{
         "pois":"CMS_zz4l_fai1",
         "fits":"profile1D:syst:all",
-        "points":"200:1",
-        "fit_opts":"--saveSpecifiedNuis all --saveInactivePOI 1 --cminApproxPreFitTolerance=10  --setParameterRanges CMS_zz4l_fai1=-0.003,0.003 --freezeParameters MH,fa3_ggH,muf --fastScan --setParameters muV=1,muf=1,fa3_ggH=1 --autoMaxPOIs 'CMS_zz4l_fai1' --autoBoundsPOIs 'CMS_zz4l_fai1' "
+        "points":"41:1",
+        "fit_opts":"--saveSpecifiedNuis all --saveInactivePOI 1 --setParameterRanges muV=0.0,4.0:muf=0.0,10.0:CMS_zz4l_fai1=-0.01,0.01   --fastScan --setParameters muV=1.,CMS_zz4l_fai1=0.,muf=1. --robustFit=1 --setRobustFitAlgo=Minuit2,Migrad --X-rtd FITTER_NEW_CROSSING_ALGO --setRobustFitTolerance=0.1 --X-rtd FITTER_NEVER_GIVE_UP --X-rtd FITTER_BOUND --cminFallbackAlgo \"Minuit2,0:1.\" "
     }
 }

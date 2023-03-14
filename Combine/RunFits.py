@@ -19,7 +19,7 @@ def get_options():
   parser.add_option('--doObserved', dest='doObserved', action="store_true", default=False, help="Fit to data")
   parser.add_option('--snapshotWSFile', dest='snapshotWSFile', default='', help="Full path to snapshot WS file (use when running observed statonly as nuisances are froze at postfit values)")
   parser.add_option('--commonOpts', dest='commonOpts', default="--cminDefaultMinimizerStrategy 0 --X-rtd MINIMIZER_freezeDisassociatedParams --X-rtd MINIMIZER_multiMin_hideConstants --X-rtd MINIMIZER_multiMin_maskConstraints --X-rtd MINIMIZER_multiMin_maskChannels=2", help="Common combine options for running fits")
-  parser.add_option('--batch', dest='batch', default='condor', help='Batch: [crab,condor/SGE/IC]')
+  parser.add_option('--batch', dest='batch', default='condor', help='Batch: [crab,condor/SGE/IC/lxbatch]')
   parser.add_option('--queue', dest='queue', default='espresso', help='Queue e.g. for condor=workday, for IC=hep.q')
   parser.add_option('--subOpts', dest='subOpts', default="", help="Submission options")
   parser.add_option('--doCustomCrab', dest='doCustomCrab', default=False, action="store_true", help="Load crab options from custom_crab.py file")
@@ -65,11 +65,11 @@ elif opt.batch == 'condor':
   if opt.subOpts != "": sub_opts += "\n%s"%opt.subOpts
   sub_opts += "\'"
   job_opts = "--job-mode condor %s"%sub_opts
-elif( opt.batch == 'SGE' )|( opt.batch == 'IC' ):
+elif( opt.batch == 'SGE' )|( opt.batch == 'IC' )|( opt.batch == 'lxbatch' ):
   sub_opts = "--sub-opts=\'-q %s"%opt.queue
   if opt.subOpts != "": sub_opts += " %s"%opt.subOpts
   sub_opts += "\'"
-  job_opts = "--job-mode SGE %s"%sub_opts
+  job_opts = "--job-mode %s %s"%(opt.batch,sub_opts)
 elif opt.batch == "local":
   print "--> Will print the commands to run combine without combineTool interactively\n\n"
 else:

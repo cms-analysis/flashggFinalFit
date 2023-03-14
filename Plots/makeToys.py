@@ -43,7 +43,7 @@ setParamStr = setParamStr[:-1]
 setParam0Str = setParam0Str[:-1]
 mh_bf = w.var("MH").getVal()
 
-if opt.batch == 'IC':
+if opt.batch in ['IC','Rome']:
   # Create submission file
   for itoy in range(0,opt.nToys):
     fsub = open("./SplusBModels%s/toys/jobs/sub_toy_%g.sh"%(opt.ext,itoy),'w')
@@ -76,7 +76,8 @@ if opt.batch == 'IC':
   os.system("chmod 775 ./SplusBModels%s/toys/jobs/sub*.sh"%opt.ext)
   if not opt.dryRun:
     subs = glob.glob("./SplusBModels%s/toys/jobs/sub*"%opt.ext)
-    for fsub in subs: os.system("qsub -q hep.q -l h_rt=4:0:0 -l h_vmem=24G %s"%fsub)
+    subcmd = 'qsub -q hep.q -l h_rt=4:0:0 -l h_vmem=24G' if opt.batch == 'IC' else 'bsub -q %s'%opt.queue
+    for fsub in subs: os.system("%s %s"%(subcmd,fsub))
   else: print " --> [DRY-RUN] jobs have not been submitted"
 
 elif opt.batch == 'condor':

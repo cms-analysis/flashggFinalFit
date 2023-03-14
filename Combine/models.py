@@ -1,7 +1,7 @@
 models = {
     "mu_inclusive":"",
     
-    "xsec":"-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+    "mu":"-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
     --PO \"map=.*/ggH.*hgg:r_ggH[1,0,3]\" \
     --PO \"map=.*/qqH.*hgg:r_VBF[1,0,3]\" \
     --PO \"map=.*/ttH.*hgg:r_top[1,-1,2]\" \
@@ -11,26 +11,28 @@ models = {
     "cp":"-P HiggsAnalysis.CombinedLimit.HiggsJPC:twoHypothesisHiggs \
     --PO=muFloating", 
 
-    "ALT0M":"-P HiggsAnalysis.CombinedLimit.HiggsSingleAnomalousCoupling:FA3_Interference_JHU_ggHSyst_rw_MengsMuV_HeshyXsec_ggHInt_ggHphase \
-    --PO altSignal=ALT0M",
+    "ALT_0M":"-P HiggsAnalysis.CombinedLimit.FA3_Interference_JHU_ggHSyst_rw_MengsMuV_HeshyXsec_ggHInt_ggHphase:FA3_Interference_JHU_ggHSyst_rw_MengsMuV_HeshyXsec_ggHInt_ggHphase \
+    --PO altSignal=ALT_0M",
 
-    "ALT0PH":"-P HiggsAnalysis.CombinedLimit.HiggsSingleAnomalousCoupling:FA3_Interference_JHU_ggHSyst_rw_MengsMuV_HeshyXsec_ggHInt_ggHphase \
-    --PO altSignal=ALT0PH",
+    "ALT_0PH":"-P HiggsAnalysis.CombinedLimit.FA2_Interference_JHU_rw_MengsMuV:FA2_Interference_JHU_rw_MengsMuV \
+    --PO altSignal=ALT_0PH",
 
-    "ALT0L1":"-P HiggsAnalysis.CombinedLimit.HiggsSingleAnomalousCoupling:FA3_Interference_JHU_ggHSyst_rw_MengsMuV_HeshyXsec_ggHInt_ggHphase \
-    --PO \"altSignal=ALT0L1\"",
+    "ALT_L1":"-P HiggsAnalysis.CombinedLimit.FL1_Interference_JHU_rw_MengsMuV:FL1_Interference_JHU_rw_MengsMuV \
+    --PO \"altSignal=ALT_L1\"",
 
-    "ALT0L1Zg":"-P HiggsAnalysis.CombinedLimit.HiggsSingleAnomalousCoupling:FA3_Interference_JHU_ggHSyst_rw_MengsMuV_HeshyXsec_ggHInt_ggHphase \
-    --PO altSignal=ALT0L1Zg",
+    "ALT_L1Zg":"-P HiggsAnalysis.CombinedLimit.FL1Zg_Interference_JHU_rw_MengsMuV:FL1Zg_Interference_JHU_rw_MengsMuV \
+    --PO altSignal=ALT_L1Zg",
 
-    "mu":"-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+    "xsec":"-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
     --PO \"map=.*/ggH.*:r_ggH[1,0,2]\" \
     --PO \"map=.*/bbH.*:r_ggH[1,0,2]\" \
     --PO \"map=.*/qqH.*:r_VBF[1,0,3]\" \
-    --PO \"map=.*/WH_had.*:r_VH[1,0,3]\" \
+    --PO \"map=.*/WPLUSH2HQQ.*:r_VH[1,0,3]\" \
+    --PO \"map=.*/WMINUSH2HQQ.*:r_VH[1,0,3]\" \
     --PO \"map=.*/ZH_had.*:r_VH[1,0,3]\" \
     --PO \"map=.*/ggZH_had.*:r_VH[1,0,3]\" \
-    --PO \"map=.*/WH_lep.*:r_VH[1,0,3]\" \
+    --PO \"map=.*/WPLUSH_lep.*:r_VH[1,0,3]\" \
+    --PO \"map=.*/WMINUSH_lep.*:r_VH[1,0,3]\" \
     --PO \"map=.*/ZH_lep.*:r_VH[1,0,3]\" \
     --PO \"map=.*/ggZH_ll.*:r_VH[1,0,3]\" \
     --PO \"map=.*/ggZH_nunu.*:r_VH[1,0,3]\" \

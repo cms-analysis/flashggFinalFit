@@ -1,13 +1,12 @@
 {
-  "all":"All Categories",
-  "wall":"#splitline{All Categories}{S/(S+B) weighted}",
-  "VBFTag_0":"not populated cat",
-  "VBFTag_1":"ggH low purity",
-  "VBFTag_2":"not populated cat",
-  "VBFTag_3":"ggH high purity",
-  "VBFTag_4":"not populated cat",
-  "VBFTag_5":"qqH SM-like",
-  "VBFTag_6":"qqH BSM-like high purity",
-  "VBFTag_7":"qqH BSM-like med purity"
+    "all":"All Categories",
+    "wall":"#splitline{All Categories}{S/(S+B) weighted}",
+    "RECO_VBFTOPO_ACGGH_Tag0":"ggH low purity",
+    "RECO_VBFTOPO_ACGGH_Tag1":"ggH high purity",
+    "RECO_VBFTOPO_ACVBFSM_Tag0":"qqH SM-like",
+    "RECO_VBFTOPO_ACVBFBSM_Tag0":"qqH BSM-like high purity",
+    "RECO_VBFTOPO_ACVBFBSM_Tag1":"qqH BSM-like med purity",
+    "RECO_VBFTOPO_VHHAD_Tag0":"qqH VH Tag0",
+    "RECO_VBFTOPO_VHHAD_Tag1":"qqH VH Tag1",
 }
 

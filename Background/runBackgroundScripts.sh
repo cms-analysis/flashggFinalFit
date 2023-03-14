@@ -92,7 +92,7 @@ done
 
 OUTDIR="outdir_${EXT}"
 if [[ $PLOTDIR == "" ]]; then
-    PLOTDIR=OUTDIR
+    PLOTDIR=$OUTDIR
 fi
 
 echo "[INFO] outdir is $OUTDIR, plotdir is $PLOTDIR INTLUMI $INTLUMI" 
@@ -168,7 +168,11 @@ OPT=" --isData 1"
 fi
 
 mkdir -p "${PLOTDIR}/bkgfTest${DATAEXT}"
-cp "/afs/cern.ch/user/g/gpetrucc/php/index.php" "${PLOTDIR}/bkgfTest${DATAEXT}"
+if test -f "/afs/cern.ch/user/g/gpetrucc/php/index.php"; then
+    cp "/afs/cern.ch/user/g/gpetrucc/php/index.php" "${PLOTDIR}/bkgfTest${DATAEXT}"
+elif test -f "/cmshome/dimarcoe/php/index.php"; then
+    cp "/cmshome/dimarcoe/php/index.php" "${PLOTDIR}/bkgfTest${DATAEXT}"
+fi
 echo " ./bin/fTest -i $FILE --saveMultiPdf $OUTDIR/CMS-HGG_multipdf_$EXT_$CATS.root  -D $OUTDIR/bkgfTest$DATAEXT -f $CATS $OPT --year $YEAR --catOffset $CATOFFSET"
 ./bin/fTest -i $FILE --saveMultiPdf $OUTDIR/CMS-HGG_multipdf_$EXT_$CATS.root  -D $OUTDIR/bkgfTest$DATAEXT -P $PLOTDIR/bkgfTest$DATAEXT -f $CATS $OPT --year $YEAR --catOffset $CATOFFSET
 

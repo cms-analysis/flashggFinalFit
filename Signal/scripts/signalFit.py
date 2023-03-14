@@ -54,7 +54,7 @@ def get_options():
   parser.add_option("--scalesGlobal", dest='scalesGlobal', default='', help='Photon shape systematics: scalesGlobal')
   parser.add_option("--smears", dest='smears', default='', help='Photon shape systematics: smears')
   # Parameter values
-  parser.add_option('--replacementThreshold', dest='replacementThreshold', default=100, type='int', help="Nevent threshold to trigger replacement dataset")
+  parser.add_option('--replacementThreshold', dest='replacementThreshold', default=50, type='int', help="Nevent threshold to trigger replacement dataset")
   parser.add_option('--beamspotWidthData', dest='beamspotWidthData', default=3.4, type='float', help="Width of beamspot in data [cm]")
   parser.add_option('--beamspotWidthMC', dest='beamspotWidthMC', default=5.14, type='float', help="Width of beamspot in MC [cm]")
   parser.add_option('--MHPolyOrder', dest='MHPolyOrder', default=1, type='int', help="Order of polynomial for MH dependence")
@@ -172,7 +172,7 @@ if( datasetRVForFit[MHNominal].numEntries() < opt.replacementThreshold  )|( data
     WSFileName = glob.glob("%s/output*%s*%s.root"%(opt.inputWSDir,mp,procReplacementFit))[0]
     f = ROOT.TFile(WSFileName,"read")
     inputWS = f.Get(inputWSName__)
-    d = reduceDataset(inputWS.data("%s_%s_%s"%(procToData(procReplacementFit),sqrts__,catReplacementFit)),aset)
+    d = reduceDataset(inputWS.data("%s_%s_%s_%s"%(procToData(procReplacementFit),mp,sqrts__,catReplacementFit)),aset)
     if opt.skipVertexScenarioSplit: datasetRVForFit[mp] = d
     else: datasetRVForFit[mp] = splitRVWV(d,aset,mode="RV")
     inputWS.Delete()
@@ -216,7 +216,7 @@ if not opt.skipVertexScenarioSplit:
     WSFileName = glob.glob("%s/output*%s*%s.root"%(opt.inputWSDir,mp,procWVFit))[0]
     f = ROOT.TFile(WSFileName,"read")
     inputWS = f.Get(inputWSName__)
-    d = reduceDataset(inputWS.data("%s_%s_%s"%(procToData(procWVFit),sqrts__,catWVFit)),aset)
+    d = reduceDataset(inputWS.data("%s_%s_%s_%s"%(procToData(procWVFit),mp,sqrts__,catWVFit)),aset)
     datasetWVForFit[mp] = splitRVWV(d,aset,mode="WV")
     inputWS.Delete()
     f.Close()
@@ -230,7 +230,7 @@ if not opt.skipVertexScenarioSplit:
       WSFileName = glob.glob("%s/output*%s*%s.root"%(opt.inputWSDir,mp,procReplacementFit))[0]
       f = ROOT.TFile(WSFileName,"read")
       inputWS = f.Get(inputWSName__)
-      d = reduceDataset(inputWS.data("%s_%s_%s"%(procToData(procReplacementFit),sqrts__,catReplacementFit)),aset)
+      d = reduceDataset(inputWS.data("%s_%s_%s_%s"%(procToData(procReplacementFit),mp,sqrts__,catReplacementFit)),aset)
       datasetWVForFit[mp] = splitRVWV(d,aset,mode="WV")
       inputWS.Delete()
       f.Close()
