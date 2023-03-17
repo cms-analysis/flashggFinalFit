@@ -65,6 +65,10 @@ elif [[ $STEP == "plot" ]]; then
             python PlotScans.py --inputJson inputs.json --mode $fit  --ext $fit --outdir $outdate-fits $obs
         done
     done
+elif [[ $STEP == "impacts-initial" ]]; then
+    python RunImpacts.py --inputJson inputs.json --ext xsec --mode xsec --batch lxbatch --queue cmsan ${DROPT}
+elif [[ $STEP == "impacts-scans" ]]; then
+    python RunImpacts.py --inputJson inputs.json --ext xsec --mode xsec --doFits --batch lxbatch --queue cmsan ${DROPT}
 else
     echo "Step $STEP is not one among t2w,fit,plot. Exiting."
 fi
