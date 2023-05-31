@@ -1,7 +1,7 @@
 #!/bin/bash
 
-YEAR=-753
-STEP=0
+YEAR=all
+STEP=calcPhotonSyst
 
 usage(){
     echo "The script runs background scripts:"
@@ -61,7 +61,7 @@ if [[ $STEP == "fTest" ]] || [[ $STEP == "calcPhotonSyst" ]] || [[ $STEP == 'sig
 	fi
     done
 elif [[ $STEP == 'packager' ]]; then
-    python RunPackager.py --cats "auto" --inputWSDir cards/signal_2016preVFP --outputExt packaged --exts 2023-02-13_year2016preVFP,2023-02-13_year2016postVFP,2023-02-13_year2017,2023-02-13_year2018 --mergeYears --batch Rome --queue cmsan ${DROPT}
+    python RunPackager.py --cats "auto" --inputWSDir /pnfs/roma1.infn.it/data/cms/store/user/emanuele/vbfhgg/WS_2023_02_13/signal_2016preVFP/ --outputExt packaged --exts 2023-02-13_year2016preVFP,2023-02-13_year2016postVFP,2023-02-13_year2017,2023-02-13_year2018 --mergeYears --batch Rome --queue cmsan ${DROPT}
 elif [[ $STEP == 'plotter' ]]; then
     smprocs=("GG2H" "VBF" "TTH" "WMINUSH2HQQ" "WPLUSH2HQQ" "QQ2HLL")
     smprocs_csv=$(IFS=, ; echo "${smprocs[*]}")
@@ -74,7 +74,7 @@ elif [[ $STEP == 'plotter' ]]; then
     for cat in ${significantCats[*]}
     do
     	echo "=> Now plotting all processes together for cat: $cat"
-    	python RunPlotter.py --procs $smprocs_csv --cats cat --year 2016preVFP,2016postVFP,2017,2018 --outdir plots --ext packaged --outdir plots --translateCats ../Plots/cats.json
+    	python RunPlotter.py --procs $smprocs_csv --cats $cat --year 2016preVFP,2016postVFP,2017,2018 --outdir plots --ext packaged --outdir plots --translateCats ../Plots/cats.json
     done
     # split by process, all the categories together (the SM + some alternatives)
     for proc in ${smprocs[*]}
