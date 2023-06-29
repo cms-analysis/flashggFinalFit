@@ -9,30 +9,22 @@ Slides from the flashgg tutorial series can be found [here](https://indico.cern.
 export SCRAM_ARCH=slc7_amd64_gcc700
 cmsrel CMSSW_10_2_13
 cd CMSSW_10_2_13/src
-cmsenv
-git cms-init
 
 # Install the GBRLikelihood package which contains the RooDoubleCBFast implementation
-git clone git@github.com:jonathon-langford/HiggsAnalysis.git
+git clone https://github.com/jonathon-langford/HiggsAnalysis.git
 
 # Install Combine as per the documentation here: cms-analysis.github.io/HiggsAnalysis-CombinedLimit/
-git clone git@github.com:cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit
-
-# Switch to combine v8.2.0
-cd $CMSSW_BASE/src/HiggsAnalysis/CombinedLimit
-git fetch origin
-git checkout v8.2.0
-cd $CMSSW_BASE/src
+git clone -b v8.2.0 https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit
 
 # Install Combine Harvester for parallelizing fits
-git clone https://github.com/cms-analysis/CombineHarvester.git CombineHarvester
+git clone -b 102x https://github.com/cms-analysis/CombineHarvester.git CombineHarvester
 
 # Compile external libraries
 cmsenv
 scram b -j 9
 
 # Install Flashgg Final Fit packages
-git clone -b dev_fggfinalfits_lite git@github.com:cms-analysis/flashggFinalFit.git
+git clone -b dev_fggfinalfits_lite https://github.com/cms-analysis/flashggFinalFit.git
 cd flashggFinalFit/
 ```
 
