@@ -162,9 +162,7 @@ class FinalModel:
         ea.append(float(ea_data['%s__%s'%(self.proc,self.cat)]))
       else:
         sumw = self.datasets[mp].sumEntries()
-        self.MH.setVal(float(mp))
-        xs,br = self.Splines['xs'].getVal(), self.Splines['br'].getVal()
-        ea.append(sumw/(lumiScaleFactor*xs*br)) 
+        ea.append(sumw) 
     # If single mass point then add MHLow and MHHigh dummy points for constant ea
     if len(ea) == 1: ea, mh = [ea[0],ea[0],ea[0]], [float(self.MHLow),mh[0],float(self.MHHigh)]
     # Convert to numpy arrays and make spline

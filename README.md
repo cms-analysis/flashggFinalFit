@@ -1,4 +1,7 @@
-# Final Fits (lite)
+# Final Fits (dev_higgsdnafinalfit)
+
+**NOTE** This is the devlopment branch for using final fits with the output of HiggsDNA.
+
 Welcome to the new Final Fits package. Here lies a a series of scripts which are used to run the final stages of the CMS Hgg analysis: signal modelling, background modelling, datacard creation, final statistical interpretation and final result plots.
 
 Slides from the flashgg tutorial series can be found [here](https://indico.cern.ch/event/963619/contributions/4112177/attachments/2151275/3627204/finalfits_tutorial_201126.pdf)
@@ -24,7 +27,7 @@ cmsenv
 scram b -j 9
 
 # Install Flashgg Final Fit packages
-git clone -b dev_fggfinalfits_lite https://github.com/cms-analysis/flashggFinalFit.git
+git clone -b dev_higgsdnafinalfit https://github.com/cms-analysis/flashggFinalFit.git
 cd flashggFinalFit/
 ```
 
