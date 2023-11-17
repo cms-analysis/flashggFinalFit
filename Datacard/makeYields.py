@@ -90,7 +90,7 @@ for year in years:
     # Mapping to STXS definition here
     _procOriginal = proc
     _proc = "%s_%s_%s"%(procToDatacardName(proc),year,decayMode)
-    _proc_s0 = procToData(proc.split("_")[0])
+    _proc_s0 = procToData(proc)
 
     # Define category: add year tag if not merging
     if opt.mergeYears: _cat = opt.cat
@@ -106,9 +106,6 @@ for year in years:
       f = ROOT.TFile(_inputWSFile)
       w = f.Get(inputWSName__)
       sumw = w.data(_nominalDataName).sumEntries()
-      print "inputWSName__ = ",inputWSName__
-      print "===> _nominalDataName = ",_nominalDataName
-      print "sumw = ",sumw
       if sumw == 0.: skipProc = True
       w.Delete()
       f.Close()

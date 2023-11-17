@@ -42,7 +42,8 @@ def addConstantSyst(sd,_syst,options):
 
 def getValueFromJson(row,uncertainties,sname):
   # uncertainties is a dict of the form proc:{sname:X}
-  p = re.sub("_2016_%s"%decayMode,"",row['proc'])
+  p = re.sub("_2016preVFP_%s"%decayMode,"",row['proc'])
+  p = re.sub("_2016postVFP_%s"%decayMode,"",p)
   p = re.sub("_2017_%s"%decayMode,"",p)
   p = re.sub("_2018_%s"%decayMode,"",p)
   if p in uncertainties: 
@@ -58,8 +59,11 @@ def getValueFromJson(row,uncertainties,sname):
 def factoryType(d,s):
 
   #Fix for pdfWeight (as Nweights > 10)
-  if('pdfWeight' in s['name']): return "s_w"
-  #if('pdfWeight' in s['name'])|('alphaSWeight' in s['name']): return "s_w"
+  #if('pdfWeight' in s['name']): return "s_w"
+  if('pdfWeight' in s['name'])|('alphaSWeight' in s['name'])|('scaleWeight' in s['name']): return "s_w"
+
+  #Fix for rare cases in which there is no signal for that category at all (and skipZeroes has been used)
+  if(d[d['type']=='sig'].size==0): return "-"
 
   # Loop over rows in dataframe: until syst is found
   for ir, r in d[d['type']=='sig'].iterrows():
@@ -69,8 +73,8 @@ def factoryType(d,s):
     dataHistDown = "%s_%sDown01sigma"%(r.nominalDataName,s['name'])
 
     # Check if syst is var (i.e. weight) in workspace
-    if ws.allVars().selectByName("%s*"%(s['name'])).getSize():
-      nWeights = ws.allVars().selectByName("%s*"%(s['name'])).getSize()
+    if ws.allVars().selectByName("%s*sigma"%(s['name'])).getSize():
+      nWeights = ws.allVars().selectByName("%s*sigma"%(s['name'])).getSize()
       ws.Delete()
       f.Close()
       if nWeights == 2: return "a_w"
@@ -91,7 +95,7 @@ def factoryType(d,s):
       f.Close()
 
   # If never found:
-  print " --> [ERROR] systematic %s: cannot extract type in factoryType function. Doesn't match requirement for (anti)-symmetric weights or anti-symmetric histograms. Leaving..."
+  print " --> [ERROR] systematic %s: cannot extract type in factoryType function. Doesn't match requirem5Cent for (anti)-symmetric weights or anti-symmetric histograms. Leaving..." % s['name']
   sys.exit(1)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -314,11 +318,12 @@ def theorySystFactory(d,systs,ftype,options,stxsMergeScheme=None,_removal=False)
   # Loop over systematics and add new column in dataFrame for each tier
   for s in systs:
     if s['type'] == 'constant': continue
-    for tier in s['tiers']: 
-      if tier == 'mnorm': 
-        if options.doSTXSMerging:
-          for mergeName in stxsMergeScheme: d["%s_%s_mnorm"%(s['name'],mergeName)] = '-'
-      else: d["%s_%s"%(s['name'],tier)] = '-'
+    if 'tiers' in s:
+      for tier in s['tiers']: 
+        if tier == 'mnorm': 
+          if options.doSTXSMerging:
+            for mergeName in stxsMergeScheme: d["%s_%s_mnorm"%(s['name'],mergeName)] = '-'
+        else: d["%s_%s"%(s['name'],tier)] = '-'
 
   # Loop over systematics and fill entries for rows which satisfy mask
   for s in systs:
@@ -329,9 +334,10 @@ def theorySystFactory(d,systs,ftype,options,stxsMergeScheme=None,_removal=False)
     if "THU_ggH" in s['name']: mask = (d['type']=='sig')&(d['nominal_yield']!=0)&(d['proc'].str.contains('ggH'))
     else: mask = (d['type']=='sig')&(d['nominal_yield']!=0)
     # Loop over tiers and use appropriate mode for compareYield function: skip mnorm as treated separately below
-    for tier in s['tiers']: 
-      if tier == 'mnorm': continue
-      d.loc[mask,"%s_%s"%(s['name'],tier)] = d[mask].apply(lambda x: compareYield(x,f,s['name'],mode=tier), axis=1)
+    if 'tiers' in s:
+      for tier in s['tiers']: 
+        if tier == 'mnorm': continue
+        d.loc[mask,"%s_%s"%(s['name'],tier)] = d[mask].apply(lambda x: compareYield(x,f,s['name'],mode=tier), axis=1)
 
   # For merging STXS bins in parameter scheme: calculate mnorm systematics (merged-STXS-normalisation)
   # One nuisance per merge
@@ -339,7 +345,7 @@ def theorySystFactory(d,systs,ftype,options,stxsMergeScheme=None,_removal=False)
     for mergeName in stxsMergeScheme:
       for s in systs:
 	if s['type'] == 'constant': continue
-        elif 'mnorm' not in s['tiers']: continue
+        elif ('tiers' in s and 'mnorm' not in s['tiers']): continue
 	for year in options.years.split(","):
 	  # Remove NaN entries and require specific year
 	  mask = (d['merge_%s_nominal_yield'%mergeName]==d['merge_%s_nominal_yield'%mergeName])&(d['year']==year)&(d['nominal_yield']!=0)

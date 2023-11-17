@@ -19,7 +19,7 @@ def get_options():
   parser.add_option('--doObserved', dest='doObserved', action="store_true", default=False, help="Fit to data")
   parser.add_option('--snapshotWSFile', dest='snapshotWSFile', default='', help="Full path to snapshot WS file (use when running observed statonly as nuisances are froze at postfit values)")
   parser.add_option('--commonOpts', dest='commonOpts', default="--cminDefaultMinimizerStrategy 0 --X-rtd MINIMIZER_freezeDisassociatedParams --X-rtd MINIMIZER_multiMin_hideConstants --X-rtd MINIMIZER_multiMin_maskConstraints --X-rtd MINIMIZER_multiMin_maskChannels=2", help="Common combine options for running fits")
-  parser.add_option('--batch', dest='batch', default='condor', help='Batch: [crab,condor/SGE/IC]')
+  parser.add_option('--batch', dest='batch', default='condor', help='Batch: [crab,condor/SGE/IC/lxbatch]')
   parser.add_option('--queue', dest='queue', default='espresso', help='Queue e.g. for condor=workday, for IC=hep.q')
   parser.add_option('--subOpts', dest='subOpts', default="", help="Submission options")
   parser.add_option('--doCustomCrab', dest='doCustomCrab', default=False, action="store_true", help="Load crab options from custom_crab.py file")
@@ -47,7 +47,7 @@ def getPdfIndicesFromJson(pdfjson):
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Options:
 # Expected/Observed
-exp_opts = '' if opt.doObserved else '--expectSignal 1 -t -1'
+exp_opts = '' if opt.doObserved else '-t -1'
 
 # Common opts for combine jobs
 common_opts = opt.commonOpts
@@ -65,11 +65,11 @@ elif opt.batch == 'condor':
   if opt.subOpts != "": sub_opts += "\n%s"%opt.subOpts
   sub_opts += "\'"
   job_opts = "--job-mode condor %s"%sub_opts
-elif( opt.batch == 'SGE' )|( opt.batch == 'IC' ):
+elif( opt.batch == 'SGE' )|( opt.batch == 'IC' )|( opt.batch == 'lxbatch' ):
   sub_opts = "--sub-opts=\'-q %s"%opt.queue
   if opt.subOpts != "": sub_opts += " %s"%opt.subOpts
   sub_opts += "\'"
-  job_opts = "--job-mode SGE %s"%sub_opts
+  job_opts = "--job-mode %s %s"%(opt.batch,sub_opts)
 elif opt.batch == "local":
   print "--> Will print the commands to run combine without combineTool interactively\n\n"
 else:
@@ -100,7 +100,7 @@ for fidx in range(len(fits)):
 
   # If ALL in fit_opts: replace by list of constrained nuisances in workspace
   if "ALL" in _fit_opts: 
-    fd = ROOT.TFile("Datacard%s_%s.root"%(opt.ext,opt.mode))
+    fd = ROOT.TFile("Datacard_%s.root"%(opt.ext))
     ws = fd.Get("w")
     nuisances = ws.obj("ModelConfig").GetNuisanceParameters().contentsString()
     _fit_opts = re.sub("ALL",nuisances,_fit_opts)
@@ -117,11 +117,14 @@ for fidx in range(len(fits)):
     pdf_opts = getPdfIndicesFromJson("pdfindex%s_observed.json"%opt.ext) if opt.setPdfIndices else ''
   else: pdf_opts = getPdfIndicesFromJson("pdfindex%s.json"%opt.ext) if opt.setPdfIndices else ''
 
+  # add this to distinguish different fits with same POI
+  _name += "_"+opt.ext
+
   # File to load workspace
   if opt.snapshotWSFile != '': d_opts = '-d %s --snapshotName MultiDimFit'%opt.snapshotWSFile
   else:
     #d_opts = '-d ../Datacard%s_%s.root'%(opt.ext,opt.mode)
-    d_opts = '-d %s/src/flashggFinalFit/Combine/Datacard%s_%s.root'%(os.environ['CMSSW_BASE'],opt.ext,opt.mode)
+    d_opts = '-d %s/src/flashggFinalFit/Combine/Datacard_%s.root'%(os.environ['CMSSW_BASE'],opt.ext)
 
   # If setParameters already in _fit_opts then add to fit opts and set pdfOpts = ''
   if( "setParameters" in _fit_opts )&( pdf_opts != '' ):
@@ -176,7 +179,7 @@ for fidx in range(len(fits)):
     if( "statonly" in _fit.split(":")[1] )&( "freezeParameters" not in _fit_opts ): _fit_opts += " --freezeParameters allConstrainedNuisances"
     for poi in _fitpois:
       if opt.batch == 'local':
-        fitcmd = "combine -M MultiDimFit -m 125 %s --floatOtherPOIs 1 %s -n _%s_%s -P %s --algo grid --points %s --alignEdges 1 --split-points %s %s %s %s"%(d_opts,exp_opts,_name,poi,poi,_points.split(":")[0],_points.split(":")[1],_fit_opts,pdf_opts,common_opts)
+        fitcmd = "combine -M MultiDimFit -m 125 %s --floatOtherPOIs 1 %s -n _%s_%s -P %s --algo grid --points %s --alignEdges 1 %s %s %s"%(d_opts,exp_opts,_name,poi,poi,_points.split(":")[0],_fit_opts,pdf_opts,common_opts)
       else:
         fitcmd = "cd runFits%s_%s; source /cvmfs/cms.cern.ch/crab3/crab.sh; combineTool.py --task-name %s_%s -M MultiDimFit -m 125 %s --floatOtherPOIs 1 %s -n _%s_%s -P %s --algo grid --points %s --alignEdges 1 --split-points %s %s %s %s %s; cd .."%(opt.ext,opt.mode,_name,poi,d_opts,exp_opts,_name,poi,poi,_points.split(":")[0],_points.split(":")[1],_fit_opts,pdf_opts,common_opts,job_opts)
       run(fitcmd,opt)
@@ -186,7 +189,7 @@ for fidx in range(len(fits)):
     if( "statonly" in _fit.split(":")[1] )&( "freezeParameters" not in _fit_opts ): _fit_opts += " --freezeParameters allConstrainedNuisances"
     for poi in _fitpois:
       if opt.batch == 'local':
-        fitcmd = "combine -M MultiDimFit -m 125 %s --floatOtherPOIs 0 %s -n _%s_%s -P %s --algo grid --points %s --alignEdges 1 --split-points %s %s %s %s"%(d_opts,exp_opts,_name,poi,poi,_points.split(":")[0],_points.split(":")[1],_fit_opts,pdf_opts,common_opts)
+        fitcmd = "combine -M MultiDimFit -m 125 %s --floatOtherPOIs 0 %s -n _%s_%s -P %s --algo grid --points %s --alignEdges 1 %s %s %s"%(d_opts,exp_opts,_name,poi,poi,_points.split(":")[0],_fit_opts,pdf_opts,common_opts)
       else:
         fitcmd = "cd runFits%s_%s; source /cvmfs/cms.cern.ch/crab3/crab.sh; combineTool.py --task-name %s_%s -M MultiDimFit -m 125 %s --floatOtherPOIs 0 %s -n _%s_%s -P %s --algo grid --points %s --alignEdges 1 --split-points %s %s %s %s %s; cd .."%(opt.ext,opt.mode,_name,poi,d_opts,exp_opts,_name,poi,poi,_points.split(":")[0],_points.split(":")[1],_fit_opts,pdf_opts,common_opts,job_opts)
       run(fitcmd,opt)

@@ -155,7 +155,7 @@ for cat in cats:
 
   # Theory weights
   for ts, tsColumns in theoryWeightColumns.iteritems():
-    if opt.productionMode in modesToSkipTheoryWeights: 
+    if opt.productionMode in modesToSkipTheoryWeights or 'ALT' in opt.productionMode: 
       dfs[ts] = pandas.DataFrame(np.ones(shape=(len(t),theoryWeightContainers[ts])))
     else:
       dfs[ts] = t.pandas.df(ts)

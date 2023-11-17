@@ -16,7 +16,7 @@ def get_options():
   parser.add_option('--cats', dest='cats', default='', help="Comma separated list of analysis categories to include. all = sum of all categories, wall = weighted sum of categories (requires S/S+B from ./Plots/getCatInfo.py)")
   parser.add_option('--loadCatWeights', dest='loadCatWeights', default='', help="Load S/S+B weights for analysis categories (path to weights json file)")
   parser.add_option('--ext', dest='ext', default='test', help="Extension: defines output dir where signal models are saved")
-  parser.add_option("--xvar", dest="xvar", default='dipho_mass:m_{#gamma#gamma}:GeV', help="x-var (name:title:units)")
+  parser.add_option("--xvar", dest="xvar", default='CMS_hgg_mass:m_{#gamma#gamma}:GeV', help="x-var (name:title:units)")
   parser.add_option("--mass", dest="mass", default='125', help="Mass of datasets")
   parser.add_option("--MH", dest="MH", default='125', help="Higgs mass (for pdf)")
   parser.add_option("--nBins", dest="nBins", default=160, type='int', help="Number of bins")
@@ -97,7 +97,8 @@ for cat,f in inputFiles.iteritems():
         k = "%s__%s"%(proc,year)
         _id = "%s_%s_%s_%s"%(proc,year,cat,sqrts__)
         norms[k] = w.function("%s_%s_normThisLumi"%(outputWSObjectTitle__,_id))
-    
+
+
   # Iterate over norms: extract total category norm
   catNorm = 0
   for k, norm in norms.iteritems():
@@ -149,13 +150,13 @@ for cat,f in inputFiles.iteritems():
   # Per-year pdf histograms
   if len(opt.years.split(",")) > 1:
     for year in opt.years.split(","):
-      if 'pdf_%s'%year not in hists:
+      if 'pdf_%s'%year not in hists or hists['pdf_%s'%year]==None:
 	hists['pdf_%s'%year] = hists['pdf'].Clone()
 	hists['pdf_%s'%year].Reset()
       # Fill
       for _id,p in hpdfs.iteritems():
 	if year in _id: hists['pdf_%s'%year] += p
-   
+      
   # Garbage removal
   for d in data_rwgt.itervalues(): d.Delete()
   for p in hpdfs.itervalues(): p.Delete()
@@ -166,4 +167,5 @@ for cat,f in inputFiles.iteritems():
 outdir="%s/%s/Plots"%(opt.outdir,opt.ext)
 if not os.path.isdir(outdir): os.system("mkdir -p %s"%outdir)
 if os.path.exists("/afs/cern.ch"): os.system("cp /afs/cern.ch/user/g/gpetrucc/php/index.php "+outdir)
+elif os.path.exists("/cmshome/dimarcoe"): os.system("cp /cmshome/dimarcoe/php/index.php "+outdir)
 plotSignalModel(hists,opt,_outdir=outdir)
