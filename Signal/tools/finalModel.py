@@ -70,6 +70,7 @@ def initialiseXSBR():
   xsbr['constant'] = np.asarray(xsbr['constant'])
   # If ggZH and ZH in production modes then make qqZH numpy array
   if('ggZH' in productionModes)&('ZH' in productionModes): xsbr['qqZH'] = xsbr['ZH']-xsbr['ggZH']
+  if('WH' in productionModes)&('ZH' in productionModes): xsbr['VH'] = xsbr['WH']+xsbr['ZH']
   return xsbr
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
@@ -135,16 +136,19 @@ class FinalModel:
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Functions to get XS, BR and EA splines for given proc/decay from map
   def buildXSBRSplines(self):
-    mh = np.linspace(120.,130.,101)
+    #mh = np.linspace(120.,130.,101)
+    mh = np.linspace(float(self.MHLow),float(self.MHHigh),101)
     # XS
     fp = self.xsbrMap[self.proc]['factor'] if 'factor' in self.xsbrMap[self.proc] else 1.
     mp = self.xsbrMap[self.proc]['mode']
-    xs = fp*self.XSBR[mp]
+    #xs = fp*self.XSBR[mp]
+    xs = np.ones_like(mh)
     self.Splines['xs'] = ROOT.RooSpline1D("fxs_%s_%s"%(self.proc,self.sqrts),"fxs_%s_%s"%(self.proc,self.sqrts),self.MH,len(mh),mh,xs)
     # BR
     fd = self.xsbrMap['decay']['factor'] if 'factor' in self.xsbrMap['decay'] else 1.
     md = self.xsbrMap['decay']['mode']
-    br = fd*self.XSBR[md]
+    #br = fd*self.XSBR[md]
+    br = np.ones_like(mh)
     self.Splines['br'] = ROOT.RooSpline1D("fbr_%s"%self.sqrts,"fbr_%s"%self.sqrts,self.MH,len(mh),mh,br)
 
   def buildEffAccSpline(self):
@@ -164,7 +168,7 @@ class FinalModel:
         sumw = self.datasets[mp].sumEntries()
         self.MH.setVal(float(mp))
         xs,br = self.Splines['xs'].getVal(), self.Splines['br'].getVal()
-        ea.append(sumw/(lumiScaleFactor*xs*br)) 
+        ea.append(sumw/(lumiScaleFactor*xs*br)) #divide by 59.83 (2018 lumi)  
     # If single mass point then add MHLow and MHHigh dummy points for constant ea
     if len(ea) == 1: ea, mh = [ea[0],ea[0],ea[0]], [float(self.MHLow),mh[0],float(self.MHHigh)]
     # Convert to numpy arrays and make spline

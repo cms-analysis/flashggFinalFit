@@ -10,6 +10,8 @@ from commonTools import *
 from commonObjects import *
 from tools.submissionTools import *
 
+import importlib
+
 def get_options():
   parser = OptionParser()
   # Take inputs from config file
@@ -34,9 +36,14 @@ if opt.inputConfig != '':
   if os.path.exists( opt.inputConfig ):
 
     #copy file to have common name and then import cfg options (dict)
-    os.system("cp %s config.py"%opt.inputConfig)
-    from config import signalScriptCfg
-    _cfg = signalScriptCfg
+    #os.system("cp %s config.py"%opt.inputConfig)
+    #from config import signalScriptCfg
+    #_cfg = signalScriptCfg
+
+    config = importlib.import_module(opt.inputConfig.split(".")[0])
+    _cfg = config.signalScriptCfg
+    print(opt.inputConfig)
+    print(_cfg)
 
     #Extract options
     options['inputWSDir']   = _cfg['inputWSDir']
@@ -60,7 +67,7 @@ if opt.inputConfig != '':
     options['printOnly']               = opt.printOnly
   
     #Delete copy of file
-    os.system("rm config.py")
+    #os.system("rm config.py")
   
   else:
     print "[ERROR] %s config file does not exist. Leaving..."%opt.inputConfig

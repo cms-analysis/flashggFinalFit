@@ -11,6 +11,7 @@ def get_options():
   parser.add_option('--inputConfig',dest='inputConfig', default="", help='Input config: specify list of variables/analysis categories')
   parser.add_option('--inputTreeFile',dest='inputTreeFile', default=None, help='Input tree file')
   parser.add_option('--outputWSDir',dest='outputWSDir', default=None, help='Output dir (default is same as input dir)')
+  parser.add_option('--mgg-range',dest="mgg_range", nargs=2, default=(100.0,180.0), type=float, help="Range of (mgg allowed in trees")
   return parser.parse_args()
 (opt,args) = get_options()
 
@@ -32,16 +33,23 @@ def leave():
   sys.exit(1)
 
 # Function to add vars to workspace
-def add_vars_to_workspace(_ws=None,_dataVars=None):
+def add_vars_to_workspace(mgg_range=(100,180),_ws=None,_dataVars=None):
   # Add intLumi var
   intLumi = ROOT.RooRealVar("intLumi","intLumi",1000.,0.,999999999.)
   intLumi.setConstant(True)
   getattr(_ws,'import')(intLumi)
   _vars = od()
+
+  mhl = mgg_range[0]
+  mhh = mgg_range[1]
+  print(mhl, mhh)
+
   for var in _dataVars:
     if var == "CMS_hgg_mass":
-      _vars[var] = ROOT.RooRealVar(var,var,125.,100.,180.)
-      _vars[var].setBins(160)
+      _vars[var] = ROOT.RooRealVar(var,var,mhl,mhl,mhh)
+      nbins = int((mhh-mhl)/0.25) #0.25 GeV intervals
+      _vars[var].setBins(nbins)
+      #_vars[var].setBins(160)
     elif var == "dZ":
       _vars[var] = ROOT.RooRealVar(var,var,0.,-20.,20.)
       _vars[var].setBins(40)
@@ -83,7 +91,7 @@ else:
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # UPROOT file
 f = uproot.open(opt.inputTreeFile)
-if inputTreeDir == '': listOfTreeNames == f.keys()
+if inputTreeDir == '': listOfTreeNames = f.keys()
 else: listOfTreeNames = f[inputTreeDir].keys()
 # If cats = 'auto' then determine from list of trees
 if cats == 'auto':
@@ -111,7 +119,7 @@ foutdir.cd()
 ws = ROOT.RooWorkspace(inputWSName__.split("/")[1],inputWSName__.split("/")[1])
 
 # Add variables to workspace
-varNames = add_vars_to_workspace(ws,dataVars)
+varNames = add_vars_to_workspace(opt.mgg_range,ws,dataVars)
 
 # Make argset
 aset = make_argset(ws,varNames)
@@ -130,6 +138,7 @@ for cat in cats:
 
   # Loop over events in tree and add to dataset with weight 1
   for ev in t:
+    if (ev.CMS_hgg_mass < opt.mgg_range[0]) or (ev.CMS_hgg_mass > opt.mgg_range[1]): continue #only include events in mgg range
     for var in dataVars: 
       if var == "weight": continue
       ws.var(var).setVal(getattr(ev,var))

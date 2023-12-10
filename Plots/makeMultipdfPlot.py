@@ -13,6 +13,8 @@ from collections import OrderedDict as od
 from commonTools import *
 from commonObjects import *
 
+DATA_SCALER = 1
+
 def get_options():
   parser = OptionParser()
   parser.add_option("--inputWSFile", dest="inputWSFile", default=None, help="Input multipdf RooWorkspace file")
@@ -37,6 +39,7 @@ if opt.inputWSFile is not None:
   print " --> Opening workspace: %s"%opt.inputWSFile
   f = ROOT.TFile(opt.inputWSFile)
   w = f.Get("multipdf")
+  w.Print()
 
 # Define blinding region
 blindingRegion = [float(opt.blindingRegion.split(",")[0]),float(opt.blindingRegion.split(",")[1])]
@@ -49,8 +52,8 @@ xvar.setUnit(opt.xvar.split(",")[2])
 xvar_arglist, xvar_argset = ROOT.RooArgList(xvar), ROOT.RooArgSet(xvar)
 
 # Exact multipdf object and pdfindex
-multipdf = w.pdf("CMS_hgg_%s_13TeV_bkgshape"%opt.cat)
-pdfindex_bf = w.cat("pdfindex_%s_13TeV"%opt.cat).getIndex()
+multipdf = w.pdf("CMS_hgg_%s_2018_13TeV_bkgshape"%opt.cat)
+pdfindex_bf = w.cat("pdfindex_%s_2018_13TeV"%opt.cat).getIndex()
 bpdf_bf_name = None
 bpdfs = od()
 for ipdf in range(multipdf.getNumPdfs()): 
@@ -58,7 +61,7 @@ for ipdf in range(multipdf.getNumPdfs()):
   if ipdf == pdfindex_bf: bpdf_bf_name = multipdf.getPdf(ipdf).GetName()
 
 # Make histograms from bpdfs and scale by norm
-norm = w.var("CMS_hgg_%s_13TeV_bkgshape_norm"%opt.cat).getVal()
+norm = w.var("CMS_hgg_%s_2018_13TeV_bkgshape_norm"%opt.cat).getVal()
 
 hists = od()
 for bname, bpdf in bpdfs.iteritems():
@@ -81,6 +84,20 @@ hists['data'] = xvar.createHistogram("h_data", ROOT.RooFit.Binning(opt.nBins,xva
 hists['data'].SetBinErrorOption(ROOT.TH1.kPoisson)
 if opt.unblind: d.fillHistogram(hists['data'],xvar_arglist)
 else: d.reduce("%s<%f|%s>%f"%(xvar.GetName(),blindingRegion[0],xvar.GetName(),blindingRegion[1])).fillHistogram(hists['data'],xvar_arglist)
+
+#reduce dataset by 5
+events = [i for i in range(int(hists['data'].GetSumOfWeights()))]
+chosen_events = np.random.choice(events, size=int(len(events)/DATA_SCALER))
+counter = 0
+for i in range(opt.nBins):
+  old_n = int(hists['data'].GetBinContent(i))
+  new_n = int(sum((chosen_events>=counter)&(chosen_events<counter+old_n)))
+  new_n = 3
+  hists['data'].SetBinContent(i, new_n * DATA_SCALER)
+  hists['data'].SetBinError(i, np.sqrt(new_n) * DATA_SCALER)
+  counter += old_n
+
+
 if opt.doZeroes:
   for ibin in range(1,hists['data'].GetNbinsX()+1):
     bcenter = hists['data'].GetBinCenter(ibin)
@@ -110,6 +127,9 @@ if opt.inputSignalWSFile is not None:
   fsig = ROOT.TFile(opt.inputSignalWSFile)
   wsig = fsig.Get("wsig_13TeV")
   wsig.var("MH").setVal(float(opt.mass))
+  wsig.Print()
+
+
 
   # Extract norms
   norms = od()
@@ -117,14 +137,29 @@ if opt.inputSignalWSFile is not None:
   for year in ['2016','2017','2018']:
     allNorms = wsig.allFunctions().selectByName("*%s*normThisLumi"%year)
     for norm in rooiter(allNorms):
-      proc = norm.GetName().split("_%s_"%sqrts__)[-1].split("_RECO")[0]
+      proc = norm.GetName().split("_")[1]
+      print(proc)
       k  =  "%s__%s"%(proc,year)
-      _id = "%s_%s_%s_%s"%(year,sqrts__,proc,cat)
+      _id = "%s_%s_%s_%s"%(proc,year,cat,sqrts__)
       norms[k] = w.function("%s_%s_normThisLumi"%(outputWSObjectTitle__,_id))
 
+      # IntLumi = wsig.var("IntLumi")
+      # IntLumi.Print()
+      # current_int_lumi = IntLumi.getVal()
+      # IntLumi.setVal(current_int_lumi*1.7*59/100)
+
       pdf = wsig.pdf("extend%s_%sThisLumi"%(outputWSObjectTitle__,_id))
+      print("extend%s_%sThisLumi"%(outputWSObjectTitle__,_id))
+      pdf.Print()
       spdfs[_id] = pdf.createHistogram("h_pdf_%s"%_id,xvar,ROOT.RooFit.Binning(opt.pdfNBins))
+      
+      #print(norms[k].getVal())
       #spdfs[_id].Scale(160./320)
+      spdfs[_id].Scale((float(opt.pdfNBins)/float(opt.nBins)))
+      #spdfs[_id].Scale(1.6)
+      spdfs[_id].Scale(0.186)
+
+      print(spdfs[_id].Integral())
 
   # Sum pdf histograms
   for _id, p in spdfs.iteritems():
@@ -132,6 +167,9 @@ if opt.inputSignalWSFile is not None:
       hists['spdf'] = p.Clone("h_spdf")
       hists['spdf'].Reset()
     hists['spdf'] += p
+  #hists['spdf'].Scale(1.59/h.Integral())
+else:
+  doSignal = False
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Plotting
@@ -156,14 +194,14 @@ pad1.SetTicky()
 pad1.SetBottomMargin(0.18)
 pad1.SetLeftMargin(0.12)
 pad1.Draw()
-pad2 = ROOT.TPad("pad2_%s"%cat,"pad2_%s"%cat,0,0,1,0.45)
-pad2.SetTickx()
-pad2.SetTicky()
-pad2.SetTopMargin(0.03)
-pad2.SetBottomMargin(0.25)
-pad2.SetLeftMargin(0.12)
-pad2.Draw()
-padSizeRatio = 0.65/0.45
+# pad2 = ROOT.TPad("pad2_%s"%cat,"pad2_%s"%cat,0,0,1,0.45)
+# pad2.SetTickx()
+# pad2.SetTicky()
+# pad2.SetTopMargin(0.03)
+# pad2.SetBottomMargin(0.25)
+# pad2.SetLeftMargin(0.12)
+# pad2.Draw()
+# padSizeRatio = 0.65/0.45
 
 # Axis options 
 ROOT.TGaxis.SetMaxDigits(4)
@@ -177,7 +215,7 @@ h_axes.SetMaximum((hists['data'].GetMaximum()+hists['data'].GetBinError(hists['d
 h_axes.SetMinimum(0.)
 h_axes.SetTitle("")
 h_axes.GetXaxis().SetTitle("")
-h_axes.GetXaxis().SetLabelSize(0)
+h_axes.GetXaxis().SetLabelSize(0.035)
 h_axes.GetYaxis().SetTitleSize(0.05)
 h_axes.GetYaxis().SetTitle("Events / GeV")
 h_axes.GetYaxis().SetTitleOffset(1.1)
@@ -191,7 +229,7 @@ leg0.SetLineColor(0)
 leg0.SetTextSize(0.025)
 leg0.SetNColumns(2)
 leg0.AddEntry(hists['data'],"#scale[1.5]{Data}","ep")
-if doSignal: leg0.AddEntry(hists['spdf'],"#scale[1.5]{S model}","fl")
+if doSignal: leg0.AddEntry(hists['spdf'],"#scale[1.5]{Exp. excl. Signal}","fl")
 leg0.Draw("Same")
 
 
@@ -218,8 +256,14 @@ if doSignal:
   hists['spdf'].SetLineColor(9)
   hists['spdf'].SetFillColor(38)
   hists['spdf'].SetFillStyle(3001)
-  hists['spdf'].GetXaxis().SetRangeUser(blindingRegion[0],blindingRegion[1])
+  #hists['spdf'].GetXaxis().SetRangeUser(blindingRegion[0],blindingRegion[1])
   hists['spdf'].Draw("Hist same cf")
+
+  # new_sig = hists['spdf'].Clone()
+  # new_sig.SetLineColor(2)
+  # new_sig.SetFillColor(46)
+  # new_sig.Scale(10*0.1856)
+  # new_sig.Draw("Hist same cf")
 
 colourOptions=[1,2,3,4,5,6,7,8,9]
 bnames = bpdfs.keys()
@@ -230,7 +274,7 @@ for bidx, bname in enumerate(bnames):
 hists['data'].SetMarkerStyle(20)
 hists['data'].SetMarkerColor(1)
 hists['data'].SetLineColor(1)
-hists['data'].Draw("Same PE")
+#hists['data'].Draw("Same PE")
 
 
 # Add TLatex to plot
@@ -248,50 +292,50 @@ lat1.SetTextFont(42)
 lat1.SetTextAlign(31)
 lat1.SetNDC()
 lat1.SetTextSize(0.06)
-lat1.DrawLatex(0.9,0.92,"137 fb^{-1} (13 TeV)")
+lat1.DrawLatex(0.9,0.92,"59 fb^{-1} (13 TeV)")
 
-pad2.cd()
-h_axes_ratio = hists_ratio['data'].Clone()
-h_axes_ratio.Reset()
-h_axes_ratio.SetMaximum((hists_ratio['data'].GetMaximum()+hists_ratio['data'].GetBinError(hists_ratio['data'].GetMaximumBin()))*1.5)
-h_axes_ratio.SetMinimum((hists_ratio['data'].GetMinimum()-hists_ratio['data'].GetBinError(hists_ratio['data'].GetMinimumBin()))*1.3)
-h_axes_ratio.SetTitle("")
-h_axes_ratio.GetXaxis().SetTitleSize(0.05*padSizeRatio)
-h_axes_ratio.GetXaxis().SetLabelSize(0.035*padSizeRatio)
-h_axes_ratio.GetXaxis().SetLabelOffset(0.007)
-h_axes_ratio.GetXaxis().SetTickLength(0.03*padSizeRatio)
-h_axes_ratio.GetYaxis().SetLabelSize(0.035*padSizeRatio)
-h_axes_ratio.GetYaxis().SetLabelOffset(0.007)
-h_axes_ratio.GetYaxis().SetTitle("")
-h_axes_ratio.Draw()
+# pad2.cd()
+# h_axes_ratio = hists_ratio['data'].Clone()
+# h_axes_ratio.Reset()
+# h_axes_ratio.SetMaximum((hists_ratio['data'].GetMaximum()+hists_ratio['data'].GetBinError(hists_ratio['data'].GetMaximumBin()))*1.5)
+# h_axes_ratio.SetMinimum((hists_ratio['data'].GetMinimum()-hists_ratio['data'].GetBinError(hists_ratio['data'].GetMinimumBin()))*1.3)
+# h_axes_ratio.SetTitle("")
+# h_axes_ratio.GetXaxis().SetTitleSize(0.05*padSizeRatio)
+# h_axes_ratio.GetXaxis().SetLabelSize(0.035*padSizeRatio)
+# h_axes_ratio.GetXaxis().SetLabelOffset(0.007)
+# h_axes_ratio.GetXaxis().SetTickLength(0.03*padSizeRatio)
+# h_axes_ratio.GetYaxis().SetLabelSize(0.035*padSizeRatio)
+# h_axes_ratio.GetYaxis().SetLabelOffset(0.007)
+# h_axes_ratio.GetYaxis().SetTitle("")
+# #h_axes_ratio.Draw()
 
-if doSignal:
-  hsr = hists['spdf'].Clone()
-  hsr.SetLineWidth(2)
-  hsr.SetLineColor(9)
-  hsr.SetFillColor(38)
-  hsr.SetFillStyle(3001)
-  hsr.GetXaxis().SetRangeUser(blindingRegion[0],blindingRegion[1])
-  hsr.Draw("Hist same cf")
+# if doSignal:
+#   hsr = hists['spdf'].Clone()
+#   hsr.SetLineWidth(2)
+#   hsr.SetLineColor(9)
+#   hsr.SetFillColor(38)
+#   hsr.SetFillStyle(3001)
+#   hsr.GetXaxis().SetRangeUser(blindingRegion[0],blindingRegion[1])
+#   hsr.Draw("Hist same cf")
 
-for bidx, bname in enumerate(bnames):
-  hists_ratio[bname].SetLineWidth(2)
-  hists_ratio[bname].SetLineColor( colourOptions[bidx] )
-  hists_ratio[bname].Draw("HIST same C")
-hists_ratio['data'].SetMarkerStyle(20)
-hists_ratio['data'].SetMarkerColor(1)
-hists_ratio['data'].SetLineColor(1)
-hists_ratio['data'].Draw("Same PE")
+# for bidx, bname in enumerate(bnames):
+#   hists_ratio[bname].SetLineWidth(2)
+#   hists_ratio[bname].SetLineColor( colourOptions[bidx] )
+#   hists_ratio[bname].Draw("HIST same C")
+# hists_ratio['data'].SetMarkerStyle(20)
+# hists_ratio['data'].SetMarkerColor(1)
+# hists_ratio['data'].SetLineColor(1)
+# hists_ratio['data'].Draw("Same PE")
 
-# Add TLatex to ratio plot
-lat2 = ROOT.TLatex()
-lat2.SetTextFont(42)
-lat2.SetTextAlign(33)
-lat2.SetNDC(1)
-lat2.SetTextSize(0.045*padSizeRatio)
-lat2.DrawLatex(0.87,0.91,"Best fit B function subtracted")
+# # Add TLatex to ratio plot
+# lat2 = ROOT.TLatex()
+# lat2.SetTextFont(42)
+# lat2.SetTextAlign(33)
+# lat2.SetNDC(1)
+# lat2.SetTextSize(0.045*padSizeRatio)
+# lat2.DrawLatex(0.87,0.91,"Best fit B function subtracted")
 
 canv.Update()
-canv.SaveAs("/eos/home-j/jlangfor/www/CMS/hgg/stxs_runII/Dec20/final_new/AN/background_models_new/bmodel_%s.pdf"%(cat))
-canv.SaveAs("/eos/home-j/jlangfor/www/CMS/hgg/stxs_runII/Dec20/final_new/AN/background_models_new/bmodel_%s.png"%(cat))
+canv.SaveAs("bmodel_%s.pdf"%(cat))
+canv.SaveAs("bmodel_%s.png"%(cat))
 

@@ -1,6 +1,27 @@
 models = {
   "mu_inclusive":"",
 
+  "ggtt_w_resonant_bkg":"-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+  --PO \"map=.*/gravitonm.*:r[1,0,2]\"",
+
+  "ggtt_w_resonant_bkg_nmssm":"-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+  --PO \"map=.*/Nmssm.*:r[1,0,2]\"",
+
+  "ggtt_resonant":"-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+  --PO \"map=.*/ggttres.*:r[1,0,2]\"",
+
+  "ggbbres":"-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+  --PO \"map=.*/ggbbres.*:r[1,0,2]\"",
+
+  # "ggtt_w_resonant_bkg":"-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+  # --PO \"map=.*/gravitonm300.*:r300[1,0,2]\", \
+  # --PO \"map=.*/gravitonm1000.*:r1000[1,0,2]\", \
+  # --PO \"map=.*/gravitonm260.*:r260[1,0,2]\"", \
+
+  "ggtt_w_resonant_bkg_continuous":"-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel " + " ".join(['--PO \"map=.*/gravitonm%d.*:r%d[1,0,2]\"'%(m,m) for m in range(260,1010,10)]),
+  #"ggtt_w_resonant_bkg_continuous":"-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel " + " ".join(['--PO \"map=.*/gravitonm%d.*:r[1,0,2]\"'%(m) for m in [750]]),
+
+
   "mu":"-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
 --PO \"map=.*/ggH.*:r_ggH[1,0,2]\" \
 --PO \"map=.*/bbH.*:r_ggH[1,0,2]\" \

@@ -58,6 +58,7 @@ else:
       xvar.setUnit(opt.xvar.split(":")[2])
       alist = ROOT.RooArgList(xvar)
     citr += 1
+print(citr)
 
 # Load cat S/S+B weights
 if opt.loadCatWeights != '':
@@ -101,6 +102,7 @@ for cat,f in inputFiles.iteritems():
   catNorm = 0
   for k, norm in norms.iteritems():
     proc, year = k.split("__")
+    w.Print()
     w.var("IntLumi").setVal(lumiScaleFactor*lumiMap[year])
     catNorm += norm.getVal()
 
@@ -163,4 +165,4 @@ for cat,f in inputFiles.iteritems():
 
 # Make plot
 if not os.path.isdir("%s/outdir_%s/Plots"%(swd__,opt.ext)): os.system("mkdir %s/outdir_%s/Plots"%(swd__,opt.ext))
-plotSignalModel(hists,opt,_outdir="%s/outdir_%s/Plots"%(swd__,opt.ext))
+plotSignalModel(hists,opt,_outdir="%s/outdir_%s/Plots"%(swd__,opt.ext),low=int(opt.mass)-10,high=int(opt.mass)+10)

@@ -14,7 +14,7 @@ def writePreamble(f,options):
   f.write("---------------------------------------------\n")
   return True
 
-def writeProcesses(f,d,options):
+def writeProcesses(f,d,options,procTemplate="gg"):
   f.write("\n")
   # If opt.prune then remove all rows from dataFrame with prune=1
   if options.prune: d = d[d['prune']==0]
@@ -40,15 +40,19 @@ def writeProcesses(f,d,options):
     lbin_cat += "%-55s "%cat
     lobs_cat += "%-55s "%"-1"
     sigID = 0
+    bkgID = 2
     # Loop over rows for respective category
     for ir,r in d[d['cat']==cat].iterrows():
       if r['proc'] == "data_obs": continue
       lbin_procXcat += "%-55s "%cat
       lproc += "%-55s "%r['proc']
       if r['proc'] == "bkg_mass": lprocid += "%-55s "%"1"
-      else:
+      elif procTemplate in r['proc']:
         lprocid += "%-55s "%sigID
         sigID -= 1
+      else:
+        lprocid += "%-55s "%bkgID
+        bkgID += 1
       if r['rate'] == 1.0: lrate += "%-55.1f "%r['rate']
       else: lrate += "%-55.7f "%r['rate']
   #Remove final space from lines and add to file
@@ -83,6 +87,8 @@ def writeSystematic(f,d,s,options,stxsMergeScheme=None,scaleCorrScheme=None):
   if options.prune:
     mask = (d['prune']==0)
     d = d[mask]
+
+
 
   # If theory: loop over tiers else run over once
   tiers = []
@@ -224,10 +230,14 @@ def writeMCStatUncertainty(f,d,options):
   return True
 
 
-def writePdfIndex(f,d,options):
+def writePdfIndex(f,d,options,cat_postfix=""):
   f.write("\n")
-  for cat in d[~d['cat'].str.contains("NOTAG")].cat.unique(): 
-    indexStr = "pdfindex_%s_13TeV"%cat
+
+  mask = (d['prune']==0)
+  d = d[mask]
+  
+  for cat in d[~d['cat'].str.contains("NOTAG")].cat.unique():
+    indexStr = "pdfindex_%s%s_13TeV"%(cat,cat_postfix)
     f.write("%-55s  discrete\n"%indexStr)
   return True
 

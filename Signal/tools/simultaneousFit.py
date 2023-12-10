@@ -70,7 +70,7 @@ def poisson_interval(x,eSumW2,level=0.68):
 # Function to calc chi2 for binned fit given pdf, RooDataHist and xvar as inputs
 #def calcChi2(x,pdf,d,errorType="Sumw2",_verbose=False,fitRange=[100,180]):
 #def calcChi2(x,pdf,d,errorType="Poisson",_verbose=False,fitRange=[110,140]):
-def calcChi2(x,pdf,d,errorType="Poisson",_verbose=False,fitRange=[105,150]):
+def calcChi2(x,pdf,d,errorType="Poisson",_verbose=False,fitRange=[90,110]):
 
   k = 0. # number of non empty bins (for calc degrees of freedom)
   normFactor = d.sumEntries()
@@ -138,7 +138,7 @@ def nChi2Addition(X,ssf,verbose=False):
   C = len(X)-1 # number of fit params (-1 for MH)
   for mp,d in ssf.DataHists.iteritems():
     ssf.MH.setVal(int(mp))
-    chi2, k  = calcChi2(ssf.xvar,ssf.Pdfs['final'],d,_verbose=verbose)
+    chi2, k  = calcChi2(ssf.xvar,ssf.Pdfs['final'],d,_verbose=verbose,fitRange=[int(ssf.MHLow),int(ssf.MHHigh)])
     chi2sum += chi2
     K += k
   # N degrees of freedom
@@ -149,13 +149,14 @@ def nChi2Addition(X,ssf,verbose=False):
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
 class SimultaneousFit:
   # Constructor
-  def __init__(self,_name,_proc,_cat,_datasetForFit,_xvar,_MH,_MHLow,_MHHigh,_massPoints,_nBins,_MHPolyOrder,_minimizerMethod,_minimizerTolerance,verbose=True):
+  def __init__(self,_name,_proc,_cat,_datasetForFit,_xvar,_MH,_MHNominal,_MHLow,_MHHigh,_massPoints,_nBins,_MHPolyOrder,_minimizerMethod,_minimizerTolerance,verbose=True):
     self.name = _name
     self.proc = _proc
     self.cat = _cat
     self.datasetForFit = _datasetForFit
     self.xvar = _xvar
     self.MH = _MH
+    self.MHNominal = _MHNominal
     self.MHLow = _MHLow
     self.MHHigh = _MHHigh
     self.massPoints = _massPoints
@@ -166,10 +167,13 @@ class SimultaneousFit:
     self.verbose = verbose
     # Prepare vars
     self.MH.setConstant(False)
-    self.MH.setVal(125)
+    #self.MH.setVal(125)
+    self.MH.setVal(int(self.MHNominal))
     self.MH.setBins(10)
-    self.dMH = ROOT.RooFormulaVar("dMH","dMH","@0-125.0",ROOT.RooArgList(self.MH)) 
-    self.xvar.setVal(125)
+    #self.dMH = ROOT.RooFormulaVar("dMH","dMH","@0-125.0",ROOT.RooArgList(self.MH)) 
+    self.dMH = ROOT.RooFormulaVar("dMH","dMH","@0-%s.0"%self.MHNominal,ROOT.RooArgList(self.MH)) 
+    #self.xvar.setVal(125)
+    self.MH.setVal(int(self.MHNominal))
     self.xvar.setBins(self.nBins)
     # Dicts to store all fit vars, polynomials, pdfs and splines
     self.nGaussians = 1
@@ -353,6 +357,8 @@ class SimultaneousFit:
       _x, _y = [], []
       _mh = 100.
       while(_mh<180.1):
+      # _mh = 65.
+      # while(_mh<120.1):
         self.MH.setVal(_mh)
         _x.append(_mh)
         _y.append(poly.getVal())

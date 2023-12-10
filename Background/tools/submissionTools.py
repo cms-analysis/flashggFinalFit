@@ -54,12 +54,11 @@ def writeSubFiles(_opts):
     writePreamble(_f)
 
     # For looping over categories
-    if( _opts['mode'] == "fTestParallel" ):
+    if( _opts['mode'] == "fTest" ):
       for cidx in range(_opts['nCats']):
         c = _opts['cats'].split(",")[cidx]
-        co = _opts['catOffset']+cidx
         _f.write("if [ $1 -eq %g ]; then\n"%cidx)
-        _cmd = "%s/runBackgroundScripts.sh -i %s -p %s -f %s --ext %s --catOffset %g --intLumi %s --year %s --batch %s --queue %s --sigFile %s --isData --fTest"%(bwd__,_opts['dataFile'],_opts['procs'],c,_opts['ext'],co,_opts['lumi'],_opts['year'],_opts['batch'],_opts['queue'],_opts['signalFitWSFile'])
+        _cmd = "  python %s/scripts/fTest.py --inputWSFile %s --cat %s --ext %s --year %s %s"%(bwd__,_opts['inputWSFile'],c,_opts['ext'],_opts['year'],_opts['modeOpts'])
         _f.write("  %s\n"%_cmd)
         _f.write("fi\n")
       
@@ -69,7 +68,7 @@ def writeSubFiles(_opts):
 
     # Condor submission file
     _fsub = open("%s/%s.sub"%(_jobdir,_executable),"w")
-    if( _opts['mode'] == "fTestParallel" ): writeCondorSub(_fsub,_executable,_opts['queue'],_opts['nCats'],_opts['jobOpts'])
+    if( _opts['mode'] == "fTest" ): writeCondorSub(_fsub,_executable,_opts['queue'],_opts['nCats'],_opts['jobOpts'])
     _fsub.close()
     
   # SGE...
@@ -79,13 +78,14 @@ def writeSubFiles(_opts):
     # Write details depending on mode
 
     # For separate submission file per category
-    if _opts['mode'] == "fTestParallel":
+    if _opts['mode'] == "fTest":
+      print("Start")
       for cidx in range(_opts['nCats']):
         c = _opts['cats'].split(",")[cidx]
-        co = _opts['catOffset']+cidx
         _f = open("%s/%s_%s.sh"%(_jobdir,_executable,c),"w")
         writePreamble(_f)
-        _cmd = "%s/runBackgroundScripts.sh -i %s -p %s -f %s --ext %s --catOffset %g --intLumi %s --year %s --batch %s --queue %s --sigFile %s --isData --fTest"%(bwd__,_opts['dataFile'],_opts['procs'],c,_opts['ext'],co,_opts['lumi'],_opts['year'],_opts['batch'],_opts['queue'],_opts['signalFitWSFile'])
+        print("wrote")
+        _cmd = "python %s/scripts/fTest.py --inputWSFile %s --cat %s --ext %s --year %s %s"%(bwd__,_opts['inputWSFile'],c,_opts['ext'],_opts['year'],_opts['modeOpts'])
         _f.write("%s\n"%_cmd)
         _f.close()
         os.system("chmod 775 %s/%s_%s.sh"%(_jobdir,_executable,c))
@@ -109,7 +109,7 @@ def submitFiles(_opts):
     jobOptsStr = _opts['jobOpts']
 
     # Separate submission per category  
-    if( _opts['mode'] == "fTestParallel" ):
+    if( _opts['mode'] == "fTest" ):
       for cidx in range(_opts['nCats']):
         c = _opts['cats'].split(",")[cidx]
         _subfile = "%s/%s_%s"%(_jobdir,_executable,c)
@@ -122,7 +122,7 @@ def submitFiles(_opts):
     _executable = "sub_%s_%s"%(_opts['mode'],_opts['ext'])
 
     # Separate submission per category  
-    if( _opts['mode'] == "fTestParallel" ):
+    if( _opts['mode'] == "fTest" ):
       for cidx in range(_opts['nCats']):
         c = _opts['cats'].split(",")[cidx]
         _subfile = "%s/%s_%s"%(_jobdir,_executable,c)

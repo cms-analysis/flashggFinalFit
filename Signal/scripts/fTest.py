@@ -19,7 +19,8 @@ from signalTools import *
 from simultaneousFit import *
 from plottingTools import *
 
-MHLow, MHHigh = '120', '130'
+#MHLow, MHHigh = '120', '130'
+#MHLow, MHHigh = '90', '110'
 
 def leave():
   print "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG SIGNAL FTEST (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ "
@@ -33,7 +34,11 @@ def get_options():
   parser.add_option("--procs", dest='procs', default='', help="Signal processes")
   parser.add_option("--nProcsToFTest", dest='nProcsToFTest', default=5, type='int',help="Number of signal processes to fTest (ordered by sum entries), others are set to nRV=1,nWV=1. Set to -1 to run over all")
   parser.add_option("--cat", dest='cat', default='', help="RECO category")
+  
   parser.add_option('--mass', dest='mass', default='125', help="Mass point to fit")
+  parser.add_option('--MHLow', dest='MHLow', default='120')
+  parser.add_option('--MHHigh', dest='MHHigh', default='130')
+  
   parser.add_option('--doPlots', dest='doPlots', default=False, action="store_true", help="Produce Signal fTest plots")
   parser.add_option('--nBins', dest='nBins', default=80, type='int', help="Number of bins for fit")
   parser.add_option('--threshold', dest='threshold', default=30, type='int', help="Threshold number of events")
@@ -44,6 +49,12 @@ def get_options():
   parser.add_option('--minimizerTolerance', dest='minimizerTolerance', default=1e-8, type='float', help="(Scipy) Minimizer toleranve")
   return parser.parse_args()
 (opt,args) = get_options()
+
+MHLow = opt.MHLow
+MHHigh = opt.MHHigh
+
+print(opt.mass, type(opt.mass))
+print(MHLow, MHHigh, type(MHLow), type(MHHigh))
 
 ROOT.gStyle.SetOptStat(0)
 ROOT.gROOT.SetBatch(True)
@@ -101,7 +112,7 @@ for pidx, proc in enumerate(procsToFTest):
     min_reduced_chi2, nGauss_opt = 999, 1
     for nGauss in range(1,opt.nGaussMax+1):
       k = "nGauss_%g"%nGauss
-      ssf = SimultaneousFit("fTest_RV_%g"%nGauss,proc,opt.cat,datasets_RV,xvar.Clone(),MH,MHLow,MHHigh,opt.mass,opt.nBins,0,opt.minimizerMethod,opt.minimizerTolerance,verbose=False)
+      ssf = SimultaneousFit("fTest_RV_%g"%nGauss,proc,opt.cat,datasets_RV,xvar.Clone(),MH,opt.mass,MHLow,MHHigh,opt.mass,opt.nBins,0,opt.minimizerMethod,opt.minimizerTolerance,verbose=False)
       ssf.buildNGaussians(nGauss)
       ssf.runFit()
       ssf.buildSplines()
@@ -126,7 +137,7 @@ for pidx, proc in enumerate(procsToFTest):
     min_reduced_chi2, nGauss_opt = 999, 1
     for nGauss in range(1,opt.nGaussMax+1):
       k = "nGauss_%g"%nGauss
-      ssf = SimultaneousFit("fTest_WV_%g"%nGauss,proc,opt.cat,datasets_WV,xvar.Clone(),MH,MHLow,MHHigh,opt.mass,opt.nBins,0,opt.minimizerMethod,opt.minimizerTolerance,verbose=False)
+      ssf = SimultaneousFit("fTest_WV_%g"%nGauss,proc,opt.cat,datasets_WV,xvar.Clone(),MH,opt.mass,MHLow,MHHigh,opt.mass,opt.nBins,0,opt.minimizerMethod,opt.minimizerTolerance,verbose=False)
       ssf.buildNGaussians(nGauss)
       ssf.runFit()
       ssf.buildSplines()

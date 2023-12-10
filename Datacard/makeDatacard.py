@@ -145,6 +145,8 @@ if opt.prune:
   # Finally set all NOTAG events to be pruned
   mask = data['cat'].str.contains("NOTAG")
   data.loc[mask,'prune'] = 1
+else:
+  data['prune'] = 0
     
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # SAVE DATAFRAME
