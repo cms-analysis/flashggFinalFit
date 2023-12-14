@@ -5,6 +5,8 @@ import sys
 
 from detect_mass_points import detect_mass_points
 
+doSyst = False
+
 
 def get_mX(mass):
   return int(mass.split('x')[1].split('m')[0])
@@ -50,7 +52,6 @@ def modelNonResBkg(doFailedFits, nonResYears, masses, nonResBkgTrees, procTempla
         os.system('sed -i "s;<m>;'+m+';g" Background/config_'+procTemplate+'_batch_'+year+'_'+m+'.py')
 
         mh = get_mH(config, m)
-        print(mh)
         low_bound=None; high_bound=None
         if mh < 83:
           low_bound = 68 # Low mass exception
@@ -104,14 +105,14 @@ def modelSignalAndResBkg(sigModels, resHBkgModels, mggl, mggh):
   print('Starting step 3: Get the models for signal and resonant background')
   print()
 
-  os.system('python SignalModelInterpolation/create_signal_ws_new_cat_2d.py -i '+sigModels+' -o SignalModelInterpolation/outdir --mgg-range '+str(mggl)+' '+str(mggh))
-  os.system('python SignalModelInterpolation/create_signal_ws_new_cat_2d_res_bkg.py -i '+resHBkgModels+' -o SignalModelInterpolation/res_bkg_outdir --mgg-range '+str(mggl)+' '+str(mggh))
+  os.system('python SignalModelInterpolation/create_signal_ws_new_cat_2d.py -i '+sigModels+' -o SignalModelInterpolation/outdir --mgg-range '+str(mggl)+' '+str(mggh)+(' --doSyst' if doSyst else ''))
+  os.system('python SignalModelInterpolation/create_signal_ws_new_cat_2d_res_bkg.py -i '+resHBkgModels+' -o SignalModelInterpolation/res_bkg_outdir --mgg-range '+str(mggl)+' '+str(mggh)+(' --doSyst' if doSyst else ''))
 
   print('Finished step 3: Get the models for signal and resonant background')
   print()
 
 
-def makeDatacards(masses, sigModels, resHBkgModels, resDYBkgModels, config, procTemplate, indir):
+def makeDatacards(masses, sigModels, resHBkgModels, resDYBkg, config, procTemplate, indir):
   print('Starting step 4: Make datacards')
   print()
 
@@ -119,7 +120,7 @@ def makeDatacards(masses, sigModels, resHBkgModels, resDYBkgModels, config, proc
     mH = str(get_mH(config, m))
     mX = str(get_mX(m))
     mY = str(get_mY(m))
-    if resDYBkgModels is not None:
+    if resDYBkg:
       os.system('bash get_limit_datacard.sh '+sigModels+' '+resHBkgModels+' '+m+' '+mH+' '+mX+' '+mY+' 1 '+procTemplate+' '+indir)
     else:
       os.system('bash get_limit_datacard.sh '+sigModels+' '+resHBkgModels+' '+m+' '+mH+' '+mX+' '+mY+' 0 '+procTemplate+' '+indir)
@@ -128,18 +129,16 @@ def makeDatacards(masses, sigModels, resHBkgModels, resDYBkgModels, config, proc
   print()
 
 
-def makeWorkspaces(resDYBkgModels, procTemplate, masses, config, mggl, mggh):
+def makeWorkspaces(procTemplate, masses, config, mggl, mggh):
   print('Starting step 5: Make workspaces')
   print()
 
   os.system('mkdir -p Combine/Models; ' + \
             'mkdir -p Combine/Models/signal; ' + \
             'mkdir -p Combine/Models/res_bkg; '+ \
-           ('mkdir -p Combine/Models/dy_bkg; ' if resDYBkgModels is not None else '') + \
             'mkdir -p Combine/Models/background; ' + \
             'cp SignalModelInterpolation/outdir/* Combine/Models/signal/.; ' + \
             'cp SignalModelInterpolation/res_bkg_outdir/* Combine/Models/res_bkg/.; ' + \
-           ('cp SignalModelInterpolation/dy_bkg_outdir/* Combine/Models/dy_bkg/.; ' if resDYBkgModels is not None else '') + \
             'cp Background/outdir_'+procTemplate+'_*/fTest/output/CMS-HGG*.root Combine/Models/background/.; ' + \
             'cp Datacard/Datacard_'+procTemplate+'*.txt Combine/.; ' \
   )
@@ -162,15 +161,16 @@ def getLimit(masses, config, mggl, mggh, procTemplate):
     mH = str(get_mH(config, m))
     mX = str(get_mX(m))
     mY = str(get_mY(m))
+    print("Limit to run for mX = "+mX+", mY = "+mY)
     os.system('bash get_limit_combine.sh '+str(mggl)+' '+str(mggh)+' '+mX+' '+mY+' '+mH+' '+procTemplate)
 
-  os.system('grep "r <" Combine/combine_results_'+procTemplate+'_mx*.txt > Combine/summary_combine_results_'+procTemplate+'.txt')
+  os.system('grep "r <" Combine/combine_results_'+procTemplate+'*_mx*.txt > Combine/summary_combine_results_'+procTemplate+'.txt')
 
   os.system('mkdir -p Outputs/CollectedPlots_'+procTemplate+'; ' + \
             'cp -r Background/plots Outputs/CollectedPlots_'+procTemplate+'/Background/; ' + \
             'mkdir -p Outputs/CollectedPlots_'+procTemplate+'/Combine; ' + \
             'mkdir -p Outputs/CollectedPlots_'+procTemplate+'/Combine/Datacard; ' + \
-            'cp Combine/Datacard* Outputs/CollectedPlots_'+procTemplate+'/Combine/Datacard; ' + \
+            'cp Combine/Datacard_'+procTemplate+'* Outputs/CollectedPlots_'+procTemplate+'/Combine/Datacard; ' + \
             'mkdir -p Outputs/CollectedPlots_'+procTemplate+'/Combine/Results; ' + \
             'cp Combine/*combine_results_'+procTemplate+'_* Outputs/CollectedPlots_'+procTemplate+'/Combine/Results; ' + \
             'cp -r Combine/Models Outputs/CollectedPlots_'+procTemplate+'/Combine/Models; ' + \
@@ -209,7 +209,7 @@ def main(args):
     mggl=65
     mggh=1000
     plot_blinding_region='68,135'
-    do_dy_bkg=(args.resDYBkgModels is not None)
+    do_dy_bkg=(args.resDYBkg is not None)
     lumiMap='lumiMap = {\'2016\':36.31, \'2017\':41.48, \'2018\':54.67, \'combined\':132.46, \'merged\':132.46}'
   if args.config == 'Ygg_high':
     mggl=100
@@ -226,8 +226,9 @@ def main(args):
     print('Detected mass points,\tSRs,\tCRs:')
     for m in masses:
       nCats[m]=os.popen('ls '+treePerYearDir+'/Data*'+m+'cat* | wc -w').read()
-      nCRs[m]=0 # FIXME: No CRs for now, when we have them, switch to: os.system('ls '+treePerYearDir+'/Data*'+m+'*cr_* | wc -w')
-      print(m+'\t\t'+str(int(nCats[m])-int(nCRs[m]))+'\t'+str(nCRs[m]))
+      nCRs[m]=os.popen('ls '+treePerYearDir+'/Data*'+m+'cat*cr_* | wc -w').read()
+      nCats[m]=str(int(nCats[m])-int(nCRs[m]))
+      print(m+'\t\t'+str(nCats[m])+'\t'+str(nCRs[m]))
     print()
   print()
 
@@ -238,9 +239,9 @@ def main(args):
   if '3' in args.steps:
     modelSignalAndResBkg(args.sigModels, args.resHBkgModels, mggl, mggh)
   if '4' in args.steps:
-    makeDatacards(masses, args.sigModels, args.resHBkgModels, args.resDYBkgModels, args.config, args.procTemplate, args.nonResBkgTrees)
+    makeDatacards(masses, args.sigModels, args.resHBkgModels, args.resDYBkg, args.config, args.procTemplate, args.nonResBkgTrees)
   if '5' in args.steps:
-    makeWorkspaces(args.resDYBkgModels, args.procTemplate, masses, args.config, mggl, mggh)
+    makeWorkspaces(args.procTemplate, masses, args.config, mggl, mggh)
   if '6' in args.steps:
     getLimit(masses, args.config, mggl, mggh, args.procTemplate)
 
@@ -249,8 +250,8 @@ if __name__=="__main__":
   parser = argparse.ArgumentParser()
   parser.add_argument('--nonResBkgTrees', '-inrb', type=str, required=True)
   parser.add_argument('--sigModels', '-is', type=str, required=True)
-  parser.add_argument('--resHBkgModels', '-nhrb', type=str, required=True)
-  parser.add_argument('--resDYBkgModels', '-idyrb', type=str, default=None)
+  parser.add_argument('--resHBkgModels', '-inhrb', type=str, required=True)
+  parser.add_argument('--resDYBkg', '-dy', action="store_true", default=False)
   parser.add_argument('--masses', '-m', type=str, default='mx') # masses format mxXmyY so 'mx' as default means that all masses are run 
   parser.add_argument('--steps', '-s', type=str, default='123456')
   parser.add_argument('--config', '-c', type=str, choices=['Ybb','Ygg_low','Ygg_high'], default='Ygg_low')

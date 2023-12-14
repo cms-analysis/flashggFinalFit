@@ -5,8 +5,6 @@ import argparse
 import json
 import os
 
-DO_SYST = True
-
 def loadJson(path):
   with open(path, "r") as f:
     return json.load(f)

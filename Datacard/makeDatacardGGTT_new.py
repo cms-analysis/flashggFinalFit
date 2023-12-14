@@ -12,8 +12,9 @@ import numpy as np
 import copy
 
 class Options:
-  def __init__(self):
+  def __init__(self, args):
     self.years = '2016,2017,2018'
+    self.prune = args.prune
     self.doSTXSMerging = False
     self.doSTXSScaleCorrelationScheme = False
 
@@ -354,11 +355,11 @@ def main(args):
     new_rows.append(["data_obs", cat, "merged", -1, "./Models/background/CMS-HGG_multipdf_%s_combined.root"%cat, "", "multipdf:roohist_data_mass_%s"%cat, 0])
   
     if args.doABCD:
-      new_rows.append(["bkg_mass", cat+"cr", "merged", 1, "./Models/background/CMS-HGG_ws_%s.root"%(cat+"cr"), "", "w_control_regions:CMS_hgg_%s_combined_13TeV_bkgshape"%(cat+"cr"), 0])
-      new_rows.append(["data_obs", cat+"cr", "merged", -1, "./Models/background/CMS-HGG_ws_%s.root"%(cat+"cr"), "", "w_control_regions:roohist_data_mass_%s"%(cat+"cr"), 0])
+      new_rows.append(["bkg_mass", cat+"cr", "merged", 1, "./Models/background/CMS-HGG_ws_%s_combined.root"%(cat+"cr"), "", "w_control_regions:CMS_hgg_%s_combined_13TeV_bkgshape"%(cat+"cr"), 0])
+      new_rows.append(["data_obs", cat+"cr", "merged", -1, "./Models/background/CMS-HGG_ws_%s_combined.root"%(cat+"cr"), "", "w_control_regions:roohist_data_mass_%s"%(cat+"cr"), 0])
       catnum = int(cat.split("cat")[1].split("cr")[0])
-      new_rows.append(["dy_merged_hgg", cat+"cr", "merged", 1, "./Models/background/CMS-HGG_ws_%s.root"%(cat+"cr"), "", "w_control_regions:bkg_combined_cat%d_dy"%catnum, 0])
-      new_rows.append(["dy_merged_hgg", cat, "merged", 1, "./Models/background/CMS-HGG_ws_%s.root"%(cat+"cr"), "", "w_control_regions:bkg_combined_cat%d_dy"%catnum, 0])
+      new_rows.append(["dy_merged_hgg", cat+"cr", "merged", 1, "./Models/background/CMS-HGG_ws_%s_combined.root"%(cat+"cr"), "", "w_control_regions:bkg_combined_cat%d_dy"%catnum, 0])
+      new_rows.append(["dy_merged_hgg", cat, "merged", 1, "./Models/background/CMS-HGG_ws_%s_combined.root"%(cat+"cr"), "", "w_control_regions:bkg_combined_cat%d_dy"%catnum, 0])
 
 
   df = pd.concat([df, pd.DataFrame(new_rows, columns=columns)], ignore_index=True)
@@ -396,7 +397,7 @@ def main(args):
   print(df)
 
   with open(args.output, "w") as f:
-    opt=Options()
+    opt=Options(args)
     td.writePreamble(f, opt)
     td.writeProcesses(f,df,opt,args.procTemplate)
     for syst in systematics_ggtt.experimental_systematics:
@@ -438,16 +439,16 @@ def main(args):
           continue
         catnum = int(cat.split("cat")[1])
         df_row = df[(df.proc=="data_obs")&(df.cat==cat+"cr")].iloc[0]
-        df_row.current_modelWSFile = bkg_workspace_file = "../Background/outdir_%s_combined_mx%dmy%d/fTest/output/CMS-HGG_ws_%s.root"%(args.procTemplate, args.MX, args.MY, df_row["cat"])
+        df_row.current_modelWSFile = bkg_workspace_file = "../Background/outdir_%s_combined_mx%dmy%d/fTest/output/CMS-HGG_ws_%s_combined.root"%(args.procTemplate, args.MX, args.MY, df_row["cat"])
         cr_yield = getNEvents(df_row.current_modelWSFile, df_row.model)
 
         if catnum == nCats - 1:
-          f.write("\nABCD_A rateParam %scr dy_merged_hgg %d [0,1000000]"%(cat, cr_yield))
+          f.write("\nABCD_A rateParam %scr dy_merged_hgg %d [0,3000000]"%(cat, cr_yield))
           to_add_to_group.append("ABCD_A")
-          f.write("\nABCD_C rateParam %s dy_merged_hgg 350 [0,1000]"%cat)
+          f.write("\nABCD_C rateParam %s dy_merged_hgg 5800 [0,10000]"%cat)
           to_add_to_group.append("ABCD_C")
         else:
-          f.write("\nABCD_B%d rateParam %scr dy_merged_hgg %d [0,10000]"%(catnum, cat, cr_yield))
+          f.write("\nABCD_B%d rateParam %scr dy_merged_hgg %d [0,20000]"%(catnum, cat, cr_yield))
           to_add_to_group.append("ABCD_B%d"%catnum)
           f.write("\nABCD_D%d rateParam %s dy_merged_hgg (@0*(@1/@2)) ABCD_C,ABCD_B%d,ABCD_A"%(catnum, cat, catnum))
         f.write("\ndy_bkg_scaler rateParam %s dy_merged_hgg 1"%cat)

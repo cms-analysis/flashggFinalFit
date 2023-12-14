@@ -10,8 +10,6 @@ import argparse
 import json
 import os
 
-DO_SYST = False
-
 def loadJson(path):
   with open(path, "r") as f:
     return json.load(f)
@@ -31,7 +29,7 @@ def getNuisanceDatacardName(name, year):
   else:
     raise Exception("Unexpected shape systematic: %s"%name)
 
-def makeWorkspace(models, systematicss, year, cat, workspace_output, mgg_range, proc):
+def makeWorkspace(models, systematicss, year, cat, workspace_output, mgg_range, proc, doSyst):
   suffix = "_%s_cat%s_%s"%(year, cat, proc)
 
   model = models[year][cat]
@@ -68,7 +66,7 @@ def makeWorkspace(models, systematicss, year, cat, workspace_output, mgg_range, 
   a1 = ROOT.RooSpline1D("a1"+suffix, "a1"+suffix, MX_MY, len(mx_my_arr), mx_my_arr, np.array(popts[:, 3]))
   a2 = ROOT.RooSpline1D("a2"+suffix, "a2"+suffix, MX_MY, len(mx_my_arr), mx_my_arr, np.array(popts[:, 5]))
 
-  if DO_SYST:
+  if doSyst:
     systematics = systematicss[year][cat]
 
     #creates splines for const values
@@ -141,7 +139,7 @@ def rearrangeModels(models):
 def main(args):
   with open(os.path.join(args.indir, "model.json"), "r") as f:
     models = rearrangeModels(json.load(f))
-  if DO_SYST:
+  if args.doSyst:
     with open(os.path.join(args.indir, "systematics.json"), "r") as f:
       systematics = rearrangeModels(json.load(f))
   else:
@@ -149,7 +147,7 @@ def main(args):
 
   with open("rearranged_model.json", "w") as f:
     json.dump(models, f, indent=4, sort_keys=True)
-  if DO_SYST:
+  if args.doSyst:
     with open("rearranged_systematics.json", "w") as f:
       json.dump(systematics, f, indent=4, sort_keys=True)
 
@@ -162,13 +160,14 @@ def main(args):
       cats = sorted(models[proc][year].keys())
       for cat in cats:
         out_path = os.path.join(args.outdir, "%s_%s_cat%s.root"%(proc, year, cat))
-#        makeWorkspace(models[proc], systematics[proc], year, cat, out_path, args.mgg_range, proc)
-        makeWorkspace(models[proc], systematics, year, cat, out_path, args.mgg_range, proc)
+#        makeWorkspace(models[proc], systematics[proc], year, cat, out_path, args.mgg_range, proc, args.doSyst)
+        makeWorkspace(models[proc], systematics, year, cat, out_path, args.mgg_range, proc, args.doSyst)
 if __name__=="__main__":
   parser = argparse.ArgumentParser()
   parser.add_argument('--indir', '-i', type=str, required=True)
   parser.add_argument('--outdir', '-o', type=str, required=True)
   parser.add_argument('--mgg-range', type=float, nargs=2, default=(100,180))
+  parser.add_argument('--doSyst', action="store_true", default=False)
   args = parser.parse_args()
 
   main(args)
