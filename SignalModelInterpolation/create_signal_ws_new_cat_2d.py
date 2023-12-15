@@ -10,8 +10,6 @@ import argparse
 import json
 import os
 
-DO_SYST = False
-
 def loadJson(path):
   with open(path, "r") as f:
     return json.load(f)
@@ -31,7 +29,7 @@ def getNuisanceDatacardName(name, year):
   else:
     raise Exception("Unexpected shape systematic: %s"%name)
 
-def makeWorkspace(models, systematicss, year, cat, workspace_output, mgg_range):
+def makeWorkspace(models, systematicss, year, cat, workspace_output, mgg_range, doSyst):
   suffix = "_%s_cat%s"%(year, cat)
 
   model = models[year][cat]
@@ -94,7 +92,7 @@ def makeWorkspace(models, systematicss, year, cat, workspace_output, mgg_range):
   a1 = ROOT.RooSpline1D("a1"+suffix, "a1"+suffix, MX_MY, len(mx_my_arr), mx_my_arr, np.array(popts[:, 3]))
   a2 = ROOT.RooSpline1D("a2"+suffix, "a2"+suffix, MX_MY, len(mx_my_arr), mx_my_arr, np.array(popts[:, 5]))
 
-  if DO_SYST:
+  if doSyst:
     systematics = systematicss[year][cat]
 
     #creates splines for const values
@@ -147,14 +145,13 @@ def tryMake(path):
 def main(args):
   with open(os.path.join(args.indir, "model.json"), "r") as f:
     models = json.load(f)
-  if DO_SYST:
+  if args.doSyst:
     with open(os.path.join(args.indir, "systematics.json"), "r") as f:
       systematics = json.load(f)
   else:
     systematics = None
 
   years = sorted(models.keys())
-  #years = ["2016"]
   cats = sorted(models[years[0]].keys())
   tryMake(args.outdir)
 
@@ -163,13 +160,14 @@ def main(args):
     for cat in cats:
       print(cat)
       out_path = os.path.join(args.outdir, "sig_%s_cat%s.root"%(year, cat))
-      makeWorkspace(models, systematics, year, cat, out_path, args.mgg_range)
+      makeWorkspace(models, systematics, year, cat, out_path, args.mgg_range, args.doSyst)
 
 if __name__=="__main__":
   parser = argparse.ArgumentParser()
   parser.add_argument('--indir', '-i', type=str, required=True)
   parser.add_argument('--outdir', '-o', type=str, required=True)
   parser.add_argument('--mgg-range', type=float, nargs=2, default=(100,180))
+  parser.add_argument('--doSyst', action="store_true", default=False)
   args = parser.parse_args()
 
   main(args)

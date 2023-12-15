@@ -12,6 +12,7 @@ from commonObjects import inputWSName__,sqrts__
 import os
 
 def main(f_in, cat, f_out):
+    ROOT.gROOT.SetBatch(ROOT.kTRUE)
     f = ROOT.TFile(f_in,"read")
     inputWS = f.Get(inputWSName__)
     f.Close()
