@@ -141,7 +141,7 @@ def plotLimitsStackMX(masses, limits, ylabel, nominal_mx, nominal_my, savename):
     limits_slice = limits_slice[:,np.argsort(my)]
     my = my[np.argsort(my)]
 
-    limits_slice *= 10**i
+    limits_slice *= 10**{i}
 
     plt.scatter(my, limits_slice[2], zorder=3, facecolors="none", edgecolors="blue")
     if mx in nominal_mx:
@@ -185,7 +185,7 @@ def plotLimitsStackMY(masses, limits, ylabel, nominal_mx, nominal_my, savename):
     limits_slice = limits_slice[:,np.argsort(mx)]
     mx = mx[np.argsort(mx)]
 
-    limits_slice *= 10**i
+    limits_slice *= 10**{i}
 
     plt.scatter(mx, limits_slice[2], zorder=3, facecolors="none", edgecolors="blue")
     if my in nominal_my:
