@@ -223,7 +223,8 @@ def grabYields(df, args):
     df.loc[idx, "sig_yield"] = norm * sf * row.rate
 
     if (args.procTemplate in row.proc) and (row.year == "2016"): # only need bkg yield in one row (choose 2016)
-      bkg_workspace_file = "../Background/outdir_%s_combined_mx%dmy%d/fTest/output/CMS-HGG_multipdf_%s_combined.root"%(args.procTemplate, args.MX, args.MY, row["cat"])
+      bkg_workspace_file = "/home/users/evourlio/CMSSW_10_2_13/src/flashggFinalFit/Background/massDecorSRs_noSys_DY/outdir_%s_combined_mx%dmy%d/fTest/output/CMS-HGG_multipdf_%s_combined.root"%(args.procTemplate, args.MX, args.MY, row["cat"])
+      #bkg_workspace_file = "../Background/outdir_%s_combined_mx%dmy%d/fTest/output/CMS-HGG_multipdf_%s_combined.root"%(args.procTemplate, args.MX, args.MY, row["cat"])
       df.loc[idx, "bkg_yield"] = getBackgroundYield(bkg_workspace_file, row["cat"], args.MY)
 
   return df
@@ -439,16 +440,22 @@ def main(args):
           continue
         catnum = int(cat.split("cat")[1])
         df_row = df[(df.proc=="data_obs")&(df.cat==cat+"cr")].iloc[0]
-        df_row.current_modelWSFile = bkg_workspace_file = "../Background/outdir_%s_combined_mx%dmy%d/fTest/output/CMS-HGG_ws_%s_combined.root"%(args.procTemplate, args.MX, args.MY, df_row["cat"])
+        df_row.current_modelWSFile = bkg_workspace_file = "/home/users/evourlio/CMSSW_10_2_13/src/flashggFinalFit/Background/massDecorSRs_noSys_DY/outdir_%s_combined_mx%dmy%d/fTest/output/CMS-HGG_ws_%s_combined.root"%(args.procTemplate, args.MX, args.MY, df_row["cat"])
+        #df_row.current_modelWSFile = bkg_workspace_file = "../Background/outdir_%s_combined_mx%dmy%d/fTest/output/CMS-HGG_ws_%s_combined.root"%(args.procTemplate, args.MX, args.MY, df_row["cat"])
         cr_yield = getNEvents(df_row.current_modelWSFile, df_row.model)
+        upper_bound = cr_yield*2
 
         if catnum == nCats - 1:
-          f.write("\nABCD_A rateParam %scr dy_merged_hgg %d [0,3000000]"%(cat, cr_yield))
+          f.write("\nABCD_A rateParam %scr dy_merged_hgg %d [0,%d]"%(cat, cr_yield, upper_bound))
+          #f.write("\nABCD_A rateParam %scr dy_merged_hgg %d [0,3000000]"%(cat, cr_yield))
           to_add_to_group.append("ABCD_A")
-          f.write("\nABCD_C rateParam %s dy_merged_hgg 5800 [0,10000]"%cat)
+          #TODO find a way to not hard code 5800
+          f.write("\nABCD_C rateParam %s dy_merged_hgg 5800 [0,%d]"%cat)
+          #f.write("\nABCD_C rateParam %s dy_merged_hgg 5800 [0,10000]"%cat)
           to_add_to_group.append("ABCD_C")
         else:
-          f.write("\nABCD_B%d rateParam %scr dy_merged_hgg %d [0,20000]"%(catnum, cat, cr_yield))
+          f.write("\nABCD_B%d rateParam %scr dy_merged_hgg %d [0,%d]"%(catnum, cat, cr_yield, upper_bound))
+          #f.write("\nABCD_B%d rateParam %scr dy_merged_hgg %d [0,20000]"%(catnum, cat, cr_yield))
           to_add_to_group.append("ABCD_B%d"%catnum)
           f.write("\nABCD_D%d rateParam %s dy_merged_hgg (@0*(@1/@2)) ABCD_C,ABCD_B%d,ABCD_A"%(catnum, cat, catnum))
         f.write("\ndy_bkg_scaler rateParam %s dy_merged_hgg 1"%cat)
