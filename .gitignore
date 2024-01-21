@@ -37,4 +37,8 @@ AutoDict_*
 # Output dirs in signal and bkg
 Signal/outdir_*
 Background/outdir_*
+Background/config_*
+Datacard/yields_*
+Combine/impacts*.json
+Plots/*/
 files/*
