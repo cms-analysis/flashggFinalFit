@@ -206,3 +206,15 @@ globalReplacementMap["STXS"]["catRVMap"]["RECO_WH_LEP_PTV_75_150_Tag1"] = "RECO_
 globalReplacementMap["STXS"]["catRVMap"]["RECO_WH_LEP_PTV_GT150_Tag0"] = "RECO_WH_LEP_PTV_GT150_Tag0"
 globalReplacementMap["STXS"]["catRVMap"]["RECO_ZH_LEP_Tag0"] = "RECO_ZH_LEP_Tag0"
 globalReplacementMap["STXS"]["catRVMap"]["RECO_ZH_LEP_Tag1"] = "RECO_ZH_LEP_Tag1"
+
+
+# Early Analysis
+globalReplacementMap["earlyAnalysis"] = od()
+# Replacement category for RV fit
+globalReplacementMap["earlyAnalysis"]['procRVMap'] = od()
+globalReplacementMap["earlyAnalysis"]["procRVMap"]["Untagged_Tag0"] = "GG2H"
+globalReplacementMap["earlyAnalysis"]["procRVMap"]["VBF_Tag0"] = "VBF"
+# Replacement category for RV fit
+globalReplacementMap["earlyAnalysis"]["catRVMap"] = od()
+globalReplacementMap["earlyAnalysis"]["catRVMap"]["Untagged_Tag0"] = "Untagged_Tag0"
+globalReplacementMap["earlyAnalysis"]["catRVMap"]["VBF_Tag0"] = "VBF_Tag0"

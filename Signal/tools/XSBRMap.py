@@ -28,6 +28,14 @@ globalXSBRMap['example']['THQ'] = {'mode':'tHq'}
 globalXSBRMap['example']['THW'] = {'mode':'tHW'}
 # ...
 
+# Early Run 3 Hgg analysis
+globalXSBRMap['earlyAnalysis'] = od()
+globalXSBRMap['earlyAnalysis']['decay'] = {'mode':'hgg'}
+globalXSBRMap['earlyAnalysis']['GG2H'] = {'mode':'constant','factor':51.96}
+globalXSBRMap['earlyAnalysis']['VBF'] = {'mode':'constant','factor':4.067}
+globalXSBRMap['earlyAnalysis']['VH'] = {'mode':'constant','factor':2.3781}
+globalXSBRMap['earlyAnalysis']['TTH'] = {'mode':'constant','factor':0.5638}
+
 # STXS analysis: add factor for bin composition
 globalXSBRMap['STXS'] = od()
 globalXSBRMap['STXS']['decay'] = {'mode':'hgg'}
