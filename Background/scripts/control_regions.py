@@ -20,12 +20,18 @@ def main(f_in, cat, f_out):
     xvar = inputWS.var("CMS_hgg_mass")
     nBinsOutput = xvar.getBins()
     xvar.setBins(nBinsOutput/4)
-    
+
+    zoom = True
+    if zoom:
+        xvar.setRange(55, 180)
+        xvar.setBins(125)
+ 
     # create data roohist
     #inputWS.Print()
     data = inputWS.data("Data_%s_%s"%(sqrts__,cat))
-    DataHistFit = ROOT.RooDataHist("datahistfit","datahistfit",ROOT.RooArgSet(xvar),data)
-    
+    data_zoom = data.reduce(ROOT.RooFit.CutRange("CMS_hgg_mass > 55 && CMS_hgg_mass < 180"))
+    DataHistFit = ROOT.RooDataHist("datahistfit","datahistfit",ROOT.RooArgSet(xvar),data_zoom)
+
     frame = xvar.frame()
     DataHistFit.plotOn(frame)
 

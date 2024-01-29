@@ -352,15 +352,15 @@ def main(args):
 
   new_rows = []
   for cat in df.cat.unique():
-    new_rows.append(["bkg_mass", cat, "merged", 1, "./Models/background/CMS-HGG_multipdf_%s.root"%cat, "", "multipdf:CMS_hgg_%s_combined_13TeV_bkgshape"%cat, 0])
-    new_rows.append(["data_obs", cat, "merged", -1, "./Models/background/CMS-HGG_multipdf_%s.root"%cat, "", "multipdf:roohist_data_mass_%s"%cat, 0])
+    new_rows.append(["bkg_mass", cat, "merged", 1, "./Models/background/CMS-HGG_multipdf_%s_combined.root"%cat, "", "multipdf:CMS_hgg_%s_combined_13TeV_bkgshape"%cat, 0])
+    new_rows.append(["data_obs", cat, "merged", -1, "./Models/background/CMS-HGG_multipdf_%s_combined.root"%cat, "", "multipdf:roohist_data_mass_%s"%cat, 0])
   
     if args.doABCD:
-      new_rows.append(["bkg_mass", cat+"cr", "merged", 1, "./Models/background/CMS-HGG_ws_%s.root"%(cat+"cr"), "", "w_control_regions:CMS_hgg_%s_combined_13TeV_bkgshape"%(cat+"cr"), 0])
-      new_rows.append(["data_obs", cat+"cr", "merged", -1, "./Models/background/CMS-HGG_ws_%s.root"%(cat+"cr"), "", "w_control_regions:roohist_data_mass_%s"%(cat+"cr"), 0])
+      new_rows.append(["bkg_mass", cat+"cr", "merged", 1, "./Models/background/CMS-HGG_ws_%s_combined.root"%(cat+"cr"), "", "w_control_regions:CMS_hgg_%s_combined_13TeV_bkgshape"%(cat+"cr"), 0])
+      new_rows.append(["data_obs", cat+"cr", "merged", -1, "./Models/background/CMS-HGG_ws_%s_combined.root"%(cat+"cr"), "", "w_control_regions:roohist_data_mass_%s"%(cat+"cr"), 0])
       catnum = int(cat.split("cat")[1].split("cr")[0])
-      new_rows.append(["dy_merged_hgg", cat+"cr", "merged", 1, "./Models/background/CMS-HGG_ws_%s.root"%(cat+"cr"), "", "w_control_regions:bkg_combined_cat%d_dy"%catnum, 0])
-      new_rows.append(["dy_merged_hgg", cat, "merged", 1, "./Models/background/CMS-HGG_ws_%s.root"%(cat+"cr"), "", "w_control_regions:bkg_combined_cat%d_dy"%catnum, 0])
+      new_rows.append(["dy_merged_hgg", cat+"cr", "merged", 1, "./Models/background/CMS-HGG_ws_%s_combined.root"%(cat+"cr"), "", "w_control_regions:bkg_combined_cat%d_dy"%catnum, 0])
+      new_rows.append(["dy_merged_hgg", cat, "merged", 1, "./Models/background/CMS-HGG_ws_%s_combined.root"%(cat+"cr"), "", "w_control_regions:bkg_combined_cat%d_dy"%catnum, 0])
 
 
   df = pd.concat([df, pd.DataFrame(new_rows, columns=columns)], ignore_index=True)
