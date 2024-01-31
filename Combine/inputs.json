@@ -1,9 +1,23 @@
 {
     "mu_inclusive":{
         "pois":"r",
-        "fits":"profile1D:syst:r",
+        "fits":"profile1D:syst:all",
         "points":"20:1",
         "fit_opts":"--setParameterRanges r=0,2 --saveSpecifiedNuis all"
+    },
+    
+    "mu_inclusive_wsyst":{
+        "pois":"r",
+        "fits":"profile1D:syst:all+profile1D:statonly:all",
+        "points":"40:1+40:1",
+        "fit_opts":"--setParameterRanges r=0,2 --saveSpecifiedNuis all+--setParameterRanges r=0,2 --saveSpecifiedNuis all"
+    },
+
+    "mu_fiducial":{
+        "pois":"r",
+        "fits":"profile1D:syst:all+profile1D:statonly:all",
+        "points":"40:1+40:1",
+        "fit_opts":"--setParameterRanges r=0,2 --saveSpecifiedNuis all+--setParameterRanges r=0,2 --saveSpecifiedNuis all"
     },
 
     "mu":{

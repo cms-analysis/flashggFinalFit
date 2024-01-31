@@ -206,3 +206,22 @@ globalReplacementMap["STXS"]["catRVMap"]["RECO_WH_LEP_PTV_75_150_Tag1"] = "RECO_
 globalReplacementMap["STXS"]["catRVMap"]["RECO_WH_LEP_PTV_GT150_Tag0"] = "RECO_WH_LEP_PTV_GT150_Tag0"
 globalReplacementMap["STXS"]["catRVMap"]["RECO_ZH_LEP_Tag0"] = "RECO_ZH_LEP_Tag0"
 globalReplacementMap["STXS"]["catRVMap"]["RECO_ZH_LEP_Tag1"] = "RECO_ZH_LEP_Tag1"
+
+
+# Early Analysis
+globalReplacementMap["earlyAnalysis"] = od()
+# Wrong vertex stuff
+globalReplacementMap["earlyAnalysis"]['procWV'] = "GG2H"
+globalReplacementMap["earlyAnalysis"]['catWV'] = "worst_resolution"
+# Relacement processes for RV
+globalReplacementMap["earlyAnalysis"]['procRVMap'] = od()
+globalReplacementMap["earlyAnalysis"]["procRVMap"]["best_resolution"] = "GG2H"
+globalReplacementMap["earlyAnalysis"]["procRVMap"]["best_resolution"] = "VBF"
+globalReplacementMap["earlyAnalysis"]["procRVMap"]["best_resolution"] = "VH"
+globalReplacementMap["earlyAnalysis"]["procRVMap"]["best_resolution"] = "TTH"
+# Replacement categories for RV
+globalReplacementMap["earlyAnalysis"]["catRVMap"] = od()
+globalReplacementMap["earlyAnalysis"]["catRVMap"]["GG2H"] = "GG2H"
+globalReplacementMap["earlyAnalysis"]["catRVMap"]["VBF"]  = "VBF"
+globalReplacementMap["earlyAnalysis"]["catRVMap"]["VH"]   = "VH"
+globalReplacementMap["earlyAnalysis"]["catRVMap"]["TTH"]  = "TTH"
