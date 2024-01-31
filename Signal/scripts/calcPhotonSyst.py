@@ -130,7 +130,13 @@ for ir,r in data.iterrows():
   for stype in ['scales','scalesCorr','smears']:
     for s in getattr(opt,stype).split(","):
       if s == '': continue
-      sname = "%s%s"%(inputNuisanceExtMap[stype],s)
+      # Following has been modified by JLS just for the early analysis, we need to revise the interfacing
+      if s=='scale' and stype=='scales':
+        sname = 'Scale'
+      elif s=='smearing' and stype=='smears':
+        sname = 'Smearing'
+      else:
+        sname = "%s%s"%(inputNuisanceExtMap[stype],s)
       #print "    * Systematic = %s (%s)"%(sname,stype)
       hists = getHistograms(inputWS,r['nominalDataName'],sname)
       # If nominal yield = 0:
