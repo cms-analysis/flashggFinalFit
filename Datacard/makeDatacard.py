@@ -35,7 +35,6 @@ def get_options():
 
 def leave():
   print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG DATACARD MAKER RUN II (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ "
-  exit(1)
 
 STXSMergingScheme, STXSScaleCorrelationScheme = None, None
 if opt.doSTXSMerging: from tools.STXS_tools import STXSMergingScheme
