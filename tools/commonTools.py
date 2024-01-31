@@ -89,6 +89,7 @@ def signalFromFileName(_fileName):
 procToDataMap = od()
 procToDataMap['GG2H'] = 'ggh'
 procToDataMap['VBF'] = 'vbf'
+procToDataMap['VH'] = 'vh'
 procToDataMap['WH2HQQ'] = 'wh'
 procToDataMap['ZH2HQQ'] = 'zh'
 procToDataMap['QQ2HLNU'] = 'wh'
