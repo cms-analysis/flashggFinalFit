@@ -210,11 +210,26 @@ globalReplacementMap["STXS"]["catRVMap"]["RECO_ZH_LEP_Tag1"] = "RECO_ZH_LEP_Tag1
 
 # Early Analysis
 globalReplacementMap["earlyAnalysis"] = od()
-# Replacement category for RV fit
+# Wrong vertex stuff
+globalReplacementMap["earlyAnalysis"]['procWV'] = "GG2H"
+globalReplacementMap["earlyAnalysis"]['catWV'] = "worst_resolution"
+# Relacement processes for RV
 globalReplacementMap["earlyAnalysis"]['procRVMap'] = od()
-globalReplacementMap["earlyAnalysis"]["procRVMap"]["Untagged_Tag0"] = "GG2H"
-globalReplacementMap["earlyAnalysis"]["procRVMap"]["VBF_Tag0"] = "VBF"
-# Replacement category for RV fit
+globalReplacementMap["earlyAnalysis"]["procRVMap"]["best_resolution_GG2H"]   = "GG2H"
+globalReplacementMap["earlyAnalysis"]["procRVMap"]["medium_resolution_GG2H"] = "GG2H"
+globalReplacementMap["earlyAnalysis"]["procRVMap"]["best_resolution_GG2H"]   = "GG2H"
+globalReplacementMap["earlyAnalysis"]["procRVMap"]["best_resolution_VBF"]    = "VBF"
+globalReplacementMap["earlyAnalysis"]["procRVMap"]["medium_resolution_VBF"]  = "VBF"
+globalReplacementMap["earlyAnalysis"]["procRVMap"]["best_resolution_VBF"]    = "VBF"
+globalReplacementMap["earlyAnalysis"]["procRVMap"]["best_resolution_VH"]     = "VH"
+globalReplacementMap["earlyAnalysis"]["procRVMap"]["medium_resolution_VH"]   = "VH"
+globalReplacementMap["earlyAnalysis"]["procRVMap"]["best_resolution_VH"]     = "VH"
+globalReplacementMap["earlyAnalysis"]["procRVMap"]["best_resolution_TTH"]     = "TTH"
+globalReplacementMap["earlyAnalysis"]["procRVMap"]["medium_resolution_TTH"]   = "TTH"
+globalReplacementMap["earlyAnalysis"]["procRVMap"]["best_resolution_TTH"]     = "TTH"
+# Replacement categories for RV
 globalReplacementMap["earlyAnalysis"]["catRVMap"] = od()
-globalReplacementMap["earlyAnalysis"]["catRVMap"]["Untagged_Tag0"] = "Untagged_Tag0"
-globalReplacementMap["earlyAnalysis"]["catRVMap"]["VBF_Tag0"] = "VBF_Tag0"
+globalReplacementMap["earlyAnalysis"]["procRVMap"]["GG2H"] = "GG2H"
+globalReplacementMap["earlyAnalysis"]["procRVMap"]["VBF"]  = "VBF"
+globalReplacementMap["earlyAnalysis"]["procRVMap"]["VH"]   = "VH"
+globalReplacementMap["earlyAnalysis"]["procRVMap"]["TTH"]  = "TTH"
