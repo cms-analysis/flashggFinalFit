@@ -21,12 +21,12 @@ get_last_cat() {
 
 pushd Datacard
   if [ $dy_bkg_model = 0 ]; then 
-    python makeDatacardGGTT_new.py -o Datacard_${procTemplate}_${m}.txt --n-in-sideband $indir/../CatOptim/N_in_sidebands.json --MH $mh --MX $mx --MY $my --procTemplate ${procTemplate} --prune --do-res-bkg
+    python makeDatacardGGTT_new.py -o Datacard_${procTemplate}_${m}.txt --n-in-sideband $indir/../CatOptim/N_in_sidebands.json --MH $mh --MX $mx --MY $my --procTemplate ${procTemplate} --prune --do-res-bkg --sig-syst $indir/../Interpolation/systematics.json
 
     #python makeDatacardGGTT_new.py -o Datacard_${procTemplate}_${m}.txt --MH $mh --MX $mx --MY $my --prune --sig-syst ${sig_model}/systematics.json --res-bkg-syst ${res_bkg_model}/systematics.json --do-res-bkg
     #python makeDatacardGGTT_new.py -o Datacard_${procTemplate}_${m}.txt --MH $mh --MX $mx --MY $my --prune --sig-syst ${sig_model}/systematics.json --res-bkg-syst ${res_bkg_model}/systematics.json --doABCD
   else
-    python makeDatacardGGTT_new.py -o Datacard_${procTemplate}_${m}.txt --n-in-sideband $indir/../CatOptim/N_in_sidebands.json --MH $mh --MX $mx --MY $my --procTemplate ${procTemplate} --prune --do-res-bkg --doABCD
+    python makeDatacardGGTT_new.py -o Datacard_${procTemplate}_${m}.txt --n-in-sideband $indir/../CatOptim/N_in_sidebands.json --MH $mh --MX $mx --MY $my --procTemplate ${procTemplate} --prune --do-res-bkg --sig-syst $indir/../Interpolation/systematics.json --doABCD
     #python makeDatacardGGTT_new.py -o Datacard_${procTemplate}_${m}.txt --n-in-sideband $indir/../CatOptim/N_in_sidebands.json --MH $mh --MX $mx --MY $my --procTemplate ${procTemplate} --prune --sig-syst ${sig_model}/systematics.json --res-bkg-syst ${res_bkg_model}/systematics.json --do-res-bkg --doABCD
     #python makeDatacardGGTT_new.py -o Datacard_${procTemplate}_${m}.txt --MH $mh --MX $mx --MY $my --prune --sig-syst ${sig_model}/systematics.json --res-bkg-syst ${res_bkg_model}/systematics.json
   fi
