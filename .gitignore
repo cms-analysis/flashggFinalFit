@@ -34,6 +34,11 @@ AutoDict_*
 *.pcm
 *.o
 
+# Files and folders from compiling the background area
+Background/RootDict.cxx
+Background/bin/
+Background/lib/
+
 # Output dirs in signal and bkg
 Signal/outdir_*
 Background/outdir_*
