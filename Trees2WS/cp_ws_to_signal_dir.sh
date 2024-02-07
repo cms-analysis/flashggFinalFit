@@ -13,7 +13,7 @@ path="$1"
 source_directories=("ws_GG2H" "ws_TTH" "ws_VBF" "ws_VH")
 
 # Create the destination directory if it does not exist
-destination_directory="$path/ws_signals"
+destination_directory="$path/ws_signal"
 mkdir -p "$destination_directory"
 
 # Iterate over each source directory and copy .root files to the destination

@@ -11,6 +11,14 @@ eras=("preEE" "postEE")
 # Define an array of production modes and corresponding process strings
 productionModes=("ggh:GluGluHtoGG" "vbf:VBFHtoGG" "vh:VHtoGG" "tth:ttHtoGG")
 
+# Check if path argument is provided
+if [ $# -ne 1 ]; then
+    echo "Usage: $0 <path_to_root_files>"
+    exit 1
+fi
+
+path_to_root_files="$1"
+
 # Function to check if a directory is empty
 is_directory_empty() {
     local dir="$1"
@@ -36,16 +44,7 @@ for modeString in "${productionModes[@]}"; do
         fi
         
         for mass in "${inputMasses[@]}"; do
-            python trees2ws.py --inputMass "$mass" --productionMode "$mode" --year 2022"$era" --doSystematics --inputConfig config_2022.py --inputTreeFile /net/scratch_cms3a/spaeh/private/PhD/analyses/early_Run3_Hgg/HiggsDNA/earlyRun3_production_v13/signal/earlyRun3_NTuples_Jan24_v13_signal_wSFs/root/"$process"_M-"$mass"_"$era"/*.root --outputWSDir "$outputDir"
+            python trees2ws.py --inputMass "$mass" --productionMode "$mode" --year 2022"$era" --doSystematics --inputConfig config_2022.py --inputTreeFile "$path_to_root_files"/"$process"_M-"$mass"_"$era"/*.root --outputWSDir "$outputDir"
         done
-        
-        # Check if ws_signal directory exists and is empty
-        wsSignalDir="$outputDir/ws_signal"
-        if [ ! -d "$wsSignalDir" ]; then
-            mkdir -p "$outputDir"
-        fi
-        # Copy converted .root files into ws_signal directory
-        cp "$outputDir"/ws_*/"$process"_M-*_"$era"/*.root "$wsSignalDir"
-
     done
 done
