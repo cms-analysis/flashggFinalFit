@@ -6,7 +6,7 @@ import argparse
 import ROOT
 import os
 from commonObjects import lumiMap
-import systematics_ggtt
+import systematics_ggbbres
 import json
 import numpy as np
 import copy
@@ -101,17 +101,17 @@ def addMigrationSystematics(df):
   for i in range(nCats-1):    
     template_copy = copy.deepcopy(template)
     template_copy["name"] = template_copy["title"] = "Interpolation_migration_%d_%d"%(i, i+1)
-    systematics_ggtt.experimental_systematics.append(template_copy)
+    systematics_ggbbres.experimental_systematics.append(template_copy)
 
 def grabSystematics(df, args):
   sig_systematics = attemptLoadSystematics(args.sig_syst)
   res_bkg_systematics = attemptLoadSystematics(args.res_bkg_syst)
 
-  addMigrationSystematics(df)
+  #addMigrationSystematics(df)
 
   years = df.year.unique()
 
-  for syst in systematics_ggtt.experimental_systematics:
+  for syst in systematics_ggbbres.experimental_systematics:
     if syst["correlateAcrossYears"] == -1:
       df[syst["name"]] = '-'
       df_name = lambda sys_name, year: sys_name
@@ -132,7 +132,7 @@ def grabSystematics(df, args):
         raise Exception()
       df.loc[idx, df_name(syst["name"], year)] = val
 
-  for syst in systematics_ggtt.theory_systematics:
+  for syst in systematics_ggbbres.theory_systematics:
     assert syst["correlateAcrossYears"] == 1
     df[syst["name"]] = '-'
 
@@ -394,18 +394,17 @@ def main(args):
       df = pd.concat([df_sr, df_cr])    
       
   df = grabSystematics(df, args)
-  print(df)
 
   with open(args.output, "w") as f:
     opt=Options(args)
     td.writePreamble(f, opt)
     td.writeProcesses(f,df,opt,args.procTemplate)
-    for syst in systematics_ggtt.experimental_systematics:
+    for syst in systematics_ggbbres.experimental_systematics:
       td.writeSystematic(f,df,syst,opt)
-    for syst in systematics_ggtt.theory_systematics:
+    for syst in systematics_ggbbres.theory_systematics:
       td.writeSystematic(f,df,syst,opt)
     td.writeBreak(f)
-    for syst in systematics_ggtt.signal_shape_systematics:
+    for syst in systematics_ggbbres.signal_shape_systematics:
       td.writeSystematic(f,df,syst,opt)
     # if args.do_dy_bkg:
     #   dy_systematics = createDYSystematics(df)

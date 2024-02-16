@@ -25,19 +25,19 @@ def get_mH(config, mass):
 
 def tree2ws(nonResYears, masses, nonResBkgTrees, procTemplate, mggl, mggh):
   print('Starting step 1: Make workspaces from pNN root files')
-  print()
+  print("")
 
   for year in nonResYears:
     for m in masses:
       os.system('bash get_limit_hadd_tree2ws.sh'+' '+str(nonResBkgTrees)+' '+str(procTemplate)+' '+str(year)+' '+str(m)+' '+str(mggl)+' '+str(mggh))
 
   print('Finished step 1: Make workspaces from pNN root files')
-  print()
+  print("")
 
 
 def modelNonResBkg(doFailedFits, nonResYears, masses, nonResBkgTrees, procTemplate, config, nCats):
   print('Starting step 2: Model the non-resonant background')
-  print()
+  print("")
 
   if not doFailedFits:
     for year in nonResYears:
@@ -98,23 +98,23 @@ def modelNonResBkg(doFailedFits, nonResYears, masses, nonResBkgTrees, procTempla
       os.system('for f in $(ls Background/outdir_'+procTemplate+'_'+year+'_*/fTest/output/*.root | grep "'+year+'.root" -v); do rename .root _'+year+'.root $f; done')
 
   print('Finished step 2: Model the non-resonant background')
-  print()
+  print("")
 
 
 def modelSignalAndResBkg(sigModels, resHBkgModels, mggl, mggh):
   print('Starting step 3: Get the models for signal and resonant background')
-  print()
+  print("")
 
   os.system('python SignalModelInterpolation/create_signal_ws_new_cat_2d.py -i '+sigModels+' -o SignalModelInterpolation/outdir --mgg-range '+str(mggl)+' '+str(mggh)+(' --doSyst' if doSyst else ''))
   os.system('python SignalModelInterpolation/create_signal_ws_new_cat_2d_res_bkg.py -i '+resHBkgModels+' -o SignalModelInterpolation/res_bkg_outdir --mgg-range '+str(mggl)+' '+str(mggh)+(' --doSyst' if doSyst else ''))
 
   print('Finished step 3: Get the models for signal and resonant background')
-  print()
+  print("")
 
 
 def makeDatacards(masses, sigModels, resHBkgModels, resDYBkg, config, procTemplate, indir):
   print('Starting step 4: Make datacards')
-  print()
+  print("")
 
   for m in masses:
     mH = str(get_mH(config, m))
@@ -126,12 +126,12 @@ def makeDatacards(masses, sigModels, resHBkgModels, resDYBkg, config, procTempla
       os.system('bash get_limit_datacard.sh '+sigModels+' '+resHBkgModels+' '+m+' '+mH+' '+mX+' '+mY+' 0 '+procTemplate+' '+indir)
 
   print('Finished step 4: Make datacards')
-  print()
+  print("")
 
 
 def makeWorkspaces(procTemplate, masses, config, mggl, mggh):
   print('Starting step 5: Make workspaces')
-  print()
+  print("")
 
   os.system('mkdir -p Combine/Models; ' + \
             'mkdir -p Combine/Models/signal; ' + \
@@ -150,12 +150,12 @@ def makeWorkspaces(procTemplate, masses, config, mggl, mggh):
     os.system('bash get_limit_workspace.sh '+str(mggl)+' '+str(mggh)+' '+mX+' '+mY+' '+mH+' '+procTemplate)
 
   print('Finished step 5: Make workspaces')
-  print()
+  print("")
 
 
 def getLimit(masses, config, mggl, mggh, procTemplate):
   print('Starting step 6: Get limit')
-  print()
+  print("")
 
   for m in masses:
     mH = str(get_mH(config, m))
@@ -177,21 +177,49 @@ def getLimit(masses, config, mggl, mggh, procTemplate):
             'mkdir -p Outputs/CollectedPlots_'+procTemplate+'/Combine/Impacts; ' + \
             'cp Combine/impacts* Outputs/CollectedPlots_'+procTemplate+'/Combine/Impacts/; ' + \
             'mkdir -p Outputs/CollectedPlots_'+procTemplate+'/Combine/NLL_Scans; ' + \
-            'cp Combine/NLL_Scan* Outputs/CollectedPlots_'+procTemplate+'/Combine/NLL_Scans; ' + \
-            'mkdir -p Outputs/CollectedPlots_'+procTemplate+'/Background/DY; ' + \
-            'cp Combine/'+procTemplate+'*cr*.png Outputs/CollectedPlots_'+procTemplate+'/Background/DY; ' \
+            'cp Combine/NLL_Scan* Outputs/CollectedPlots_'+procTemplate+'/Combine/NLL_Scans; ' \
   )
 
   print('Finished step 6: Get limit')
-  print()
+  print("")
+
+
+def getImpact(masses, config, mggl, mggh, procTemplate):
+  print('Starting step 7: Get impacts')
+  print("")
+
+  for m in masses:
+    mH = str(get_mH(config, m))
+    mX = str(get_mX(m))
+    mY = str(get_mY(m))
+    print("Impacts to run for mX = "+mX+", mY = "+mY)
+    os.system('bash get_limit_impacts.sh '+str(mggl)+' '+str(mggh)+' '+mX+' '+mY+' '+mH+' '+procTemplate)
+
+  print('Finished step 7: Get impacts')
+  print("")
+
+
+def getFitDiagnostics(masses, config, mggl, mggh, procTemplate):
+  print('Starting step 7: Get fit diagnostics')
+  print("")
+
+  for m in masses:
+    mH = str(get_mH(config, m))
+    mX = str(get_mX(m))
+    mY = str(get_mY(m))
+    print("Fit diagnostics to run for mX = "+mX+", mY = "+mY)
+    os.system('bash get_limit_fitDiagnostics.sh '+str(mggl)+' '+str(mggh)+' '+mX+' '+mY+' '+mH+' '+procTemplate)
+
+  print('Finished step 7: Get fit diagnostics')
+  print("")
 
 
 def main(args):
-  print()
+  print("")
   print('Starting FlashGG Workflow')
   print('Running steps: '+args.steps)
   print('Running configuration: '+args.config)
-  print()
+  print("")
   if args.doFailedFits and '2' not in args.steps:
     print('WARNING: The "doFailedFits" flag only works with step 2! It will do nothing for this run.')
 
@@ -222,6 +250,14 @@ def main(args):
   for year in nonResYears:
     treePerYearDir = args.nonResBkgTrees+'/'+year
     masses=[m for m in detect_mass_points(treePerYearDir) if args.masses in m]
+    if args.useSmallMassGrid:
+      masses=["mx240my70", "mx320my70", "mx450my70", "mx600my70", "mx750my70", "mx850my70", "mx1000my70",
+              "mx240my100", "mx320my100", "mx450my100", "mx600my100", "mx750my100", "mx850my100", "mx1000my100",
+              "mx300my170", "mx320my170", "mx450my170", "mx600my170", "mx750my170", "mx850my170", "mx1000my170",
+              "mx450my300", "mx600my300", "mx750my300", "mx850my300", "mx1000my300",
+              "mx600my450", "mx750my450", "mx850my450", "mx1000my450",
+              "mx750my600", "mx850my600", "mx1000my600", "mx1000my800"]
+    masses=[m for m in masses if args.masses in m]
     print('Year = '+year)
     print('Detected mass points,\tSRs,\tCRs:')
     for m in masses:
@@ -229,8 +265,8 @@ def main(args):
       nCRs[m]=os.popen('ls '+treePerYearDir+'/Data*'+m+'cat*cr_* | wc -w').read()
       nCats[m]=str(int(nCats[m])-int(nCRs[m]))
       print(m+'\t\t'+str(nCats[m])+'\t'+str(nCRs[m]))
-    print()
-  print()
+    print("")
+  print("")
 
   if '1' in args.steps:
     tree2ws(nonResYears, masses, args.nonResBkgTrees, args.procTemplate, mggl, mggh)
@@ -244,6 +280,10 @@ def main(args):
     makeWorkspaces(args.procTemplate, masses, args.config, mggl, mggh)
   if '6' in args.steps:
     getLimit(masses, args.config, mggl, mggh, args.procTemplate)
+  if '7' in args.steps:
+    getImpact(masses, args.config, mggl, mggh, args.procTemplate)
+  if '8' in args.steps:
+    getFitDiagnostics(masses, args.config, mggl, mggh, args.procTemplate)
 
 
 if __name__=="__main__":
@@ -253,10 +293,11 @@ if __name__=="__main__":
   parser.add_argument('--resHBkgModels', '-inhrb', type=str, required=True)
   parser.add_argument('--resDYBkg', '-dy', action="store_true", default=False)
   parser.add_argument('--masses', '-m', type=str, default='mx') # masses format mxXmyY so 'mx' as default means that all masses are run 
-  parser.add_argument('--steps', '-s', type=str, default='123456')
+  parser.add_argument('--steps', '-s', type=str, default='1234567')
   parser.add_argument('--config', '-c', type=str, choices=['Ybb','Ygg_low','Ygg_high'], default='Ygg_low')
   parser.add_argument('--procTemplate', '-p', type=str, default='ggbbres')
   parser.add_argument('--doFailedFits', action="store_true", default=False)
+  parser.add_argument('--useSmallMassGrid', action="store_true", default=False)
   args = parser.parse_args()
 
   main(args)
