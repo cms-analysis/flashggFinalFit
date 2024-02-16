@@ -74,8 +74,8 @@ experimental_systematics = [
 signal_shape_systematics = [
                 {'name':'fnufUnc','title':'funf','type':'signal_shape','mode':'scalesCorr','mean':'0.0','sigma':'1.0'},
                 {'name':'materialUnc','title':'material','type':'signal_shape','mode':'scalesCorr','mean':'0.0','sigma':'1.0'},
-                {'name':'PhoScaleUnc','title':'MCSmear','type':'signal_shape','mode':'smears','mean':'0.0','sigma':'1.0'},
-                {'name':'PhoSmearUnc','title':'MCScale','type':'signal_shape','mode':'scales','mean':'0.0','sigma':'1.0'},
+                {'name':'PhoSmearUnc','title':'MCSmear','type':'signal_shape','mode':'smears','mean':'0.0','sigma':'1.0'},
+                {'name':'PhoScaleUnc','title':'MCScale','type':'signal_shape','mode':'scales','mean':'0.0','sigma':'1.0'},
                 {'name':'PUWeight','title':'pileup','type':'signal_shape','mode':'scales','mean':'0.0','sigma':'1.0'},
                 {'name':'JESUnc2','title':'scale_j_absolute','type':'signal_shape','mode':'scalesCorr','mean':'0.0','sigma':'1.0'},
                 {'name':'JESUnc3','title':'scale_j_absolute','type':'signal_shape','mode':'scales','mean':'0.0','sigma':'1.0'},
