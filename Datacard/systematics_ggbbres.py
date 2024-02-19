@@ -46,16 +46,23 @@ theory_systematics = [
 # EXPERIMENTAL SYSTEMATICS
 
 experimental_systematics = [
-                # Updated luminosity partial-correlation scheme: 13/5/21 (recommended simplified nuisances)
                 {'name':'lumi_13TeV_','title':'lumi_13TeV','type':'constant','prior':'lnN','correlateAcrossYears':0,'value':{'2016':'1.010','2017':'1.020','2018':'1.015'}},
                 {'name':'lumi_13TeV_correlated','title':'lumi_13TeV_correlated','type':'constant','prior':'lnN','correlateAcrossYears':-1,'value':{'2016':'1.006','2017':'1.009','2018':'1.020'}},
                 {'name':'lumi_13TeV_1718','title':'lumi_13TeV_1718','type':'constant','prior':'lnN','correlateAcrossYears':-1,'value':{'2016':'-','2017':'1.006','2018':'1.002'}},
-                {'name':'L1_prefiring_sf','title':'CMS_hgg_L1_prefiring_sf','type':'factory','prior':'lnN','correlateAcrossYears':0},
-                {'name':'puWeight','title':'CMS_pileup','type':'factory','prior':'lnN','correlateAcrossYears':0},
-                {'name':'trigger_sf','title':'CMS_hgg_trigger_sf','type':'factory','prior':'lnN','correlateAcrossYears':0},
-                {'name':'trigger_sf','title':'CMS_hgg_trigger_sf','type':'factory','prior':'lnN','correlateAcrossYears':0},
-                {'name':'electron_veto_sf_Diphoton_Photon','title':'CMS_hgg_electron_veto_sf','type':'factory','prior':'lnN','correlateAcrossYears':0},
-                {'name':'photon_id_sf_Diphoton_Photon','title':'CMS_photon_id_sf','type':'factory','prior':'lnN','correlateAcrossYears':0},
+                {'name':'L1pref','title':'CMS_hgg_L1_prefiring_sf','type':'factory','prior':'lnN','correlateAcrossYears':0},
+                {'name':'electronVetoSF','title':'CMS_hgg_electron_veto_sf','type':'factory','prior':'lnN','correlateAcrossYears':0},
+                {'name':'triggerSF','title':'CMS_hgg_trigger_sf','type':'factory','prior':'lnN','correlateAcrossYears':0},
+                {'name':'phoMVAIDWP90SF','title':'CMS_photon_id_sf','type':'factory','prior':'lnN','correlateAcrossYears':0},
+                {'name':'JESUnc7','title':'CMS_scale_j_EC2_2016_2017_2018','type':'factory','prior':'lnN','correlateAcrossYears':1},
+                {'name':'JESUnc8','title':'CMS_scale_j_EC2','type':'factory','prior':'lnN','correlateAcrossYears':0},
+                {'name':'JESUnc9','title':'CMS_scale_j_HF_2016_2017_2018','type':'factory','prior':'lnN','correlateAcrossYears':1},
+                {'name':'JESUnc10','title':'CMS_scale_j_HF','type':'factory','prior':'lnN','correlateAcrossYears':0},
+                {'name':'bTagSF2','title':'CMS_btag_hf_2016_2017_2018','type':'factory','prior':'lnN','correlateAcrossYears':1},
+                {'name':'bTagSF3','title':'CMS_btag_hfstats1','type':'factory','prior':'lnN','correlateAcrossYears':0},
+                {'name':'bTagSF4','title':'CMS_btag_hfstats2','type':'factory','prior':'lnN','correlateAcrossYears':0},
+                {'name':'bTagSF5','title':'CMS_btag_lf_2016_2017_2018','type':'factory','prior':'lnN','correlateAcrossYears':1},
+                {'name':'bTagSF6','title':'CMS_btag_lfstats1','type':'factory','prior':'lnN','correlateAcrossYears':0},
+                {'name':'bTagSF7','title':'CMS_btag_lfstats2','type':'factory','prior':'lnN','correlateAcrossYears':0}
                 {'name':'photon_presel_sf_Diphoton_Photon','title':'CMS_hgg_presel_sf','type':'factory','prior':'lnN','correlateAcrossYears':0}
 ]
 
@@ -65,19 +72,19 @@ experimental_systematics = [
 # mode = (other,scalesGlobal,scales,scalesCorr,smears): match the definition in the signal models
 
 signal_shape_systematics = [
-                {'name':'funf','title':'funf','type':'signal_shape','mode':'scalesCorr','mean':'0.0','sigma':'1.0'},
-                {'name':'material','title':'material','type':'signal_shape','mode':'scalesCorr','mean':'0.0','sigma':'1.0'},
-                {'name':'MCSmear_smear','title':'MCSmear_smear','type':'signal_shape','mode':'smears','mean':'0.0','sigma':'1.0'},
-                {'name':'MCScale_scale','title':'MCScale_scale','type':'signal_shape','mode':'scales','mean':'0.0','sigma':'1.0'},
-                {'name':'JER','title':'CMS_res_j','type':'factory','prior':'lnN','correlateAcrossYears':0},
-                {'name':'JES','title':'CMS_scale_j','type':'factory','prior':'lnN','correlateAcrossYears':0},
-                {'name':'btag_deepjet_sf_SelectedJet_cferr1','title':'CMS_btag_cferr1_2016_2017_2018','type':'factory','prior':'lnN','correlateAcrossYears':-1},
-                {'name':'btag_deepjet_sf_SelectedJet_cferr2','title':'CMS_btag_cferr2_2016_2017_2018','type':'factory','prior':'lnN','correlateAcrossYears':-1},
-                {'name':'btag_deepjet_sf_SelectedJet_hf','title':'CMS_btag_HF_2016_2017_2018','type':'factory','prior':'lnN','correlateAcrossYears':-1},
-                {'name':'btag_deepjet_sf_SelectedJet_hfstats1','title':'CMS_btag_hfstats1','type':'factory','prior':'lnN','correlateAcrossYears':0},
-                {'name':'btag_deepjet_sf_SelectedJet_hfstats2','title':'CMS_btag_hfstats2','type':'factory','prior':'lnN','correlateAcrossYears':0},
-                {'name':'btag_deepjet_sf_SelectedJet_jes','title':'CMS_btag_jes','type':'factory','prior':'lnN','correlateAcrossYears':0},
-                {'name':'btag_deepjet_sf_SelectedJet_lf','title':'CMS_btag_LF_2016_2017_2018','type':'factory','prior':'lnN','correlateAcrossYears':-1},
-                {'name':'btag_deepjet_sf_SelectedJet_lfstats1','title':'CMS_btag_lfstats1','type':'factory','prior':'lnN','correlateAcrossYears':0},
-                {'name':'btag_deepjet_sf_SelectedJet_lfstats2','title':'CMS_btag_lfstats2','type':'factory','prior':'lnN','correlateAcrossYears':0}
+                {'name':'fnufUnc','title':'funf','type':'signal_shape','mode':'scalesCorr','mean':'0.0','sigma':'1.0'},
+                {'name':'materialUnc','title':'material','type':'signal_shape','mode':'scalesCorr','mean':'0.0','sigma':'1.0'},
+                {'name':'PhoSmearUnc','title':'MCSmear','type':'signal_shape','mode':'smears','mean':'0.0','sigma':'1.0'},
+                {'name':'PhoScaleUnc','title':'MCScale','type':'signal_shape','mode':'scales','mean':'0.0','sigma':'1.0'},
+                {'name':'PUWeight','title':'pileup','type':'signal_shape','mode':'scales','mean':'0.0','sigma':'1.0'},
+                {'name':'JESUnc2','title':'scale_j_absolute','type':'signal_shape','mode':'scalesCorr','mean':'0.0','sigma':'1.0'},
+                {'name':'JESUnc3','title':'scale_j_absolute','type':'signal_shape','mode':'scales','mean':'0.0','sigma':'1.0'},
+                {'name':'JESUnc4','title':'scale_j_flavorQCD','type':'signal_shape','mode':'scalesCorr','mean':'0.0','sigma':'1.0'},
+                {'name':'JESUnc5','title':'scale_j_BBEC1','type':'signal_shape','mode':'scalesCorr','mean':'0.0','sigma':'1.0'},
+                {'name':'JESUnc6','title':'scale_j_BBEC1','type':'signal_shape','mode':'scales','mean':'0.0','sigma':'1.0'},
+                {'name':'JESUnc11','title':'scale_j_relativeBal','type':'signal_shape','mode':'scalesCorr','mean':'0.0','sigma':'1.0'},
+                {'name':'JESUnc12','title':'scale_j_relativeSample','type':'signal_shape','mode':'scales','mean':'0.0','sigma':'1.0'},
+                {'name':'bTagSF8','title':'btag_cferr1','type':'signal_shape','mode':'scalesCorr','mean':'0.0','sigma':'1.0'},
+                {'name':'bTagSF9','title':'btag_cferr2','type':'signal_shape','mode':'scalesCorr','mean':'0.0','sigma':'1.0'},
+                {'name':'JERUnc','title':'res_j','type':'signal_shape','mode':'scales','mean':'0.0','sigma':'1.0'},
 ]
