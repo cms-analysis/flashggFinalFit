@@ -160,7 +160,8 @@ def calcSystYields(_nominalDataName,_nominalDataContents,_inputWS,_systFactoryTy
         else:
           centralWeightStr = "centralObjectWeight"
           f_central = p.getRealValue(centralWeightStr) if centralWeightStr in _nominalDataContents else 1.
-          f_up, f_down = p.getRealValue("%sUp01sigma"%s), p.getRealValue("%sDown01sigma"%s)
+          # Changed and removed 01sigma to account for HiggsDNA conventions
+          f_up, f_down = p.getRealValue("%sUp"%s), p.getRealValue("%sDown"%s)
           # Checks:
           # 1) if central weights are zero then skip event
           if f_central == 0: continue
@@ -262,7 +263,6 @@ def experimentalSystFactory(d,systs,ftype,options,_removal=False):
       if f in ['a_h','a_w']: 
 	for direction in ['up','down']: d.drop(['%s_%s_yield'%(s['name'],direction)], axis=1, inplace=True)
       else: d.drop(['%s_yield'%s['name']], axis=1, inplace=True)
-
   return d
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
