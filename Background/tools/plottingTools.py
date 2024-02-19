@@ -116,8 +116,8 @@ def plotPdfMap(model,pdfs,plotBlindingRegion,_outdir='./',_cat='',_pdfNBins=1600
     canv.SaveAs("%s/bkgmodel_pdfs_%s.png"%(_outdir,_cat))
     canv.SaveAs("%s/bkgmodel_pdfs_%s.pdf"%(_outdir,_cat))
 
-  if model.xvar.getMax() > 180:
-    hists['data'].GetXaxis().SetRangeUser(100,180)
+  if model.xvar.getMax() > 120:
+    hists['data'].GetXaxis().SetRangeUser(65,120)
     if setLogY:
       canv.SaveAs("%s/bkgmodel_pdfs_%s_log_zoom.png"%(_outdir,_cat))
       canv.SaveAs("%s/bkgmodel_pdfs_%s_log_zoom.pdf"%(_outdir,_cat))

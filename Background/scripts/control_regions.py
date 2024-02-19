@@ -20,12 +20,24 @@ def main(f_in, cat, f_out):
     xvar = inputWS.var("CMS_hgg_mass")
     nBinsOutput = xvar.getBins()
     xvar.setBins(nBinsOutput/4)
-    
+
+    zoom = False
+    if zoom:
+        xvar.setRange(65, 120)
+        xvar.setBins(55)
+ 
     # create data roohist
     #inputWS.Print()
     data = inputWS.data("Data_%s_%s"%(sqrts__,cat))
-    DataHistFit = ROOT.RooDataHist("datahistfit","datahistfit",ROOT.RooArgSet(xvar),data)
-    
+    if zoom:
+        data_zoom = data.reduce(ROOT.RooFit.CutRange("CMS_hgg_mass > 65 && CMS_hgg_mass < 120"))
+        DataHistFit = ROOT.RooDataHist("datahistfit","datahistfit",ROOT.RooArgSet(xvar),data_zoom)
+        #print("Debug---------------------------")
+        #print(DataHistFit.numEntries())
+        #DataHistFit.set(DataHistFit.numEntries()-1,0.0)
+    else:
+        DataHistFit = ROOT.RooDataHist("datahistfit","datahistfit",ROOT.RooArgSet(xvar),data)
+
     frame = xvar.frame()
     DataHistFit.plotOn(frame)
 
@@ -63,6 +75,14 @@ def main(f_in, cat, f_out):
       a2 = ROOT.RooRealVar("a2"+suffix, "a2"+suffix, 1.,0.5,5.0)
 
       dcb = ROOT.RooDoubleCBFast("bkg_dcb"+suffix, "bkg_dcb"+suffix, xvar, mean, sigma, a1, n1, a2, n2)
+      print("---------------------------------")
+      print(mean)
+      print(sigma)
+      print(a1)
+      print(n1)
+      print(a2)
+      print(n2)
+      print("---------------------------------")
       dcb_model = ROOT.RooAddPdf("dcb_model", "dcb_model", bkg, dcb, bkg_frac)
       dcb_model.fitTo(DataHistFit)
       dcb_model.plotOn(frame, ROOT.RooFit.LineColor(ROOT.kRed))
@@ -86,6 +106,7 @@ def main(f_in, cat, f_out):
     #dy_norm = ROOT.RooRealVar("bkg"+suffix+"_norm","bkg"+suffix+"_norm",1-bkg_frac.getVal(),0,n_events)
 
     c = ROOT.TCanvas("canvas", "canvas", 600, 600)
+    frame.SetAxisRange(65.0,120)
     frame.Draw()
     if not os.path.exists("plots"):
       os.mkdir("plots")
