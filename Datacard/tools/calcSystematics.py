@@ -58,7 +58,8 @@ def getValueFromJson(row,uncertainties,sname):
 def factoryType(d,s):
 
   #Fix for pdfWeight (as Nweights > 10)
-  if('pdfWeight' in s['name']): return "s_w"
+  # HiggsDNA: pdfWeight to weight_LHEPd
+  if('weight_LHEPd' in s['name']): return "s_w"
   #if('pdfWeight' in s['name'])|('alphaSWeight' in s['name']): return "s_w"
 
   # Loop over rows in dataframe: until syst is found
@@ -77,6 +78,7 @@ def factoryType(d,s):
       elif nWeights == 1: return "s_w"
       else:
         print " --> [ERROR] systematic %s: > 2 weights in workspace. Leaving..."%s['name']
+        print "We found nWeights: %s"%nWeights
         sys.exit(1)
 
     # Check if RooDataHist exists for syst
@@ -184,9 +186,13 @@ def calcSystYields(_nominalDataName,_nominalDataContents,_inputWS,_systFactoryTy
               systYields["%s_COWCorr"%s] += w*(f_NNLOPS/f_COWCorr)
 
         else:
-          if "scaleWeight" in s: centralWeightStr = "scaleWeight_0"
-          elif "alphaSWeight" in s: centralWeightStr = "scaleWeight_0" 
-          elif "pdfWeight" in s: centralWeightStr = "pdfWeight_0"
+          #if "scaleWeight" in s: centralWeightStr = "scaleWeight_0"
+          #elif "alphaSWeight" in s: centralWeightStr = "scaleWeight_0" 
+          #elif "pdfWeight" in s: centralWeightStr = "pdfWeight_0"
+          # HiggsDNA conventions
+          if "LHEScal" in s: centralWeightStr = "weight_LHEScal_0"
+          #elif "alphaSWeight" in s: centralWeightStr = "scaleWeight_0" 
+          elif "LHEPd" in s: centralWeightStr = "weight_LHEPd_0"
           else: centralWeightStr = "centralObjectWeight"
 	  f_central = p.getRealValue(centralWeightStr) if centralWeightStr in _nominalDataContents else 1.
 	  f = p.getRealValue(s)
