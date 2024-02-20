@@ -21,19 +21,19 @@ def main(f_in, cat, f_out):
     nBinsOutput = xvar.getBins()
     xvar.setBins(nBinsOutput/4)
 
-    recude_range = False
+    reduce_range = False
     low_bound = 65
     high_bound = 120
-    if recude_range:
+    if reduce_range:
         xvar.setRange(low_bound, high_bound)
         xvar.setBins(high_bound-low_bound)
  
     # create data roohist
     #inputWS.Print()
     data = inputWS.data("Data_%s_%s"%(sqrts__,cat))
-    if recude_range:
-        data_recude_range = data.reduce(ROOT.RooFit.CutRange("CMS_hgg_mass > {} && CMS_hgg_mass < {}".format(low_bound,high_bound)))
-        DataHistFit = ROOT.RooDataHist("datahistfit","datahistfit",ROOT.RooArgSet(xvar),data_recude_range)
+    if reduce_range:
+        data_reduce_range = data.reduce(ROOT.RooFit.CutRange("CMS_hgg_mass > {} && CMS_hgg_mass < {}".format(low_bound,high_bound)))
+        DataHistFit = ROOT.RooDataHist("datahistfit","datahistfit",ROOT.RooArgSet(xvar),data_reduce_range)
         #print("Debug---------------------------")
         #print(DataHistFit.numEntries())
         #DataHistFit.set(DataHistFit.numEntries()-1,0.0)
