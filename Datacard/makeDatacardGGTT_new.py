@@ -112,7 +112,7 @@ def grabSystematics(df, args):
   years = df.year.unique()
 
   for syst in systematics_ggbbres.experimental_systematics:
-    if syst["correlateAcrossYears"] == -1:
+    if abs(syst["correlateAcrossYears"]) == 1:
       df[syst["name"]] = '-'
       df_name = lambda sys_name, year: sys_name
     else:
