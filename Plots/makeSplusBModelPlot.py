@@ -13,7 +13,7 @@ import math
 import json
 from collections import OrderedDict
 # Scripts for plotting
-from plottingTools import getEffSigma, makeSplusBPlot
+from plottingToolsHH import getEffSigma, makeSplusBPlot
 
 print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG MODEL PLOTTER RUN II ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ "
 def leave():

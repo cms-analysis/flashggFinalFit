@@ -20,12 +20,26 @@ def main(f_in, cat, f_out):
     xvar = inputWS.var("CMS_hgg_mass")
     nBinsOutput = xvar.getBins()
     xvar.setBins(nBinsOutput/4)
-    
+
+    reduce_range = False
+    low_bound = 65
+    high_bound = 120
+    if reduce_range:
+        xvar.setRange(low_bound, high_bound)
+        xvar.setBins(high_bound-low_bound)
+ 
     # create data roohist
     #inputWS.Print()
     data = inputWS.data("Data_%s_%s"%(sqrts__,cat))
-    DataHistFit = ROOT.RooDataHist("datahistfit","datahistfit",ROOT.RooArgSet(xvar),data)
-    
+    if reduce_range:
+        data_reduce_range = data.reduce(ROOT.RooFit.CutRange("CMS_hgg_mass > {} && CMS_hgg_mass < {}".format(low_bound,high_bound)))
+        DataHistFit = ROOT.RooDataHist("datahistfit","datahistfit",ROOT.RooArgSet(xvar),data_reduce_range)
+        #print("Debug---------------------------")
+        #print(DataHistFit.numEntries())
+        #DataHistFit.set(DataHistFit.numEntries()-1,0.0)
+    else:
+        DataHistFit = ROOT.RooDataHist("datahistfit","datahistfit",ROOT.RooArgSet(xvar),data)
+
     frame = xvar.frame()
     DataHistFit.plotOn(frame)
 
@@ -39,6 +53,7 @@ def main(f_in, cat, f_out):
     # signal model
     proc="dy"
     catnum = int(cat.split("cat")[1].split("cr")[0])
+    my = int(cat.split("my")[1].split("cat")[0])
     suffix = "_%s_cat%d_%s"%("combined", catnum, proc)
     mean = ROOT.RooRealVar("mean"+suffix, "mean"+suffix, 90.,85.,95.)
     sigma = ROOT.RooRealVar("sigma"+suffix, "sigma"+suffix, 2.5,1.,4.)
@@ -63,6 +78,14 @@ def main(f_in, cat, f_out):
       a2 = ROOT.RooRealVar("a2"+suffix, "a2"+suffix, 1.,0.5,5.0)
 
       dcb = ROOT.RooDoubleCBFast("bkg_dcb"+suffix, "bkg_dcb"+suffix, xvar, mean, sigma, a1, n1, a2, n2)
+      print("---------------------------------")
+      print(mean)
+      print(sigma)
+      print(a1)
+      print(n1)
+      print(a2)
+      print(n2)
+      print("---------------------------------")
       dcb_model = ROOT.RooAddPdf("dcb_model", "dcb_model", bkg, dcb, bkg_frac)
       dcb_model.fitTo(DataHistFit)
       dcb_model.plotOn(frame, ROOT.RooFit.LineColor(ROOT.kRed))
@@ -86,6 +109,9 @@ def main(f_in, cat, f_out):
     #dy_norm = ROOT.RooRealVar("bkg"+suffix+"_norm","bkg"+suffix+"_norm",1-bkg_frac.getVal(),0,n_events)
 
     c = ROOT.TCanvas("canvas", "canvas", 600, 600)
+
+    if (my>=80) and (my<=100):
+        frame.SetAxisRange(65.0,120)
     frame.Draw()
     if not os.path.exists("plots"):
       os.mkdir("plots")

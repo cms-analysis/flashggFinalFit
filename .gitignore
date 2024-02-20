@@ -36,5 +36,12 @@ AutoDict_*
 
 # Output dirs in signal and bkg
 Signal/outdir_*
+Background/config_ggbbres_batch_combined*
 Background/outdir_*
+Background/config_*
+Datacard/yields_*
+Combine/impacts*.json
+Combine/t2w_jobs/
 files/*
+Plots/SplusBModels*/
+Outputs/

@@ -62,7 +62,7 @@ experimental_systematics = [
                 {'name':'bTagSF4','title':'CMS_btag_hfstats2','type':'factory','prior':'lnN','correlateAcrossYears':0},
                 {'name':'bTagSF5','title':'CMS_btag_lf_2016_2017_2018','type':'factory','prior':'lnN','correlateAcrossYears':1},
                 {'name':'bTagSF6','title':'CMS_btag_lfstats1','type':'factory','prior':'lnN','correlateAcrossYears':0},
-                {'name':'bTagSF7','title':'CMS_btag_lfstats2','type':'factory','prior':'lnN','correlateAcrossYears':0}
+                {'name':'bTagSF7','title':'CMS_btag_lfstats2','type':'factory','prior':'lnN','correlateAcrossYears':0},
                 {'name':'photon_presel_sf_Diphoton_Photon','title':'CMS_hgg_presel_sf','type':'factory','prior':'lnN','correlateAcrossYears':0}
 ]
 

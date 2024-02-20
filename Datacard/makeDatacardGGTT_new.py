@@ -112,7 +112,7 @@ def grabSystematics(df, args):
   years = df.year.unique()
 
   for syst in systematics_ggbbres.experimental_systematics:
-    if syst["correlateAcrossYears"] == -1:
+    if abs(syst["correlateAcrossYears"]) == 1:
       df[syst["name"]] = '-'
       df_name = lambda sys_name, year: sys_name
     else:
@@ -440,14 +440,16 @@ def main(args):
         df_row = df[(df.proc=="data_obs")&(df.cat==cat+"cr")].iloc[0]
         df_row.current_modelWSFile = bkg_workspace_file = "../Background/outdir_%s_combined_mx%dmy%d/fTest/output/CMS-HGG_ws_%s_combined.root"%(args.procTemplate, args.MX, args.MY, df_row["cat"])
         cr_yield = getNEvents(df_row.current_modelWSFile, df_row.model)
+        upper_bound = cr_yield*2
 
         if catnum == nCats - 1:
-          f.write("\nABCD_A rateParam %scr dy_merged_hgg %d [0,3000000]"%(cat, cr_yield))
+          f.write("\nABCD_A rateParam %scr dy_merged_hgg %d [0,%d]"%(cat, cr_yield, upper_bound))
           to_add_to_group.append("ABCD_A")
+          #TODO find a way to not hard code 5800
           f.write("\nABCD_C rateParam %s dy_merged_hgg 5800 [0,10000]"%cat)
           to_add_to_group.append("ABCD_C")
         else:
-          f.write("\nABCD_B%d rateParam %scr dy_merged_hgg %d [0,20000]"%(catnum, cat, cr_yield))
+          f.write("\nABCD_B%d rateParam %scr dy_merged_hgg %d [0,%d]"%(catnum, cat, cr_yield, upper_bound))
           to_add_to_group.append("ABCD_B%d"%catnum)
           f.write("\nABCD_D%d rateParam %s dy_merged_hgg (@0*(@1/@2)) ABCD_C,ABCD_B%d,ABCD_A"%(catnum, cat, catnum))
         f.write("\ndy_bkg_scaler rateParam %s dy_merged_hgg 1"%cat)
