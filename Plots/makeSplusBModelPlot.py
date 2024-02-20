@@ -29,7 +29,7 @@ def get_options():
   parser.add_option("--loadSnapshot", dest="loadSnapshot", default=None, help="Load best-fit snapshot name")
   parser.add_option("--cats", dest="cats", default=None, help="Analysis categories. all = loop over cats and plot sum")
   parser.add_option("--unblind", dest="unblind", default=False, action="store_true", help="Unblind signal region")
-  parser.add_option("--blindingRegion", dest="blindingRegion", default="120,130", help="Region in xvar to blind")
+  parser.add_option("--blindingRegion", dest="blindingRegion", default="116,134", help="Region in xvar to blind")
   parser.add_option("--dataScaler", dest="dataScaler", default=1., type='float', help="Scaling term for data histogram")
   parser.add_option("--doBkgRenormalization", dest="doBkgRenormalization", default=False, action="store_true", help="Do Bkg renormalization")
   parser.add_option("--doBands", dest="doBands", default=False, action="store_true", help="Do +-1/2sigma bands for bkg model")
