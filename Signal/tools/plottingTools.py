@@ -11,7 +11,7 @@ def drawCMS(onTop=False, CMSString="Simulation Private Work", sqrts=13.6):
     latex.SetNDC()
     latex.SetTextFont(42)
     latex.SetTextSize(0.05)
-    latex.DrawLatex(0.1, 0.85 if not onTop else 0.93, text)
+    latex.DrawLatex(0.1, 0.85 if not onTop else 0.91, text)
     if sqrts is not None: latex.DrawLatex(1.00-canv.GetRightMargin()-0.02,1.00-canv.GetTopMargin()-0.12,'('+sqrts+' TeV)')
 
 
@@ -24,7 +24,6 @@ def Translate(name, ndict):
     return ndict[name] if name in ndict else name
 
 
-# Function to extract the sigma effective of a histogram
 # Function to extract the sigma effective of a histogram
 def getEffSigma(_h):
   nbins, binw, xmin = _h.GetXaxis().GetNbins(), _h.GetXaxis().GetBinWidth(1), _h.GetXaxis().GetXmin()
@@ -141,6 +140,8 @@ def plotFTest(ssfs,_opt=1,_outdir='./',_extension='',_proc='',_cat='',_mass='125
   lat.SetTextSize(0.03)
   lat.DrawLatex(0.9,0.92,"( %s , %s , %s )"%(_extension,_proc,_cat))
 
+  drawCMS(onTop=True, CMSString="Simulation Private Work", sqrts=None)
+
   canv.Update()
   canv.SaveAs("%s/fTest_%s_%s_%s.png"%(_outdir,_cat,_proc,_extension))
   canv.SaveAs("%s/fTest_%s_%s_%s.pdf"%(_outdir,_cat,_proc,_extension))
@@ -190,6 +191,9 @@ def plotFTestResults(ssfs,_opt,_outdir="./",_extension='',_proc='',_cat='',_mass
   lat.SetTextSize(0.03)
   lat.DrawLatex(0.9,0.92,"( %s , %s , %s )"%(_extension,_proc,_cat))
   lat.DrawLatex(0.6,0.75,"Optimum N_{gauss} = %s"%_opt)
+
+  drawCMS(onTop=True, CMSString="Simulation Private Work", sqrts=None)
+
   canv.Update()
   canv.SaveAs("%s/fTest_%s_%s_%s_chi2_vs_nGauss.png"%(_outdir,_cat,_proc,_extension))
   canv.SaveAs("%s/fTest_%s_%s_%s_chi2_vs_nGauss.pdf"%(_outdir,_cat,_proc,_extension))
@@ -199,7 +203,7 @@ def plotFTestResults(ssfs,_opt,_outdir="./",_extension='',_proc='',_cat='',_mass
 # Plot final pdf at MH = 125 (with data) + individual Pdf components
 def plotPdfComponents(ssf,_outdir='./',_extension='',_proc='',_cat=''):
   canv = ROOT.TCanvas()
-  canv.SetLeftMargin(0.15)
+  canv.SetLeftMargin(0.1)
   ssf.MH.setVal(125)
   LineColorMap = {0:ROOT.kAzure+1,1:ROOT.kRed-4,2:ROOT.kOrange,3:ROOT.kGreen+2,4:ROOT.kMagenta-9}
   pdfs = od()
@@ -284,6 +288,8 @@ def plotPdfComponents(ssf,_outdir='./',_extension='',_proc='',_cat=''):
   lat1.SetTextSize(0.035)
   lat1.DrawLatex(0.65,0.3,"#chi^{2}/n(dof) = %.4f"%(ssf.getChi2()/ssf.Ndof))
 
+  drawCMS(onTop=True, CMSString="Simulation Private Work", sqrts=None)
+
   canv.Update()
   canv.SaveAs("%s/%sshape_pdf_components_%s_%s.png"%(_outdir,_extension,_proc,_cat))
   canv.SaveAs("%s/%sshape_pdf_components_%s_%s.pdf"%(_outdir,_extension,_proc,_cat))
@@ -331,6 +337,7 @@ def plotInterpolation(_finalModel,_outdir='./',_massPoints='120,121,122,123,124,
   haxes = hists[hists.keys()[0]].Clone()
   haxes.GetXaxis().SetTitle("m_{#gamma#gamma} [GeV]")
   haxes.GetYaxis().SetTitle("Events / %.2f GeV"%((_finalModel.xvar.getMax()-_finalModel.xvar.getMin())/_finalModel.xvar.getBins()))
+  haxes.GetYaxis().SetTitleOffset(0.9)
   haxes.SetMinimum(0)
   haxes.SetMaximum(hmax*1.2)
   haxes.GetXaxis().SetRangeUser(100,150)
@@ -350,6 +357,7 @@ def plotInterpolation(_finalModel,_outdir='./',_massPoints='120,121,122,123,124,
   lat.SetTextSize(0.03)
   lat.DrawLatex(0.9,0.92,"%s"%(_finalModel.name))
 
+  drawCMS(onTop=True, CMSString="Simulation Private Work", sqrts=None)
 
   canv.Update()
   canv.SaveAs("%s/%s_model_vs_mH.png"%(_outdir,_finalModel.name))
@@ -417,7 +425,7 @@ def plotSplines(_finalModel,_outdir="./",_nominalMass='125',splinesToPlot=['xs',
     gr.SetMarkerColor(colorMap[x])
     gr.SetMarkerStyle(20)
     gr.Draw("Same PL")
-    if x == "norm": leg.AddEntry(gr,"N_{exp}: @%s = %.2f"%(_nominalMass,xnom['norm']))
+    if x == "norm": leg.AddEntry(gr,"N_{exp}: @%s = %.2f/pb"%(_nominalMass,xnom['norm']))
     if x == "xs": leg.AddEntry(gr,"#sigma: @%s = %.2f pb"%(_nominalMass,xnom['xs']))
     if x == "br": leg.AddEntry(gr,"#bf{#it{#Beta}}: @%s = %.2f%%"%(_nominalMass,100*xnom['br']))
     if x == "ea": leg.AddEntry(gr,"#epsilon x #it{#Alpha}: @%s = %.2f%%"%(_nominalMass,100*xnom['ea']))
@@ -432,12 +440,7 @@ def plotSplines(_finalModel,_outdir="./",_nominalMass='125',splinesToPlot=['xs',
   lat.SetTextSize(0.03)
   lat.DrawLatex(0.9,0.92,"%s"%(_finalModel.name))
   # Decorate with CMS label
-  drawCMS(onTop=True, CMSString="Simulation Private Work", sqrts=None) # somehow this does not work
-  #latex = ROOT.TLatex()
-  #latex.SetNDC()
-  #latex.SetTextFont(42)
-  #latex.SetTextSize(0.05)
-  #latex.DrawLatex(0.1, 0.92, '#bf{CMS} #scale[0.75]{#it{Simulation Private Work}}')
+  drawCMS(onTop=True, CMSString="Simulation Private Work", sqrts=None)
   canv.Update()
   canv.SaveAs("%s/%s_splines.png"%(_outdir,_finalModel.name))
   canv.SaveAs("%s/%s_splines.pdf"%(_outdir,_finalModel.name))
@@ -582,6 +585,8 @@ def plotSignalModel(_hists,_opt,_outdir=".",offset=0.02):
  
   lat1.DrawLatex(0.85,0.86,"%s"%catStr)
   lat1.DrawLatex(0.83,0.8,"%s %s"%(procStr,yearStr))
+
+  drawCMS(onTop=True, CMSString="Simulation Private Work", sqrts=None)
 
   canv.Update()
 
