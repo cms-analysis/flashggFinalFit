@@ -2,7 +2,7 @@
 #include <iostream>
 
   void 
-CMS_lumi( TPad* pad, int iPeriod, int iPosX , TString extraExtraText)
+CMS_lumi(TPad* pad, int iPeriod, int iPosX , TString extraExtraText)
 {            
 
   bool outOfFrame    = false;
@@ -71,6 +71,11 @@ CMS_lumi( TPad* pad, int iPeriod, int iPosX , TString extraExtraText)
   else if ( iPeriod==12 )
   {
     lumiText += "8 TeV";
+  }
+  else if (iPeriod == 2022)
+  {
+    lumiText += lumi_13p6TeV;
+    lumiText += " (13.6 TeV)";
   }
   else if ( iPeriod==0 )
   {
