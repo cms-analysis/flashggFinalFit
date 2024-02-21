@@ -158,7 +158,8 @@ def calcSystYields(_nominalDataName,_nominalDataContents,_inputWS,_systFactoryTy
               systYields["%s_down_COWCorr"%s] += w*(f_NNLOPS/f_COWCorr)
 
         else:
-          centralWeightStr = "centralObjectWeight"
+          #centralWeightStr = "centralObjectWeight"
+          centralWeightStr = "weight_central"
           f_central = p.getRealValue(centralWeightStr) if centralWeightStr in _nominalDataContents else 1.
           # Changed and removed 01sigma to account for HiggsDNA conventions
           f_up, f_down = p.getRealValue("%sUp"%s), p.getRealValue("%sDown"%s)
