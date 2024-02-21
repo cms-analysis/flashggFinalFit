@@ -160,7 +160,10 @@ def calcSystYields(_nominalDataName,_nominalDataContents,_inputWS,_systFactoryTy
         else:
           #centralWeightStr = "centralObjectWeight"
           centralWeightStr = "weight_central"
-          f_central = p.getRealValue(centralWeightStr) if centralWeightStr in _nominalDataContents else 1.
+          if centralWeightStr in _nominalDataContents:
+            f_central = p.getRealValue(centralWeightStr)
+          else:
+            print "Be careful, the centralWeightStr %s cannot be found in the contents of the nominal tree"%centralWeightStr
           # Changed and removed 01sigma to account for HiggsDNA conventions
           f_up, f_down = p.getRealValue("%sUp"%s), p.getRealValue("%sDown"%s)
           # Checks:
