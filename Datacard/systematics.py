@@ -142,7 +142,6 @@ theory_systematics = [
               ]
 # PDF weight
 # For some reason, at the moment the LHEPdf weights are stored with `Pd` instead of `Pdf`, no idea why
-# This does not work at the moment, in contact with Charlotte about it!
 for i in range(1,101): theory_systematics.append( {'name':'weight_LHEPd_%g'%i, 'title':'CMS_hgg_pdfWeight_%g'%i, 'type':'factory','prior':'lnN','correlateAcrossYears':1,'tiers':['shape']} )
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
