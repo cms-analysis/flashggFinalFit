@@ -195,7 +195,7 @@ def calcSystYields(_nominalDataName,_nominalDataContents,_inputWS,_systFactoryTy
           #elif "alphaSWeight" in s: centralWeightStr = "scaleWeight_0" 
           #elif "pdfWeight" in s: centralWeightStr = "pdfWeight_0"
           # HiggsDNA conventions
-          if "LHEScal" in s: centralWeightStr = "weight_LHEScal_0"
+          if "LHEScal" in s: centralWeightStr = "weight_LHEScal_4" # accurate for v13
           #elif "alphaSWeight" in s: centralWeightStr = "scaleWeight_0" 
           elif "LHEPd" in s: centralWeightStr = "weight_LHEPd_0"
           else: centralWeightStr = "centralObjectWeight"

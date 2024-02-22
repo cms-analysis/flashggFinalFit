@@ -90,7 +90,7 @@ if opt.doSystematics:
   data = theorySystFactory(data, theory_systematics, theoryFactoryType, opt, stxsMergeScheme=STXSMergingScheme)
   #data, theory_systematics = groupSystematics(data, theory_systematics, opt, prefix="scaleWeight", groupings=[[1,2],[3,6],[4,8]], stxsMergeScheme=STXSMergingScheme)
   # Changed to nanoAOD conventions based on advice by Jon, 22nd of Feb 2024
-  data, theory_systematics = groupSystematics(data, theory_systematics, opt, prefix="scaleWeight", groupings=[[0,7],[1,6],[3,4]], stxsMergeScheme=STXSMergingScheme)
+  data, theory_systematics = groupSystematics(data, theory_systematics, opt, prefix="scaleWeight", groupings=[[0,8],[1,7],[3,5]], stxsMergeScheme=STXSMergingScheme)
   data, theory_systematics = groupSystematics(data, theory_systematics, opt, prefix="alphaSWeight", groupings=[[0,1]], stxsMergeScheme=STXSMergingScheme)
 
   # Rename systematics
