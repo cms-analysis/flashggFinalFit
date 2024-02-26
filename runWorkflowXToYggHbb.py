@@ -44,6 +44,10 @@ def modelNonResBkg(doFailedFits, nonResYears, masses, nonResBkgTrees, procTempla
       command = ''
       for m in masses:
         proc = procTemplate+m
+        # Need to remove output files for the doFailedFits option to work on repeat runs
+        os.system('rm -rf Background/outdir_'+procTemplate+'_'+year+'_'+m+'/')
+
+        # Prepping config files
         os.system('cp Background/config_'+procTemplate+'.py Background/config_'+procTemplate+'_batch_'+year+'_'+m+'.py')
         os.system('sed -i "s;<trees/year/m/ws/signal_year>;'+nonResBkgTrees+'/'+year+'/'+m+'/ws/data_'+year+';g" Background/config_'+procTemplate+'_batch_'+year+'_'+m+'.py')
         os.system('sed -i "s;<proc_template>_<signal_year>_<m>;'+procTemplate+'_'+year+'_'+m+';g" Background/config_'+procTemplate+'_batch_'+year+'_'+m+'.py')

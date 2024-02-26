@@ -140,8 +140,7 @@ def plotLimitsStackMX(masses, limits, ylabel, nominal_mx, nominal_my, savename):
     
     limits_slice = limits_slice[:,np.argsort(my)]
     my = my[np.argsort(my)]
-
-    limits_slice *= 10**{i}
+    limits_slice *= 10**i
 
     plt.scatter(my, limits_slice[2], zorder=3, facecolors="none", edgecolors="blue")
     if mx in nominal_mx:
@@ -151,7 +150,7 @@ def plotLimitsStackMX(masses, limits, ylabel, nominal_mx, nominal_my, savename):
     plt.fill_between(my, limits_slice[0], limits_slice[4], zorder=1, facecolor="yellow", label=label4)
     label1 = label2 = label3 = label4 = None
 
-    plt.text(my[-1]+10, limits_slice[2][-1], r"$m_X=%d$ GeV $(\times 10^%d)$"%(mx, i), fontsize=12, verticalalignment="center")
+    plt.text(my[-1]+10, limits_slice[2][-1], r"$m_X=%d$ GeV $(\times 10^{%d})$"%(mx, i), fontsize=12, verticalalignment="center")
 
   plt.xlabel(r"$m_Y$")
   plt.ylabel(ylabel)  
@@ -160,7 +159,6 @@ def plotLimitsStackMX(masses, limits, ylabel, nominal_mx, nominal_my, savename):
   plt.ylim(limits.min(), limits.max()*10**(i+1))
   left, right = plt.xlim()
   plt.xlim(left, my.max()*1.2)
-    
   mplhep.cms.label(llabel="Work in Progress", data=True, lumi=common.tot_lumi, loc=0)
 
   if savename!=None:
