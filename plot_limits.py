@@ -140,8 +140,7 @@ def plotLimitsStackMX(masses, limits, ylabel, nominal_mx, nominal_my, savename):
     
     limits_slice = limits_slice[:,np.argsort(my)]
     my = my[np.argsort(my)]
-
-    limits_slice *= 10**{i}
+    limits_slice *= 10**i
 
     plt.scatter(my, limits_slice[2], zorder=3, facecolors="none", edgecolors="blue")
     if mx in nominal_mx:
@@ -160,8 +159,8 @@ def plotLimitsStackMX(masses, limits, ylabel, nominal_mx, nominal_my, savename):
   plt.ylim(limits.min(), limits.max()*10**(i+1))
   left, right = plt.xlim()
   plt.xlim(left, my.max()*1.2)
-    
-  mplhep.cms.label(llabel="Work in Progress", data=True, lumi=common.tot_lumi, loc=0)
+  #TODO: Fix the lumi call
+  mplhep.cms.label(llabel="Work in Progress", data=True, lumi=139, loc=0)
 
   if savename!=None:
     plt.savefig(savename+".png")
