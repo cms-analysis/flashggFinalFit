@@ -150,7 +150,7 @@ def plotLimitsStackMX(masses, limits, ylabel, nominal_mx, nominal_my, savename):
     plt.fill_between(my, limits_slice[0], limits_slice[4], zorder=1, facecolor="yellow", label=label4)
     label1 = label2 = label3 = label4 = None
 
-    plt.text(my[-1]+10, limits_slice[2][-1], r"$m_X=%d$ GeV $(\times 10^%d)$"%(mx, i), fontsize=12, verticalalignment="center")
+    plt.text(my[-1]+10, limits_slice[2][-1], r"$m_X=%d$ GeV $(\times 10^{%d})$"%(mx, i), fontsize=12, verticalalignment="center")
 
   plt.xlabel(r"$m_Y$")
   plt.ylabel(ylabel)  
