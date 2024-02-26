@@ -159,8 +159,7 @@ def plotLimitsStackMX(masses, limits, ylabel, nominal_mx, nominal_my, savename):
   plt.ylim(limits.min(), limits.max()*10**(i+1))
   left, right = plt.xlim()
   plt.xlim(left, my.max()*1.2)
-  #TODO: Fix the lumi call
-  mplhep.cms.label(llabel="Work in Progress", data=True, lumi=139, loc=0)
+  mplhep.cms.label(llabel="Work in Progress", data=True, lumi=common.tot_lumi, loc=0)
 
   if savename!=None:
     plt.savefig(savename+".png")
