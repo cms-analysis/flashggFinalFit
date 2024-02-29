@@ -22,6 +22,7 @@ def get_options():
   parser.add_option('--doNNLOPS',dest='doNNLOPS', default=False, action="store_true", help='Add NNLOPS weight variable: NNLOPSweight')
   parser.add_option('--doSystematics',dest='doSystematics', default=False, action="store_true", help='Add systematics datasets to output WS')
   parser.add_option('--doSTXSSplitting',dest='doSTXSSplitting', default=False, action="store_true", help='Split output WS per STXS bin')
+  parser.add_option('--doInOutSplitting',dest='doInOutSplitting', default=False, action="store_true", help='Split output WS into in/out fiducial based on some variable in the input trees (to be improved).')
   return parser.parse_args()
 (opt,args) = get_options()
 
@@ -170,7 +171,14 @@ for cat in cats:
   df = pandas.concat(dfs.values(), axis=1)
 
   # Add STXS splitting var if splitting necessary
-  if opt.doSTXSSplitting: df[stxsVar] = t.pandas.df(stxsVar)
+  if opt.doSTXSSplitting:
+    df[stxsVar] = t.pandas.df(stxsVar)
+  elif opt.doInOutSplitting:
+    print(df['fiducialGeometricTagger_20'] > 20.5)
+    df = df[df['fiducialGeometricTagger_20'] > 20.5] # only selecting events inside the fiducial region here
+    # This should be improved to provide both in and out fiducial!!
+    df.drop(columns=['fiducialGeometricTagger_20']) # Somehow this actually does not drop it, not sure why, it is still contained in the output
+    # Goal would now be to implement saving two workspace directories (GG2H_in and GG2H_out) and only scale the in-contribution with the POI
 
   # For NOTAG: fix extract centralObjectWeight from theory weights if available
   if cat == 'NOTAG':
