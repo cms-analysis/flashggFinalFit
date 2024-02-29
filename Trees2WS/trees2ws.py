@@ -285,6 +285,7 @@ for stxsId in data[stxsVar].unique():
   
   # Add variables to workspace
   varNames = add_vars_to_workspace(ws,df,stxsVar)
+  # Here maybe we should remove the fiducialTagger thingy or something, or add it explicitly in the config as another source to avoid having it in the final ws!!
 
   # Loop over cats
   for cat in cats:
