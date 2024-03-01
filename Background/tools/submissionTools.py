@@ -97,7 +97,7 @@ def submitFiles(_opts):
   # CONDOR
   if _opts['batch'] == "condor":
     _executable = "condor_%s_%s"%(_opts['mode'],_opts['ext'])
-    cmdLine = "cd %s; condor_submit %s.sub; cd %s"%(_jobdir,_executable,bwd__)
+    cmdLine = "cd %s; condor_submit -spool %s.sub; cd %s"%(_jobdir,_executable,bwd__)
     run(cmdLine)
     print "  --> Finished submitting files"
 

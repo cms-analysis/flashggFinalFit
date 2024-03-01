@@ -207,8 +207,8 @@ experimental_systematics = [
 
 signal_shape_systematics = [
                 {'name':'deltafracright','title':'deltafracright','type':'signal_shape','mode':'other','mean':'0.0','sigma':'0.02'},
-                {'name':'scale','title':'Scale','type':'signal_shape','mode':'scales','mean':'0.0','sigma':'1.0'},
-                {'name':'smearing','title':'Smearing','type':'signal_shape','mode':'smears','mean':'0.0','sigma':'1.0'},
+                {'name':'scale','title':'scale','type':'signal_shape','mode':'scales','mean':'0.0','sigma':'1.0'},
+                {'name':'smearing','title':'smearing','type':'signal_shape','mode':'smears','mean':'0.0','sigma':'1.0'},
                 {'name':'NonLinearity','title':'NonLinearity','type':'signal_shape','mode':'scalesGlobal','mean':'0.0','sigma':'0.002'},
                 {'name':'Geant4','title':'Geant4','type':'signal_shape','mode':'scalesGlobal','mean':'0.0','sigma':'0.0005'},
                 #{'name':'HighR9EB','title':'HighR9EB','type':'signal_shape','mode':'scales','mean':'0.0','sigma':'1.0'},

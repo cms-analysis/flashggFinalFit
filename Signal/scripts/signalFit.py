@@ -12,12 +12,12 @@ from collections import OrderedDict as od
 
 from commonTools import *
 from commonObjects import *
-from signalTools import *
-from replacementMap import globalReplacementMap
-from XSBRMap import *
-from simultaneousFit import *
-from finalModel import *
-from plottingTools import *
+from tools.signalTools import *
+from tools.replacementMap import globalReplacementMap
+from tools.XSBRMap import *
+from tools.simultaneousFit import *
+from tools.finalModel import *
+from tools.plottingTools import *
 
 # Constant
 MHLow, MHHigh = '120', '130'
@@ -108,7 +108,10 @@ if opt.skipZeroes:
   WSFileName = glob.glob("%s/output*M%s*%s.root"%(opt.inputWSDir,MHNominal,opt.proc))[0]
   f = ROOT.TFile(WSFileName,"read")
   inputWS = f.Get(inputWSName__)
-  d = reduceDataset(inputWS.data("%s_%s_%s_%s"%(procToData(opt.proc.split("_")[0]),MHNominal,sqrts__,opt.cat)),aset)
+  if opt.proc.split("_")[-1] in ["in", "out"]:
+    d = reduceDataset(inputWS.data("%s_%s_%s_%s_%s"%(procToData(opt.proc.split("_")[0]),procToData(opt.proc.split("_")[-1]),MHNominal,sqrts__,opt.cat)),aset)
+  else:
+    d = reduceDataset(inputWS.data("%s_%s_%s_%s"%(procToData(opt.proc.split("_")[0]),MHNominal,sqrts__,opt.cat)),aset)
   if( d.numEntries() == 0. )|( d.sumEntries <= 0. ):
     print " --> (%s,%s) has zero events. Will not construct signal model"%(opt.proc,opt.cat)
     exit()
@@ -154,7 +157,10 @@ for mp in opt.massPoints.split(","):
   WSFileName = glob.glob("%s/output*M%s*%s.root"%(opt.inputWSDir,mp,procRVFit))[0]
   f = ROOT.TFile(WSFileName,"read")
   inputWS = f.Get(inputWSName__)
-  d = reduceDataset(inputWS.data("%s_%s_%s_%s"%(procToData(procRVFit.split("_")[0]),mp,sqrts__,catRVFit)),aset)
+  if procRVFit.split("_")[-1] in ["in", "out"]:
+    d = reduceDataset(inputWS.data("%s_%s_%s_%s_%s"%(procToData(procRVFit.split("_")[0]),procToData(procRVFit.split("_")[-1]),mp,sqrts__,catRVFit)),aset)
+  else:
+    d = reduceDataset(inputWS.data("%s_%s_%s_%s"%(procToData(procRVFit.split("_")[0]),mp,sqrts__,catRVFit)),aset)
   nominalDatasets[mp] = d.Clone()
   if opt.skipVertexScenarioSplit: datasetRVForFit[mp] = d
   else: datasetRVForFit[mp] = splitRVWV(d,aset,mode="RV")
@@ -169,7 +175,10 @@ if( datasetRVForFit[MHNominal].numEntries() < opt.replacementThreshold  )|( data
     WSFileName = glob.glob("%s/output*M%s*%s.root"%(opt.inputWSDir,mp,procReplacementFit))[0]
     f = ROOT.TFile(WSFileName,"read")
     inputWS = f.Get(inputWSName__)
-    d = reduceDataset(inputWS.data("%s_%s_%s_%s"%(procToData(procReplacementFit.split("_")[0]),mp,sqrts__,catReplacementFit)),aset)
+    if procReplacementFit.split("_")[-1] in ["in", "out"]:
+      d = reduceDataset(inputWS.data("%s_%s_%s_%s_%s"%(procToData(procReplacementFit.split("_")[0]),procToData(procReplacementFit.split("_")[-1]),mp,sqrts__,catReplacementFit)),aset)
+    else:
+      d = reduceDataset(inputWS.data("%s_%s_%s_%s"%(procToData(procReplacementFit.split("_")[0]),mp,sqrts__,catReplacementFit)),aset)
     if opt.skipVertexScenarioSplit: datasetRVForFit[mp] = d
     else: datasetRVForFit[mp] = splitRVWV(d,aset,mode="RV")
     inputWS.Delete()
@@ -208,7 +217,10 @@ if not opt.skipVertexScenarioSplit:
     WSFileName = glob.glob("%s/output*M%s*%s.root"%(opt.inputWSDir,mp,procWVFit))[0]
     f = ROOT.TFile(WSFileName,"read")
     inputWS = f.Get(inputWSName__)
-    d = reduceDataset(inputWS.data("%s_%s_%s_%s"%(procToData(procWVFit.split("_")[0]),mp,sqrts__,catWVFit)),aset)
+    if procWVFit.split("_")[-1] in ["in", "out"]:
+      d = reduceDataset(inputWS.data("%s_%s_%s_%s_%s"%(procToData(procWVFit.split("_")[0]),procToData(procWVFit.split("_")[-1]),mp,sqrts__,catWVFit)),aset)
+    else:
+      d = reduceDataset(inputWS.data("%s_%s_%s_%s"%(procToData(procWVFit.split("_")[0]),mp,sqrts__,catWVFit)),aset)
     datasetWVForFit[mp] = splitRVWV(d,aset,mode="WV")
     inputWS.Delete()
     f.Close()
@@ -221,7 +233,10 @@ if not opt.skipVertexScenarioSplit:
       WSFileName = glob.glob("%s/output*M%s*%s.root"%(opt.inputWSDir,mp,procReplacementFit))[0]
       f = ROOT.TFile(WSFileName,"read")
       inputWS = f.Get(inputWSName__)
-      d = reduceDataset(inputWS.data("%s_%s_%s_%s"%(procToData(procReplacementFit.split("_")[0]),mp,sqrts__,catReplacementFit)),aset)
+      if procReplacementFit.split("_")[-1] in ["in", "out"]:
+        d = reduceDataset(inputWS.data("%s_%s_%s_%s_%s"%(procToData(procReplacementFit.split("_")[0]),procToData(procReplacementFit.split("_")[-1]),mp,sqrts__,catReplacementFit)),aset)
+      else:
+        d = reduceDataset(inputWS.data("%s_%s_%s_%s"%(procToData(procReplacementFit.split("_")[0]),mp,sqrts__,catReplacementFit)),aset)
       datasetWVForFit[mp] = splitRVWV(d,aset,mode="WV")
       inputWS.Delete()
       f.Close()
