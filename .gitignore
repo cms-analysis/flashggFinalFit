@@ -42,3 +42,13 @@ Background/lib/
 # Output dirs in signal and bkg
 Signal/outdir_*
 Background/outdir_*
+
+.old
+.old/*
+
+runFits_mu_fiducial/*
+runFits_mu_fiducial/
+
+t2w_jobs/
+
+yields_earlyAnalysis/
