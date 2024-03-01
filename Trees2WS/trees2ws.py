@@ -369,8 +369,8 @@ for fiducialId in data['fiducialGeometricTagger_20'].unique():
     else: fidTag = "out"
     df = data[data['fiducialGeometricTagger_20'] == fiducialId]
     if opt.doSystematics: 
-      # sdf = sdata[sdata['fiducialGeometricTagger_20']==fiducialId]
-      sdf = sdata
+      sdf = sdata[sdata['fiducialGeometricTagger_20']==fiducialId]
+      # sdf = sdata
     
     # Define output workspace file
     if opt.outputWSDir is not None:
@@ -392,7 +392,7 @@ for fiducialId in data['fiducialGeometricTagger_20'].unique():
 
   # Removes fiducialGeometricTagger column
   df.drop(columns=['fiducialGeometricTagger_20'], inplace=True)
-  # sdf.drop(columns=['fiducialGeometricTagger_20'], inplace=True)
+  
 
   # Loop over cats
   for cat in cats:
@@ -448,10 +448,12 @@ for fiducialId in data['fiducialGeometricTagger_20'].unique():
           # Add to workspace
           getattr(ws,'import')(h)
 
+
           # Delete trees and RooDataHist
           t.Delete()
           h.Delete()
           del sa
+  sdf.drop(columns=['fiducialGeometricTagger_20'], inplace=True)
 
   # Write WS to file
   ws.Write()
