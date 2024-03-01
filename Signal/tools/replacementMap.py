@@ -225,3 +225,21 @@ globalReplacementMap["earlyAnalysis"]["catRVMap"]["GG2H"] = "GG2H"
 globalReplacementMap["earlyAnalysis"]["catRVMap"]["VBF"]  = "VBF"
 globalReplacementMap["earlyAnalysis"]["catRVMap"]["VH"]   = "VH"
 globalReplacementMap["earlyAnalysis"]["catRVMap"]["TTH"]  = "TTH"
+
+
+# Early Analysis WITH in/out splitting
+globalReplacementMap["earlyAnalysisInOut"] = od()
+# Wrong vertex stuff
+globalReplacementMap["earlyAnalysisInOut"]['procWV'] = "GG2H_in"
+globalReplacementMap["earlyAnalysisInOut"]['catWV'] = "worst_resolution"
+# Relacement processes for RV
+globalReplacementMap["earlyAnalysisInOut"]['procRVMap'] = od()
+globalReplacementMap["earlyAnalysisInOut"]["procRVMap"]["best_resolution"] = "GG2H_in"
+globalReplacementMap["earlyAnalysisInOut"]["procRVMap"]["medium_resolution"] = "GG2H_in"
+globalReplacementMap["earlyAnalysisInOut"]["procRVMap"]["worst_resolution"] = "GG2H_in"
+# Replacement categories for RV
+globalReplacementMap["earlyAnalysisInOut"]["catRVMap"] = od()
+globalReplacementMap["earlyAnalysisInOut"]["catRVMap"]["best_resolution"] = "best_resolution"
+globalReplacementMap["earlyAnalysisInOut"]["catRVMap"]["medium_resolution"]  = "medium_resolution"
+globalReplacementMap["earlyAnalysisInOut"]["catRVMap"]["worst_resolution"]   = "worst_resolution"
+#TBD
