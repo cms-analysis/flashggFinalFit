@@ -173,12 +173,12 @@ for cat in cats:
   # Add STXS splitting var if splitting necessary
   if opt.doSTXSSplitting:
     df[stxsVar] = t.pandas.df(stxsVar)
-  elif opt.doInOutSplitting:
-    print(df['fiducialGeometricTagger_20'] > 20.5)
-    df = df[df['fiducialGeometricTagger_20'] > 20.5] # only selecting events inside the fiducial region here
-    # This should be improved to provide both in and out fiducial!!
-    df.drop(columns=['fiducialGeometricTagger_20']) # Somehow this actually does not drop it, not sure why, it is still contained in the output
-    # Goal would now be to implement saving two workspace directories (GG2H_in and GG2H_out) and only scale the in-contribution with the POI
+  # elif opt.doInOutSplitting:
+  #   print(df['fiducialGeometricTagger_20'] > 20.5)
+  #   df = df[df['fiducialGeometricTagger_20'] > 20.5] # only selecting events inside the fiducial region here
+  #   # This should be improved to provide both in and out fiducial!!
+  #   df.drop(columns=['fiducialGeometricTagger_20']) # Somehow this actually does not drop it, not sure why, it is still contained in the output
+  #   # Goal would now be to implement saving two workspace directories (GG2H_in and GG2H_out) and only scale the in-contribution with the POI
 
   # For NOTAG: fix extract centralObjectWeight from theory weights if available
   if cat == 'NOTAG':
@@ -237,8 +237,10 @@ if not opt.doSTXSSplitting:
   if opt.doSystematics: sdata[stxsVar] = 'nosplit'
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# 2) Convert pandas dataframe to RooWorkspace
+# 2) Convert pandas dataframe to RooWorkspace (STXS Version)
 for stxsId in data[stxsVar].unique():
+
+  if (stxsVar == '') and (not opt.doSTXSSplitting): continue
 
   if opt.doSTXSSplitting:
     df = data[data[stxsVar]==stxsId]
@@ -263,6 +265,7 @@ for stxsId in data[stxsVar].unique():
     if not os.path.exists(outputWSDir): os.system("mkdir %s"%outputWSDir)
     outputWSFile = outputWSDir+"/"+re.sub(".root","_%s.root"%stxsBin,opt.inputTreeFile.split("/")[-1])
     print " --> Creating output workspace for STXS bin: %s (%s)"%(stxsBin,outputWSFile)
+
     
   else:
     df = data
@@ -324,6 +327,110 @@ for stxsId in data[stxsVar].unique():
           
           # Define RooDataHist
           hName = "%s_%s_%s_%s_%s%s01sigma"%(opt.productionMode,opt.inputMass,sqrts__,cat,s,direction)
+
+          # Make argset 
+          systematicsVarsDropWeight = []
+          for var in systematicsVars:
+            if var != "weight": systematicsVarsDropWeight.append(var)
+          aset = make_argset(ws,systematicsVarsDropWeight)
+          
+          h = ROOT.RooDataHist(hName,hName,aset)
+          for ev in t:
+            for v in systematicsVars:
+              if v == "weight": continue
+              else: ws.var(v).setVal(getattr(ev,v))
+            h.add(aset,getattr(ev,'weight'))
+          
+          # Add to workspace
+          getattr(ws,'import')(h)
+
+          # Delete trees and RooDataHist
+          t.Delete()
+          h.Delete()
+          del sa
+
+  # Write WS to file
+  ws.Write()
+
+  # Close file and delete workspace from heap
+  fout.Close()
+  ws.Delete()
+  fout.Delete()
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 2) Convert pandas dataframe to RooWorkspace (In/Out Splitting)
+for fiducialId in data['fiducialGeometricTagger_20'].unique():
+
+  if (stxsVar != '') or (opt.doSTXSSplitting): continue
+    
+  if opt.doInOutSplitting:
+    if int(fiducialId) == 21: fidTag = "in"
+    else: fidTag = "out"
+    df = data[data['fiducialGeometricTagger_20'] == fiducialId]
+    if opt.doSystematics: 
+      # sdf = sdata[sdata['fiducialGeometricTagger_20']==fiducialId]
+      sdf = sdata
+    
+    # Define output workspace file
+    if opt.outputWSDir is not None:
+      outputWSDir = opt.outputWSDir+"/ws_%s_%s"%(dataToProc(opt.productionMode), fidTag) # Multiple slashes are normalised away, no worries ("../test/" and "../test" are equivalent)
+    else:
+      outputWSDir = "/".join(opt.inputTreeFile.split("/")[:-1])+"/ws_%s_%s"%(dataToProc(opt.productionMode), fidTag)
+    if not os.path.exists(outputWSDir): os.system("mkdir %s"%outputWSDir)
+    outputWSFile = outputWSDir+"/"+re.sub(".root","_%s_%s.root"%(dataToProc(opt.productionMode), fidTag),opt.inputTreeFile.split("/")[-1])
+    print " --> Creating output workspace: (%s)"%outputWSFile
+    
+  # Open file and initiate workspace
+  fout = ROOT.TFile(outputWSFile,"RECREATE")
+  foutdir = fout.mkdir(inputWSName__.split("/")[0])
+  foutdir.cd()
+  ws = ROOT.RooWorkspace(inputWSName__.split("/")[1],inputWSName__.split("/")[1])
+  
+  # Add variables to workspace
+  varNames = add_vars_to_workspace(ws,df,stxsVar)
+
+  # Removes fiducialGeometricTagger column
+  df.drop(columns=['fiducialGeometricTagger_20'], inplace=True)
+  # sdf.drop(columns=['fiducialGeometricTagger_20'], inplace=True)
+
+  # Loop over cats
+  for cat in cats:
+
+    # a) make RooDataSets: type = nominal/notag
+    mask = (df['cat']==cat)
+    # Convert dataframe to structured array, then to ROOT tree
+    sa = df[mask].to_records()
+    t = array2tree(sa)
+
+    # Define RooDataSet
+    dName = "%s_%s_%s_%s_%s"%(opt.productionMode,fidTag,opt.inputMass,sqrts__,cat)
+    
+    # Make argset
+    aset = make_argset(ws,varNames)
+
+    # Convert tree to RooDataset and add to workspace
+    d = ROOT.RooDataSet(dName,dName,t,aset,'','weight')
+    getattr(ws,'import')(d)
+
+    # Delete trees and RooDataSet from heap
+    t.Delete()
+    d.Delete()
+    del sa
+
+    if opt.doSystematics:
+      # b) make RooDataHists for systematic variations
+      if cat == "NOTAG": continue
+      for s in systematics:
+        for direction in ['Up','Down']:
+          # Create mask for systematic variation
+          mask = (sdf['type']=='%s%s'%(s,direction))&(sdf['cat']==cat)
+          # Convert dataframe to structured array, then to ROOT tree
+          sa = sdf[mask].to_records()
+          t = array2tree(sa)
+          
+          # Define RooDataHist
+          hName = "%s_%s_%s_%s_%s_%s%s01sigma"%(opt.productionMode,fidTag,opt.inputMass,sqrts__,cat,s,direction)
 
           # Make argset 
           systematicsVarsDropWeight = []
