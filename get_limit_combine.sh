@@ -16,7 +16,7 @@ mo="mx${mx}my${my}mh${mh}"
 
 pushd Combine  
   echo "Nominal limit being calculated"
-  combine --redefineSignalPOI r --cminDefaultMinimizerStrategy 0 --X-rtd MINIMIZER_freezeDisassociatedParams --X-rtd MINIMIZER_multiMin_hideConstants --X-rtd MINIMIZER_multiMin_maskConstraints --X-rtd MINIMIZER_multiMin_maskChannels=2 -M AsymptoticLimits -m ${mh} -d Datacard_${procTemplate}_${m}_${procTemplate}.root -n _AsymptoticLimit_r_${procTemplate}_${mo} --freezeParameters MH,MX,MY --run=expected --setParameters MX=${mx},MY=${my} > combine_results_${procTemplate}_${mo}.txt
+  combine --redefineSignalPOI r --cminDefaultMinimizerStrategy 0 --X-rtd MINIMIZER_freezeDisassociatedParams --X-rtd MINIMIZER_multiMin_hideConstants --X-rtd MINIMIZER_multiMin_maskConstraints --X-rtd MINIMIZER_multiMin_maskChannels=2 -M AsymptoticLimits -m ${mh} -d Datacard_${procTemplate}_${m}_${procTemplate}.root -n _AsymptoticLimit_r_${procTemplate}_${mo} --freezeParameters MH,MX,MY --run=blind --setParameters MX=${mx},MY=${my} > combine_results_${procTemplate}_${mo}.txt
   # Toy limits
   #combine --redefineSignalPOI r --cminDefaultMinimizerStrategy 0 -m ${mh} -d Datacard_${procTemplate}_${m}_${procTemplate}.root -n _HybridNew_r_${procTemplate}_${mo} --freezeParameters MH,MX,MY -M HybridNew --LHCmode LHC-limits --expectedFromGrid 0.5 --setParameters MX=${mx},MY=${my} --saveHybridResult --rMin=${l} --rMax=${h} --fork 16 -T 500 > combine_results_${procTemplate}_toys_${mo}.txt
   exp_limit=$(grep 'Expected 50.0%' combine_results_${procTemplate}_${mo}.txt)
@@ -31,7 +31,7 @@ pushd Combine
   hh=${hh: -6}
 
   echo "No resonant bkg limit being calculated"
-  combine --redefineSignalPOI r --cminDefaultMinimizerStrategy 0 --X-rtd MINIMIZER_freezeDisassociatedParams --X-rtd MINIMIZER_multiMin_hideConstants --X-rtd MINIMIZER_multiMin_maskConstraints --X-rtd MINIMIZER_multiMin_maskChannels=2 -M AsymptoticLimits -m ${mh} -d Datacard_${procTemplate}_${m}_${procTemplate}.root -n _AsymptoticLimit_r_${procTemplate}_${mo} --freezeParameters MH,MX,MY --run=expected --setParameters MX=${mx},MY=${my},res_bkg_scaler=0 > combine_results_${procTemplate}_no_res_bkg_${mo}.txt
+  combine --redefineSignalPOI r --cminDefaultMinimizerStrategy 0 --X-rtd MINIMIZER_freezeDisassociatedParams --X-rtd MINIMIZER_multiMin_hideConstants --X-rtd MINIMIZER_multiMin_maskConstraints --X-rtd MINIMIZER_multiMin_maskChannels=2 -M AsymptoticLimits -m ${mh} -d Datacard_${procTemplate}_${m}_${procTemplate}.root -n _AsymptoticLimit_r_${procTemplate}_${mo} --freezeParameters MH,MX,MY --run=blind --setParameters MX=${mx},MY=${my},res_bkg_scaler=0 > combine_results_${procTemplate}_no_res_bkg_${mo}.txt
 
   if [[ -n $(grep ABCD Datacard_${procTemplate}_${m}.txt) ]]; then
   echo "No DY bkg limit being calculated"
