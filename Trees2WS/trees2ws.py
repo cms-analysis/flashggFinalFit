@@ -391,7 +391,7 @@ for fiducialId in data['fiducialGeometricTagger_20'].unique():
   varNames = add_vars_to_workspace(ws,df,stxsVar)
 
   # Removes fiducialGeometricTagger column
-  df.drop(columns=['fiducialGeometricTagger_20'], inplace=True)
+  df = df.drop(columns=['fiducialGeometricTagger_20'])
   
 
   # Loop over cats
@@ -453,7 +453,7 @@ for fiducialId in data['fiducialGeometricTagger_20'].unique():
           t.Delete()
           h.Delete()
           del sa
-  sdf.drop(columns=['fiducialGeometricTagger_20'], inplace=True)
+  sdf = sdf.drop(columns=['fiducialGeometricTagger_20'])
 
   # Write WS to file
   ws.Write()
