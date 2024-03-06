@@ -54,6 +54,7 @@ def add_vars_to_workspace(_ws=None,_data=None,_stxsVar=None):
   _vars = od()
   for var in _data.columns:
     if var in ['type','cat',_stxsVar]: continue
+    if 'fiducial' and 'Tagger' in var: continue
     if var == "CMS_hgg_mass": 
       _vars[var] = ROOT.RooRealVar(var,var,125.,100.,180.)
       _vars[var].setBins(160)
@@ -173,12 +174,6 @@ for cat in cats:
   # Add STXS splitting var if splitting necessary
   if opt.doSTXSSplitting:
     df[stxsVar] = t.pandas.df(stxsVar)
-  # elif opt.doInOutSplitting:
-  #   print(df['fiducialGeometricTagger_20'] > 20.5)
-  #   df = df[df['fiducialGeometricTagger_20'] > 20.5] # only selecting events inside the fiducial region here
-  #   # This should be improved to provide both in and out fiducial!!
-  #   df.drop(columns=['fiducialGeometricTagger_20']) # Somehow this actually does not drop it, not sure why, it is still contained in the output
-  #   # Goal would now be to implement saving two workspace directories (GG2H_in and GG2H_out) and only scale the in-contribution with the POI
 
   # For NOTAG: fix extract centralObjectWeight from theory weights if available
   if cat == 'NOTAG':
@@ -288,7 +283,6 @@ for stxsId in data[stxsVar].unique():
   
   # Add variables to workspace
   varNames = add_vars_to_workspace(ws,df,stxsVar)
-  # Here maybe we should remove the fiducialTagger thingy or something, or add it explicitly in the config as another source to avoid having it in the final ws!!
 
   # Loop over cats
   for cat in cats:
@@ -392,7 +386,6 @@ for fiducialId in data['fiducialGeometricTagger_20'].unique():
 
   # Removes fiducialGeometricTagger column
   df.drop(columns=['fiducialGeometricTagger_20'], inplace=True)
-  
 
   # Loop over cats
   for cat in cats:
