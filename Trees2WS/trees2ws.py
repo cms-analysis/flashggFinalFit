@@ -348,6 +348,42 @@ if opt.doInOutSplitting:
     
     create_workspace(df, sdf, outputWSFile, productionMode_string)
 
+if opt.doInOutSplitting: fiducialIds = data['fiducialGeometricTagger_20'].unique()
+else: fiducialIds = [0] # If we do not perform in/out splitting, we want to have one inclusive (for particle-level) process definition, our code int for that is zero
+
+for fiducialId in fiducialIds:
+
+  # In the end, the STXS and fiducial in/out splitting should maybe be harmonised, this looks a bit ugly
+  if (stxsVar != '') or (opt.doSTXSSplitting): continue
+
+  if int(fiducialId) == 21: fidTag = "in"
+  elif int(fiducialId) == 20: fidTag = "out"
+  else: fidTag = "incl"
+
+  if opt.doInOutSplitting:
+    fiducial_mask = data['fiducialGeometricTagger_20'] == fiducialId
+    fiducial_mask_syst = sdata['fiducialGeometricTagger_20'] == fiducialId
+  else:
+    fiducial_mask = data['CMS_hgg_mass'] > 0 # Basically a true mask because we are all inclusive
+    fiducial_mask_syst = sdata['CMS_hgg_mass'] > 0
+
+  df = data[fiducial_mask]
+  if opt.doSystematics: 
+    sdf = sdata[fiducial_mask_syst]
+
+  # Define output workspace file
+  if opt.outputWSDir is not None:
+    outputWSDir = opt.outputWSDir+"/ws_%s_%s"%(dataToProc(opt.productionMode), fidTag) # Multiple slashes are normalised away, no worries ("../test/" and "../test" are equivalent)
+  else:
+    outputWSDir = "/".join(opt.inputTreeFile.split("/")[:-1])+"/ws_%s_%s"%(dataToProc(opt.productionMode), fidTag)
+  if not os.path.exists(outputWSDir): os.system("mkdir %s"%outputWSDir)
+  outputWSFile = outputWSDir+"/"+re.sub(".root","_%s_%s.root"%(dataToProc(opt.productionMode), fidTag),opt.inputTreeFile.split("/")[-1])
+  print " --> Creating output workspace: (%s)"%outputWSFile
+  
+  productionMode_string = opt.productionMode + "_" + fidTag # This is, for example, "ggh_in"
+
+  create_workspace(df, sdf, outputWSFile, productionMode_string)
+
 if opt.doSTXSSplitting:
 
   for stxsId in data[stxsVar].unique():
@@ -377,19 +413,3 @@ if opt.doSTXSSplitting:
     productionMode_string = opt.productionMode
 
     create_workspace(df, sdf, outputWSFile, productionMode_string)
-
-else:
-  df = data
-  if opt.doSystematics: sdf = sdata
-  # Define output workspace file
-  if opt.outputWSDir is not None:
-    outputWSDir = opt.outputWSDir+"/ws_%s"%dataToProc(opt.productionMode) # Multiple slashes are normalised away, no worries ("../test/" and "../test" are equivalent)
-  else:
-    outputWSDir = "/".join(opt.inputTreeFile.split("/")[:-1])+"/ws_%s"%dataToProc(opt.productionMode)
-  if not os.path.exists(outputWSDir): os.system("mkdir %s"%outputWSDir)
-  outputWSFile = outputWSDir+"/"+re.sub(".root","_%s.root"%dataToProc(opt.productionMode),opt.inputTreeFile.split("/")[-1])
-  print " --> Creating output workspace: (%s)"%outputWSFile
-  productionMode_string = opt.productionMode + "_incl" 
-  
-  # The part below should be done twice for fiducial in/out splitting but only once if running without, hmmmm
-  create_workspace(df, sdf, outputWSFile, productionMode_string)
