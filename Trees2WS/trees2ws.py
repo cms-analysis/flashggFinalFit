@@ -27,7 +27,7 @@ def get_options():
 (opt,args) = get_options()
 
 from collections import OrderedDict as od
-from importlib import import_module
+import imp
 
 import ROOT
 import pandas
@@ -84,8 +84,15 @@ options = od()
 if opt.inputConfig != '':
   if os.path.exists( opt.inputConfig ):
 
-    # Import config options
-    _cfg = import_module(re.sub(".py","",opt.inputConfig)).trees2wsCfg
+    # Get the config name from the relative path
+    config_name = re.sub(r"\.py", "", opt.inputConfig)
+
+    # Add the current directory to sys.path
+    sys.path.append(".")
+
+    # Load the config using imp.load_source
+    module = imp.load_source(config_name, opt.inputConfig)
+    _cfg = getattr(module, "trees2wsCfg")
 
     #Extract options
     inputTreeDir     = _cfg['inputTreeDir']
