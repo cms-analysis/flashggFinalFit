@@ -354,18 +354,18 @@ for stxsId in data[stxsVar].unique():
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # 2) Convert pandas dataframe to RooWorkspace (In/Out Splitting)
-for fiducialId in data['fiducialGeometricTagger_20'].unique():
+if opt.doInOutSplitting:
+  for fiducialId in data['fiducialGeometricTagger_20'].unique():
+    if (stxsVar != '') or (opt.doSTXSSplitting): continue
 
-  if (stxsVar != '') or (opt.doSTXSSplitting): continue
-    
-  if opt.doInOutSplitting:
     if int(fiducialId) == 21: fidTag = "in"
     else: fidTag = "out"
+
     df = data[data['fiducialGeometricTagger_20'] == fiducialId]
     if opt.doSystematics: 
       sdf = sdata[sdata['fiducialGeometricTagger_20']==fiducialId]
       # sdf = sdata
-    
+
     # Define output workspace file
     if opt.outputWSDir is not None:
       outputWSDir = opt.outputWSDir+"/ws_%s_%s"%(dataToProc(opt.productionMode), fidTag) # Multiple slashes are normalised away, no worries ("../test/" and "../test" are equivalent)
@@ -374,7 +374,23 @@ for fiducialId in data['fiducialGeometricTagger_20'].unique():
     if not os.path.exists(outputWSDir): os.system("mkdir %s"%outputWSDir)
     outputWSFile = outputWSDir+"/"+re.sub(".root","_%s_%s.root"%(dataToProc(opt.productionMode), fidTag),opt.inputTreeFile.split("/")[-1])
     print " --> Creating output workspace: (%s)"%outputWSFile
-    
+
+    productionMode_string = opt.productionMode + "_" + fidTag # This is, for example, "ggh_in"
+
+else:
+  df = data
+  if opt.doSystematics: sdf = sdata
+  # Define output workspace file
+  if opt.outputWSDir is not None:
+    outputWSDir = opt.outputWSDir+"/ws_%s"%dataToProc(opt.productionMode) # Multiple slashes are normalised away, no worries ("../test/" and "../test" are equivalent)
+  else:
+    outputWSDir = "/".join(opt.inputTreeFile.split("/")[:-1])+"/ws_%s"%dataToProc(opt.productionMode)
+  if not os.path.exists(outputWSDir): os.system("mkdir %s"%outputWSDir)
+  outputWSFile = outputWSDir+"/"+re.sub(".root","_%s.root"%dataToProc(opt.productionMode),opt.inputTreeFile.split("/")[-1])
+  print " --> Creating output workspace: (%s)"%outputWSFile
+  productionMode_string = opt.productionMode # Would be only ggh without an in/out suffix
+  
+  # The part below should be done twice for fiducial in/out splitting but only once if running without, hmmmm
   # Open file and initiate workspace
   fout = ROOT.TFile(outputWSFile,"RECREATE")
   foutdir = fout.mkdir(inputWSName__.split("/")[0])
@@ -383,9 +399,6 @@ for fiducialId in data['fiducialGeometricTagger_20'].unique():
   
   # Add variables to workspace
   varNames = add_vars_to_workspace(ws,df,stxsVar)
-
-  # Removes fiducialGeometricTagger column
-  df = df.drop(columns=['fiducialGeometricTagger_20'])
 
   # Loop over cats
   for cat in cats:
@@ -397,7 +410,7 @@ for fiducialId in data['fiducialGeometricTagger_20'].unique():
     t = array2tree(sa)
 
     # Define RooDataSet
-    dName = "%s_%s_%s_%s_%s"%(opt.productionMode,fidTag,opt.inputMass,sqrts__,cat)
+    dName = "%s_%s_%s_%s"%(productionMode_string,opt.inputMass,sqrts__,cat)
     
     # Make argset
     aset = make_argset(ws,varNames)
@@ -423,7 +436,7 @@ for fiducialId in data['fiducialGeometricTagger_20'].unique():
           t = array2tree(sa)
           
           # Define RooDataHist
-          hName = "%s_%s_%s_%s_%s_%s%s01sigma"%(opt.productionMode,fidTag,opt.inputMass,sqrts__,cat,s,direction)
+          hName = "%s_%s_%s_%s_%s%s01sigma"%(productionMode_string,opt.inputMass,sqrts__,cat,s,direction)
 
           # Make argset 
           systematicsVarsDropWeight = []
