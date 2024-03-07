@@ -193,9 +193,11 @@ def writeSubFiles(_opts):
 def submitFiles(_opts):
   _jobdir = "%s/outdir_%s/%s/jobs"%(swd__,_opts['ext'],_opts['mode'])
   # CONDOR
-  if _opts['batch'] == "condor":
+  if "condor" in _opts['batch']:
     _executable = "condor_%s_%s"%(_opts['mode'],_opts['ext'])
-    cmdLine = "cd %s; condor_submit -spool %s.sub; cd %s"%(_jobdir,_executable,swd__)
+    if _opts['batch'] == "condor_lxplus": cmdLine = "cd %s; condor_submit -spool %s.sub; cd %s"%(_jobdir,_executable,swd__)
+    elif _opts['batch'] == "condor": cmdLine = "cd %s; condor_submit %s.sub; cd %s"%(_jobdir,_executable,swd__)
+    else: print "PROBLEM: Only condor_lxplus or condor allowed as condor-like settings for batch. Please check your settings."
     run(cmdLine)
     print "  --> Finished submitting files"
 
