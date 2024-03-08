@@ -323,30 +323,6 @@ if not opt.doSTXSSplitting:
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # 2) Convert pandas dataframe to RooWorkspace
-if opt.doInOutSplitting:
-  for fiducialId in data['fiducialGeometricTagger_20'].unique():
-    if (stxsVar != '') or (opt.doSTXSSplitting): continue
-
-    if int(fiducialId) == 21: fidTag = "in"
-    else: fidTag = "out"
-
-    df = data[data['fiducialGeometricTagger_20'] == fiducialId]
-    if opt.doSystematics: 
-      sdf = sdata[sdata['fiducialGeometricTagger_20']==fiducialId]
-      # sdf = sdata
-
-    # Define output workspace file
-    if opt.outputWSDir is not None:
-      outputWSDir = opt.outputWSDir+"/ws_%s_%s"%(dataToProc(opt.productionMode), fidTag) # Multiple slashes are normalised away, no worries ("../test/" and "../test" are equivalent)
-    else:
-      outputWSDir = "/".join(opt.inputTreeFile.split("/")[:-1])+"/ws_%s_%s"%(dataToProc(opt.productionMode), fidTag)
-    if not os.path.exists(outputWSDir): os.system("mkdir %s"%outputWSDir)
-    outputWSFile = outputWSDir+"/"+re.sub(".root","_%s_%s.root"%(dataToProc(opt.productionMode), fidTag),opt.inputTreeFile.split("/")[-1])
-    print " --> Creating output workspace: (%s)"%outputWSFile
-
-    productionMode_string = opt.productionMode + "_" + fidTag # This is, for example, "ggh_in"
-    
-    create_workspace(df, sdf, outputWSFile, productionMode_string)
 
 if opt.doInOutSplitting: fiducialIds = data['fiducialGeometricTagger_20'].unique()
 else: fiducialIds = [0] # If we do not perform in/out splitting, we want to have one inclusive (for particle-level) process definition, our code int for that is zero
