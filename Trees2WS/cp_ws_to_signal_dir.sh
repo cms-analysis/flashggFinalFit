@@ -10,7 +10,7 @@ fi
 path="$1"
 
 # Define the source directories
-source_directories=("ws_GG2H" "ws_TTH" "ws_VBF" "ws_VH")
+source_directories=("ws_GG2H_in" "ws_GG2H_out" "ws_TTH_in" "ws_TTH_out" "ws_VBF_in" "ws_VBF_out" "ws_VH_in" "ws_VH_out")
 
 # Create the destination directory if it does not exist
 destination_directory="$path/ws_signal"

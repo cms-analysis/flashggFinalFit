@@ -8,7 +8,7 @@ signalScriptCfg = {
   'cats':'auto', # if auto: inferred automatically from (0) workspace
   #'ext':'earlyAnalysis_freeze_include', # output directory extension
   'ext':'earlyAnalysis_2022postEE', # output directory extension
-  'analysis':'earlyAnalysis', # To specify replacement dataset and XS*BR mapping (defined in ./tools/replacementMap.py and ./tools/XSBRMap.py respectively)
+  'analysis':'earlyAnalysisInOut', # To specify replacement dataset and XS*BR mapping (defined in ./tools/replacementMap.py and ./tools/XSBRMap.py respectively)
   'year':'2022postEE', # Use 'combined' if merging all years: not recommended
   'massPoints':'120,125,130', # You can now run with a single mass point if necessary
 
@@ -19,6 +19,6 @@ signalScriptCfg = {
   'smears':'smearing', # separate nuisance per year
 
   # Job submission options
-  'batch':'condor', # ['condor','SGE','IC','local']
-  'queue':'espresso' # use hep.q for IC
+  'batch':'condor',  # ['condor_lxplus','condor','SGE','IC','local']
+  'queue':'microcentury' # use hep.q for IC
 }

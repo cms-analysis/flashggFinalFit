@@ -50,13 +50,14 @@ if opt.batch == 'condor':
   f_cdr.write("output              = %s/src/flashggFinalFit/Combine/t2w_jobs/t2w_%s%s.sh.out\n"%(os.environ['CMSSW_BASE'],opt.mode,opt.ext))
   f_cdr.write("error               = %s/src/flashggFinalFit/Combine/t2w_jobs/t2w_%s%s.sh.err\n"%(os.environ['CMSSW_BASE'],opt.mode,opt.ext))
   f_cdr.write("log                 = %s/src/flashggFinalFit/Combine/t2w_jobs/t2w_%s%s.sh.log\n"%(os.environ['CMSSW_BASE'],opt.mode,opt.ext))
+  f_cdr.write('+AccountingGroup = "group_u_CMS.u_zh.users"\n')
   f_cdr.write("+JobFlavour         = \"%s\"\n"%opt.queue)
   f_cdr.write("RequestCpus         = %g\n"%opt.ncpus)
   f_cdr.write("queue\n")
   f_cdr.close()
 
 # Submit
-if opt.batch == "condor": subcmd = "condor_submit ./t2w_jobs/t2w_%s%s.sub"%(opt.mode,opt.ext)
+if opt.batch == "condor": subcmd = "condor_submit -spool ./t2w_jobs/t2w_%s%s.sub"%(opt.mode,opt.ext)
 elif opt.batch == 'local': subcmd = "bash ./t2w_jobs/t2w_%s%s.sh"%(opt.mode,opt.ext)
 else: subcmd = "qsub -q hep.q -l h_rt=6:0:0 -l h_vmem=24G ./t2w_jobs/t2w_%s%s.sh"%(opt.mode,opt.ext)
 if opt.dryRun: print "[DRY RUN] %s"%subcmd

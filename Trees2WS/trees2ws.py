@@ -27,7 +27,7 @@ def get_options():
 (opt,args) = get_options()
 
 from collections import OrderedDict as od
-from importlib import import_module
+import imp
 
 import ROOT
 import pandas
@@ -54,6 +54,7 @@ def add_vars_to_workspace(_ws=None,_data=None,_stxsVar=None):
   _vars = od()
   for var in _data.columns:
     if var in ['type','cat',_stxsVar]: continue
+    if 'fiducial' and 'Tagger' in var: continue
     if var == "CMS_hgg_mass": 
       _vars[var] = ROOT.RooRealVar(var,var,125.,100.,180.)
       _vars[var].setBins(160)
@@ -84,8 +85,15 @@ options = od()
 if opt.inputConfig != '':
   if os.path.exists( opt.inputConfig ):
 
-    # Import config options
-    _cfg = import_module(re.sub(".py","",opt.inputConfig)).trees2wsCfg
+    # Get the config name from the relative path
+    config_name = re.sub(r"\.py", "", opt.inputConfig)
+
+    # Add the current directory to sys.path
+    sys.path.append(".")
+
+    # Load the config using imp.load_source
+    module = imp.load_source(config_name, opt.inputConfig)
+    _cfg = getattr(module, "trees2wsCfg")
 
     #Extract options
     inputTreeDir     = _cfg['inputTreeDir']
@@ -103,6 +111,87 @@ if opt.inputConfig != '':
 else:
   print "[ERROR] Please specify config file to run from. Leaving..."%opt.inputConfig
   leave()
+
+
+def create_workspace(df, sdf, outputWSFile, productionMode_string):
+  # Open file and initiate workspace
+  fout = ROOT.TFile(outputWSFile,"RECREATE")
+  foutdir = fout.mkdir(inputWSName__.split("/")[0])
+  foutdir.cd()
+  ws = ROOT.RooWorkspace(inputWSName__.split("/")[1],inputWSName__.split("/")[1])
+  
+  # Add variables to workspace
+  varNames = add_vars_to_workspace(ws,df,stxsVar)
+
+  # Loop over cats
+  for cat in cats:
+
+    # a) make RooDataSets: type = nominal/notag
+    mask = (df['cat']==cat)
+    # Convert dataframe to structured array, then to ROOT tree
+    sa = df[mask].to_records()
+    t = array2tree(sa)
+
+    # Define RooDataSet
+    dName = "%s_%s_%s_%s"%(productionMode_string,opt.inputMass,sqrts__,cat)
+    
+    # Make argset
+    aset = make_argset(ws,varNames)
+
+    # Convert tree to RooDataset and add to workspace
+    d = ROOT.RooDataSet(dName,dName,t,aset,'','weight')
+    getattr(ws,'import')(d)
+
+    # Delete trees and RooDataSet from heap
+    t.Delete()
+    d.Delete()
+    del sa
+
+    if opt.doSystematics:
+      # b) make RooDataHists for systematic variations
+      if cat == "NOTAG": continue
+      for s in systematics:
+        for direction in ['Up','Down']:
+          # Create mask for systematic variation
+          mask = (sdf['type']=='%s%s'%(s,direction))&(sdf['cat']==cat)
+          # Convert dataframe to structured array, then to ROOT tree
+          sa = sdf[mask].to_records()
+          t = array2tree(sa)
+          
+          # Define RooDataHist
+          hName = "%s_%s_%s_%s_%s%s01sigma"%(productionMode_string,opt.inputMass,sqrts__,cat,s,direction)
+
+          # Make argset 
+          systematicsVarsDropWeight = []
+          for var in systematicsVars:
+            if 'fiducial' and 'Tagger' in var: continue
+            if var != "weight": systematicsVarsDropWeight.append(var)
+          aset = make_argset(ws,systematicsVarsDropWeight)
+          
+          h = ROOT.RooDataHist(hName,hName,aset)
+          for ev in t:
+            for v in systematicsVars:
+              if (v == "weight") or ('fiducial' and 'Tagger' in v): continue
+              else: ws.var(v).setVal(getattr(ev,v))
+            h.add(aset,getattr(ev,'weight'))
+          
+          # Add to workspace
+          getattr(ws,'import')(h)
+
+
+          # Delete trees and RooDataHist
+          t.Delete()
+          h.Delete()
+          del sa
+  sdf = sdf.drop(columns=['fiducialGeometricTagger_20'])
+
+  # Write WS to file
+  ws.Write()
+
+  # Close file and delete workspace from heap
+  fout.Close()
+  ws.Delete()
+  fout.Delete()
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # For theory weights: create vars for each weight
@@ -173,12 +262,6 @@ for cat in cats:
   # Add STXS splitting var if splitting necessary
   if opt.doSTXSSplitting:
     df[stxsVar] = t.pandas.df(stxsVar)
-  elif opt.doInOutSplitting:
-    print(df['fiducialGeometricTagger_20'] > 20.5)
-    df = df[df['fiducialGeometricTagger_20'] > 20.5] # only selecting events inside the fiducial region here
-    # This should be improved to provide both in and out fiducial!!
-    df.drop(columns=['fiducialGeometricTagger_20']) # Somehow this actually does not drop it, not sure why, it is still contained in the output
-    # Goal would now be to implement saving two workspace directories (GG2H_in and GG2H_out) and only scale the in-contribution with the POI
 
   # For NOTAG: fix extract centralObjectWeight from theory weights if available
   if cat == 'NOTAG':
@@ -236,11 +319,50 @@ if not opt.doSTXSSplitting:
   data[stxsVar] = 'nosplit'  
   if opt.doSystematics: sdata[stxsVar] = 'nosplit'
 
+
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # 2) Convert pandas dataframe to RooWorkspace
-for stxsId in data[stxsVar].unique():
 
-  if opt.doSTXSSplitting:
+if opt.doInOutSplitting: fiducialIds = data['fiducialGeometricTagger_20'].unique()
+else: fiducialIds = [0] # If we do not perform in/out splitting, we want to have one inclusive (for particle-level) process definition, our code int for that is zero
+
+for fiducialId in fiducialIds:
+
+  # In the end, the STXS and fiducial in/out splitting should maybe be harmonised, this looks a bit ugly
+  if (stxsVar != '') or (opt.doSTXSSplitting): continue
+
+  if int(fiducialId) == 21: fidTag = "in"
+  elif int(fiducialId) == 20: fidTag = "out"
+  else: fidTag = "incl"
+
+  if opt.doInOutSplitting:
+    fiducial_mask = data['fiducialGeometricTagger_20'] == fiducialId
+    fiducial_mask_syst = sdata['fiducialGeometricTagger_20'] == fiducialId
+  else:
+    fiducial_mask = data['CMS_hgg_mass'] > 0 # Basically a true mask because we are all inclusive
+    fiducial_mask_syst = sdata['CMS_hgg_mass'] > 0
+
+  df = data[fiducial_mask]
+  if opt.doSystematics: 
+    sdf = sdata[fiducial_mask_syst]
+
+  # Define output workspace file
+  if opt.outputWSDir is not None:
+    outputWSDir = opt.outputWSDir+"/ws_%s_%s"%(dataToProc(opt.productionMode), fidTag) # Multiple slashes are normalised away, no worries ("../test/" and "../test" are equivalent)
+  else:
+    outputWSDir = "/".join(opt.inputTreeFile.split("/")[:-1])+"/ws_%s_%s"%(dataToProc(opt.productionMode), fidTag)
+  if not os.path.exists(outputWSDir): os.system("mkdir %s"%outputWSDir)
+  outputWSFile = outputWSDir+"/"+re.sub(".root","_%s_%s.root"%(dataToProc(opt.productionMode), fidTag),opt.inputTreeFile.split("/")[-1])
+  print " --> Creating output workspace: (%s)"%outputWSFile
+  
+  productionMode_string = opt.productionMode + "_" + fidTag # This is, for example, "ggh_in"
+
+  create_workspace(df, sdf, outputWSFile, productionMode_string)
+
+if opt.doSTXSSplitting:
+
+  for stxsId in data[stxsVar].unique():
     df = data[data[stxsVar]==stxsId]
     if opt.doSystematics: sdf = sdata[sdata[stxsVar]==stxsId]
 
@@ -263,93 +385,7 @@ for stxsId in data[stxsVar].unique():
     if not os.path.exists(outputWSDir): os.system("mkdir %s"%outputWSDir)
     outputWSFile = outputWSDir+"/"+re.sub(".root","_%s.root"%stxsBin,opt.inputTreeFile.split("/")[-1])
     print " --> Creating output workspace for STXS bin: %s (%s)"%(stxsBin,outputWSFile)
-    
-  else:
-    df = data
-    if opt.doSystematics: sdf = sdata
 
-    # Define output workspace file
-    if opt.outputWSDir is not None:
-      outputWSDir = opt.outputWSDir+"/ws_%s"%dataToProc(opt.productionMode) # Multiple slashes are normalised away, no worries ("../test/" and "../test" are equivalent)
-    else:
-      outputWSDir = "/".join(opt.inputTreeFile.split("/")[:-1])+"/ws_%s"%dataToProc(opt.productionMode)
-    if not os.path.exists(outputWSDir): os.system("mkdir %s"%outputWSDir)
-    outputWSFile = outputWSDir+"/"+re.sub(".root","_%s.root"%dataToProc(opt.productionMode),opt.inputTreeFile.split("/")[-1])
-    print " --> Creating output workspace: (%s)"%outputWSFile
-    
-  # Open file and initiate workspace
-  fout = ROOT.TFile(outputWSFile,"RECREATE")
-  foutdir = fout.mkdir(inputWSName__.split("/")[0])
-  foutdir.cd()
-  ws = ROOT.RooWorkspace(inputWSName__.split("/")[1],inputWSName__.split("/")[1])
-  
-  # Add variables to workspace
-  varNames = add_vars_to_workspace(ws,df,stxsVar)
-  # Here maybe we should remove the fiducialTagger thingy or something, or add it explicitly in the config as another source to avoid having it in the final ws!!
+    productionMode_string = opt.productionMode
 
-  # Loop over cats
-  for cat in cats:
-
-    # a) make RooDataSets: type = nominal/notag
-    mask = (df['cat']==cat)
-    # Convert dataframe to structured array, then to ROOT tree
-    sa = df[mask].to_records()
-    t = array2tree(sa)
-
-    # Define RooDataSet
-    dName = "%s_%s_%s_%s"%(opt.productionMode,opt.inputMass,sqrts__,cat)
-    
-    # Make argset
-    aset = make_argset(ws,varNames)
-
-    # Convert tree to RooDataset and add to workspace
-    d = ROOT.RooDataSet(dName,dName,t,aset,'','weight')
-    getattr(ws,'import')(d)
-
-    # Delete trees and RooDataSet from heap
-    t.Delete()
-    d.Delete()
-    del sa
-
-    if opt.doSystematics:
-      # b) make RooDataHists for systematic variations
-      if cat == "NOTAG": continue
-      for s in systematics:
-        for direction in ['Up','Down']:
-          # Create mask for systematic variation
-          mask = (sdf['type']=='%s%s'%(s,direction))&(sdf['cat']==cat)
-          # Convert dataframe to structured array, then to ROOT tree
-          sa = sdf[mask].to_records()
-          t = array2tree(sa)
-          
-          # Define RooDataHist
-          hName = "%s_%s_%s_%s_%s%s01sigma"%(opt.productionMode,opt.inputMass,sqrts__,cat,s,direction)
-
-          # Make argset 
-          systematicsVarsDropWeight = []
-          for var in systematicsVars:
-            if var != "weight": systematicsVarsDropWeight.append(var)
-          aset = make_argset(ws,systematicsVarsDropWeight)
-          
-          h = ROOT.RooDataHist(hName,hName,aset)
-          for ev in t:
-            for v in systematicsVars:
-              if v == "weight": continue
-              else: ws.var(v).setVal(getattr(ev,v))
-            h.add(aset,getattr(ev,'weight'))
-          
-          # Add to workspace
-          getattr(ws,'import')(h)
-
-          # Delete trees and RooDataHist
-          t.Delete()
-          h.Delete()
-          del sa
-
-  # Write WS to file
-  ws.Write()
-
-  # Close file and delete workspace from heap
-  fout.Close()
-  ws.Delete()
-  fout.Delete()
+    create_workspace(df, sdf, outputWSFile, productionMode_string)
