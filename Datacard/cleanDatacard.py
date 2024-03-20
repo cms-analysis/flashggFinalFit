@@ -14,6 +14,7 @@ parser.add_option("--verbose",default=False,action="store_true",help="Spit out a
 if not opts.outfilename: 
   opts.outfilename = opts.datacard.replace('.txt','_cleaned.txt')
 
+
 opts.factor = float(opts.factor)
 factorLo = 1./opts.factor
 factorHi = opts.factor

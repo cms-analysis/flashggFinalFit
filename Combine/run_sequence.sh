@@ -34,7 +34,9 @@ if [[ $DR ]]; then
     DROPT=" --dryRun "
 fi
 
-fits=("xsec" "ALT_L1" "ALT_L1Zg" "ALT_0PH" "ALT_0M")
+#fits=("xsec" "ALT_L1" "ALT_L1Zg" "ALT_0PH" "ALT_0M")
+fits=("ALT_L1" "ALT_L1Zg" "ALT_0PH" "ALT_0M")
+#fits=("xsec" )
 
 if [[ $STEP == "t2w" ]]; then
     for fit in ${fits[*]}
@@ -42,11 +44,12 @@ if [[ $STEP == "t2w" ]]; then
         python RunText2Workspace.py --ext $fit --mode $fit --batch Rome
     done
 elif [[ $STEP == "fit" ]]; then
-    for obs in " " " --doObserved "
+    #for obs in " " " --doObserved "
+    for obs in " "
     do
         for fit in ${fits[*]}
         do
-            python RunFits.py --inputJson inputs.json --ext $fit --mode $fit --batch lxbatch --queue cmsan ${DROPT} $obs
+            python RunFits.py --inputJson inputs.json --ext $fit --mode $fit --queue cmsan --batch lxbatch  ${DROPT} $obs
         done
     done
 elif [[ $STEP == "collect" ]]; then

@@ -153,6 +153,7 @@ globalXSBRMap['AC']['GG2H'] = {'mode':'ggH'}
 globalXSBRMap['AC']['VBF'] = {'mode':'qqH'}
 globalXSBRMap['AC']['TTH'] = {'mode':'ttH'}
 globalXSBRMap['AC']['WH'] = {'mode':'WH'} 
+globalXSBRMap['AC']['QQ2HLNU'] = {'mode':'WH'}
 globalXSBRMap['AC']['WMINUSH2HQQ'] = {'mode':'WH','factor':0.5}
 globalXSBRMap['AC']['WPLUSH2HQQ'] = {'mode':'WH','factor':0.5}
 globalXSBRMap['AC']['ZH'] = {'mode':'qqZH'}

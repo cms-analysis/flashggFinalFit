@@ -315,6 +315,7 @@ class FinalModel:
         self.buildMean('dm_g%g_%s'%(g,extStr),skipSystematics=self.skipSystematics)
         self.buildSigma('sigma_g%g_%s'%(g,extStr),skipSystematics=self.skipSystematics)
         # Build Gaussian
+        
         if self.doVoigtian: 
           self.Pdfs['gaus_g%g_%s'%(g,extStr)] = ROOT.RooVoigtian("gaus_g%g_%s"%(g,extStr),"gaus_g%g_%s"%(g,extStr),self.xvar,self.Functions["mean_g%g_%s"%(g,extStr)],self.GammaH,self.Functions["sigma_g%g_%s"%(g,extStr)])
         else: 

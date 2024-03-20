@@ -400,7 +400,7 @@ def compareYield(row,factoryType,sname,mode='default',mname=None):
       midpoint_yield = 0.5*(row["%s_down_yield"%sname]+row["%s_up_yield"%sname])
       if midpoint_yield == 0: return [1.,1.]
       else: return [(row["%s_down_yield"%sname]/midpoint_yield),(row["%s_up_yield"%sname]/midpoint_yield)]
-    elif factoryType == "a_w": return [(row["%s_down_yield"%sname]/row['nominal_yield']),(row["%s_up_yield"%sname]/row['nominal_yield'])]
+    elif factoryType == "a_w":   return [(row["%s_down_yield"%sname]/row['nominal_yield']),(row["%s_up_yield"%sname]/row['nominal_yield'])]
     else: return [row["%s_yield"%sname]/row['nominal_yield']]
 
   elif mode=='shape':

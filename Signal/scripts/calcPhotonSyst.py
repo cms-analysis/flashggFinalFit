@@ -113,6 +113,7 @@ data = pd.DataFrame( columns=columns_data )
 # Loop over processes and add row to dataframe
 for _proc in opt.procs.split(","):
   # Glob M125 filename
+  print "%s/output*M125*%s.root"%(opt.inputWSDir,_proc)
   _WSFileName = glob.glob("%s/output*M125*%s.root"%(opt.inputWSDir,_proc))[0]
   _nominalDataName = "%s_125_%s_%s"%(procToData(_proc),sqrts__,opt.cat)
   data = data.append({'proc':_proc,'cat':opt.cat,'inputWSFile':_WSFileName,'nominalDataName':_nominalDataName}, ignore_index=True, sort=False)

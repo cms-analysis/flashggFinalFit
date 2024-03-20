@@ -54,7 +54,7 @@ def get_options():
   parser.add_option("--scalesGlobal", dest='scalesGlobal', default='', help='Photon shape systematics: scalesGlobal')
   parser.add_option("--smears", dest='smears', default='', help='Photon shape systematics: smears')
   # Parameter values
-  parser.add_option('--replacementThreshold', dest='replacementThreshold', default=50, type='int', help="Nevent threshold to trigger replacement dataset")
+  parser.add_option('--replacementThreshold', dest='replacementThreshold', default=45, type='int', help="Nevent threshold to trigger replacement dataset")
   parser.add_option('--beamspotWidthData', dest='beamspotWidthData', default=3.4, type='float', help="Width of beamspot in data [cm]")
   parser.add_option('--beamspotWidthMC', dest='beamspotWidthMC', default=5.14, type='float', help="Width of beamspot in MC [cm]")
   parser.add_option('--MHPolyOrder', dest='MHPolyOrder', default=1, type='int', help="Order of polynomial for MH dependence")
@@ -168,7 +168,8 @@ if( datasetRVForFit[MHNominal].numEntries() < opt.replacementThreshold  )|( data
   nominal_numEntries = datasetRVForFit[MHNominal].numEntries()
   procReplacementFit, catReplacementFit = rMap['procRVMap'][opt.cat], rMap['catRVMap'][opt.cat]
   for mp in opt.massPoints.split(","):
-    if 'ALT' in procRVFit and mp!=MHNominal: continue
+    if 'ALT' in procRVFit and mp!=MHNominal: continue 
+    print("%s/output*%s*%s.root"%(opt.inputWSDir,mp,procReplacementFit))
     WSFileName = glob.glob("%s/output*%s*%s.root"%(opt.inputWSDir,mp,procReplacementFit))[0]
     f = ROOT.TFile(WSFileName,"read")
     inputWS = f.Get(inputWSName__)
@@ -224,12 +225,14 @@ if not opt.skipVertexScenarioSplit:
   # Check nominal mass dataset
   if( datasetWVForFit[MHNominal].numEntries() < opt.replacementThreshold  )|( datasetWVForFit[MHNominal].sumEntries() < 0. ):
     nominal_numEntries = datasetWVForFit[MHNominal].numEntries()
+    
     procReplacementFit, catReplacementFit = rMap['procWV'], rMap['catWV']
     for mp in opt.massPoints.split(","):
       if 'ALT' in procReplacementFit and mp!=MHNominal: continue
       WSFileName = glob.glob("%s/output*%s*%s.root"%(opt.inputWSDir,mp,procReplacementFit))[0]
       f = ROOT.TFile(WSFileName,"read")
       inputWS = f.Get(inputWSName__)
+      print WSFileName, inputWS
       d = reduceDataset(inputWS.data("%s_%s_%s_%s"%(procToData(procReplacementFit),mp,sqrts__,catReplacementFit)),aset)
       datasetWVForFit[mp] = splitRVWV(d,aset,mode="WV")
       inputWS.Delete()
@@ -237,6 +240,8 @@ if not opt.skipVertexScenarioSplit:
     # Check if replacement dataset has too few entries: if so throw error
     if( datasetWVForFit[MHNominal].numEntries() < opt.replacementThreshold )|( datasetWVForFit[MHNominal].sumEntries() < 0. ):
       print " --> [ERROR] replacement dataset (%s,%s) has too few entries (%g < %g)"%(procReplacementFit,catReplacementFit,datasetWVForFit[MHNominal].numEntries,opt.replacementThreshold)
+      
+
       sys.exit(1)
     else:
       procWVFit, catWVFit = procReplacementFit, catReplacementFit
@@ -278,6 +283,7 @@ if not opt.skipBeamspotReweigh:
 # If using nGaussian fit then extract nGaussians from fTest json file
 if not opt.useDCB:
   with open("%s/outdir_%s/fTest/json/nGauss_%s.json"%(swd__,opt.ext,catRVFit)) as jf: ngauss = json.load(jf)
+  print "%s/outdir_%s/fTest/json/nGauss_%s.json"%(swd__,opt.ext,catRVFit)
   nRV = int(ngauss["%s__%s"%(procRVFit,catRVFit)]['nRV'])
   if opt.skipVertexScenarioSplit: print " --> Fitting function: convolution of nGaussians (%g)"%nRV
   else: 

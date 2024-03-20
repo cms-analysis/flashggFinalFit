@@ -31,7 +31,7 @@ import ROOT
 import pandas
 import numpy as np
 import uproot
-from root_numpy import array2tree
+from root_numpy import array2tree, tree2array
 
 from commonTools import *
 from commonObjects import *
@@ -107,8 +107,8 @@ else:
 theoryWeightColumns = {}
 for ts, nWeights in theoryWeightContainers.iteritems(): theoryWeightColumns[ts] = ["%s_%g"%(ts[:-1],i) for i in range(0,nWeights)] # drop final s from container name
 
-# If year == 2018, add HET
-if opt.year == '2018': systematics.append("JetHEM")
+#If year == 2018, add HET
+#if opt.year == '2018': systematics.append("JetHEM")
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -142,6 +142,7 @@ if opt.doSystematics: sdata = pandas.DataFrame()
 
 # Loop over categories: fill dataframe
 for cat in cats:
+#for cat in cats:
   print " --> Extracting events from category: %s"%cat
   if inputTreeDir == '': treeName = "%s_%s_%s_%s"%(opt.productionMode,opt.inputMass,sqrts__,cat)
   else: treeName = "%s/%s_%s_%s_%s"%(inputTreeDir,opt.productionMode,opt.inputMass,sqrts__,cat)
@@ -151,6 +152,7 @@ for cat in cats:
   if len(t) == 0: continue
   
   # Convert tree to pandas dataframe
+
   dfs = {}
 
   # Theory weights
@@ -160,13 +162,22 @@ for cat in cats:
     else:
       dfs[ts] = t.pandas.df(ts)
     dfs[ts].columns = tsColumns
-
   # Main variables to add to nominal RooDataSets
   dfs['main'] = t.pandas.df(mainVars) if cat!='NOTAG' else t.pandas.df(notagVars)
-
+ 
+ 
   # Concatenate current dataframes
   df = pandas.concat(dfs.values(), axis=1)
-
+  #print list(df.columns ) 
+  # Add NLO scale factor 
+  if "vbf" in opt.productionMode and "ALT" in opt.productionMode: 
+      df['weightNLO'] = df['weight']* df['vbfNLOweight'] 
+  elif "wh" in opt.productionMode and "ALT" in opt.productionMode:
+      df['weightNLO'] = df['weight']* df['vhhadNLOweight'] 
+  elif "zh" in opt.productionMode and "ALT" in opt.productionMode:
+      df['weightNLO'] = df['weight']* df['vhhadNLOweight'] 
+  else : df['weightNLO'] = df['weight']
+    
   # Add STXS splitting var if splitting necessary
   if opt.doSTXSSplitting: df[stxsVar] = t.pandas.df(stxsVar)
 
@@ -204,6 +215,7 @@ for cat in cats:
   if opt.doSystematics:
     if cat == "NOTAG": continue
     sdf = pandas.DataFrame()
+    print systematics
     for s in systematics:
       print "    --> Systematic: %s"%re.sub("YEAR",opt.year,s)
       for direction in ['Up','Down']:
@@ -211,6 +223,7 @@ for cat in cats:
         # If year in streeName then replace by year being processed
         streeName = re.sub("YEAR",opt.year,streeName)
         st = f[streeName]
+        
         if len(st)==0: continue
         sdf = st.pandas.df(systematicsVars)
         sdf['type'] = "%s%s"%(s,direction)
@@ -269,7 +282,6 @@ for stxsId in data[stxsVar].unique():
   foutdir = fout.mkdir(inputWSName__.split("/")[0])
   foutdir.cd()
   ws = ROOT.RooWorkspace(inputWSName__.split("/")[1],inputWSName__.split("/")[1])
-  
   # Add variables to workspace
   varNames = add_vars_to_workspace(ws,df,stxsVar)
 
@@ -279,6 +291,7 @@ for stxsId in data[stxsVar].unique():
     # a) make RooDataSets: type = nominal/notag
     mask = (df['cat']==cat)
     # Convert dataframe to structured array, then to ROOT tree
+    
     sa = df[mask].to_records()
     t = array2tree(sa)
 
@@ -289,7 +302,7 @@ for stxsId in data[stxsVar].unique():
     aset = make_argset(ws,varNames)
 
     # Convert tree to RooDataset and add to workspace
-    d = ROOT.RooDataSet(dName,dName,t,aset,'','weight')
+    d= ROOT.RooDataSet(dName,dName,t,aset,'','weightNLO')
     getattr(ws,'import')(d)
 
     # Delete trees and RooDataSet from heap
@@ -314,13 +327,14 @@ for stxsId in data[stxsVar].unique():
           # Make argset 
           systematicsVarsDropWeight = []
           for var in systematicsVars:
-            if var != "weight": systematicsVarsDropWeight.append(var)
+            if  "weight" not in var: systematicsVarsDropWeight.append(var)
+            # ORIGINAL if var != "weight": systematicsVarsDropWeight.append(var)
           aset = make_argset(ws,systematicsVarsDropWeight)
-          
+          print aset 
           h = ROOT.RooDataHist(hName,hName,aset)
           for ev in t:
             for v in systematicsVars:
-              if v == "weight": continue
+              if  "weight" in v: continue
               else: ws.var(v).setVal(getattr(ev,v))
             h.add(aset,getattr(ev,'weight'))
           

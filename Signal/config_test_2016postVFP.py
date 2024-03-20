@@ -4,7 +4,7 @@ _year = '2016postVFP'
 
 signalScriptCfg = {
     # Setup
-    'inputWSDir':'cards/signal_%s'%_year,
+    'inputWSDir':'cards/signal_%s/'%_year,
     'procs':'auto',
     'cats':'auto',
     'ext':'2023-02-13_year%s'%_year,

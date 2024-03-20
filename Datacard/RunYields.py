@@ -71,6 +71,8 @@ options['printOnly'] = opt.printOnly
 # If auto: extract cats from first input workspace dir
 inputWSDir0 = options['inputWSDirMap'].split(",")[0].split("=")[1]
 WSFileNames = extractWSFileNames(inputWSDir0)
+
+print(inputWSDir0, WSFileNames)
 if options['cats'] == "auto": options['cats'] = extractListOfCats(WSFileNames)
 
 if( opt.doNOTAG )&( 'NOTAG' not in options['cats'] ):

@@ -1,5 +1,5 @@
 #ext=`date +%F` 
-ext='2023-03-02'
+ext='2024-02-14'
 
 STEP=0
 usage(){
@@ -35,7 +35,7 @@ if [[ $DR ]]; then
     DROPT=" --printOnly "
 fi
 
-smprocs=("GG2H" "VBF" "TTH" "WMINUSH2HQQ" "WPLUSH2HQQ" "QQ2HLL")
+smprocs=("GG2H" "VBF" "TTH" "QQ2HLNU"  "QQ2HLL")
 smprocs_csv=$(IFS=, ; echo "${smprocs[*]}")
 
 if [[ $STEP == "yields" ]]; then
@@ -52,11 +52,13 @@ if [[ $STEP == "yields" ]]; then
 	zhsamples="QQ2HLL,ZH_${altproc_nonvbf},ZH_${altproc_nonvbf}f05ph0"
         if [[ $altproc == "ALT_0PH" ]]; then # not all the WH alternative samples are available yet
 	    whsamples="WMINUSH2HQQ,WPLUSH2HQQ,WH_${altproc_nonvbf},WH_${altproc_nonvbf}f05ph0"
+	    whsamples="QQ2HLNU,WH_${altproc_nonvbf},WH_${altproc_nonvbf}f05ph0"
         else
-            whsamples="WMINUSH2HQQ,WPLUSH2HQQ"
+            whsamples="QQ2HLNU"
         fi
 	if [[ $altproc == "ALT_0M" ]]; then
-	    tthsamples="TTH,TTH_${altproc_nonvbf},TTH_${altproc_nonvbf}f05ph0"
+	    #tthsamples="TTH,TTH_${altproc_nonvbf},TTH_${altproc_nonvbf}f05ph0"
+	    tthsamples="TTH"
 	else
 	    tthsamples="TTH"
 	fi
@@ -66,11 +68,12 @@ if [[ $STEP == "yields" ]]; then
         python RunYields.py --cats "auto" --inputWSDirMap 2016preVFP=cards/signal_2016preVFP,2016postVFP=cards/signal_2016postVFP,2017=cards/signal_2017,2018=cards/signal_2018 --procs "GG2H,$tthsamples,$vbfsamples,$whsamples,$zhsamples" --mergeYears --doSystematics --skipZeroes --ext ${ext}_${altproc} --batch Rome --queue cmsan ${DROPT}
     done
 elif [[ $STEP == "datacards" ]]; then
-    for fit in "xsec" "ALT_L1" "ALT_L1Zg" "ALT_0PH" "ALT_0M"
+#    for fit in "xsec" "ALT_L1" "ALT_L1Zg" "ALT_0PH" "ALT_0M"
+    for fit in "ALT_L1" "ALT_L1Zg" "ALT_0PH" "ALT_0M"
     do
 	echo "making datacards for all years together for type of fit: $fit"
-        python makeDatacard.py --years 2016preVFP,2016postVFP,2017,2018 --ext ${ext}_${fit} --prune --doSystematics --output "Datacard_${fit}" --pruneCat RECO_VBFLIKEGGH_Tag1,RECO_VBFLIKEGGH_Tag0
-	python cleanDatacard.py --datacard "Datacard_${fit}" --factor 2 --removeDoubleSided
+       python makeDatacard.py --years 2016preVFP,2016postVFP,2017,2018 --ext ${ext}_${fit} --prune --doSystematics --output "Datacard_${fit}" --pruneCat RECO_VBFLIKEGGH_Tag1,RECO_VBFLIKEGGH_Tag0
+	python cleanDatacard.py --datacard "Datacard_${fit}.txt" --factor 2 --removeDoubleSided
 	mv "Datacard_${fit}_cleaned.txt" "Datacard_${fit}.txt"
     done
 elif [[ $STEP == "links" ]]; then
@@ -78,11 +81,11 @@ elif [[ $STEP == "links" ]]; then
     rm signal background 
     echo "linking Models/signal to ../../Signal/outdir_packaged"
     ln -s ../../Signal/outdir_packaged signal
-    echo "linking Models/background to ../../Background/outdir_2022-11-21"
-    ln -s ../../Background/outdir_2022-11-21 background
+    echo "linking Models/background to ../../Background/outdir_2024-02-14"
+    ln -s ../../Background/outdir_2024-02-14 background
     cd -
 else
-    echo "Step $STEP is not one among yields,datacard,links. Exiting."
+    echo "Step $STEP is not one among yields,datacards,links. Exiting."
 fi
 
 

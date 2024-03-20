@@ -243,6 +243,7 @@ def submitFiles(_opts):
           if skipMe: continue
         _subfile = "%s/%s_%g"%(_jobdir,_executable,tfidx)
         cmdLine = "%s -q %s %s -o %s.log -e %s.err %s.sh"%(_subcmd,_opts['queue'],jobOptsStr,_subfile,_subfile,_subfile)
+        print "   ----------------->  "+ cmdLine
         run(cmdLine)
 
     elif( _opts['mode'] == 'haddMC' ):
