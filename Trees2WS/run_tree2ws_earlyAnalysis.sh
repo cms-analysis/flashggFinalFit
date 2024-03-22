@@ -44,7 +44,7 @@ for modeString in "${productionModes[@]}"; do
         fi
         
         for mass in "${inputMasses[@]}"; do
-            python trees2ws.py --inputMass "$mass" --productionMode "$mode" --year 2022"$era" --doSystematics --doInOutSplitting --inputConfig config_2022.py --inputTreeFile "$path_to_root_files"/"$process"_M-"$mass"_"$era"/*.root --outputWSDir "$outputDir"
+            python trees2ws.py --inputMass "$mass" --productionMode "$mode" --year 2022"$era" --doSystematics --doDiffSplitting --inputConfig config_2022.py --inputTreeFile "$path_to_root_files"/"$process"_M-"$mass"_"$era"/*.root --outputWSDir "$outputDir"
         done
     done
 done

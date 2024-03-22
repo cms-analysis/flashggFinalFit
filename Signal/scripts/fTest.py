@@ -72,7 +72,7 @@ for proc in opt.procs.split(","):
   WSFileName = glob.glob("%s/output*M%s*%s.root"%(opt.inputWSDir,opt.mass,proc))[0]
   f = ROOT.TFile(WSFileName,"read")
   inputWS = f.Get(inputWSName__)
-  if proc.split("_")[-1] in ["in", "out"]:
+  if (len(proc.split("_")) <= 2) and (proc.split("_")[-1] in ["in", "out"]):
     d = reduceDataset(inputWS.data("%s_%s_%s_%s_%s"%(procToData(proc.split("_")[0]),procToData(proc.split("_")[-1]),opt.mass,sqrts__,opt.cat)),aset)
   else:
     d = reduceDataset(inputWS.data("%s_%s_%s_%s"%(procToData(proc.split("_")[0]),opt.mass,sqrts__,opt.cat)),aset)
@@ -92,7 +92,7 @@ for pidx, proc in enumerate(procsToFTest):
   WSFileName = glob.glob("%s/output*M%s*%s.root"%(opt.inputWSDir,opt.mass,proc))[0]
   f = ROOT.TFile(WSFileName,"read")
   inputWS = f.Get(inputWSName__)
-  if proc.split("_")[-1] in ["in", "out"]:
+  if (len(proc.split("_")) <= 2) and (proc.split("_")[-1] in ["in", "out"]):
     d = reduceDataset(inputWS.data("%s_%s_%s_%s_%s"%(procToData(proc.split("_")[0]),procToData(proc.split("_")[-1]),opt.mass,sqrts__,opt.cat)),aset)
   else:
     d = reduceDataset(inputWS.data("%s_%s_%s_%s"%(procToData(proc.split("_")[0]),opt.mass,sqrts__,opt.cat)),aset)

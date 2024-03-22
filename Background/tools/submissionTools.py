@@ -33,6 +33,7 @@ def writeCondorSub(_file,_exec,_queue,_nJobs,_jobOpts,doHoldOnFailure=True,doPer
   if doPeriodicRetry:
     _file.write("# Periodically retry the jobs every 10 minutes, up to a maximum of 5 retries.\n")
     _file.write("periodic_release =  (NumJobStarts < 3) && ((CurrentTime - EnteredCurrentStatus) > 600)\n\n")
+  _file.write("+AccountingGroup = 'group_u_CMS.u_zh.users'\n")
   _file.write("+JobFlavour = \"%s\"\n"%_queue)
   _file.write("queue %g"%_nJobs)
 
@@ -48,7 +49,7 @@ def writeSubFiles(_opts):
   if len(glob.glob("%s/*"%_jobdir)): os.system("rm %s/*"%_jobdir)
   
   # CONDOR
-  if _opts['batch'] == "condor":
+  if "condor" in _opts['batch']:
     _executable = "condor_%s_%s"%(_opts['mode'],_opts['ext'])
     _f = open("%s/%s.sh"%(_jobdir,_executable),"w") # single .sh script split into separate jobs
     writePreamble(_f)

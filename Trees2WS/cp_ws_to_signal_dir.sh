@@ -1,5 +1,20 @@
 #!/bin/bash
 
+
+extract_bins() {
+    local path="$1"
+    local bins=()
+
+    # Use find to search for folders matching the pattern ws_<proc>_<bins>
+    while IFS= read -r folder; do
+        # Append the folder name to the bins array
+        bins+=("$folder")
+    done < <(find "$path" -type d -name 'ws_*_*' 2>/dev/null)
+
+    # Output the bins array
+    printf '%s\n' "${bins[@]}"
+}
+
 # Check if the correct number of command-line arguments is provided
 if [ "$#" -ne 1 ]; then
     echo "Usage: $0 <path>"
@@ -9,8 +24,9 @@ fi
 # Get the path from the command-line argument
 path="$1"
 
-# Define the source directories
-source_directories=("ws_GG2H_in" "ws_GG2H_out" "ws_TTH_in" "ws_TTH_out" "ws_VBF_in" "ws_VBF_out" "ws_VH_in" "ws_VH_out")
+# Define the gen-level bins
+source_directories=($(extract_bins "$path"))
+
 
 # Create the destination directory if it does not exist
 destination_directory="$path/ws_signal"

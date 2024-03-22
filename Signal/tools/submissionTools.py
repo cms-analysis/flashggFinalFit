@@ -49,7 +49,7 @@ def writeSubFiles(_opts):
   if len(glob.glob("%s/*"%_jobdir)): os.system("rm %s/*"%_jobdir)
   
   # CONDOR
-  if _opts['batch'] == "condor":
+  if "condor" in _opts['batch']:
     _executable = "condor_%s_%s"%(_opts['mode'],_opts['ext'])
     _f = open("%s/%s.sh"%(_jobdir,_executable),"w") # single .sh script split into separate jobs
     writePreamble(_f)

@@ -248,6 +248,41 @@ models = {
 --PO \"map=.*/tHW.*hgg:r_tH[1,0,15]\"",
 
 
+  "differential_pt":"-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+--PO \"map=.*/ggH_PTH_0p0_15p0.*:r_PTH_0p0_15p0[1,0,3]\" \
+--PO \"map=.*/ttH_PTH_0p0_15p0.*:r_PTH_0p0_15p0[1,0,3]\" \
+--PO \"map=.*/VH_PTH_0p0_15p0.*:r_PTH_0p0_15p0[1,0,3]\" \
+--PO \"map=.*/qqH_PTH_0p0_15p0.*:r_PTH_0p0_15p0[1,0,3]\" \
+--PO \"map=.*/ggH_PTH_15p0_30p0.*:r_PTH_15p0_30p0[1,0,3]\" \
+--PO \"map=.*/ttH_PTH_15p0_30p0.*:r_PTH_15p0_30p0[1,0,3]\" \
+--PO \"map=.*/VH_PTH_15p0_30p0.*:r_PTH_15p0_30p0[1,0,3]\" \
+--PO \"map=.*/qqH_PTH_15p0_30p0.*:r_PTH_15p0_30p0[1,0,3]\" \
+--PO \"map=.*/ggH_PTH_30p0_45p0.*:r_PTH_30p0_45p0[1,0,3]\" \
+--PO \"map=.*/ttH_PTH_30p0_45p0.*:r_PTH_30p0_45p0[1,0,3]\" \
+--PO \"map=.*/VH_PTH_30p0_45p0.*:r_PTH_30p0_45p0[1,0,3]\" \
+--PO \"map=.*/qqH_PTH_30p0_45p0.*:r_PTH_30p0_45p0[1,0,3]\" \
+--PO \"map=.*/ggH_PTH_45p0_80p0.*:r_PTH_45p0_80p0[1,0,3]\" \
+--PO \"map=.*/ttH_PTH_45p0_80p0.*:r_PTH_45p0_80p0[1,0,3]\" \
+--PO \"map=.*/VH_PTH_45p0_80p0.*:r_PTH_45p0_80p0[1,0,3]\" \
+--PO \"map=.*/qqH_PTH_45p0_80p0.*:r_PTH_45p0_80p0[1,0,3]\" \
+--PO \"map=.*/ggH_PTH_80p0_120p0.*:r_PTH_80p0_120p0[1,0,3]\" \
+--PO \"map=.*/ttH_PTH_80p0_120p0.*:r_PTH_80p0_120p0[1,0,3]\" \
+--PO \"map=.*/VH_PTH_80p0_120p0.*:r_PTH_80p0_120p0[1,0,3]\" \
+--PO \"map=.*/qqH_PTH_80p0_120p0.*:r_PTH_80p0_120p0[1,0,3]\" \
+--PO \"map=.*/ggH_PTH_120p0_200p0.*:r_PTH_120p0_200p0[1,0,3]\" \
+--PO \"map=.*/ttH_PTH_120p0_200p0.*:r_PTH_120p0_200p0[1,0,3]\" \
+--PO \"map=.*/VH_PTH_120p0_200p0.*:r_PTH_120p0_200p0[1,0,3]\" \
+--PO \"map=.*/qqH_PTH_120p0_200p0.*:r_PTH_120p0_200p0[1,0,3]\" \
+--PO \"map=.*/ggH_PTH_200p0_350p0.*:r_PTH_200p0_350p0[1,0,3]\" \
+--PO \"map=.*/ttH_PTH_200p0_350p0.*:r_PTH_200p0_350p0[1,0,3]\" \
+--PO \"map=.*/VH_PTH_200p0_350p0.*:r_PTH_200p0_350p0[1,0,3]\" \
+--PO \"map=.*/qqH_PTH_200p0_350p0.*:r_PTH_200p0_350p0[1,0,3]\" \
+--PO \"map=.*/ggH_PTH_350p0_10000p0.*:r_PTH_350p0_10000p0[1,0,3]\" \
+--PO \"map=.*/ttH_PTH_350p0_10000p0.*:r_PTH_350p0_10000p0[1,0,3]\" \
+--PO \"map=.*/VH_PTH_350p0_10000p0.*:r_PTH_350p0_10000p0[1,0,3]\" \
+--PO \"map=.*/qqH_PTH_350p0_10000p0.*:r_PTH_350p0_10000p0[1,0,3]\"",
+
+
   "kappas_resolved":"-P HiggsAnalysis.CombinedLimit.LHCHCGModels:K1 --PO BRU=0",
 
   "kappas":"-P HiggsAnalysis.CombinedLimit.LHCHCGModels:K2 --PO BRU=0",

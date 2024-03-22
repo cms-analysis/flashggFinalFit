@@ -20,6 +20,13 @@
         "fit_opts":"--setParameterRanges r=0,2 --saveSpecifiedNuis all+--setParameterRanges r=0,2 --saveSpecifiedNuis all"
     },
 
+    "differential_pt":{
+        "pois":"r_PTH_0p0_15p0,r_PTH_15p0_35p0,r_PTH_35p0_45p0,r_PTH_45p0_80p0,r_PTH_80p0_120p0,r_PTH_120p0_200p0,r_PTH_200p0_350p0,r_PTH_350p0_10000p0",
+        "fits":"profile1D:syst:all+profile1D:statonly:all",
+        "points":"10:1+10:1",
+        "fit_opts":"--setParameterRanges r=0,3 --saveSpecifiedNuis all+--setParameterRanges r=0,3 --saveSpecifiedNuis all"
+    },
+
     "mu":{
         "pois":"r_ggH,r_VBF,r_VH,r_top",
         "fits":"profile1D:syst:all",

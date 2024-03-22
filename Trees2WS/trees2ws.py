@@ -22,6 +22,7 @@ def get_options():
   parser.add_option('--doNNLOPS',dest='doNNLOPS', default=False, action="store_true", help='Add NNLOPS weight variable: NNLOPSweight')
   parser.add_option('--doSystematics',dest='doSystematics', default=False, action="store_true", help='Add systematics datasets to output WS')
   parser.add_option('--doSTXSSplitting',dest='doSTXSSplitting', default=False, action="store_true", help='Split output WS per STXS bin')
+  parser.add_option('--doDiffSplitting',dest='doDiffSplitting', default=False, action="store_true", help='Split output WS per differential bin')
   parser.add_option('--doInOutSplitting',dest='doInOutSplitting', default=False, action="store_true", help='Split output WS into in/out fiducial based on some variable in the input trees (to be improved).')
   return parser.parse_args()
 (opt,args) = get_options()
@@ -38,6 +39,7 @@ from root_numpy import array2tree
 from commonTools import *
 from commonObjects import *
 from tools.STXS_tools import *
+from tools.diff_tools import *
 
 print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG TREES 2 WS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ "
 def leave():
@@ -55,6 +57,7 @@ def add_vars_to_workspace(_ws=None,_data=None,_stxsVar=None):
   for var in _data.columns:
     if var in ['type','cat',_stxsVar]: continue
     if 'fiducial' and 'Tagger' in var: continue
+    if "diff" in var: continue
     if var == "CMS_hgg_mass": 
       _vars[var] = ROOT.RooRealVar(var,var,125.,100.,180.)
       _vars[var].setBins(160)
@@ -99,6 +102,7 @@ if opt.inputConfig != '':
     inputTreeDir     = _cfg['inputTreeDir']
     mainVars         = _cfg['mainVars']
     stxsVar          = _cfg['stxsVar']
+    diffVar          = _cfg['diffVar']
     notagVars        = _cfg['notagVars']
     systematicsVars  = _cfg['systematicsVars']
     theoryWeightContainers = _cfg['theoryWeightContainers']
@@ -164,14 +168,14 @@ def create_workspace(df, sdf, outputWSFile, productionMode_string):
           # Make argset 
           systematicsVarsDropWeight = []
           for var in systematicsVars:
-            if 'fiducial' and 'Tagger' in var: continue
+            if ('fiducial' and 'Tagger' in var) or ("diff" in var): continue
             if var != "weight": systematicsVarsDropWeight.append(var)
           aset = make_argset(ws,systematicsVarsDropWeight)
           
           h = ROOT.RooDataHist(hName,hName,aset)
           for ev in t:
             for v in systematicsVars:
-              if (v == "weight") or ('fiducial' and 'Tagger' in v): continue
+              if (v == "weight") or ('fiducial' and 'Tagger' in v) or ("diff" in v): continue
               else: ws.var(v).setVal(getattr(ev,v))
             h.add(aset,getattr(ev,'weight'))
           
@@ -183,7 +187,7 @@ def create_workspace(df, sdf, outputWSFile, productionMode_string):
           t.Delete()
           h.Delete()
           del sa
-  sdf = sdf.drop(columns=['fiducialGeometricTagger_20'])
+  # sdf = sdf.drop(columns=['fiducialGeometricTagger_20', 'diffVariable_pt'])
 
   # Write WS to file
   ws.Write()
@@ -328,6 +332,8 @@ if opt.doInOutSplitting: fiducialIds = data['fiducialGeometricTagger_20'].unique
 else: fiducialIds = [0] # If we do not perform in/out splitting, we want to have one inclusive (for particle-level) process definition, our code int for that is zero
 
 for fiducialId in fiducialIds:
+  
+  if opt.doDiffSplitting: continue
 
   # In the end, the STXS and fiducial in/out splitting should maybe be harmonised, this looks a bit ugly
   if (stxsVar != '') or (opt.doSTXSSplitting): continue
@@ -385,6 +391,34 @@ if opt.doSTXSSplitting:
     if not os.path.exists(outputWSDir): os.system("mkdir %s"%outputWSDir)
     outputWSFile = outputWSDir+"/"+re.sub(".root","_%s.root"%stxsBin,opt.inputTreeFile.split("/")[-1])
     print " --> Creating output workspace for STXS bin: %s (%s)"%(stxsBin,outputWSFile)
+
+    productionMode_string = opt.productionMode
+
+    create_workspace(df, sdf, outputWSFile, productionMode_string)
+
+
+if opt.doDiffSplitting:
+
+  for diffId in data[diffVar].unique():
+    # diffId should be a gen-level pt bin
+    df = data[data[diffVar]==diffId]
+    if opt.doSystematics: sdf = sdata[sdata[diffVar]==diffId]
+
+    # Extract diffBin
+    diffBin = diffDict[int(diffId)]
+    diffBin = opt.productionMode + "_" + diffBin
+    print(diffBin)
+
+    # Define output workspace file
+    if opt.outputWSDir is not None:
+      # outputWSDir = opt.outputWSDir+"/ws_%s"%(dataToProc(opt.productionMode)) + "/ws_%s"%diffBin
+      outputWSDir = opt.outputWSDir + "/ws_%s"%diffBin
+    else:
+      outputWSDir = "/".join(opt.inputTreeFile.split("/")[:-1])+"/ws_%s"%diffBin
+    if not os.path.exists(outputWSDir): os.system("mkdir %s"%outputWSDir)
+    outputWSFile = outputWSDir+"/"+re.sub(".root","_%s.root"%diffBin,opt.inputTreeFile.split("/")[-1])
+    # outputWSFile = outputWSDir+"/"+re.sub(".root","_%s_%s.root"%(dataToProc(opt.productionMode), fidTag),opt.inputTreeFile.split("/")[-1])
+    print " --> Creating output workspace for differential bin: %s (%s)"%(diffBin,outputWSFile)
 
     productionMode_string = opt.productionMode
 

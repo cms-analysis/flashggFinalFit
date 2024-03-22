@@ -48,6 +48,49 @@ globalXSBRMap['earlyAnalysisInOut']['VBF_out'] = {'mode':'constant','factor':4.0
 globalXSBRMap['earlyAnalysisInOut']['VH_out'] = {'mode':'constant','factor':2.3781}
 globalXSBRMap['earlyAnalysisInOut']['TTH_out'] = {'mode':'constant','factor':0.5638}
 
+# Early Run 3 Hgg analysis with differentials in pt
+globalXSBRMap['earlyAnalysisDiffPt'] = od()
+globalXSBRMap['earlyAnalysisDiffPt']['decay'] = {'mode':'hgg'}
+globalXSBRMap['earlyAnalysisDiffPt']['ggh_PTH_0p0_15p0_in'] = {'mode':'constant','factor':51.96}
+globalXSBRMap['earlyAnalysisDiffPt']['ggh_PTH_15p0_30p0_in'] = {'mode':'constant','factor':51.96}
+globalXSBRMap['earlyAnalysisDiffPt']['ggh_PTH_30p0_45p0_in'] = {'mode':'constant','factor':51.96}
+globalXSBRMap['earlyAnalysisDiffPt']['ggh_PTH_45p0_80p0_in'] = {'mode':'constant','factor':51.96}
+globalXSBRMap['earlyAnalysisDiffPt']['ggh_PTH_80p0_120p0_in'] = {'mode':'constant','factor':51.96}
+globalXSBRMap['earlyAnalysisDiffPt']['ggh_PTH_120p0_200p0_in'] = {'mode':'constant','factor':51.96}
+globalXSBRMap['earlyAnalysisDiffPt']['ggh_PTH_200p0_350p0_in'] = {'mode':'constant','factor':51.96}
+globalXSBRMap['earlyAnalysisDiffPt']['ggh_PTH_350p0_10000p0_in'] = {'mode':'constant','factor':51.96}
+globalXSBRMap['earlyAnalysisDiffPt']['ggh_PTH_0p0_10000p0_out'] = {'mode':'constant','factor':51.96}
+
+globalXSBRMap['earlyAnalysisDiffPt']['vbf_PTH_0p0_15p0_in'] = {'mode':'constant','factor':4.067}
+globalXSBRMap['earlyAnalysisDiffPt']['vbf_PTH_15p0_30p0_in'] = {'mode':'constant','factor':4.067}
+globalXSBRMap['earlyAnalysisDiffPt']['vbf_PTH_30p0_45p0_in'] = {'mode':'constant','factor':4.067}
+globalXSBRMap['earlyAnalysisDiffPt']['vbf_PTH_45p0_80p0_in'] = {'mode':'constant','factor':4.067}
+globalXSBRMap['earlyAnalysisDiffPt']['vbf_PTH_80p0_120p0_in'] = {'mode':'constant','factor':4.067}
+globalXSBRMap['earlyAnalysisDiffPt']['vbf_PTH_120p0_200p0_in'] = {'mode':'constant','factor':4.067}
+globalXSBRMap['earlyAnalysisDiffPt']['vbf_PTH_200p0_350p0_in'] = {'mode':'constant','factor':4.067}
+globalXSBRMap['earlyAnalysisDiffPt']['vbf_PTH_350p0_10000p0_in'] = {'mode':'constant','factor':4.067}
+globalXSBRMap['earlyAnalysisDiffPt']['vbf_PTH_0p0_10000p0_out'] = {'mode':'constant','factor':4.067}
+
+globalXSBRMap['earlyAnalysisDiffPt']['vh_PTH_0p0_15p0_in'] = {'mode':'constant','factor':2.3781}
+globalXSBRMap['earlyAnalysisDiffPt']['vh_PTH_15p0_30p0_in'] = {'mode':'constant','factor':2.3781}
+globalXSBRMap['earlyAnalysisDiffPt']['vh_PTH_30p0_45p0_in'] = {'mode':'constant','factor':2.3781}
+globalXSBRMap['earlyAnalysisDiffPt']['vh_PTH_45p0_80p0_in'] = {'mode':'constant','factor':2.3781}
+globalXSBRMap['earlyAnalysisDiffPt']['vh_PTH_80p0_120p0_in'] = {'mode':'constant','factor':2.3781}
+globalXSBRMap['earlyAnalysisDiffPt']['vh_PTH_120p0_200p0_in'] = {'mode':'constant','factor':2.3781}
+globalXSBRMap['earlyAnalysisDiffPt']['vh_PTH_200p0_350p0_in'] = {'mode':'constant','factor':2.3781}
+globalXSBRMap['earlyAnalysisDiffPt']['vh_PTH_350p0_10000p0_in'] = {'mode':'constant','factor':2.3781}
+globalXSBRMap['earlyAnalysisDiffPt']['vh_PTH_0p0_10000p0_out'] = {'mode':'constant','factor':2.3781}
+
+globalXSBRMap['earlyAnalysisDiffPt']['tth_PTH_0p0_15p0_in'] = {'mode':'constant','factor':0.5638}
+globalXSBRMap['earlyAnalysisDiffPt']['tth_PTH_15p0_30p0_in'] = {'mode':'constant','factor':0.5638}
+globalXSBRMap['earlyAnalysisDiffPt']['tth_PTH_30p0_45p0_in'] = {'mode':'constant','factor':0.5638}
+globalXSBRMap['earlyAnalysisDiffPt']['tth_PTH_45p0_80p0_in'] = {'mode':'constant','factor':0.5638}
+globalXSBRMap['earlyAnalysisDiffPt']['tth_PTH_80p0_120p0_in'] = {'mode':'constant','factor':0.5638}
+globalXSBRMap['earlyAnalysisDiffPt']['tth_PTH_120p0_200p0_in'] = {'mode':'constant','factor':0.5638}
+globalXSBRMap['earlyAnalysisDiffPt']['tth_PTH_200p0_350p0_in'] = {'mode':'constant','factor':0.5638}
+globalXSBRMap['earlyAnalysisDiffPt']['tth_PTH_350p0_10000p0_in'] = {'mode':'constant','factor':0.5638}
+globalXSBRMap['earlyAnalysisDiffPt']['tth_PTH_0p0_10000p0_out'] = {'mode':'constant','factor':0.5638}
+
 # STXS analysis: add factor for bin composition
 globalXSBRMap['STXS'] = od()
 globalXSBRMap['STXS']['decay'] = {'mode':'hgg'}

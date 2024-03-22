@@ -114,7 +114,7 @@ data = pd.DataFrame( columns=columns_data )
 for _proc in opt.procs.split(","):
   # Glob M125 filename
   _WSFileName = glob.glob("%s/output*M125*%s.root"%(opt.inputWSDir,_proc))[0]
-  if _proc.split("_")[-1] in ["in", "out"]:
+  if (len(_proc.split("_")) <= 2) and (_proc.split("_")[-1] in ["in", "out"]):
     _nominalDataName = "%s_%s_125_%s_%s"%(procToData(_proc.split("_")[0]),procToData(_proc.split("_")[-1]),sqrts__,opt.cat)
   else:
     _nominalDataName = "%s_125_%s_%s"%(procToData(_proc.split("_")[0]),sqrts__,opt.cat)

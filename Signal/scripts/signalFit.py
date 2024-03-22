@@ -108,7 +108,7 @@ if opt.skipZeroes:
   WSFileName = glob.glob("%s/output*M%s*%s.root"%(opt.inputWSDir,MHNominal,opt.proc))[0]
   f = ROOT.TFile(WSFileName,"read")
   inputWS = f.Get(inputWSName__)
-  if opt.proc.split("_")[-1] in ["in", "out"]:
+  if (len(opt.proc.split("_")) <= 2) and (opt.proc.split("_")[-1] in ["in", "out"]):
     d = reduceDataset(inputWS.data("%s_%s_%s_%s_%s"%(procToData(opt.proc.split("_")[0]),procToData(opt.proc.split("_")[-1]),MHNominal,sqrts__,opt.cat)),aset)
   else:
     d = reduceDataset(inputWS.data("%s_%s_%s_%s"%(procToData(opt.proc.split("_")[0]),MHNominal,sqrts__,opt.cat)),aset)
@@ -157,7 +157,7 @@ for mp in opt.massPoints.split(","):
   WSFileName = glob.glob("%s/output*M%s*%s.root"%(opt.inputWSDir,mp,procRVFit))[0]
   f = ROOT.TFile(WSFileName,"read")
   inputWS = f.Get(inputWSName__)
-  if procRVFit.split("_")[-1] in ["in", "out"]:
+  if (len(procRVFit.split("_")) <= 2) and (procRVFit.split("_")[-1] in ["in", "out"]):
     d = reduceDataset(inputWS.data("%s_%s_%s_%s_%s"%(procToData(procRVFit.split("_")[0]),procToData(procRVFit.split("_")[-1]),mp,sqrts__,catRVFit)),aset)
   else:
     d = reduceDataset(inputWS.data("%s_%s_%s_%s"%(procToData(procRVFit.split("_")[0]),mp,sqrts__,catRVFit)),aset)
@@ -175,7 +175,7 @@ if( datasetRVForFit[MHNominal].numEntries() < opt.replacementThreshold  )|( data
     WSFileName = glob.glob("%s/output*M%s*%s.root"%(opt.inputWSDir,mp,procReplacementFit))[0]
     f = ROOT.TFile(WSFileName,"read")
     inputWS = f.Get(inputWSName__)
-    if procReplacementFit.split("_")[-1] in ["in", "out"]:
+    if (len(procReplacementFit.split("_")) <= 2) and (procReplacementFit.split("_")[-1] in ["in", "out"]):
       d = reduceDataset(inputWS.data("%s_%s_%s_%s_%s"%(procToData(procReplacementFit.split("_")[0]),procToData(procReplacementFit.split("_")[-1]),mp,sqrts__,catReplacementFit)),aset)
     else:
       d = reduceDataset(inputWS.data("%s_%s_%s_%s"%(procToData(procReplacementFit.split("_")[0]),mp,sqrts__,catReplacementFit)),aset)
@@ -217,7 +217,7 @@ if not opt.skipVertexScenarioSplit:
     WSFileName = glob.glob("%s/output*M%s*%s.root"%(opt.inputWSDir,mp,procWVFit))[0]
     f = ROOT.TFile(WSFileName,"read")
     inputWS = f.Get(inputWSName__)
-    if procWVFit.split("_")[-1] in ["in", "out"]:
+    if (len(procWVFit.split("_")) <= 2) and (procWVFit.split("_")[-1] in ["in", "out"]):
       d = reduceDataset(inputWS.data("%s_%s_%s_%s_%s"%(procToData(procWVFit.split("_")[0]),procToData(procWVFit.split("_")[-1]),mp,sqrts__,catWVFit)),aset)
     else:
       d = reduceDataset(inputWS.data("%s_%s_%s_%s"%(procToData(procWVFit.split("_")[0]),mp,sqrts__,catWVFit)),aset)
@@ -233,7 +233,7 @@ if not opt.skipVertexScenarioSplit:
       WSFileName = glob.glob("%s/output*M%s*%s.root"%(opt.inputWSDir,mp,procReplacementFit))[0]
       f = ROOT.TFile(WSFileName,"read")
       inputWS = f.Get(inputWSName__)
-      if procReplacementFit.split("_")[-1] in ["in", "out"]:
+      if (len(procReplacementFit.split("_")) <= 2) and (procReplacementFit.split("_")[-1] in ["in", "out"]):
         d = reduceDataset(inputWS.data("%s_%s_%s_%s_%s"%(procToData(procReplacementFit.split("_")[0]),procToData(procReplacementFit.split("_")[-1]),mp,sqrts__,catReplacementFit)),aset)
       else:
         d = reduceDataset(inputWS.data("%s_%s_%s_%s"%(procToData(procReplacementFit.split("_")[0]),mp,sqrts__,catReplacementFit)),aset)
