@@ -13,6 +13,14 @@
         "fit_opts":"--setParameters MH=125.38 --saveSpecifiedNuis all --saveInactivePOI 1 --freezeParameters ALL,MH"
     },
 
+    "differential_pt":{
+        "pois":"r_PTH_0p0_15p0,r_PTH_15p0_35p0,r_PTH_35p0_45p0,r_PTH_45p0_80p0,r_PTH_80p0_120p0,r_PTH_120p0_200p0,r_PTH_200p0_350p0,r_PTH_350p0_10000p0",
+        "fits":"profile1D:syst:all+profile1D:statonly:all",
+        "points":"40:1+40:1",
+        "fit_opts":"--setParameterRanges r=0,3 --saveSpecifiedNuis all+--setParameterRanges r=0,3 --saveSpecifiedNuis all"
+    },
+
+
     "stage1p2_extended":{
         "pois":"r_ggH_0J_low,r_ggH_0J_high,r_ggH_1J_low,r_ggH_1J_med,r_ggH_1J_high,r_ggH_2J_low,r_ggH_2J_med,r_ggH_2J_high,r_ggH_BSM_low,r_ggH_BSM_med,r_ggH_BSM_high,r_qqH_low_mjj_low_pthjj,r_qqH_low_mjj_high_pthjj,r_qqH_high_mjj_low_pthjj,r_qqH_high_mjj_high_pthjj,r_qqH_BSM,r_qqH_VHhad,r_WH_lep_low,r_WH_lep_high,r_ZH_lep,r_ttH_low,r_ttH_medlow,r_ttH_medhigh,r_ttH_high,r_tH",
         "fits":"profile1D:syst:r_ggH_BSM_low,r_ggH_BSM_med,r_ggH_BSM_high",
