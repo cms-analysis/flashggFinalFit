@@ -34,7 +34,8 @@ if [[ $DR ]]; then
     DROPT=" --dryRun "
 fi
 
-fits=("xsec" "ALT_L1" "ALT_L1Zg" "ALT_0PH" "ALT_0M")
+#fits=("xsec" "ALT_L1" "ALT_L1Zg" "ALT_0PH" "ALT_0M")
+fits=("ALT_L1")
 
 if [[ $STEP == "t2w" ]]; then
     for fit in ${fits[*]}
@@ -66,9 +67,32 @@ elif [[ $STEP == "plot" ]]; then
         done
     done
 elif [[ $STEP == "impacts-initial" ]]; then
-    python RunImpacts.py --inputJson inputs.json --ext xsec --mode xsec --batch lxbatch --queue cmsan ${DROPT}
+    for fit in ${fits[*]} 
+    do
+	python RunImpacts.py --inputJson inputs.json --ext $fit --mode $fit --batch lxbatch --queue cmsan ${DROPT}
+    done
 elif [[ $STEP == "impacts-scans" ]]; then
-    python RunImpacts.py --inputJson inputs.json --ext xsec --mode xsec --doFits --batch lxbatch --queue cmsan ${DROPT}
+    for fit in ${fits[*]}
+    do
+	python RunImpacts.py --inputJson inputs.json --ext $fit --mode $fit --doFits --batch lxbatch --queue cmsan ${DROPT}
+    done
+elif [[ $STEP == "impacts-collect" ]]; then
+    for fit in ${fits[*]}
+    do
+	cd runImpacts${fit}_${fit}
+	echo "Making JSON file for fit $fit It might take time, depending on the number of parameters..."
+	combineTool.py -M Impacts -n _bestfit_syst_${fit}_initialFit -d ../Datacard_${fit}.root -i impacts_${fit}.json -m 125 -o impacts_${poi}
+	if [[ $fit == "xsec" ]]; then 
+	    pois=("r_ggH" "r_VBF" "r_VH" "r_top")
+	    translate="pois_mu.json"
+	fi
+	for poi in ${pois[*]}
+	do
+	    echo "    ===> Producing impact plots for the *** main-only *** systematics for fit: === $fit === and POI: == $poi === "
+	    plotImpacts.py -i impacts_${fit}.json -o impacts_${poi} --POI ${poi}  --translate "../../Plots/${translate}" --max-pages 1
+	done
+	cd -
+    done
 else
     echo "Step $STEP is not one among t2w,fit,plot. Exiting."
 fi

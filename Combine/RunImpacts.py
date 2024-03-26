@@ -88,8 +88,9 @@ for fidx in range(len(fits)):
   _fit_opts = fit_opts[fidx].replace("--robustFit=1","").replace("--robustFit 1","")
   # in case of doFits, combineTool adds floatOtherPOIs 1, so do not repeat twice in case it is given
   if opt.doFits:
-    _fit_opts = fit_opts[fidx].replace("--floatOtherPOIs=1","").replace("--floatOtherPOIs 1","")
-    _fit_opts = fit_opts[fidx].replace("--saveInactivePOI=1","").replace("--saveInactivePOI 1","")
+    _fit_opts = _fit_opts.replace("--floatOtherPOIs=1","").replace("--floatOtherPOIs 1","")
+    _fit_opts = _fit_opts.replace("--saveInactivePOI=1","").replace("--saveInactivePOI 1","")
+    _fit_opts = _fit_opts.replace("--saveWorkspace","")
 
   # If ALL in fit_opts: replace by list of constrained nuisances in workspace
   if "ALL" in _fit_opts: 
@@ -132,4 +133,4 @@ for fidx in range(len(fits)):
       impactcmd1 += " %s"%job_opts
       impactcmd2 += " %s"%job_opts
     if not opt.doFits: run(impactcmd1,opt)
-    run(impactcmd2,opt)
+    else: run(impactcmd2,opt)
