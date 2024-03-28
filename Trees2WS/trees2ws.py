@@ -266,8 +266,11 @@ for stxsId in data[stxsVar].unique():
     
   # Open file and initiate workspace
   fout = ROOT.TFile(outputWSFile,"RECREATE")
+  print "-------> file is created %s"%outputWSFile
   foutdir = fout.mkdir(inputWSName__.split("/")[0])
+  print "----> Creating Directory %s"%inputWSName__.split("/")[0]
   foutdir.cd()
+  print "----> Creating Directory cd"
   ws = ROOT.RooWorkspace(inputWSName__.split("/")[1],inputWSName__.split("/")[1])
   
   # Add variables to workspace
