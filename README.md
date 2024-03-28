@@ -1,4 +1,7 @@
 # Final Fits (lite)
+
+**NOTE** If using Final Fits with the output of HiggsDNA, then please switch to [this](https://github.com/cms-analysis/flashggFinalFit/tree/dev_higgsdnafinalfit) branch
+
 Welcome to the new Final Fits package. Here lies a a series of scripts which are used to run the final stages of the CMS Hgg analysis: signal modelling, background modelling, datacard creation, final statistical interpretation and final result plots.
 
 Slides from the flashgg tutorial series can be found [here](https://indico.cern.ch/event/963619/contributions/4112177/attachments/2151275/3627204/finalfits_tutorial_201126.pdf)
@@ -9,17 +12,15 @@ Slides from the flashgg tutorial series can be found [here](https://indico.cern.
 export SCRAM_ARCH=slc7_amd64_gcc700
 cmsrel CMSSW_10_2_13
 cd CMSSW_10_2_13/src
-cmsenv
-git cms-init
 
 # Install the GBRLikelihood package which contains the RooDoubleCBFast implementation
-git clone git@github.com:jonathon-langford/HiggsAnalysis.git
+git clone https://github.com/jonathon-langford/HiggsAnalysis.git
 
 # Install Combine as per the documentation here: cms-analysis.github.io/HiggsAnalysis-CombinedLimit/
-git clone git@github.com:cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit
+git clone -b v8.2.0 https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit
 
 # Install Combine Harvester for parallelizing fits
-git clone https://github.com/cms-analysis/CombineHarvester.git CombineHarvester
+git clone -b 102x https://github.com/cms-analysis/CombineHarvester.git CombineHarvester
 
 # Compile external libraries
 cmsenv

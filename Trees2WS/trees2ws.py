@@ -158,7 +158,8 @@ for cat in cats:
     if opt.productionMode in modesToSkipTheoryWeights or 'ALT' in opt.productionMode: 
       dfs[ts] = pandas.DataFrame(np.ones(shape=(len(t),theoryWeightContainers[ts])))
     else:
-      dfs[ts] = t.pandas.df(ts)
+      #dfs[ts] = t.pandas.df(ts)
+      dfs[ts] = pandas.DataFrame(np.reshape(np.array(t[ts].array()),(len(t),len(tsColumns))))
     dfs[ts].columns = tsColumns
 
   # Main variables to add to nominal RooDataSets
