@@ -155,7 +155,7 @@ for cat in cats:
 
   # Theory weights
   for ts, tsColumns in theoryWeightColumns.iteritems():
-    if opt.productionMode in modesToSkipTheoryWeights: 
+    if opt.productionMode in modesToSkipTheoryWeights or 'ALT' in opt.productionMode: 
       dfs[ts] = pandas.DataFrame(np.ones(shape=(len(t),theoryWeightContainers[ts])))
     else:
       #dfs[ts] = t.pandas.df(ts)
@@ -267,8 +267,11 @@ for stxsId in data[stxsVar].unique():
     
   # Open file and initiate workspace
   fout = ROOT.TFile(outputWSFile,"RECREATE")
+  print "-------> file is created %s"%outputWSFile
   foutdir = fout.mkdir(inputWSName__.split("/")[0])
+  print "----> Creating Directory %s"%inputWSName__.split("/")[0]
   foutdir.cd()
+  print "----> Creating Directory cd"
   ws = ROOT.RooWorkspace(inputWSName__.split("/")[1],inputWSName__.split("/")[1])
   
   # Add variables to workspace

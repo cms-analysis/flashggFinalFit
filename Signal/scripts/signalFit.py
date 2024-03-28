@@ -31,6 +31,7 @@ def get_options():
   parser = OptionParser()
   parser.add_option("--xvar", dest='xvar', default='CMS_hgg_mass', help="Observable to fit")
   parser.add_option("--inputWSDir", dest='inputWSDir', default='', help="Input flashgg WS directory")
+  parser.add_option("--outdir", dest='outdir', default=swd__, help="Output directory (default is the current one)")
   parser.add_option("--ext", dest='ext', default='', help="Extension")
   parser.add_option("--proc", dest='proc', default='', help="Signal process")
   parser.add_option("--cat", dest='cat', default='', help="RECO category")
@@ -53,7 +54,7 @@ def get_options():
   parser.add_option("--scalesGlobal", dest='scalesGlobal', default='', help='Photon shape systematics: scalesGlobal')
   parser.add_option("--smears", dest='smears', default='', help='Photon shape systematics: smears')
   # Parameter values
-  parser.add_option('--replacementThreshold', dest='replacementThreshold', default=100, type='int', help="Nevent threshold to trigger replacement dataset")
+  parser.add_option('--replacementThreshold', dest='replacementThreshold', default=50, type='int', help="Nevent threshold to trigger replacement dataset")
   parser.add_option('--beamspotWidthData', dest='beamspotWidthData', default=3.4, type='float', help="Width of beamspot in data [cm]")
   parser.add_option('--beamspotWidthMC', dest='beamspotWidthMC', default=5.14, type='float', help="Width of beamspot in MC [cm]")
   parser.add_option('--MHPolyOrder', dest='MHPolyOrder', default=1, type='int', help="Order of polynomial for MH dependence")
@@ -67,9 +68,9 @@ def get_options():
 ROOT.gStyle.SetOptStat(0)
 ROOT.gROOT.SetBatch(True)
 
+print opt.massPoints
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # SETUP: signal fit
-print " --> Running fit for (proc,cat) = (%s,%s)"%(opt.proc,opt.cat)
 if( len(opt.massPoints.split(",")) == 1 )&( opt.MHPolyOrder > 0 ):
   print " --> [WARNING] Attempting to fit polynomials of O(MH^%g) for single mass point. Setting order to 0"%opt.MHPolyOrder
   opt.MHPolyOrder=0
@@ -89,7 +90,7 @@ if opt.analysis not in globalXSBRMap:
 else: xsbrMap = globalXSBRMap[opt.analysis]
 
 # Load RooRealVars
-nominalWSFileName = glob.glob("%s/output*M%s*%s.root"%(opt.inputWSDir,MHNominal,opt.proc))[0]
+nominalWSFileName = glob.glob("%s/output*%s*.root"%(opt.inputWSDir,MHNominal))[0]
 f0 = ROOT.TFile(nominalWSFileName,"read")
 inputWS0 = f0.Get(inputWSName__)
 xvar = inputWS0.var(opt.xvar)
@@ -105,10 +106,10 @@ MH.setConstant(True)
 
 if opt.skipZeroes:
   # Extract nominal mass dataset and see if entries == 0
-  WSFileName = glob.glob("%s/output*M%s*%s.root"%(opt.inputWSDir,MHNominal,opt.proc))[0]
+  WSFileName = glob.glob("%s/output*%s*.root"%(opt.inputWSDir,MHNominal))[0]
   f = ROOT.TFile(WSFileName,"read")
   inputWS = f.Get(inputWSName__)
-  d = reduceDataset(inputWS.data("%s_%s_%s_%s"%(procToData(opt.proc.split("_")[0]),MHNominal,sqrts__,opt.cat)),aset)
+  d = reduceDataset(inputWS.data("%s_%s_%s_%s"%(procToData(opt.proc),MHNominal,sqrts__,opt.cat)),aset)
   if( d.numEntries() == 0. )|( d.sumEntries <= 0. ):
     print " --> (%s,%s) has zero events. Will not construct signal model"%(opt.proc,opt.cat)
     exit()
@@ -151,10 +152,12 @@ nominalDatasets = od()
 # For RV (or if skipping vertex scenario split)
 datasetRVForFit = od()
 for mp in opt.massPoints.split(","):
-  WSFileName = glob.glob("%s/output*M%s*%s.root"%(opt.inputWSDir,mp,procRVFit))[0]
+  if 'ALT' in procRVFit and mp!=MHNominal: continue
+  print "##########",glob.glob("%s/output*%s*%s.root"%(opt.inputWSDir,mp,procRVFit))
+  WSFileName = glob.glob("%s/output*%s*%s.root"%(opt.inputWSDir,mp,procRVFit))[0]
   f = ROOT.TFile(WSFileName,"read")
   inputWS = f.Get(inputWSName__)
-  d = reduceDataset(inputWS.data("%s_%s_%s_%s"%(procToData(procRVFit.split("_")[0]),mp,sqrts__,catRVFit)),aset)
+  d = reduceDataset(inputWS.data("%s_%s_%s_%s"%(procToData(procRVFit),mp,sqrts__,catRVFit)),aset)
   nominalDatasets[mp] = d.Clone()
   if opt.skipVertexScenarioSplit: datasetRVForFit[mp] = d
   else: datasetRVForFit[mp] = splitRVWV(d,aset,mode="RV")
@@ -166,10 +169,11 @@ if( datasetRVForFit[MHNominal].numEntries() < opt.replacementThreshold  )|( data
   nominal_numEntries = datasetRVForFit[MHNominal].numEntries()
   procReplacementFit, catReplacementFit = rMap['procRVMap'][opt.cat], rMap['catRVMap'][opt.cat]
   for mp in opt.massPoints.split(","):
-    WSFileName = glob.glob("%s/output*M%s*%s.root"%(opt.inputWSDir,mp,procReplacementFit))[0]
+    if 'ALT' in procRVFit and mp!=MHNominal: continue
+    WSFileName = glob.glob("%s/output*%s*%s.root"%(opt.inputWSDir,mp,procReplacementFit))[0]
     f = ROOT.TFile(WSFileName,"read")
     inputWS = f.Get(inputWSName__)
-    d = reduceDataset(inputWS.data("%s_%s_%s_%s"%(procToData(procReplacementFit.split("_")[0]),mp,sqrts__,catReplacementFit)),aset)
+    d = reduceDataset(inputWS.data("%s_%s_%s_%s"%(procToData(procReplacementFit),mp,sqrts__,catReplacementFit)),aset)
     if opt.skipVertexScenarioSplit: datasetRVForFit[mp] = d
     else: datasetRVForFit[mp] = splitRVWV(d,aset,mode="RV")
     inputWS.Delete()
@@ -185,30 +189,35 @@ if( datasetRVForFit[MHNominal].numEntries() < opt.replacementThreshold  )|( data
     if opt.skipVertexScenarioSplit: 
       print " --> Too few entries in nominal dataset (%g < %g). Using replacement (proc,cat) = (%s,%s) for extracting shape"%(nominal_numEntries,opt.replacementThreshold,procRVFit,catRVFit)
       for mp in opt.massPoints.split(","):
+        if 'ALT' in procRVFit and mp!=MHNominal: continue
         print "     * MH = %s GeV: numEntries = %g, sumEntries = %.6f"%(mp,datasetRVForFit[mp].numEntries(),datasetRVForFit[mp].sumEntries())
     else: 
       print " --> RV: Too few entries in nominal dataset (%g < %g). Using replacement (proc,cat) = (%s,%s) for extracting shape"%(nominal_numEntries,opt.replacementThreshold,procRVFit,catRVFit)
       for mp in opt.massPoints.split(","):
+        if 'ALT' in procRVFit and mp!=MHNominal: continue
         print "     * MH = %s: numEntries = %g, sumEntries = %.6f"%(mp,datasetRVForFit[mp].numEntries(),datasetRVForFit[mp].sumEntries())
 
 else:
   if opt.skipVertexScenarioSplit: 
     print " --> Using (proc,cat) = (%s,%s) for extracting shape"%(procRVFit,catRVFit)
     for mp in opt.massPoints.split(","):
+      if 'ALT' in procRVFit and mp!=MHNominal: continue
       print "     * MH = %s: numEntries = %g, sumEntries = %.6f"%(mp,datasetRVForFit[mp].numEntries(),datasetRVForFit[mp].sumEntries())
   else: 
     print " --> RV: Using (proc,cat) = (%s,%s) for extracting shape"%(procRVFit,catRVFit)
     for mp in opt.massPoints.split(","):
+      if 'ALT' in procRVFit and mp!=MHNominal: continue
       print "     * MH = %s: numEntries = %g, sumEntries = %.6f"%(mp,datasetRVForFit[mp].numEntries(),datasetRVForFit[mp].sumEntries())
 
 # Repeat for WV scenario
 if not opt.skipVertexScenarioSplit:
   datasetWVForFit = od()
   for mp in opt.massPoints.split(","):
-    WSFileName = glob.glob("%s/output*M%s*%s.root"%(opt.inputWSDir,mp,procWVFit))[0]
+    if 'ALT' in procWVFit and mp!=MHNominal: continue
+    WSFileName = glob.glob("%s/output*%s*%s.root"%(opt.inputWSDir,mp,procWVFit))[0]
     f = ROOT.TFile(WSFileName,"read")
     inputWS = f.Get(inputWSName__)
-    d = reduceDataset(inputWS.data("%s_%s_%s_%s"%(procToData(procWVFit.split("_")[0]),mp,sqrts__,catWVFit)),aset)
+    d = reduceDataset(inputWS.data("%s_%s_%s_%s"%(procToData(procWVFit),mp,sqrts__,catWVFit)),aset)
     datasetWVForFit[mp] = splitRVWV(d,aset,mode="WV")
     inputWS.Delete()
     f.Close()
@@ -218,10 +227,11 @@ if not opt.skipVertexScenarioSplit:
     nominal_numEntries = datasetWVForFit[MHNominal].numEntries()
     procReplacementFit, catReplacementFit = rMap['procWV'], rMap['catWV']
     for mp in opt.massPoints.split(","):
-      WSFileName = glob.glob("%s/output*M%s*%s.root"%(opt.inputWSDir,mp,procReplacementFit))[0]
+      if 'ALT' in procReplacementFit and mp!=MHNominal: continue
+      WSFileName = glob.glob("%s/output*%s*%s.root"%(opt.inputWSDir,mp,procReplacementFit))[0]
       f = ROOT.TFile(WSFileName,"read")
       inputWS = f.Get(inputWSName__)
-      d = reduceDataset(inputWS.data("%s_%s_%s_%s"%(procToData(procReplacementFit.split("_")[0]),mp,sqrts__,catReplacementFit)),aset)
+      d = reduceDataset(inputWS.data("%s_%s_%s_%s"%(procToData(procReplacementFit),mp,sqrts__,catReplacementFit)),aset)
       datasetWVForFit[mp] = splitRVWV(d,aset,mode="WV")
       inputWS.Delete()
       f.Close()
@@ -233,10 +243,12 @@ if not opt.skipVertexScenarioSplit:
       procWVFit, catWVFit = procReplacementFit, catReplacementFit
       print " --> WV: Too few entries in nominal dataset (%g < %g). Using replacement (proc,cat) = (%s,%s) for extracting shape"%(nominal_numEntries,opt.replacementThreshold,procWVFit,catWVFit)
       for mp in opt.massPoints.split(","):
+        if 'ALT' in procWVFit and mp!=MHNominal: continue
         print "     * MH = %s: numEntries = %g, sumEntries = %.6f"%(mp,datasetWVForFit[mp].numEntries(),datasetWVForFit[mp].sumEntries())
   else:
     print " --> WV: Using (proc,cat) = (%s,%s) for extracting shape"%(procWVFit,catRVFit)
     for mp in opt.massPoints.split(","):
+      if 'ALT' in procWVFit and mp!=MHNominal: continue
       print "     * MH = %s: numEntries = %g, sumEntries = %.6f"%(mp,datasetWVForFit[mp].numEntries(),datasetWVForFit[mp].sumEntries())
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -244,15 +256,19 @@ if not opt.skipVertexScenarioSplit:
 if not opt.skipBeamspotReweigh:
   # Datasets for fit
   for mp,d in datasetRVForFit.iteritems(): 
+    if 'ALT' in d and mp!=MHNominal: continue
     drw = beamspotReweigh(datasetRVForFit[mp],opt.beamspotWidthData,opt.beamspotWidthMC,xvar,dZ,_x=opt.xvar)
     datasetRVForFit[mp] = drw
   if not opt.skipVertexScenarioSplit:
     for mp,d in datasetWVForFit.iteritems(): 
+      if mp!=MHNominal: continue
       drw = beamspotReweigh(datasetWVForFit[mp],opt.beamspotWidthData,opt.beamspotWidthMC,xvar,dZ,_x=opt.xvar)
       datasetWVForFit[mp] = drw
-    print " --> Beamspot reweigh: RV(sumEntries) = %.6f, WV(sumEntries) = %.6f"%(datasetRVForFit[mp].sumEntries(),datasetWVForFit[mp].sumEntries())
+      print " --> Beamspot reweigh: RV(sumEntries) = %.6f, WV(sumEntries) = %.6f"%(datasetRVForFit[mp].sumEntries(),datasetWVForFit[mp].sumEntries())
   else:
-    print " --> Beamspot reweigh: sumEntries = %.6f"%datasetRVForFit[mp].sumEntries()
+    for mp,d in datasetRVForFit.iteritems():
+      if mp!=MHNominal: continue
+      print " --> Beamspot reweigh: sumEntries = %.6f"%datasetRVForFit[mp].sumEntries()
 
   # Nominal datasets for saving to output Workspace: preserve norm for eff * acc calculation
   for mp,d in nominalDatasets.iteritems():
@@ -316,12 +332,14 @@ fout.Close()
 # PLOTTING
 if opt.doPlots:
   print "\n --> Making plots..."
-  if not os.path.isdir("%s/outdir_%s/signalFit/Plots"%(swd__,opt.ext)): os.system("mkdir %s/outdir_%s/signalFit/Plots"%(swd__,opt.ext))
+  outdir="%s/%s/signalFit/Plots"%(opt.outdir,opt.ext)
+  if not os.path.isdir(outdir): os.system("mkdir -p %s"%outdir)
+  if os.path.exists("/afs/cern.ch"): os.system("cp /afs/cern.ch/user/g/gpetrucc/php/index.php "+outdir)
   if opt.skipVertexScenarioSplit:
-    plotPdfComponents(ssfRV,_outdir="%s/outdir_%s/signalFit/Plots"%(swd__,opt.ext),_extension="total_",_proc=procRVFit,_cat=catRVFit) 
+    plotPdfComponents(ssfRV,_outdir=outdir,_extension="total_",_proc=procRVFit,_cat=catRVFit) 
   if not opt.skipVertexScenarioSplit:
-    plotPdfComponents(ssfRV,_outdir="%s/outdir_%s/signalFit/Plots"%(swd__,opt.ext),_extension="RV_",_proc=procRVFit,_cat=catRVFit) 
-    plotPdfComponents(ssfWV,_outdir="%s/outdir_%s/signalFit/Plots"%(swd__,opt.ext),_extension="WV_",_proc=procWVFit,_cat=catRVFit) 
+    plotPdfComponents(ssfRV,_outdir=outdir,_extension="RV_",_proc=procRVFit,_cat=catRVFit) 
+    plotPdfComponents(ssfWV,_outdir=outdir,_extension="WV_",_proc=procWVFit,_cat=catRVFit) 
   # Plot interpolation
-  plotInterpolation(fm,_outdir="%s/outdir_%s/signalFit/Plots"%(swd__,opt.ext)) 
-  plotSplines(fm,_outdir="%s/outdir_%s/signalFit/Plots"%(swd__,opt.ext),_nominalMass=MHNominal) 
+  plotInterpolation(fm,_outdir=outdir) 
+  plotSplines(fm,_outdir=outdir,_nominalMass=MHNominal) 

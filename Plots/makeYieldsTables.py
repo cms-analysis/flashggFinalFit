@@ -14,10 +14,14 @@ from collections import OrderedDict as od
 from usefulStyle import setCanvas, drawCMS, drawEnPu, drawEnYear, formatHisto
 from shanePalette import set_color_palette
 
+from commonObjects import *
+from commonTools import *
+
 print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG YIELDS TABLES RUN II ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ "
 def leave():
   print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG YIELDS TABLES RUN II (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ "
   sys.exit(1)
+
 
 # Define STXS stage 0 mapping to procs
 stage0_ggh = od()
@@ -50,6 +54,17 @@ stage0_top["ttH"] = ['ttH_PTH_0_60','ttH_PTH_60_120','ttH_PTH_120_200','ttH_PTH_
 stage0_top["tHq"] = ['tHq']
 stage0_top["tHW"] = ['tHW']
 
+cp_ggh = od()
+cp_ggh["ggH"] = ['ggH']
+
+cp_qqh = od()
+cp_qqh["qqH"] = ['qqH']
+
+cp_top = od()
+cp_top["ttH"] = ['ttH']
+
+cp_vh = od()
+cp_vh["vH"] = ['WMINUSH2HQQ','WPLUSH2HQQ','ZH_lep']
 
 # ggH tags
 target_procs_ggh = od()
@@ -143,9 +158,86 @@ target_procs_qqh["RECO_VBFTOPO_BSM_Tag1"] = ['qqH_GE2J_MJJ_GT350_PTH_GT200','WH_
 target_procs_qqh["RECO_VBFTOPO_VHHAD_Tag0"] = ['qqH_GE2J_MJJ_60_120','WH_had_GE2J_MJJ_60_120','ZH_had_GE2J_MJJ_60_120']
 target_procs_qqh["RECO_VBFTOPO_VHHAD_Tag1"] = ['qqH_GE2J_MJJ_60_120','WH_had_GE2J_MJJ_60_120','ZH_had_GE2J_MJJ_60_120']
 
+# qqH tags for anomalous couplings
+target_procs_ggh_ac = od()
+target_procs_ggh_ac["RECO_0J_PTH_0_10_Tag0"] = ['ggH']
+target_procs_ggh_ac["RECO_0J_PTH_0_10_Tag1"] = ['ggH']
+target_procs_ggh_ac["RECO_0J_PTH_0_10_Tag2"] = ['ggH']
+target_procs_ggh_ac["RECO_0J_PTH_GT10_Tag0"] = ['ggH']
+target_procs_ggh_ac["RECO_0J_PTH_GT10_Tag1"] = ['ggH']
+target_procs_ggh_ac["RECO_0J_PTH_GT10_Tag2"] = ['ggH']
+target_procs_ggh_ac["RECO_1J_PTH_0_60_Tag0"] = ['ggH']
+target_procs_ggh_ac["RECO_1J_PTH_0_60_Tag1"] = ['ggH']
+target_procs_ggh_ac["RECO_1J_PTH_0_60_Tag2"] = ['ggH']
+target_procs_ggh_ac["RECO_1J_PTH_120_200_Tag0"] = ['ggH']
+target_procs_ggh_ac["RECO_1J_PTH_120_200_Tag1"] = ['ggH']
+target_procs_ggh_ac["RECO_1J_PTH_120_200_Tag2"] = ['ggH']
+target_procs_ggh_ac["RECO_1J_PTH_60_120_Tag0"] = ['ggH']
+target_procs_ggh_ac["RECO_1J_PTH_60_120_Tag1"] = ['ggH']
+target_procs_ggh_ac["RECO_1J_PTH_60_120_Tag2"] = ['ggH']
+target_procs_ggh_ac["RECO_GE2J_PTH_0_60_Tag0"] = ['ggH']
+target_procs_ggh_ac["RECO_GE2J_PTH_0_60_Tag1"] = ['ggH']
+target_procs_ggh_ac["RECO_GE2J_PTH_0_60_Tag2"] = ['ggH']
+target_procs_ggh_ac["RECO_GE2J_PTH_120_200_Tag0"] = ['ggH']
+target_procs_ggh_ac["RECO_GE2J_PTH_120_200_Tag1"] = ['ggH']
+target_procs_ggh_ac["RECO_GE2J_PTH_120_200_Tag2"] = ['ggH']
+target_procs_ggh_ac["RECO_GE2J_PTH_60_120_Tag0"] = ['ggH']
+target_procs_ggh_ac["RECO_GE2J_PTH_60_120_Tag1"] = ['ggH']
+target_procs_ggh_ac["RECO_GE2J_PTH_60_120_Tag2"] = ['ggH']
+target_procs_ggh_ac["RECO_PTH_200_300_Tag0"] = ['ggH']
+target_procs_ggh_ac["RECO_PTH_200_300_Tag1"] = ['ggH']
+target_procs_ggh_ac["RECO_PTH_300_450_Tag0"] = ['ggH']
+target_procs_ggh_ac["RECO_PTH_300_450_Tag1"] = ['ggH']
+target_procs_ggh_ac["RECO_PTH_450_650_Tag0"] = ['ggH']
+target_procs_ggh_ac["RECO_PTH_GT650_Tag0"] = ['ggH']
+
+target_procs_top_ac = od()
+target_procs_top_ac["RECO_THQ_LEP"] = ['ttH']
+target_procs_top_ac["RECO_TTH_HAD_PTH_0_60_Tag0"] = ['ttH']
+target_procs_top_ac["RECO_TTH_HAD_PTH_0_60_Tag1"] = ['ttH']
+target_procs_top_ac["RECO_TTH_HAD_PTH_0_60_Tag2"] = ['ttH']
+target_procs_top_ac["RECO_TTH_HAD_PTH_120_200_Tag0"] = ['ttH']
+target_procs_top_ac["RECO_TTH_HAD_PTH_120_200_Tag1"] = ['ttH']
+target_procs_top_ac["RECO_TTH_HAD_PTH_120_200_Tag2"] = ['ttH']
+target_procs_top_ac["RECO_TTH_HAD_PTH_120_200_Tag3"] = ['ttH']
+target_procs_top_ac["RECO_TTH_HAD_PTH_200_300_Tag0"] = ['ttH']
+target_procs_top_ac["RECO_TTH_HAD_PTH_200_300_Tag1"] = ['ttH']
+target_procs_top_ac["RECO_TTH_HAD_PTH_200_300_Tag2"] = ['ttH']
+target_procs_top_ac["RECO_TTH_HAD_PTH_60_120_Tag0"] = ['ttH']
+target_procs_top_ac["RECO_TTH_HAD_PTH_60_120_Tag1"] = ['ttH']
+target_procs_top_ac["RECO_TTH_HAD_PTH_60_120_Tag2"] = ['ttH']
+target_procs_top_ac["RECO_TTH_HAD_PTH_GT300_Tag0"] = ['ttH']
+target_procs_top_ac["RECO_TTH_HAD_PTH_GT300_Tag1"] = ['ttH']
+target_procs_top_ac["RECO_TTH_LEP_PTH_0_60_Tag0"] = ['ttH']
+target_procs_top_ac["RECO_TTH_LEP_PTH_0_60_Tag1"] = ['ttH']
+target_procs_top_ac["RECO_TTH_LEP_PTH_0_60_Tag2"] = ['ttH']
+target_procs_top_ac["RECO_TTH_LEP_PTH_120_200_Tag0"] = ['ttH']
+target_procs_top_ac["RECO_TTH_LEP_PTH_120_200_Tag1"] = ['ttH']
+target_procs_top_ac["RECO_TTH_LEP_PTH_200_300_Tag0"] = ['ttH']
+target_procs_top_ac["RECO_TTH_LEP_PTH_60_120_Tag0"] = ['ttH']
+target_procs_top_ac["RECO_TTH_LEP_PTH_60_120_Tag1"] = ['ttH']
+target_procs_top_ac["RECO_TTH_LEP_PTH_60_120_Tag2"] = ['ttH']
+target_procs_top_ac["RECO_TTH_LEP_PTH_GT300_Tag0"] = ['ttH']
+
+target_procs_qqh_ac = od()
+target_procs_qqh_ac["RECO_VBFTOPO_ACGGH_Tag0"] = ['qqH']
+target_procs_qqh_ac["RECO_VBFTOPO_ACGGH_Tag1"] = ['qqH']
+target_procs_qqh_ac["RECO_VBFTOPO_ACVBFBSM_Tag0"] = ['qqH']
+target_procs_qqh_ac["RECO_VBFTOPO_ACVBFBSM_Tag1"] = ['qqH']
+target_procs_qqh_ac["RECO_VBFTOPO_ACVBFSM_Tag0"] = ['qqH']
+
+target_procs_vh_ac = od()
+target_procs_vh_ac["RECO_VBFTOPO_VHHAD_Tag0"] = ['vH']
+target_procs_vh_ac["RECO_VBFTOPO_VHHAD_Tag1"] = ['vH']
+target_procs_vh_ac["RECO_VH_MET_Tag0"] = ['vH']
+target_procs_vh_ac["RECO_VH_MET_Tag1"] = ['vH']
+target_procs_vh_ac["RECO_VH_MET_Tag2"] = ['vH']
+target_procs_vh_ac["RECO_WH_LEP_PTV_0_75_Tag0"] = ['vH']
+target_procs_vh_ac["RECO_WH_LEP_PTV_0_75_Tag1"] = ['vH']
+
 def get_options():
   parser = OptionParser()
-  parser.add_option("--inputPkl", dest="inputPkl", default='', help="Input pickle file")
+  parser.add_option("--inputPklDir", dest="inputPklDir", default='', help="Directory in Datacard with Input pickle files for each category")
   parser.add_option("--loadCatInfo", dest="loadCatInfo", default='', help="Load eff sigma, B and S/S+B from pickle file")
   parser.add_option("--group", dest="group", default='ggh', help="Group of cats")
   parser.add_option("--ext", dest="ext", default='', help="Extension for saving")
@@ -164,26 +256,29 @@ translateCats = {} if opt.translateCats is None else LoadTranslations(opt.transl
 translateStage0 = {} if opt.translateStage0 is None else LoadTranslations(opt.translateStage0)
 
 if opt.group == "ggh": 
-  stage0 = stage0_ggh
-  target_procs = target_procs_ggh
+  stage0 = cp_ggh
+  target_procs = target_procs_ggh_ac
 elif opt.group == "qqh": 
-  stage0 = stage0_qqh
-  target_procs = target_procs_qqh
+  stage0 = cp_qqh
+  target_procs = target_procs_qqh_ac
 elif opt.group == "vh": 
-  stage0 = stage0_vh
-  target_procs = target_procs_vh
+  stage0 = cp_vh
+  target_procs = target_procs_vh_ac
 elif opt.group == "top": 
-  stage0 = stage0_top
-  target_procs = target_procs_top
+  stage0 = cp_top
+  target_procs = target_procs_top_ac
 else:
   print " --> [ERROR] target group of categories %s does not exist"%opt.group
   leave()
 
 # Load input dataFrame from pickle file
-if not os.path.exists( opt.inputPkl ): 
-  print " --> [ERROR] Input pickle file does not exist. Leaving"
+if not os.path.exists( opt.inputPklDir ): 
+  print " --> [ERROR] Input directory with pickle files does not exist. Leaving"
   leave()
-with open( opt.inputPkl, "rb" ) as fin: data = pickle.load(fin)
+yfiles = glob.glob("%s/*.pkl" % opt.inputPklDir)
+data = pd.concat([pd.read_pickle(f) for f in yfiles],sort=False)
+#with open( opt.inputPkl, "rb" ) as fin: data = pickle.load(fin)
+
 # Load cat info dataframe
 if opt.loadCatInfo != '':
   if not os.path.exists( opt.loadCatInfo ):
@@ -199,11 +294,21 @@ tab_data = pd.DataFrame(columns=_columns)
 
 # Fill frame
 for cat in target_procs:
-  mask = (data['cat']==cat)&(data['type']=='sig')
-  _nominal_yield = data[mask][opt.yieldVar].sum()
-  _target_yield = data[mask][data[mask].apply(lambda x: "_".join(x['proc'].split("_")[:-2]) in target_procs[cat], axis=1)][opt.yieldVar].sum()
   _s0_yields = od()
-  for s0 in stage0: _s0_yields[s0] = data[mask][data[mask].apply(lambda x: "_".join(x['proc'].split("_")[:-2]) in stage0[s0], axis=1)][opt.yieldVar].sum()
+  _nominal_yield = 0
+  _target_yield = 0
+  for year in ['2016preVFP','2016postVFP','2017','2018']:
+    mask = (data['cat']==cat)&(data['type']=='sig')&(data['year']==year)
+    # Extract rate from lumi
+    _rate = float(lumiMap[year])
+    _nominal_yield += data[mask][opt.yieldVar].sum()*_rate
+    _target_yield += data[mask][data[mask].apply(lambda x: "_".join(x['proc'].split("_")[:-2]) in target_procs[cat], axis=1)][opt.yieldVar].sum()*_rate
+    for s0 in stage0: 
+      s0_y = data[mask][data[mask].apply(lambda x: "_".join(x['proc'].split("_")[:-2]) in stage0[s0], axis=1)][opt.yieldVar].sum()*_rate
+      if s0 in _s0_yields.keys():
+        _s0_yields[s0] += s0_y
+      else:
+        _s0_yields[s0] = s0_y
 
   if opt.loadCatInfo != '':
     catdata_mask = catinfo_data['cat']==cat
@@ -219,18 +324,20 @@ for cat in target_procs:
   tab_data.loc[len(tab_data)] = vals
 
 # Make table
-nColumns = 5+len(stage0.keys())
-fout = open("Tables/yields_table_lite_%s%s.txt"%(opt.group,opt.ext),"w")
+nColumns = 4+len(stage0.keys())
+foutname = "Tables/yields_table_lite_%s%s.txt"%(opt.group,opt.ext)
+if not os.path.isdir('Tables'): os.system("mkdir Tables")
+fout = open(foutname,"w")
 fout.write("\\begin{tabular}{%s}\n"%("l|"+("c"*(nColumns-1))))
 #fout.write("    \\hline \\hline \n")
 #fout.write("    \\multirow{3}{*}{Analysis categories} & \\multicolumn{%g}{c|}{SM 125 GeV Higgs boson expected signal} & \\multirow{3}{*}{S/S+B} \\\\ \\cline{2-%g}\n"%(3+len(stage0.keys()),nColumns-1))
-fout.write("    \\multirow{3}{*}{Analysis categories} & \\multicolumn{%g}{c}{SM 125 GeV Higgs boson expected signal} & \\multirow{3}{*}{S/S+B} \\\\ \n"%(3+len(stage0.keys())))
+fout.write("    \\multirow{3}{*}{Analysis categories} & \\multicolumn{%g}{c}{SM 125 GeV Higgs boson expected signal} & \\multirow{3}{*}{S/S+B} \\\\ \n"%(2+len(stage0.keys())))
 #fout.write("     & \\multirow{2}{*}{\\begin{tabular}[c]{@{}c@{}}Total\\\\Yield\\end{tabular}} & \\multirow{2}{*}{\\begin{tabular}[c]{@{}c@{}}Target\\\\Fraction\\end{tabular}} & \\multicolumn{%g}{c|}{Production Mode Fractions} & \\multirow{2}{*}{\\begin{tabular}[c]{@{}c@{}}$\\sigma_{\\rm{eff}}$\\\\(GeV)\\end{tabular}} & \\\\ \\cline{4-%g}\n"%(len(stage0.keys()),nColumns-2))
-fout.write("     & \\multirow{2}{*}{Total} & \\multirow{2}{*}{\\begin{tabular}[c]{@{}c@{}}Target\\\\STXS bin(s)\\end{tabular}} & \\multicolumn{%g}{c}{Production Mode Fractions} & \\multirow{2}{*}{\\begin{tabular}[c]{@{}c@{}}$\\sigma_{\\rm{eff}}$\\\\(GeV)\\end{tabular}} & \\\\ \n"%(len(stage0.keys())))
+fout.write("     & \\multirow{2}{*}{Total}  & \\multicolumn{%g}{c}{Production Mode Fractions} & \\multirow{2}{*}{\\begin{tabular}[c]{@{}c@{}}$\\sigma_{\\rm{eff}}$\\\\(GeV)\\end{tabular}} & \\\\ \n"%(len(stage0.keys())))
 s0_str = Translate(stage0.keys()[0],translateStage0)
 for s0 in stage0.keys()[1:]: s0_str += " & %s"%Translate(s0,translateStage0)
 #fout.write("     & & & %s & & \\\\ \\hline \\hline \n"%s0_str)
-fout.write("     & & & %s & & \\\\ \\hline \n"%s0_str)
+fout.write("     & & %s & & \\\\ \\hline \n"%s0_str)
 # Add numbers
 tag_itr = -1
 for ir,r in tab_data.iterrows():
@@ -238,7 +345,7 @@ for ir,r in tab_data.iterrows():
     tag_itr = len(tab_data[tab_data['cat'].str.contains(r['cat'].split("_Tag")[0])])-1
     doRow = True
   else: doRow = False
-  catline = "     %s & %.1f & %.1f\\%%"%(Translate(r['cat'],translateCats),r['nominal_yield'],100*(r['target_yield']/r['nominal_yield']))
+  catline = "     %s & %.1f"%(Translate(r['cat'],translateCats),r['nominal_yield'])
   for s0 in stage0:
     pcs0 = 100*(r['%s_yield'%s0]/r['nominal_yield'])
     #if pcs0 < 0.1: catline += " & $<$0.1\\%"
@@ -247,7 +354,9 @@ for ir,r in tab_data.iterrows():
   catline += " & %.2f & %.2f"%(r['effSigma'],r['SoverSplusB'])
   fout.write("%s \\\\ \n"%catline)
   #if tag_itr == 0: fout.write("     \\hline\n")
-  if tag_itr == 0: fout.write("     [\\cmsTabSkip]\n")
+  #if tag_itr == 0: fout.write("     [\\cmsTabSkip]\n")
   tag_itr -= 1
 #fout.write("     \\hline \n")
 fout.write("\\end{tabular}\n")
+print "Written latex table in ",foutname
+

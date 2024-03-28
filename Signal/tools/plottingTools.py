@@ -90,6 +90,7 @@ def plotFTest(ssfs,_opt=1,_outdir='./',_extension='',_proc='',_cat='',_mass='125
   # Extract data histogram
   hists['data'] = ssf.xvar.createHistogram("h_data%s"%_extension,ROOT.RooFit.Binning(ssf.nBins))
   ssf.DataHists[_mass].fillHistogram(hists['data'],ROOT.RooArgList(ssf.xvar))
+  hists['data'].Scale(1./hists['data'].Integral())
   hists['data'].Scale(float(ssf.nBins)/1600)
   hists['data'].SetMarkerStyle(20)
   hists['data'].SetMarkerColor(1)
@@ -357,7 +358,7 @@ def plotSplines(_finalModel,_outdir="./",_nominalMass='125',splinesToPlot=['xs',
   xnom = od()
   _finalModel.MH.setVal(float(_nominalMass))
   for sp in splinesToPlot: xnom[sp] = _finalModel.Splines[sp].getVal()
-  _finalModel.intLumi.setVal(float(lumiMap[_finalModel.year]))
+  _finalModel.intLumi.setVal(lumiScaleFactor*float(lumiMap[_finalModel.year]))
   xnom['norm'] = _finalModel.Functions['final_normThisLumi'].getVal()
   # Loop over mass points
   p = 0
@@ -424,7 +425,7 @@ def plotSplines(_finalModel,_outdir="./",_nominalMass='125',splinesToPlot=['xs',
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Function for plotting final signal model: neat
 def plotSignalModel(_hists,_opt,_outdir=".",offset=0.02):
-  colorMap = {'2016':38,'2017':30,'2018':46}
+  colorMap = {'2016':38,'2016preVFP': 38, '2016postVFP': 35,'2017':30,'2018':46}
   canv = ROOT.TCanvas("c","c",650,600)
   canv.SetBottomMargin(0.12)
   canv.SetLeftMargin(0.15)
@@ -556,7 +557,7 @@ def plotSignalModel(_hists,_opt,_outdir=".",offset=0.02):
 
   if _opt.cats == 'all': catStr, catExt = "All categories", "all"
   elif _opt.cats == 'wall': catStr, catExt = "#splitline{All categories}{S/(S+B) weighted}", "wall"
-  elif len(_opt.cats.split(","))>1: procStr, procExt = "Multiple categories", "multipleCats"
+  elif len(_opt.cats.split(","))>1: catStr, catExt = "Multiple categories", "multipleCats"
   else: catStr, catExt = Translate(_opt.cats,translateCats), _opt.cats
  
   lat1.DrawLatex(0.85,0.86,"%s"%catStr)

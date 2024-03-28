@@ -1,0 +1,15 @@
+{
+  "GG2H":"ggH",
+  "VBF":"qqH",
+  "TTH":"ttH",
+  "VH":"VH",
+  "VBF_ALTL1":"VBF f_{#Lambda 1}=1",
+  "VBF_ALTL1f05":"VBF f_{#Lambda 1}=0.5",
+  "VBF_ALTL1Zg":"VBF f_{#Lambda 1}^{Z#gamma}=1",
+  "VBF_ALTL1Zgf05":"VBF f_{#Lambda 1}^{Z#gamma}=0.5",
+  "VBF_ALT0PH":"VBF f_{a2}=1",
+  "VBF_ALT0PHf05":"VBF f_{a2}=0.5",
+  "VBF_ALT0M":"VBF f_{a3}=1",
+  "VBF_ALT0Mf05":"VBF f_{a3}=0.5"
+}
+
