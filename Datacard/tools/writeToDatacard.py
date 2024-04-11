@@ -113,7 +113,8 @@ def writeSystematic(f,d,s,options,stxsMergeScheme=None,scaleCorrScheme=None):
 	    if r['proc'] == "data_obs": continue
 	    # Extract value and add to line (with checks)
 	    sval = r["%s%s%s"%(s['name'],mergeStr,tierStr)]
-	    lsyst = addSyst(lsyst,sval,stitle,r['proc'],cat)
+	    lsyst = addSyst(lsyst,sval,stitle,r['proc'],cat,r['numEvents'])
+	    # code.interact(local=locals())
 	# Remove final space from line and add to file
 	f.write("%s\n"%lsyst[:-1])
         # For uncorrelated scale weights: not for merged bins
@@ -134,7 +135,7 @@ def writeSystematic(f,d,s,options,stxsMergeScheme=None,scaleCorrScheme=None):
 		  # Add value if in proc in phase space else -
 		  if p in psProcs: sval = r["%s%s"%(s['name'],tierStr)]
 		  else: sval = '-'
-		  lsyst = addSyst(lsyst,sval,stitle,r['proc'],cat)
+		  lsyst = addSyst(lsyst,sval,stitle,r['proc'],cat,r['numEvents'])
               # Remove final space from line and add to file
               f.write("%s\n"%lsyst[:-1])
       else:
@@ -148,14 +149,15 @@ def writeSystematic(f,d,s,options,stxsMergeScheme=None,scaleCorrScheme=None):
 	      if r['proc'] == "data_obs": continue
 	      # Extract value and add to line (with checks)
 	      sval = r[sname]
-	      lsyst = addSyst(lsyst,sval,stitle,r['proc'],cat)
+	      lsyst = addSyst(lsyst,sval,stitle,r['proc'],cat,r['numEvents'])
 	  # Remove final space from line and add to file
 	  f.write("%s\n"%lsyst[:-1])
   return True
           
 
-def addSyst(l,v,s,p,c):
-  #l-systematic line, v-value, s-systematic title, p-proc, c-cat
+def addSyst(l,v,s,p,c,n):
+  #l-systematic line, v-value, s-systematic title, p-proc, c-cat, n-numEvents
+  minEventNumber = 100
   if type(v) is str: 
     l += "%-15s "%v
     return l
@@ -164,18 +166,23 @@ def addSyst(l,v,s,p,c):
     if len(v) == 1: 
       # Check 1: variation is non-negligible. If not then skip
       if abs(v[0]-1)<0.0005: l += "%-15s "%"-"
+      # If number of events smaller than minEventNumber add - to datacard
+      elif (n < minEventNumber) and not ('lumi' in s) and not ('scale' in s): l += "%-15s "%"-"
       # Check 2: variation is not negative. Print message and add - to datacard (cleaned later)
       elif v[0] < 0.: 
         print " --> [WARNING] systematic %s: negative variation for (%s,%s)"%(s,p,c)
         #vstr = "%s"%v[0]
         vstr = "-"
-        l += "%-15s "%v[0]
+        # l += "%-15s "%v[0] # After discussion on the 10.04.24
+        l += "%-15s "%vstr
       else:
         l += "%-15.3f "%v[0]
     # Anti-symmetirc
     if len(v) == 2:
       # Check 1: variation is non-negligible. If not then skip
       if(abs(v[0]-1)<0.0005)&(abs(v[1]-1)<0.0005): l += "%-15s "%"-"
+      # If number of events smaller than minEventNumber add - to datacard
+      elif (n < minEventNumber) and not ('lumi' in s) and not ('scale' in s): l += "%-15s "%"-"
       # Check 2: neither variation is negative. Print message and add - to datacard (cleaned later)
       elif(v[0]<0.)|(v[1]<0.):
         print " --> [WARNING] systematic %s: negative variation for (%s,%s)"%(s,p,c)
@@ -185,8 +192,13 @@ def addSyst(l,v,s,p,c):
       # Check 3: effect is approximately symmetric: then just add single up variation
       elif( abs((v[0]*v[1])-1)<0.0005 ): l += "%-15.3f "%v[1]
       else: 
-        vstr = "%.3f/%.3f"%(v[0],v[1])
-        l += "%-15s "%vstr
+        if (n < minEventNumber) and not ('lumi' in s) and not ('scale' in s): 
+          l += "%-15s "%"-"
+        else:
+          vstr = "%.3f/%.3f"%(v[0],v[1])
+          if s == "CMS_hgg_SigmaEOverEShift":
+            print(vstr, p, c, n)
+          l += "%-15s "%vstr
     return l
   else:
     print " --> [ERROR] systematic %s: value does not have type string or list for (%s,%s). Leaving..."%(s['title'],p,c)
@@ -217,7 +229,7 @@ def writeMCStatUncertainty(f,d,options):
           if r['proc'] == "data_obs": continue
           sval = scval if cat == scat else '-'
           # Extract value and add to line (with checks)
-          lsyst = addSyst(lsyst,sval,stitle,r['proc'],cat)
+          lsyst = addSyst(lsyst,sval,stitle,r['proc'],cat,r['numEvents'])
       # Remove final space from line and add to file
       f.write("%s\n"%lsyst[:-1])
   

@@ -168,6 +168,7 @@ if not writeProcesses(fdata,data,opt):
   print " --> [ERROR] in writing processes. Leaving..."
   leave()
 if opt.doSystematics:
+  print " --> Systematics for bins x processes with less than 100 events will be deactivated!"
   for syst in experimental_systematics:
     if not writeSystematic(fdata,data,syst,opt):
       print " --> [ERROR] in writing systematic %s (experiment). Leaving"%syst['name']

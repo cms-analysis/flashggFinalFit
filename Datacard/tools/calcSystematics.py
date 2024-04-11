@@ -134,6 +134,11 @@ def calcSystYields(_nominalDataName,_nominalDataContents,_inputWS,_systFactoryTy
 	systToSkip.append(s)
 	print " --> [%s] Weight in nominal RooDataSet for systematic (%s) does not exist for (%s,%s). %s"%(errMessage,s,proc,year,errString)
 	if not ignoreWarnings: sys.exit(1)
+ 
+  if data_nominal.numEntries() < 100:
+    print " [WARNING] Less than 100 events in considered bin. Those variations will be excluded."
+
+  systYields["numEvents"] = data_nominal.numEntries()
 
   # Loop over events and extract reweighted yields
   for i in range(0,data_nominal.numEntries()):

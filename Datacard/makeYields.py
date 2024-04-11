@@ -244,6 +244,7 @@ for ir,r in data[data['type']=='sig'].iterrows():
       # Skip centralObjectWeight correction as concerns events in acceptance
       experimentalSystYields = calcSystYields(r['nominalDataName'],contents,inputWS,experimentalFactoryType,skipCOWCorr=True,proc=r['proc'],year=r['year'],ignoreWarnings=opt.ignore_warnings)
       for s,f in experimentalFactoryType.iteritems():
+        data.at[ir, 'numEvents'] = experimentalSystYields["numEvents"]
 	if f in ['a_w','a_h']: 
 	  for direction in ['up','down']: 
 	    data.at[ir,"%s_%s_yield"%(s,direction)] = experimentalSystYields["%s_%s"%(s,direction)]
@@ -253,6 +254,7 @@ for ir,r in data[data['type']=='sig'].iterrows():
     # For theoretical systematics:
     theorySystYields = calcSystYields(r['nominalDataName'],contents,inputWS,theoryFactoryType,skipCOWCorr=opt.skipCOWCorr,proc=r['proc'],year=r['year'],ignoreWarnings=opt.ignore_warnings)
     for s,f in theoryFactoryType.iteritems():
+      data.at[ir, 'numEvents'] = theorySystYields["numEvents"]
       if f in ['a_w','a_h']: 
 	for direction in ['up','down']: 
 	  data.at[ir,"%s_%s_yield"%(s,direction)] = theorySystYields["%s_%s"%(s,direction)]
