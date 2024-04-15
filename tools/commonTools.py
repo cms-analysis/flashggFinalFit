@@ -45,6 +45,7 @@ def extractListOfCats( _listOfWSFileNames ):
 
 def extractListOfCatsFromData( _fileName ):
   f = ROOT.TFile(_fileName)
+  print inputWSName__
   ws = f.Get(inputWSName__)
   allData = ws.allData()
   cats = []
@@ -75,8 +76,8 @@ def signalFromFileName(_fileName):
   elif "GluGlu" in _fileName: p = "ggh"
   elif "VBF" in _fileName: p = "vbf"
   elif "WH" in _fileName: p = "wh"
-  elif "Wminus" in _fileName: p = "wh"
-  elif "Wplus" in _fileName: p = "wh"
+  elif "Wminus" in _fileName: p = "wh_minus"
+  elif "Wplus" in _fileName: p = "wh_minus"
   elif "ZH" in _fileName: p = "zh"
   elif "ttH" in _fileName: p = "tth"
   elif "THQ" in _fileName: p = "thq"
@@ -130,11 +131,13 @@ procToDataMap['VBF_ALT_L1Zgf05'] = 'vbf_ALT_L1Zgf05'
 procToDataMap['VH'] = 'wzh'
 procToDataMap['WMINUSH2HQQ'] = 'wh'
 procToDataMap['WPLUSH2HQQ'] = 'wh'
+
 procToDataMap['WH_ALT0L1f05ph0'] = 'wh_ALT_L1f05'
+procToDataMap['wh_ALT_L1'] = 'wh_ALT_L1'
 procToDataMap['WH_ALT0PHf05ph0'] = 'wh_ALT_0PHf05'
 procToDataMap['WH_ALT0PH'] = 'wh_ALT_0PH'
-procToDataMap['WH_ALT0PM'] = 'wh_ALT_0PM'
-procToDataMap['ZH'] = 'zh'
+procToDataMap['wh_ALT_0M'] = 'wh_ALT_0M'
+
 procToDataMap['ZH_ALT0L1f05ph0'] = 'zh_ALT_L1f05'
 procToDataMap['ZH_ALT0L1'] = 'zh_ALT_L1'
 procToDataMap['ZH_ALT0L1Zgf05ph0'] = 'zh_ALT_L1Zgf05'
@@ -143,19 +146,13 @@ procToDataMap['ZH_ALT0Mf05ph0'] = 'zh_ALT_0Mf05'
 procToDataMap['ZH_ALT0M'] = 'zh_ALT_0M'
 procToDataMap['ZH_ALT0PHf05ph0'] = 'zh_ALT_0PHf05'
 procToDataMap['ZH_ALT0PH'] = 'zh_ALT_0PH'
-procToDataMap['ZH_ALT0PM'] = 'zh_ALT_0PM'
 procToDataMap['QQ2HLNU'] = 'wh'
 procToDataMap['QQ2HLL'] = 'zh'
 procToDataMap['TTH'] = 'tth'
-procToDataMap['TTH_ALT0Mf05ph0'] = 'tth_ALT_0Mf05'
-procToDataMap['TTH_ALT0M'] = 'tth_ALT_0M'
-procToDataMap['TTH_ALT0PM'] = 'tth_ALT_0PM'
-procToDataMap['BBH'] = 'bbh'
-procToDataMap['THQ'] = 'thq'
-procToDataMap['THW'] = 'thw'
-procToDataMap['GG2HQQ'] = 'ggzh'
-procToDataMap['GG2HLL'] = 'ggzh'
-procToDataMap['GG2HNUNU'] = 'ggzh'
+#procToDataMap['WMINUSH2HQQ'] = 'wh_plus'
+#procToDataMap['WPLUSH2HQQ'] = 'wh_minus'
+
+
 def procToData( _proc ):
   k = _proc
   if k in procToDataMap: _proc = re.sub( k, procToDataMap[k], _proc )
@@ -170,21 +167,41 @@ def dataToProc( _d ):
 procToDatacardNameMap = od()
 procToDatacardNameMap['GG2H'] = "ggH"
 procToDatacardNameMap['VBF'] = "qqH"
-procToDatacardNameMap['VH'] = "vH"
-procToDatacardNameMap['WH2HQQ'] = "WH_had"
-procToDatacardNameMap["ZH2HQQ"] = "ZH_had"
-procToDatacardNameMap["QQ2HLNU"] = "WH_lep"
-procToDatacardNameMap["QQ2HLL"] = "ZH_lep"
 procToDatacardNameMap["TTH"] = "ttH"
-procToDatacardNameMap["BBH"] = "bbH"
-procToDatacardNameMap["THQ"] = "tHq"
-procToDatacardNameMap["THW"] = "tHW"
-procToDatacardNameMap["TH"] = "tHq"
-procToDatacardNameMap["GG2HQQ"] = "ggZH_had"
-procToDatacardNameMap["GG2HLL"] = "ggZH_ll"
-procToDatacardNameMap["GG2HNUNU"] = "ggZH_nunu"
+procToDatacardNameMap['WMINUSH2HQQ'] = 'wh'
+procToDatacardNameMap['WPLUSH2HQQ'] = 'wh'
+procToDatacardNameMap['QQ2HLL'] = 'zh'
+
+procToDatacardNameMap['VBF_ALT_0PH'] = 'qqH_ALT_0PH'
+procToDatacardNameMap['VBF_ALT_0PHf05'] = 'qqH_ALT_0PHf05'
+procToDatacardNameMap['VBF_ALT_0M'] = 'qqH_ALT_0M'
+procToDatacardNameMap['VBF_ALT_0Mf05'] = 'qqH_ALT_0Mf05'
+procToDatacardNameMap['VBF_ALT_L1'] = 'qqH_ALT_L1'
+procToDatacardNameMap['VBF_ALT_L1f05'] = 'qqH_ALT_L1f05'
+procToDatacardNameMap['VBF_ALT_L1Zg'] = 'qqH_ALT_L1Zg'
+procToDatacardNameMap['VBF_ALT_L1Zgf05'] = 'qqH_ALT_L1Zgf05'
+
+procToDatacardNameMap['WH_ALT0L1f05ph0'] = 'wh_ALT_L1f05'
+procToDatacardNameMap['wh_ALT_L1'] = 'wh_ALT_L1'
+procToDatacardNameMap['WH_ALT0PHf05ph0'] = 'wh_ALT_0PHf05'
+procToDatacardNameMap['WH_ALT0PH'] = 'wh_ALT_0PH'
+procToDatacardNameMap['wh_ALT_0M'] = 'wh_ALT_0M'
+
+procToDatacardNameMap['ZH_ALT0L1f05ph0'] = 'zh_ALT_L1f05'
+procToDatacardNameMap['ZH_ALT0L1'] = 'zh_ALT_L1'
+procToDatacardNameMap['ZH_ALT0L1Zgf05ph0'] = 'zh_ALT_L1Zgf05'
+procToDatacardNameMap['ZH_ALT0L1Zg'] = 'zh_ALT_L1Zg'
+procToDatacardNameMap['ZH_ALT0Mf05ph0'] = 'zh_ALT_0Mf05'
+procToDatacardNameMap['ZH_ALT0M'] = 'zh_ALT_0M'
+procToDatacardNameMap['ZH_ALT0PHf05ph0'] = 'zh_ALT_0PHf05'
+procToDatacardNameMap['ZH_ALT0PH'] = 'zh_ALT_0PH'
+
+
+#procToDatacardNameMap["WPLUSH2HQQ"] = "WH_lep"
+#procToDatacardNameMap["WPLUSH2HQQ"] = "WH_lep"
 
 def procToDatacardName( _proc ):
-  k = _proc.split("_")[0]
-  if k in procToDatacardNameMap: _proc = re.sub( k, procToDatacardNameMap[k], _proc )
+  k = _proc 
+  if k in procToDatacardNameMap: 
+    _proc = re.sub( k, procToDatacardNameMap[k], _proc )
   return _proc
