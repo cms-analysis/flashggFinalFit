@@ -24,12 +24,7 @@ def extractListOfProcs( _listOfWSFileNames ):
   procs = []
   print "hey ", _listOfWSFileNames
   for fName in _listOfWSFileNames:
-<<<<<<< HEAD
-    print fName, "HEY"
-    p = fName.split("13TeV_")[1].split(".root")[0]
-=======
     p = fName.split("pythia8_")[1].split(".root")[0]
->>>>>>> origin/dev_fggfinalfits_lite
     if p not in procs: procs.append(p)
   return ",".join(procs)
 

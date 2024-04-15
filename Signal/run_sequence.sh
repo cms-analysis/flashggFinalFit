@@ -52,7 +52,7 @@ if [[ $STEP == "fTest" ]] || [[ $STEP == "calcPhotonSyst" ]] || [[ $STEP == 'sig
 	if [[ $year == $YEAR ]] || [[ $YEAR == "all" ]]; then
 	    echo "====> Running $STEP for year $year"
 	    if [[ $STEP == "fTest" ]]; then
-		python RunSignalScripts.py --inputConfig config_test_${year}.py --mode fTest --modeOpts "--doPlots --outdir plots --nProcsToFTest -1" ${DROPT}
+		python RunSignalScripts.py --inputConfig config_test_${year}.py  --mode fTest --modeOpts "--doPlots --outdir plots --nProcsToFTest -1" ${DROPT}
 	    elif [[ $STEP == "calcPhotonSyst" ]]; then
 		python RunSignalScripts.py --inputConfig config_test_${year}.py --mode calcPhotonSyst ${DROPT}
 	    elif [[ $STEP == 'signalFit' ]]; then
@@ -61,7 +61,7 @@ if [[ $STEP == "fTest" ]] || [[ $STEP == "calcPhotonSyst" ]] || [[ $STEP == 'sig
 	fi
     done
 elif [[ $STEP == 'packager' ]]; then
-    python RunPackager.py --cats "auto" --inputWSDir /pnfs/roma1.infn.it/data/cms/store/user/emanuele/vbfhgg/WS_2023_02_13/signal_2016preVFP/ --outputExt packaged --exts 2023-02-13_year2016preVFP,2023-02-13_year2016postVFP,2023-02-13_year2017,2023-02-13_year2018 --mergeYears --batch Rome --queue cmsan ${DROPT}
+    python RunPackager.py --cats "auto" --inputWSDir /pnfs/roma1.infn.it/data/cms/store/user/emanuele/vbfhgg/WS_2023_02_13/signal_2016preVFP/ --outputExt packaged --exts 2023-02-13_year2016preVFP,2023-02-13_year2016postVFP,2023-02-13_year2017,2023-02-13_year2018 --mergeYears --batch condor --queue espresso ${DROPT}
 elif [[ $STEP == 'plotter' ]]; then
     smprocs=("GG2H" "VBF" "TTH" "WMINUSH2HQQ" "WPLUSH2HQQ" "QQ2HLL")
     smprocs_csv=$(IFS=, ; echo "${smprocs[*]}")

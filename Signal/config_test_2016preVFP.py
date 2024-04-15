@@ -21,6 +21,6 @@ signalScriptCfg = {
     'smears':'HighR9EBPhi,HighR9EBRho,HighR9EEPhi,HighR9EERho,LowR9EBPhi,LowR9EBRho,LowR9EEPhi,LowR9EERho', # separate nuisance per year
 
     # Job submission options
-    'batch':'Rome', # ['condor','SGE','IC','Rome','local']
-    'queue':'cmsan'
+    'batch':'condor', # ['condor','SGE','IC','Rome','local']
+    'queue':'longlunch'
 }

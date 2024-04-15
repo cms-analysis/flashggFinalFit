@@ -1,5 +1,5 @@
 #ext=`date +%F` 
-ext='2023-03-02'
+ext='2024-03-22'
 
 STEP=0
 usage(){
@@ -36,6 +36,7 @@ if [[ $DR ]]; then
 fi
 
 smprocs=("GG2H" "VBF" "TTH" "WMINUSH2HQQ" "WPLUSH2HQQ" "QQ2HLL")
+#smprocs=("GG2H" "VBF" "WMINUSH2HQQ" "WPLUSH2HQQ" "QQ2HLL")
 smprocs_csv=$(IFS=, ; echo "${smprocs[*]}")
 
 if [[ $STEP == "yields" ]]; then
@@ -63,7 +64,7 @@ if [[ $STEP == "yields" ]]; then
 	if [[ $altproc == "ALT_L1" ]] || [[ $altproc == "ALT_L1Zg" ]]; then
 	    zhsamples=`echo ${zhsamples} | sed 's|L1|0L1|g'`
 	fi
-        python RunYields.py --cats "auto" --inputWSDirMap 2016preVFP=cards/signal_2016preVFP,2016postVFP=cards/signal_2016postVFP,2017=cards/signal_2017,2018=cards/signal_2018 --procs "GG2H,$tthsamples,$vbfsamples,$whsamples,$zhsamples" --mergeYears --doSystematics --skipZeroes --ext ${ext}_${altproc} --batch Rome --queue cmsan ${DROPT}
+        python RunYields.py --cats "auto" --inputWSDirMap 2016preVFP=cards/signal_2016preVFP,2016postVFP=cards/signal_2016postVFP,2017=cards/signal_2017,2018=cards/signal_2018 --procs "GG2H,$tthsamples,$vbfsamples,$whsamples,$zhsamples" --mergeYears --doSystematics --skipZeroes --ext ${ext}_${altproc}  ${DROPT}
     done
 elif [[ $STEP == "datacards" ]]; then
     for fit in "xsec" "ALT_L1" "ALT_L1Zg" "ALT_0PH" "ALT_0M"

@@ -46,7 +46,7 @@ QUEUE=""
 if [[ $I ]]; then
     QUEUE=" --batch local "
 else
-    QUEUE=" --batch Rome --queue cmsan "
+    QUEUE=" --batch condor --queue longlunch "
 fi
 
 years=("2016preVFP" "2016postVFP" "2017" "2018")
@@ -55,9 +55,9 @@ for year in ${years[*]}
 do
     if [[ $year == $YEAR ]] || [[ $YEAR == "all" ]]; then
 	if [[ $STEP == "t2ws-mc" ]]; then
-	    python RunWSScripts.py --inputConfig config.py --inputDir trees/merged/signal_${year} --mode trees2ws --modeOpts "--doSystematics" --year ${year} --ext GGH_${year} ${QUEUE} ${DROPT}
+	    python RunWSScripts.py --inputConfig config.py --inputDir Merged/${year} --mode trees2ws --modeOpts "--doSystematics" --year ${year} --ext ${year} ${QUEUE} ${DROPT}
 	elif [[ $STEP == "t2ws-data" ]]; then
-	    python RunWSScripts.py --inputConfig config.py --inputDir trees/merged/data_${year} --mode trees2ws_data --year ${year} --ext ${year} ${QUEUE} ${DROPT}    
+	    python RunWSScripts.py --inputConfig config.py --inputDir trees/data_${year} --mode trees2ws_data --year ${year} --ext ${year} ${QUEUE} ${DROPT}    
 	elif [[ $STEP == "hadd-mc" ]]; then
 	    python RunWSScripts.py --inputDir trees/signal_${year} --mode haddMC --year ${year} --ext ${year} --flashggPath ${fggDir} ${QUEUE} ${DROPT}
 	elif [[ $STEP == "hadd-data" ]]; then
