@@ -168,8 +168,8 @@ procToDatacardNameMap = od()
 procToDatacardNameMap['GG2H'] = "ggH"
 procToDatacardNameMap['VBF'] = "qqH"
 procToDatacardNameMap["TTH"] = "ttH"
-procToDatacardNameMap['WMINUSH2HQQ'] = 'wh'
-procToDatacardNameMap['WPLUSH2HQQ'] = 'wh'
+procToDatacardNameMap['WMINUSH2HQQ'] = 'wh_minus'
+procToDatacardNameMap['WPLUSH2HQQ'] = 'wh_plus'
 procToDatacardNameMap['QQ2HLL'] = 'zh'
 
 procToDatacardNameMap['VBF_ALT_0PH'] = 'qqH_ALT_0PH'
