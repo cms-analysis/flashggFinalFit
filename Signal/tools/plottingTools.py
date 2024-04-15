@@ -308,7 +308,7 @@ def plotInterpolation(_finalModel,_outdir='./',_massPoints='120,121,122,123,124,
       dh[mp] = ROOT.RooDataHist("dh_%s"%mp,"dh_%s"%mp,ROOT.RooArgSet(_finalModel.xvar),_finalModel.Datasets[mp])
       hists['data_%s'%mp] = _finalModel.xvar.createHistogram("h_data_%s"%mp,ROOT.RooFit.Binning(_finalModel.xvar.getBins()))
       dh[mp].fillHistogram(hists['data_%s'%mp],ROOT.RooArgList(_finalModel.xvar))
-      if norm == 0.: hists['data_%s'%mp].Scale(0)
+      if norm == 0. or hists['data_%s'%mp].Integral()==0: hists['data_%s'%mp].Scale(0)
       else: hists['data_%s'%mp].Scale(norm/(hists['data_%s'%mp].Integral()))
       hists['data_%s'%mp].SetMarkerStyle(20)
       hists['data_%s'%mp].SetMarkerColor(colorMap[mp])

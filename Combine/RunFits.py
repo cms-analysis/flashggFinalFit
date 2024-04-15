@@ -184,7 +184,6 @@ for fidx in range(len(fits)):
         fitcmd = "combine -M MultiDimFit -m 125.38 %s --floatOtherPOIs 1 %s -n _%s_%s -P %s --algo grid --points %s --alignEdges 1 %s %s %s"%(d_opts,exp_opts,_name,poi,poi,_points.split(":")[0],_fit_opts,pdf_opts,common_opts)
       else:
         fitcmd = "cd runFits%s_%s; source /cvmfs/cms.cern.ch/crab3/crab.sh; combineTool.py --task-name %s_%s -M MultiDimFit -m 125.38 %s --floatOtherPOIs 1 %s -n _%s_%s -P %s --algo grid --points %s --alignEdges 1 --split-points %s %s %s %s %s; cd .."%(opt.ext,opt.mode,_name,poi,d_opts,exp_opts,_name,poi,poi,_points.split(":")[0],_points.split(":")[1],_fit_opts,pdf_opts,common_opts,job_opts)
-    
       run(fitcmd,opt)
 
   # For 1D scan when fixing other pois

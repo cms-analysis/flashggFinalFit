@@ -48,7 +48,9 @@ print " --> Loading per category dataframes into single dataframe"
 skipCats = []
 if opt.pruneCat: skipCats = opt.pruneCat.split(",")
 extStr = "_%s"%opt.ext if opt.ext != '' else ''
+print "./yields%s/*.pkl"%extStr
 pkl_files = glob.glob("./yields%s/*.pkl"%extStr)
+
 pkl_files.sort() # Categories in alphabetical order
 data = pd.DataFrame()
 for f_pkl_name in pkl_files:
@@ -110,6 +112,7 @@ if opt.prune:
   data['prune'] = 0
   if opt.doTrueYield:
     print " --> Using the true yield of process for pruning: N = Product(XS,BR,eff*acc,lumi)"
+
     mask = (data['type']=='sig')
 
     # Extract XS*BR using tools.XSBR
@@ -138,6 +141,7 @@ if opt.prune:
 
   else:
     print " --> Using nominal yield of process (sumEntries) for pruning"
+
     mask = (data['type']=='sig')
 
     # Extract per category yields

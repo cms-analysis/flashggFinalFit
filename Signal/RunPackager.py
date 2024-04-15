@@ -52,6 +52,9 @@ if options['cats'] == "auto":
   options['cats'] = extractListOfCats(WSFileNames)
 options['nCats'] = len(options['cats'].split(","))
 
+
+
+
 print " --> Packaging signal workspaces from: %s"%opt.exts
 print " --> For analysis categories: %s"%options['cats']
 

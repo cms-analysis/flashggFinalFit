@@ -71,7 +71,8 @@ if options['mode'] not in ['fTestParallel']:
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # If cat == auto: extract list of categories from datafile
 if options['cats'] == 'auto':
-  options['cats'] = extractListOfCatsFromData(options['dataFile'])
+   print options['dataFile']
+   options['cats'] = extractListOfCatsFromData(options['dataFile'])
 options['nCats'] = len(options['cats'].split(","))
 
 # Add dummy entries for procs and signalFitWSFile (used in old plotting script)

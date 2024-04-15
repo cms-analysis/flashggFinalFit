@@ -73,7 +73,10 @@ with open( opt.inputJson ) as jsonfile: inputs = json.load(jsonfile)[opt.mode]
 
 # Extract info
 pois = inputs['pois'].split(",")
+<<<<<<< HEAD
 print(pois)
+=======
+>>>>>>> 58e260488d1c116725d0b7542c5d58ae6baf74ba
 fits = inputs['fits'].split("+")
 points = inputs['points'].split("+")
 fit_opts = inputs['fit_opts'].split("+")
