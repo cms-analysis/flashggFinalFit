@@ -1,4 +1,26 @@
-{
+{    "WH_ALT0L1f05ph0":{
+    "THU_WH_inc":[1.005,0.993]
+    },
+    "WH_ALT0PH":{
+     "THU_WH_inc":[1.005,0.993]
+    },
+    "WH_ALT0PHf05ph0":{
+        "THU_WH_inc":[1.005,0.993]
+    },
+    "wh_ALT_0M":{
+        "THU_WH_inc":[1.005,0.993]
+    },
+    "WMINUSH2HQQ":{
+        "QCDscale_VH":[1.005,0.993],
+        "pdf_Higgs_VH":1.017,
+        "alphaS_VH":1.009
+        },
+        "WPLUSH2HQQ":{
+        "QCDscale_VH":[1.005,0.993],
+        "pdf_Higgs_VH":1.017,
+        "alphaS_VH":1.009
+        },
+
     "WH_lep_FWDH":{
         "THU_WH_inc":[1.005,0.993],
         "THU_WH_mig75":1.000,
