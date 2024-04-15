@@ -1,0 +1,2 @@
+ModelConfig 'ModelConfig' defines more than one parameter of interest. This is not supported in some statistical methods.
+Error in <ROOT::Math::Fitter::CalculateMinosErrors>: Minos error calculation failed for all parameters

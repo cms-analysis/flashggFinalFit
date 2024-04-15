@@ -82,5 +82,6 @@ for fidx in range(len(fits)):
         print "Warning: unknown poi. Use r as default"
         translate_json = "pois_mu.json"
       plotcmd = "cd %s; plot1DScan.py higgsCombine_%s_%s.root --y-cut 30 --y-max 30 -o %s_%s --POI %s --main-label %s --translate %s/src/flashggFinalFit/Plots/%s; cd .."%(pdir,_name,poi,_name,poi,poi,mainlabel,os.environ['CMSSW_BASE'],translate_json)
+      print (plotcmd)
       run(plotcmd)
 

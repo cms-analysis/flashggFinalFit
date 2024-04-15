@@ -1,3 +1,0 @@
-SysError in <TFile::TFile>: file higgsCombine_paramFit__bestfit_syst_ALT_0PH_initialFit_env_pdf_63_13TeV_bern1_p0.MultiDimFit.mH125.38.root can not be opened (Disk quota exceeded)
-ModelConfig 'ModelConfig' defines more than one parameter of interest. This is not supported in some statistical methods.
-Error in <TFile::WriteTObject>: Directory higgsCombine_paramFit__bestfit_syst_ALT_0PH_initialFit_env_pdf_63_13TeV_bern1_p0.MultiDimFit.mH125.38.root is not writable

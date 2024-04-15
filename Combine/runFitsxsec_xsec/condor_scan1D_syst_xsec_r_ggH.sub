@@ -1,0 +1,15 @@
+executable = condor_scan1D_syst_xsec_r_ggH.sh
+arguments = $(ProcId)
+output                = scan1D_syst_xsec_r_ggH.$(ClusterId).$(ProcId).out
+error                 = scan1D_syst_xsec_r_ggH.$(ClusterId).$(ProcId).err
+log                   = scan1D_syst_xsec_r_ggH.$(ClusterId).log
+
+# Send the job to Held state on failure.
+on_exit_hold = (ExitBySignal == True) || (ExitCode != 0)
+
+# Periodically retry the jobs every 10 minutes, up to a maximum of 5 retries.
+periodic_release =  (NumJobStarts < 3) && ((CurrentTime - EnteredCurrentStatus) > 600)
+
++JobFlavour = "workday"
+queue 41
+

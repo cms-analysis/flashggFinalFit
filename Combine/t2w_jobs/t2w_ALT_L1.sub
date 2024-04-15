@@ -1,0 +1,7 @@
+executable          = /afs/cern.ch/user/f/fderiggi/AC/CMSSW_10_2_13/src/flashggFinalFit/Combine/t2w_jobs/t2w_ALT_L1.sh
+output              = /afs/cern.ch/user/f/fderiggi/AC/CMSSW_10_2_13/src/flashggFinalFit/Combine/t2w_jobs/t2w_ALT_L1.sh.out
+error               = /afs/cern.ch/user/f/fderiggi/AC/CMSSW_10_2_13/src/flashggFinalFit/Combine/t2w_jobs/t2w_ALT_L1.sh.err
+log                 = /afs/cern.ch/user/f/fderiggi/AC/CMSSW_10_2_13/src/flashggFinalFit/Combine/t2w_jobs/t2w_ALT_L1.sh.log
++JobFlavour         = "workday"
+RequestCpus         = 4
+queue
