@@ -51,7 +51,7 @@ def add_vars_to_workspace(_ws=None,_data=None,_stxsVar=None):
   # Add vars specified by dataframe columns: skipping cat, stxsvar and type
   _vars = od()
   for var in _data.columns:
-    if var in ['type','cat',_stxsVar]: continue
+    if var in ['type','cat',_stxsVar,'']: continue
     if var == "CMS_hgg_mass": 
       _vars[var] = ROOT.RooRealVar(var,var,125.,100.,180.)
       _vars[var].setBins(160)
@@ -295,7 +295,7 @@ for stxsId in data[stxsVar].unique():
 
     # Delete trees and RooDataSet from heap
     t.Delete()
-    d.Delete()
+    #d.Delete()
     del sa
 
     if opt.doSystematics:
@@ -330,7 +330,7 @@ for stxsId in data[stxsVar].unique():
 
           # Delete trees and RooDataHist
           t.Delete()
-          h.Delete()
+          #h.Delete()
           del sa
 
   # Write WS to file
@@ -338,5 +338,5 @@ for stxsId in data[stxsVar].unique():
 
   # Close file and delete workspace from heap
   fout.Close()
-  ws.Delete()
-  fout.Delete()
+  #ws.Delete()
+  #fout.Delete()
