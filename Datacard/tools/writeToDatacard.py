@@ -2,7 +2,6 @@
 import os, sys, re
 from commonTools import *
 from commonObjects import *
-import code
 
 def writePreamble(f,options):
   f.write("CMS HGG Datacard - %s - %s\n"%(options.years,sqrts__)) 
@@ -177,7 +176,7 @@ def addSyst(l,v,s,p,c,n):
       # Check 1: variation is non-negligible. If not then skip
       if abs(v[0]-1)<0.0005: l += "%-15s "%"-"
       # If number of events smaller than minEventNumber add - to datacard
-      elif (n < minEventNumber) and not ('lumi' in s) and not ('scale' in s): l += "%-15s "%"-"
+      elif (n < minEventNumber) and (not ('lumi' in s)) and (not ('scale' in s)): l += "%-15s "%"-"
       # Check 2: variation is not negative. Print message and add - to datacard (cleaned later)
       elif v[0] < 0.: 
         print " --> [WARNING] systematic %s: negative variation for (%s,%s)"%(s,p,c)
@@ -192,7 +191,7 @@ def addSyst(l,v,s,p,c,n):
       # Check 1: variation is non-negligible. If not then skip
       if(abs(v[0]-1)<0.0005)&(abs(v[1]-1)<0.0005): l += "%-15s "%"-"
       # If number of events smaller than minEventNumber add - to datacard
-      elif (n < minEventNumber) and not ('lumi' in s) and not ('scale' in s): l += "%-15s "%"-"
+      elif (n < minEventNumber) and (not ('lumi' in s)) and (not ('scale' in s)): l += "%-15s "%"-"
       # Check 2: neither variation is negative. Print message and add - to datacard (cleaned later)
       elif(v[0]<0.)|(v[1]<0.):
         print " --> [WARNING] systematic %s: negative variation for (%s,%s)"%(s,p,c)
@@ -202,7 +201,7 @@ def addSyst(l,v,s,p,c,n):
       # Check 3: effect is approximately symmetric: then just add single up variation
       elif( abs((v[0]*v[1])-1)<0.0005 ): l += "%-15.3f "%v[1]
       else: 
-        if (n < minEventNumber) and not ('lumi' in s) and not ('scale' in s): 
+        if (n < minEventNumber) and (not ('lumi' in s)) and (not ('scale' in s)): 
           l += "%-15s "%"-"
         else:
           vstr = "%.3f/%.3f"%(v[0],v[1])
