@@ -27,6 +27,13 @@
         "fit_opts":"--setParameterRanges r=0,3 --saveSpecifiedNuis all+--setParameterRanges r=0,3 --saveSpecifiedNuis all"
     },
 
+    "differential_y":{
+        "pois":"r_YH_0p0_0p15,r_YH_0p15_0p3,r_YH_0p3_0p6,r_YH_0p6_0p9,r_YH_0p9_2p5",
+        "fits":"profile1D:syst:all+profile1D:statonly:all",
+        "points":"40:40+40:40",
+        "fit_opts":"--setParameterRanges r=0,3 --saveSpecifiedNuis all+--setParameterRanges r=0,3 --saveSpecifiedNuis all"
+    },
+
     "mu":{
         "pois":"r_ggH,r_VBF,r_VH,r_top",
         "fits":"profile1D:syst:all",

@@ -20,6 +20,13 @@
         "fit_opts":"--saveInactivePOI 1 --saveWorkspace --saveSpecifiedNuis all"
     },
 
+    "differential_y":{
+        "pois":"r_YH_0p0_0p15,r_YH_0p15_0p3,r_YH_0p3_0p6,r_YH_0p6_0p9,r_YH_0p9_2p5",
+        "fits":"bestfit:syst:all",
+        "points":"1",
+        "fit_opts":"--saveInactivePOI 1 --saveWorkspace --saveSpecifiedNuis all"
+    },
+
 
     "mu_extended":{
         "pois":"r_ggH,r_VBF,r_WH,r_ZH,r_top",
