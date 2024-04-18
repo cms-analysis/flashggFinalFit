@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Assuming your Condor submission files are located in a directory named "condor_files"
-condor_dir="./runFits_differential_pt/"
+condor_dir="./runFits_differential_y/"
 
 # Check if the directory exists
 if [ ! -d "$condor_dir" ]; then
