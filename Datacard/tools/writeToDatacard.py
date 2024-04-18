@@ -2,6 +2,7 @@
 import os, sys, re
 from commonTools import *
 from commonObjects import *
+import code
 
 def writePreamble(f,options):
   f.write("CMS HGG Datacard - %s - %s\n"%(options.years,sqrts__)) 
@@ -21,11 +22,20 @@ def writeProcesses(f,d,options):
   # d = Pandas DataFrame
   # Shapes
   # Loop over categories in dataframe
+  years = list(set([re.search(r'\d{4}', item).group() for item in options.years.split(",") if re.search(r'\d{4}', item)]))
   for cat in d.cat.unique():
-    # Loop over rows for respective category
-    for ir,r in d[d['cat']==cat].iterrows():
-      # Write to datacard
-      f.write("shapes      %-55s %-40s %s %s\n"%(r['proc'],r['cat'],r['modelWSFile'],r['model']))
+    for year in years:
+      # Loop over rows for respective category
+      for ir,r in d[d['cat']==cat].iterrows():
+        if (not (str(year) in r["year"])) and (not (r["year"] == "merged")): continue
+        # Write to datacard
+        if r['proc'] == "bkg_mass":
+          index = r['model'].rfind("_13TeV_bkgshape")
+          if index != -1:
+            model = r['model'][:index] + "_" + year + "_13TeV_bkgshape"
+            f.write("shapes      %-55s %-40s %s %s\n"%(r['proc'],r['cat'],r['modelWSFile'],model))
+        else: 
+          f.write("shapes      %-55s %-40s %s %s\n"%(r['proc'],r['cat'],r['modelWSFile'],r['model']))
 
   # Bin, observation and rate lines
   lbreak = '----------------------------------------------------------------------------------------------------------------------------------'
@@ -227,6 +237,10 @@ def writeMCStatUncertainty(f,d,options):
       for cat in d.cat.unique():
         for ir,r in d[d['cat']==cat].iterrows():
           if r['proc'] == "data_obs": continue
+          if (not (year in r['proc'])) or (r['proc'] == "bkg_mass"): 
+            # Do not assign the MC uncertainty to procs not matching the year/era and to the data
+            lsyst += "%-15s "%"-"
+            continue
           sval = scval if cat == scat else '-'
           # Extract value and add to line (with checks)
           lsyst = addSyst(lsyst,sval,stitle,r['proc'],cat,r['numEvents'])
@@ -238,9 +252,11 @@ def writeMCStatUncertainty(f,d,options):
 
 def writePdfIndex(f,d,options):
   f.write("\n")
+  years = list(set([re.search(r'\d{4}', item).group() for item in options.years.split(",") if re.search(r'\d{4}', item)]))
   for cat in d[~d['cat'].str.contains("NOTAG")].cat.unique(): 
-    indexStr = "pdfindex_%s_13TeV"%cat
-    f.write("%-55s  discrete\n"%indexStr)
+    for year in years:
+      indexStr = "pdfindex_%s_%s_13TeV"%(cat, year)
+      f.write("%-55s  discrete\n"%indexStr)
   return True
 
 def writeBreak(f):
