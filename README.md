@@ -1,37 +1,43 @@
-# Final Fits (dev_higgsdnafinalfit)
+# Final Fits (higgsdnafinalfit)
 
-**NOTE** This is the devlopment branch for using final fits with the output of HiggsDNA.
+This is the branch for using final fits with the output of HiggsDNA.
 
-Welcome to the new Final Fits package. Here lies a a series of scripts which are used to run the final stages of the CMS Hgg analysis: signal modelling, background modelling, datacard creation, final statistical interpretation and final result plots.
+Welcome to the new Final Fits package. Here lies a a series of scripts which are used to run the final stages of CMS Hgg analyses: signal modelling, background modelling, datacard creation, final statistical interpretation and final result plots.
 
 Slides from the flashgg tutorial series can be found [here](https://indico.cern.ch/event/963619/contributions/4112177/attachments/2151275/3627204/finalfits_tutorial_201126.pdf)
 
 ## Download and setup instructions
 
 ```
-export SCRAM_ARCH=slc7_amd64_gcc700
-cmsrel CMSSW_10_2_13
-cd CMSSW_10_2_13/src
-
-# Install the GBRLikelihood package which contains the RooDoubleCBFast implementation
-git clone https://github.com/jonathon-langford/HiggsAnalysis.git
-
-# Install Combine as per the documentation here: cms-analysis.github.io/HiggsAnalysis-CombinedLimit/
-git clone -b v8.2.0 https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit
-
-# Install Combine Harvester for parallelizing fits
-git clone -b 102x https://github.com/cms-analysis/CombineHarvester.git CombineHarvester
-
-# Compile external libraries
+export SCRAM_ARCH=el9_amd64_gcc12
+cmsrel CMSSW_14_0_0_pre0
+cd CMSSW_14_0_0_pre0/src
 cmsenv
-scram b -j 9
 
-# Install Flashgg Final Fit packages
-git clone -b dev_higgsdnafinalfit https://github.com/cms-analysis/flashggFinalFit.git
+COMBINE_TAG=dev_jlangfor_combinev10_revert974
+COMBINEHARVESTER_TAG=main
+FINALFIT_TAG=dev_higgsdnafinalfit
+
+# Install Combine with the latest EL9 compatible branch
+git clone -b $COMBINE_TAG https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit
+
+# Install CombineTools in CombineHarvester
+cd ${CMSSW_BASE}/src
+bash <(curl -s https://raw.githubusercontent.com/cms-analysis/CombineHarvester/${COMBINEHARVESTER_TAG}/CombineTools/scripts/sparse-checkout-https.sh)
+cd CombineHarvester && git fetch origin ${COMBINEHARVESTER_TAG} && git checkout ${COMBINEHARVESTER_TAG}
+
+# Compile libraries
+cd ${CMSSW_BASE}/src
+cmsenv
+scram b clean
+scram b -j 8
+
+# Install Final Fit package
+git clone -b $FINALFIT_TAG https://github.com/cms-analysis/flashggFinalFit.git
 cd flashggFinalFit/
 ```
 
-In every new shell run the following to add `tools/commonTools` and `tools/commonObjects` to your `${PYTHONPATH}`:
+Ignore the compilation warnings from the CombineTools package. These will be fixed in the near future. In every new shell run the following to add `tools/commonTools` and `tools/commonObjects` to you `${PYTHONPATH}`:
 ```
 cmsenv
 source setup.sh
@@ -50,4 +56,4 @@ The signal modelling, background modelling and datacard creation can be ran in p
 
 Finally, the objects and tools which are common to all subfolders are defined in the `tools` directory. If your input workspaces differ from the flashgg output workspace structure, then you may need to change the options here.
 
-Each of the relevant folders are documented with specific `README.md` files. Some (temporary) instructions can be found in this [google docs](https://docs.google.com/document/d/1NwUrPvOZ2bByaHNqt_Fr6oYcP7icpbw1mPlw_3lHhEE/edit)
+Each of the relevant folders are documented with specific `README.md` files. 
