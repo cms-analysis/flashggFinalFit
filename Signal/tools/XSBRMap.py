@@ -28,6 +28,14 @@ globalXSBRMap['example']['THQ'] = {'mode':'tHq'}
 globalXSBRMap['example']['THW'] = {'mode':'tHW'}
 # ...
 
+# For tutorial analysis: use 13.6 TeV cross sections and branching fraction
+# These are not yet stored in Combine, so we will use the constant-factor approach 
+# Setting the values at MH=125.38 GeV
+globalXSBRMap['tutorial'] = od()
+globalXSBRMap['tutorial']['decay'] = {'mode':'hgg'}
+globalXSBRMap['tutorial']['GG2H'] = {'mode':'constant', 'factor':51.96}
+globalXSBRMap['tutorial']['VBF'] = {'mode':'constant', 'factor':4.067}
+
 # STXS analysis: add factor for bin composition
 globalXSBRMap['STXS'] = od()
 globalXSBRMap['STXS']['decay'] = {'mode':'hgg'}

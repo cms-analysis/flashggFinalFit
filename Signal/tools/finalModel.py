@@ -75,7 +75,7 @@ def initialiseXSBR():
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
 class FinalModel:
   # Constructor
-  def __init__(self,_ssfMap,_proc,_cat,_ext,_year,_sqrts,_datasets,_xvar,_MH,_MHLow,_MHHigh,_massPoints,_xsbrMap,_procSyst,_scales,_scalesCorr,_scalesGlobal,_smears,_doVoigtian,_useDCB,_skipVertexScenarioSplit,_skipSystematics,_doEffAccFromJson):
+  def __init__(self,_ssfMap,_proc,_cat,_ext,_year,_sqrts,_datasets,_xvar,_MH,_MHLow,_MHHigh,_massPoints,_xsbrMap,_procSyst,_scales,_scalesCorr,_scalesGlobal,_smears,_doVoigtian,_useDCB,_skipVertexScenarioSplit,_skipSystematics):
     self.ssfMap = _ssfMap
     self.proc = _proc
     self.procSyst = _procSyst # Signal process used for systematics (useful for low stat cases)
@@ -104,7 +104,6 @@ class FinalModel:
     self.doVoigtian = _doVoigtian
     if self.doVoigtian: self.GammaH = ROOT.RooRealVar("GammaH","GammaH",0.004,0.,5.)
     self.skipVertexScenarioSplit = _skipVertexScenarioSplit
-    self.doEffAccFromJson = _doEffAccFromJson
     self.verbose = True
     # Dict to store objects
     self.Splines = od()
@@ -148,21 +147,13 @@ class FinalModel:
     self.Splines['br'] = ROOT.RooSpline1D("fbr_%s"%self.sqrts,"fbr_%s"%self.sqrts,self.MH,len(mh),mh,br)
 
   def buildEffAccSpline(self):
-    # Two treatments: load from json created with getEffAcc.py script or calc from sum of weights
+    # In HiggsDNA, eff x acc = sum of weights
     # Loop over mass points  
     ea, mh = [], []
     for mp in self.massPoints.split(","):
       mh.append(float(mp))
-      if self.doEffAccFromJson:
-        jfname = "%s/outdir_%s/getEffAcc/json/effAcc_M%s_%s.json"%(swd__,self.ext,mp,self.ext)
-        if not os.path.exists(jfname):
-          print " --> [ERROR] effAcc json file (%s) does not exist for mass point = %s. Run getEffAcc first."%(jfname,mp)
-          sys.exit(1)
-        with open(jfname,'r') as jf: ea_data = json.load(jf)
-        ea.append(float(ea_data['%s__%s'%(self.proc,self.cat)]))
-      else:
-        sumw = self.datasets[mp].sumEntries()
-        ea.append(sumw) 
+      sumw = self.datasets[mp].sumEntries()
+      ea.append(sumw) 
     # If single mass point then add MHLow and MHHigh dummy points for constant ea
     if len(ea) == 1: ea, mh = [ea[0],ea[0],ea[0]], [float(self.MHLow),mh[0],float(self.MHHigh)]
     # Convert to numpy arrays and make spline
@@ -198,20 +189,20 @@ class FinalModel:
     # Extract calcPhotonSyst output
     psname = "%s/outdir_%s/calcPhotonSyst/pkl/%s.pkl"%(swd__,self.ext,self.cat)
     if not os.path.exists(psname):
-      print " --> [ERROR] Photon systematics do not exist (%s). Please run calcPhotonSyst mode first or skip systematics (--skipSystematics)"%psname
+      print(" --> [ERROR] Photon systematics do not exist (%s). Please run calcPhotonSyst mode first or skip systematics (--skipSystematics)"%psname)
       sys.exit(1)
-    with open(psname,"r") as fpkl: psdata = pickle.load(fpkl)
+    with open(psname,"rb") as fpkl: psdata = pickle.load(fpkl)
     
     # Get row for proc: option to use diagonal process
     r = psdata[psdata['proc']==self.procSyst]
     if len(r) == 0:
-      print " --> [WARNING] Process %s is not in systematics pkl (%s). Skipping systematics."%(self.proc,psname)
+      print(" --> [WARNING] Process %s is not in systematics pkl (%s). Skipping systematics."%(self.proc,psname))
       self.skipSystematics = True
 
     else:
       # Add scales, scalesCorr, scalesGlobal, smears
       for sType in ['scales','scalesCorr','scalesGlobal','smears']:
-	for syst in getattr(self,sType).split(","):
+        for syst in getattr(self,sType).split(","):
           if syst == '': continue
 
           # If corr/global nor in sType then build separate nuisance per year i.e. de-correlate
@@ -219,14 +210,14 @@ class FinalModel:
           else: sExt = "_%s"%self.year
 
           # Extract info
-	  systOpts = syst.split(":")
-	  sName = "%s_%s"%(systOpts[0],outputNuisanceExtMap[sType])
+          systOpts = syst.split(":")
+          sName = "%s_%s"%(systOpts[0],outputNuisanceExtMap[sType])
 
           # Extract constant values and make nuisance
           if sType == 'scalesGlobal': cMean, cSigma, cRate = 0.,0.,0.
-	  else: cMean, cSigma, cRate = r["%s_mean"%sName].values[0], r["%s_sigma"%sName].values[0], r["%s_rate"%sName].values[0]
-	  sOpts = systOpts[1:] if len(systOpts) > 1 else []
-	  self.makeNuisance("%s%s"%(sName,sExt),cMean,cSigma,cRate,sType,sOpts)
+          else: cMean, cSigma, cRate = r["%s_mean"%sName].values[0], r["%s_sigma"%sName].values[0], r["%s_rate"%sName].values[0]
+          sOpts = systOpts[1:] if len(systOpts) > 1 else []
+          self.makeNuisance("%s%s"%(sName,sExt),cMean,cSigma,cRate,sType,sOpts)
 
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Function to get RV fraction func
@@ -340,7 +331,7 @@ class FinalModel:
       formula += "*(1."
       # Global
       if 'scalesGlobal' in self.NuisanceMap:
-        for sName, sInfo in self.NuisanceMap['scalesGlobal'].iteritems():
+        for sName, sInfo in self.NuisanceMap['scalesGlobal'].items():
           formula += "+@%g"%dependents.getSize()
           # For adding additional factor
           for so in sInfo['opts']: 
@@ -351,7 +342,7 @@ class FinalModel:
       # Other systs: scales, scalesCorr, smears
       for sType in ['scales','scalesCorr','smears']:
         if sType in self.NuisanceMap:
-          for sName, sInfo in self.NuisanceMap[sType].iteritems():
+          for sName, sInfo in self.NuisanceMap[sType].items():
             c = sInfo['meanConst'].getVal()
             if abs(c)>=5.e-5:
               formula += "+@%g*@%g"%(dependents.getSize(),dependents.getSize()+1)
@@ -371,7 +362,7 @@ class FinalModel:
       formula += "*TMath::Max(1.e-2,(1."
       for sType in ['scales','scalesCorr','smears']:
         if sType in self.NuisanceMap:
-          for sName, sInfo in self.NuisanceMap[sType].iteritems():
+          for sName, sInfo in self.NuisanceMap[sType].items():
             c = sInfo['sigmaConst'].getVal()
             if c>=1e-4:
               formula += "+@%g*@%g"%(dependents.getSize(),dependents.getSize()+1)
@@ -388,7 +379,7 @@ class FinalModel:
       # Add systematics
       for sType in ['scales','scalesCorr','smears']:
         if sType in self.NuisanceMap:
-          for sName, sInfo in self.NuisanceMap[sType].iteritems():
+          for sName, sInfo in self.NuisanceMap[sType].items():
             c = sInfo['rateConst'].getVal()
             if c>=5.e-4:
               formula += "+@%g*@%g"%(dependents.getSize(),dependents.getSize()+1)
@@ -400,7 +391,7 @@ class FinalModel:
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Function to build datasets to add to workspace
   def buildDatasets(self):
-    for mp, d in self.datasets.iteritems(): 
+    for mp, d in self.datasets.items(): 
       self.Datasets[mp] = d.Clone("sig_mass_m%s_%s"%(mp,self.name))
       self.Datasets['%s_copy'%mp] = d.Clone("sig_mass_m%s_%s"%(mp,self.cat))
 
@@ -421,4 +412,4 @@ class FinalModel:
     wsout.imp(self.Functions['final_normThisLumi'],ROOT.RooFit.RecycleConflictNodes())
     wsout.imp(self.Pdfs['final_extend'],ROOT.RooFit.RecycleConflictNodes())
     wsout.imp(self.Pdfs['final_extendThisLumi'],ROOT.RooFit.RecycleConflictNodes())
-    for d in self.Datasets.itervalues(): wsout.imp(d) 
+    for d in self.Datasets.values(): wsout.imp(d) 

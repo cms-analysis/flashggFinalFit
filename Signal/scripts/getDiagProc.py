@@ -1,6 +1,6 @@
 # Script to determine diagonal process for each category and write to json file
 
-print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG GET DIAG PROC RUN II ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ "
+print(" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG GET DIAG PROC RUN II ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ")
 import os, sys
 import re
 from optparse import OptionParser
@@ -15,7 +15,7 @@ from commonTools import *
 from commonObjects import *
 
 def leave():
-  print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG GET DIAG PROC RUN II (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ "
+  print(" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG GET DIAG PROC RUN II (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ")
   sys.exit(1)
 
 def get_options():
@@ -42,7 +42,7 @@ for cat in allCats.split(","):
 
 # Loop over procs
 for proc in allProcs.split(","):
-  print " --> Processing: %s"%proc
+  print(" --> Processing: %s"%proc)
   # Open workspace
   _WSFileName = glob.glob("%s/output*M%s*%s.root"%(opt.inputWSDir,opt.MH,proc))[0]
   f = ROOT.TFile(_WSFileName,'read')
@@ -64,13 +64,13 @@ for proc in allProcs.split(","):
   f.Close()
 
 # Save json file
-print " --> Writing diagonal processes to json file\n"
+print(" --> Writing diagonal processes to json file\n")
 if not os.path.isdir("%s/outdir_%s/getDiagProc/json"%(swd__,opt.ext)): os.system("mkdir %s/outdir_%s/getDiagProc/json"%(swd__,opt.ext))
 with open("%s/outdir_%s/getDiagProc/json/diagonal_process.json"%(swd__,opt.ext),"w") as jf: json.dump(dproc,jf)
 
 # One json file for each cat: diagonal proc first line in file
 if opt.makeSimpleFTest:
-  print " --> Making simple fTest config json using diagonal procs (nRV,nWV) = (%s,%s)"%(opt.nRV,opt.nWV)
+  print(" --> Making simple fTest config json using diagonal procs (nRV,nWV) = (%s,%s)"%(opt.nRV,opt.nWV))
   if not os.path.isdir("%s/outdir_%s/fTest"%(swd__,opt.ext)): os.system("mkdir %s/outdir_%s/fTest"%(swd__,opt.ext))
   if not os.path.isdir("%s/outdir_%s/fTest/json"%(swd__,opt.ext)): os.system("mkdir %s/outdir_%s/fTest/json"%(swd__,opt.ext))
   for cidx, cat in enumerate(allCats.split(",")):

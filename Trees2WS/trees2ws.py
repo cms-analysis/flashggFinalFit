@@ -190,10 +190,10 @@ for cat in cats:
         streeName = re.sub("YEAR",opt.year,streeName)
         st = f[streeName]
         if len(st)==0: continue
-        sdf = t.arrays(systematicsVars, library='pd')
+        sdf = st.arrays(systematicsVars, library='pd')
         sdf['type'] = "%s%s"%(s,direction)
         # Add STXS splitting var if splitting necessary
-        if opt.doSTXSSplitting: sdf[stxsVar] = t.arrays(stxsVar, library='pd')
+        if opt.doSTXSSplitting: sdf[stxsVar] = st.arrays(stxsVar, library='pd')
     
         # Add column specifying category and add to systematics dataframe
         sdf['cat'] = cat

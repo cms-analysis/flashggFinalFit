@@ -1,7 +1,7 @@
 # Python script to perform signal modelling fTest: extract number of gaussians for final fit
 # * run per category over single mass point
 
-print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG SIGNAL FTEST ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ "
+print(" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG SIGNAL FTEST ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ")
 import ROOT
 import pandas as pd
 import pickle
@@ -22,8 +22,8 @@ from plottingTools import *
 MHLow, MHHigh = '120', '130'
 
 def leave():
-  print "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG SIGNAL FTEST (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ "
-  exit()
+  print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG SIGNAL FTEST (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ")
+  exit(0)
 
 def get_options():
   parser = OptionParser()
@@ -82,7 +82,7 @@ if( opt.nProcsToFTest == -1)|( opt.nProcsToFTest > len(opt.procs.split(",")) ): 
 else: procsToFTest = list(df.sort_values('sumEntries',ascending=False)[0:opt.nProcsToFTest].proc.values)
 for pidx, proc in enumerate(procsToFTest): 
 
-  print "\n --> Process (%g): %s"%(pidx,proc)
+  print("\n --> Process (%g): %s"%(pidx,proc))
 
   # Split dataset to RV/WV: ssf requires input as dict (with mass point as key)
   datasets_RV, datasets_WV = od(), od()
@@ -106,11 +106,11 @@ for pidx, proc in enumerate(procsToFTest):
       ssf.runFit()
       ssf.buildSplines()
       if ssf.Ndof >= 1: 
-	ssfs[k] = ssf
-	if ssfs[k].getReducedChi2() < min_reduced_chi2: 
-	  min_reduced_chi2 = ssfs[k].getReducedChi2()
-	  nGauss_opt = nGauss
-	print "   * (%s,%s,RV): nGauss = %g, chi^2/n(dof) = %.4f"%(proc,opt.cat,nGauss,ssfs[k].getReducedChi2())
+        ssfs[k] = ssf
+        if ssfs[k].getReducedChi2() < min_reduced_chi2: 
+          min_reduced_chi2 = ssfs[k].getReducedChi2()
+          nGauss_opt = nGauss
+        print("   * (%s,%s,RV): nGauss = %g, chi^2/n(dof) = %.4f"%(proc,opt.cat,nGauss,ssfs[k].getReducedChi2()))
     # Set optimum
     df.loc[df['proc']==proc,'nRV'] = nGauss_opt
     # Make plots
@@ -131,11 +131,11 @@ for pidx, proc in enumerate(procsToFTest):
       ssf.runFit()
       ssf.buildSplines()
       if ssf.Ndof >= 1:
-	ssfs[k] = ssf
-	if ssfs[k].getReducedChi2() < min_reduced_chi2:
-	  min_reduced_chi2 = ssfs[k].getReducedChi2()
-	  nGauss_opt = nGauss
-	print "   * (%s,%s,WV): nGauss = %g, chi^2/n(dof) = %.4f"%(proc,opt.cat,nGauss,ssfs[k].getReducedChi2())
+        ssfs[k] = ssf
+        if ssfs[k].getReducedChi2() < min_reduced_chi2:
+          min_reduced_chi2 = ssfs[k].getReducedChi2()
+          nGauss_opt = nGauss
+        print("   * (%s,%s,WV): nGauss = %g, chi^2/n(dof) = %.4f"%(proc,opt.cat,nGauss,ssfs[k].getReducedChi2()))
     # Set optimum
     df.loc[df['proc']==proc,'nWV'] = nGauss_opt
     # Make plots
@@ -162,4 +162,3 @@ for ir,r in df.sort_values('sumEntries',ascending=False).iterrows():
   pitr += 1
 ff.write("}")
 ff.close()
-

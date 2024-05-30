@@ -23,6 +23,40 @@ globalReplacementMap["example"]["catRVMap"] = od()
 globalReplacementMap["example"]["catRVMap"]["Untagged_Tag0"] = "Untagged_Tag0"
 globalReplacementMap["example"]["catRVMap"]["VBF_Tag0"] = "VBF_Tag0"
 
+# Tutorial analysis
+globalReplacementMap['tutorial'] = od()
+# For WRONG VERTEX SCENARIO:
+#  * single proc x cat for wrong vertex since for dZ > 1cm shape independent of proc x cat
+#  * use proc x cat with highest number of WV events
+globalReplacementMap['tutorial']['procWV'] = "GG2H"
+globalReplacementMap['tutorial']['catWV'] = "EBEB_highR9highR9"
+# For RIGHT VERTEX SCENARIO
+#  * default mapping is to use diagonal process from given category 
+#  * if few events in diagonal process then may need to change the category aswell (see catRVMap)
+#  * map must contain entry for all cats being processed (for replacement proc and cat)
+globalReplacementMap['tutorial']['procRVMap'] = od()
+globalReplacementMap["tutorial"]["procRVMap"]["EBEB_highR9highR9"] = "GG2H"
+globalReplacementMap["tutorial"]["procRVMap"]["EBEB_highR9lowR9"] = "GG2H"
+globalReplacementMap["tutorial"]["procRVMap"]["EBEB_lowR9highR9"] = "GG2H"
+globalReplacementMap["tutorial"]["procRVMap"]["EBEE_highR9highR9"] = "GG2H"
+globalReplacementMap["tutorial"]["procRVMap"]["EBEE_highR9lowR9"] = "GG2H"
+globalReplacementMap["tutorial"]["procRVMap"]["EBEE_lowR9highR9"] = "GG2H"
+globalReplacementMap["tutorial"]["procRVMap"]["EEEB_highR9highR9"] = "GG2H"
+globalReplacementMap["tutorial"]["procRVMap"]["EEEB_highR9lowR9"] = "GG2H"
+globalReplacementMap["tutorial"]["procRVMap"]["EEEB_lowR9highR9"] = "GG2H"
+globalReplacementMap["tutorial"]["procRVMap"]["EEEE_incl"] = "GG2H"
+globalReplacementMap['tutorial']['catRVMap'] = od()
+globalReplacementMap["tutorial"]["catRVMap"]["EBEB_highR9highR9"] = "EBEB_highR9highR9"
+globalReplacementMap["tutorial"]["catRVMap"]["EBEB_highR9lowR9"] = "EBEB_highR9lowR9"
+globalReplacementMap["tutorial"]["catRVMap"]["EBEB_lowR9highR9"] = "EBEB_lowR9highR9"
+globalReplacementMap["tutorial"]["catRVMap"]["EBEE_highR9highR9"] = "EBEE_highR9highR9"
+globalReplacementMap["tutorial"]["catRVMap"]["EBEE_highR9lowR9"] = "EBEE_highR9lowR9"
+globalReplacementMap["tutorial"]["catRVMap"]["EBEE_lowR9highR9"] = "EBEE_lowR9highR9"
+globalReplacementMap["tutorial"]["catRVMap"]["EEEB_highR9highR9"] = "EEEB_highR9highR9"
+globalReplacementMap["tutorial"]["catRVMap"]["EEEB_highR9lowR9"] = "EEEB_highR9lowR9"
+globalReplacementMap["tutorial"]["catRVMap"]["EEEB_lowR9highR9"] = "EEEB_lowR9highR9"
+globalReplacementMap["tutorial"]["catRVMap"]["EEEE_incl"] = "EEEE_incl"
+
 
 # STXS analysis
 globalReplacementMap['STXS'] = od()

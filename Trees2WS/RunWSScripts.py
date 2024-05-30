@@ -44,8 +44,6 @@ options['ext']         = opt.ext
 options['year']        = opt.year
 options['mode']        = opt.mode
 options['modeOpts']    = opt.modeOpts
-options['flashggPath'] = opt.flashggPath
-options['outputWSDir'] = opt.outputWSDir if opt.outputWSDir != '' else "%s/outdir_%s/%s"%(twd__,opt.ext,opt.mode)
 options['inputMass']   = opt.inputMass
 options['targetMasses']   = opt.targetMasses
 options['batch']       = opt.batch

@@ -14,7 +14,7 @@ def splitRVWV(_d,_argset,mode="RV"):
   if mode == "RV": return _d.reduce(_argset,"abs(dZ)<=1.")
   elif mode == "WV": return _d.reduce(_argset,"abs(dZ)>1.")
   else:
-    print " --> [ERROR] unrecognised mode (%s) in splitRVWV function"%mode
+    print(" --> [ERROR] unrecognised mode (%s) in splitRVWV function"%mode)
     return 0
 
 def beamspotReweigh(d,widthData,widthMC,_xvar,_dZ,_x='CMS_hgg_mass',preserveNorm=True):

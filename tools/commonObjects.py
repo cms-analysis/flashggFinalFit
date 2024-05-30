@@ -14,7 +14,15 @@ twd__ = "%s/Trees2WS"%cwd__
 sqrts__ = "13TeV"
 
 # Luminosity map in fb^-1: for using UL 2018
-lumiMap = {'2016':36.33, '2017':41.48, '2018':59.83, 'combined':137.65, 'merged':137.65}
+lumiMap = {
+    '2016':36.33, 
+    '2017':41.48, 
+    '2018':59.83, 
+    'combined':137.65, 
+    'merged':137.65,
+    '2022preEE':8.00,
+    '2022postEE':26.70
+}
 # If using ReReco samples then switch to lumiMap below (missing data in 2018 EGamma data set)
 #lumiMap = {'2016':36.33, '2017':41.48, '2018':59.35, 'combined':137.17, 'merged':137.17}
 lumiScaleFactor = 1000. # Converting from pb to fb
@@ -32,11 +40,12 @@ decayMode = 'hgg'
 
 # flashgg input WS objects
 inputWSName__ = "tagsDumper/cms_hgg_13TeV"
-inputNuisanceExtMap = {'scales':'MCScale','scalesCorr':'','smears':'MCSmear'}
+inputNuisanceExtMap = {'scales':'','scalesCorr':'','smears':''}
 # Signal output WS objects
 outputWSName__ = "wsig"
 outputWSObjectTitle__ = "hggpdfsmrel"
 outputWSNuisanceTitle__ = "CMS_hgg_nuisance"
-outputNuisanceExtMap = {'scales':'%sscale'%sqrts__,'scalesCorr':'%sscaleCorr'%sqrts__,'smears':'%ssmear'%sqrts__,'scalesGlobal':'%sscale'%sqrts__}
+#outputNuisanceExtMap = {'scales':'%sscale'%sqrts__,'scalesCorr':'%sscaleCorr'%sqrts__,'smears':'%ssmear'%sqrts__,'scalesGlobal':'%sscale'%sqrts__}
+outputNuisanceExtMap = {'scales':'','scalesCorr':'','smears':'','scalesGlobal':''}
 # Bkg output WS objects
 bkgWSName__ = "multipdf"
