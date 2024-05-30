@@ -9,7 +9,6 @@ trees2wsCfg = {
   'mainVars':["CMS_hgg_mass","weight","dZ","weight_*"], # Var for the nominal RooDataSets
   'dataVars':["CMS_hgg_mass","weight"], # Vars to be added for data
   'stxsVar':'',
-  'notagVars':[], # Vars to add to NOTAG RooDataset
   'systematicsVars':["CMS_hgg_mass","weight"], # Variables to add to sytematic RooDataHists
   'theoryWeightContainers':{},
 

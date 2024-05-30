@@ -88,7 +88,6 @@ if opt.inputConfig != '':
     inputTreeDir     = _cfg['inputTreeDir']
     mainVars         = _cfg['mainVars']
     stxsVar          = _cfg['stxsVar']
-    notagVars        = _cfg['notagVars']
     systematicsVars  = _cfg['systematicsVars']
     theoryWeightContainers = _cfg['theoryWeightContainers']
     systematics      = _cfg['systematics']

@@ -3,13 +3,12 @@
 trees2wsCfg = {
 
   # Name of RooDirectory storing input tree
-  'inputTreeDir':'tagsDumper/trees',
+  'inputTreeDir':'DiphotonTree',
 
   # Variables to be added to dataframe: use wildcard * for common strings
-  'mainVars':["CMS_hgg_mass","weight","centralObjectWeight","dZ","*sigma"], # Vars to add to nominal RooDatasets
+  'mainVars':["CMS_hgg_mass","weight","dZ","weight_*"], # Vars to add to nominal RooDatasets
   'dataVars':["CMS_hgg_mass","weight"], # Vars for data workspace (trees2ws_data.py script)
   'stxsVar':'stage1p2bin', # Var for STXS splitting: if using option doSTXSSplitting
-  'notagVars':["weight","*sigma"], # Vars to add to NOTAG RooDataset
   'systematicsVars':["CMS_hgg_mass","weight"], # Variables to add to sytematic RooDataHists
   'theoryWeightContainers':{'alphaSWeights':2,'scaleWeights':9,'pdfWeights':60}, # Theory weights to add to nominal + NOTAG RooDatasets, value corresponds to number of weights (0-N)
 
