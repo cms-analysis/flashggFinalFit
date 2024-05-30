@@ -67,23 +67,10 @@ This will submit a separate job per input tree file in the specified path. Use t
 
 This script also supports running over multiple data input tree files. Simply change the `--inputDir` to the path to the input data trees and use `--mode trees2ws_data`.
 
-## Hadding the output
-
-If you have multiple output workspaces per signal process then you can hadd them together to get a single workspace per signal process. This is again steered with `RunWSScripts.py`. For this you will need to have/setup a working (and compiled) flashgg area.
+## Hadding the data
+If you are intending to merge categories across years then you should merge the per yer data files before running the Trees2WS step e.g.
 ```
-# For MC
-python RunWSScripts.py --inputDir /{path-to-input-trees} --year 2016 --ext test_2016 --mode haddMC --batch condor --queue longlunch --flashggPath /{path-to-flashgg-area} (--printOnly)
-
-# For data
-python RunWSScripts.py --inputDir /{path-to-input-data-trees} --year 2016 --ext test_2016 --mode haddData --batch condor --queue longlunch --flashggPath /{path-to-flashgg-area} (--printOnly)
-```
-The default output is stored in the `./outdir_{ext}/haddMC` and `./outdir_{ext}/haddData` folders. You can change the output directory using the `--outputWSDir` option. 
-
-You want at this point to have a single workspace per signal process (per year) and a single workspace per year for data (`allData_{year}.root`). If you are intending to merge categories across years then you should merge the per yer data workspaces e.g.
-```
-cd /{path-to-flashgg-area}
-cmsenv
-hadd_workspaces allData.root allData_201*.root
+hadd allData.root allData_20*.root
 ```
 
 ## Mass shifting

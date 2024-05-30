@@ -4,7 +4,7 @@ This is the branch for using final fits with the output of HiggsDNA.
 
 Welcome to the new Final Fits package. Here lies a a series of scripts which are used to run the final stages of CMS Hgg analyses: signal modelling, background modelling, datacard creation, final statistical interpretation and final result plots.
 
-Slides from the flashgg tutorial series can be found [here](https://indico.cern.ch/event/963619/contributions/4112177/attachments/2151275/3627204/finalfits_tutorial_201126.pdf)
+You can follow the latest Final Fits tutorial [here](https://gitlab.cern.ch/jspah/higgsdna_finalfits_tutorial_24/-/tree/master). Slides from an older flashgg-based tutorial series can be found [here](https://indico.cern.ch/event/963619/contributions/4112177/attachments/2151275/3627204/finalfits_tutorial_201126.pdf)
 
 ## Download and setup instructions
 
@@ -16,7 +16,7 @@ cmsenv
 
 COMBINE_TAG=dev_jlangfor_combinev10_revert974
 COMBINEHARVESTER_TAG=main
-FINALFIT_TAG=dev_higgsdnafinalfit
+FINALFIT_TAG=higgsdnafinalfit
 
 # Install Combine with the latest EL9 compatible branch
 git clone -b $COMBINE_TAG https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit

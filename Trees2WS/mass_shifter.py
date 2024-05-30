@@ -7,7 +7,7 @@ from commonTools import *
 from commonObjects import *
 
 parser = OptionParser()
-parser.add_option("--inputWSFile", dest="inputWSFile", default="/vols/cms/es811/FinalFits/ws_ReweighAndNewggHweights/output_GluGluHToGG_M125_13TeV_amcatnloFXFX_pythia8_GG2H.root", help="Input file")
+parser.add_option("--inputWSFile", dest="inputWSFile", default="output_GluGluHToGG_M125_13TeV_amcatnloFXFX_pythia8_GG2H.root", help="Input file")
 parser.add_option("--inputMass", dest="inputMass", default=125, type='int', help="Input mass")
 parser.add_option("--xvar", dest="xvar", default="CMS_hgg_mass:100:180", help="Input mass variable (name:xmin:xmax)")
 parser.add_option("--targetMass", dest="targetMass", default=130, type='int', help="Target mass")
@@ -18,11 +18,12 @@ verbose = opt.verbose
 xvar = opt.xvar
 
 if not os.path.exists( opt.inputWSFile ): 
-  print " --> [ERROR] input file %s does not exist. Leaving..."%(opt.inputWSFile)
+  print(" --> [ERROR] input file %s does not exist. Leaving..."%(opt.inputWSFile))
   sys.exit(1)
 
 if str(opt.inputMass) not in opt.inputWSFile: 
-  print " --> [ERROR] input file %s does not correspond to input mass (%s). Leaving..."%(opt.inputWSFile,str(opt.inputMass))
+  print(" --> [ERROR] input file %s does not correspond to input mass (%s). Leaving..."%(opt.inputWSFile,str(opt.inputMass)))
+  sys.exit(1)
 
 # Calculate shift
 shift = float(opt.inputMass-opt.targetMass)
@@ -38,7 +39,7 @@ wsout.imp = getattr(wsout,"import")
 # Import all vars from original ws
 allVars = {}
 for _var in rooiter(ws.allVars()): allVars[_var.GetName()] = _var
-for _varName, _var in allVars.iteritems():  
+for _varName, _var in allVars.items():  
   wsout.imp(_var, ROOT.RooFit.RecycleConflictNodes(), ROOT.RooFit.Silence() )
 
 # Extract datasets from original workspace
@@ -56,7 +57,7 @@ for d_orig in allData:
 
   n_components = n_orig.split("_%s_"%sqrts__)  
   n_shift = re.sub(str(opt.inputMass),str(opt.targetMass),n_components[0])+"_%s_"%sqrts__+n_components[-1]
-  if verbose: print "%s --> %s"%(n_orig,n_shift)
+  if verbose: print("%s --> %s"%(n_orig,n_shift))
 
   # Create an empty clone of original dataset
   shifted_datasets[n_shift] = d_orig.emptyClone( n_shift )
@@ -108,7 +109,7 @@ for d_orig in allData:
       else: shifted_datasets[n_shift].add(p,weight.getVal())
 
 # Import all shifted datasets to output ws
-for d_shift in shifted_datasets.itervalues(): wsout.imp( d_shift, ROOT.RooFit.RecycleConflictNodes() )
+for d_shift in shifted_datasets.values(): wsout.imp( d_shift, ROOT.RooFit.RecycleConflictNodes() )
 
 # Configure output file and write output ws
 fout_name = re.sub("M%s"%str(opt.inputMass),"M%s"%str(opt.targetMass), opt.inputWSFile)

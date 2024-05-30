@@ -5,7 +5,7 @@ from commonObjects import *
 from commonTools import *
 
 def run(cmd):
-  print "%s\n\n"%cmd
+  print("%s\n\n"%cmd)
   os.system(cmd)
 
 def writePreamble(_file,_otherBase=None):
@@ -36,6 +36,7 @@ def writeCondorSub(_file,_exec,_queue,_nJobs,_jobOpts,doHoldOnFailure=True,doPer
     _file.write("# Periodically retry the jobs every 10 minutes, up to a maximum of 5 retries.\n")
     _file.write("periodic_release =  (NumJobStarts < 3) && ((CurrentTime - EnteredCurrentStatus) > 600)\n\n")
   _file.write("+JobFlavour = \"%s\"\n"%_queue)
+  _file.write("Requirements = (OpSysAndVer =?= \"AlmaLinux9\")\n")
   _file.write("queue %g"%_nJobs)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -63,7 +64,8 @@ def writeSubFiles(_opts):
       for tfidx,tf in enumerate(tfiles):
         # Extract production mode (and decay extension if required)
         p, d = signalFromFileName(tf)
-        _cmd = "python %s/trees2ws.py --inputConfig %s --inputTreeFile %s --productionMode %s --year %s"%(twd__,_opts['inputConfig'],tf,p,_opts['year'])
+        m = massFromFileName(tf)
+        _cmd = "python3 %s/trees2ws.py --inputConfig %s --inputTreeFile %s --inputMass %s --productionMode %s --year %s"%(twd__,_opts['inputConfig'],tf,m,p,_opts['year'])
         if d is not None: _cmd += " --decayExt %s"%d
         if _opts['modeOpts'] != '': _cmd += " %s"%_opts['modeOpts']
         _f.write("if [ $1 -eq %g ]; then\n"%tfidx)
@@ -75,32 +77,11 @@ def writeSubFiles(_opts):
       tfiles = glob.glob("%s/*.root"%_opts['inputDir'])
       # Run separate command per file
       for tfidx,tf in enumerate(tfiles):
-        _cmd = "python %s/trees2ws_data.py --inputConfig %s --inputTreeFile %s"%(twd__,_opts['inputConfig'],tf)
+        _cmd = "python3 %s/trees2ws_data.py --inputConfig %s --inputTreeFile %s"%(twd__,_opts['inputConfig'],tf)
         if _opts['modeOpts'] != '': _cmd += " %s"%_opts['modeOpts']
         _f.write("if [ $1 -eq %g ]; then\n"%tfidx)
         _f.write(" %s\n"%_cmd)
         _f.write("fi\n")
-
-    elif( _opts['mode'] == "haddMC" ):
-      # Extract list of ws folders: one for each process
-      wsdirs = glob.glob("%s/ws_*"%_opts['inputDir']) 
-      # Run separate command per process
-      for widx,wsdir in enumerate(wsdirs):
-        # Extract process name
-        p = "_".join(wsdir.split("/")[-1].split("_")[1:])
-        # Define output file name
-        outf = "_".join(re.sub("_%s.root"%p,"",glob.glob("%s/*.root"%wsdir)[0].split("/")[-1]).split("_")[0:-1])+"_%s.root"%p
-        outfFullName = "%s/%s"%(_opts['outputWSDir'],outf)
-        _f.write("if [ $1 -eq %g ]; then\n"%tfidx)
-        _f.write("  hadd_workspaces %s %s/*.root\n"%(outfFullName,wsdir))
-        _f.write("fi\n")
-
-    elif( _opts['mode'] == "haddData" ):
-      # Extract folder
-      wsdir = "%s/ws"%_opts['inputDir']
-      # Define output file name
-      outfFullName = "%s/allData_%s.root"%(_opts['outputWSDir'],_opts['year'])
-      _f.write("hadd_workspaces %s %s/*.root\n"%(outfFullName,wsdir))
 
     elif( _opts['mode'] == "mass_shift" ):
       # Extract list of ws files
@@ -110,7 +91,7 @@ def writeSubFiles(_opts):
         _f.write("if [ $1 -eq %g ]; then\n"%tfidx)
         # Add command per target mass
         for tm in _opts['targetMasses'].split(","):
-          _f.write("python %s/mass_shifter.py --inputWSFile %s --inputMass %s --targetMass %s %s\n"%(twd__,f,_opts['inputMass'],tm,_opts['modeOpts']))
+          _f.write("python3 %s/mass_shifter.py --inputWSFile %s --inputMass %s --targetMass %s %s\n"%(twd__,f,_opts['inputMass'],tm,_opts['modeOpts']))
         _f.write("fi\n")
 
     # Close .sh file
@@ -120,8 +101,6 @@ def writeSubFiles(_opts):
     # Condor submission file
     _fsub = open("%s/%s.sub"%(_jobdir,_executable),"w")
     if( _opts['mode'] == "trees2ws" )|( _opts['mode'] == "trees2ws_data" ): writeCondorSub(_fsub,_executable,_opts['queue'],len(tfiles),_opts['jobOpts'])
-    elif( _opts['mode'] == "haddMC" ): writeCondorSub(_fsub,_executable,_opts['queue'],len(wsdirs),_opts['jobOpts'])
-    elif( _opts['mode'] == "haddData" ): writeCondorSub(_fsub,_executable,_opts['queue'],1,_opts['jobOpts'])
     elif( _opts['mode'] == "mass_shift" ): writeCondorSub(_fsub,_executable,_opts['queue'],len(wsfiles),_opts['jobOpts'])
     _fsub.close()
     
@@ -139,7 +118,7 @@ def writeSubFiles(_opts):
         writePreamble(_f)
         # Extract production mode (and decay extension if required)
         p, d = signalFromFileName(tf)
-        _cmd = "python %s/trees2ws.py --inputConfig %s --inputTreeFile %s --productionMode %s --year %s"%(twd__,_opts['inputConfig'],tf,p,_opts['year'])
+        _cmd = "python3 %s/trees2ws.py --inputConfig %s --inputTreeFile %s --productionMode %s --year %s"%(twd__,_opts['inputConfig'],tf,p,_opts['year'])
         if d is not None: _cmd += " --decayExt %s"%d
         if _opts['modeOpts'] != '': _cmd += " %s"%_opts['modeOpts'] 
         _f.write("%s\n"%_cmd)
@@ -153,39 +132,12 @@ def writeSubFiles(_opts):
       for tfidx,tf in enumerate(tfiles):
         _f = open("%s/%s_%g.sh"%(_jobdir,_executable,tfidx),"w")
         writePreamble(_f)
-        _cmd = "python %s/trees2ws_data.py --inputConfig %s --inputTreeFile %s"%(twd__,_opts['inputConfig'],tf)
+        _cmd = "python3 %s/trees2ws_data.py --inputConfig %s --inputTreeFile %s"%(twd__,_opts['inputConfig'],tf)
         if _opts['modeOpts'] != '': _cmd += " %s"%_opts['modeOpts']
         _f.write("%s\n"%_cmd)
         _f.close()
         os.system("chmod 775 %s/%s_%g.sh"%(_jobdir,_executable,tfidx))
         
-    elif( _opts['mode'] == "haddMC" ):
-      # Extract list of ws folders: one for each process
-      wsdirs = glob.glob("%s/ws_*"%_opts['inputDir'])
-      # Separate submission file per process
-      for widx,wsdir in enumerate(wsdirs):
-        _f = open("%s/%s_%g.sh"%(_jobdir,_executable,widx),"w")
-        writePreamble(_f,_otherBase=_opts['flashggPath'])
-        # Extract process name
-        p = "_".join(wsdir.split("/")[-1].split("_")[1:])
-        # Define output file name: remove number from files
-        outf = "_".join(re.sub("_%s.root"%p,"",glob.glob("%s/*.root"%wsdir)[0].split("/")[-1]).split("_")[0:-1])+"_%s.root"%p
-        outfFullName = "%s/%s"%(_opts['outputWSDir'],outf)
-        _f.write("hadd_workspaces %s %s/*.root\n"%(outfFullName,wsdir))
-        _f.close()
-        os.system("chmod 775 %s/%s_%g.sh"%(_jobdir,_executable,widx)) 
-
-    elif( _opts['mode'] == "haddData" ):
-      # Extract list of ws folders: one for each process
-      wsdir = "%s/ws"%_opts['inputDir']
-      _f = open("%s/%s.sh"%(_jobdir,_executable),"w")
-      writePreamble(_f,_otherBase=_opts['flashggPath'])
-      # Define output file name
-      outfFullName = "%s/allData_%s.root"%(_opts['outputWSDir'],_opts['year'])
-      _f.write("hadd_workspaces %s %s/*.root\n"%(outfFullName,wsdir))
-      _f.close()
-      os.system("chmod 775 %s/%s.sh"%(_jobdir,_executable))
-
     elif( _opts['mode'] == "mass_shift" ):
       # Extract list of ws files
       wsfiles = glob.glob("%s/*.root"%_opts['inputDir'])
@@ -195,7 +147,7 @@ def writeSubFiles(_opts):
         writePreamble(_f)
         # Add a command per target mass
         for tm in _opts['targetMasses'].split(","):
-          _f.write("python %s/mass_shifter.py --inputWSFile %s --inputMass %s --targetMass %s %s\n"%(twd__,f,_opts['inputMass'],tm,_opts['modeOpts']))
+          _f.write("python3 %s/mass_shifter.py --inputWSFile %s --inputMass %s --targetMass %s %s\n"%(twd__,f,_opts['inputMass'],tm,_opts['modeOpts']))
         _f.close()
         os.system("chmod 775 %s/%s_%g.sh"%(_jobdir,_executable,fidx))
  
@@ -206,9 +158,12 @@ def submitFiles(_opts):
   # CONDOR
   if _opts['batch'] == "condor":
     _executable = "condor_%s_%s"%(_opts['mode'],_opts['ext'])
-    cmdLine = "cd %s; condor_submit %s.sub; cd %s"%(_jobdir,_executable,twd__)
+    if os.environ['PWD'].startswith("/eos"):
+      cmdLine = "cd %s; condor_submit -spool %s.sub; cd %s"%(_jobdir,_executable,twd__)
+    else:
+      cmdLine = "cd %s; condor_submit %s.sub; cd %s"%(_jobdir,_executable,twd__)
     run(cmdLine)
-    print "  --> Finished submitting files"
+    print("  --> Finished submitting files")
 
   # SGE
   elif _opts['batch'] in ['IC','SGE']:
@@ -224,18 +179,6 @@ def submitFiles(_opts):
         cmdLine = "qsub -q %s %s -o %s.log -e %s.err %s.sh"%(_opts['queue'],jobOptsStr,_subfile,_subfile,_subfile)
         run(cmdLine)
 
-    elif( _opts['mode'] == 'haddMC' ):
-      wsdirs = glob.glob("%s/ws_*"%_opts['inputDir'])
-      for widx in range(len(wsdirs)):
-        _subfile = "%s/%s_%g"%(_jobdir,_executable,widx)
-        cmdLine = "qsub -q %s %s -o %s.log -e %s.err %s.sh"%(_opts['queue'],jobOptsStr,_subfile,_subfile,_subfile)
-        run(cmdLine)
-
-    elif( _opts['mode'] == 'haddData' ):
-      _subfile = "%s/%s"%(_jobdir,_executable)
-      cmdLine = "qsub -q %s %s -o %s.log -e %s.err %s.sh"%(_opts['queue'],jobOptsStr,_subfile,_subfile,_subfile)
-      run(cmdLine)
-
     elif( _opts['mode'] == 'mass_shift' ):
       wsfiles = glob.glob("%s/*.root"%_opts['inputDir'])
       for fidx in range(len(wsfiles)):
@@ -243,7 +186,7 @@ def submitFiles(_opts):
         cmdLine = "qsub -q %s %s -o %s.log -e %s.err %s.sh"%(_opts['queue'],jobOptsStr,_subfile,_subfile,_subfile)
         run(cmdLine)
 
-    print "  --> Finished submitting files"
+    print("  --> Finished submitting files")
   
   # Running locally
   elif _opts['batch'] == 'local':
@@ -256,18 +199,6 @@ def submitFiles(_opts):
         cmdLine = "bash %s.sh"%(_subfile)
         run(cmdLine)
 
-    elif( _opts['mode'] == 'haddMC' ):
-      wsdirs = glob.glob("%s/ws_*"%_opts['inputDir'])
-      for widx in range(len(wsdirs)):
-        _subfile = "%s/%s_%g"%(_jobdir,_executable,widx)
-        cmdLine = "bash %s.sh"%(_subfile)
-        run(cmdLine)
-
-    elif( _opts['mode'] == 'haddData' ):
-      _subfile = "%s/%s"%(_jobdir,_executable)
-      cmdLine = "bash %s.sh"%(_subfile)
-      run(cmdLine)
-
     elif( _opts['mode'] == 'mass_shift' ):
       wsfiles = glob.glob("%s/*.root"%_opts['inputDir'])
       for fidx in range(len(wsfiles)):
@@ -275,4 +206,4 @@ def submitFiles(_opts):
         cmdLine = "bash %s.sh"%(_subfile)
         run(cmdLine)
 
-    print "  --> Finished running files"
+    print("  --> Finished running files")

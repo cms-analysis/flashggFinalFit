@@ -16,7 +16,7 @@ def rooiter(x):
 
 def extractWSFileNames( _inputWSDir ): 
   if not os.path.isdir(_inputWSDir):
-    print " --> [ERROR] No such directory (%s)"
+    print(" --> [ERROR] No such directory (%s)")
     return False
   return glob.glob("%s/output_*.root"%_inputWSDir)
 
@@ -81,9 +81,15 @@ def signalFromFileName(_fileName):
   elif "THW" in _fileName: p = "thw"
   elif "bbH" in _fileName: p = "bbh"
   else:
-    print " --> [ERROR]: cannot extract production mode from input file name. Please update tools.commonTools.signalFromFileName"
+    print(" --> [ERROR]: cannot extract production mode from input file name. Please update tools.commonTools.signalFromFileName")
     exit(1)
   return p,d
+
+def massFromFileName(_fileName):
+  m = 125 #default
+  if "_M" in _fileName:
+    m = _fileName.split("_M")[-1].split("_")[0]
+  return m
 
 # Function for converting STXS process to production mode in dataset name
 procToDataMap = od()
@@ -106,7 +112,7 @@ def procToData( _proc ):
   return _proc
 
 def dataToProc( _d ):
-  dataToProcMap = {v:k for k,v in procToDataMap.iteritems()}
+  dataToProcMap = {v:k for k,v in procToDataMap.items()}
   if _d in dataToProcMap: return dataToProcMap[_d]
   else: return _d
 
