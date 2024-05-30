@@ -17,10 +17,10 @@ from systematics import theory_systematics, experimental_systematics, signal_sha
 from commonObjects import *
 from commonTools import *
 
-print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG DATACARD MAKER RUN II ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ "
+print(" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG DATACARD MAKER RUN II ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ")
 def leave():
-  print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG DATACARD MAKER RUN II (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ "
-  exit(1)
+  print(" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG DATACARD MAKER RUN II (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ")
+  exit(0)
 
 def get_options():
   parser = OptionParser()
@@ -48,25 +48,25 @@ def get_options():
 # Extract years and inputWSDir
 inputWSDirMap = od()
 for i in opt.inputWSDirMap.split(","): 
-  print " --> Taking %s input workspaces from: %s"%(i.split("=")[0],i.split("=")[1]) 
+  print(" --> Taking %s input workspaces from: %s"%(i.split("=")[0],i.split("=")[1]) )
   if not os.path.isdir( i.split("=")[1] ):
-    print " --> [ERROR] Directory %s does not exist. Leaving..."%i.split("=")[1]
+    print(" --> [ERROR] Directory %s does not exist. Leaving..."%i.split("=")[1])
     leave()
   inputWSDirMap[i.split("=")[0]] = i.split("=")[1]
-years = inputWSDirMap.keys()
+years = list(inputWSDirMap.keys())
 
 procsMap = od()
 if opt.procs == 'auto':
-  for y,iWSDir in inputWSDirMap.iteritems():
+  for y,iWSDir in inputWSDirMap.items():
     WSFileNames = extractWSFileNames(iWSDir)
     procsMap[y] = extractListOfProcs(WSFileNames)
   # Require common procs for each year
   for i,iy in enumerate(years):
     for j,jy in enumerate(years):
       if j > i:
-	if set(procsMap[iy].split(",")) != set(procsMap[jy].split(",")):
-	  print " --> [ERROR] Mis-match in list of process for %s and %s. Intersection = %s"%(iy,jy,(set(procsMap[jy]).symmetric_difference(set(procsMap[iy]))))
-	  leave()
+        if set(procsMap[iy].split(",")) != set(procsMap[jy].split(",")):
+          print(" --> [ERROR] Mis-match in list of process for %s and %s. Intersection = %s"%(iy,jy,(set(procsMap[jy]).symmetric_difference(set(procsMap[iy])))))
+          leave()
   # Define list of procs (alphabetically ordered)
   procs = procsMap[years[0]].split(",")
 else: procs = opt.procs.split(",")
@@ -78,7 +78,7 @@ data = pd.DataFrame( columns=columns_data )
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # FILL DATAFRAME: all processes
-print " .........................................................................................."
+print(" ..........................................................................................")
 
 # Signal processes
 for year in years:
@@ -121,7 +121,7 @@ for year in years:
     _rate = float(lumiMap[year])*1000
 
     # Add signal process to dataFrame:
-    print " --> Adding to dataFrame: (proc,cat) = (%s,%s)"%(_proc,_cat)
+    print(" --> Adding to dataFrame: (proc,cat) = (%s,%s)"%(_proc,_cat))
     data.loc[len(data)] = [year,'sig',_procOriginal,_proc,_proc_s0,_cat,_inputWSFile,_nominalDataName,_modelWSFile,_model,_rate]
 
 # Background and data processes
@@ -136,8 +136,8 @@ if( not opt.skipBkg)&( opt.cat != "NOTAG" ):
     _proc_s0 = '-' #not needed for data/bkg
     _inputWSFile = '-' #not needed for data/bkg
     _nominalDataName = '-' #not needed for data/bkg
-    print " --> Adding to dataFrame: (proc,cat) = (%s,%s)"%(_proc_bkg,_cat)
-    print " --> Adding to dataFrame: (proc,cat) = (%s,%s)"%(_proc_data,_cat)
+    print(" --> Adding to dataFrame: (proc,cat) = (%s,%s)"%(_proc_bkg,_cat))
+    print(" --> Adding to dataFrame: (proc,cat) = (%s,%s)"%(_proc_data,_cat))
     data.loc[len(data)] = ["merged",'bkg',_proc_bkg,_proc_bkg,'-',_cat,_inputWSFile,_nominalDataName,_modelWSFile,_model_bkg,opt.bkgScaler]
     data.loc[len(data)] = ["merged",'data',_proc_data,_proc_data,'-',_cat,_inputWSFile,_nominalDataName,_modelWSFile,_model_data,-1]
 
@@ -152,15 +152,15 @@ if( not opt.skipBkg)&( opt.cat != "NOTAG" ):
       _proc_s0 = '-' #not needed for data/bkg
       _inputWSFile = '-' #not needed for data/bkg
       _nominalDataName = '-' #not needed for data/bkg
-      print " --> Adding to dataFrame: (proc,cat) = (%s,%s)"%(_proc_bkg,_cat)
-      print " --> Adding to dataFrame: (proc,cat) = (%s,%s)"%(_proc_data,_cat)
+      print(" --> Adding to dataFrame: (proc,cat) = (%s,%s)"%(_proc_bkg,_cat))
+      print(" --> Adding to dataFrame: (proc,cat) = (%s,%s)"%(_proc_data,_cat))
       data.loc[len(data)] = ["year",'bkg',_proc_bkg,_proc_bkg,'-',_cat,_inputWSFile,_nominalDataName,_modelWSFile,_model_bkg,opt.bkgScaler]
       data.loc[len(data)] = ["year",'data',_proc_data,_proc_data,'-',_cat,_inputWSFile,_nominalDataName,_modelWSFile,_model_data,-1]
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Yields: for each signal row in dataFrame extract the yield
-print " .........................................................................................."
+print(" ..........................................................................................")
 #   * if systematics=True: also extract reweighted yields for each uncertainty source
 from tools.calcSystematics import factoryType, calcSystYields
 
@@ -181,31 +181,31 @@ if opt.doSystematics:
   if opt.cat != "NOTAG":
     for s in experimental_systematics: 
       if s['type'] == 'factory': 
-	# Fix for HEM as only in 2018 workspaces
-	if s['name'] == 'JetHEM': experimentalFactoryType[s['name']] = "a_h"
-	else: experimentalFactoryType[s['name']] = factoryType(data,s)
-	if experimentalFactoryType[s['name']] in ["a_w","a_h"]:
-	  data['%s_up_yield'%s['name']] = '-'
-	  data['%s_down_yield'%s['name']] = '-'
-	else: data['%s_yield'%s['name']] = '-'
+        # Fix for HEM as only in 2018 workspaces
+        if s['name'] == 'JetHEM': experimentalFactoryType[s['name']] = "a_h"
+        else: experimentalFactoryType[s['name']] = factoryType(data,s)
+        if experimentalFactoryType[s['name']] in ["a_w","a_h"]:
+          data['%s_up_yield'%s['name']] = '-'
+          data['%s_down_yield'%s['name']] = '-'
+        else: data['%s_yield'%s['name']] = '-'
   for s in theory_systematics: 
     if s['type'] == 'factory': 
       theoryFactoryType[s['name']] = factoryType(data,s)
       if theoryFactoryType[s['name']] in ["a_w","a_h"]:
-	data['%s_up_yield'%s['name']] = '-'
-	data['%s_down_yield'%s['name']] = '-'
-	if not opt.skipCOWCorr:
-	  data['%s_up_yield_COWCorr'%s['name']] = '-'
-	  data['%s_down_yield_COWCorr'%s['name']] = '-'
+        data['%s_up_yield'%s['name']] = '-'
+        data['%s_down_yield'%s['name']] = '-'
+        if not opt.skipCOWCorr:
+          data['%s_up_yield_COWCorr'%s['name']] = '-'
+          data['%s_down_yield_COWCorr'%s['name']] = '-'
       else: 
-	data['%s_yield'%s['name']] = '-'
-	if not opt.skipCOWCorr: data['%s_yield_COWCorr'%s['name']] = '-'
+        data['%s_yield'%s['name']] = '-'
+        if not opt.skipCOWCorr: data['%s_yield_COWCorr'%s['name']] = '-'
 
 # Loop over signal rows in dataFrame: extract yields (nominal & systematic variations)
 totalSignalRows = float(data[data['type']=='sig'].shape[0])
 for ir,r in data[data['type']=='sig'].iterrows():
 
-  print " --> Extracting yields: (%s,%s) [%.1f%%]"%(r['proc'],r['cat'],100*(float(ir)/totalSignalRows))
+  print(" --> Extracting yields: (%s,%s) [%.1f%%]"%(r['proc'],r['cat'],100*(float(ir)/totalSignalRows)))
 
   # Open input WS file and extract workspace
   f_in = ROOT.TFile(r.inputWSFile)
@@ -240,23 +240,23 @@ for ir,r in data[data['type']=='sig'].iterrows():
     if "NOTAG" not in r['cat']:
       # Skip centralObjectWeight correction as concerns events in acceptance
       experimentalSystYields = calcSystYields(r['nominalDataName'],contents,inputWS,experimentalFactoryType,skipCOWCorr=True,proc=r['proc'],year=r['year'],ignoreWarnings=opt.ignore_warnings)
-      for s,f in experimentalFactoryType.iteritems():
-	if f in ['a_w','a_h']: 
-	  for direction in ['up','down']: 
-	    data.at[ir,"%s_%s_yield"%(s,direction)] = experimentalSystYields["%s_%s"%(s,direction)]
-	else:
-	  data.at[ir,"%s_yield"%s] = experimentalSystYields[s]
+      for s,f in experimentalFactoryType.items():
+        if f in ['a_w','a_h']: 
+          for direction in ['up','down']: 
+            data.at[ir,"%s_%s_yield"%(s,direction)] = experimentalSystYields["%s_%s"%(s,direction)]
+        else:
+          data.at[ir,"%s_yield"%s] = experimentalSystYields[s]
 
     # For theoretical systematics:
     theorySystYields = calcSystYields(r['nominalDataName'],contents,inputWS,theoryFactoryType,skipCOWCorr=opt.skipCOWCorr,proc=r['proc'],year=r['year'],ignoreWarnings=opt.ignore_warnings)
-    for s,f in theoryFactoryType.iteritems():
+    for s,f in theoryFactoryType.items():
       if f in ['a_w','a_h']: 
-	for direction in ['up','down']: 
-	  data.at[ir,"%s_%s_yield"%(s,direction)] = theorySystYields["%s_%s"%(s,direction)]
-	  if not opt.skipCOWCorr: data.at[ir,"%s_%s_yield_COWCorr"%(s,direction)] = theorySystYields["%s_%s_COWCorr"%(s,direction)]
+        for direction in ['up','down']: 
+          data.at[ir,"%s_%s_yield"%(s,direction)] = theorySystYields["%s_%s"%(s,direction)]
+          if not opt.skipCOWCorr: data.at[ir,"%s_%s_yield_COWCorr"%(s,direction)] = theorySystYields["%s_%s_COWCorr"%(s,direction)]
       else:
-	data.at[ir,"%s_yield"%s] = theorySystYields[s]
-	if not opt.skipCOWCorr: data.at[ir,"%s_yield_COWCorr"%s] = theorySystYields["%s_COWCorr"%s]
+        data.at[ir,"%s_yield"%s] = theorySystYields[s]
+        if not opt.skipCOWCorr: data.at[ir,"%s_yield_COWCorr"%s] = theorySystYields["%s_COWCorr"%s]
 
   # Remove the workspace and file from heap
   inputWS.Delete()
@@ -264,8 +264,8 @@ for ir,r in data[data['type']=='sig'].iterrows():
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # SAVE YIELDS DATAFRAME
-print " .........................................................................................."
+print(" ..........................................................................................")
 extStr = "_%s"%opt.ext if opt.ext != '' else ''
-print " --> Saving yields dataframe: ./yields%s/%s.pkl"%(extStr,opt.cat)
+print(" --> Saving yields dataframe: ./yields%s/%s.pkl"%(extStr,opt.cat))
 if not os.path.isdir("./yields%s"%extStr): os.system("mkdir ./yields%s"%extStr)
 with open("./yields%s/%s.pkl"%(extStr,opt.cat),"wb") as fD: pickle.dump(data,fD)

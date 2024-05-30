@@ -4,7 +4,7 @@ import re
 from commonObjects import *
 
 def run(cmd):
-  print "%s\n\n"%cmd
+  print("%s\n\n"%cmd)
   os.system(cmd)
 
 def writePreamble(_file):
@@ -56,7 +56,7 @@ def writeSubFiles(_opts):
     for cidx in range(_opts['nCats']):
       c = _opts['cats'].split(",")[cidx]
       _f.write("if [ $1 -eq %g ]; then\n"%cidx)
-      _f.write("  python %s/makeYields.py --cat %s --procs %s --ext %s --mass %s --inputWSDirMap %s %s\n"%(dwd__,c,_opts['procs'],_opts['ext'],_opts['mass'],_opts['inputWSDirMap'],_opts['modeOpts']))
+      _f.write("  python3 %s/makeYields.py --cat %s --procs %s --ext %s --mass %s --inputWSDirMap %s %s\n"%(dwd__,c,_opts['procs'],_opts['ext'],_opts['mass'],_opts['inputWSDirMap'],_opts['modeOpts']))
       _f.write("fi\n")
       
     # Close .sh file
@@ -76,7 +76,7 @@ def writeSubFiles(_opts):
       c = _opts['cats'].split(",")[cidx]
       _f = open("%s/%s_%s.sh"%(_jobdir,_executable,c),"w")
       writePreamble(_f)
-      _f.write("python %s/makeYields.py --cat %s --procs %s --ext %s --mass %s --inputWSDirMap %s --sigModelWSDir %s --sigModelExt %s --bkgModelWSDir %s --bkgModelExt %s %s\n"%(dwd__,c,_opts['procs'],_opts['ext'],_opts['mass'],_opts['inputWSDirMap'],_opts['sigModelWSDir'],_opts['sigModelExt'],_opts['bkgModelWSDir'],_opts['bkgModelExt'],_opts['modeOpts']))
+      _f.write("python3 %s/makeYields.py --cat %s --procs %s --ext %s --mass %s --inputWSDirMap %s --sigModelWSDir %s --sigModelExt %s --bkgModelWSDir %s --bkgModelExt %s %s\n"%(dwd__,c,_opts['procs'],_opts['ext'],_opts['mass'],_opts['inputWSDirMap'],_opts['sigModelWSDir'],_opts['sigModelExt'],_opts['bkgModelWSDir'],_opts['bkgModelExt'],_opts['modeOpts']))
       _f.close()
       os.system("chmod 775 %s/%s_%s.sh"%(_jobdir,_executable,c))
 
@@ -87,9 +87,12 @@ def submitFiles(_opts):
   # CONDOR
   if _opts['batch'] == "condor":
     _executable = "condor_yields_%s"%_opts['ext']
-    cmdLine = "cd %s; condor_submit %s.sub; cd %s"%(_jobdir,_executable,dwd__)
+    if os.environ['PWD'].startswith("/eos"):
+      cmdLine = "cd %s; condor_submit -spool %s.sub; cd %s"%(_jobdir,_executable,dwd__)
+    else:
+      cmdLine = "cd %s; condor_submit %s.sub; cd %s"%(_jobdir,_executable,dwd__)
     run(cmdLine)
-    print "  --> Finished submitting files"
+    print("  --> Finished submitting files")
 
   # SGE
   elif _opts['batch'] in ['IC','SGE']:
@@ -103,7 +106,7 @@ def submitFiles(_opts):
       _subfile = "%s/%s_%s"%(_jobdir,_executable,c)
       cmdLine = "qsub -q hep.q %s -o %s.log -e %s.err %s.sh"%(jobOptsStr,_subfile,_subfile,_subfile)
       run(cmdLine)
-    print "  --> Finished submitting files"
+    print("  --> Finished submitting files")
   
   # Running locally
   elif _opts['batch'] == 'local':
@@ -113,6 +116,6 @@ def submitFiles(_opts):
       _subfile = "%s/%s_%s"%(_jobdir,_executable,c)
       cmdLine = "bash %s.sh"%_subfile
       run(cmdLine)
-    print "  --> Finished running files"
+    print("  --> Finished running files")
 
  

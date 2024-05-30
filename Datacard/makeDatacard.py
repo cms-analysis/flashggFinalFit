@@ -1,6 +1,6 @@
 # Datacard making script: uses output pkl file of makeYields.py script
 
-print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG DATACARD MAKER RUN II ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ "
+print(" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG DATACARD MAKER RUN II ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ")
 import os, sys
 import re
 from optparse import OptionParser
@@ -14,13 +14,13 @@ from systematics import theory_systematics, experimental_systematics, signal_sha
 def get_options():
   parser = OptionParser()
   parser.add_option('--ext', dest='ext', default='', help="Extension (used when running RunYields.py)")
-  parser.add_option('--years', dest='years', default='2016,2017,2018', help="Comma separated list of years in makeYields output")
+  parser.add_option('--years', dest='years', default='2022preEE,2022postEE', help="Comma separated list of years in makeYields output")
   # For pruning processes
   parser.add_option('--prune', dest='prune', default=False, action="store_true", help="Prune proc x cat which make up less than pruneThreshold (default 0.1%) of given total category")
   parser.add_option('--pruneThreshold', dest='pruneThreshold', default=0.001, type='float', help="Threshold with which to prune proc x cat as fraction of total category yield (default=0.1%)")
-  parser.add_option('--doTrueYield', dest='doTrueYield', default=False, action="store_true", help="For pruning: use true number of expected events for proc x cat i.e. Product(XS,BR,eff*acc,lumi). Use only if NOTAG dataset has been included. If false then will use nominal_yield (i.e. sumEntries)")
+  parser.add_option('--doTrueYield', dest='doTrueYield', default=False, action="store_true", help="For pruning: use true number of expected events for proc x cat i.e. Product(XS,BR,eff*acc,lumi). If false then will just use sum of weights (= eff x acc)")
   parser.add_option('--mass', dest='mass', default='125', help="MH mass: required for doTrueYield")
-  parser.add_option('--analysis', dest='analysis', default='STXS', help="Analysis extension: required for doTrueYield (see ./tools/XSBR.py for example)")
+  parser.add_option('--analysis', dest='analysis', default='tutorial', help="Analysis extension: required for doTrueYield (see ./tools/XSBR.py for example)")
   # For yield/systematics:
   parser.add_option('--skipCOWCorr', dest='skipCOWCorr', default=False, action="store_true", help="Skip centralObjectWeight correction for events in acceptance")
   parser.add_option('--doSystematics', dest='doSystematics', default=False, action="store_true", help="Include systematics calculations and add to datacard")
@@ -34,8 +34,8 @@ def get_options():
 (opt,args) = get_options()
 
 def leave():
-  print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG DATACARD MAKER RUN II (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ "
-  exit(1)
+  print(" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG DATACARD MAKER RUN II (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ")
+  exit(0)
 
 STXSMergingScheme, STXSScaleCorrelationScheme = None, None
 if opt.doSTXSMerging: from tools.STXS_tools import STXSMergingScheme
@@ -43,7 +43,7 @@ if opt.doSTXSScaleCorrelationScheme: from tools.STXS_tools import STXSScaleCorre
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Concatenate dataframes
-print " --> Loading per category dataframes into single dataframe"
+print(" --> Loading per category dataframes into single dataframe")
 extStr = "_%s"%opt.ext if opt.ext != '' else ''
 pkl_files = glob.glob("./yields%s/*.pkl"%extStr)
 pkl_files.sort() # Categories in alphabetical order
@@ -58,10 +58,10 @@ for f_pkl_name in pkl_files:
 if opt.doSystematics:
   from tools.calcSystematics import factoryType, addConstantSyst, experimentalSystFactory, theorySystFactory, groupSystematics, envelopeSystematics, renameSyst
 
-  print " .........................................................................................."
+  print(" ..........................................................................................")
 
   # Extract factory types of systematics
-  print " --> Extracting factory types for systematics"
+  print(" --> Extracting factory types for systematics")
   experimentalFactoryType = {}
   theoryFactoryType = {}
   mask = (~data['cat'].str.contains("NOTAG"))&(data['type']=='sig')
@@ -76,34 +76,32 @@ if opt.doSystematics:
       theoryFactoryType[s['name']] = factoryType(data[mask],s)
   
   # Experimental:
-  print " --> Adding experimental systematics variations to dataFrame"
+  print(" --> Adding experimental systematics variations to dataFrame")
   # Add constant systematics to dataFrame
   for s in experimental_systematics:
     if s['type'] == 'constant': data = addConstantSyst(data,s,opt)
   data = experimentalSystFactory(data, experimental_systematics, experimentalFactoryType, opt )
 
   # Theory:
-  print " --> Adding theory systematics variations to dataFrame"
+  print(" --> Adding theory systematics variations to dataFrame")
   # Add constant systematics to dataFrame
   for s in theory_systematics:
     if s['type'] == 'constant': data = addConstantSyst(data,s,opt)
   # Theory factory: group scale weights after calculation in relevant grouping scheme
   data = theorySystFactory(data, theory_systematics, theoryFactoryType, opt, stxsMergeScheme=STXSMergingScheme)
-  data, theory_systematics = groupSystematics(data, theory_systematics, opt, prefix="scaleWeight", groupings=[[1,2],[3,6],[4,8]], stxsMergeScheme=STXSMergingScheme)
-  data, theory_systematics = groupSystematics(data, theory_systematics, opt, prefix="alphaSWeight", groupings=[[0,1]], stxsMergeScheme=STXSMergingScheme)
+  #data, theory_systematics = groupSystematics(data, theory_systematics, opt, prefix="scaleWeight", groupings=[[1,2],[3,6],[4,8]], stxsMergeScheme=STXSMergingScheme)
 
   # Rename systematics
   for s in theory_systematics: s['title'] = renameSyst(s['title'],"scaleWeight","scale")
 
-
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Pruning: if process contributes less than 0.1% of yield in analysis category then ignore
 if opt.prune:
-  print " .........................................................................................."
-  print " --> Pruning processes which contribute < %.2f%% of RECO category yield"%(100*opt.pruneThreshold)
+  print(" ..........................................................................................")
+  print(" --> Pruning processes which contribute < %.2f%% of RECO category yield"%(100*opt.pruneThreshold))
   data['prune'] = 0
   if opt.doTrueYield:
-    print " --> Using the true yield of process for pruning: N = Product(XS,BR,eff*acc,lumi)"
+    print(" --> Using the true yield of process for pruning: N = Product(XS,BR,eff*acc,lumi)")
     mask = (data['type']=='sig')
 
     # Extract XS*BR using tools.XSBR
@@ -114,10 +112,8 @@ if opt.prune:
 
     # Extract eff*acc using total proc yield: strictly should include NOTAG
     data['ea'] = '-'
-    corrExt = "_COWCorr" if not opt.skipCOWCorr else ''
-    procYields = od()
-    for proc in data[mask]['proc'].unique(): procYields[proc] = data[data['proc']==proc]['nominal_yield%s'%corrExt].sum()
-    data.loc[mask,'ea'] = data[mask].apply(lambda x : 0 if procYields[x['proc']] == 0 else x['nominal_yield']/procYields[x['proc']], axis=1 )
+    # In HiggsDNA the sumw = eff*acc
+    data.loc[mask,'ea'] = data.loc[mask,'nominal_yield']
 
     # Calculate true yield
     data.loc[mask,'true_yield'] = data[mask].apply(lambda x: x['xsbr']*x['ea']*x['rate'], axis=1)
@@ -131,7 +127,7 @@ if opt.prune:
     data.loc[mask,'prune'] = 1
 
   else:
-    print " --> Using nominal yield of process (sumEntries) for pruning"
+    print(" --> Using nominal yield of process (sumEntries) for pruning")
     mask = (data['type']=='sig')
 
     # Extract per category yields
@@ -149,46 +145,46 @@ if opt.prune:
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # SAVE DATAFRAME
 if opt.saveDataFrame:
-  print " .........................................................................................."
-  print " --> Saving dataFrame: %s.pkl"%opt.output
+  print(" ..........................................................................................")
+  print(" --> Saving dataFrame: %s.pkl"%opt.output)
   with open("%s.pkl"%opt.output,"wb") as fD: pickle.dump(data,fD)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # WRITE TO .TXT FILE
-print " .........................................................................................."
+print(" ..........................................................................................")
 fdataName = "%s.txt"%opt.output
-print " --> Writing to datacard file: %s"%fdataName
+print(" --> Writing to datacard file: %s"%fdataName)
 from tools.writeToDatacard import writePreamble, writeProcesses, writeSystematic, writeMCStatUncertainty, writePdfIndex, writeBreak
 fdata = open(fdataName,"w")
 if not writePreamble(fdata,opt): 
-  print " --> [ERROR] in writing preamble. Leaving..."
+  print(" --> [ERROR] in writing preamble. Leaving...")
   leave()
 if not writeProcesses(fdata,data,opt):
-  print " --> [ERROR] in writing processes. Leaving..."
+  print(" --> [ERROR] in writing processes. Leaving...")
   leave()
 if opt.doSystematics:
   for syst in experimental_systematics:
     if not writeSystematic(fdata,data,syst,opt):
-      print " --> [ERROR] in writing systematic %s (experiment). Leaving"%syst['name']
+      print(" --> [ERROR] in writing systematic %s (experiment). Leaving"%syst['name'])
       leave()
   writeBreak(fdata)
   for syst in theory_systematics:
     if not writeSystematic(fdata,data,syst,opt,stxsMergeScheme=STXSMergingScheme,scaleCorrScheme=STXSScaleCorrelationScheme):
-      print " --> [ERROR] in writing systematic %s (theory). Leaving"%syst['name']
+      print(" --> [ERROR] in writing systematic %s (theory). Leaving"%syst['name'])
       leave()
   writeBreak(fdata)
   for syst in signal_shape_systematics:
     if not writeSystematic(fdata,data,syst,opt):
-      print " --> [ERROR] in writing systematic %s (signal shape). Leaving"%syst['name']
+      print(" --> [ERROR] in writing systematic %s (signal shape). Leaving"%syst['name'])
       leave()
 if opt.doMCStatUncertainty:
   writeBreak(fdata)
   if not writeMCStatUncertainty(fdata,data,opt):
-    print " --> [ERROR] in writing MC stat uncertainty systematic. Leaving"
+    print(" --> [ERROR] in writing MC stat uncertainty systematic. Leaving")
     leave()
 writeBreak(fdata)
 if not writePdfIndex(fdata,data,opt):
-  print " --> [ERROR] in writing pdf indices. Leaving..."
+  print(" --> [ERROR] in writing pdf indices. Leaving...")
   leave()
 fdata.close()
 

@@ -1,4 +1,9 @@
 {
+    "qqH":{
+        "QCDscale_qqH":[1.004,0.997],
+        "pdf_Higgs_qqH":1.021,
+        "alphaS_qqH":1.005
+    },
     "qqH_FWDH":{
         "QCDscale_qqH":[1.004,0.997],
         "pdf_Higgs_qqH":1.021,
