@@ -1,19 +1,18 @@
 # Converting ROOT trees to workspaces
 
-This package offers a brand new functionality of Final Fits which enables you to convert flat ROOT trees to Final Fits compatible workspaces. This means (at least for quick sensitivity studies) you can skip the lengthy process of making the flashgg workspaces.
+This package offers a brand new functionality of Final Fits which enables you to convert flat ROOT trees to Final Fits compatible workspaces. 
 
 The input options for converting trees to workspaces are steered by a config file:
 ```
 trees2wsCfg = {
 
   # Name of RooDirectory storing input tree
-  'inputTreeDir':'tagsDumper/trees',
+  'inputTreeDir':'DiphotonTree',
 
   # Variables to be added to dataframe: use wildcard * for common strings
-  'mainVars':["CMS_hgg_mass","weight","dZ","*sigma"], # Vars added to nominal MC RooDataSets
+  'mainVars':["CMS_hgg_mass","weight","dZ","weight_*"], # Vars added to nominal MC RooDataSets
   'dataVars':["CMS_hgg_mass","weight"], # Vars to be added nominal data RooDataSets
   'stxsVar':'', # Var for STXS splitting: if using the option -doSTXSSplitting
-  'notagVars':["weight"], # Vars to add to NOTAG RooDataset: if using option --doNOTAG
   'systematicsVars':["CMS_hgg_mass","weight"], # Variables to add to sytematic RooDataHists
   'theoryWeightContainers':{'alphaSWeights':2,'scaleWeights':9,'pdfWeights':60}, # Theory weights to add to nominal + NOTAG RooDatasets, value corresponds to number of weights (0-N).
 
@@ -31,7 +30,7 @@ It is important that the input trees have the following name structure:
 
   * For data: `{inputTreeDir}/Data_{sqrts}_{category}`. For example, for data events at sqrts=13TeV falling in the `RECO_0J_PTH_0_10_Tag0` category the tree in the input ROOT file would be: `tagsDumper/trees/Data_13TeV_RECO_0J_PTH_0_10_Tag0`.
 
-The variables then correspond to tree branches that will be added to the output `RooDataSets` and `RooDataHists`. The `mainVars` are included in the nominal MC `RooDataSet`'s. As a bare minimum for the signal fitting to work you will need the mass variable (e.g. `CMS_hgg_mass`), the event `weight` and `dZ`. In addition you can add `*sigma` to include all the systematics which are stored as event weight factors. Of course it goes without saying but each variable that you want to add must be defined as a separate branch in the input ROOT tree.
+The variables then correspond to tree branches that will be added to the output `RooDataSets` and `RooDataHists`. The `mainVars` are included in the nominal MC `RooDataSet`'s. As a bare minimum for the signal fitting to work you will need the mass variable (e.g. `CMS_hgg_mass`), the event `weight` and `dZ`. In addition you can add `weight_*` to include all the systematics which are stored as event weight factors. Of course it goes without saying but each variable that you want to add must be defined as a separate branch in the input ROOT tree.
 
 The `dataVars` are the variables which enter the data `RooDataSet`'s. The only thing you need here is the mass variable (e.g. `CMS_hgg_mass`) and the event `weight` (=1). The `systematics` list defines the systematic variations to be saved as `RooDataHists`. They each require separate trees with naming format e.g. `tagsDumper/trees/ggh_125_13TeV_RECO_0J_PTH_0_10_Tag0_{syst}Up01sigma` and `tagsDumper/trees/ggh_125_13TeV_RECO_0J_PTH_0_10_Tag0_{syst}Down01sigma` for the up and down variations respectively.
 
@@ -42,11 +41,9 @@ For variables stored as arrays in the input trees e.g. `pdfWeights` then you can
 For MC e.g.:
 
 ```
-python trees2ws.py --inputConfig config_test.py --inputTreeFile output_2016_GG2H.root --inputMass 125 --productionMode ggh --year 2016 (--doSystematics)
+python trees2ws.py --inputConfig config.py --inputTreeFile output_2016_GG2H.root --inputMass 125 --productionMode ggh --year 2016 (--doSystematics)
 ```
 The output is a `RooWorkspace` containing the `RooDataSets` and `RooDataHists` derived from the input tree. These are stored in a ROOT file in the `ws_{process}` directory which is produced in the same directory as the input tree file. There are a number of additional options:
-
- * `--doNOTAG`: include the `NOTAG` dataset (requires input tree of the form `tagsDumper/trees/ggh_125_13TeV_NOTAG`). The variables added are those specified in the `notagVars` list in the input config file.
  * `--doNNLOPS`: add NNLOPS weight into nominal `RooDataSet`. Requires `NNLOPSWeight` as branch in tree.
  * `--doSTXSSplitting`: split the input tree into separate workspace files for each STXS bin (defined with the `stxsVar` input). Used to generate separate procs for each STXS bin to then be processed separately in the signal modelling and datacard generation steps. Something similar could be done for differential analyses.
 
@@ -68,10 +65,11 @@ This will submit a separate job per input tree file in the specified path. Use t
 This script also supports running over multiple data input tree files. Simply change the `--inputDir` to the path to the input data trees and use `--mode trees2ws_data`.
 
 ## Hadding the data
-If you are intending to merge categories across years then you should merge the per yer data files before running the Trees2WS step e.g.
+If you are intending to merge categories across years then you should merge the per year data files before running the trees2ws step e.g.
 ```
 hadd allData.root allData_20*.root
 ```
+If possible, you should keep signal MC split-by-year to keep track of the year-dependent systematic uncertainties.
 
 ## Mass shifting
 
