@@ -107,7 +107,9 @@ for stype in ['scales','scalesCorr','smears']:
   systs = getattr( opt, stype )
   for s in systs.split(","):
     if s == '': continue
-    for x in ['mean','sigma','rate']: columns_data.append("%s_%s_%s"%(s,outputNuisanceExtMap[stype],x))
+    for x in ['mean','sigma','rate']: 
+      outputNuisanceExt = "_%s"%outputNuisanceExtMap[stype] if outputNuisanceExtMap[stype] != "" else ""
+      columns_data.append("%s%s_%s"%(s,outputNuisanceExt,x))
 data = pd.DataFrame( columns=columns_data ) 
 
 # Loop over processes and add row to dataframe
@@ -140,9 +142,10 @@ for ir,r in data.iterrows():
         _sigmaVar = getSigmaVar(hists)
         _rateVar = getRateVar(hists)
       # Add values to dataFrame
-      data.at[ir,'%s_%s_mean'%(s,outputNuisanceExtMap[stype])] = _meanVar
-      data.at[ir,'%s_%s_sigma'%(s,outputNuisanceExtMap[stype])] = _sigmaVar
-      data.at[ir,'%s_%s_rate'%(s,outputNuisanceExtMap[stype])] = _rateVar
+      outputNuisanceExt = "_%s"%outputNuisanceExtMap[stype] if outputNuisanceExtMap[stype] != "" else ""
+      data.at[ir,'%s%s_mean'%(s,outputNuisanceExt)] = _meanVar
+      data.at[ir,'%s%s_sigma'%(s,outputNuisanceExt)] = _sigmaVar
+      data.at[ir,'%s%s_rate'%(s,outputNuisanceExt)] = _rateVar
 
       # Delete histograms
       for h in hists.values(): h.Delete()

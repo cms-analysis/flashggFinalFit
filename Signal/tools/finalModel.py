@@ -211,7 +211,10 @@ class FinalModel:
 
           # Extract info
           systOpts = syst.split(":")
-          sName = "%s_%s"%(systOpts[0],outputNuisanceExtMap[sType])
+          if outputNuisanceExtMap[sType] != "":
+            sName = "%s_%s"%(systOpts[0],outputNuisanceExtMap[sType])
+          else:
+            sName = systOpts[0]
 
           # Extract constant values and make nuisance
           if sType == 'scalesGlobal': cMean, cSigma, cRate = 0.,0.,0.

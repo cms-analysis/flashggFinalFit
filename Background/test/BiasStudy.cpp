@@ -406,7 +406,7 @@ std::cout << "DEBUG LC 4 " <<std::endl;
       if (!skipPlots) paulProfiler.plotNominalFits(it->second,mass,80,Form("%s/plots/toys/job%d_toy%d_fit_paul",outDir.c_str(),jobn,toy));
       //continue;
       // --------------------------------
-      cout << "Fitting toy for truth model " << distance(toys.begin(),it) << "/" << toys.size() << " (" << it->first << ") " << endl;
+      //cout << "Fitting toy for truth model " << distance(toys.begin(),it) << "/" << toys.size() << " (" << it->first << ") " << endl;
       // get Fabian envelope
       pair<double,map<string,TGraph*> > fabianMinNlls = fabianProfiler.profileLikelihood(it->second,mass,mu,mu_low,mu_high,mu_step);
       pair<double,map<string,TGraph*> > fabianEnvelope = fabianProfiler.computeEnvelope(fabianMinNlls,Form("fabEnvelope_job%d_%s_cat%d_toy%d",jobn,it->first.c_str(),cat,toy),0.);

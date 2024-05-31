@@ -11,6 +11,8 @@ def get_options():
   parser.add_option('--inputConfig',dest='inputConfig', default="", help='Input config: specify list of variables/analysis categories')
   parser.add_option('--inputTreeFile',dest='inputTreeFile', default=None, help='Input tree file')
   parser.add_option('--outputWSDir',dest='outputWSDir', default=None, help='Output dir (default is same as input dir)')
+  parser.add_option('--applyMassCut',dest='applyMassCut', default=False, action="store_true", help='Apply cut on CMS_hgg_mass')
+  parser.add_option('--massCutRange',dest='massCutRange', default='100,180', help='CMS_hgg_mass cut range')
   return parser.parse_args()
 (opt,args) = get_options()
 
@@ -128,6 +130,8 @@ for cat in cats:
 
   # Loop over events in tree and add to dataset with weight 1
   for ev in t:
+    if opt.applyMassCut:
+      if(getattr(ev,"CMS_hgg_mass") < float(opt.massCutRange.split(",")[0])) | (getattr(ev,"CMS_hgg_mass") > float(opt.massCutRange.split(",")[1])): continue
     for var in dataVars: 
       if var == "weight": continue
       ws.var(var).setVal(getattr(ev,var))
