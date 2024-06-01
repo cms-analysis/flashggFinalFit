@@ -14,10 +14,10 @@ from collections import OrderedDict as od
 from usefulStyle import setCanvas, drawCMS, drawEnPu, drawEnYear, formatHisto
 from shanePalette import set_color_palette
 
-print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG YIELDS TABLES RUN II ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ "
+print(" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG YIELDS TABLES RUN II ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ")
 def leave():
-  print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG YIELDS TABLES RUN II (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ "
-  sys.exit(1)
+  print(" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG YIELDS TABLES RUN II (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ")
+  exit(0)
 
 # Define STXS stage 0 mapping to procs
 stage0_ggh = od()
@@ -176,18 +176,18 @@ elif opt.group == "top":
   stage0 = stage0_top
   target_procs = target_procs_top
 else:
-  print " --> [ERROR] target group of categories %s does not exist"%opt.group
+  print(" --> [ERROR] target group of categories %s does not exist"%opt.group)
   leave()
 
 # Load input dataFrame from pickle file
 if not os.path.exists( opt.inputPkl ): 
-  print " --> [ERROR] Input pickle file does not exist. Leaving"
+  print(" --> [ERROR] Input pickle file does not exist. Leaving")
   leave()
 with open( opt.inputPkl, "rb" ) as fin: data = pickle.load(fin)
 # Load cat info dataframe
 if opt.loadCatInfo != '':
   if not os.path.exists( opt.loadCatInfo ):
-    print " --> [ERROR] Cat info pickle file does not exist. Leaving"
+    print(" --> [ERROR] Cat info pickle file does not exist. Leaving")
     leave()
   with open( opt.loadCatInfo, "rb" ) as fin: catinfo_data = pickle.load(fin)
 
@@ -214,21 +214,21 @@ for cat in target_procs:
   # Add values to dataframe
   _target_bins_str = '-'
   vals = [cat,_target_bins_str,_nominal_yield,_target_yield]
-  for _ys0 in _s0_yields.itervalues(): vals.append(_ys0)
+  for _ys0 in _s0_yields.values(): vals.append(_ys0)
   if opt.loadCatInfo != '': vals.extend( [_effSigma,_bkg,_SoverSplusB] )
   tab_data.loc[len(tab_data)] = vals
 
 # Make table
-nColumns = 5+len(stage0.keys())
+nColumns = 5+len(list(stage0.keys()))
 fout = open("Tables/yields_table_lite_%s%s.txt"%(opt.group,opt.ext),"w")
 fout.write("\\begin{tabular}{%s}\n"%("l|"+("c"*(nColumns-1))))
 #fout.write("    \\hline \\hline \n")
 #fout.write("    \\multirow{3}{*}{Analysis categories} & \\multicolumn{%g}{c|}{SM 125 GeV Higgs boson expected signal} & \\multirow{3}{*}{S/S+B} \\\\ \\cline{2-%g}\n"%(3+len(stage0.keys()),nColumns-1))
-fout.write("    \\multirow{3}{*}{Analysis categories} & \\multicolumn{%g}{c}{SM 125 GeV Higgs boson expected signal} & \\multirow{3}{*}{S/S+B} \\\\ \n"%(3+len(stage0.keys())))
+fout.write("    \\multirow{3}{*}{Analysis categories} & \\multicolumn{%g}{c}{SM 125 GeV Higgs boson expected signal} & \\multirow{3}{*}{S/S+B} \\\\ \n"%(3+len(list(stage0.keys()))))
 #fout.write("     & \\multirow{2}{*}{\\begin{tabular}[c]{@{}c@{}}Total\\\\Yield\\end{tabular}} & \\multirow{2}{*}{\\begin{tabular}[c]{@{}c@{}}Target\\\\Fraction\\end{tabular}} & \\multicolumn{%g}{c|}{Production Mode Fractions} & \\multirow{2}{*}{\\begin{tabular}[c]{@{}c@{}}$\\sigma_{\\rm{eff}}$\\\\(GeV)\\end{tabular}} & \\\\ \\cline{4-%g}\n"%(len(stage0.keys()),nColumns-2))
-fout.write("     & \\multirow{2}{*}{Total} & \\multirow{2}{*}{\\begin{tabular}[c]{@{}c@{}}Target\\\\STXS bin(s)\\end{tabular}} & \\multicolumn{%g}{c}{Production Mode Fractions} & \\multirow{2}{*}{\\begin{tabular}[c]{@{}c@{}}$\\sigma_{\\rm{eff}}$\\\\(GeV)\\end{tabular}} & \\\\ \n"%(len(stage0.keys())))
-s0_str = Translate(stage0.keys()[0],translateStage0)
-for s0 in stage0.keys()[1:]: s0_str += " & %s"%Translate(s0,translateStage0)
+fout.write("     & \\multirow{2}{*}{Total} & \\multirow{2}{*}{\\begin{tabular}[c]{@{}c@{}}Target\\\\STXS bin(s)\\end{tabular}} & \\multicolumn{%g}{c}{Production Mode Fractions} & \\multirow{2}{*}{\\begin{tabular}[c]{@{}c@{}}$\\sigma_{\\rm{eff}}$\\\\(GeV)\\end{tabular}} & \\\\ \n"%(len(list(stage0.keys()))))
+s0_str = Translate(list(stage0.keys())[0],translateStage0)
+for s0 in list(stage0.keys())[1:]: s0_str += " & %s"%Translate(s0,translateStage0)
 #fout.write("     & & & %s & & \\\\ \\hline \\hline \n"%s0_str)
 fout.write("     & & & %s & & \\\\ \\hline \n"%s0_str)
 # Add numbers

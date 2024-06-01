@@ -1,10 +1,10 @@
 # Running the fits
 
-Now the signal and background models and the datacard has been produced, it is time to run the fits using [combine](https://cms-analysis.github.io/HiggsAnalysis-CombinedLimit/). We have replaced the old combineHarvester.py script (specific to H->gg) with the common tools. Please refer to the linked manual for the details on fitting and the options you can use.
+Now the signal and background models and the datacard has been produced, it is time to run the fits using [combine](https://cms-analysis.github.io/HiggsAnalysis-CombinedLimit/). Please refer to the linked manual for the details on fitting and the options you can use.
 
 ## Copy everything across
 
-The very first step is to copy your signal and background models, and the `.txt` datacard to this directory. I have not written a script for this yet so please do it by hand. The signal and background models must match the specified paths in the `.txt` datacard (the default is `./Models/signal` and `./Models/background`, you can change this with the `--sigModelWSDir` and `--bkgModelWSDir` options in the `Datacard/RunYields.py` script) i.e.
+The very first step is to copy your signal and background models, and the `.txt` datacard to this directory. The signal and background models must match the specified paths in the `.txt` datacard (the default is `./Models/signal` and `./Models/background`, you can change this with the `--sigModelWSDir` and `--bkgModelWSDir` options in the `Datacard/RunYields.py` script) i.e.
 ```
 mkdir Models
 mkdir Models/signal
@@ -16,7 +16,7 @@ cp /path-to-datacard/Datacard.txt .
 
 ## Building the workspace
 
-Then you are ready to build the `RooWorkspace` from the `.txt` datacard i.e. construct the likelihood function. At this step you need to specify the signal parametrization (physics model) you want to use in the fit. These parametrizations are defined in `models.py`:
+Then you are ready to build the `RooWorkspace` from the `.txt` datacard i.e. define the likelihood function. At this step you need to specify the signal parametrization (physics model) you want to use in the fit. These parametrizations are defined in `models.py`:
 
  * `mu_inclusive`: common signal strength for all signal processes
 
@@ -26,13 +26,13 @@ Then you are ready to build the `RooWorkspace` from the `.txt` datacard i.e. con
 
 Once you have decided/defined your signal parametrization you can run: 
 ```
-python RunText2Workspace.py --mode {model} --dryRun
+python3 RunText2Workspace.py --mode {model} --dryRun
 ```
 where `{model}` matches the key in `models.py`. For the simplest case, where you scale all signal processes equally then use `--mode mu_inclusive`.
 
 The `--dryRun` option means the script (produced in `t2w_jobs`) will not be submitted. You can then go and run this script locally (recommend for analyses with a small number of categories as this step should not take too long). For bigger analyses you will want to submit the job to your favourite batch system e.g.
 ```
-python RunText2Workspace.py --mode {model} --batch condor --queue workday
+python3 RunText2Workspace.py --mode {model} --batch condor --queue workday
 ```
 The output will be a compiled `RooWorkspace` with the name `Datacard_{model}.root`.
 
@@ -40,7 +40,7 @@ The output will be a compiled `RooWorkspace` with the name `Datacard_{model}.roo
 
 When you have built the workspace, you are finally ready to run the fits and extract the results! The options for the fit are steered using the input json files:
 ```
-python RunFits.py --inputJson inputs.json --mode {model}
+python3 RunFits.py --inputJson inputs.json --mode {model}
 ```
 This script uses the functionalities of [combineHarvester](https://cms-analysis.github.io/CombineHarvester/) in `combineTools`. The nominal fit is an `expected` fit (i.e. using an asimov toy dataset). An example input json file specifying the options for the `mu` model:
 ```
@@ -80,7 +80,7 @@ All jobs and outputs will be stored in the `runFits_{model}` directory.
 
 After the fits are completed, you can collect/hadd the outputs using:
 ```
-python CollectFits.py --inputJson inputs.json --mode {model} (--doObserved)
+python3 CollectFits.py --inputJson inputs.json --mode {model} (--doObserved)
 ```
 
 The hadded output will be of the format: `runFits_mu/profile1D_syst_r_ggH.root` for e.g. using the model `mu`, a `profile1D` fit with name `syst` for poi `r_ggH`. This contains the `limit` tree with all of the fit results plus any nuisance parameters that you have specified to save. The tree can then be used to plot the results with whatever fancy plots you can make e.g. for `profile2D` scans you can use the `../Plots/make2DPlot.py` for a smooth 2D likelihood contour.

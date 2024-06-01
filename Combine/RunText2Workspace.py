@@ -2,14 +2,14 @@ import os, glob, sys
 from optparse import OptionParser
 from models import models
 
-print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG T2W RUN II ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ "
+print(" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG T2W RUN II ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ")
 
 def get_options():
   parser = OptionParser()
   parser.add_option('--mode', dest='mode', default='mu_inclusive', help="Physics Model (specified in models.py)")
   parser.add_option('--ext',dest='ext', default="", help='In case running over datacard with extension')
   parser.add_option('--common_opts',dest='common_opts', default="-m 125 higgsMassRange=122,128", help='Common options')
-  parser.add_option('--batch', dest='batch', default='SGE', help="Batch system [SGE,IC,condor]")
+  parser.add_option('--batch', dest='batch', default='condor', help="Batch system [SGE,IC,condor]")
   parser.add_option('--queue', dest='queue', default='workday', help="Condor queue")
   parser.add_option('--ncpus', dest='ncpus', default=4, type='int', help="Number of cpus")
   parser.add_option('--dryRun', dest='dryRun', action="store_true", default=False, help="Only create submission files")
@@ -17,19 +17,19 @@ def get_options():
 (opt,args) = get_options()
 
 def leave():
-  print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG T2W RUN II (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ "
+  print(" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG T2W RUN II (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ")
   exit(1)
 
 def run(cmd):
-  print "%s\n\n"%cmd
+  print("%s\n\n"%cmd)
   os.system(cmd)
 
 if opt.mode not in models: 
-  print " --> [ERROR] opt.mode (%s) is not specified in models.py. Leaving..."%opt.mode
+  print(" --> [ERROR] opt.mode (%s) is not specified in models.py. Leaving..."%opt.mode)
   leave()
 
-print " --> Running text2workspace for model: %s"%opt.mode
-print " --> Input: Datacard%s.txt --> Output: Datacard%s_%s.root"%(opt.ext,opt.ext,opt.mode)
+print(" --> Running text2workspace for model: %s"%opt.mode)
+print(" --> Input: Datacard%s.txt --> Output: Datacard%s_%s.root"%(opt.ext,opt.ext,opt.mode))
 
 if not os.path.isdir("./t2w_jobs"): os.system("mkdir ./t2w_jobs")
 # Open submission file to write to
@@ -56,8 +56,12 @@ if opt.batch == 'condor':
   f_cdr.close()
 
 # Submit
-if opt.batch == "condor": subcmd = "condor_submit ./t2w_jobs/t2w_%s%s.sub"%(opt.mode,opt.ext)
+if opt.batch == "condor": 
+  if os.environ['PWD'].startswith("/eos"):
+    subcmd = "condor_submit -spool ./t2w_jobs/t2w_%s%s.sub"%(opt.mode,opt.ext) 
+  else:
+    subcmd = "condor_submit ./t2w_jobs/t2w_%s%s.sub"%(opt.mode,opt.ext)
 elif opt.batch == 'local': subcmd = "bash ./t2w_jobs/t2w_%s%s.sh"%(opt.mode,opt.ext)
 else: subcmd = "qsub -q hep.q -l h_rt=6:0:0 -l h_vmem=24G ./t2w_jobs/t2w_%s%s.sh"%(opt.mode,opt.ext)
-if opt.dryRun: print "[DRY RUN] %s"%subcmd
+if opt.dryRun: print("[DRY RUN] %s"%subcmd)
 else: run(subcmd)

@@ -31,10 +31,8 @@ def get_options():
   return parser.parse_args()
 (opt,args) = get_options()
 
-
-
 if opt.inputWSFile is not None:
-  print " --> Opening workspace: %s"%opt.inputWSFile
+  print((" --> Opening workspace: %s"%opt.inputWSFile))
   f = ROOT.TFile(opt.inputWSFile)
   w = f.Get("multipdf")
 
@@ -61,7 +59,7 @@ for ipdf in range(multipdf.getNumPdfs()):
 norm = w.var("CMS_hgg_%s_13TeV_bkgshape_norm"%opt.cat).getVal()
 
 hists = od()
-for bname, bpdf in bpdfs.iteritems():
+for bname, bpdf in list(bpdfs.items()):
   hists[bname] = bpdf.createHistogram("h_%s"%bname,xvar,ROOT.RooFit.Binning(opt.pdfNBins,xvar.getMin(),xvar.getMax()))
   #hists[bname].Scale(norm)
   hists[bname].Scale(norm*(float(opt.pdfNBins)/float(opt.nBins)))
@@ -73,7 +71,7 @@ for bname, bpdf in bpdfs.iteritems():
 # Scale pdf histograms to match data
 xvar_range = int(xvar.getBinning().highBound()-xvar.getBinning().lowBound())
 if opt.nBins != xvar_range:
-  for h in hists.itervalues(): h.Scale(float(xvar_range)/opt.nBins)
+  for h in list(hists.values()): h.Scale(float(xvar_range)/opt.nBins)
   
 # Extract data histogram
 d = w.data("roohist_data_mass_%s"%opt.cat)
@@ -114,20 +112,22 @@ if opt.inputSignalWSFile is not None:
   # Extract norms
   norms = od()
   spdfs = od()
-  for year in ['2016','2017','2018']:
+  for year in years_to_process:
     allNorms = wsig.allFunctions().selectByName("*%s*normThisLumi"%year)
     for norm in rooiter(allNorms):
-      proc = norm.GetName().split("_%s_"%sqrts__)[-1].split("_RECO")[0]
+      # Set integrated lumi
+      wsig.var("IntLumi").setVal(lumiMap[year]*lumiScaleFactor)
+      proc = norm.GetName().split("hggpdfsmrel_")[-1].split("_%s_"%year)[0]
       k  =  "%s__%s"%(proc,year)
-      _id = "%s_%s_%s_%s"%(year,sqrts__,proc,cat)
-      norms[k] = w.function("%s_%s_normThisLumi"%(outputWSObjectTitle__,_id))
+      _id = "%s_%s_%s_%s"%(proc,year,cat,sqrts__)
+      norms[k] = wsig.function("%s_%s_normThisLumi"%(outputWSObjectTitle__,_id))
 
-      pdf = wsig.pdf("extend%s_%sThisLumi"%(outputWSObjectTitle__,_id))
+      pdf = wsig.pdf("%s_%s"%(outputWSObjectTitle__,_id))
       spdfs[_id] = pdf.createHistogram("h_pdf_%s"%_id,xvar,ROOT.RooFit.Binning(opt.pdfNBins))
-      #spdfs[_id].Scale(160./320)
+      spdfs[_id].Scale(norms[k].getVal()*(float(opt.pdfNBins)/float(opt.nBins)))
 
   # Sum pdf histograms
-  for _id, p in spdfs.iteritems():
+  for _id, p in list(spdfs.items()):
     if 'spdf' not in hists:
       hists['spdf'] = p.Clone("h_spdf")
       hists['spdf'].Reset()
@@ -222,7 +222,7 @@ if doSignal:
   hists['spdf'].Draw("Hist same cf")
 
 colourOptions=[1,2,3,4,5,6,7,8,9]
-bnames = bpdfs.keys()
+bnames = list(bpdfs.keys())
 for bidx, bname in enumerate(bnames):
   hists[bname].SetLineWidth(2)
   hists[bname].SetLineColor( colourOptions[bidx] )
@@ -248,7 +248,7 @@ lat1.SetTextFont(42)
 lat1.SetTextAlign(31)
 lat1.SetNDC()
 lat1.SetTextSize(0.06)
-lat1.DrawLatex(0.9,0.92,"137 fb^{-1} (13 TeV)")
+#lat1.DrawLatex(0.9,0.92,"137 fb^{-1} (13 TeV)")
 
 pad2.cd()
 h_axes_ratio = hists_ratio['data'].Clone()
@@ -292,6 +292,9 @@ lat2.SetTextSize(0.045*padSizeRatio)
 lat2.DrawLatex(0.87,0.91,"Best fit B function subtracted")
 
 canv.Update()
-canv.SaveAs("/eos/home-j/jlangfor/www/CMS/hgg/stxs_runII/Dec20/final_new/AN/background_models_new/bmodel_%s.pdf"%(cat))
-canv.SaveAs("/eos/home-j/jlangfor/www/CMS/hgg/stxs_runII/Dec20/final_new/AN/background_models_new/bmodel_%s.png"%(cat))
 
+ext_str = f"_{opt.ext}" if opt.ext != "" else ""
+if not os.path.isdir(f"plots{ext_str}"):
+  os.system(f"mkdir -p plots{ext_str}")
+canv.SaveAs(f"plots{ext_str}/multipdf_plot_%s.pdf"%(cat))
+canv.SaveAs(f"plots{ext_str}/multipdf_plot_%s.png"%(cat))

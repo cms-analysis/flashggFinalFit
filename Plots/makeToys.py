@@ -36,7 +36,7 @@ poi_bf = {}
 for poi in opt.POIs.split(","): poi_bf[poi] = w.var(poi).getVal()
 setParamStr = "--setParameters "
 setParam0Str = "--setParameters "
-for p,v in poi_bf.iteritems(): 
+for p,v in poi_bf.items(): 
   setParamStr += "%s=%.3f,"%(p,v)
   setParam0Str += "%s=0,"%p
 setParamStr = setParamStr[:-1]
@@ -77,7 +77,7 @@ if opt.batch == 'IC':
   if not opt.dryRun:
     subs = glob.glob("./SplusBModels%s/toys/jobs/sub*"%opt.ext)
     for fsub in subs: os.system("qsub -q hep.q -l h_rt=4:0:0 -l h_vmem=24G %s"%fsub)
-  else: print " --> [DRY-RUN] jobs have not been submitted"
+  else: print(" --> [DRY-RUN] jobs have not been submitted")
 
 elif opt.batch == 'condor':
 
@@ -125,4 +125,4 @@ elif opt.batch == 'condor':
   # Submission
   os.system("chmod 775 ./SplusBModels%s/toys/jobs/sub_toys.sh"%opt.ext)
   if not opt.dryRun: os.system("cd ./SplusBModels%s/toys/jobs; source /cvmfs/cms.cern.ch/cmsset_default.sh; eval `scramv1 runtime -sh`; condor_submit sub_toys.sub; cd ../../.."%opt.ext)
-  else: print " --> [DRY-RUN] jobs have not been submitted"  
+  else: print(" --> [DRY-RUN] jobs have not been submitted")  

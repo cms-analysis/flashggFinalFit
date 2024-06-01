@@ -123,10 +123,10 @@ if opt.mode == "fixed":
     with open("pdfindex.json", "r") as jf:
         pdf_index_bf = json.load(jf)
  
-    pdf_index_save = ",".join(pdf_index_bf.keys())
-    pdf_index_freeze = ",".join(pdf_index_bf.keys())
+    pdf_index_save = ",".join(list(pdf_index_bf.keys()))
+    pdf_index_freeze = ",".join(list(pdf_index_bf.keys()))
     pdf_index_set = ""
-    for k,v in pdf_index_bf.items(): pdf_index_set += "%s=%s,"%(k,v)
+    for k,v in list(pdf_index_bf.items()): pdf_index_set += "%s=%s,"%(k,v)
     pdf_index_set = pdf_index_set[:-1]
 
     for i_job in range( opt.nJobs ):
@@ -161,7 +161,7 @@ if opt.mode == "envelope":
     with open("pdfindex.json", "r") as jf:
         pdf_index_bf = json.load(jf)
  
-    pdf_index_save = ",".join(pdf_index_bf.keys())
+    pdf_index_save = ",".join(list(pdf_index_bf.keys()))
 
     for i_job in range( opt.nJobs ):
         f_sub_name = "jobs_fits_envelope/sub_%g.sh"%(i_job)

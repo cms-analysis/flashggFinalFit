@@ -1,0 +1,8 @@
+{
+    "mu_inclusive":{
+        "pois":"r",
+        "fits":"profile1D:statonly:r+profile1D:removeTHU:r",
+        "points":"20:10+20:10",
+        "fit_opts":"--setParameterRanges r=0,2 --saveSpecifiedNuis all --freezeParameters MH,allConstrainedNuisances+--setParameterRanges r=0,2 --saveSpecifiedNuis all --freezeParameters MH,BR_hgg,rgx{QCDscale_.*},rgx{pdf_Higgs_.*},rgx{alphaS_.*}"
+    }
+}

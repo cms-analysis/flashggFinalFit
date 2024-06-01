@@ -15,10 +15,10 @@ from collections import OrderedDict
 # Scripts for plotting
 from plottingTools import getEffSigma
 
-print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG CAT INFO RUN II ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ "
+print(" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG CAT INFO RUN II ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ")
 def leave():
-  print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG CAT INFO (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ "
-  sys.exit(1)
+  print(" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG CAT INFO (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ")
+  exit(0)
 
 ROOT.gROOT.SetBatch(True)
 ROOT.gStyle.SetOptStat(0)
@@ -40,16 +40,16 @@ def get_options():
 
 # Open WS
 if opt.inputWSFile is not None:
-  print " --> Opening workspace: %s"%opt.inputWSFile
+  print(" --> Opening workspace: %s"%opt.inputWSFile)
   f = ROOT.TFile(opt.inputWSFile)
   w = f.Get("w")
   # If required loadSnapshot
   if opt.loadSnapshot is not None: 
-    print "    * Loading snapshot: %s"%opt.loadSnapshot
+    print("    * Loading snapshot: %s"%opt.loadSnapshot)
     w.loadSnapshot(opt.loadSnapshot)
   # Set parameters
   if opt.parameterMap is not None:
-    print "    * Setting values of parameters: %s"%opt.parameterMap
+    print("    * Setting values of parameters: %s"%opt.parameterMap)
     for kv in opt.parameterMap.split(","):
       k, v = kv.split(":")[0], kv.split(":")[1]
       w.var(k).setVal(float(v))

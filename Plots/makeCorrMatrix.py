@@ -41,7 +41,7 @@ modes[opt.mode] = pois
 # Load translations
 translate = {} if opt.translate is None else LoadTranslations(opt.translate)
 
-for mode,pois in modes.iteritems():
+for mode,pois in modes.items():
   fileName = '%s/src/flashggFinalFit/Combine/runFits%s_%s/robustHesse_%s%s.root'%(os.environ['CMSSW_BASE'],opt.ext,opt.mode,name,obs_ext)
   inFile = ROOT.TFile(fileName,'READ')
   theMatrix = inFile.Get('h_correlation')
@@ -52,10 +52,10 @@ for mode,pois in modes.iteritems():
     if iPar==len(theList)-1: break
     if not par.GetName().startswith('r_'): continue
     pars[par.GetName()] = iPar
-  nPars = len(pars.keys())
-  print 'Procesing the following %g parameters:'%nPars
-  for par in pars.keys(): print par
-  revPars = {i:name for name,i in pars.iteritems()}
+  nPars = len(list(pars.keys()))
+  print('Procesing the following %g parameters:'%nPars)
+  for par in list(pars.keys()): print(par)
+  revPars = {i:name for name,i in pars.items()}
 
   theHist = ROOT.TH2F('corr_%s'%mode, '', nPars, -0.5, nPars-0.5, nPars, -0.5, nPars-0.5)
   theMap = {}
@@ -85,8 +85,8 @@ for mode,pois in modes.iteritems():
       #print 'Filling correlation for %s and %s of %.3f'%(iPar, jPar, theMap[(iPar,jPar)])
       if iBin <= (theHist.GetNbinsX()-1-jBin): theHist.Fill(iBin, jBin, theMap[(iPar,jPar)])
 
-  print 'Final correlation map used is:'
-  print theMap
+  print('Final correlation map used is:')
+  print(theMap)
 
   set_color_palette('frenchFlag')
   ROOT.gStyle.SetNumberContours(500)

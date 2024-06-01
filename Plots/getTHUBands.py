@@ -9,10 +9,10 @@ import pickle
 import json
 from collections import OrderedDict as od
 
-print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG THU BANDS RUN II ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ "
+print(" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG THU BANDS RUN II ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ")
 def leave():
-  print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG THU BANDS RUN II (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ "
-  sys.exit(1)
+  print(" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG THU BANDS RUN II (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ")
+  exit(0)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # List of parameter merging schemes
@@ -132,11 +132,11 @@ elif opt.mode == "minimal": pms, th_systs = paramMergingScheme_minimal, theory_s
 elif opt.mode == "extended": pms, th_systs = paramMergingScheme_extended, theory_systematics['stage1p2_extended']
 elif opt.mode == "stage0": pms, th_systs = paramMergingScheme_stage0, theory_systematics['stage0']
 else:
-  print " --> [ERROR] %s mode not supported. Leaving"%mode
-  sys.exit(1)
+  print(" --> [ERROR] %s mode not supported. Leaving"%mode)
+  exit(0)
 
 # Extract pois
-pois = pms.keys()
+pois = list(pms.keys())
 
 # Open ROOT file and extract workspace
 f = ROOT.TFile(opt.inputWS)
@@ -146,12 +146,12 @@ if opt.setParameter != '':
   for paramMap in opt.setParameter.split(","):
     p, val = paramMap.split("=")
     w.var(p).setVal(float(val))
-    print " --> Setting value of %s in workspace to be %s"%(p,val)
-print " --> Extracting cross sections for best fit mH = %.2f GeV"%w.var("MH").getVal()
+    print(" --> Setting value of %s in workspace to be %s"%(p,val))
+print(" --> Extracting cross sections for best fit mH = %.2f GeV"%w.var("MH").getVal())
 # Extract all XS x BR
 br_hgg = w.function("fbr_13TeV").getVal()
 xsbr = {}
-print " --> Extracting XS from input workspace"
+print(" --> Extracting XS from input workspace")
 for fxs in rooiter(w.allFunctions().selectByName("fxs_*")):
   # Extract process
   fname = fxs.GetName()
@@ -163,9 +163,9 @@ for fxs in rooiter(w.allFunctions().selectByName("fxs_*")):
 # Loop over params in merging scheme
 poi_xsbr = {}
 poi_xsbr_var = {}
-for poi, procs in pms.iteritems():
+for poi, procs in pms.items():
   if poi not in pois: continue
-  print " --> For parameter of interest: %s"%poi 
+  print(" --> For parameter of interest: %s"%poi) 
   poi_xsbr[poi] = 0
   poi_xsbr_var[poi] = {}
   for ts in th_systs: 
@@ -181,7 +181,7 @@ for poi, procs in pms.iteritems():
     # Add nominal cross section
     poi_xsbr[poi] += xsbr[proc]
 
-    print "    * process: %s"%proc
+    print("    * process: %s"%proc)
     syst_var = {}
     nominal_yield = 0
     # Extract relevant normalisation for proc
@@ -202,7 +202,7 @@ for poi, procs in pms.iteritems():
         for norm in rooiter(allNorms): syst_var['%s_Down01Sigma'%ts] += (norm.getVal()/nominal_yield)
       w.var(ts).setVal(0)
       # Changes to cross section
-      print " --> [DEBUG] (%s): poi = %s, proc = %s, nominal = %.5f, syst_var_up = %.5f, syst_var_down = %.5f"%(ts,poi,proc,xsbr[proc],syst_var['%s_Up01Sigma'%ts],syst_var['%s_Down01Sigma'%ts])
+      print(" --> [DEBUG] (%s): poi = %s, proc = %s, nominal = %.5f, syst_var_up = %.5f, syst_var_down = %.5f"%(ts,poi,proc,xsbr[proc],syst_var['%s_Up01Sigma'%ts],syst_var['%s_Down01Sigma'%ts]))
       poi_xsbr_var[poi]['%s_Up01Sigma'%ts] += xsbr[proc]*syst_var['%s_Up01Sigma'%ts]
       poi_xsbr_var[poi]['%s_Down01Sigma'%ts] += xsbr[proc]*syst_var['%s_Down01Sigma'%ts]
 
@@ -210,13 +210,13 @@ for poi, procs in pms.iteritems():
 xsbr_theory = {}
 for poi in pois:
   xsbr_theory[poi] = {}
-  print " --> Calculating theory uncertainty: %s"%poi
+  print(" --> Calculating theory uncertainty: %s"%poi)
   FracHigh01Sigma2, FracLow01Sigma2 = 0,0
   # Loop over systematics:
   for ts in th_systs:
     if not w.var(ts): continue #If var not in workspace
     up_fracvar, down_fracvar = (poi_xsbr_var[poi]['%s_Up01Sigma'%ts]/poi_xsbr[poi]-1), (poi_xsbr_var[poi]['%s_Down01Sigma'%ts]/poi_xsbr[poi]-1)
-    print "    * %s: (upfracvar,downfracvar) = (%.3f,%.3f)"%(ts,up_fracvar,down_fracvar)
+    print("    * %s: (upfracvar,downfracvar) = (%.3f,%.3f)"%(ts,up_fracvar,down_fracvar))
     if up_fracvar >= 0: 
       FracHigh01Sigma2 += up_fracvar*up_fracvar
       FracLow01Sigma2 += down_fracvar*down_fracvar
@@ -232,7 +232,7 @@ for poi in pois:
   xsbr_theory[poi]['FracLow01Sigma'] = FracLow01Sigma
 
 # Write to json file
-print " --> Writing to json file: xsbr_theory_%s.json"%opt.mode
+print(" --> Writing to json file: xsbr_theory_%s.json"%opt.mode)
 if not os.path.isdir("./jsons"): os.system("mkdir ./jsons")
 mH_str = "mH_"+re.sub("\.","p","%.2f"%w.var("MH").getVal())
 with open("./jsons/xsbr_theory_%s_%s.json"%(opt.mode,mH_str),'w') as jsonfile: json.dump(xsbr_theory,jsonfile)

@@ -202,10 +202,10 @@ for poi_idx in range(len(params[opt.mode])):
 # Get maximum and min values
 nominal_max, nominal_min = 0, 999
 ratio_max = 0
-for gr in grs_nominal.itervalues():
+for gr in grs_nominal.values():
   if max(gr.GetY()) > nominal_max: nominal_max = max(gr.GetY())
   if min(gr.GetY()) < nominal_min: nominal_min = min(gr.GetY())
-for mode, gr in grs_ratio.iteritems():
+for mode, gr in grs_ratio.items():
   if mode == "tH": continue
   if max(gr.GetY()) > ratio_max: ratio_max = max(gr.GetY())
 
@@ -266,10 +266,10 @@ for i in range(1,nPOIs):
   vlines['vline_%g'%i] = ROOT.TLine(i,haxes.GetMinimum(),i,haxes.GetMaximum())
   vlines['vline_%g'%i].SetLineColorAlpha(ROOT.kGray,0.5)
   vlines['vline_%g'%i].Draw("SAME")
-for gr in grs_nominal_theory.itervalues(): gr.Draw("SAME E2")
-for gr in grs_nominal_theory_v.itervalues(): gr.Draw("SAME PE")
-for gr in grs_nominal_systonly.itervalues(): gr.Draw("SAME E2")
-for gr in grs_nominal.itervalues(): gr.Draw("SAME E2P")
+for gr in grs_nominal_theory.values(): gr.Draw("SAME E2")
+for gr in grs_nominal_theory_v.values(): gr.Draw("SAME PE")
+for gr in grs_nominal_systonly.values(): gr.Draw("SAME E2")
+for gr in grs_nominal.values(): gr.Draw("SAME E2P")
 if( "minimal" in opt.mode )|( "extended" in opt.mode  ): grs_nominal_VBFlike.Draw("SAME ZP")
 #for gr in grs_nominal_bf.itervalues(): gr.Draw("SAME E2")
 # Add legend
@@ -430,9 +430,9 @@ if opt.doTHBox:
 
 
 # Draw graphs
-for gr in grs_ratio_theory.itervalues(): gr.Draw("SAME E2")
-for gr in grs_ratio_systonly.itervalues(): gr.Draw("SAME E2")
-for gr in grs_ratio.itervalues(): gr.Draw("SAME ZP")
+for gr in grs_ratio_theory.values(): gr.Draw("SAME E2")
+for gr in grs_ratio_systonly.values(): gr.Draw("SAME E2")
+for gr in grs_ratio.values(): gr.Draw("SAME ZP")
 if( "minimal" in opt.mode )|( "extended" in opt.mode ): grs_ratio_VBFlike.Draw("SAME ZP")
 if opt.doTHBox:
   grs_ratio_theory_TH.Draw("SAME E2")

@@ -1,0 +1,8 @@
+{
+    "mu_inclusive":{
+        "pois":"r",
+        "fits":"bestfit:syst:r",
+        "points":"1",
+        "fit_opts":"--saveWorkspace --setParameterRanges r=0,2 --saveSpecifiedNuis all --freezeParameters MH"
+    }
+}

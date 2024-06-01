@@ -11,10 +11,10 @@ import pickle
 import json
 from collections import OrderedDict as od
 
-print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG RESULTS TABLES RUN II ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ "
+print(" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG RESULTS TABLES RUN II ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ")
 def leave():
-  print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG RESULTS TABLES RUN II (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ "
-  sys.exit(1)
+  print(" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG RESULTS TABLES RUN II (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ")
+  exit(0)
 
 params = od()
 params['stage0'] = ['r_ggH', 'r_qqH', 'r_WH_lep', 'r_ZH_lep', 'r_ttH', 'r_tH']

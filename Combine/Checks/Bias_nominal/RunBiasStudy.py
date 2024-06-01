@@ -20,7 +20,7 @@ parser.add_option("--split",default=500,type="int")
 parser.add_option("--selectFunction",default=None)
 parser.add_option("--gaussianFit",action="store_true", default=False)
 (opts,args) = parser.parse_args()
-print
+print()
 if opts.nToys>opts.split and not opts.nToys%opts.split==0: raise RuntimeError('The number of toys %g needs to be smaller than or divisible by the split number %g'%(opts.nToys, opts.split))
 
 import ROOT as r
@@ -35,9 +35,9 @@ for pdf in pdfs:
     if pdf.InheritsFrom("RooMultiPdf"):
         if multipdfName is not None: raiseMultiError() 
         multipdfName = pdf.GetName()
-        print 'Conduct bias study for multipdf called %s'%multipdfName
+        print('Conduct bias study for multipdf called %s'%multipdfName)
 multipdf = ws.pdf(multipdfName)
-print
+print()
 
 varlist = rooArgSetToList(ws.allCats())
 indexName = None
@@ -45,8 +45,8 @@ for var in varlist:
     if var.GetName().startswith('pdfindex'):
         if indexName is not None: raiseMultiError()
         indexName = var.GetName()
-        print 'Found index called %s'%indexName
-print
+        print('Found index called %s'%indexName)
+print()
 
 from collections import OrderedDict as od
 indexNameMap = od()
@@ -58,7 +58,7 @@ for ipdf in range(multipdf.getNumPdfs()):
 if opts.toys:
     if not path.isdir('BiasToysn'): system('mkdir -p BiasToys')
     toyCmdBase = 'combine -m %.4f -d %s -M GenerateOnly --expectSignal %.4f -s %g --saveToys %s '%(opts.mH, opts.datacard, opts.expectSignal, opts.seed, opts.combineOptions)
-    for ipdf,pdfName in indexNameMap.iteritems():
+    for ipdf,pdfName in indexNameMap.items():
         name = shortName(pdfName)
         if opts.nToys > opts.split:
             for isplit in range(opts.nToys//opts.split):
@@ -69,12 +69,12 @@ if opts.toys:
             toyCmd = toyCmdBase + ' -t %g -n _%s --setParameters %s=%g --freezeParameters %s'%(opts.nToys, name, indexName, ipdf, indexName)
             run(toyCmd, dry=opts.dryRun)
             system('mv higgsCombine_%s* %s'%(name, toyName(name)))
-print
+print()
 
 if opts.fits:
     if not path.isdir('BiasFits'): system('mkdir -p BiasFits')
     fitCmdBase = 'combine -m %.4f -d %s -M MultiDimFit -P %s --algo singles %s '%(opts.mH, opts.datacard, opts.poi, opts.combineOptions)
-    for ipdf,pdfName in indexNameMap.iteritems():
+    for ipdf,pdfName in indexNameMap.items():
         name = shortName(pdfName)
         if opts.nToys > opts.split:
             for isplit in range(opts.nToys//opts.split):
@@ -89,7 +89,7 @@ if opts.fits:
 
 if opts.plots:
     if not path.isdir('BiasPlots'): system('mkdir -p BiasPlots')
-    for ipdf,pdfName in indexNameMap.iteritems():
+    for ipdf,pdfName in indexNameMap.items():
         name = shortName(pdfName)
         tfile = r.TFile(fitName(name))
         tree = tfile.Get('limit')

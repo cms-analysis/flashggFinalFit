@@ -64,9 +64,9 @@ if opt.mode == "fixed":
     with open("pdfindex.json", "r") as jf:
         pdf_index_bf = json.load(jf)
 
-    pdf_index_freeze = ",".join(pdf_index_bf.keys())
+    pdf_index_freeze = ",".join(list(pdf_index_bf.keys()))
     pdf_index_set = ""
-    for k,v in pdf_index_bf.items(): pdf_index_set += "%s=%s,"%(k,v)
+    for k,v in list(pdf_index_bf.items()): pdf_index_set += "%s=%s,"%(k,v)
     pdf_index_set = pdf_index_set[:-1]
 
     cmd = "combine -m %s -d higgsCombine_initial.MultiDimFit.mH%s.root -M Significance --snapshotName MultiDimFit --cminDefaultMinimizerStrategy 0 --setParameters MH=%s,%s --expectSignal 0 --freezeParameters MH,%s -n _fixed_ -t %s --X-rtd MINIMIZER_freezeDisassociatedParams --X-rtd MINIMIZER_multiMin_hideConstants --X-rtd MINIMIZER_multiMin_maskConstraints --X-rtd MINIMIZER_multiMin_maskChannels=2 --toysFile toys.root --X-rtd ADDNLL_RECURSIVE=1; mv higgsCombine_fixed_* fit_fixed.root"%(opt.MH,opt.MH,opt.MH,pdf_index_set,pdf_index_freeze,opt.nToys)

@@ -218,8 +218,11 @@ def writeMCStatUncertainty(f,d,options):
       # Loop over categories and then iterate over rows in category
       for cat in d.cat.unique():
         for ir,r in d[d['cat']==cat].iterrows():
-          if r['type'] != "sig": continue
-          sval = scval if cat == scat else '-'
+          if r['proc'] == "data_obs": continue
+          elif r['type'] == "sig": 
+            sval = scval if cat == scat else '-'
+          else:
+            sval = '-'
           # Extract value and add to line (with checks)
           lsyst = addSyst(lsyst,sval,stitle,r['proc'],cat)
       # Remove final space from line and add to file

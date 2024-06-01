@@ -51,7 +51,7 @@ z_envelope = z_envelope[z_envelope<z_thr]
 N_fixed = len(z_fixed)
 N_envelope = len(z_envelope)
 
-print("N_fixed = %g, N_envelope = %g"%(N_fixed,N_envelope))
+print(("N_fixed = %g, N_envelope = %g"%(N_fixed,N_envelope)))
 
 p_fixed, p_envelope = [], []
 err_fixed, err_envelope = [], []

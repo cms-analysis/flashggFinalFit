@@ -263,10 +263,10 @@ def MakeGraph(drawlist, hframe, label='Error', valid_checks=[],productionMode=No
             if not info["%sHi" % v]:
                 valid_hi = False
         if not valid_lo:
-            print 'Warning, entry %sLo for %s is not valid' % (label, info["Name"])
+            print('Warning, entry %sLo for %s is not valid' % (label, info["Name"]))
             # err_lo = 0.0
         if not valid_hi:
-            print 'Warning, Entry %sHi for %s is not valid' % (label, info["Name"])
+            print('Warning, Entry %sHi for %s is not valid' % (label, info["Name"]))
             # err_hi = 0.0
         gr_bar.SetPointError(i, err_lo, err_hi, 0., 0.)
     return gr_bar
@@ -306,7 +306,7 @@ def MakeYaxis(N, hframe, bin_labels=[], label_size=1.0):
     height = (ymax - ymin) * frac
     gaxis = ROOT.TGaxis(xmin, 0, xmin, ymin + height,
                    0, N, N, '-M')
-    for i in xrange(N):
+    for i in range(N):
         gaxis.ChangeLabel(i + 1, -1, -1, -1, -1, -1, ROOT.TString(bin_labels[i]))
     gaxis.SetLabelFont(42)
     gaxis.SetLabelSize(gaxis.GetLabelSize() * label_size)
@@ -375,7 +375,7 @@ if __name__ == "__main__":
         poilist.extend(pois)
         drawlist.extend(CopyDataFromJsonFile(jsonfilename, model, pois))
 
-    print drawlist
+    print(drawlist)
 
     N = len(poilist)
 
@@ -393,7 +393,7 @@ if __name__ == "__main__":
     hframe.Draw()
 
     bin_labels = [Translate(poi, translate) for poi in poilist]
-    for i, new_label in relabel.iteritems():
+    for i, new_label in relabel.items():
         bin_labels[i] = new_label
 
     #gaxis = MakeYaxis(N, hframe, bin_labels=bin_labels, label_size=0.5)
@@ -528,7 +528,7 @@ if __name__ == "__main__":
         # plot.Set(line, **linestyle)
         #line.DrawLine(xleft, 0., xleft, float(N) * YEntryHeight(N, hframe))
         remove_x_labels = 0
-        for il in xrange(remove_x_labels):
+        for il in range(remove_x_labels):
             hframe.GetXaxis().ChangeLabel(-1 * il, -1, -1, -1, -1, -1, " ")
         # n_labels = hframe.GetXaxis().GetLabels().GetSize()
         # print n_labels

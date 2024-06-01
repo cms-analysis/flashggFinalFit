@@ -13,10 +13,10 @@ import json
 from usefulStyle import setCanvas, drawCMS, drawEnPu, drawEnYear, formatHisto
 from shanePalette import set_color_palette
 
-print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG YIELDS RUN II ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ "
+print(" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG YIELDS RUN II ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ")
 def leave():
-  print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG YIELDS RUN II (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ "
-  sys.exit(1)
+  print(" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG YIELDS RUN II (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ")
+  exit(0)
 
 ROOT.gROOT.SetBatch(True)
 
@@ -167,7 +167,7 @@ if opt.mode == 'migration': cats.insert(0,"NOTAG")
 
 # Load input dataFrame from pickle file
 if not os.path.exists( opt.inputPkl ): 
-  print " --> [ERROR] Input pickle file does not exist. Leaving"
+  print(" --> [ERROR] Input pickle file does not exist. Leaving")
   leave()
 with open( opt.inputPkl, "rb" ) as fin: idata = pickle.load(fin)
 
@@ -181,7 +181,7 @@ for pm in productionModes:
     _proc = stxsBin
     paramFound = False
     if opt.paramMergingScheme in paramMergingSchemes:
-      for p, mergeBins in paramMergingSchemes[opt.paramMergingScheme].iteritems():
+      for p, mergeBins in paramMergingSchemes[opt.paramMergingScheme].items():
         if paramFound: continue
         if _proc in mergeBins: 
           _param = p
@@ -338,7 +338,7 @@ lines['l_bd_right'] = ROOT.TLine(nParams,0,nParams,nCats)
 lines['l_bd_right'].SetLineColorAlpha(ROOT.kBlack,0.5)
 lines['l_bd_right'].SetLineWidth(2)
 
-for l in lines.itervalues(): l.Draw()
+for l in lines.values(): l.Draw()
 
 # Writing text
 drawCMS(True)

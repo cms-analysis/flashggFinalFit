@@ -21,7 +21,7 @@ def raiseMultiError(lax=False):
 def raiseFailError(itoy, lax=False):
     text = 'some fits have failed, wrong quantile for toy number %g'%itoy
     if not lax: raise RuntimeError('ERROR %s'%text)
-    else: print 'WARNING %s'%text
+    else: print('WARNING %s'%text)
 
 def shortName(name):
     return name.split('_')[-1]
@@ -44,5 +44,5 @@ def plotName(name):
     return 'BiasPlots/biasStudy_%s_pulls'%name
 
 def run(cmd, dry=False):
-   print cmd
+   print(cmd)
    if not dry: system(cmd)

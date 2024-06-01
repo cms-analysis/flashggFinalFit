@@ -77,7 +77,7 @@ OtherSystGroups_rgx = od()
 ExpSystGroups = od()
 TheorySystGroups = od()
 OtherSystGroups = od()
-for gr, gr_rgxs in ExpSystGroups_rgx.iteritems():
+for gr, gr_rgxs in ExpSystGroups_rgx.items():
   ExpSystGroups[gr] = []
   # Loop over params and check if satsify rgx
   for p in impacts:
@@ -93,7 +93,7 @@ for gr, gr_rgxs in ExpSystGroups_rgx.iteritems():
       if inRGX: inGroup = True
     if inGroup: ExpSystGroups[gr].append(pname)
 
-for gr, gr_rgxs in TheorySystGroups_rgx.iteritems():
+for gr, gr_rgxs in TheorySystGroups_rgx.items():
   TheorySystGroups[gr] = []
   # Loop over params and check if satsify rgx
   for p in impacts:
@@ -109,7 +109,7 @@ for gr, gr_rgxs in TheorySystGroups_rgx.iteritems():
       if inRGX: inGroup = True
     if inGroup: TheorySystGroups[gr].append(pname)
 
-for gr, gr_rgxs in OtherSystGroups_rgx.iteritems():
+for gr, gr_rgxs in OtherSystGroups_rgx.items():
   OtherSystGroups[gr] = []
   # Loop over params and check if satsify rgx
   for p in impacts:
@@ -128,9 +128,9 @@ for gr, gr_rgxs in OtherSystGroups_rgx.iteritems():
 ExpSystVals = od()
 TheorySystVals = od()
 OtherSystVals = od()
-for gr, systs in ExpSystGroups.iteritems():
+for gr, systs in ExpSystGroups.items():
   ExpSystVals[gr] = {}
-  print " --> %s"%gr
+  print(" --> %s"%gr)
   # Loop over pois
   for poi in opt.pois.split(","):
     u_up, u_down = 0, 0
@@ -155,13 +155,13 @@ for gr, systs in ExpSystGroups.iteritems():
             else:
               u_up += b*b
               u_down += a*a
-    print "   * %s: (+%.4f,-%.4f)"%(poi,math.sqrt(u_up),math.sqrt(u_down))
+    print("   * %s: (+%.4f,-%.4f)"%(poi,math.sqrt(u_up),math.sqrt(u_down)))
     ExpSystVals[gr]['%s_up'%poi] = math.sqrt(u_up)
     ExpSystVals[gr]['%s_down'%poi] = math.sqrt(u_down)
 
-for gr, systs in TheorySystGroups.iteritems():
+for gr, systs in TheorySystGroups.items():
   TheorySystVals[gr] = {}
-  print " --> %s"%gr
+  print(" --> %s"%gr)
   # Loop over pois
   for poi in opt.pois.split(","):
     u_up, u_down = 0, 0
@@ -186,13 +186,13 @@ for gr, systs in TheorySystGroups.iteritems():
             else:
               u_up += b*b
               u_down += a*a
-    print "   * %s: (+%.4f,-%.4f)"%(poi,math.sqrt(u_up),math.sqrt(u_down))
+    print("   * %s: (+%.4f,-%.4f)"%(poi,math.sqrt(u_up),math.sqrt(u_down)))
     TheorySystVals[gr]['%s_up'%poi] = math.sqrt(u_up)
     TheorySystVals[gr]['%s_down'%poi] = math.sqrt(u_down)
 
-for gr, systs in OtherSystGroups.iteritems():
+for gr, systs in OtherSystGroups.items():
   OtherSystVals[gr] = {}
-  print " --> %s"%gr
+  print(" --> %s"%gr)
   # Loop over pois
   for poi in opt.pois.split(","):
     u_up, u_down = 0, 0
@@ -217,7 +217,7 @@ for gr, systs in OtherSystGroups.iteritems():
             else:
               u_up += b*b
               u_down += a*a
-    print "   * %s: (+%.4f,-%.4f)"%(poi,math.sqrt(u_up),math.sqrt(u_down))
+    print("   * %s: (+%.4f,-%.4f)"%(poi,math.sqrt(u_up),math.sqrt(u_down)))
     OtherSystVals[gr]['%s_up'%poi] = math.sqrt(u_up)
     OtherSystVals[gr]['%s_down'%poi] = math.sqrt(u_down)
 
@@ -226,9 +226,9 @@ if opt.inputExpJson != '':
   ExpSystVals_exp = od()
   TheorySystVals_exp = od()
   OtherSystVals_exp = od()
-  for gr, systs in ExpSystGroups.iteritems():
+  for gr, systs in ExpSystGroups.items():
     ExpSystVals_exp[gr] = {}
-    print " --> %s"%gr
+    print(" --> %s"%gr)
     #if gr == "Photon identification":
     #  systs = ['CMS_hgg_phoIdMva']#`_2016','CMS_hgg_phoIdMva_2017','CMS_hgg_phoIdMva_2018']
     # Loop over pois
@@ -255,7 +255,7 @@ if opt.inputExpJson != '':
               else:
                 u_up += b*b
                 u_down += a*a
-      print "   * %s: (+%.4f,-%.4f)"%(poi,math.sqrt(u_up),math.sqrt(u_down))
+      print("   * %s: (+%.4f,-%.4f)"%(poi,math.sqrt(u_up),math.sqrt(u_down)))
       if( poi == "r_ggH")&( gr in ['Lepton ID and reconstruction','B Tagging','MET'] ):
         ExpSystVals_exp[gr]['%s_up'%poi] = 0.0005
         ExpSystVals_exp[gr]['%s_down'%poi] = 0.0005
@@ -263,9 +263,9 @@ if opt.inputExpJson != '':
         ExpSystVals_exp[gr]['%s_up'%poi] = math.sqrt(u_up)
         ExpSystVals_exp[gr]['%s_down'%poi] = math.sqrt(u_down)
 
-  for gr, systs in TheorySystGroups.iteritems():
+  for gr, systs in TheorySystGroups.items():
     TheorySystVals_exp[gr] = {}
-    print " --> %s"%gr
+    print(" --> %s"%gr)
     # No UEPS for expected: copy 
     #if gr == "Underlying event and parton shower":
     #  for k, v in TheorySystVals[gr].iteritems():
@@ -295,13 +295,13 @@ if opt.inputExpJson != '':
               else:
                 u_up += b*b
                 u_down += a*a
-      print "   * %s: (+%.4f,-%.4f)"%(poi,math.sqrt(u_up),math.sqrt(u_down))
+      print("   * %s: (+%.4f,-%.4f)"%(poi,math.sqrt(u_up),math.sqrt(u_down)))
       TheorySystVals_exp[gr]['%s_up'%poi] = math.sqrt(u_up)
       TheorySystVals_exp[gr]['%s_down'%poi] = math.sqrt(u_down)
 
-  for gr, systs in OtherSystGroups.iteritems():
+  for gr, systs in OtherSystGroups.items():
     OtherSystVals_exp[gr] = {}
-    print " --> %s"%gr
+    print(" --> %s"%gr)
     # Loop over pois
     for poi in opt.pois.split(","):
       u_up, u_down = 0, 0
@@ -326,7 +326,7 @@ if opt.inputExpJson != '':
               else:
                 u_up += b*b
                 u_down += a*a
-      print "   * %s: (+%.4f,-%.4f)"%(poi,math.sqrt(u_up),math.sqrt(u_down))
+      print("   * %s: (+%.4f,-%.4f)"%(poi,math.sqrt(u_up),math.sqrt(u_down)))
       OtherSystVals_exp[gr]['%s_up'%poi] = math.sqrt(u_up)
       OtherSystVals_exp[gr]['%s_down'%poi] = math.sqrt(u_down)
 
@@ -335,7 +335,7 @@ if opt.inputExpJson != '':
 colorMap = {'r_ggH':ROOT.kAzure-9,'r_VBF':ROOT.kOrange-4,'r_VH':ROOT.kGreen-6,'r_top':ROOT.kMagenta-9}
 ROOT.gStyle.SetOptStat(0)
 nPOIs = len(opt.pois.split(","))
-nGroups = len(ExpSystGroups.keys())+len(TheorySystGroups.keys())+len(OtherSystGroups.keys())
+nGroups = len(list(ExpSystGroups.keys()))+len(list(TheorySystGroups.keys()))+len(list(OtherSystGroups.keys()))
 chunk_width = 175
 #chunk_width = 150
 canv_width = chunk_width*(nPOIs+3)
@@ -344,9 +344,9 @@ canv = ROOT.TCanvas("canv","canv",canv_width,800)
 canv.SetLeftMargin(2*float(chunk_width)/canv_width)
 # Define axes histogram for canvas
 haxes_canv = ROOT.TH2F("h_axes","",nPOIs,0,nPOIs,nGroups+1,0,nGroups+1)
-binLabels = ExpSystGroups.keys()
-binLabels.extend(TheorySystGroups.keys())
-binLabels.extend(OtherSystGroups.keys())
+binLabels = list(ExpSystGroups.keys())
+binLabels.extend(list(TheorySystGroups.keys()))
+binLabels.extend(list(OtherSystGroups.keys()))
 binLabels_rev = list(binLabels)
 binLabels_rev.reverse()
 for bidx in range(2,haxes_canv.GetNbinsY()+1): haxes_canv.GetYaxis().SetBinLabel(bidx,binLabels_rev[bidx-2])
@@ -382,14 +382,14 @@ for pidx in range(nPOIs):
   f = 1./poiVals[poi] if opt.doRelative else 1.
   max_vals[poi] = 0
   for systVals in [ExpSystVals,TheorySystVals,OtherSystVals]:
-    for gr,vals in systVals.iteritems():
+    for gr,vals in systVals.items():
       if abs(vals['%s_up'%poi])*f > max_val: max_val = abs(vals['%s_up'%poi])*f
       if abs(vals['%s_down'%poi])*f > max_val: max_val = abs(vals['%s_down'%poi])*f
       if abs(vals['%s_up'%poi])*f > max_vals[poi]: max_vals[poi] = abs(vals['%s_up'%poi])*f
       if abs(vals['%s_down'%poi])*f > max_vals[poi]: max_vals[poi] = abs(vals['%s_down'%poi])*f
   if opt.inputExpJson != '':
     for systVals in [ExpSystVals_exp,TheorySystVals_exp,OtherSystVals_exp]:
-      for gr,vals in systVals.iteritems():
+      for gr,vals in systVals.items():
         if abs(vals['%s_up'%poi]) > max_val: max_val = abs(vals['%s_up'%poi])
         if abs(vals['%s_down'%poi]) > max_val: max_val = abs(vals['%s_down'%poi])
         if abs(vals['%s_up'%poi]) > max_vals[poi]: max_vals[poi] = abs(vals['%s_up'%poi])
@@ -423,7 +423,7 @@ for pidx in range(nPOIs):
   #graphs[poi].SetFillColor(ROOT.kGray)
   binidx = 1
   for systVals in [ExpSystVals,TheorySystVals,OtherSystVals]:
-    for gr,vals in systVals.iteritems():
+    for gr,vals in systVals.items():
       graphs[poi].SetPoint(binidx-1,0.001,nGroups-binidx+1.5)
       if opt.doRelative: graphs[poi].SetPointError(binidx-1,0,(100./poiVals[poi])*max(abs(vals['%s_down'%poi]),abs(vals['%s_up'%poi])),0.25,0.25)
       else: graphs[poi].SetPointError(binidx-1,0,max(abs(vals['%s_down'%poi]),abs(vals['%s_up'%poi])),0.25,0.25)
@@ -440,7 +440,7 @@ if opt.inputExpJson != '':
     graphs_exp[poi].SetFillStyle(0)
     binidx = 1
     for systVals in [ExpSystVals_exp,TheorySystVals_exp,OtherSystVals_exp]:
-      for gr,vals in systVals.iteritems():
+      for gr,vals in systVals.items():
         graphs_exp[poi].SetPoint(binidx-1,0.001,nGroups-binidx+1.5)
         if opt.doRelative: graphs_exp[poi].SetPointError(binidx-1,0,100*max(abs(vals['%s_down'%poi]),abs(vals['%s_up'%poi])),0.25,0.25)
         else: graphs_exp[poi].SetPointError(binidx-1,0,max(abs(vals['%s_down'%poi]),abs(vals['%s_up'%poi])),0.25,0.25)
@@ -469,7 +469,7 @@ for pidx in range(nPOIs):
   # Create lines
   for lidx in range(1,nGroups+1):
     lines["%s_%s"%(poi,lidx)] = ROOT.TLine(haxes[poi].GetXaxis().GetXmin(),lidx,haxes[poi].GetXaxis().GetXmax(),lidx)
-    if lidx == len(TheorySystGroups.keys())+1:
+    if lidx == len(list(TheorySystGroups.keys()))+1:
       lines["%s_%s"%(poi,lidx)].SetLineWidth(1)
     else:
       lines["%s_%s"%(poi,lidx)].SetLineColorAlpha(ROOT.kGray,0.5)

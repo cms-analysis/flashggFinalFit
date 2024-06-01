@@ -6,7 +6,7 @@ from optparse import OptionParser
 import glob
 import json
 
-print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG COLLECT FITS RUN II ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ "
+print(" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG COLLECT FITS RUN II ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ")
 
 def get_options():
   parser = OptionParser()
@@ -18,8 +18,8 @@ def get_options():
 (opt,args) = get_options()
 
 def leave():
-  print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG COLLECT FITS RUN II (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ "
-  sys.exit(1)
+  print(" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG COLLECT FITS RUN II (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ")
+  exit(0)
 
 def run(cmd):
   #print "%s\n"%cmd
@@ -45,13 +45,13 @@ for fidx in range(len(fits)):
   if( _fit.split(":")[0] == "bestfit" ):
     for poi in _fitpois:
       mvcmd = "cd runFits%s_%s; mv higgsCombine_%s_%s.MultiDimFit.mH125.root %s_%s.root; cd .."%(opt.ext,opt.mode,_name,poi,_name,poi)
-      print " --> Storing best fit: runFits%s_%s/%s_%s.root"%(opt.ext,opt.mode,_name,poi)
+      print(" --> Storing best fit: runFits%s_%s/%s_%s.root"%(opt.ext,opt.mode,_name,poi))
       run(mvcmd)
 
   elif( _fit.split(":")[0] == "fixed" ):
     for poi in _fitpois:
       mvcmd = "cd runFits%s_%s; mv higgsCombine_%s_%s.MultiDimFit.mH125.root %s.root; cd .."%(opt.ext,opt.mode,_name,poi,_name)
-      print " --> Storing fixed point: runFits%s_%s/%s.root"%(opt.ext,opt.mode,_name)
+      print(" --> Storing fixed point: runFits%s_%s/%s.root"%(opt.ext,opt.mode,_name))
       run(mvcmd)
 
   elif( _fit.split(":")[0] == "profile1D")|( _fit.split(":")[0] == "scan1D" ):

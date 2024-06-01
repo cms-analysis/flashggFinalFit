@@ -99,7 +99,7 @@ def set_color_palette(name, alpha=1., ncontours=256):
         green = [0.00, 0.81, 1.00, 0.20, 0.00]
         blue  = [0.51, 1.00, 0.12, 0.00, 0.00]
     else:
-        raise AttributeError, "Palette '{0}' undefined".format(str(name))
+        raise AttributeError("Palette '{0}' undefined".format(str(name)))
 
     stops = array('d', stops)
     red   = array('d', red)
