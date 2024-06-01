@@ -4,6 +4,7 @@ import math
 import pandas
 import numpy as np
 import re
+import scipy.stats
 
 def Translate(name, ndict):
     return ndict[name] if name in ndict else name
@@ -144,33 +145,16 @@ def makeSplusBPlot(workspace,hD,hSB,hB,hS,hDr,hBr,hSr,cat,options,dB=None,reduce
       gr_1sig_r.SetPointError(gr_i,xerr,xerr,properties['median']-properties['down1sigma'],properties['up1sigma']-properties['median'])
       gr_2sig_r.SetPointError(gr_i,xerr,xerr,properties['median']-properties['down2sigma'],properties['up2sigma']-properties['median'])
       gr_i += 1
-    gr_1sig.SetFillColor(ROOT.kGreen)
+    gr_1sig.SetFillColor(ROOT.kGreen+1)
     gr_1sig.SetFillStyle(1001)
-    gr_2sig.SetFillColor(ROOT.kYellow)
+    gr_2sig.SetFillColor(ROOT.kOrange)
     gr_2sig.SetFillStyle(1001)
-    gr_1sig_r.SetFillColor(ROOT.kGreen)
+    gr_1sig_r.SetFillColor(ROOT.kGreen+1)
     gr_1sig_r.SetFillStyle(1001)
-    gr_2sig_r.SetFillColor(ROOT.kYellow)
+    gr_2sig_r.SetFillColor(ROOT.kOrange)
     gr_2sig_r.SetFillStyle(1001)
     gr_2sig.Draw("LE3SAME")
     gr_1sig.Draw("LE3SAME")
-  # Add legend
-  if options.doBands: leg = ROOT.TLegend(0.58,0.46,0.86,0.76)
-  else: leg = ROOT.TLegend(0.58,0.52,0.86,0.76)
-  leg.SetFillStyle(0)
-  leg.SetLineColor(0)
-  leg.SetTextSize(0.045)
-  leg.AddEntry(hD,"Data","ep")
-  if options.unblind:
-    leg.AddEntry(hSB['pdfNBins'],"S+B fit","l")
-    leg.AddEntry(hB['pdfNBins'],"B component","l")
-  else:
-    leg.AddEntry(hB['pdfNBins'],"B fit","l")
-    leg.AddEntry(hS['pdfNBins'],"S model","fl")
-  if options.doBands:
-    leg.AddEntry(gr_1sig,"#pm1 #sigma","F")
-    leg.AddEntry(gr_2sig,"#pm2 #sigma","F")
-  leg.Draw("Same")
   # Set pdf style
   if options.unblind:
     hSB['pdfNBins'].SetLineWidth(3)
@@ -190,11 +174,39 @@ def makeSplusBPlot(workspace,hD,hSB,hB,hS,hDr,hBr,hSr,cat,options,dB=None,reduce
     hB['pdfNBins'].SetLineWidth(3)
     hB['pdfNBins'].SetLineColor(2)
     hB['pdfNBins'].Draw("Hist same c")
+
   # Set data style
-  hD.SetMarkerStyle(20)
-  hD.SetMarkerColor(1)
-  hD.SetLineColor(1)
-  hD.Draw("Same PE")
+  gD = ROOT.TGraphAsymmErrors()
+  for ibin in range(1,hD.GetNbinsX()+1):
+    gD.SetPoint(ibin-1,hD.GetBinCenter(ibin),hD.GetBinContent(ibin))
+    l = scipy.stats.gamma.interval(0.68,hD.GetBinContent(ibin))[0]
+    # Catch for zero entries
+    if l!=l: l = 0
+    u = scipy.stats.gamma.interval(0.68,hD.GetBinContent(ibin)+1)[1]
+    gD.SetPointError(ibin-1,0,0,abs(hD.GetBinContent(ibin)-l),abs(hD.GetBinContent(ibin)-u))
+  gD.SetMarkerColor(1)
+  gD.SetMarkerStyle(20)
+  gD.SetFillColor(2)
+  gD.Draw("Same PE")
+
+  # Add legend
+  if options.doBands: leg = ROOT.TLegend(0.58,0.46,0.86,0.76)
+  else: leg = ROOT.TLegend(0.58,0.52,0.86,0.76)
+  leg.SetFillStyle(0)
+  leg.SetLineColor(0)
+  leg.SetTextSize(0.045)
+  leg.AddEntry(gD,"Data","ep")
+  if options.unblind:
+    leg.AddEntry(hSB['pdfNBins'],"S+B fit","l")
+    leg.AddEntry(hB['pdfNBins'],"B component","l")
+  else:
+    leg.AddEntry(hB['pdfNBins'],"B fit","l")
+    leg.AddEntry(hS['pdfNBins'],"S model","fl")
+  if options.doBands:
+    leg.AddEntry(gr_1sig,"#pm1 #sigma","F")
+    leg.AddEntry(gr_2sig,"#pm2 #sigma","F")
+  leg.Draw("Same")
+
   # Add TLatex to plot
   lat0 = ROOT.TLatex()
   lat0.SetTextFont(42)
@@ -202,28 +214,11 @@ def makeSplusBPlot(workspace,hD,hSB,hB,hS,hDr,hBr,hSr,cat,options,dB=None,reduce
   lat0.SetNDC()
   lat0.SetTextSize(0.06)
   #lat0.DrawLatex(0.12,0.92,"#bf{CMS} #it{Preliminary}")
-  #lat0.DrawLatex(0.12,0.92,"#bf{CMS}")
-  lat0.DrawLatex(0.6,0.92,"137 fb^{-1} (13 TeV)")
+  lat0.DrawLatex(0.12,0.92,"#bf{CMS}")
+  lat0.DrawLatex(0.6,0.92,"8.0 fb^{-1} (13.6 TeV)")
   lat0.DrawLatex(0.6,0.8,"#scale[0.6]{%s}"%Translate(cat,translateCats))
   #lat0.DrawLatex(0.15,0.83,"#scale[0.75]{H#rightarrow#gamma#gamma}")
   lat0.DrawLatex(0.15,0.83,"#scale[0.75]{H #rightarrow #gamma#gamma, m_{H} = 125.38 GeV}")
-  if(options.loadSnapshot is not None):
-    #lat0.DrawLatex(0.15,0.77,"#scale[0.6]{#vec{#alpha} = STXS stage 1.2 minimal}")
-    lat0.DrawLatex(0.15,0.77,"#scale[0.6]{#vec{#alpha} = (#mu_{ggH}, #mu_{VBF}, #mu_{VH}, #mu_{top})}")
-    #lat0.DrawLatex(0.15,0.77,"#scale[0.5]{(#hat{#mu}_{ggH},#hat{#mu}_{VBF},#hat{#mu}_{VH},#hat{#mu}_{top}) = (1.07,1.04,1.34,1.35)}")
-    #lat0.DrawLatex(0.15,0.77,"#scale[0.75]{#hat{#mu} = 1.03}")
-    #muhat_ggh, muhat_vbf, muhat_vh, muhat_top, mhhat = workspace.var("r_ggH").getVal(), workspace.var("r_VBF").getVal(), workspace.var("r_VH").getVal(), workspace.var("r_top").getVal(), workspace.var("MH").getVal()
-    #lat0.DrawLatex(0.13,0.77,"#scale[0.6]{(#hat{#mu}_{ggH},#hat{#mu}_{VBF},#hat{#mu}_{VH},#hat{#mu}_{top}) = (%.2f,%.2f,%.2f,%.2f)}"%(muhat_ggh,muhat_vbf,muhat_vh,muhat_top))
-    #muhat, mhhat = workspace.var("r").getVal(), workspace.var("MH").getVal()
-    #lat0.DrawLatex(0.13,0.77,"#scale[0.75]{#hat{m}_{H} = %.1f GeV, #hat{#mu} = %.2f}"%(mhhat,muhat))
-  #elif options.parameterMap is not None:
-  #  poiStr = ''
-  #  for kv in options.parameterMap.split(","):
-  #    [k,v] = kv.split(":")
-  #    poiStr += ' %s = %.1f,'%(Translate(k,translatePOIs),float(v))
-  #  poiStr = poiStr[:-1]
-  #  lat0.DrawLatex(0.13,0.77,"#scale[0.75]{%s}"%poiStr)
-  else: lat0.DrawLatex(0.15,0.77,"#scale[0.75]{#mu = 1.0}")
   # Ratio plot
   pad2.cd()
   h_axes_ratio = hDr.Clone()
@@ -262,11 +257,21 @@ def makeSplusBPlot(workspace,hD,hSB,hB,hS,hDr,hBr,hSr,cat,options,dB=None,reduce
     hBr.SetLineWidth(3)
     hBr.SetLineColor(2)
     hBr.Draw("Hist same c")
+
   # Set data style
-  hDr.SetMarkerStyle(20)
-  hDr.SetMarkerColor(1)
-  hDr.SetLineColor(1)
-  hDr.Draw("Same PE")
+  gDr = ROOT.TGraphAsymmErrors()
+  for ibin in range(1,hDr.GetNbinsX()+1):
+    gDr.SetPoint(ibin-1,hDr.GetBinCenter(ibin),hDr.GetBinContent(ibin))
+    l = scipy.stats.gamma.interval(0.68,hD.GetBinContent(ibin))[0]
+    # Catch for zero entries
+    if l!=l: l = 0
+    u = scipy.stats.gamma.interval(0.68,hD.GetBinContent(ibin)+1)[1]
+    gDr.SetPointError(ibin-1,0,0,abs(hD.GetBinContent(ibin)-l),abs(hD.GetBinContent(ibin)-u))
+  gDr.SetMarkerColor(1)
+  gDr.SetMarkerStyle(20)
+  gDr.SetFillColor(2)
+  gDr.Draw("Same PE")
+
   # Add TLatex to ratio plot
   lat1 = ROOT.TLatex()
   lat1.SetTextFont(42)
@@ -277,6 +282,6 @@ def makeSplusBPlot(workspace,hD,hSB,hB,hS,hDr,hBr,hSr,cat,options,dB=None,reduce
 
   # Save canvas
   canv.Update()
-  canv.SaveAs("./SplusBModels%s/%s_%s.png"%(options.ext,cat,options.xvar.split(",")[0]))
-  canv.SaveAs("./SplusBModels%s/%s_%s.pdf"%(options.ext,cat,options.xvar.split(",")[0]))
+  canv.SaveAs("./SplusBModels%s/%s_%s_%s.png"%(options.ext,options.ext,cat,options.xvar.split(",")[0]))
+  canv.SaveAs("./SplusBModels%s/%s_%s_%s.pdf"%(options.ext,options.ext,cat,options.xvar.split(",")[0]))
   #raw_input("Press any key to continue...")

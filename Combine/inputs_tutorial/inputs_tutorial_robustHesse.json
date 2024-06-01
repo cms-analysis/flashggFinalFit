@@ -1,0 +1,8 @@
+{
+    "mu_ggH_VBF":{
+        "pois":"r_ggH,r_VBF",
+        "fits":"robustHesse:syst:r_ggH",
+        "points":"",
+        "fit_opts":"--saveInactivePOI 1 --setParameterRanges r_ggH=0,3:r_VBF=0,5 --saveSpecifiedNuis all --freezeParameters MH"
+    }
+}

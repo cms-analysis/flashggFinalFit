@@ -12,6 +12,7 @@ import pickle
 import math
 import json
 from collections import OrderedDict
+import scipy.stats
 # Scripts for plotting
 from plottingTools import getEffSigma, makeSplusBPlot
 
@@ -152,12 +153,12 @@ else:
       S = SB-B 
       # If option doBkfRenormalization: renormalize B pdf to be S+B-S
       if opt.doBkgRenormalization:
-	Bcorr = B-S
-	SBcorr = B
-	normFactor_B, normFactor_SB = Bcorr/B, SBcorr/SB
-	h_sbpdf_tmp.Scale(normFactor_SB)
-	h_bpdf_tmp.Scale(normFactor_B)
-	B = Bcorr # set new bkg yield
+        Bcorr = B-S
+        SBcorr = B
+        normFactor_B, normFactor_SB = Bcorr/B, SBcorr/SB
+        h_sbpdf_tmp.Scale(normFactor_SB)
+        h_bpdf_tmp.Scale(normFactor_B)
+        B = Bcorr # set new bkg yield
       # Make signal pdf
       h_spdf_tmp = h_sbpdf_tmp-h_bpdf_tmp
 
@@ -207,7 +208,7 @@ if opt.doBands:
     if opt.doSumCategories: 
       for ibin in range(1,opt.nBins+1):_columns.append("sum_%g"%ibin)
       if opt.doCatWeights: 
-	for ibin in range(1,opt.nBins+1):_columns.append("wsum_%g"%ibin)
+        for ibin in range(1,opt.nBins+1):_columns.append("wsum_%g"%ibin)
     # Create dataframe
     df_bands = pd.DataFrame(columns=_columns)
     # Loop over toys file and add row for each toy dataset
@@ -218,48 +219,49 @@ if opt.doBands:
     else:
       for tidx in range(len(toyFiles)):
         print(" --> Processing toy (%g/%g) ::: %s"%(tidx,len(toyFiles),toyFiles[tidx]))
-	ftoy = ROOT.TFile(toyFiles[tidx])
-	toy = ftoy.Get("toys/toy_asimov")
-        # Fla for vetoing toy
+        ftoy = ROOT.TFile(toyFiles[tidx])
+        toy = ftoy.Get("toys/toy_asimov")
+        # Flag for vetoing toy
         vetoToy = False
-	# Save bin contents in dict
-	values = {}
-	# Add columns for summing categories
+        # Save bin contents in dict
+        values = {}
+        # Add columns for summing categories
         for cat in cats:
           for ibin in range(1,opt.nBins+1): values['%s_%g'%(cat,ibin)] = 0
-	if opt.doSumCategories:
-	  for ibin in range(1,opt.nBins+1): values['sum_%g'%ibin] = 0
-	  if opt.doCatWeights:
-	    for ibin in range(1,opt.nBins+1): values['wsum_%g'%ibin] = 0
-	# Loop over cats
-	for cidx in range(chan.numTypes()):
-	  chan.setIndex(cidx)
-	  c = chan.getLabel()
-	  if( opt.cats == 'all' )|( c in opt.cats.split(",") ):
+        if opt.doSumCategories:
+          for ibin in range(1,opt.nBins+1): values['sum_%g'%ibin] = 0
+          if opt.doCatWeights:
+            for ibin in range(1,opt.nBins+1): values['wsum_%g'%ibin] = 0
+        # Loop over cats
+        for cidx in range(chan.numTypes()):
+          chan.setIndex(cidx)
+          c = chan.getLabel()
+          if( opt.cats == 'all' )|( c in opt.cats.split(",") ):
             if( opt.doHHMjjFix )&( c in catsfix ): 
               _xvar, _xvar_arglist = xvarfix, xvarfix_arglist
             else:
               _xvar, _xvar_arglist = xvar, xvar_arglist
-	    dtoy = toy.reduce("CMS_channel==CMS_channel::%g"%(cidx))
-	    htoy = _xvar.createHistogram("h_%s"%c,ROOT.RooFit.Binning(opt.nBins,xvar.getMin(),xvar.getMax()))
-	    dtoy.fillHistogram(htoy,_xvar_arglist)
-	    for ibin in range(1,htoy.GetNbinsX()+1): 
-	      v = htoy.GetBinContent(ibin)
+            #dtoy = toy.reduce("CMS_channel==CMS_channel::%g"%(cidx))
+            dtoy = toy.reduce("CMS_channel==%g"%(cidx))
+            htoy = _xvar.createHistogram("h_%s"%c,ROOT.RooFit.Binning(opt.nBins,xvar.getMin(),xvar.getMax()))
+            dtoy.fillHistogram(htoy,_xvar_arglist)
+            for ibin in range(1,htoy.GetNbinsX()+1): 
+              v = htoy.GetBinContent(ibin)
               if v!=v: vetoToy = True # Veto toys which have a NaN
-	      values['%s_%g'%(c,ibin)] = v
-	      if opt.doSumCategories:
-	        values['sum_%g'%ibin] += v
-	        if opt.doCatWeights: values['wsum_%g'%ibin] += v*catsWeights[c]
+              values['%s_%g'%(c,ibin)] = v
+              if opt.doSumCategories:
+                values['sum_%g'%ibin] += v
+                if opt.doCatWeights: values['wsum_%g'%ibin] += v*catsWeights[c]
             # Option for vetoing toy
             if opt.doToyVeto:
               if values['%s_1'%c] == 0: vetoToy = True
-	    # Clear memory
-	    htoy.Delete()
-	    dtoy.Delete()
+            # Clear memory
+            htoy.Delete()
+            dtoy.Delete()
         toy.Delete()
         ftoy.Close()
-	# Add values to dataframe
-	if not vetoToy: df_bands.loc[len(df_bands)] = values
+        # Add values to dataframe
+        if not vetoToy: df_bands.loc[len(df_bands)] = values
         else: print("   --> Toy veto: zero entries in first bin")
       # Savin toy yields dataframe to pickle file
       if opt.saveToyYields:
@@ -294,6 +296,16 @@ for cidx in range(len(cats)):
     if opt.unblind: wd.fillHistogram(h_wdata,_xvar_arglist)
     else: wd.reduce("%s<%f|%s>%f"%(_xvar.GetName(),blindingRegion[0],_xvar.GetName(),blindingRegion[1])).fillHistogram(h_wdata,_xvar_arglist)
 
+  # Change to Poisson intervals in data histogram
+  for ibin in range(1,h_data.GetNbinsX()+1):
+    bval = h_data.GetBinContent(ibin)
+    l = scipy.stats.gamma.interval(0.68,bval)[0]
+    # Catch for zero entries
+    if l!=l: l = 0
+    u = scipy.stats.gamma.interval(0.68,bval+1)[1]
+    err = max( abs(bval-l), abs(bval-u) )
+    h_data.SetBinError(ibin,err)
+
   # Scale data histogram
   h_data.Scale(opt.dataScaler)
   if opt.doCatWeights: h_wdata.Scale(opt.dataScaler)
@@ -305,7 +317,7 @@ for cidx in range(len(cats)):
       # Skip blinded region
       if( not opt.unblind )&(bcenter > blindingRegion[0])&(bcenter < blindingRegion[1]): continue 
       if h_data.GetBinContent(ibin)==0.: 
-        h_data.SetBinError(ibin,1)
+        h_data.SetBinError(ibin, scipy.stats.gamma.interval(0.68,1)[1])
         if opt.doCatWeights: h_wdata.SetBinError(ibin,catsWeights[c])
 
   # Extract pdfs for category and create histograms
@@ -384,37 +396,37 @@ for cidx in range(len(cats)):
     if opt.doSumCategories:
       print("    * adding histogram to sum")
       if cidx == 0:
-	h_data_sum = h_data.Clone()
-	h_data_ratio_sum = h_data_ratio.Clone()
-	h_sbpdf_sum = {'pdfNBins':h_sbpdf['pdfNBins'].Clone(),'nBins':h_sbpdf['nBins'].Clone()}
-	h_bpdf_sum = {'pdfNBins':h_bpdf['pdfNBins'].Clone(),'nBins':h_bpdf['nBins'].Clone()}
-	h_bpdf_ratio_sum = h_bpdf_ratio.Clone()
-	h_spdf_sum = {'pdfNBins':h_spdf['pdfNBins'].Clone(),'nBins':h_spdf['nBins'].Clone()}
-	h_spdf_ratio_sum = h_spdf_ratio.Clone()
+        h_data_sum = h_data.Clone()
+        h_data_ratio_sum = h_data_ratio.Clone()
+        h_sbpdf_sum = {'pdfNBins':h_sbpdf['pdfNBins'].Clone(),'nBins':h_sbpdf['nBins'].Clone()}
+        h_bpdf_sum = {'pdfNBins':h_bpdf['pdfNBins'].Clone(),'nBins':h_bpdf['nBins'].Clone()}
+        h_bpdf_ratio_sum = h_bpdf_ratio.Clone()
+        h_spdf_sum = {'pdfNBins':h_spdf['pdfNBins'].Clone(),'nBins':h_spdf['nBins'].Clone()}
+        h_spdf_ratio_sum = h_spdf_ratio.Clone()
         if opt.doCatWeights:
-	  h_wdata_sum = h_wdata.Clone()
-	  h_wdata_ratio_sum = h_wdata_ratio.Clone()
-	  h_wsbpdf_sum = {'pdfNBins':h_wsbpdf['pdfNBins'].Clone(),'nBins':h_wsbpdf['nBins'].Clone()}
-	  h_wbpdf_sum = {'pdfNBins':h_wbpdf['pdfNBins'].Clone(),'nBins':h_wbpdf['nBins'].Clone()}
-	  h_wbpdf_ratio_sum = h_wbpdf_ratio.Clone()
-	  h_wspdf_sum = {'pdfNBins':h_wspdf['pdfNBins'].Clone(),'nBins':h_wspdf['nBins'].Clone()}
-	  h_wspdf_ratio_sum = h_wspdf_ratio.Clone()
+          h_wdata_sum = h_wdata.Clone()
+          h_wdata_ratio_sum = h_wdata_ratio.Clone()
+          h_wsbpdf_sum = {'pdfNBins':h_wsbpdf['pdfNBins'].Clone(),'nBins':h_wsbpdf['nBins'].Clone()}
+          h_wbpdf_sum = {'pdfNBins':h_wbpdf['pdfNBins'].Clone(),'nBins':h_wbpdf['nBins'].Clone()}
+          h_wbpdf_ratio_sum = h_wbpdf_ratio.Clone()
+          h_wspdf_sum = {'pdfNBins':h_wspdf['pdfNBins'].Clone(),'nBins':h_wspdf['nBins'].Clone()}
+          h_wspdf_ratio_sum = h_wspdf_ratio.Clone()
       else:
-	h_data_sum += h_data.Clone()
-	h_data_ratio_sum += h_data_ratio.Clone()
-	for b,h in h_sbpdf.items(): h_sbpdf_sum[b] += h.Clone()
-	for b,h in h_bpdf.items(): h_bpdf_sum[b] += h.Clone()
-	h_bpdf_ratio_sum += h_bpdf_ratio.Clone()
-	for b,h in h_spdf.items(): h_spdf_sum[b] += h.Clone()
-	h_spdf_ratio_sum += h_spdf_ratio.Clone()
+        h_data_sum += h_data.Clone()
+        h_data_ratio_sum += h_data_ratio.Clone()
+        for b,h in h_sbpdf.items(): h_sbpdf_sum[b] += h.Clone()
+        for b,h in h_bpdf.items(): h_bpdf_sum[b] += h.Clone()
+        h_bpdf_ratio_sum += h_bpdf_ratio.Clone()
+        for b,h in h_spdf.items(): h_spdf_sum[b] += h.Clone()
+        h_spdf_ratio_sum += h_spdf_ratio.Clone()
         if opt.doCatWeights:
-	  h_wdata_sum += h_wdata.Clone()
-	  h_wdata_ratio_sum += h_wdata_ratio.Clone()
-	  for b,h in h_wsbpdf.items(): h_wsbpdf_sum[b] += h.Clone()
-	  for b,h in h_wbpdf.items(): h_wbpdf_sum[b] += h.Clone()
-	  h_wbpdf_ratio_sum += h_wbpdf_ratio.Clone()
-	  for b,h in h_wspdf.items(): h_wspdf_sum[b] += h.Clone()
-	  h_wspdf_ratio_sum += h_wspdf_ratio.Clone()
+          h_wdata_sum += h_wdata.Clone()
+          h_wdata_ratio_sum += h_wdata_ratio.Clone()
+          for b,h in h_wsbpdf.items(): h_wsbpdf_sum[b] += h.Clone()
+          for b,h in h_wbpdf.items(): h_wbpdf_sum[b] += h.Clone()
+          h_wbpdf_ratio_sum += h_wbpdf_ratio.Clone()
+          for b,h in h_wspdf.items(): h_wspdf_sum[b] += h.Clone()
+          h_wspdf_ratio_sum += h_wspdf_ratio.Clone()
 
   # Make plot for individual cats
   if not opt.skipIndividualCatPlots:

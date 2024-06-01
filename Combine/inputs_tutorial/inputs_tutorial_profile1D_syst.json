@@ -4,5 +4,12 @@
         "fits":"profile1D:syst:r",
         "points":"20:10",
         "fit_opts":"--setParameterRanges r=0,2 --saveSpecifiedNuis all --freezeParameters MH"
+    },
+
+    "mu_ggH_VBF":{
+        "pois":"r_ggH,r_VBF",
+        "fits":"profile1D:syst:all",
+        "points":"20:10",
+        "fit_opts":"--saveInactivePOI 1 --setParameterRanges r_ggH=0,3:r_VBF=0,5 --saveSpecifiedNuis all --freezeParameters MH"
     }
 }

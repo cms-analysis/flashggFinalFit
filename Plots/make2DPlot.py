@@ -41,7 +41,7 @@ def get_options():
   parser.add_option("--doSM", dest="doSM", default=False, action="store_true", help="Do SM point")
   parser.add_option("--ext", dest="ext", default='', help="Extension for saving")
   parser.add_option("--placeLegend", dest="placeLegend", default='bottom_right', help="Legend position")
-  parser.add_option("--no_colour", dest="no_colour", default=False, action="store_true", help="Legend position")
+  parser.add_option("--no-colour", dest="no_colour", default=False, action="store_true", help="Legend position")
   return parser.parse_args()
 (opt,args) = get_options()
 

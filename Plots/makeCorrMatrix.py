@@ -22,6 +22,9 @@ def LoadTranslations(jsonfilename):
     with open(jsonfilename) as jsonfile:
         return json.load(jsonfile)
 
+def Translate(name, ndict):
+    return ndict[name] if name in ndict else name
+
 ROOT.gROOT.SetBatch(True)
 ROOT.gStyle.SetNumberContours(500)
 lumi = 137
@@ -77,8 +80,8 @@ for mode,pois in modes.items():
   pois_reverse.reverse()
   for iBin,iPar in enumerate(pois):
     for jBin,jPar in enumerate(pois_reverse):
-      theHist.GetXaxis().SetBinLabel(iBin+1, translate[iPar])
-      theHist.GetYaxis().SetBinLabel(jBin+1, translate[jPar])
+      theHist.GetXaxis().SetBinLabel(iBin+1, Translate(iPar,translate))
+      theHist.GetYaxis().SetBinLabel(jBin+1, Translate(jPar,translate))
       #theHist.GetXaxis().SetBinLabel(iBin+1, iPar)
       #theHist.GetYaxis().SetBinLabel(jBin+1, jPar)
 
@@ -149,9 +152,10 @@ for mode,pois in modes.items():
   latex.DrawLatex(1.00-canv.GetRightMargin()-0.02,1.00-canv.GetTopMargin()-0.12,'%2.0f fb^{-1} (13 TeV)'%lumi)
   latex.SetTextSize(0.025)
   latex.DrawLatex(1.00-canv.GetRightMargin()-0.02,1.00-canv.GetTopMargin()-0.18,'H #rightarrow #gamma#gamma, m_{H} = 125.38 GeV')
-  #canv.Print("/eos/home-j/jlangfor/www/CMS/hgg/stxs_runII/May20/pass0/test/test_%s.png"%opt.mode)
-  #canv.Print("/eos/home-j/jlangfor/www/CMS/hgg/stxs_runII/May20/pass0/test/test_%s.pdf"%opt.mode)
-  #canv.Print('%s/src/flashggFinalFit/Combine/runFits%s_%s/Plots/corrMatrix_%s_%s%s%s.png'%(os.environ['CMSSW_BASE'],opt.ext,mode,mode,name.split("_")[-1],obs_ext,opt.ext))
-  #canv.Print('%s/src/flashggFinalFit/Combine/runFits%s_%s/Plots/corrMatrix_%s_%s%s%s.pdf'%(os.environ['CMSSW_BASE'],opt.ext,mode,mode,name.split("_")[-1],obs_ext,opt.ext))
-  canv.Print('/eos/home-j/jlangfor/www/CMS/thesis/chapter6/final/corrMatrix_%s_%s%s%s.png'%(mode,name.split("_")[-1],obs_ext,opt.ext))
-  canv.Print('/eos/home-j/jlangfor/www/CMS/thesis/chapter6/final/corrMatrix_%s_%s%s%s.pdf'%(mode,name.split("_")[-1],obs_ext,opt.ext))
+
+  ext_str = "_%s"%opt.ext if opt.ext != "" else ""
+  if not os.path.isdir(f"plots{ext_str}"):
+    os.system(f"mkdir -p plots{ext_str}")
+  name_str = name.split("_")[-1]
+  canv.Print(f"plots{ext_str}/corrMatrix_{mode}_{name_str}{obs_ext}{opt.ext}.png")
+  canv.Print(f"plots{ext_str}/corrMatrix_{mode}_{name_str}{obs_ext}{opt.ext}.pdf")
