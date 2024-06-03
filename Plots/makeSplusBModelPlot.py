@@ -241,7 +241,6 @@ if opt.doBands:
               _xvar, _xvar_arglist = xvarfix, xvarfix_arglist
             else:
               _xvar, _xvar_arglist = xvar, xvar_arglist
-            #dtoy = toy.reduce("CMS_channel==CMS_channel::%g"%(cidx))
             dtoy = toy.reduce("CMS_channel==%g"%(cidx))
             htoy = _xvar.createHistogram("h_%s"%c,ROOT.RooFit.Binning(opt.nBins,xvar.getMin(),xvar.getMax()))
             dtoy.fillHistogram(htoy,_xvar_arglist)
