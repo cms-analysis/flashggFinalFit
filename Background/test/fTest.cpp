@@ -19,7 +19,6 @@
 #include "RooAbsPdf.h"
 #include "RooArgSet.h"
 #include "RooFitResult.h"
-#include "RooMinuit.h"
 #include "RooMinimizer.h"
 #include "RooMsgService.h"
 #include "RooDataHist.h"

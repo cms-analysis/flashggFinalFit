@@ -10,11 +10,11 @@ You can follow the latest Final Fits tutorial [here](https://gitlab.cern.ch/jspa
 
 ```
 export SCRAM_ARCH=el9_amd64_gcc12
-cmsrel CMSSW_14_0_0_pre0
-cd CMSSW_14_0_0_pre0/src
+cmsrel CMSSW_14_1_0_pre4
+cd CMSSW_14_1_0_pre4
 cmsenv
 
-COMBINE_TAG=dev_jlangfor_combinev10_revert974
+COMBINE_TAG=combine_v10
 COMBINEHARVESTER_TAG=main
 FINALFIT_TAG=higgsdnafinalfit
 

@@ -41,7 +41,7 @@ For variables stored as arrays in the input trees e.g. `pdfWeights` then you can
 For MC e.g.:
 
 ```
-python trees2ws.py --inputConfig config.py --inputTreeFile output_2016_GG2H.root --inputMass 125 --productionMode ggh --year 2016 (--doSystematics)
+python3 trees2ws.py --inputConfig config.py --inputTreeFile output_2016_GG2H.root --inputMass 125 --productionMode ggh --year 2016 (--doSystematics)
 ```
 The output is a `RooWorkspace` containing the `RooDataSets` and `RooDataHists` derived from the input tree. These are stored in a ROOT file in the `ws_{process}` directory which is produced in the same directory as the input tree file. There are a number of additional options:
  * `--doNNLOPS`: add NNLOPS weight into nominal `RooDataSet`. Requires `NNLOPSWeight` as branch in tree.
@@ -49,7 +49,7 @@ The output is a `RooWorkspace` containing the `RooDataSets` and `RooDataHists` d
 
 For data e.g.:
 ```
-python trees2ws_data.py --inputConfig config_test.py --inputTreeFile output_2016_data.root
+python3 trees2ws_data.py --inputConfig config_test.py --inputTreeFile output_2016_data.root
 ```
 The output is a `RooWorkspace` with a `RooDataSet` for each category, containing the `dataVars`. You only require the mass variable for the nominal background modelling.
 
@@ -58,7 +58,7 @@ The output is a `RooWorkspace` with a `RooDataSet` for each category, containing
 
 The `RunWSScripts.py` can be used to submit many `trees2ws` jobs for a large number of input tree files. 
 ```
-python RunWSScripts.py --inputDir /{path-to-input-trees} --inputConfig config_test.py --year 2016 --ext test_2016 --mode trees2ws --batch condor --queue longlunch
+python3 RunWSScripts.py --inputDir /{path-to-input-trees} --inputConfig config_test.py --year 2016 --ext test_2016 --mode trees2ws --batch condor --queue longlunch
 ```
 This will submit a separate job per input tree file in the specified path. Use the option `--printOnly` to write the submission scripts without submitting. For the additional commands specific to the `trees2ws.py` script then use the `--modeOpts` option e.g. `--modeOpts "--doNOTAG --doSTXSSplitting`.
 
@@ -76,13 +76,13 @@ If possible, you should keep signal MC split-by-year to keep track of the year-d
 There is an additional script which allows you to shift the mass of an input MC workspace (simply shift the mass variable of each event by some fixed amount). Note, it is no longer required to have multiple mass point in the signal fitting so this functionality is not particularly useful. For example the following command would shift all the mass values up by 5 GeV.
 
 ```
-python mass_shifter.py --inputWSFile {inputWSFile.root} --inputMass 125 --targetMass 130
+python3 mass_shifter.py --inputWSFile {inputWSFile.root} --inputMass 125 --targetMass 130
 ```
 
 Note, the input WS requires `M{inputMass}` (e.g. `M125`) in its name. You can use the `RunWSScripts.py` to submit fr multiple workspaces (and multiple target mass points) e.g.
 
 ```
-python RunWSScripts.py --inputDir /{path-to-input-workspaces} --mode mass_shift --inputMass 125 --targetMasses 120,130 --ext test_2016 --batch condor --queue longlunch (--printOnly)
+python3 RunWSScripts.py --inputDir /{path-to-input-workspaces} --mode mass_shift --inputMass 125 --targetMasses 120,130 --ext test_2016 --batch condor --queue longlunch (--printOnly)
 ```
 The output is a mass shifted workspace in the same directory as the input workspace.
 

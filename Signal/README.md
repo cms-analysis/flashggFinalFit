@@ -32,7 +32,7 @@ signalScriptCfg = {
 ```
 The basic command for using `RunSignalScripts.py` is the following:
 ```
-python RunSignalScripts.py --inputConfig {config_file}.py --mode {mode} --modeOpts "{list of options for specific mode}" --jobOpts "{list of options for job submission}"
+python3 RunSignalScripts.py --inputConfig {config_file}.py --mode {mode} --modeOpts "{list of options for specific mode}" --jobOpts "{list of options for job submission}"
 ```
 To simply print the job scripts without submitting then add the option: `--printOnly`. You can then go to the respective `outdir_{ext}/{mode}/jobs` directory to run the individual scripts locally (great for testing and debugging!)
 
@@ -43,13 +43,13 @@ In this new final fits package we have introduced a number of additional options
 Test for determining the optimal number of gaussians to use in signal model. If you want to use the Double Crystal Ball (DCB) + Gaussian function for the models then you can skip the F-test.
 
 ```
-python RunSignalScripts.py --inputConfig config_tutorial_2022preEE.py --mode fTest
+python3 RunSignalScripts.py --inputConfig config_tutorial_2022preEE.py --mode fTest
 ```
 This will create a separate job per analysis category, which outputs a json file (`./outdir_{ext}/fTest/json`) specifying the optimal number of Gaussians for each signal process for both the RV (right-vertex) and WV (wrong-vertex) scenarios. The optimal number of gaussians is chosen as the number which minimises the reduced chi2.
 
 In general, we only need to know the shape for the signal processes which have a sizeable contribution in a given category. By default the fTest script will only calculate the optimal number of Gaussians for the 5 signal processes in a category with the highest sum of weights. The other signal processes are set to (nRV,nWV)=(1,1). To toggle this number add the option `--nProcsToFTest X` into the `--modeOpts` string, where X will replace 5. To determine the optimum for all signal processes then set X = -1.
 ```
-python RunSignalScripts.py --inputConfig config_tutorial_2022preEE.py --mode fTest --modeOpts "--nProcsToFTest X"
+python3 RunSignalScripts.py --inputConfig config_tutorial_2022preEE.py --mode fTest --modeOpts "--nProcsToFTest X"
 ```
 To produce the fTest plots then add `--doPlots` to the `--modeOpts` string.
 
@@ -59,7 +59,7 @@ For other options when running `fTest`, see `./scripts/fTest`
 
 For calculating the effect of the photon systematics on the mean, width and rate of the signal spectrum.
 ```
-python RunSignalScripts.py --inputConfig config_tutorial_2022preEE.py --mode calcPhotonSyst
+python3 RunSignalScripts.py --inputConfig config_tutorial_2022preEE.py --mode calcPhotonSyst
 ```
 This will again create a separate job per category, where the output is a pandas dataframe stored as a `.pkl` file. The dataframe contains the constants which describe how the systematics (specified in the `config` file) affect the mean, sigma and rate of each signal process. The final model construction will lift these constants directly from the `.pkl` files (replaced the monolithic `.dat` files in the old Final Fits).
 
@@ -80,7 +80,7 @@ The output of HiggsDNA is configured such that the sum of weights for a process,
 
 There are two options in the final model construction which require the knowledge of the diagonal process (i.e. highest sum of weights) in the analysis categories. The following mode determines the diagonal proc and outputs this info in a json file to be read by the final model construction:
 ```
-python RunSignalScripts.py --inputConfig config_tutorial_2022preEE.py --mode getDiagProc
+python3 RunSignalScripts.py --inputConfig config_tutorial_2022preEE.py --mode getDiagProc
 ```
 
 ## Final model construction
@@ -93,7 +93,7 @@ Before you build the final models you MUST define the replacement dataset and th
 
 You are now ready to run the actual fit:
 ```
-python RunSignalScripts.py -inputConfig config_tutorial_2022preEE.py --mode signalFit --groupSignalFitJobsByCat
+python3 RunSignalScripts.py -inputConfig config_tutorial_2022preEE.py --mode signalFit --groupSignalFitJobsByCat
 ```
 The `groupSignalFitJobsByCat` option will create a submission script per category. If removed, the default is to have a single script per process x category (which can be a very large number!). The output is a separate ROOT file for each process x category containing the signal fit workspace.
 
@@ -117,7 +117,7 @@ There are many different options for running the `signalFit` which can be added 
 
 Package the individual ROOT files from the `signalFit` into a single file per category. Here you can also merge across years to package all years into a single file. For example, packaging 2016, 2017 and 2018 models for categories `cat0` and `cat1`:
 ``` 
-python RunPackager.py --cats cat0,cat1 --exts test_2016,test_2017,test_2018 --mergeYears
+python3 RunPackager.py --cats cat0,cat1 --exts test_2016,test_2017,test_2018 --mergeYears
 ```
 where `exts` are the `outdir` extensions that you want to merge. To automatically infer the categories from an input flashgg workspace use:
 ```
@@ -129,7 +129,7 @@ The output are the packaged signal models ready for the final fits!
 
 Run on the packaged signal models to produce this kind of [plot](http://cms-results.web.cern.ch/cms-results/public-results/preliminary-results/HIG-19-015/CMS-PAS-HIG-19-015_Figure_012-a.pdf). 
 ```
-python RunPlotter.py --procs all --years 2016,2017,2018 --cats cat0 --ext packaged
+python3 RunPlotter.py --procs all --years 2016,2017,2018 --cats cat0 --ext packaged
 ```
 The options are defined in `RunPlotter.py`. Use `--cats all` to plot the sum of all analysis categories in `./outdir_{ext}` directory.
 

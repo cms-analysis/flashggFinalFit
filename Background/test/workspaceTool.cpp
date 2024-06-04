@@ -21,7 +21,7 @@
 #include "RooFitResult.h"
 #include "RooPlot.h"
 #include "RooMsgService.h"
-#include "RooMinuit.h"
+#include "RooMinimizer.h"
 
 #include "boost/program_options.hpp"
 #include "boost/algorithm/string/split.hpp"

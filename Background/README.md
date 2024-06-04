@@ -24,7 +24,7 @@ Takes the output of flashgg (`allData.root`) and outputs a `RooMultiPdf` for eac
 
 The new functionality performs the fTest in parallel for each analysis category:
 ```
-python RunBackgroundScripts.py --inputConfig config_test.py --mode fTestParallel (--printOnly)
+python3 RunBackgroundScripts.py --inputConfig config_test.py --mode fTestParallel (--printOnly)
 ```
 
 Similar to the signal scripts the options are steered using an input config file e.g.:

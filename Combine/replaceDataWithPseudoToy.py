@@ -31,8 +31,9 @@ w = f.Get("w")
 
 # Get data object and delete
 data_obs = w.data("data_obs")
-data_obs.Delete()
+#data_obs.Delete()
 w.RecursiveRemove(data_obs)
+data_obs.Delete()
 
 # Load toy
 ftoy_name = glob.glob(f"higgsCombine_gen_pseudoToy.GenerateOnly.mH{opt.mass}.*.root")[0]

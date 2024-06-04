@@ -7,7 +7,7 @@ This is where you build the `.txt` datacard to be used for the final fits (see `
 
 The first step is to produce a pandas dataframe for each analysis category which holds information on the signal models, background models and the data. For each signal process, the dataframe stores the nominal yields (sum of weights) as well as the varied yields for each systematic uncertainty source (excluding the signal shape uncertainties). The systematics are defined in `systematics.py`. Simply comment out (or add new) systematics where appropriate. If you want to ignore the systematics completely then just run the following command without the `--doSystematics` option:
 ```
-python RunYields.py --cats auto --inputWSDirMap 2016={path to 2016 flashgg workspaces},2017={path to 2017 workspaces},2018={path to 2018 workspaces} --procs auto (--mergeYears) (--doSystematics) --batch condor --queue longlunch
+python3 RunYields.py --cats auto --inputWSDirMap 2016={path to 2016 flashgg workspaces},2017={path to 2017 workspaces},2018={path to 2018 workspaces} --procs auto (--mergeYears) (--doSystematics) --batch condor --queue longlunch
 ```
 This script creates a job for each analysis category in the `yields` directory and submits this job to the batch. The output is the pandas dataframe, stored as a `pkl` file. To produce the job script without submitting, add the option `--dryRun`.
 
@@ -57,7 +57,7 @@ Finally the theory systematics (of `'type':'factory'`) have an additional input 
 
 Once the `pkl` files have been produced then you are ready to make the datacard:
 ```
-python makeDatacard.py --years 2016,2017,2018 --prune (--doSystematics)
+python3 makeDatacard.py --years 2016,2017,2018 --prune (--doSystematics)
 ```
 The datacard will be produced using the concatenation of all `pkl` files in the `yields` directory. The `--prune` option will prune all signal processes which contribute less than 0.1% to the total signal yield in a given category. This threshold has been shown to have negligible effect on the final results but can be toggled using the `--pruneThreshold 0.001` option.
 
@@ -74,7 +74,7 @@ Additional options for the STXS analysis:
 
 There is an additional light weight script which cleans up the datacards i.e. remove double-sided uncertainties (both up/down variations act in same direction) and all those with a factor greater than a specified value (useful for low MC stats): 
 ```
-python cleanDatacard.py --datacard Datacard.txt --factor 2 --removeDoubleSided
+python3 cleanDatacard.py --datacard Datacard.txt --factor 2 --removeDoubleSided
 ```
 
 

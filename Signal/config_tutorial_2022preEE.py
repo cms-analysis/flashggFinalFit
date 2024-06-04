@@ -5,7 +5,7 @@ _year = '2022preEE'
 signalScriptCfg = {
   
   # Setup
-  'inputWSDir':'/eos/user/j/jlangfor/icrf/hgg/FinalFitsTutorial/higgsdna_finalfits_tutorial_24/inputs/workspaces/signal_%s'%_year,
+  'inputWSDir':'PATH_TO_INPUTS/workspaces/signal_%s'%_year,
   'procs':'auto', # if auto: inferred automatically from filenames
   'cats':'auto', # if auto: inferred automatically from (0) workspace
   'ext':'tutorial_%s'%_year,
