@@ -116,8 +116,9 @@ def writeSubFiles(_opts):
         _f = open("%s/%s_%g.sh"%(_jobdir,_executable,tfidx),"w")
         writePreamble(_f)
         # Extract production mode (and decay extension if required)
+        m = massFromFileName(tf)
         p, d = signalFromFileName(tf)
-        _cmd = "python3 %s/trees2ws.py --inputConfig %s --inputTreeFile %s --productionMode %s --year %s"%(twd__,_opts['inputConfig'],tf,p,_opts['year'])
+        _cmd = "python3 %s/trees2ws.py --inputConfig %s --inputTreeFile %s --inputMass %s --productionMode %s --year %s"%(twd__,_opts['inputConfig'],tf,m,p,_opts['year'])
         if d is not None: _cmd += " --decayExt %s"%d
         if _opts['modeOpts'] != '': _cmd += " %s"%_opts['modeOpts'] 
         _f.write("%s\n"%_cmd)
