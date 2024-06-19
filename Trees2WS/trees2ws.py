@@ -136,7 +136,7 @@ for cat in cats:
   print("    * tree: %s"%treeName)
   # Extract tree from uproot
   t = f[treeName]
-  if len(t) == 0: continue
+  if t.num_entries == 0: continue
   
   # Convert tree to pandas dataframe
   dfs = {}
@@ -144,9 +144,9 @@ for cat in cats:
   # Theory weights
   for ts, tsColumns in theoryWeightColumns.items():
     if opt.productionMode in modesToSkipTheoryWeights: 
-      dfs[ts] = pandas.DataFrame(np.ones(shape=(len(t),theoryWeightContainers[ts])))
+      dfs[ts] = pandas.DataFrame(np.ones(shape=(t.num_entries,theoryWeightContainers[ts])))
     else:
-      dfs[ts] = pandas.DataFrame(np.reshape(np.array(t[ts].array()),(len(t),len(tsColumns))))
+      dfs[ts] = pandas.DataFrame(np.reshape(np.array(t[ts].array()),(t.num_entries,len(tsColumns))))
     dfs[ts].columns = tsColumns
 
   # Main variables to add to nominal RooDataSets
