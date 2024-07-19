@@ -65,10 +65,11 @@ for fidx in range(len(fits)):
       if poi in ["r_ggH","r_VBF","r_top","r_VH"]:
         translate_json = "pois_mu.json" 
       elif poi=='CMS_zz4l_fai1':
-        if 'ALT_0M' in opt.ext: translate_json = "pois_fa3.json"
-        if 'ALT_0PH' in opt.ext: translate_json = "pois_fa2.json"
-        if 'ALT_L1' in opt.ext: translate_json = "pois_flambda1.json"
-        if 'ALT_L1Zg' in opt.ext: translate_json = "pois_flambda1zgamma.json"
+
+        if 'ALT_0M' in opt.mode: translate_json = "pois_fa3.json"
+        if 'ALT_0PH' in opt.mode: translate_json = "pois_fa2.json"
+        if 'ALT_L1' in opt.mode: translate_json = "pois_flambda1.json"
+        if 'ALT_L1Zg' in opt.mode: translate_json = "pois_flambda1zgamma.json"
       else:
         print "Warning: unknown poi. Use r as default"
         translate_json = "pois_mu.json"
