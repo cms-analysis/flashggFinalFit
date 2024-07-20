@@ -8,7 +8,7 @@ def get_options():
   parser = OptionParser()
   parser.add_option('--mode', dest='mode', default='mu_inclusive', help="Physics Model (specified in models.py)")
   parser.add_option('--ext',dest='ext', default="", help='In case running over datacard with extension')
-  parser.add_option('--common_opts',dest='common_opts', default="-m 125 higgsMassRange=122,128", help='Common options')
+  parser.add_option('--common_opts',dest='common_opts', default="-m 125.38 higgsMassRange=122,128", help='Common options')
   parser.add_option('--batch', dest='batch', default='condor', help="Batch system [SGE,IC,condor]")
   parser.add_option('--queue', dest='queue', default='workday', help="Condor queue")
   parser.add_option('--ncpus', dest='ncpus', default=4, type='int', help="Number of cpus")
@@ -33,8 +33,11 @@ print " --> Input: Datacard_%s.txt --> Output: Datacard_%s.root"%(opt.ext,opt.ex
 
 if not os.path.isdir("./t2w_jobs"): os.system("mkdir ./t2w_jobs")
 # Open submission file to write to
+
 fsub = open("./t2w_jobs/t2w_%s.sh"%(opt.ext),"w")
 fsub.write("#!/bin/bash\n\n")
+fsub.write("source /cvmfs/cms.cern.ch/cmsset_default.sh \n")
+
 fsub.write("cd %s\n\n"%os.environ['PWD'])
 fsub.write("eval `scramv1 runtime -sh`\n\n")
 fsub.write("text2workspace.py Datacard_%s.txt -o Datacard_%s.root %s %s\n"%(opt.ext,opt.ext,opt.common_opts,models[opt.mode]))
@@ -51,6 +54,7 @@ if opt.batch == 'condor':
   f_cdr.write("error               = %s/src/flashggFinalFit/Combine/t2w_jobs/t2w_%s.sh.err\n"%(os.environ['CMSSW_BASE'],opt.ext))
   f_cdr.write("log                 = %s/src/flashggFinalFit/Combine/t2w_jobs/t2w_%s.sh.log\n"%(os.environ['CMSSW_BASE'],opt.ext))
   f_cdr.write("+JobFlavour         = \"%s\"\n"%opt.queue)
+  f_cdr.write('MY.SingularityImage = "/cvmfs/unpacked.cern.ch/gitlab-registry.cern.ch/cms-cat/cmssw-lxplus/cmssw-el7-lxplus:latest/"\n\n')
   f_cdr.write("RequestCpus         = %g\n"%opt.ncpus)
   f_cdr.write("queue\n")
   f_cdr.close()
