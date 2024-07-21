@@ -34,6 +34,11 @@ AutoDict_*
 *.pcm
 *.o
 
+
+
 # Output dirs in signal and bkg
 Signal/outdir_*
 Background/outdir_*
+
+Combine/runFits*
+Combine/runImpact*
