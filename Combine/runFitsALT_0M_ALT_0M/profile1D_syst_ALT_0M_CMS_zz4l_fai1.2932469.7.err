@@ -1,2 +1,0 @@
-ModelConfig 'ModelConfig' defines more than one parameter of interest. This is not supported in some statistical methods.
-SysError in <TFile::Flush>: error flushing file higgsCombine_profile1D_syst_ALT_0M_CMS_zz4l_fai1.POINTS.7.7.MultiDimFit.mH125.38.root (Input/output error)
