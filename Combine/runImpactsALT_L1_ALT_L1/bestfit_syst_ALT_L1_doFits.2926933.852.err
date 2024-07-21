@@ -1,4 +1,0 @@
-SysError in <TFile::TFile>: file higgsCombine_paramFit__bestfit_syst_ALT_L1_initialFit_env_pdf_7_13TeV_exp3_p1.MultiDimFit.mH125.38.root can not be opened (Disk quota exceeded)
-ModelConfig 'ModelConfig' defines more than one parameter of interest. This is not supported in some statistical methods.
-Info in <Minuit2>: Minuit2Minimizer::Minimize : Minimization did NOT converge, Edm is above max
-Error in <TFile::WriteTObject>: Directory higgsCombine_paramFit__bestfit_syst_ALT_L1_initialFit_env_pdf_7_13TeV_exp3_p1.MultiDimFit.mH125.38.root is not writable
