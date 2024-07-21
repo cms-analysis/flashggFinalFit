@@ -42,3 +42,9 @@ Background/outdir_*
 
 Combine/runFits*
 Combine/runImpact*
+Combine/t2w_jobs*
+
+
+Datacard/yields*
+
+Combine/Checks/Bias_nominal/*/
