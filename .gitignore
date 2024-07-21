@@ -34,6 +34,23 @@ AutoDict_*
 *.pcm
 *.o
 
+
+
 # Output dirs in signal and bkg
 Signal/outdir_*
+Signal/card*
+
+
 Background/outdir_*
+Background/cards*
+
+
+Combine/runFits*
+Combine/runImpact*
+Combine/t2w_jobs*
+Combine/Models*
+Combine/plot*
+
+Datacard/yields*
+
+Combine/Checks/Bias_nominal/*/

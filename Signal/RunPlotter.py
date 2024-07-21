@@ -26,6 +26,7 @@ def get_options():
   parser.add_option("--translateProcs", dest="translateProcs", default=None, help="JSON to store proc translations")
   parser.add_option("--label", dest="label", default='Simulation Preliminary', help="CMS Sub-label")
   parser.add_option("--doFWHM", dest="doFWHM", default=False, action='store_true', help="Do FWHM")
+  parser.add_option("--outdir", dest='outdir', default=swd__, help="Output directory (default is the current one)")
   return parser.parse_args()
 (opt,args) = get_options()
 
@@ -96,14 +97,14 @@ for cat,f in inputFiles.iteritems():
         k = "%s__%s"%(proc,year)
         _id = "%s_%s_%s_%s"%(proc,year,cat,sqrts__)
         norms[k] = w.function("%s_%s_normThisLumi"%(outputWSObjectTitle__,_id))
-    
   # Iterate over norms: extract total category norm
   catNorm = 0
   for k, norm in norms.iteritems():
     proc, year = k.split("__")
     w.var("IntLumi").setVal(lumiScaleFactor*lumiMap[year])
+    
     catNorm += norm.getVal()
-
+    
   # Iterate over norms and extract data sets + pdfs
   for k, norm in norms.iteritems():
     proc, year = k.split("__")
@@ -148,13 +149,13 @@ for cat,f in inputFiles.iteritems():
   # Per-year pdf histograms
   if len(opt.years.split(",")) > 1:
     for year in opt.years.split(","):
-      if 'pdf_%s'%year not in hists:
+      if 'pdf_%s'%year not in hists or hists['pdf_%s'%year]==None:
 	hists['pdf_%s'%year] = hists['pdf'].Clone()
 	hists['pdf_%s'%year].Reset()
       # Fill
       for _id,p in hpdfs.iteritems():
 	if year in _id: hists['pdf_%s'%year] += p
-   
+      
   # Garbage removal
   for d in data_rwgt.itervalues(): d.Delete()
   for p in hpdfs.itervalues(): p.Delete()
@@ -162,5 +163,8 @@ for cat,f in inputFiles.iteritems():
   fin.Close()
 
 # Make plot
-if not os.path.isdir("%s/outdir_%s/Plots"%(swd__,opt.ext)): os.system("mkdir %s/outdir_%s/Plots"%(swd__,opt.ext))
-plotSignalModel(hists,opt,_outdir="%s/outdir_%s/Plots"%(swd__,opt.ext))
+outdir="%s/%s/Plots"%(opt.outdir,opt.ext)
+if not os.path.isdir(outdir): os.system("mkdir -p %s"%outdir)
+if os.path.exists("/afs/cern.ch"): os.system("cp /afs/cern.ch/user/g/gpetrucc/php/index.php "+outdir)
+elif os.path.exists("/cmshome/dimarcoe"): os.system("cp /cmshome/dimarcoe/php/index.php "+outdir)
+plotSignalModel(hists,opt,_outdir=outdir)

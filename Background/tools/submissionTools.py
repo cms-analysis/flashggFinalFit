@@ -59,7 +59,7 @@ def writeSubFiles(_opts):
         c = _opts['cats'].split(",")[cidx]
         co = _opts['catOffset']+cidx
         _f.write("if [ $1 -eq %g ]; then\n"%cidx)
-        _cmd = "%s/runBackgroundScripts.sh -i %s -p %s -f %s --ext %s --catOffset %g --intLumi %s --year %s --batch %s --queue %s --sigFile %s --isData --fTest"%(bwd__,_opts['dataFile'],_opts['procs'],c,_opts['ext'],co,_opts['lumi'],_opts['year'],_opts['batch'],_opts['queue'],_opts['signalFitWSFile'])
+        _cmd = "%s/runBackgroundScripts.sh -i %s -p %s -f %s --ext %s --catOffset %g --intLumi %s --year %s --batch %s --queue %s --sigFile %s --isData --fTest --pdir %s"%(bwd__,_opts['dataFile'],_opts['procs'],c,_opts['ext'],co,_opts['lumi'],_opts['year'],_opts['batch'],_opts['queue'],_opts['signalFitWSFile'],_opts['plotdir'])
         _f.write("  %s\n"%_cmd)
         _f.write("fi\n")
       
@@ -73,7 +73,7 @@ def writeSubFiles(_opts):
     _fsub.close()
     
   # SGE...
-  if (_opts['batch'] == "IC")|(_opts['batch'] == "SGE")|(_opts['batch'] == "local" ):
+  if (_opts['batch'] == "IC")|(_opts['batch'] == "SGE")|(_opts['batch'] == "Rome")|(_opts['batch'] == "local" ):
     _executable = "sub_%s_%s"%(_opts['mode'],_opts['ext'])
 
     # Write details depending on mode
@@ -102,8 +102,9 @@ def submitFiles(_opts):
     print "  --> Finished submitting files"
 
   # SGE
-  elif _opts['batch'] in ['IC','SGE']:
+  elif _opts['batch'] in ['IC','SGE','Rome']:
     _executable = "sub_%s_%s"%(_opts['mode'],_opts['ext'])
+    _subcmd = 'bsub' if _opts['batch']=='Rome' else 'qsub'
 
     # Extract job opts
     jobOptsStr = _opts['jobOpts']
@@ -113,7 +114,7 @@ def submitFiles(_opts):
       for cidx in range(_opts['nCats']):
         c = _opts['cats'].split(",")[cidx]
         _subfile = "%s/%s_%s"%(_jobdir,_executable,c)
-        cmdLine = "qsub -q hep.q %s -o %s.log -e %s.err %s.sh"%(jobOptsStr,_subfile,_subfile,_subfile)
+        cmdLine = "%s -q %s %s -o %s.log -e %s.err %s.sh"%(_subcmd,_opts['queue'],jobOptsStr,_subfile,_subfile,_subfile)
         run(cmdLine)
     print "  --> Finished submitting files"
   

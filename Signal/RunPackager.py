@@ -18,8 +18,8 @@ def get_options():
   parser.add_option("--massPoints", dest='massPoints', default='120,125,130', help="Comma separated list of mass points")
   parser.add_option('--mergeYears', dest='mergeYears', default=False, action="store_true", help="Use if merging categories across years")
   parser.add_option('--year', dest='year', default='2016', help="If not merging then add year tag to file name")
-  parser.add_option('--batch', dest='batch', default='IC', help='Batch')
-  parser.add_option('--queue', dest='queue', default='microcentury', help='Queue: should not take long (microcentury will do)')
+  parser.add_option('--batch', dest='batch', default='condor', help='Batch')
+  parser.add_option('--queue', dest='queue', default='espresso', help='Queue: should not take long (espresso will do)')
   parser.add_option('--jobOpts', dest='jobOpts', default='', help="Additional options to add to job submission. For Condor separate individual options with a colon (specify all within quotes e.g. \"option_xyz = abc+option_123 = 456\")")
   parser.add_option('--printOnly', dest='printOnly', default=False, action="store_true", help="Dry run: print submission files only")
   return parser.parse_args()
@@ -51,6 +51,9 @@ if options['cats'] == "auto":
   WSFileNames = extractWSFileNames(options['inputWSDir'])
   options['cats'] = extractListOfCats(WSFileNames)
 options['nCats'] = len(options['cats'].split(","))
+
+
+
 
 print " --> Packaging signal workspaces from: %s"%opt.exts
 print " --> For analysis categories: %s"%options['cats']

@@ -19,6 +19,7 @@ def get_options():
   parser.add_option('--year', dest='year', default='2016', help="Year of trees to process")
   parser.add_option('--mode', dest='mode', default='', help="Which mode to run. Options: ['trees2ws','trees2ws_data','haddMC','haddData','mass_shift']")
   parser.add_option('--modeOpts', dest='modeOpts', default='', help="Additional options to add to command line when running different scripts (specify all within quotes e.g. \"--XYZ ABC\")")
+  parser.add_option('--selectProcess', dest='selectProcess', action="append", default=[], help="select only these processes to be converted in workspaces (can be specified multiple times)")
   # Specifically for hadding
   parser.add_option('--flashggPath', dest='flashggPath', default='', help="Path to flashgg area required for hadding")
   parser.add_option('--outputWSDir', dest='outputWSDir', default='', help="Location to store output workspaces of hadding script")
@@ -26,8 +27,8 @@ def get_options():
   parser.add_option('--inputMass', dest='inputMass', default='125', help="Input mass of workspace")
   parser.add_option('--targetMasses', dest='targetMasses', default='120,130', help="Comma separated list of target masses")
   # Job submission options
-  parser.add_option('--batch', dest='batch', default='IC', help='Batch')
-  parser.add_option('--queue', dest='queue', default='hep.q', help='Queue: can take a while if including all systematics for many categories')
+  parser.add_option('--batch', dest='batch', default='condor', help='Batch')
+  parser.add_option('--queue', dest='queue', default='longlunch', help='Queue: can take a while if including all systematics for many categories')
   parser.add_option('--jobOpts', dest='jobOpts', default='', help="Additional options to add to job submission. For Condor separate individual options with a colon (specify all within quotes e.g. \"option_xyz = abc+option_123 = 456\")")
   parser.add_option('--printOnly', dest='printOnly', default=False, action="store_true", help="Dry run: print submission files only")
   return parser.parse_args()
@@ -47,6 +48,7 @@ options['ext']         = opt.ext
 options['year']        = opt.year
 options['mode']        = opt.mode
 options['modeOpts']    = opt.modeOpts
+options['selectProcess'] = opt.selectProcess
 options['flashggPath'] = opt.flashggPath
 options['outputWSDir'] = opt.outputWSDir if opt.outputWSDir != '' else "%s/outdir_%s/%s"%(twd__,opt.ext,opt.mode)
 options['inputMass']   = opt.inputMass
@@ -75,6 +77,8 @@ elif options['mode'] == "trees2ws_data": print " --> Converting ROOT Trees to Fi
 elif options['mode'] == "haddMC": print " --> Hadd MC workspaces..."
 elif options['mode'] == "haddData": print " --> Hadd data workspaces..."
 elif options['mode'] == "mass_shift": print " --> Ad-hoc shifting of mass in RooWorkspaces..."
+
+if options['mode'] == "trees2ws" and len(options['selectProcess']): print " ==> Chosen to convert only the processes in this list: ",options['selectProcess']
 print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

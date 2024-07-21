@@ -45,6 +45,7 @@ def extractListOfCats( _listOfWSFileNames ):
 
 def extractListOfCatsFromData( _fileName ):
   f = ROOT.TFile(_fileName)
+  print inputWSName__
   ws = f.Get(inputWSName__)
   allData = ws.allData()
   cats = []
@@ -75,6 +76,8 @@ def signalFromFileName(_fileName):
   elif "GluGlu" in _fileName: p = "ggh"
   elif "VBF" in _fileName: p = "vbf"
   elif "WH" in _fileName: p = "wh"
+  elif "Wminus" in _fileName: p = "wh"
+  elif "Wplus" in _fileName: p = "wh"
   elif "ZH" in _fileName: p = "zh"
   elif "ttH" in _fileName: p = "tth"
   elif "THQ" in _fileName: p = "thq"
@@ -83,25 +86,75 @@ def signalFromFileName(_fileName):
   else:
     print " --> [ERROR]: cannot extract production mode from input file name. Please update tools.commonTools.signalFromFileName"
     exit(1)
+  if "JHUGen" in _fileName:
+    if "0L1Zg" in _fileName:
+      p += "_ALT_L1Zg"
+    elif "0L1" in _fileName:
+      p += "_ALT_L1"
+    elif "0M" in _fileName:
+      p += "_ALT_0M"
+    elif "0PH" in _fileName:
+      p += "_ALT_0PH"
+    elif "0PM" in _fileName:
+      p += "_ALT_0PM"
+    else:
+      print " --> [ERROR]: cannot extract production mode from input file name. Please update tools.commonTools.signalFromFileName"
+      exit(1)
+    if "f05ph0" in _fileName:
+      p += "f05"
   return p,d
+
+# Function to return mass from input file name
+def massFromFileName(_fileName):
+  m = None
+  # to be done with regexp
+  if "_M120_" in _fileName: m = 120
+  elif "_M125_" in _fileName: m = 125
+  elif "_M130_" in _fileName: m = 130
+  else: 
+    print " ---> [ERROR]: cannot extract mass from input file name. Please update tools.commonTools.massFromFileName"
+  return m
 
 # Function for converting STXS process to production mode in dataset name
 procToDataMap = od()
 procToDataMap['GG2H'] = 'ggh'
 procToDataMap['VBF'] = 'vbf'
-procToDataMap['WH2HQQ'] = 'wh'
-procToDataMap['ZH2HQQ'] = 'zh'
+procToDataMap['VBF_ALT_0PM'] = 'vbf_ALT_0PM'
+procToDataMap['VBF_ALT_0PH'] = 'vbf_ALT_0PH'
+procToDataMap['VBF_ALT_0PHf05'] = 'vbf_ALT_0PHf05'
+procToDataMap['VBF_ALT_0M'] = 'vbf_ALT_0M'
+procToDataMap['VBF_ALT_0Mf05'] = 'vbf_ALT_0Mf05'
+procToDataMap['VBF_ALT_L1'] = 'vbf_ALT_L1'
+procToDataMap['VBF_ALT_L1f05'] = 'vbf_ALT_L1f05'
+procToDataMap['VBF_ALT_L1Zg'] = 'vbf_ALT_L1Zg'
+procToDataMap['VBF_ALT_L1Zgf05'] = 'vbf_ALT_L1Zgf05'
+procToDataMap['VH'] = 'wzh'
+procToDataMap['WMINUSH2HQQ'] = 'wh'
+procToDataMap['WPLUSH2HQQ'] = 'wh'
+
+procToDataMap['WH_ALT0L1f05ph0'] = 'wh_ALT_L1f05'
+procToDataMap['wh_ALT_L1'] = 'wh_ALT_L1'
+procToDataMap['WH_ALT0PHf05ph0'] = 'wh_ALT_0PHf05'
+procToDataMap['WH_ALT0PH'] = 'wh_ALT_0PH'
+procToDataMap['wh_ALT_0M'] = 'wh_ALT_0M'
+
+procToDataMap['ZH_ALT0L1f05ph0'] = 'zh_ALT_L1f05'
+procToDataMap['ZH_ALT0L1'] = 'zh_ALT_L1'
+procToDataMap['ZH_ALT0L1Zgf05ph0'] = 'zh_ALT_L1Zgf05'
+procToDataMap['ZH_ALT0L1Zg'] = 'zh_ALT_L1Zg'
+procToDataMap['ZH_ALT0Mf05ph0'] = 'zh_ALT_0Mf05'
+procToDataMap['ZH_ALT0M'] = 'zh_ALT_0M'
+procToDataMap['ZH_ALT0PHf05ph0'] = 'zh_ALT_0PHf05'
+procToDataMap['ZH_ALT0PH'] = 'zh_ALT_0PH'
 procToDataMap['QQ2HLNU'] = 'wh'
 procToDataMap['QQ2HLL'] = 'zh'
 procToDataMap['TTH'] = 'tth'
-procToDataMap['BBH'] = 'bbh'
-procToDataMap['THQ'] = 'thq'
-procToDataMap['THW'] = 'thw'
-procToDataMap['GG2HQQ'] = 'ggzh'
-procToDataMap['GG2HLL'] = 'ggzh'
-procToDataMap['GG2HNUNU'] = 'ggzh'
+#procToDataMap['WMINUSH2HQQ'] = 'wh_plus'
+#procToDataMap['WPLUSH2HQQ'] = 'wh_minus'
+
+
 def procToData( _proc ):
-  k = _proc.split("_")[0]
+  k = _proc
   if k in procToDataMap: _proc = re.sub( k, procToDataMap[k], _proc )
   return _proc
 
@@ -114,20 +167,41 @@ def dataToProc( _d ):
 procToDatacardNameMap = od()
 procToDatacardNameMap['GG2H'] = "ggH"
 procToDatacardNameMap['VBF'] = "qqH"
-procToDatacardNameMap['WH2HQQ'] = "WH_had"
-procToDatacardNameMap["ZH2HQQ"] = "ZH_had"
-procToDatacardNameMap["QQ2HLNU"] = "WH_lep"
-procToDatacardNameMap["QQ2HLL"] = "ZH_lep"
 procToDatacardNameMap["TTH"] = "ttH"
-procToDatacardNameMap["BBH"] = "bbH"
-procToDatacardNameMap["THQ"] = "tHq"
-procToDatacardNameMap["THW"] = "tHW"
-procToDatacardNameMap["TH"] = "tHq"
-procToDatacardNameMap["GG2HQQ"] = "ggZH_had"
-procToDatacardNameMap["GG2HLL"] = "ggZH_ll"
-procToDatacardNameMap["GG2HNUNU"] = "ggZH_nunu"
+procToDatacardNameMap['WMINUSH2HQQ'] = 'wh_minus'
+procToDatacardNameMap['WPLUSH2HQQ'] = 'wh_plus'
+procToDatacardNameMap['QQ2HLL'] = 'zh'
+
+procToDatacardNameMap['VBF_ALT_0PH'] = 'qqH_ALT_0PH'
+procToDatacardNameMap['VBF_ALT_0PHf05'] = 'qqH_ALT_0PHf05'
+procToDatacardNameMap['VBF_ALT_0M'] = 'qqH_ALT_0M'
+procToDatacardNameMap['VBF_ALT_0Mf05'] = 'qqH_ALT_0Mf05'
+procToDatacardNameMap['VBF_ALT_L1'] = 'qqH_ALT_L1'
+procToDatacardNameMap['VBF_ALT_L1f05'] = 'qqH_ALT_L1f05'
+procToDatacardNameMap['VBF_ALT_L1Zg'] = 'qqH_ALT_L1Zg'
+procToDatacardNameMap['VBF_ALT_L1Zgf05'] = 'qqH_ALT_L1Zgf05'
+
+procToDatacardNameMap['WH_ALT0L1f05ph0'] = 'wh_ALT_L1f05'
+procToDatacardNameMap['wh_ALT_L1'] = 'wh_ALT_L1'
+procToDatacardNameMap['WH_ALT0PHf05ph0'] = 'wh_ALT_0PHf05'
+procToDatacardNameMap['WH_ALT0PH'] = 'wh_ALT_0PH'
+procToDatacardNameMap['wh_ALT_0M'] = 'wh_ALT_0M'
+
+procToDatacardNameMap['ZH_ALT0L1f05ph0'] = 'zh_ALT_L1f05'
+procToDatacardNameMap['ZH_ALT0L1'] = 'zh_ALT_L1'
+procToDatacardNameMap['ZH_ALT0L1Zgf05ph0'] = 'zh_ALT_L1Zgf05'
+procToDatacardNameMap['ZH_ALT0L1Zg'] = 'zh_ALT_L1Zg'
+procToDatacardNameMap['ZH_ALT0Mf05ph0'] = 'zh_ALT_0Mf05'
+procToDatacardNameMap['ZH_ALT0M'] = 'zh_ALT_0M'
+procToDatacardNameMap['ZH_ALT0PHf05ph0'] = 'zh_ALT_0PHf05'
+procToDatacardNameMap['ZH_ALT0PH'] = 'zh_ALT_0PH'
+
+
+#procToDatacardNameMap["WPLUSH2HQQ"] = "WH_lep"
+#procToDatacardNameMap["WPLUSH2HQQ"] = "WH_lep"
 
 def procToDatacardName( _proc ):
-  k = _proc.split("_")[0]
-  if k in procToDatacardNameMap: _proc = re.sub( k, procToDatacardNameMap[k], _proc )
+  k = _proc 
+  if k in procToDatacardNameMap: 
+    _proc = re.sub( k, procToDatacardNameMap[k], _proc )
   return _proc

@@ -136,6 +136,8 @@ class FinalModel:
   # Functions to get XS, BR and EA splines for given proc/decay from map
   def buildXSBRSplines(self):
     mh = np.linspace(120.,130.,101)
+    # the alternative models have only the nominal mass. Take the trends from the SM one
+    if "ALT" in self.proc: self.proc = self.proc.split("_")[0]
     # XS
     fp = self.xsbrMap[self.proc]['factor'] if 'factor' in self.xsbrMap[self.proc] else 1.
     mp = self.xsbrMap[self.proc]['mode']
@@ -313,6 +315,7 @@ class FinalModel:
         self.buildMean('dm_g%g_%s'%(g,extStr),skipSystematics=self.skipSystematics)
         self.buildSigma('sigma_g%g_%s'%(g,extStr),skipSystematics=self.skipSystematics)
         # Build Gaussian
+        
         if self.doVoigtian: 
           self.Pdfs['gaus_g%g_%s'%(g,extStr)] = ROOT.RooVoigtian("gaus_g%g_%s"%(g,extStr),"gaus_g%g_%s"%(g,extStr),self.xvar,self.Functions["mean_g%g_%s"%(g,extStr)],self.GammaH,self.Functions["sigma_g%g_%s"%(g,extStr)])
         else: 

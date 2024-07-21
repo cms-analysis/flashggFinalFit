@@ -21,6 +21,7 @@ def get_options():
   parser.add_option('--doTrueYield', dest='doTrueYield', default=False, action="store_true", help="For pruning: use true number of expected events for proc x cat i.e. Product(XS,BR,eff*acc,lumi). Use only if NOTAG dataset has been included. If false then will use nominal_yield (i.e. sumEntries)")
   parser.add_option('--mass', dest='mass', default='125', help="MH mass: required for doTrueYield")
   parser.add_option('--analysis', dest='analysis', default='STXS', help="Analysis extension: required for doTrueYield (see ./tools/XSBR.py for example)")
+  parser.add_option('--pruneCat', dest='pruneCat', default=None, help="Prune category, can specify multiple times")
   # For yield/systematics:
   parser.add_option('--skipCOWCorr', dest='skipCOWCorr', default=False, action="store_true", help="Skip centralObjectWeight correction for events in acceptance")
   parser.add_option('--doSystematics', dest='doSystematics', default=False, action="store_true", help="Include systematics calculations and add to datacard")
@@ -44,11 +45,18 @@ if opt.doSTXSScaleCorrelationScheme: from tools.STXS_tools import STXSScaleCorre
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Concatenate dataframes
 print " --> Loading per category dataframes into single dataframe"
+skipCats = []
+if opt.pruneCat: skipCats = opt.pruneCat.split(",")
 extStr = "_%s"%opt.ext if opt.ext != '' else ''
+print "./yields%s/*.pkl"%extStr
 pkl_files = glob.glob("./yields%s/*.pkl"%extStr)
+
 pkl_files.sort() # Categories in alphabetical order
 data = pd.DataFrame()
 for f_pkl_name in pkl_files:
+  if any([skipCat in f_pkl_name for skipCat in skipCats]):
+    print "\t===> Pruning category: ",f_pkl_name
+    continue
   with open(f_pkl_name,"rb") as f_pkl: 
     df = pickle.load(f_pkl)
     data = pd.concat([data,df], ignore_index=True, axis=0, sort=False)
@@ -104,6 +112,7 @@ if opt.prune:
   data['prune'] = 0
   if opt.doTrueYield:
     print " --> Using the true yield of process for pruning: N = Product(XS,BR,eff*acc,lumi)"
+
     mask = (data['type']=='sig')
 
     # Extract XS*BR using tools.XSBR
@@ -132,6 +141,7 @@ if opt.prune:
 
   else:
     print " --> Using nominal yield of process (sumEntries) for pruning"
+
     mask = (data['type']=='sig')
 
     # Extract per category yields

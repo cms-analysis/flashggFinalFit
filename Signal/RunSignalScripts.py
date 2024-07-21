@@ -52,6 +52,8 @@ if opt.inputConfig != '':
     options['smears']       = _cfg['smears']
     options['batch']        = _cfg['batch']
     options['queue']        = _cfg['queue']
+    options['xvar']         = _cfg['xvar']
+    options['outdir']       = _cfg['outdir'] if 'outdir' in _cfg else swd__
     # Options from command line
     options['mode']                    = opt.mode
     options['modeOpts']                = opt.modeOpts
@@ -103,6 +105,7 @@ print " --> Input flashgg ws dir: %s"%options['inputWSDir']
 print " --> Processes: %s"%options['procs']
 print " --> Categories: %s"%options['cats']
 print " --> Mass points: %s --> Low = %s, High = %s"%(options['massPoints'],options['massLow'],options['massHigh'])
+print " --> Variable to fit: %s"%options['xvar']
 print " --> Extension: %s"%options['ext']
 print " --> Analysis: %s"%options['analysis']
 print " --> Year: %s ::: Corresponds to intLumi = %.2f fb^-1"%(options['year'],lumiMap[options['year']])
@@ -135,7 +138,7 @@ print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Make directory to store job scripts and output
-if not os.path.isdir("%s/outdir_%s"%(swd__,options['ext'])): os.system("mkdir %s/outdir_%s"%(swd__,options['ext']))
+if not os.path.isdir("%s/%s"%(options['outdir'],options['ext'])): os.system("mkdir %s/%s"%(options['outdir'],options['ext']))
 
 # Write submission files: style depends on batch system
 writeSubFiles(options)

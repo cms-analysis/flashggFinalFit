@@ -32,8 +32,8 @@ def get_options():
   parser.add_option('--doSystematics', dest='doSystematics', default=False, action="store_true", help="Include systematics calculations and add to datacard")
   parser.add_option('--ignore-warnings', dest='ignore_warnings', default=False, action="store_true", help="Skip errors for missing systematics. Instead output warning message")
   # For submission
-  parser.add_option('--batch', dest='batch', default='IC', help='Batch')
-  parser.add_option('--queue', dest='queue', default='microcentury', help='Queue: should not take long (microcentury will do)')
+  parser.add_option('--batch', dest='batch', default='condor', help='Batch')
+  parser.add_option('--queue', dest='queue', default='espresso', help='Queue: should not take long (microcentury will do)')
   parser.add_option('--jobOpts', dest='jobOpts', default='', help="Additional options to add to job submission. For Condor separate individual options with a colon (specify all within quotes e.g. \"option_xyz = abc+option_123 = 456\")")
   parser.add_option('--printOnly', dest='printOnly', default=False, action="store_true", help="Dry run: print submission files only")
   return parser.parse_args()
@@ -71,6 +71,8 @@ options['printOnly'] = opt.printOnly
 # If auto: extract cats from first input workspace dir
 inputWSDir0 = options['inputWSDirMap'].split(",")[0].split("=")[1]
 WSFileNames = extractWSFileNames(inputWSDir0)
+
+print(inputWSDir0, WSFileNames)
 if options['cats'] == "auto": options['cats'] = extractListOfCats(WSFileNames)
 
 if( opt.doNOTAG )&( 'NOTAG' not in options['cats'] ):
