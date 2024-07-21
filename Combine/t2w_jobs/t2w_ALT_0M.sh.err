@@ -1,6 +1,0 @@
-Traceback (most recent call last):
-  File "/afs/cern.ch/user/f/fderiggi/AC/CMSSW_10_2_13/bin/slc7_amd64_gcc700/text2workspace.py", line 55, in <module>
-    __import__(physModMod)
-  File "/cvmfs/cms.cern.ch/slc7_amd64_gcc700/lcg/root/6.12.07-gnimlf5/lib/ROOT.py", line 318, in _importhook
-    return _orig_ihook( name, *args, **kwds )
-ImportError: No module named FA3_Interference_JHU_ggHSyst_rw_MengsMuV_HeshyXsec_ggHInt_ggHphase

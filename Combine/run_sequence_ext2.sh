@@ -36,12 +36,13 @@ fi
 
 fits=( "ALT_L1" "ALT_L1Zg" "ALT_0PH" "ALT_0M")
 fits=( "ALT_0M")
-ext2=("_WHLEP_VHLEP_MET" "_VHLEP_MET" "_VHLEP_new_syst")
+ext2=("GGH" "VBF" "VHHAD"  "TTH" "VH_LEP" "WH_LEP" "ZH_LEP" )
+
 
 if [[ $STEP == "t2w" ]]; then
-    for fit in ${fits[*]}
+    for ext in ${ext2[*]}
     do
-        python RunText2Workspace.py --ext $fit --mode $fit --batch Rome
+        python RunText2Workspace.py --ext ${ext} --mode ALT_0M 
     done
 elif [[ $STEP == "fit" ]]; then
     for obs in " " 
@@ -51,7 +52,7 @@ elif [[ $STEP == "fit" ]]; then
         do
             for ext in ${ext2[*]}
             do
-            python RunFits.py --inputJson inputs.json --ext $fit$ext --mode $fit  ${DROPT} $obs
+            python RunFits.py --inputJson inputs.json --ext $fit_$ext --mode $fit  ${DROPT} $obs
             done 
         done
     done
@@ -64,7 +65,7 @@ elif [[ $STEP == "collect" ]]; then
             for ext in ${ext2[*]}
             do
         #    python RunFits.py --inputJson inputs.json --ext $fit$ext --mode $fit  ${DROPT} $obs
-	    python CollectFits.py --inputJson inputs.json --ext $fit$ext --mode $fit $obs
+	    python CollectFits.py --inputJson inputs.json --ext $fit_$ext --mode $fit $obs
 	done
    done
    done
@@ -74,43 +75,9 @@ elif [[ $STEP == "plot" ]]; then
     do
         for fit in ${fits[*]}
         do
-            python PlotScans.py --inputJson inputs.json --mode $fit  --ext $fit --outdir $outdate-fits $obs
+           string="runFitsTTH_ALT_0M/profile1D_syst_TTH_CMS_zz4l_fai1.root:TTH:2 runFitsVBF_ALT_0M/profile1D_syst_VBF_CMS_zz4l_fai1.root:VBF:3 runFitsVHHAD_ALT_0M/profile1D_syst_VHHAD_CMS_zz4l_fai1.root:VHHAD:4  runFitsVH_LEP_ALT_0M/profile1D_syst_VH_LEP_CMS_zz4l_fai1.root:VH-MET:9 runFitsWH_LEP_ALT_0M/profile1D_syst_WH_LEP_CMS_zz4l_fai1.root:WH-LEP:6 runFitsZH_LEP_ALT_0M/profile1D_syst_ZH_LEP_CMS_zz4l_fai1.root:ZH-LEP:46"
+           plot1DScan.py runFitsGGH_ALT_0M/profile1D_syst_GGH_CMS_zz4l_fai1.root   --y-cut 30 --y-max 30 -o  plots/Breakdown --POI CMS_zz4l_fai1 --main-label GGH --translate ../Plots/pois_fa3.json --others $string
         done
-    done
-elif [[ $STEP == "impacts-initial" ]]; then
-    for fit in ${fits[*]} 
-    do
-	python RunImpacts.py --inputJson inputs.json --ext $fit --mode $fit --queue workday   ${DROPT}
-    done
-elif [[ $STEP == "impacts-scans" ]]; then
-    for fit in ${fits[*]}
-    do
-	python RunImpacts.py --inputJson inputs.json --ext $fit --mode $fit --doFits  --queue tomorrow  ${DROPT}
-    done
-elif [[ $STEP == "impacts-collect" ]]; then
-    for fit in ${fits[*]}
-    do
-	cd runImpacts${fit}_${fit}
-	echo "Making JSON file for fit $fit It might take time, depending on the number of parameters..."
-	##combineTool.py -M Impacts -n _bestfit_syst_${fit}_initialFit -d ../Datacard_${fit}.root -i impacts_${fit}.json -m 125.38 -o impacts_${poi}.json
-	if [[ $fit == "xsec" ]]; then 
-	    pois=("r_ggH" "r_VBF" "r_VH" "r_top")
-	    translate="pois_mu.json"
-   else 
-       pois=("CMS_zz4l_fai1")
-       translate="pois_fa3.json"
-	fi
-	for poi in ${pois[*]}
-	do
-
-	#combineTool.py -M Impacts -n _bestfit_syst_${fit}_initialFit -d ../Datacard_${fit}.root -i impacts_${fit}.json -m 125.38 -o impacts_${poi}
-	    echo "    ===> Producing impact plots for the *** main-only *** systematics for fit: === $fit === and POI: == $poi === "
-       
-	    #combineTool.py -M Impacts -n _bestfit_syst_${fit}_initialFit -d ../Datacard_${fit}.root -i impacts_${fit}.json -m 125.38 -o impacts_${poi}.json -P ${poi}
-	    plotImpacts.py   -i impacts_${poi}.json -o impacts_${poi}_${fit} --POI ${poi}  --max-pages 1
-#--translate "../../Plots/pois_${fit}.json" --max-pages 1
-	done
-	cd -
     done
 else
     echo "Step $STEP is not one among t2w,fit,plot. Exiting."

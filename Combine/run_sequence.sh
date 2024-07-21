@@ -34,14 +34,14 @@ if [[ $DR ]]; then
     DROPT=" --dryRun "
 fi
 
-fits=( "ALT_L1" "ALT_L1Zg" "ALT_0PH" "ALT_0M")
-fits=( "xsec")
+fits=("xsec" "ALT_L1" "ALT_L1Zg" "ALT_0PH" "ALT_0M")
 
+fits=(  "ALT_0M"  )
 
 if [[ $STEP == "t2w" ]]; then
     for fit in ${fits[*]}
     do
-        python RunText2Workspace.py --ext $fit --mode $fit --batch Rome
+        python RunText2Workspace.py --ext $fit --mode $fit --batch condor
     done
 elif [[ $STEP == "fit" ]]; then
     for obs in " " 
@@ -49,7 +49,7 @@ elif [[ $STEP == "fit" ]]; then
     do
         for fit in ${fits[*]}
         do
-            python RunFits.py --inputJson inputs.json --ext $fit$ext --mode $fit  ${DROPT} $obs
+            python RunFits.py --inputJson inputs.json --ext $fit --mode $fit  ${DROPT} $obs
         done
     done
 elif [[ $STEP == "collect" ]]; then
@@ -67,6 +67,7 @@ elif [[ $STEP == "plot" ]]; then
     do
         for fit in ${fits[*]}
         do
+       
             python PlotScans.py --inputJson inputs.json --mode $fit  --ext $fit --outdir $outdate-fits $obs
         done
     done
@@ -78,32 +79,32 @@ elif [[ $STEP == "impacts-initial" ]]; then
 elif [[ $STEP == "impacts-scans" ]]; then
     for fit in ${fits[*]}
     do
-	python RunImpacts.py --inputJson inputs.json --ext $fit --mode $fit --doFits  --queue tomorrow  ${DROPT}
+	python RunImpacts.py --inputJson inputs.json --ext $fit --mode $fit --doFits  --queue workday  ${DROPT}
     done
 elif [[ $STEP == "impacts-collect" ]]; then
     for fit in ${fits[*]}
     do
-	cd runImpacts${fit}_${fit}
+	#cd runImpacts${fit}_${fit}
 	echo "Making JSON file for fit $fit It might take time, depending on the number of parameters..."
-	combineTool.py -M Impacts -n _bestfit_syst_${fit}_initialFit -d ../Datacard_${fit}.root -i impacts_${fit}.json -m 125.38 -o impacts_${poi}.json
 	if [[ $fit == "xsec" ]]; then 
 	    pois=("r_ggH" "r_VBF" "r_VH" "r_top")
 	    translate="pois_mu.json"
    else 
        pois=("CMS_zz4l_fai1")
-       translate="pois_fa3.json"
+       translate="pois_${fit}.json"
 	fi
 	for poi in ${pois[*]}
 	do
-
-	#combineTool.py -M Impacts -n _bestfit_syst_${fit}_initialFit -d ../Datacard_${fit}.root -i impacts_${fit}.json -m 125.38 -o impacts_${poi}
+      cd runImpacts${fit}_${fit} 
+	    #combineTool.py -M Impacts -n _bestfit_syst_${fit}_initialFit -d ../Datacard_${fit}.root -i impacts_${fit}.json -m 125.38 -o impacts_${poi}.json
+	    echo " combineTool.py -M Impacts -n _bestfit_syst_${fit}_initialFit -d ../Datacard_${fit}.root -i impacts_${fit}.json -m 125.38 -o impacts_${poi}"
 	    echo "    ===> Producing impact plots for the *** main-only *** systematics for fit: === $fit === and POI: == $poi === "
-       
-	    #combineTool.py -M Impacts -n _bestfit_syst_${fit}_initialFit -d ../Datacard_${fit}.root -i impacts_${fit}.json -m 125.38 -o impacts_${poi}.json -P ${poi}
-	    plotImpacts.py   -i impacts_${poi}.json -o ../plot_impact/impacts_${poi}_${fit} --POI ${poi}  --max-pages 4
-#--translate "../../Plots/pois_${fit}.json" --max-pages 1
+      cd - 
+#	    combineTool.py -M Impacts -n _bestfit_syst_${fit}_initialFit -d ../Datacard_${fit}.root -i impacts_${fit}.json -m 125.38 -o impacts_${poi}.json
+	    plotImpacts.py   -i runImpacts${fit}_${fit}/impacts_${poi}.json -o plot_impact/impacts_${poi}_${fit}_allpages --POI ${poi}   --translate "../Plots/${translate}"
+	   #plotImpacts.py   -i impacts_${poi}.json -o ../plot_impact/impacts_${poi}_${fit}_allpages --POI ${poi}   --translate "../../Plots/${translate}"
+       echo "plotImpacts.py   -i impacts_${poi}.json -o ../plot_impact/impacts_${poi}_${fit}_all_pages --POI ${poi}   --translate "../../Plots/${translate}" --max-pages "1
 	done
-	cd -
     done
 else
     echo "Step $STEP is not one among t2w,fit,plot. Exiting."
