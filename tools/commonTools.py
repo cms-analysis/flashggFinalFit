@@ -186,7 +186,7 @@ procToDatacardNameMap['wh_ALT_L1'] = 'wh_ALT_L1'
 procToDatacardNameMap['WH_ALT0PHf05ph0'] = 'wh_ALT_0PHf05'
 procToDatacardNameMap['WH_ALT0PH'] = 'wh_ALT_0PH'
 procToDatacardNameMap['wh_ALT_0M'] = 'wh_ALT_0M'
-
+procToDatacardNameMap['wh_ALT_0Mf05'] = 'wh_ALT_0Mf05'
 procToDatacardNameMap['ZH_ALT0L1f05ph0'] = 'zh_ALT_L1f05'
 procToDatacardNameMap['ZH_ALT0L1'] = 'zh_ALT_L1'
 procToDatacardNameMap['ZH_ALT0L1Zgf05ph0'] = 'zh_ALT_L1Zgf05'
