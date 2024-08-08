@@ -68,6 +68,8 @@
   "RECO_TTH_HAD_PTH_GT300_Tag2":"ttH had high $\\ptgg$ Tag2",
   "RECO_VH_MET_Tag0":"VH MET Tag0",
   "RECO_VH_MET_Tag1":"VH MET Tag1",
+  "RECO_VH_MET_Tag2":"VH MET Tag2",
+  "RECO_VH_MET_Tag3":"VH MET Tag3",
   "RECO_WH_LEP_Tag0":"WH-lep Tag0",
   "RECO_WH_LEP_Tag1":"WH-lep Tag1",
   "RECO_WH_LEP_Tag2":"WH-lep Tag2",
@@ -92,7 +94,7 @@
   "RECO_VBFTOPO_ACVHHADBSM_Tag1":"VH had BSM-like Tag1",
   "RECO_VBFTOPO_ACVHHADSM_Tag0":"VH had SM-like Tag0",
   "RECO_VBFTOPO_ACVHHADSM_Tag1":"VH had SM-like Tag1",
-  "RECO_VBFTOPO_ACVHHADSM_Tag2":"VH had SM-like Tag1",
+  "RECO_VBFTOPO_ACVHHADSM_Tag2":"VH had SM-like Tag2",
   "RECO_THQ_LEP":"tHq lep"
 }
 

@@ -64,7 +64,7 @@ cp_top = od()
 cp_top["ttH"] = ['ttH']
 
 cp_vh = od()
-cp_vh["vH"] = ['WMINUSH2HQQ','WPLUSH2HQQ','ZH_lep']
+cp_vh["vH"] = ['wh','zh']
 
 # ggH tags
 target_procs_ggh = od()
@@ -227,13 +227,21 @@ target_procs_qqh_ac["RECO_VBFTOPO_ACVBFBSM_Tag1"] = ['qqH']
 target_procs_qqh_ac["RECO_VBFTOPO_ACVBFSM_Tag0"] = ['qqH']
 
 target_procs_vh_ac = od()
-target_procs_vh_ac["RECO_VBFTOPO_VHHAD_Tag0"] = ['vH']
-target_procs_vh_ac["RECO_VBFTOPO_VHHAD_Tag1"] = ['vH']
+target_procs_vh_ac["RECO_VBFTOPO_ACVHHADBSM_Tag0"] = ['vH']
+target_procs_vh_ac["RECO_VBFTOPO_ACVHHADBSM_Tag1"] = ['vH']
+target_procs_vh_ac["RECO_VBFTOPO_ACVHHADSM_Tag2"] = ['vH']
+target_procs_vh_ac["RECO_VBFTOPO_ACVHHADSM_Tag1"] = ['vH']
+target_procs_vh_ac["RECO_VBFTOPO_ACVHHADSM_Tag0"] = ['vH']
 target_procs_vh_ac["RECO_VH_MET_Tag0"] = ['vH']
 target_procs_vh_ac["RECO_VH_MET_Tag1"] = ['vH']
 target_procs_vh_ac["RECO_VH_MET_Tag2"] = ['vH']
-target_procs_vh_ac["RECO_WH_LEP_PTV_0_75_Tag0"] = ['vH']
-target_procs_vh_ac["RECO_WH_LEP_PTV_0_75_Tag1"] = ['vH']
+target_procs_vh_ac["RECO_VH_MET_Tag3"] = ['vH']
+target_procs_vh_ac["RECO_WH_LEP_Tag3"] = ['vH']
+target_procs_vh_ac["RECO_WH_LEP_Tag2"] = ['vH']
+target_procs_vh_ac["RECO_WH_LEP_Tag1"] = ['vH']
+target_procs_vh_ac["RECO_WH_LEP_Tag0"] = ['vH']
+target_procs_vh_ac["RECO_ZH_LEP_Tag1"] = ['vH']
+target_procs_vh_ac["RECO_ZH_LEP_Tag0"] = ['vH']
 
 def get_options():
   parser = OptionParser()
@@ -340,6 +348,7 @@ for s0 in stage0.keys()[1:]: s0_str += " & %s"%Translate(s0,translateStage0)
 fout.write("     & & %s & & \\\\ \\hline \n"%s0_str)
 # Add numbers
 tag_itr = -1
+
 for ir,r in tab_data.iterrows():
   if tag_itr == -1: 
     tag_itr = len(tab_data[tab_data['cat'].str.contains(r['cat'].split("_Tag")[0])])-1
