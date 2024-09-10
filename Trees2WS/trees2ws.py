@@ -108,7 +108,7 @@ theoryWeightColumns = {}
 for ts, nWeights in theoryWeightContainers.iteritems(): theoryWeightColumns[ts] = ["%s_%g"%(ts[:-1],i) for i in range(0,nWeights)] # drop final s from container name
 
 #If year == 2018, add HET
-#if opt.year == '2018': systematics.append("JetHEM")
+if opt.year == '2018': systematics.append("JetHEM")
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -173,11 +173,21 @@ for cat in cats:
   # Add NLO scale factor 
   if "vbf" in opt.productionMode and "ALT" in opt.productionMode: 
       df['weightNLO'] = df['weight']* df['vbfNLOweight'] 
+  # a lot of jobs fails in the production of the tree so we want to reweight them taking into account it
+  elif opt.year == '2018' and "ALT" not in opt.productionMode and "vbf" in opt.productionMode:
+      df['weightNLO'] = df['weight'] * 100./43.
+      print("ripesamento VBF")
+ # a lot of jobs fails in the production of the tree so we want to reweight them taking into account it
+  elif opt.year == '2018' and opt.productionMode and "ggh" in opt.productionMode:
+      print("ripesamento ggh")
+      df['weightNLO'] = df['weight']* 100./80.
   elif "wh" in opt.productionMode and "ALT" in opt.productionMode:
       df['weightNLO'] = df['weight']* df['vhhadNLOweight'] 
   elif "zh" in opt.productionMode and "ALT" in opt.productionMode:
       df['weightNLO'] = df['weight']* df['vhhadNLOweight'] 
   else : df['weightNLO'] = df['weight']
+  print('-------------------')
+  print(df['weight'].sum())
     
   # Add STXS splitting var if splitting necessary
   if opt.doSTXSSplitting: df[stxsVar] = t.pandas.df(stxsVar)
