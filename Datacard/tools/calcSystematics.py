@@ -97,7 +97,7 @@ def factoryType(d,s):
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Function to extract yield variations for signal row in dataFrame
-def calcSystYields(_nominalDataName,_nominalDataContents,_inputWS,_systFactoryTypes,skipCOWCorr=True,proc="ggH",year='2016',ignoreWarnings=False):
+def calcSystYields(_nominalDataName,_nominalDataContents,_inputWS,_systFactoryTypes,skipCOWCorr=True,proc="ggH",year='2016',systWeightScheme="accEff",ignoreWarnings=False):
 
   errMessage = "WARNING" if ignoreWarnings else "ERROR"
   errString = "Using nominal yield" if ignoreWarnings else ""
@@ -173,11 +173,15 @@ def calcSystYields(_nominalDataName,_nominalDataContents,_inputWS,_systFactoryTy
           else:
             # In case the weights are normalised with respect to a central weight and you extract ...
             # ... the relative weight variations based on the comparison, use the line below
-            #w_up, w_down = w*(f_up/f_central), w*(f_down/f_central)
+            if systWeightScheme == "legacyHiggsDNA":
+              w_up, w_down = w*(f_up/f_central), w*(f_down/f_central)
             # In case the weight variation branches are already normalised to yield acc x eff when summing them ...
             # ... it is not needed to normalise them again, so use the line below
-            w_up = f_up
-            w_down = f_down
+            elif systWeightScheme == "accEff":
+              w_up, w_down = f_up, f_down
+            else:
+              print(f" --> [ERROR] Unknown systematic weight scheme {systWeightScheme}. Leaving...")
+              sys.exit(1)
           # Add weights to counters
           systYields["%s_up"%s] += w_up        
           systYields["%s_down"%s] += w_down
@@ -212,9 +216,14 @@ def calcSystYields(_nominalDataName,_nominalDataContents,_inputWS,_systFactoryTy
           elif f_central == 0: continue
           else:
             # Add weights to counter
-            #systYields[s] += w*(f/f_central)
             # See comments above
-            systYields[s] += w
+            if systWeightScheme == "legacyHiggsDNA":
+              systYields[s] += w*(f/f_central)
+            elif systWeightScheme == "accEff":
+              systYields[s] += w
+            else:
+              print(f" --> [ERROR] Unknown systematic weight scheme {systWeightScheme}. Leaving...")
+              sys.exit(1)
             if not skipCOWCorr:
               if f_COWCorr != 0:
                 systYields["%s_COWCorr"%s] += w*(f_NNLOPS/f_COWCorr)*(f/f_central)

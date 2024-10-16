@@ -39,6 +39,9 @@ def get_options():
   # For yields calculations:
   parser.add_option('--skipZeroes', dest='skipZeroes', default=False, action="store_true", help="Skip signal processes with 0 sum of weights")
   parser.add_option('--skipCOWCorr', dest='skipCOWCorr', default=False, action="store_true", help="Skip centralObjectWeight correction for events in acceptance. Use if no centralObjectWeight in workspace")
+  parser.add_option('--systWeightScheme', dest='systWeightScheme', default='accEff', choices=['legacyHiggsDNA','accEff'], help="""Choose normalisation scheme for weight systematics.
+                    The option legacyHiggsDNA assumes that your samples were produced with a commit from HiggsDNA before c04ff5f2, where the weight systematics were not normalised to the genWeight and normalisation wrt to central_weight is needed.
+                    Defaults to accEff, meaning that all systematic weight branches include the genWeight and sum(weight_*)=acc x eff.""")
   # For systematics:
   parser.add_option('--doSystematics', dest='doSystematics', default=False, action="store_true", help="Include systematics calculations and add to datacard")
   parser.add_option('--ignore-warnings', dest='ignore_warnings', default=False, action="store_true", help="Skip errors for missing systematics. Instead output warning message")
@@ -239,7 +242,7 @@ for ir,r in data[data['type']=='sig'].iterrows():
     # For experimental systematics: skip NOTAG events
     if "NOTAG" not in r['cat']:
       # Skip centralObjectWeight correction as concerns events in acceptance
-      experimentalSystYields = calcSystYields(r['nominalDataName'],contents,inputWS,experimentalFactoryType,skipCOWCorr=True,proc=r['proc'],year=r['year'],ignoreWarnings=opt.ignore_warnings)
+      experimentalSystYields = calcSystYields(r['nominalDataName'],contents,inputWS,experimentalFactoryType,skipCOWCorr=True,proc=r['proc'],year=r['year'],systWeightScheme=opt.systWeightScheme,ignoreWarnings=opt.ignore_warnings)
       for s,f in experimentalFactoryType.items():
         if f in ['a_w','a_h']: 
           for direction in ['up','down']: 

@@ -27,6 +27,9 @@ def get_options():
   # For yields calculations:
   parser.add_option('--skipZeroes', dest='skipZeroes', default=False, action="store_true", help="Skip signal processes with 0 sum of weights")
   parser.add_option('--skipCOWCorr', dest='skipCOWCorr', default=False, action="store_true", help="Skip centralObjectWeight correction for events in acceptance. Use if no centralObjectWeight in workspace")
+  parser.add_option('--systWeightScheme', dest='systWeightScheme', default='accEff', choices=['legacyHiggsDNA','accEff'], help="""Choose normalisation scheme for weight systematics.
+                    The option legacyHiggsDNA assumes that your samples were produced with a commit from HiggsDNA before c04ff5f2, where the weight systematics were not normalised to the genWeight and normalisation wrt to central_weight is needed.
+                    Defaults to accEff, meaning that all systematic weight branches include the genWeight and sum(weight_*)=acc x eff.""")
   # For systematics:
   parser.add_option('--doSystematics', dest='doSystematics', default=False, action="store_true", help="Include systematics calculations and add to datacard")
   parser.add_option('--ignore-warnings', dest='ignore_warnings', default=False, action="store_true", help="Skip errors for missing systematics. Instead output warning message")
@@ -60,6 +63,7 @@ if opt.skipBkg: options['modeOpts'] += ' --skipBkg'
 if opt.bkgScaler != 1.: options['modeOpts'] += ' --bkgScaler %.4f'%opt.bkgScaler
 if opt.skipZeroes: options['modeOpts'] += ' --skipZeroes'
 if opt.skipCOWCorr: options['modeOpts'] += ' --skipCOWCorr'
+if opt.systWeightScheme: options['modeOpts'] += ' --systWeightScheme %s'%opt.systWeightScheme
 if opt.doSystematics: options['modeOpts'] += ' --doSystematics'
 if opt.ignore_warnings: options['modeOpts'] += ' --ignore-warnings'
 options['batch'] = opt.batch
