@@ -219,7 +219,11 @@ def calcSystYields(_nominalDataName,_nominalDataContents,_inputWS,_systFactoryTy
             # See comments above
             if systWeightScheme == "legacyHiggsDNA":
               systYields[s] += w*(f/f_central)
-            elif systWeightScheme == "accEff":
+            # For the theory systematics (pdf and scale), they are still normalised with respect to a central weight
+            # even in the accEff convention, so we need to normalise them here 
+            elif systWeightScheme == "accEff" and ('LHEScal' in s or 'LHEPd' in s):
+              systYields[s] += w*(f/f_central)
+            elif systWeightScheme == "accEff" and not ('LHEScal' in s or 'LHEPd' in s):
               systYields[s] += w
             else:
               print(f" --> [ERROR] Unknown systematic weight scheme {systWeightScheme}. Leaving...")
