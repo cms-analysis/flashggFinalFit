@@ -91,7 +91,7 @@ elif opt.batch == 'condor':
   fsub.write("export SCRAM_ARCH=%s\n"%os.environ['SCRAM_ARCH'])
   fsub.write("source /cvmfs/cms.cern.ch/cmsset_default.sh\n")
   fsub.write("eval `scramv1 runtime -sh`\n")
-  # fsub.write("cd %s/src/flashggFinalFit/Plots/SplusBModels%s/toys\n\n"%(os.environ['CMSSW_BASE'],opt.ext))
+  fsub.write("cd %s/src/flashggFinalFit/Plots/SplusBModels%s/toys\n\n"%(os.environ['CMSSW_BASE'],opt.ext))
   fsub.write("itoy=$1\n\n")
   # Generate command
   fsub.write("#Generate command\n")
