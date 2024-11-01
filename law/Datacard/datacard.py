@@ -22,8 +22,8 @@ from commonObjects import *
 
 from Signal.signal_tasks import *
 
-# from framework import Task
-# from framework import HTCondorWorkflow
+from framework import Task
+from framework import HTCondorWorkflow
 
 # Function to safely create a directory
 def safe_mkdir(path):
@@ -32,14 +32,20 @@ def safe_mkdir(path):
     except OSError as exception:
         if exception.errno != errno.EEXIST:
             raise
+        
+def convert_boolean_string(string):
+    if (string == "True") or (string == "true") or (string == True):
+        return True
+    else:
+        return False
                 
 
-class MakeYieldsCategory(law.Task):#(law.Task): #(Task, HTCondorWorkflow, law.LocalWorkflow):
+class MakeYieldsCategory(Task, HTCondorWorkflow, law.LocalWorkflow):#(law.Task): #(Task, HTCondorWorkflow, law.LocalWorkflow):
     inputWSDirMap = law.Parameter(description="Map. Format: year=inputWSDir (separate years by comma)")
     output_dir = law.Parameter(description="Path to the output directory")
     ext = law.Parameter(default="earlyAnalysis", description="Extension to be used for output folder naming")
     year = law.Parameter(default='2022', description="Year")
-    cat = law.Parameter(description="Current category (e.g. RECO_PTH_0p0_15p0_cat0)")
+    cats = law.Parameter(description="List of categories separated with a comma.")
     procs = law.Parameter(description="Comma separated list of signal processes. auto = automatically inferred from input workspaces")
     mergeYears = law.Parameter(default=False, description="Merge category across years")
     skipBkg = law.Parameter(default=False, description="Only add signal processes to datacard")
@@ -59,7 +65,7 @@ class MakeYieldsCategory(law.Task):#(law.Task): #(Task, HTCondorWorkflow, law.Lo
     nCats = law.Parameter(description="Number of Categories")
     variable = law.Parameter(default="", description="Variable to be used")
     
-    # htcondor_job_kwargs_submit = {"spool": True}
+    htcondor_job_kwargs_submit = {"spool": True}
     
     def requires(self):
         
@@ -84,13 +90,25 @@ class MakeYieldsCategory(law.Task):#(law.Task): #(Task, HTCondorWorkflow, law.Lo
     
     def create_branch_map(self):
         # map branch indexes to ascii numbers from 97 to 122 ("a" to "z")
-        return {i: num for i, num in enumerate(range(0, self.nCats + 1))}
+        nCats = len(self.cats.split(","))
+        
+        cat_list = [
+            self.cats.split(",")[categoryIndex]
+            for categoryIndex in range(nCats)
+        ]
+        
+        branch_map = {i: cat for i, cat in enumerate(cat_list)}
+        return branch_map
 
     def output(self):
+        
+        cat = self.branch_data
 
-        return [law.LocalFileTarget(self.output_dir + f'/Datacards/yields_{self.ext}/{self.cat}.pkl')]
+        return [law.LocalFileTarget(self.output_dir + f'/Datacards/yields_{self.ext}/{cat}.pkl')]
 
     def run(self):
+        cat = self.branch_data
+        
         safe_mkdir(self.output_dir)
         safe_mkdir(self.output_dir + "/Datacards")
         safe_mkdir(self.output_dir + f"/Datacards/yields_{self.ext}")
@@ -100,7 +118,7 @@ class MakeYieldsCategory(law.Task):#(law.Task): #(Task, HTCondorWorkflow, law.Lo
             "python3",
             script_path,
             "--inputWSDirMap", f"{self.inputWSDirMap}",
-            "--cat", self.cat,
+            "--cat", cat,
             "--outputDir", f"{self.output_dir}",
             "--ext", self.ext,
             "--procs", f"{self.procs}",
@@ -112,12 +130,12 @@ class MakeYieldsCategory(law.Task):#(law.Task): #(Task, HTCondorWorkflow, law.Lo
             "--bkgModelExt", f"{self.bkgModelExt}"
             ]
         
-        if self.doSystematics: arguments.append("--doSystematics")
-        if self.mergeYears: arguments.append("--mergeYears")
-        if self.skipZeroes: arguments.append("--skipZeroes")
-        if self.ignore_warnings: arguments.append("--ignore-warnings")
-        if self.skipBkg: arguments.append("--skipBkg")
-        if self.skipCOWCorr: arguments.append("--skipCOWCorr")
+        if convert_boolean_string(self.doSystematics): arguments.append("--doSystematics")
+        if convert_boolean_string(self.mergeYears): arguments.append("--mergeYears")
+        if convert_boolean_string(self.skipZeroes): arguments.append("--skipZeroes")
+        if convert_boolean_string(self.ignore_warnings): arguments.append("--ignore-warnings")
+        if convert_boolean_string(self.skipBkg): arguments.append("--skipBkg")
+        if convert_boolean_string(self.skipCOWCorr): arguments.append("--skipCOWCorr")
 
     
         command = arguments
@@ -194,7 +212,7 @@ class MakeYields(law.Task):
                 else:
                     inputWSDirMap += currentYearEra + "=" + currentYearEraInputOutput
         
-        tasks = [MakeYieldsCategory(inputWSDirMap=inputWSDirMap, output_dir=output_dir, year=self.year, cat=datacard_config['cats'].split(",")[categoryIndex], procs=datacard_config['procs'], nCats=datacard_config['nCats'], ext=datacard_config['ext'], mergeYears=datacard_config['mergeYears'], skipBkg=datacard_config['skipBkg'], bkgScaler=datacard_config['bkgScaler'], sigModelWSDir=datacard_config['sigModelWSDir'], sigModelExt=f"packaged{packaged_config['ext']}", bkgModelWSDir=datacard_config['bkgModelWSDir'], bkgModelExt=datacard_config['bkgModelExt'], skipZeroes=datacard_config['skipZeroes'], skipCOWCorr=datacard_config['skipCOWCorr'], doSystematics=datacard_config['doSystematics'], ignore_warnings=datacard_config['ignore_warnings'], mass=datacard_config['mass'], variable=self.variable) for categoryIndex in range(datacard_config['nCats'])]
+        tasks = [MakeYieldsCategory(inputWSDirMap=inputWSDirMap, output_dir=output_dir, year=self.year, cats=datacard_config['cats'], procs=datacard_config['procs'], nCats=datacard_config['nCats'], ext=datacard_config['ext'], mergeYears=datacard_config['mergeYears'], skipBkg=datacard_config['skipBkg'], bkgScaler=datacard_config['bkgScaler'], sigModelWSDir=datacard_config['sigModelWSDir'], sigModelExt=f"packaged{packaged_config['ext']}", bkgModelWSDir=datacard_config['bkgModelWSDir'], bkgModelExt=datacard_config['bkgModelExt'], skipZeroes=datacard_config['skipZeroes'], skipCOWCorr=datacard_config['skipCOWCorr'], doSystematics=datacard_config['doSystematics'], ignore_warnings=datacard_config['ignore_warnings'], mass=datacard_config['mass'], variable=self.variable, version='v1', workflow=datacard_config['execution'])]
         
         return tasks
         
@@ -319,8 +337,9 @@ class MakeDatacard(law.Task):
         yields_config = config["datacard_yields"]
         pklInputFiles = output_dir
         
-        yields_config["ext"] = yields_config["ext"]+'_'+self.variable
-        
+        if self.variable != '':
+            yields_config["ext"] = yields_config["ext"]+'_'+self.variable
+                    
         # Create years string
         years = ''
         if self.year == 'combined': datacard_config['year'] = 'all'
@@ -357,14 +376,14 @@ class MakeDatacard(law.Task):
             "--output", f"{datacard_config['output']}"
             ]
         
-        if datacard_config["prune"]: arguments.append("--prune")
-        if datacard_config["doTrueYield"]: arguments.append("--doTrueYield")
-        if datacard_config["skipCOWCorr"]: arguments.append("--skipCOWCorr")
-        if datacard_config["doSystematics"]: arguments.append("--doSystematics")
-        if datacard_config["doMCStatUncertainty"]: arguments.append("--doMCStatUncertainty")
-        if datacard_config["doSTXSMerging"]: arguments.append("--doSTXSMerging")
-        if datacard_config["doSTXSScaleCorrelationScheme"]: arguments.append("--doSTXSScaleCorrelationScheme")
-        if datacard_config["saveDataFrame"]: arguments.append("--saveDataFrame")
+        if convert_boolean_string(datacard_config["prune"]): arguments.append("--prune")
+        if convert_boolean_string(datacard_config["doTrueYield"]): arguments.append("--doTrueYield")
+        if convert_boolean_string(datacard_config["skipCOWCorr"]): arguments.append("--skipCOWCorr")
+        if convert_boolean_string(datacard_config["doSystematics"]): arguments.append("--doSystematics")
+        if convert_boolean_string(datacard_config["doMCStatUncertainty"]): arguments.append("--doMCStatUncertainty")
+        if convert_boolean_string(datacard_config["doSTXSMerging"]): arguments.append("--doSTXSMerging")
+        if convert_boolean_string(datacard_config["doSTXSScaleCorrelationScheme"]): arguments.append("--doSTXSScaleCorrelationScheme")
+        if convert_boolean_string(datacard_config["saveDataFrame"]): arguments.append("--saveDataFrame")
     
         command = arguments
         # print("Output:", command)
@@ -390,9 +409,9 @@ class MakeDatacard(law.Task):
                 "--symmetrizeNuisance", f"{clean_config['symmetrizeNuisance']}",
                 ]
             
-            if clean_config["removeDoubleSided"]: arguments.append("--removeDoubleSided")
-            if clean_config["removeNonDiagonal"]: arguments.append("--removeNonDiagonal")
-            if clean_config["verbose"]: arguments.append("--verbose")
+            if convert_boolean_string(clean_config["removeDoubleSided"]): arguments.append("--removeDoubleSided")
+            if convert_boolean_string(clean_config["removeNonDiagonal"]): arguments.append("--removeNonDiagonal")
+            if convert_boolean_string(clean_config["verbose"]): arguments.append("--verbose")
         
             command = arguments
             # print("Output:", command)

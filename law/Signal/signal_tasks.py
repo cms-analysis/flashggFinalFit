@@ -37,6 +37,12 @@ def safe_mkdir(path):
 
 def count_files_in_directory(directory='.'):
     return len([name for name in os.listdir(directory) if os.path.isfile(os.path.join(directory, name))])
+
+def convert_boolean_string(string):
+    if (string == "True") or (string == "true") or (string == True):
+        return True
+    else:
+        return False
                 
 
 class FTestCategory(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Task): #(Task, HTCondorWorkflow, law.LocalWorkflow):
@@ -47,6 +53,8 @@ class FTestCategory(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Task): #(T
     procs = law.Parameter(description="Processes")
     variable = law.Parameter(default="", description="Variable to be used")
     year = law.Parameter(description="Year")    
+    
+    era = law.Parameter(description="Current Era")    
 
 
     
@@ -72,9 +80,42 @@ class FTestCategory(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Task): #(T
         
         return tasks
     
-    # def create_branch_map(self):
-    #     # map branch indexes to ascii numbers from 97 to 122 ("a" to "z")
-    #     return {i: num for i, num in enumerate(range(0, self.nCats + 1))}
+    # def requires(self):
+    
+    #     if self.variable == '':
+    #         configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+    #     else:
+    #         configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+        
+    #     #Load central config file
+    #     with open(configYamlPath, 'r') as file:
+    #         config = yaml.safe_load(file)
+        
+    #     if self.output_dir == '':
+    #         output_dir = config["outputFolder"]
+    #     else:
+    #         output_dir = self.output_dir
+    #     input_paths = config["inputFiles"]["Trees2WS"]
+        
+    #     config = config["trees2wsCfg"]
+                
+    #     doSTXSSplitting = convert_boolean_string(config["doSTXSSplitting"])
+    #     doDiffSplitting = convert_boolean_string(config["doDiffSplitting"])
+    #     doInOutSplitting = convert_boolean_string(config["doInOutSplitting"])
+    #     doSystematics = convert_boolean_string(config["doSystematics"])
+    #     mass_cut = convert_boolean_string(config["apply_mass_cut"])
+    #     mass_cut_r = config["mass_cut_range"]
+                       
+    #     tasks = []
+        
+    #     if self.variable == '':
+    #         current_output_path = output_dir + "/input_output_{}{}".format(self.year, self.era)
+    #     else:
+    #         current_output_path = output_dir + "/input_output_{}_{}{}".format(self.variable, self.year, self.era)
+                        
+    #     tasks.append(Trees2WSSingleProcess(input_paths=input_paths, era=self.era, apply_mass_cut=mass_cut, mass_cut_range=mass_cut_r, year=f"{self.year}{self.era}", doSystematics=doSystematics, doDiffSplitting=doDiffSplitting, doSTXSSplitting=doSTXSSplitting, doInOutSplitting=doInOutSplitting, output_dir=current_output_path, variable=self.variable, version=f"v1", workflow=config['execution']))
+        
+    #     return tasks
     
     def create_branch_map(self):
         # map branch indexes to ascii numbers from 97 to 122 ("a" to "z")
@@ -137,10 +178,35 @@ class FTestCategory(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Task): #(T
 class FTest(law.Task):
     # input_path = law.Parameter(description="Path to the input ROOT files (/ws_signal)")
     variable = law.Parameter(default="", description="Variable to be used")
-    output_dir = law.Parameter(description="Path to the output directory")
+    output_dir = law.Parameter(default="", description="Path to the output directory")
     year = law.Parameter(default='2022', description="Year")
     # ext = law.Parameter(default="earlyAnalysis", description="Descriptor of the background output folder.")
     # era = law.Parameter(default='None', description="Current era (eg. preEE, postEE for 2022), if any.")
+    
+    # def workflow_requires(self):
+    
+    #     if self.variable == '':
+    #         configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+    #     else:
+    #         configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+        
+    #     #Load central config file
+    #     with open(configYamlPath, 'r') as file:
+    #         config = yaml.safe_load(file)
+        
+    #     if self.output_dir == '':
+    #         output_dir = config['outputFolder']
+    #     else:
+    #         output_dir = self.output_dir
+            
+    #     # tasks = [Trees2WS(output_dir=output_dir, variable=self.variable, year=self.year)]
+        
+    #     reqs = super(FTest, self).workflow_requires()
+    #     reqs['trees2ws'] = {
+    #         1: Trees2WS(output_dir=output_dir, variable=self.variable, year=self.year)
+    #     }
+        
+    #     return reqs
     
     def requires(self):
         # req() is defined on all tasks and handles the passing of all parameter values that are
@@ -156,6 +222,11 @@ class FTest(law.Task):
         #Load central config file
         with open(configYamlPath, 'r') as file:
             config = yaml.safe_load(file)
+            
+        if self.output_dir == '':
+            output_dir = config['outputFolder']
+        else:
+            output_dir = self.output_dir
             
         # Use allData.root from HiggsDNA to automatically determine categories
         data_input_path = config['inputFiles']['Trees2WSData']  
@@ -184,9 +255,6 @@ class FTest(law.Task):
             mps = []
             for mp in currentConfig['massPoints'].split(","): mps.append(int(mp))
             currentConfig['massLow'], currentConfig['massHigh'] = '%s'%min(mps), '%s'%max(mps)
-                        
-            currentConfig['batch'] = 'local'
-            currentConfig['queue'] = 'none'
 
             # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             # If proc/cat == auto. Extract processes and categories
@@ -199,7 +267,7 @@ class FTest(law.Task):
             currentConfig['nProcs'] = len(currentConfig['procs'].split(","))
             
             
-            tasks.append(FTestCategory(input_path=input_path, output_dir=self.output_dir, ext=currentConfig['ext'], cats=currentConfig['cats'], procs=currentConfig['procs'], variable=self.variable, year=self.year, version=f"v{i}", workflow="htcondor"))
+            tasks.append(FTestCategory(input_path=input_path, output_dir=output_dir, ext=currentConfig['ext'], cats=currentConfig['cats'], procs=currentConfig['procs'], variable=self.variable, year=self.year, version=f"v{i}", workflow=currentConfig['execution'], era=currentEra))
             i += 1
         
         return tasks
@@ -218,6 +286,11 @@ class FTest(law.Task):
         with open(configYamlPath, 'r') as file:
             config = yaml.safe_load(file)
             
+        if self.output_dir == '':
+            output_dir = config['outputFolder']
+        else:
+            output_dir = self.output_dir
+            
         data_input_path = config['inputFiles']['Trees2WSData']  
 
         output_paths = []
@@ -232,9 +305,9 @@ class FTest(law.Task):
             # returns output folder
             
             
-            output_paths.append(law.LocalFileTarget(self.output_dir + f"/outdir_{currentConfig['ext']}/fTest"))
-            output_paths.append(law.LocalFileTarget(self.output_dir + f"/outdir_{currentConfig['ext']}/fTest/json"))
-            output_paths.append(law.LocalFileTarget(self.output_dir + f"/outdir_{currentConfig['ext']}/fTest/Plots"))
+            output_paths.append(law.LocalFileTarget(output_dir + f"/outdir_{currentConfig['ext']}/fTest"))
+            output_paths.append(law.LocalFileTarget(output_dir + f"/outdir_{currentConfig['ext']}/fTest/json"))
+            output_paths.append(law.LocalFileTarget(output_dir + f"/outdir_{currentConfig['ext']}/fTest/Plots"))
             
             # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             # If proc/cat == auto. Extract processes and categories
@@ -243,7 +316,7 @@ class FTest(law.Task):
                 
             cat_list = currentConfig['cats'].split(",")
             for cat in cat_list:
-                output_paths.append(law.LocalFileTarget(self.output_dir + f"/outdir_{currentConfig['ext']}/fTest/json/nGauss_{cat}.json"))
+                output_paths.append(law.LocalFileTarget(output_dir + f"/outdir_{currentConfig['ext']}/fTest/json/nGauss_{cat}.json"))
 
         return output_paths
                 
@@ -352,7 +425,7 @@ class CalcPhotonSystCategory(Task, HTCondorWorkflow, law.LocalWorkflow):#(law.Ta
 class CalcPhotonSyst(law.Task):
     # input_path = law.Parameter(description="Path to the input ROOT files (/ws_signal)")
     variable = law.Parameter(default="", description="Variable to be used")
-    output_dir = law.Parameter(description="Path to the output directory")
+    output_dir = law.Parameter(default="", description="Path to the output directory")
     year = law.Parameter(default='2022', description="Year")
     # ext = law.Parameter(default="earlyAnalysis", description="Descriptor of the background output folder.")
     # era = law.Parameter(default='None', description="Current era (eg. preEE, postEE for 2022), if any.")
@@ -371,6 +444,11 @@ class CalcPhotonSyst(law.Task):
         #Load central config file
         with open(configYamlPath, 'r') as file:
             config = yaml.safe_load(file)
+            
+        if self.output_dir == '':
+            output_dir = config['outputFolder']
+        else:
+            output_dir = self.output_dir
         
         # Use allData.root from HiggsDNA to automatically determine categories
         data_input_path = config['inputFiles']['Trees2WSData']  
@@ -409,11 +487,8 @@ class CalcPhotonSyst(law.Task):
             mps = []
             for mp in currentConfig['massPoints'].split(","): mps.append(int(mp))
             currentConfig['massLow'], currentConfig['massHigh'] = '%s'%min(mps), '%s'%max(mps)
-                        
-            currentConfig['batch'] = 'local'
-            currentConfig['queue'] = 'none'
                     
-            tasks.append(CalcPhotonSystCategory(input_path=input_path, output_dir=self.output_dir, ext=currentConfig['ext'], cats=currentConfig['cats'], procs=currentConfig['procs'], scales=currentConfig['scales'], scalesCorr=currentConfig['scalesCorr'], scalesGlobal=currentConfig['scalesGlobal'], smears=currentConfig['smears'], variable=self.variable, year=self.year, version=f"v{i}", workflow="htcondor"))
+            tasks.append(CalcPhotonSystCategory(input_path=input_path, output_dir=output_dir, ext=currentConfig['ext'], cats=currentConfig['cats'], procs=currentConfig['procs'], scales=currentConfig['scales'], scalesCorr=currentConfig['scalesCorr'], scalesGlobal=currentConfig['scalesGlobal'], smears=currentConfig['smears'], variable=self.variable, year=self.year, version=f"v{i}", workflow=currentConfig['execution']))
             i += 1
 
         return tasks
@@ -433,6 +508,11 @@ class CalcPhotonSyst(law.Task):
         with open(configYamlPath, 'r') as file:
             config = yaml.safe_load(file)
             
+        if self.output_dir == '':
+            output_dir = config['outputFolder']
+        else:
+            output_dir = self.output_dir
+            
         data_input_path = config['inputFiles']['Trees2WSData']  
         
         output_paths = []
@@ -446,8 +526,8 @@ class CalcPhotonSyst(law.Task):
                 currentConfig = config[f"signalScriptCfg_{self.year}"]
             # returns output folder
             
-            output_paths.append(law.LocalFileTarget(self.output_dir + f"/outdir_{currentConfig['ext']}/calcPhotonSyst"))
-            output_paths.append(law.LocalFileTarget(self.output_dir + f"/outdir_{currentConfig['ext']}/calcPhotonSyst/pkl"))
+            output_paths.append(law.LocalFileTarget(output_dir + f"/outdir_{currentConfig['ext']}/calcPhotonSyst"))
+            output_paths.append(law.LocalFileTarget(output_dir + f"/outdir_{currentConfig['ext']}/calcPhotonSyst/pkl"))
         
         
             # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -457,7 +537,7 @@ class CalcPhotonSyst(law.Task):
                 
             cat_list = currentConfig['cats'].split(",")
             for cat in cat_list:
-                output_paths.append(law.LocalFileTarget(self.output_dir + f"/outdir_{currentConfig['ext']}/calcPhotonSyst/pkl/{cat}.pkl"))
+                output_paths.append(law.LocalFileTarget(output_dir + f"/outdir_{currentConfig['ext']}/calcPhotonSyst/pkl/{cat}.pkl"))
                                     
         return output_paths
                 
@@ -487,7 +567,7 @@ class SignalFitCategoryProcess(Task, HTCondorWorkflow, law.LocalWorkflow):#(law.
     variable = law.Parameter(default="", description="Variable to be used")
     
     htcondor_job_kwargs_submit = {"spool": True}
-    
+      
     def requires(self):
         
         year = self.year[:4]
@@ -509,31 +589,8 @@ class SignalFitCategoryProcess(Task, HTCondorWorkflow, law.LocalWorkflow):#(law.
             
         tasks = []
             
-        # # Loop over a years era
-        # for currentEra in allErasMap[f"{year}"]:
-            
-            
-        #     if self.variable == '':
-        #         input_path = config["outputFolder"] + f"/input_output_{year}{currentEra}/ws_signal"
-        #     else:
-        #         input_path = config["outputFolder"] + f"/input_output_{self.variable}_{year}{currentEra}/ws_signal"
-
-        #     currentConfig = config[f"signalScriptCfg_{year}_{currentEra}"]
-
-        #     # Extract low and high MH values
-        #     mps = []
-        #     for mp in currentConfig['massPoints'].split(","): mps.append(int(mp))
-        #     currentConfig['massLow'], currentConfig['massHigh'] = '%s'%min(mps), '%s'%max(mps)
-                        
-        #     currentConfig['batch'] = 'local'
-        #     currentConfig['queue'] = 'none'
-            
-            
-        #     tasks.append(FTest(input_path=input_path, variable=self.variable, output_dir=output_dir, year=year, ext=currentConfig['ext'], era=currentEra))
-        #     tasks.append(CalcPhotonSyst(input_path=input_path, variable=self.variable, output_dir=output_dir, year=year, ext=currentConfig['ext'], era=currentEra))
-            
-        tasks.append(FTest(variable=self.variable, output_dir=output_dir, year=year))
-        tasks.append(CalcPhotonSyst(variable=self.variable, output_dir=output_dir, year=year))
+        tasks.append(FTest(variable=self.variable, output_dir=output_dir, year=year, version="v1", workflow='local'))
+        tasks.append(CalcPhotonSyst(variable=self.variable, output_dir=output_dir, year=year, version="v1", workflow='local'))
                     
                 
         return tasks
@@ -600,10 +657,10 @@ class SignalFitCategoryProcess(Task, HTCondorWorkflow, law.LocalWorkflow):#(law.
             "--beamspotWidthData", f"{self.beamspotWidthData}",
             "--beamspotWidthMC", f"{self.beamspotWidthMC}"
         ]
-        if self.doPlots:
+        if convert_boolean_string(self.doPlots):
             arguments += ["--doPlots"]
         command = arguments
-        # print(command)
+        print(command)
         try:
             result = subprocess.run(command, check=True, text=True, capture_output=True)
             print("Script output:", result.stdout)
@@ -613,7 +670,7 @@ class SignalFitCategoryProcess(Task, HTCondorWorkflow, law.LocalWorkflow):#(law.
 
 class SignalFit(law.Task):
     variable = law.Parameter(default="", description="Variable to be used")
-    output_dir = law.Parameter(default = '', description="Path to the output directory")
+    output_dir = law.Parameter(default="", description="Path to the output directory")
     year = law.Parameter(default='2022', description="Year")
     
     def requires(self):
@@ -665,13 +722,9 @@ class SignalFit(law.Task):
             # Extract low and high MH values
             mps = []
             for mp in currentConfig['massPoints'].split(","): mps.append(int(mp))
-            currentConfig['massLow'], currentConfig['massHigh'] = '%s'%min(mps), '%s'%max(mps)
-                        
-            currentConfig['batch'] = 'local'
-            currentConfig['queue'] = 'none'            
-                        
-
-            tasks.append(SignalFitCategoryProcess(input_path=input_path, output_dir=output_dir, ext=currentConfig['ext'], cats=currentConfig['cats'], procs=currentConfig['procs'], scales=currentConfig['scales'], scalesCorr=currentConfig['scalesCorr'], scalesGlobal=currentConfig['scalesGlobal'], smears=currentConfig['smears'], year=currentConfig['year'], analysis=currentConfig['analysis'], massPoints=currentConfig['massPoints'], beamspotWidthData=currentConfig['beamspotWidthData'], beamspotWidthMC=currentConfig['beamspotWidthMC'], doPlots=currentConfig['doPlots'], variable=self.variable, version=f"v{i}", workflow="htcondor"))
+            currentConfig['massLow'], currentConfig['massHigh'] = '%s'%min(mps), '%s'%max(mps)         
+            
+            tasks.append(SignalFitCategoryProcess(input_path=input_path, output_dir=output_dir, ext=currentConfig['ext'], cats=currentConfig['cats'], procs=currentConfig['procs'], scales=currentConfig['scales'], scalesCorr=currentConfig['scalesCorr'], scalesGlobal=currentConfig['scalesGlobal'], smears=currentConfig['smears'], year=currentConfig['year'], analysis=currentConfig['analysis'], massPoints=currentConfig['massPoints'], beamspotWidthData=currentConfig['beamspotWidthData'], beamspotWidthMC=currentConfig['beamspotWidthMC'], doPlots=currentConfig['doPlots'], variable=self.variable, version=f"v{i}", workflow=currentConfig['execution']))
             i += 1
                 
         return tasks
@@ -732,18 +785,18 @@ class SignalFit(law.Task):
         return True
     
     
-class SignalPackagingCategory(law.Task):#(law.Task): #(Task, HTCondorWorkflow, law.LocalWorkflow):
+class SignalPackagingCategory(Task, HTCondorWorkflow, law.LocalWorkflow):#(law.Task): #(Task, HTCondorWorkflow, law.LocalWorkflow):
     output_dir = law.Parameter(description="Path to the output directory")
     exts = law.Parameter(default="earlyAnalysis", description="Extension to be used for output folder naming")
     outputExt = law.Parameter(default="", description="Extension to be used for packaged folder naming")
-    cat = law.Parameter(description="Current category (e.g. RECO_PTH_0p0_15p0_cat0)")
+    cats = law.Parameter(description="List of categories separated with a comma.")
     year = law.Parameter(description="Year")    
     massPoints = law.Parameter(description="Mass Points")
     mergeYears = law.Parameter(default=True, description="Flag if one should merge the years or eras.")
 
     variable = law.Parameter(default="", description="Variable to be used")
     
-    # htcondor_job_kwargs_submit = {"spool": True}
+    htcondor_job_kwargs_submit = {"spool": True}
     
     def requires(self):
         
@@ -763,9 +816,7 @@ class SignalPackagingCategory(law.Task):#(law.Task): #(Task, HTCondorWorkflow, l
             output_dir = config["outputFolder"]
         else:
             output_dir = self.output_dir
-            
-        signal_input_path = glob.glob(config['inputFiles']['Trees2WS']+'/*')
-            
+                        
         tasks = []
         
         tasks.append(SignalFit(variable=self.variable, output_dir=output_dir, year=year))
@@ -775,45 +826,21 @@ class SignalPackagingCategory(law.Task):#(law.Task): #(Task, HTCondorWorkflow, l
     
     def create_branch_map(self):
         # map branch indexes to ascii numbers from 97 to 122 ("a" to "z")
-
-        year = self.year[:4]
+        nCats = len(self.cats.split(","))
         
-        # Path should be somewhere centrally...
-        if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{year}_inclusive.yml"
-        else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{year}_{self.variable}.yml"
+        cat_list = [
+            self.cats.split(",")[categoryIndex]
+            for categoryIndex in range(nCats)
+        ]
         
-        #Load central config file
-        with open(configYamlPath, 'r') as file:
-            config = yaml.safe_load(file)
-            
-        if self.output_dir == '':
-            output_dir = config["outputFolder"]
-        else:
-            output_dir = self.output_dir
-                    
-        tasks = []
-            
-        # Loop over a years era
-        for currentEra in allErasMap[f"{self.year}"]:
-            
-            input_path = config["outputFolder"] + f"/input_output_{self.year}{currentEra}/ws_signal"
-
-
-            currentConfig = config[f"signalScriptCfg_{self.year}_{currentEra}"]
-                    
-            # Use allData.root from HiggsDNA to automatically determine categories
-            data_input_path = config['inputFiles']['Trees2WSData']  
-            if currentConfig['cats'] == "auto":
-                currentConfig['cats'] = extractListOfCatsFromHiggsDNAAllData(data_input_path)
-            currentConfig['nCats'] = len(currentConfig['cats'].split(","))     
-        return {i: num for i, num in enumerate(range(0, (currentConfig['nCats']) + 1))}
+        branch_map = {i: cat for i, cat in enumerate(cat_list)}
+        return branch_map
 
     def output(self):
+        cat = self.branch_data
         safe_mkdir(self.output_dir)
         
-        signal_output = [self.output_dir + f'/outdir_packaged{self.outputExt}/CMS-HGG_sigfit_packaged{self.outputExt}_{self.cat}.root']
+        signal_output = [self.output_dir + f'/outdir_packaged{self.outputExt}/CMS-HGG_sigfit_packaged{self.outputExt}_{cat}.root']
                 
         outputFileTargets = []
             
@@ -823,6 +850,7 @@ class SignalPackagingCategory(law.Task):#(law.Task): #(Task, HTCondorWorkflow, l
         return outputFileTargets
 
     def run(self):
+        cat = self.branch_data
         sys.path.append(os.path.dirname(os.path.abspath(__file__))+ "/tools")
         
         safe_mkdir(self.output_dir)
@@ -833,7 +861,7 @@ class SignalPackagingCategory(law.Task):#(law.Task): #(Task, HTCondorWorkflow, l
         arguments = [
             "python3",
             script_path,
-            "--cat", self.cat,
+            "--cat", cat,
             "--outputExt", self.outputExt,
             "--exts", self.exts,
             "--outputDir", f"{self.output_dir}",
@@ -852,7 +880,7 @@ class SignalPackagingCategory(law.Task):#(law.Task): #(Task, HTCondorWorkflow, l
 
 class SignalPackaging(law.Task):
     variable = law.Parameter(default="", description="Variable to be used")
-    output_dir = law.Parameter(default = '', description="Path to the output directory")
+    output_dir = law.Parameter(default="", description="Path to the output directory")
     year = law.Parameter(default='2022', description="Year")
     
     def requires(self):
@@ -898,6 +926,8 @@ class SignalPackaging(law.Task):
 
             currentConfig = config[f"signalScriptCfg_{self.year}_{currentEra}"]
             
+            
+            
             exts.append(currentConfig['ext'])
         
         exts_string = ''
@@ -906,10 +936,7 @@ class SignalPackaging(law.Task):
             if i < (len(exts) - 1):
                 exts_string += ','
             
-                        
-        for categoryIndex in range(packagedConfig['nCats']):
-            category = packagedConfig['cats'].split(",")[categoryIndex]
-            tasks.append(SignalPackagingCategory(output_dir=output_dir, exts=exts_string, outputExt=outputExt, cat=category, year=self.year, massPoints=packagedConfig['massPoints'], mergeYears=mergeYears, variable=self.variable))
+        tasks.append(SignalPackagingCategory(output_dir=output_dir, exts=exts_string, outputExt=outputExt, cats=packagedConfig['cats'], year=self.year, massPoints=packagedConfig['massPoints'], mergeYears=mergeYears, variable=self.variable, version=f"v1", workflow=packagedConfig['execution']))
                 
         return tasks
 

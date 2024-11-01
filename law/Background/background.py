@@ -23,8 +23,8 @@ from Trees2WS.trees2ws_data import *
 # from tools.STXS_tools import *
 # from tools.diff_tools import *
 
-# from framework import Task
-# from framework import HTCondorWorkflow
+from framework import Task
+from framework import HTCondorWorkflow
 
 # Function to safely create a directory
 def safe_mkdir(path):
@@ -35,17 +35,16 @@ def safe_mkdir(path):
             raise
                 
 
-class BackgroundCategory(law.Task):#(law.Task): #(Task, HTCondorWorkflow, law.LocalWorkflow):
+class BackgroundCategory(Task, HTCondorWorkflow, law.LocalWorkflow):#(law.Task): #(Task, HTCondorWorkflow, law.LocalWorkflow):
     input_path = law.Parameter(description="Path to the alldata input ROOT file")
     output_dir = law.Parameter(description="Path to the output directory")
     ext = law.Parameter(default="earlyAnalysis", description="Extension to be used for output folder naming")
     year = law.Parameter(default='2022', description="Year")
-    cat = law.Parameter(description="Current category (e.g. RECO_PTH_0p0_15p0_cat0)")
+    cats = law.Parameter(description="List of categories separated by a comma.")
     cat_offset = law.Parameter(description="Category offset")
-    nCats = law.Parameter(description="Number of Categories")
     variable = law.Parameter(default="", description="Variable to be used")
     
-    # htcondor_job_kwargs_submit = {"spool": True}
+    htcondor_job_kwargs_submit = {"spool": True}
     
     def requires(self):
         
@@ -70,16 +69,25 @@ class BackgroundCategory(law.Task):#(law.Task): #(Task, HTCondorWorkflow, law.Lo
     
     def create_branch_map(self):
         # map branch indexes to ascii numbers from 97 to 122 ("a" to "z")
-        return {i: num for i, num in enumerate(range(0, self.nCats + 1))}
+        nCats = len(self.cats.split(","))
+              
+        cat_list = [
+            (self.cats.split(",")[categoryIndex], str(int(self.cat_offset)+categoryIndex))
+            for categoryIndex in range(nCats)
+        ]
+        
+        branch_map = {i: cat_catOffset for i, cat_catOffset in enumerate(cat_list)}
+        return branch_map
 
     def output(self):
-        bkg_plots = glob.glob(self.output_dir + f'/outdir_{self.ext}/bkgfTest-Data/*_cat{self.cat_offset}.png')
-        bkg_plots += glob.glob(self.output_dir + f'/outdir_{self.ext}/bkgfTest-Data/*_cat{self.cat_offset}.pdf')
-        bkg_plots += glob.glob(self.output_dir + f'/outdir_{self.ext}/bkgfTest-Data/*_cat{self.cat_offset}.pdf_gofTest.pdf')
+        cat, cat_offset = self.branch_data
+        bkg_plots = glob.glob(self.output_dir + f'/outdir_{self.ext}/bkgfTest-Data/*_cat{cat_offset}.png')
+        bkg_plots += glob.glob(self.output_dir + f'/outdir_{self.ext}/bkgfTest-Data/*_cat{cat_offset}.pdf')
+        bkg_plots += glob.glob(self.output_dir + f'/outdir_{self.ext}/bkgfTest-Data/*_cat{cat_offset}.pdf_gofTest.pdf')
         
         outputFileTargets = []
         
-        output_paths = [self.output_dir + f'/outdir_{self.ext}/CMS-HGG_multipdf_{self.cat}.root', self.output_dir + f'/outdir_{self.ext}/bkgfTest-Data/multipdf_{self.cat}.pdf',self.output_dir + f'/outdir_{self.ext}/bkgfTest-Data/multipdf_{self.cat}.png']
+        output_paths = [self.output_dir + f'/outdir_{self.ext}/CMS-HGG_multipdf_{cat}.root', self.output_dir + f'/outdir_{self.ext}/bkgfTest-Data/multipdf_{cat}.pdf',self.output_dir + f'/outdir_{self.ext}/bkgfTest-Data/multipdf_{cat}.png']
         
         output_paths += bkg_plots
                 
@@ -89,16 +97,18 @@ class BackgroundCategory(law.Task):#(law.Task): #(Task, HTCondorWorkflow, law.Lo
         return outputFileTargets
 
     def run(self):
+        cat, cat_offset = self.branch_data
+        
         safe_mkdir(self.output_dir)
 
         script_path = os.environ["ANALYSIS_PATH"] + "/Background/runBackgroundScripts.sh"
         arguments = [
             "-i", self.input_path,
             "-p", "none",
-            "-f", self.cat,
+            "-f", cat,
             "--outputFolder", f"{self.output_dir}",
             "--ext", self.ext,
-            "--catOffset", self.cat_offset,
+            "--catOffset", cat_offset,
             "--intLumi", f"{lumiMap[self.year]}",
             "--year", f"{self.year}",
             "--batch", "local",
@@ -108,7 +118,7 @@ class BackgroundCategory(law.Task):#(law.Task): #(Task, HTCondorWorkflow, law.Lo
             "--fTest"
         ]
         command = [script_path] + arguments
-        # print("Output:", command)
+        print("Output:", command)
         try:
             result = subprocess.run(command, check=True, text=True, capture_output=True)
             print("Script output:", result.stdout)
@@ -141,7 +151,11 @@ class Background(law.Task):
             
         
         input_path = config['inputFiles']['Trees2WSData']
-        all_data_input_path = output_dir + f"input_output_data_{self.year}/ws/allData.root"
+        
+        if self.variable == '':
+            all_data_input_path = output_dir + f"input_output_data_{self.year}/ws/allData.root"
+        else:
+            all_data_input_path = output_dir + f"input_output_data_{self.variable}_{self.year}/ws/allData.root"
                     
         config = config["backgroundScriptCfg"]
         
@@ -157,7 +171,7 @@ class Background(law.Task):
         if self.year == 'combined': config['year'] = 'all'
         else: config['year'] = self.year        
             
-        tasks = [BackgroundCategory(input_path=all_data_input_path, output_dir=output_dir, year=self.year, cat=config['cats'].split(",")[categoryIndex], cat_offset=str(config['catOffset']+categoryIndex), nCats=config['nCats'], ext=config['ext']) for categoryIndex in range(config['nCats'])]
+        tasks = [BackgroundCategory(input_path=all_data_input_path, output_dir=output_dir, year=self.year, cats=config['cats'], cat_offset=config['catOffset'], variable=self.variable, ext=config['ext'], version='v1', workflow=config['execution'])]
         return tasks
         
 

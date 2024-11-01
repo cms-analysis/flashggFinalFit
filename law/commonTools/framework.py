@@ -34,7 +34,9 @@ class Task(law.Task):
 
     def local_path(self, *path):
         # DATA_PATH is defined in setup.sh
-        parts = ("$ANALYSIS_PATH",) + self.store_parts() + path
+        output_folder = "$ANALYSIS_PATH/output/htcondor"
+        # os.mkdir(output_folder)
+        parts = (output_folder,) + self.store_parts() + path
         return os.path.join(*parts)
 
     def local_target(self, *path):

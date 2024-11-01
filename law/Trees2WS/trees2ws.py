@@ -539,27 +539,6 @@ class Trees2WS(law.Task):
         mass_cut_r = config["mass_cut_range"]
                        
         tasks = []
-        # mass_era_list = [
-        # (mass, era, self.variable, input_paths)
-        # for era in allErasMap[f"{self.year}"]
-        # for mass in input_masses
-        # ]
-    
-        # proc_list = [
-        #     (mode, process)
-        #     for mode, process in production_modes
-        # ]
-        
-        # for mode, process in proc_list:
-            
-        #     for mass, era, var, path_to_root_files in mass_era_list:
-        #         if var == '':
-        #             current_output_path = output_dir + "/input_output_{}{}".format(self.year, era)
-        #         else:
-        #             current_output_path = output_dir + "/input_output_{}_{}{}".format(var, self.year, era)
-                                
-        #         input_path = glob.glob(f"{path_to_root_files}/{process}_M-{mass}_{era}/*.root")[0]
-        #         tasks.append(Trees2WSSingleProcess(input_path=input_path, input_mass=mass, productionMode=mode, apply_mass_cut=mass_cut, mass_cut_range=mass_cut_r, year=f"{self.year}{era}", doSystematics=doSystematics, doDiffSplitting=doDiffSplitting, doSTXSSplitting=doSTXSSplitting, doInOutSplitting=doInOutSplitting, output_dir=current_output_path, variable=var, version="v1", workflow="htcondor"))
         
         era_list = [
         (era, self.variable, input_paths)
@@ -573,7 +552,7 @@ class Trees2WS(law.Task):
             else:
                 current_output_path = output_dir + "/input_output_{}_{}{}".format(var, self.year, era)
                             
-            tasks.append(Trees2WSSingleProcess(input_paths=path_to_root_files, era=era, apply_mass_cut=mass_cut, mass_cut_range=mass_cut_r, year=f"{self.year}{era}", doSystematics=doSystematics, doDiffSplitting=doDiffSplitting, doSTXSSplitting=doSTXSSplitting, doInOutSplitting=doInOutSplitting, output_dir=current_output_path, variable=var, version=f"v{i}", workflow="htcondor"))
+            tasks.append(Trees2WSSingleProcess(input_paths=path_to_root_files, era=era, apply_mass_cut=mass_cut, mass_cut_range=mass_cut_r, year=f"{self.year}{era}", doSystematics=doSystematics, doDiffSplitting=doDiffSplitting, doSTXSSplitting=doSTXSSplitting, doInOutSplitting=doInOutSplitting, output_dir=current_output_path, variable=var, version=f"v{i}", workflow=config['execution']))
             i += 1
         
         return tasks    

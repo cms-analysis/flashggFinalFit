@@ -20,6 +20,7 @@ class Trees2WSData(law.Task):
     year = law.Parameter(default='2022', description="Year")
     apply_mass_cut = law.Parameter(default=False, description="Apply mass cut")
     mass_cut_range = law.Parameter(default='100,180', description="Mass cut range")
+    
 
     def output(self):
         # Load the input configuration
