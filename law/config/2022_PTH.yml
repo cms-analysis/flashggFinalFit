@@ -1,18 +1,19 @@
 # Config file: options for signal fitting
 
-outputFolder: '/afs/cern.ch/user/n/niharrin/cernbox/PhD/Higgs/CMSSW_14_1_0_pre4/src/flashggFinalFit/law/output/forPaper_24_10_07_PTH/'
+outputFolder: '/afs/cern.ch/user/n/niharrin/cernbox/PhD/Higgs/CMSSW_14_1_0_pre4/src/flashggFinalFit/law/output/forPaper_24_10_14_PTH/'
 
 inputFiles:
   # Trees2WS
-  Trees2WSData: '/afs/cern.ch/user/n/niharrin/cernbox/PhD/Higgs/devel/EOSCMS/2024/ntuples/forPaper_24_10_07/variables/PTH/data_postprocessing/root/Data/allData_2022.root'
-  Trees2WS: '/afs/cern.ch/user/n/niharrin/cernbox/PhD/Higgs/devel/EOSCMS/2024/ntuples/forPaper_24_10_07/variables/PTH/signal_postprocessing/root'
+  Trees2WSData: '/afs/cern.ch/user/n/niharrin/cernbox/PhD/Higgs/devel/EOSCMS/2024/ntuples/forPaper_24_10_14/variables/PTH/data_postprocessing/root/Data/allData_2022.root'
+  Trees2WS: '/afs/cern.ch/user/n/niharrin/cernbox/PhD/Higgs/devel/EOSCMS/2024/ntuples/forPaper_24_10_14/variables/PTH/signal_postprocessing/root'
 
 backgroundScriptCfg:
   # Setup
   cats: 'auto' # auto: automatically inferred from input ws
   catOffset: 0 # add offset to category numbers (useful for categories from different allData.root files)
-  ext: 'backgroundEarlyAnalysis_PTH' # extension to add to output directory
+  ext: 'earlyAnalysis_PTH' # extension to add to output directory
   # year: '2022' # Use combined when merging all years in category (for plots)
+  execution: 'local'
 
 trees2wsCfg:
   inputTreeDir: 'DiphotonTree' # Name of RooDirectory storing input tree
@@ -66,11 +67,13 @@ trees2wsCfg:
 
   cats: 'auto'
 
+  execution: 'htcondor'
+
 signalScriptCfg_2022_preEE:
   # Setup
   procs: 'auto' # if auto: inferred automatically from filenames (requires names to be of form *pythia8_{PROC}.root)
   cats: 'auto' # if auto: inferred automatically from (0) workspace
-  ext: 'signalEarlyAnalysis_PTH_2022preEE' # output directory extension
+  ext: 'earlyAnalysis_PTH_2022preEE' # output directory extension
   analysis: 'earlyAnalysisDiffPt' # To specify replacement dataset and XS*BR mapping (defined in ./tools/replacementMap.py and ./tools/XSBRMap.py respectively)
   year: '2022preEE' # Use 'combined' if merging all years: not recommended
   massPoints: '120,125,130' # You can now run with a single mass point if necessary
@@ -88,14 +91,13 @@ signalScriptCfg_2022_preEE:
 
 
   # Job submission options
-  batch: 'local' # ['condor_lxplus','condor','SGE','IC','local']
-  queue: 'microcentury' # use hep.q for IC
+  execution: 'htcondor'
 
 signalScriptCfg_2022_postEE:
   # Setup
   procs: 'auto' # if auto: inferred automatically from filenames (requires names to be of form *pythia8_{PROC}.root)
   cats: 'auto' # if auto: inferred automatically from (0) workspace
-  ext: 'signalEarlyAnalysis_PTH_2022postEE' # output directory extension
+  ext: 'earlyAnalysis_PTH_2022postEE' # output directory extension
   analysis: 'earlyAnalysisDiffPt' # To specify replacement dataset and XS*BR mapping (defined in ./tools/replacementMap.py and ./tools/XSBRMap.py respectively)
   year: '2022postEE' # Use 'combined' if merging all years: not recommended
   massPoints: '120,125,130' # You can now run with a single mass point if necessary
@@ -112,8 +114,7 @@ signalScriptCfg_2022_postEE:
   beamspotWidthMC: '3.732'
 
   # Job submission options
-  batch: 'local' # ['condor_lxplus','condor','SGE','IC','local']
-  queue: 'microcentury' # use hep.q for IC
+  execution: 'htcondor'
 
 packaged_2022:
   cats: 'auto' # if auto: inferred automatically from (0) workspace
@@ -137,6 +138,7 @@ datacard_yields:
   skipBkg: False # Only add signal processes to datacard
   bkgScaler: 1. # Add overall scale factor for background
   skipCOWCorr: False # Skip centralObjectWeight correction for events in acceptance. Use if no centralObjectWeight in workspace
+  execution: 'htcondor'
 
 datacard:
   # For pruning processes
