@@ -167,7 +167,7 @@ class FTestCategory(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Task): #(T
             "--doPlots"
         ]
         command = arguments
-        # print(command)
+        print(command)
         try:
             result = subprocess.run(command, check=True, text=True, capture_output=True)
             print("Script output:", result.stdout)
@@ -589,8 +589,8 @@ class SignalFitCategoryProcess(Task, HTCondorWorkflow, law.LocalWorkflow):#(law.
             
         tasks = []
             
-        tasks.append(FTest(variable=self.variable, output_dir=output_dir, year=year, version="v1", workflow='local'))
-        tasks.append(CalcPhotonSyst(variable=self.variable, output_dir=output_dir, year=year, version="v1", workflow='local'))
+        tasks.append(FTest(variable=self.variable, output_dir=output_dir, year=year))
+        tasks.append(CalcPhotonSyst(variable=self.variable, output_dir=output_dir, year=year))
                     
                 
         return tasks

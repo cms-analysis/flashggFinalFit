@@ -216,8 +216,6 @@ class MakeYields(law.Task):
         
         return tasks
         
-
-    
     def output(self):
         # returns output folder
         
@@ -239,10 +237,12 @@ class MakeYields(law.Task):
         
         output_paths = []
         
-        if self.variable == '': 
-            output_paths.append(law.LocalFileTarget(output_dir + f"/Datacards/yields_{datacard_config['ext']}"))
-        else:
-            output_paths.append(law.LocalFileTarget(output_dir + f"/Datacards/yields_{datacard_config['ext']}_{self.variable}"))                        
+        output_paths.append(law.LocalFileTarget(output_dir + f"/Datacards/yields_{datacard_config['ext']}"))
+        
+        # if self.variable == '': 
+        #     output_paths.append(law.LocalFileTarget(output_dir + f"/Datacards/yields_{datacard_config['ext']}"))
+        # else:
+        #     output_paths.append(law.LocalFileTarget(output_dir + f"/Datacards/yields_{datacard_config['ext']}_{self.variable}"))                        
         return output_paths
                 
     
@@ -337,8 +337,8 @@ class MakeDatacard(law.Task):
         yields_config = config["datacard_yields"]
         pklInputFiles = output_dir
         
-        if self.variable != '':
-            yields_config["ext"] = yields_config["ext"]+'_'+self.variable
+        # if self.variable != '':
+        #     yields_config["ext"] = yields_config["ext"]+'_'+self.variable
                     
         # Create years string
         years = ''

@@ -331,13 +331,16 @@ fout.Close()
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # PLOTTING
 if opt.doPlots:
-  print("\n --> Making plots...")
-  if not os.path.isdir("%s/outdir_%s/signalFit/Plots"%(opt.outputDir,opt.ext)): os.system("mkdir %s/outdir_%s/signalFit/Plots"%(opt.outputDir,opt.ext))
-  if opt.skipVertexScenarioSplit:
-    plotPdfComponents(ssfRV,_outdir="%s/outdir_%s/signalFit/Plots"%(opt.outputDir,opt.ext),_extension="total_",_proc=procRVFit,_cat=catRVFit) 
-  if not opt.skipVertexScenarioSplit:
-    plotPdfComponents(ssfRV,_outdir="%s/outdir_%s/signalFit/Plots"%(opt.outputDir,opt.ext),_extension="RV_",_proc=procRVFit,_cat=catRVFit) 
-    plotPdfComponents(ssfWV,_outdir="%s/outdir_%s/signalFit/Plots"%(opt.outputDir,opt.ext),_extension="WV_",_proc=procWVFit,_cat=catRVFit) 
-  # Plot interpolation
-  plotInterpolation(fm,_outdir="%s/outdir_%s/signalFit/Plots"%(opt.outputDir,opt.ext)) 
-  plotSplines(fm,_outdir="%s/outdir_%s/signalFit/Plots"%(opt.outputDir,opt.ext),_nominalMass=MHNominal) 
+  try:
+    print("\n --> Making plots...")
+    if not os.path.isdir("%s/outdir_%s/signalFit/Plots"%(opt.outputDir,opt.ext)): os.system("mkdir %s/outdir_%s/signalFit/Plots"%(opt.outputDir,opt.ext))
+    if opt.skipVertexScenarioSplit:
+      plotPdfComponents(ssfRV,_outdir="%s/outdir_%s/signalFit/Plots"%(opt.outputDir,opt.ext),_extension="total_",_proc=procRVFit,_cat=catRVFit) 
+    if not opt.skipVertexScenarioSplit:
+      plotPdfComponents(ssfRV,_outdir="%s/outdir_%s/signalFit/Plots"%(opt.outputDir,opt.ext),_extension="RV_",_proc=procRVFit,_cat=catRVFit) 
+      plotPdfComponents(ssfWV,_outdir="%s/outdir_%s/signalFit/Plots"%(opt.outputDir,opt.ext),_extension="WV_",_proc=procWVFit,_cat=catRVFit) 
+    # Plot interpolation
+    plotInterpolation(fm,_outdir="%s/outdir_%s/signalFit/Plots"%(opt.outputDir,opt.ext)) 
+    plotSplines(fm,_outdir="%s/outdir_%s/signalFit/Plots"%(opt.outputDir,opt.ext),_nominalMass=MHNominal) 
+  except:
+    print("\n --> Creating plots unsuccessful. (Probably due to a empty bin.)")
