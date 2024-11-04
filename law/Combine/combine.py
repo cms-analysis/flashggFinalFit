@@ -200,3 +200,118 @@ class PrepareTheDirectory(law.Task):#(law.Task): #(Task, HTCondorWorkflow, law.L
             shutil.copy2(datacard_file, destination_file)
             
         print("Combine directory sucessfully prepared.")
+        
+        
+class RunText2Workspace(law.Task): #(law.Task): #(Task, HTCondorWorkflow, law.LocalWorkflow):
+    output_dir = law.Parameter(default = '', description="Path to the output directory")
+    variable = law.Parameter(default="", description="Variable to be used")
+    year = law.Parameter(default='2022', description="Year")
+    
+    # htcondor_job_kwargs_submit = {"spool": True}
+    
+    def requires(self):
+        
+        if self.variable == '':
+            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+        else:
+            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+        
+        #Load central config file
+        with open(configYamlPath, 'r') as file:
+            config = yaml.safe_load(file)
+        
+        if self.output_dir == '':
+            output_dir = config['outputFolder']
+        else:
+            output_dir = self.output_dir
+            
+        tasks = [PrepareTheDirectory(output_dir=output_dir, variable=self.variable, year=self.year)]
+        
+        return tasks
+    
+    def create_branch_map(self):
+        # map branch indexes to ascii numbers from 97 to 122 ("a" to "z")        
+        branch_list = [0]
+        
+        branch_map = {i: branch for i, branch in enumerate(branch_list)}
+        return branch_map
+
+    def output(self):
+        
+        if self.variable == '':
+            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+        else:
+            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+        
+        #Load central config file
+        with open(configYamlPath, 'r') as file:
+            config = yaml.safe_load(file)
+        
+        if self.output_dir == '':
+            output_dir = config['outputFolder']
+        else:
+            output_dir = self.output_dir
+
+        output = [os.path.join(output_dir, 'Combine', f'')]
+        
+        # Define the file paths
+        if self.variable == '':
+            output = [os.path.join(output_dir, 'Combine', f'Datacard_{self.year}.root')]
+            output += [os.path.join(output_dir, 'Combine', f't2w_jobs', 't2w_mu_fiducial.sh')]
+        else:
+            output = [os.path.join(output_dir, 'Combine', f'Datacard_{self.variable}_{self.year}.root')]
+            output += [os.path.join(output_dir, 'Combine', f't2w_jobs', f't2w_{self.variable}.sh')]
+            
+        output += [os.path.join(output_dir, 'Combine', f't2w_jobs')]
+                
+        outputFileTargets = []
+                
+        for _, current_output_path in enumerate(output):
+            outputFileTargets.append(law.LocalFileTarget(current_output_path))
+            
+        print(outputFileTargets)
+
+        return outputFileTargets
+
+    def run(self):      
+        
+        if self.variable == '':
+            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            mode = "mu_fiducial"
+            datacard_name = f"Datacard_{self.year}"
+        else:
+            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            mode = self.variable
+            datacard_name = f"Datacard_{self.variable}_{self.year}"
+        
+        #Load central config file
+        with open(configYamlPath, 'r') as file:
+            config = yaml.safe_load(file)
+        
+        if self.output_dir == '':
+            output_dir = config['outputFolder']
+        else:
+            output_dir = self.output_dir  
+            
+        script_path = os.environ["ANALYSIS_PATH"] + "/Combine/RunText2Workspace.py"
+        # script_path = "RunText2Workspace.py"
+        arguments = [
+            "python3",
+            script_path,
+            "--outputDir", output_dir,
+            "--outputName", datacard_name,
+            "--mode", mode,
+            "--common_opts", "-m 125.38 higgsMassRange=122,128",
+            "--batch", "local"
+        ]
+        if self.variable != '':
+            arguments.append("--ext")
+            arguments.append(f"{self.variable}")
+        command = arguments
+        # print(command)
+        try:
+            result = subprocess.run(command, check=True, text=True, capture_output=True)
+            print("Script output:", result.stdout)
+            print("Script executed successfully.")
+        except subprocess.CalledProcessError as e:
+            print("Error executing script:", e.stderr)
