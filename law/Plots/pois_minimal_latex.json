@@ -1,0 +1,28 @@
+{  
+  "r_ggH_0J_low":"ggH 0J low $\\ptH$",
+  "r_ggH_0J_high":"ggH 0J high $\\ptH$",
+  "r_ggH_1J_low":"ggH 1J low $\\ptH$",
+  "r_ggH_1J_med":"ggH 1J med $\\ptH$",
+  "r_ggH_1J_high":"ggH 1J high $\\ptH$",
+  "r_ggH_2J_low":"ggH $\\geq2$J low $\\ptH$",
+  "r_ggH_2J_med":"ggH $\\geq2$J med $\\ptH$",
+  "r_ggH_2J_high":"ggH $\\geq2$J high $\\ptH$",
+  "r_ggH_BSM_low":"ggH $\\rm{200}<\\ptH<\\rm{300}$",
+  "r_ggH_BSM_high":"ggH $\\ptH>\\rm{300}$",
+  "r_qqH_VHhad":"qqH VH-like",
+  "r_qqH_low_mjj_low_pthjj":"VBF-like low $\\mjj$ low $\\ptHjj$",
+  "r_qqH_low_mjj_high_pthjj":"VBF-like low $\\mjj$ high $\\ptHjj$",
+  "r_qqH_high_mjj_low_pthjj":"VBF-like high $\\mjj$ low $\\ptHjj$",
+  "r_qqH_high_mjj_high_pthjj":"VBF-like high $\\mjj$ high $\\ptHjj$",
+  "r_qqH_BSM":"qqH BSM",
+  "r_WH_lep_low":"WH lep $\\pt^{V}<\\text{75}$",
+  "r_WH_lep_high":"WH lep $\\pt^{V}>\\text{75}$",
+  "r_ZH_lep":"ZH lep",
+  "r_ttH_low":"ttH $\\ptH<\\text{60}$",
+  "r_ttH_medlow":"ttH $\\text{60}<\\ptH<\\text{120}$",
+  "r_ttH_medhigh":"ttH $\\text{120}<\\ptH<\\text{200}$",
+  "r_ttH_high":"ttH $\\ptH>\\text{200}$",
+  "r_tH":"tH",
+  "dummy":""
+}
+

@@ -1,0 +1,8 @@
+{
+    "mu_fiducial":{
+    "pois":"r",
+    "fits":"profile1D:statonly_fixedMH:all",
+    "points":"40:1",
+    "fit_opts":"-m 125.38 --freezeParameters MH --setParameterRanges r=0.5,1.5 --saveSpecifiedNuis all"
+    }
+}

@@ -1,0 +1,19 @@
+{
+  "r_PTH_0p0_15p0":"r_{p_{T}^{#gamma#gamma} #in [0,15[ GeV}",
+  "r_PTH_15p0_30p0":"r_{p_{T}^{#gamma#gamma} #in [15,30[ GeV}",
+  "r_PTH_30p0_45p0":"r_{p_{T}^{#gamma#gamma} #in [30,45[ GeV}",
+  "r_PTH_45p0_80p0":"r_{p_{T}^{#gamma#gamma} #in [45,80[ GeV}",
+  "r_PTH_80p0_120p0":"r_{p_{T}^{#gamma#gamma} #in [80,120[ GeV}",
+  "r_PTH_120p0_200p0":"r_{p_{T}^{#gamma#gamma} #in [120,200[ GeV}",
+  "r_PTH_200p0_350p0":"r_{p_{T}^{#gamma#gamma} #in [200,350[ GeV}",
+  "r_PTH_350p0_10000p0":"r_{p_{T}^{#gamma#gamma} #in [350,+inf[ GeV}",
+  "r_YH_0p0_0p15":"r_{|y_{#gamma#gamma}| #in [0,0.15[}",
+  "r_YH_0p15_0p3":"r_{|y_{#gamma#gamma}| #in [0.15,0.3[}",
+  "r_YH_0p3_0p6":"r_{|y_{#gamma#gamma}| #in [0.3,0.6[}",
+  "r_YH_0p6_0p9":"r_{|y_{#gamma#gamma}| #in [0.6,0.9[}",
+  "r_YH_0p9_2p5":"r_{|y_{#gamma#gamma}| #in [0.9,2.5[}",
+  "r_NJ_0p0_1p0":"r_{N_{Jets} #in [0,1[}",
+  "r_NJ_1p0_2p0":"r_{N_{Jets} #in [1,2[}",
+  "r_NJ_2p0_3p0":"r_{N_{Jets} #in [2,3[}",
+  "r_NJ_3p0_100p0":"r_{N_{Jets} #in [3,+inf[}"
+}

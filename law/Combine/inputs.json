@@ -1,0 +1,134 @@
+{
+    "mu_inclusive":{
+        "pois":"r",
+        "fits":"profile1D:syst:all",
+        "points":"20:1",
+        "fit_opts":"--setParameterRanges r=0,2 --saveSpecifiedNuis all"
+    },
+    
+    "mu_inclusive_wsyst":{
+        "pois":"r",
+        "fits":"profile1D:syst:all+profile1D:statonly:all",
+        "points":"40:1+40:1",
+        "fit_opts":"--setParameterRanges r=0,2 --saveSpecifiedNuis all+--setParameterRanges r=0,2 --saveSpecifiedNuis all"
+    },
+
+    "mu_fiducial":{
+        "pois":"r",
+        "fits":"profile1D:syst:all+profile1D:statonly:all",
+        "points":"40:1+40:1",
+        "fit_opts":"-m 125.38 --setParameterRanges r=0,2 --saveSpecifiedNuis all+--setParameterRanges r=0,2 --saveSpecifiedNuis all"
+    },
+
+    "mu_fiducial_observed":{
+        "pois":"r",
+        "fits":"profile1D:syst:all",
+        "points":"80:1",
+        "fit_opts":"-m 125.38 --setParameterRanges r=0,2 --saveSpecifiedNuis all"
+    },
+
+    "PTH":{
+        "pois":"r_PTH_0p0_15p0,r_PTH_15p0_30p0,r_PTH_30p0_45p0,r_PTH_45p0_80p0,r_PTH_80p0_120p0,r_PTH_120p0_200p0,r_PTH_200p0_350p0,r_PTH_350p0_10000p0",
+        "fits":"profile1D:syst:all+profile1D:statonly:all",
+        "points":"40:40+40:40",
+        "fit_opts":"--setParameterRanges r=-3,3 --saveSpecifiedNuis all+--setParameterRanges r=-3,3 --saveSpecifiedNuis all"
+    },
+
+    "rapidity":{
+        "pois":"r_YH_0p0_0p15,r_YH_0p15_0p3,r_YH_0p3_0p6,r_YH_0p6_0p9,r_YH_0p9_2p5",
+        "fits":"profile1D:syst:all+profile1D:statonly:all",
+        "points":"40:40+40:40",
+        "fit_opts":"--setParameterRanges r=-3,3 --saveSpecifiedNuis all+--setParameterRanges r=-3,3 --saveSpecifiedNuis all"
+    },
+
+    "Njets2p5_5bin":{
+        "pois":"r_NJ_0p0_1p0,r_NJ_1p0_2p0,r_NJ_2p0_3p0,r_NJ_3p0_4p0,r_NJ_4p0_100p0",
+        "fits":"profile1D:syst:all+profile1D:statonly:all",
+        "points":"40:40+40:40",
+        "fit_opts":"--setParameterRanges r=0,3 --saveSpecifiedNuis all+--setParameterRanges r=0,3 --saveSpecifiedNuis all"
+    },
+
+    "Njets2p5":{
+        "pois":"r_NJ_0p0_1p0,r_NJ_1p0_2p0,r_NJ_2p0_3p0,r_NJ_3p0_100p0",
+        "fits":"profile1D:syst:all+profile1D:statonly:all",
+        "points":"40:40+40:40",
+        "fit_opts":"--setParameterRanges r=-3,3 --saveSpecifiedNuis all+--setParameterRanges r=-3,3 --saveSpecifiedNuis all"
+    },
+
+    "Njets2p5_0_3_fine":{
+        "pois":"r_NJ_0p0_1p0,r_NJ_1p0_2p0,r_NJ_2p0_3p0,r_NJ_3p0_100p0",
+        "fits":"profile1D:syst:all+profile1D:statonly:all",
+        "points":"100:100+100:100",
+        "fit_opts":"--setParameterRanges r=0,3 --saveSpecifiedNuis all+--setParameterRanges r=0,3 --saveSpecifiedNuis all"
+    },
+
+    "ptJ0":{
+        "pois":"r_PTJ0_0p0_30p0,r_PTJ0_30p0_75p0,r_PTJ0_75p0_120p0,r_PTJ0_120p0_200p0,r_PTJ0_200p0_10000p0",
+        "fits":"profile1D:syst:all+profile1D:statonly:all",
+        "points":"40:40+40:40",
+        "fit_opts":"--setParameterRanges r=-3,3 --saveSpecifiedNuis all+--setParameterRanges r=-3,3 --saveSpecifiedNuis all"
+    },
+
+    "ptJ0_0_3_fine":{
+        "pois":"r_PTJ0_0p0_30p0,r_PTJ0_30p0_75p0,r_PTJ0_75p0_120p0,r_PTJ0_120p0_200p0,r_PTJ0_200p0_10000p0",
+        "fits":"profile1D:syst:all+profile1D:statonly:all",
+        "points":"100:100+100:100",
+        "fit_opts":"--setParameterRanges r=0,3 --saveSpecifiedNuis all+--setParameterRanges r=0,3 --saveSpecifiedNuis all"
+    },
+
+    "ptJ0_0_30_GeV_0_3_fine":{
+        "pois":"r_PTJ0_0p0_30p0,r_PTJ0_30p0_10000p0",
+        "fits":"profile1D:syst:all+profile1D:statonly:all",
+        "points":"100:100+100:100",
+        "fit_opts":"--setParameterRanges r=0,3 --saveSpecifiedNuis all+--setParameterRanges r=0,3 --saveSpecifiedNuis all"
+    },
+
+    "ptJ0_HIG_17_025":{
+        "pois":"r_PTJ0_0p0_30p0,r_PTJ0_30p0_45p0,r_PTJ0_45p0_70p0,r_PTJ0_70p0_110p0,r_PTJ0_110p0_200p0,r_PTJ0_200p0_10000p0",
+        "fits":"profile1D:syst:all+profile1D:statonly:all",
+        "points":"40:40+40:40",
+        "fit_opts":"--setParameterRanges r=0,3 --saveSpecifiedNuis all+--setParameterRanges r=0,3 --saveSpecifiedNuis all"
+    },
+
+    "ptJ0_30GeV":{
+        "pois":"r_PTJ0_0p0_30p0,r_PTJ0_30p0_60p0,r_PTJ0_60p0_90p0,r_PTJ0_90p0_120p0,r_PTJ0_120p0_200p0,r_PTJ0_200p0_10000p0",
+        "fits":"profile1D:syst:all+profile1D:statonly:all",
+        "points":"40:40+40:40",
+        "fit_opts":"--setParameterRanges r=0,3 --saveSpecifiedNuis all+--setParameterRanges r=0,3 --saveSpecifiedNuis all"
+    },
+
+    "yJ0":{
+        "pois":"r_YJ0_0p0_0p5,r_YJ0_0p5_1p2,r_YJ0_1p2_2p0,r_YJ0_2p0_2p5,r_YJ0_NJ0",
+        "fits":"profile1D:syst:all+profile1D:statonly:all",
+        "points":"40:40+40:40",
+        "fit_opts":"--setParameterRanges r=0,3 --saveSpecifiedNuis all+--setParameterRanges r=0,3 --saveSpecifiedNuis all"
+    },
+
+    "AbsPhiHJ0":{
+        "pois":"r_AbsPhiHJ0_0p0_2p6,r_AbsPhiHJ0_2p6_2p9,r_AbsPhiHJ0_2p9_3p03,r_AbsPhiHJ0_3p03_Pi,r_AbsPhiHJ0_NJ0",
+        "fits":"profile1D:syst:all+profile1D:statonly:all",
+        "points":"40:40+40:40",
+        "fit_opts":"--setParameterRanges r=0,3 --saveSpecifiedNuis all+--setParameterRanges r=0,3 --saveSpecifiedNuis all"
+    },
+
+    "AbsPhiHJ0_otherName":{
+        "pois":"r_AbsPhiHJ0_0p0_2p6,r_AbsPhiHJ0_2p6_2p9,r_AbsPhiHJ0_2p9_3p03,r_AbsPhiHJ0_3p03_3p1415926,r_AbsPhiHJ0_NJ",
+        "fits":"profile1D:syst:all+profile1D:statonly:all",
+        "points":"40:40+40:40",
+        "fit_opts":"--setParameterRanges r=0,3 --saveSpecifiedNuis all+--setParameterRanges r=0,3 --saveSpecifiedNuis all"
+    },
+
+    "AbsYHJ0":{
+        "pois":"r_AbsYHJ0_0p0_0p6,r_AbsYHJ0_0p6_1p2,r_AbsYHJ0_1p2_1p9,r_AbsYHJ0_1p9_100p0,r_AbsYHJ0_NJ0",
+        "fits":"profile1D:syst:all+profile1D:statonly:all",
+        "points":"40:40+40:40",
+        "fit_opts":"--setParameterRanges r=0,3 --saveSpecifiedNuis all+--setParameterRanges r=0,3 --saveSpecifiedNuis all"
+    },
+
+    "mu":{
+        "pois":"r_ggH,r_VBF,r_VH,r_top",
+        "fits":"profile1D:syst:all",
+        "points":"20:1",
+        "fit_opts":"--saveSpecifiedNuis all --saveInactivePOI 1 --cminApproxPreFitTolerance=10"
+    }
+}
