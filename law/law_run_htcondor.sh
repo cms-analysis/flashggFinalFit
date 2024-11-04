@@ -4,5 +4,6 @@ if [ $# -ne 1 ]; then
 fi
 
 differential_variable="$1"
+workers=2
 
-law run Trees2WS --workers 8 --variable $differential_variable; law run Background --workers 8 --variable $differential_variable; law run FTest --workers 8 --variable $differential_variable; law run CalcPhotonSyst --workers 8 --variable $differential_variable; law run SignalFit --workers 8 --variable $differential_variable; law run SignalPackaging --workers 8 --variable $differential_variable; law run MakeYields --workers 8 --variable $differential_variable; law run MakeDatacard --workers 8 --variable $differential_variable
+law run Trees2WS --workers $workers --variable $differential_variable; law run Background --workers $workers --variable $differential_variable; law run FTest --workers $workers --variable $differential_variable; law run CalcPhotonSyst --workers $workers --variable $differential_variable; law run SignalFit --workers $workers --variable $differential_variable; law run SignalPackaging --workers $workers --variable $differential_variable; law run MakeYields --workers $workers --variable $differential_variable; law run MakeDatacard --workers $workers --variable $differential_variable; law run PrepareTheDirectory --variable $differential_variable
