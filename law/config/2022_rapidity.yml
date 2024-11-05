@@ -4,7 +4,7 @@
 # Tests
 # Test Trees2WS: law run Trees2WS --variable rapidity --workers 4 --output-dir /afs/cern.ch/user/n/niharrin/cernbox/PhD/Higgs/CMSSW_14_1_0_pre4/src/flashggFinalFit/law/output/test_t2w_diff/t2w --doDiffSplitting True --doSystematic True
 
-outputFolder: '/afs/cern.ch/user/n/niharrin/cernbox/PhD/Higgs/CMSSW_14_1_0_pre4/src/flashggFinalFit/law/output/forPaper_24_10_14_rapidity5/'
+outputFolder: '/afs/cern.ch/user/n/niharrin/cernbox/PhD/Higgs/CMSSW_14_1_0_pre4/src/flashggFinalFit/law/output/forPaper_24_10_14_rapidity4/'
 
 inputFiles:
   # Trees2WS
@@ -171,3 +171,7 @@ datacard_clean:
   removeNonDiagonal: False # Remove any nuisances which are affect processes unimportant in that category
   symmetrizeNuisance: 'CMS_hgg_SigmaEOverEShift,CMS_hgg_scale_0_shape,CMS_hgg_scale_1_shape,CMS_hgg_scale_3_shape' # Symmetrizes asymmetric nuisance. Enter in the format nuisance1,nuisance2,nuisance3,etc.
   verbose: False # Spit out all the cleaning being done
+
+combine_fit:
+  asimov_numPoints: 30 # Number of points the Asimov generator should generate for the NLL scan
+  execution: 'local'

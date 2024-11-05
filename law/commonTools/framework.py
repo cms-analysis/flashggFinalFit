@@ -53,7 +53,7 @@ class HTCondorWorkflow(law.htcondor.HTCondorWorkflow):
     """
 
     max_runtime = law.DurationParameter(
-        default=1.0,
+        default=16.0,
         unit="h",
         significant=False,
         description="maximum runtime; default unit is hours; default: 1",
