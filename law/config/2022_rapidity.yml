@@ -176,3 +176,7 @@ combine_fit:
   asimov_numPoints: 30 # Number of points the Asimov generator should generate for the NLL scan
   setParameterRange: "r=0,3"
   execution: 'htcondor'
+
+combine_impacts:
+  exclude: "" # Nuisances that should be excluded from the impact computation
+  execution: 'htcondor'
