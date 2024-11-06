@@ -32,6 +32,7 @@ action() {
     export PYTHONPATH="${this_dir}/commonTools:${PYTHONPATH}"
     export PYTHONPATH="${this_dir}/Datacard:${PYTHONPATH}"
     export PYTHONPATH="${this_dir}/Datacard/datacardTools:${PYTHONPATH}"
+    export PYTHONPATH="${this_dir}/Combine:${PYTHONPATH}"
     export LAW_HOME="${this_dir}/.law"
     export LAW_CONFIG_FILE="${this_dir}/law.cfg"
 
