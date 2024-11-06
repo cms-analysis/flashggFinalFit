@@ -78,8 +78,10 @@ class PrepareTheDirectory(law.Task):#(law.Task): #(Task, HTCondorWorkflow, law.L
         
         if self.variable == '':
             configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            fitFolderName = f'runFits_mu_fiducial'
         else:
             configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            fitFolderName = f'runFits_{self.variable}'
         
         #Load central config file
         with open(configYamlPath, 'r') as file:
@@ -96,6 +98,8 @@ class PrepareTheDirectory(law.Task):#(law.Task): #(Task, HTCondorWorkflow, law.L
         output_data = []
         
         output_data.append(os.path.join(output_dir, 'Combine'))
+            
+        output_data.append(os.path.join(output_dir, 'Combine', fitFolderName))
         
         if signal_model_folder_name == background_model_folder_name:
             model_folder_name = signal_model_folder_name
@@ -124,8 +128,10 @@ class PrepareTheDirectory(law.Task):#(law.Task): #(Task, HTCondorWorkflow, law.L
         
         if self.variable == '':
             configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            fitFolderName = f'runFits_mu_fiducial'
         else:
             configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            fitFolderName = f'runFits_{self.variable}'
         
         #Load central config file
         with open(configYamlPath, 'r') as file:
@@ -138,6 +144,7 @@ class PrepareTheDirectory(law.Task):#(law.Task): #(Task, HTCondorWorkflow, law.L
             
         # Creating the Combine directory alongside the Models dir
         safe_mkdir(os.path.join(output_dir, 'Combine'))
+        safe_mkdir(os.path.join(output_dir, 'Combine', fitFolderName))
         
         signal_model_folder_name = config['datacard_yields']['sigModelWSDir'].split('/')[-2]
         background_model_folder_name = config['datacard_yields']['bkgModelWSDir'].split('/')[-2]
@@ -252,7 +259,7 @@ class RunText2Workspace(law.Task): #(law.Task): #(Task, HTCondorWorkflow, law.Lo
         else:
             output_dir = self.output_dir
 
-        output = [os.path.join(output_dir, 'Combine', f'')]
+        # output = [os.path.join(output_dir, 'Combine', f'')]
         
         # Define the file paths
         if self.variable == '':
@@ -381,8 +388,8 @@ class AsimovFitCategoryFirstStep(Task, HTCondorWorkflow, law.LocalWorkflow): #(l
         else:
             fitFolderName = f'runFits_{self.variable}'
             
-        output = [os.path.join(output_dir, 'Combine', fitFolderName)]
-        output += [os.path.join(output_dir, 'Combine', fitFolderName, 'asimov')]
+        # output = [os.path.join(output_dir, 'Combine', fitFolderName)]
+        output = [os.path.join(output_dir, 'Combine', fitFolderName, 'asimov')]
 
         if self.variable != '':
             output += [os.path.join(output_dir, 'Combine', fitFolderName, 'asimov', f'higgsCombinefirstStep_{current_branch}.MultiDimFit.mH125.38.root')]
@@ -422,7 +429,7 @@ class AsimovFitCategoryFirstStep(Task, HTCondorWorkflow, law.LocalWorkflow): #(l
         else:
             datacard_path = os.path.join(output_dir, 'Combine', f'Datacard_{self.variable}_{self.year}.root')
             
-        safe_mkdir(os.path.join(output_dir, 'Combine', fitFolderName))
+        # safe_mkdir(os.path.join(output_dir, 'Combine', fitFolderName))
         safe_mkdir(os.path.join(output_dir, 'Combine', fitFolderName, 'asimov'))
         
         cwd = os.getcwd()
@@ -594,8 +601,8 @@ class AsimovFitCategorySyst(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Ta
         else:
             fitFolderName = f'runFits_{self.variable}'
             
-        output = [os.path.join(output_dir, 'Combine', fitFolderName)]
-        output += [os.path.join(output_dir, 'Combine', fitFolderName, 'asimov')]
+        # output = [os.path.join(output_dir, 'Combine', fitFolderName)]
+        output = [os.path.join(output_dir, 'Combine', fitFolderName, 'asimov')]
         
         output += [os.path.join(output_dir, 'Combine', fitFolderName, 'asimov', f'higgsCombineAsimovPostFitScanFit_{self.cat}.POINTS.{current_point}.{current_point}.MultiDimFit.mH125.38.root')]
         
@@ -791,8 +798,8 @@ class AsimovFitCategoryStat(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Ta
         else:
             fitFolderName = f'runFits_{self.variable}'
             
-        output = [os.path.join(output_dir, 'Combine', fitFolderName)]
-        output += [os.path.join(output_dir, 'Combine', fitFolderName, 'asimov')]
+        # output = [os.path.join(output_dir, 'Combine', fitFolderName)]
+        output = [os.path.join(output_dir, 'Combine', fitFolderName, 'asimov')]
         
         output += [os.path.join(output_dir, 'Combine', fitFolderName, 'asimov', f'higgsCombineAsimovPostFitScanStat_{self.cat}.POINTS.{current_point}.{current_point}.MultiDimFit.mH125.38.root')]
         
@@ -1158,8 +1165,8 @@ class AsimovImpactFirstStep(law.Task): #(law.Task): #(Task, HTCondorWorkflow, la
         else:
             fitFolderName = f'runFits_{self.variable}'
             
-        output = [os.path.join(output_dir, 'Combine', fitFolderName)]
-        output += [os.path.join(output_dir, 'Combine', fitFolderName, 'impact')]
+        # output = [os.path.join(output_dir, 'Combine', fitFolderName)]
+        output = [os.path.join(output_dir, 'Combine', fitFolderName, 'impact')]
 
         output += [os.path.join(output_dir, 'Combine', fitFolderName, 'impact', f'higgsCombine_initialFit_Test.MultiDimFit.mH125.38.root')]
         
@@ -1319,18 +1326,18 @@ class AsimovImpactSecondStep(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.T
                 var = it.Next()
             return res
         
-        def list_from_workspace(file, workspace, set):
-            """Create a list of strings from a RooWorkspace set"""
-            res = []
-            wsFile = ROOT.TFile(file)
-            ws = wsFile.Get(workspace)
-            argSet = ws.set(set)
-            it = argSet.createIterator()
-            var = it.Next()
-            while var:
-                res.append(var.GetName())
-                var = it.Next()
-            return res
+        # def list_from_workspace(file, workspace, set):
+        #     """Create a list of strings from a RooWorkspace set"""
+        #     res = []
+        #     wsFile = ROOT.TFile(file)
+        #     ws = wsFile.Get(workspace)
+        #     argSet = ws.set(set)
+        #     it = argSet.createIterator()
+        #     var = it.Next()
+        #     while var:
+        #         res.append(var.GetName())
+        #         var = it.Next()
+        #     return res
 
         if self.variable == '':
             poiList = ["r"]
@@ -1365,8 +1372,8 @@ class AsimovImpactSecondStep(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.T
         else:
             fitFolderName = f'runFits_{self.variable}'
             
-        output = [os.path.join(output_dir, 'Combine', fitFolderName)]
-        output += [os.path.join(output_dir, 'Combine', fitFolderName, 'impact')]
+        # output = [os.path.join(output_dir, 'Combine', fitFolderName)]
+        output = [os.path.join(output_dir, 'Combine', fitFolderName, 'impact')]
 
         output += [os.path.join(output_dir, 'Combine', fitFolderName, 'impact', f'higgsCombine_paramFit_Test_{current_param}.MultiDimFit.mH125.38.root')]
         
@@ -1660,4 +1667,272 @@ class AsimovImpactThirdStep(law.Task): #(law.Task): #(Task, HTCondorWorkflow, la
                     print("Error executing script:", e.stderr)
             
         os.chdir(cwd)
+
+
+class AsimovCovCorrHesse(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Task): #(Task, HTCondorWorkflow, law.LocalWorkflow):
+    output_dir = law.Parameter(default = '', description="Path to the output directory")
+    variable = law.Parameter(default="", description="Variable to be used")
+    year = law.Parameter(default='2022', description="Year")
+    
+    htcondor_job_kwargs_submit = {"spool": True}
+    
+    def requires(self):
         
+        if self.variable == '':
+            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+        else:
+            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+        
+        #Load central config file
+        with open(configYamlPath, 'r') as file:
+            config = yaml.safe_load(file)
+        
+        if self.output_dir == '':
+            output_dir = config['outputFolder']
+        else:
+            output_dir = self.output_dir
+            
+        tasks = [RunText2Workspace(output_dir=output_dir, variable=self.variable, year=self.year)]
+        
+        return tasks
+
+    def create_branch_map(self):
+        branch_map = {i: current_branch for i, current_branch in enumerate([0])}
+        return branch_map
+
+    def output(self):        
+        if self.variable == '':
+            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+        else:
+            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+        
+        #Load central config file
+        with open(configYamlPath, 'r') as file:
+            config = yaml.safe_load(file)
+        
+        if self.output_dir == '':
+            output_dir = config['outputFolder']
+        else:
+            output_dir = self.output_dir
+
+        if self.variable == '':
+            fitFolderName = f'runFits_mu_fiducial'
+        else:
+            fitFolderName = f'runFits_{self.variable}'
+            
+        # output = [os.path.join(output_dir, 'Combine', fitFolderName)]
+        output = [os.path.join(output_dir, 'Combine', fitFolderName, 'hesse')]
+        
+        
+        output += [os.path.join(output_dir, 'Combine', fitFolderName, 'hesse', f'robustHessefirstStep.root')]
+        output += [os.path.join(output_dir, 'Combine', fitFolderName, 'hesse', f'multidimfitfirstStep.root')]
+        output += [os.path.join(output_dir, 'Combine', fitFolderName, 'hesse', f'higgsCombinefirstStep.MultiDimFit.mH125.38.root')]
+        
+        outputFileTargets = []
+                
+        for _, current_output_path in enumerate(output):
+            outputFileTargets.append(law.LocalFileTarget(current_output_path))
+            
+        # print(outputFileTargets)
+
+        return outputFileTargets
+
+    def run(self):
+       
+        if self.variable == '':
+            # Does not make sense inclusively
+            return True
+            
+        else:
+            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            fitFolderName = f'runFits_{self.variable}'
+                  
+        #Load central config file
+        with open(configYamlPath, 'r') as file:
+            config = yaml.safe_load(file)
+        
+        if self.output_dir == '':
+            output_dir = config['outputFolder']
+        else:
+            output_dir = self.output_dir  
+            
+        if self.variable == '':
+            datacard_path = os.path.join(output_dir, 'Combine', f'Datacard_{self.year}.root')
+        else:
+            datacard_path = os.path.join(output_dir, 'Combine', f'Datacard_{self.variable}_{self.year}.root')
+            
+        safe_mkdir(os.path.join(output_dir, 'Combine', fitFolderName))
+        safe_mkdir(os.path.join(output_dir, 'Combine', fitFolderName, 'hesse'))
+        
+        cwd = os.getcwd()
+        os.chdir(os.path.join(output_dir, 'Combine', fitFolderName, 'hesse'))
+                    
+        arguments = [
+            "combine",
+            "-M", "MultiDimFit",
+            datacard_path,
+            "--freezeParameters", "MH",
+            "-m", "125.38",
+            "-n", "firstStep",
+            "--saveWorkspace",
+            "--saveFitResult",
+            "--saveSpecifiedIndex", f"""{",".join(combineVariableDict[f'{self.variable}']['pdfIndeces'])}""",
+            "--floatOtherPOIs", "1",
+            "--robustHesse", "1",
+            "--robustHesseSave", "1",
+            "--cminDefaultMinimizerStrategy=0",
+            "--X-rtd", "MINIMIZER_freezeDisassociatedParams",
+            "--X-rtd", "MINIMIZER_multiMin_hideConstants",
+            "--X-rtd", "MINIMIZER_multiMin_maskConstraints",
+            "--X-rtd", "MINIMIZER_multiMin_maskChannels=2",
+            "-t", "-1",
+            "--setParameters", f"""{",".join(combineVariableDict[f'{self.variable}']['paramStr'])}"""
+        ]
+        command = arguments
+        # print(command)
+        try:
+            result = subprocess.run(command, check=True, text=True, capture_output=True)
+            print("Script output:", result.stdout)
+            print("Script executed successfully.")
+        except subprocess.CalledProcessError as e:
+            print("Error executing script:", e.stderr)
+            
+        os.chdir(cwd)
+        
+class AsimovCovCorr(law.Task): #(law.Task): #(Task, HTCondorWorkflow, law.LocalWorkflow):
+    output_dir = law.Parameter(default = '', description="Path to the output directory")
+    variable = law.Parameter(default="", description="Variable to be used")
+    year = law.Parameter(default='2022', description="Year")
+    
+    # htcondor_job_kwargs_submit = {"spool": True}
+    
+    def requires(self):
+        
+        if self.variable == '':
+            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+        else:
+            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+        
+        #Load central config file
+        with open(configYamlPath, 'r') as file:
+            config = yaml.safe_load(file)
+        
+        if self.output_dir == '':
+            output_dir = config['outputFolder']
+        else:
+            output_dir = self.output_dir
+            
+        tasks = [AsimovCovCorrHesse(output_dir=output_dir, variable=self.variable, year=self.year, version="v1", workflow=config["combine_hesse"]["execution"])]
+        
+        return tasks
+
+    def create_branch_map(self):
+        branch_map = {i: current_branch for i, current_branch in enumerate([0])}
+        return branch_map
+
+    def output(self):        
+        if self.variable == '':
+            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+        else:
+            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+        
+        #Load central config file
+        with open(configYamlPath, 'r') as file:
+            config = yaml.safe_load(file)
+        
+        if self.output_dir == '':
+            output_dir = config['outputFolder']
+        else:
+            output_dir = self.output_dir
+
+        if self.variable == '':
+            fitFolderName = f'runFits_mu_fiducial'
+        else:
+            fitFolderName = f'runFits_{self.variable}'
+            
+        # output = [os.path.join(output_dir, 'Combine', fitFolderName)]
+        output = [os.path.join(output_dir, 'Combine', fitFolderName, 'hesse', 'Plots')]
+
+        output += [os.path.join(output_dir, 'Combine', fitFolderName, 'hesse', 'Plots', f'corrMatrix_{self.variable}_syst.pdf')]
+        output += [os.path.join(output_dir, 'Combine', fitFolderName, 'hesse', 'Plots', f'corrMatrix_{self.variable}_syst.png')]
+        output += [os.path.join(output_dir, 'Combine', fitFolderName, 'hesse', 'Plots', f'covMatrix_{self.variable}_syst.pdf')]
+        output += [os.path.join(output_dir, 'Combine', fitFolderName, 'hesse', 'Plots', f'covMatrix_{self.variable}_syst.png')]
+        
+        outputFileTargets = []
+                
+        for _, current_output_path in enumerate(output):
+            outputFileTargets.append(law.LocalFileTarget(current_output_path))
+            
+        # print(outputFileTargets)
+
+        return outputFileTargets
+
+    def run(self):
+       
+        if self.variable == '':
+            # Does not make sense inclusively
+            return True
+            
+        else:
+            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            fitFolderName = f'runFits_{self.variable}'
+                  
+        #Load central config file
+        with open(configYamlPath, 'r') as file:
+            config = yaml.safe_load(file)
+        
+        if self.output_dir == '':
+            output_dir = config['outputFolder']
+        else:
+            output_dir = self.output_dir  
+            
+        if self.variable == '':
+            datacard_path = os.path.join(output_dir, 'Combine', f'Datacard_{self.year}.root')
+        else:
+            datacard_path = os.path.join(output_dir, 'Combine', f'Datacard_{self.variable}_{self.year}.root')
+            
+        safe_mkdir(os.path.join(output_dir, 'Combine', fitFolderName))
+        safe_mkdir(os.path.join(output_dir, 'Combine', fitFolderName, 'hesse'))
+        safe_mkdir(os.path.join(output_dir, 'Combine', fitFolderName, 'hesse', 'Plots'))
+        
+        cwd = os.getcwd()
+        os.chdir(os.path.join(os.environ["ANALYSIS_PATH"], 'Plots'))
+
+        arguments = [
+            "python3"
+            f"{os.path.join(os.environ['ANALYSIS_PATH'], 'Plots', 'makeCorrMatrix.py')}",
+            "--inputJson", f"{os.path.join(os.environ['ANALYSIS_PATH'], 'Plots', 'inputs_robustHesse.json')}",
+            "--mode", f"{self.variable}",
+            "--input", f"{os.path.join(output_dir, 'Combine', fitFolderName, 'hesse', f'robustHessefirstStep.root')}",
+            "--output", f"{os.path.join(output_dir, 'Combine', fitFolderName, 'hesse', 'Plots')}",
+            "--translate", f"{os.path.join(os.environ['ANALYSIS_PATH'], 'Combine', 'poi_differential_hesse.json')}"
+        ]
+        command = arguments
+        # print(command)
+        try:
+            result = subprocess.run(command, check=True, text=True, capture_output=True)
+            print("Script output:", result.stdout)
+            print("Script executed successfully.")
+        except subprocess.CalledProcessError as e:
+            print("Error executing script:", e.stderr)
+            
+        arguments = [
+            "python3"
+            f"{os.path.join(os.environ['ANALYSIS_PATH'], 'Plots', 'makeCorrMatrix.py')}",
+            "--inputJson", f"{os.path.join(os.environ['ANALYSIS_PATH'], 'Plots', 'inputs_robustHesse.json')}",
+            "--mode", f"{self.variable}",
+            "--input", f"{os.path.join(output_dir, 'Combine', fitFolderName, 'hesse', f'robustHessefirstStep.root')}",
+            "--output", f"{os.path.join(output_dir, 'Combine', fitFolderName, 'hesse', 'Plots')}",
+            "--translate", f"{os.path.join(os.environ['ANALYSIS_PATH'], 'Combine', 'poi_differential_hesse.json')}",
+            "--doCov"
+        ]
+        command = arguments
+        # print(command)
+        try:
+            result = subprocess.run(command, check=True, text=True, capture_output=True)
+            print("Script output:", result.stdout)
+            print("Script executed successfully.")
+        except subprocess.CalledProcessError as e:
+            print("Error executing script:", e.stderr)
+            
+        os.chdir(cwd)

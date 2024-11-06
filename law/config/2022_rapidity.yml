@@ -180,3 +180,6 @@ combine_fit:
 combine_impacts:
   exclude: "" # Nuisances that should be excluded from the impact computation
   execution: 'htcondor'
+
+combine_hesse:
+  execution: 'htcondor'
