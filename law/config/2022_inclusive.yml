@@ -177,6 +177,11 @@ combine_fit:
 
 combine_impacts:
   exclude: "" # Nuisances that should be excluded from the impact computation
+  cminApproxPreFitTolerance: 0.01
+  setParameters: 1.158
+  stepSize: 0.05
+  setCrossingTolerance: 0.00005 
+  not_show_POI: False
   execution: 'htcondor'
 
 combine_hesse:

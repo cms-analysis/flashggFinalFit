@@ -179,6 +179,7 @@ combine_fit:
 
 combine_impacts:
   exclude: "" # Nuisances that should be excluded from the impact computation
+  not_show_POI: True
   execution: 'htcondor'
 
 combine_hesse:
