@@ -184,3 +184,9 @@ combine_impacts:
 
 combine_hesse:
   execution: 'htcondor'
+
+combine_mggToys:
+  nToys: 1000 # Number of toys = nToys * 10
+  loadSnapshot: 'MultiDimFit'
+  doBands: True
+  execution: 'htcondor'

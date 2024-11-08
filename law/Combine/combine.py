@@ -1971,8 +1971,11 @@ class UnblindedFitCategorySyst(Task, HTCondorWorkflow, law.LocalWorkflow): #(law
         return tasks
     
     def create_branch_map(self):
-        
-        branch_map = {i: current_cat for i, current_cat in enumerate(combineVariableDict[f'{self.variable}']['paramStrNoOne'])}
+        if self.variable == '':
+            param_list = ["r"]
+        else:
+            param_list = combineVariableDict[f'{self.variable}']['paramStrNoOne']
+        branch_map = {i: current_cat for i, current_cat in enumerate(param_list)}
         return branch_map
 
     def output(self):
@@ -2130,16 +2133,24 @@ class UnblindedFitCategoryStat(Task, HTCondorWorkflow, law.LocalWorkflow): #(law
         else:
             output_dir = self.output_dir
                 
-        tasks = [RunText2Workspace(output_dir=output_dir, variable=self.variable, year=self.year)]
+                
+        if self.variable == '':
+            tasks = [RunText2Workspace(output_dir=output_dir, variable=self.variable, year=self.year)]
+        else:
+            tasks = [UnblindedFitCategorySyst(output_dir=output_dir, variable=self.variable, year=self.year, nPoints=self.nPoints, version=f'{self.variable}', workflow='local')]
         
         return tasks
     
     def create_branch_map(self):
-        branch_map = {i: current_cat for i, current_cat in enumerate(combineVariableDict[f'{self.variable}']['paramStrNoOne'])}
+        if self.variable == '':
+            param_list = ["r"]
+        else:
+            param_list = combineVariableDict[f'{self.variable}']['paramStrNoOne']
+        branch_map = {i: current_cat for i, current_cat in enumerate(param_list)}
         return branch_map
 
     def output(self):
-        current_cat = self.branch_data
+        cat = self.branch_data
         
         if self.variable == '':
             configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
@@ -2163,7 +2174,7 @@ class UnblindedFitCategoryStat(Task, HTCondorWorkflow, law.LocalWorkflow): #(law
         # output = [os.path.join(output_dir, 'Combine', fitFolderName)]
         # output = [os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit')]
         
-        output = [os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', f'higgsCombineDataPostFitScanStat_{current_cat}.MultiDimFit.mH125.38.root')]
+        output = [os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', f'higgsCombineDataPostFitScanStat_{cat}.MultiDimFit.mH125.38.root')]
         
         outputFileTargets = []
                 
@@ -2175,7 +2186,7 @@ class UnblindedFitCategoryStat(Task, HTCondorWorkflow, law.LocalWorkflow): #(law
         return outputFileTargets
 
     def run(self):
-        current_cat = self.branch_data
+        cat = self.branch_data
         
         if self.variable == '':
             configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
@@ -2200,17 +2211,16 @@ class UnblindedFitCategoryStat(Task, HTCondorWorkflow, law.LocalWorkflow): #(law
         cwd = os.getcwd()
         os.chdir(os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit'))
     
-        firstStepPath = os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', f"higgsCombineDataPostFitScanFit_{current_cat}.MultiDimFit.mH125.38.root")
+        firstStepPath = os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', f"higgsCombineDataPostFitScanFit_{cat}.MultiDimFit.mH125.38.root")
         
         if self.variable == '':
-            datacard_path = os.path.join(output_dir, 'Combine', f'Datacard_{self.year}.root')
             arguments = [
                 "combine",
                 "-M", "MultiDimFit",
-                "-d", datacard_path,
+                firstStepPath,
                 "--freezeParameters", "allConstrainedNuisances,MH",
                 "-m", "125.38",
-                "-n", f"DataPostFitScanStat_{current_cat}",
+                "-n", f"DataPostFitScanStat_{cat}",
                 "--cminDefaultMinimizerStrategy=0",
                 "--algo", "grid",
                 "--rMin", f"{config['combine_fit']['rMin']}",
@@ -2220,9 +2230,10 @@ class UnblindedFitCategoryStat(Task, HTCondorWorkflow, law.LocalWorkflow): #(law
                 "--X-rtd", "MINIMIZER_multiMin_hideConstants",
                 "--X-rtd", "MINIMIZER_multiMin_maskConstraints",
                 "--X-rtd", "MINIMIZER_multiMin_maskChannels=2",
-                "-P", "r",
+                "-P", f"{cat}",
                 "--floatOtherPOIs", "1",
-                "--snapshotName", "'MultiDimFit'",
+                "--saveFitResult",
+                "--snapshotName", "MultiDimFit",
                 "-w", "w",
                 "--cminApproxPreFitTolerance", f"{config['combine_fit']['cminApproxPreFitTolerance']}"
             ]
@@ -2242,7 +2253,7 @@ class UnblindedFitCategoryStat(Task, HTCondorWorkflow, law.LocalWorkflow): #(law
                 firstStepPath,
                 "--freezeParameters", "allConstrainedNuisances,MH",
                 "-m", "125.38",
-                "-n", f"DataPostFitScanStat_{current_cat}",
+                "-n", f"DataPostFitScanStat_{cat}",
                 "--cminDefaultMinimizerStrategy=0",
                 "--algo", "grid",
                 "--points", f"{int(self.nPoints)}",
@@ -2250,7 +2261,7 @@ class UnblindedFitCategoryStat(Task, HTCondorWorkflow, law.LocalWorkflow): #(law
                 "--X-rtd", "MINIMIZER_multiMin_hideConstants",
                 "--X-rtd", "MINIMIZER_multiMin_maskConstraints",
                 "--X-rtd", "MINIMIZER_multiMin_maskChannels=2",
-                "-P", f"{current_cat}",
+                "-P", f"{cat}",
                 "--saveFitResult",
                 "--floatOtherPOIs", "1",
                 "--snapshotName", "MultiDimFit",
@@ -2293,13 +2304,13 @@ class CreateUnblindedFit(law.Task): #(law.Task): #(Task, HTCondorWorkflow, law.L
             
         tasks = []
         if self.variable == '':
-            cat = "r"
+            # cat = "r"
             tasks += [UnblindedFitCategorySyst(output_dir=output_dir, variable=self.variable, year=self.year, nPoints=config["combine_fit"]["asimov_numPoints"], version=f"inclusive_v1", workflow=config["combine_fit"]["execution"]), UnblindedFitCategoryStat(output_dir=output_dir, variable=self.variable, year=self.year, nPoints=config["combine_fit"]["asimov_numPoints"], version=f"inclusive_v1", workflow=config["combine_fit"]["execution"])]
         else:
-            version_index = 1
-            for cat in combineVariableDict[f'{self.variable}']['paramStrNoOne']:
-                tasks += [UnblindedFitCategorySyst(output_dir=output_dir, variable=self.variable, year=self.year, nPoints=config["combine_fit"]["asimov_numPoints"], version=f"{self.variable}_v{version_index}", workflow=config["combine_fit"]["execution"]), UnblindedFitCategoryStat(output_dir=output_dir, variable=self.variable, year=self.year, nPoints=config["combine_fit"]["asimov_numPoints"], version=f"{self.variable}_v{version_index}", workflow=config["combine_fit"]["execution"])]
-                version_index += 1
+            # version_index = 1
+            # for cat in combineVariableDict[f'{self.variable}']['paramStrNoOne']:
+            tasks += [UnblindedFitCategorySyst(output_dir=output_dir, variable=self.variable, year=self.year, nPoints=config["combine_fit"]["asimov_numPoints"], version=f"{self.variable}", workflow=config["combine_fit"]["execution"]), UnblindedFitCategoryStat(output_dir=output_dir, variable=self.variable, year=self.year, nPoints=config["combine_fit"]["asimov_numPoints"], version=f"{self.variable}", workflow=config["combine_fit"]["execution"])]
+            # version_index += 1
         
         return tasks
     
@@ -3260,3 +3271,611 @@ class UnblindedImpactThirdStep(law.Task): #(law.Task): #(Task, HTCondorWorkflow,
                     print("Error executing script:", e.stderr)
             
         os.chdir(cwd)
+        
+class MggToyGeneration(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Task): #(Task, HTCondorWorkflow, law.LocalWorkflow):
+    output_dir = law.Parameter(default = '', description="Path to the output directory")
+    variable = law.Parameter(default="", description="Variable to be used")
+    year = law.Parameter(default='2022', description="Year")
+    is_postfit = law.Parameter(default=False, description="Flag that signifies if toys are created for postfit mass distributions.")
+    
+    htcondor_job_kwargs_submit = {"spool": True}
+    
+    def requires(self):
+        
+        if self.variable == '':
+            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+        else:
+            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+        
+        #Load central config file
+        with open(configYamlPath, 'r') as file:
+            config = yaml.safe_load(file)
+        
+        if self.output_dir == '':
+            output_dir = config['outputFolder']
+        else:
+            output_dir = self.output_dir
+        
+        if convert_boolean_string(self.is_postfit):
+            tasks = [RunText2Workspace(output_dir=output_dir, variable=self.variable, year=self.year)]  
+        else:
+            tasks = [RunText2Workspace(output_dir=output_dir, variable=self.variable, year=self.year)]
+        
+        return tasks
+
+    def create_branch_map(self):
+        
+        if self.variable == '':
+            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+        else:
+            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+                  
+        #Load central config file
+        with open(configYamlPath, 'r') as file:
+            config = yaml.safe_load(file)
+            
+        if self.variable == "":
+            cat_list = ["r"]
+        else:
+            cat_list = combineVariableDict[f'{self.variable}']['paramStrNoOne']
+        nToys = config['combine_mggToys']['nToys']
+        
+        toy_cat_list = [
+            (toy, cat)
+            for toy in range(int(nToys))
+            for cat in cat_list
+        ]
+        
+        branch_map = {i: current_toy for i, current_toy in enumerate(toy_cat_list)}
+        return branch_map
+
+    def output(self):        
+        toy, cat = self.branch_data
+        
+        if self.variable == '':
+            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+        else:
+            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+        
+        #Load central config file
+        with open(configYamlPath, 'r') as file:
+            config = yaml.safe_load(file)
+        
+        if self.output_dir == '':
+            output_dir = config['outputFolder']
+        else:
+            output_dir = self.output_dir
+
+        if self.variable == '':
+            fitFolderName = f'runFits_mu_fiducial'
+        else:
+            fitFolderName = f'runFits_{self.variable}'
+            
+        # output = [os.path.join(output_dir, 'Combine', fitFolderName)]
+        if convert_boolean_string(self.is_postfit):
+            output = [os.path.join(output_dir, 'Combine', fitFolderName, 'postFit')]
+            output += [os.path.join(output_dir, 'Combine', fitFolderName, 'postFit', f'SplusBModels_{cat}')]
+            output += [os.path.join(output_dir, 'Combine', fitFolderName, 'postFit', f'SplusBModels_{cat}', 'toys')]
+            output += [os.path.join(output_dir, 'Combine', fitFolderName, 'postFit', f'SplusBModels_{cat}', 'toys', f'toy_{toy}.root')]
+        else:
+            output = [os.path.join(output_dir, 'Combine', fitFolderName, 'preFit')]
+            output += [os.path.join(output_dir, 'Combine', fitFolderName, 'preFit', f'SplusBModels_{cat}')]
+            output += [os.path.join(output_dir, 'Combine', fitFolderName, 'preFit', f'SplusBModels_{cat}', 'toys')]
+            output += [os.path.join(output_dir, 'Combine', fitFolderName, 'preFit', f'SplusBModels_{cat}', 'toys', f'toy_{toy}.root')]
+        
+        outputFileTargets = []
+                
+        for _, current_output_path in enumerate(output):
+            outputFileTargets.append(law.LocalFileTarget(current_output_path))
+            
+        # print(outputFileTargets)
+
+        return outputFileTargets
+
+    def run(self):
+        toy, cat = self.branch_data
+       
+        if self.variable == '':
+            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            fitFolderName = f'runFits_mu_fiducial'
+            
+        else:
+            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            fitFolderName = f'runFits_{self.variable}'
+                  
+        #Load central config file
+        with open(configYamlPath, 'r') as file:
+            config = yaml.safe_load(file)
+        
+        if self.output_dir == '':
+            output_dir = config['outputFolder']
+        else:
+            output_dir = self.output_dir  
+            
+        if self.variable == '':
+            datacard_path = os.path.join(output_dir, 'Combine', f'Datacard_{self.year}.root')
+        else:
+            datacard_path = os.path.join(output_dir, 'Combine', f'Datacard_{self.variable}_{self.year}.root')
+             
+        cwd = os.getcwd()
+
+        safe_mkdir(os.path.join(output_dir, 'Combine', fitFolderName))
+        if convert_boolean_string(self.is_postfit):
+            safe_mkdir(os.path.join(output_dir, 'Combine', fitFolderName, 'postFit'))
+            safe_mkdir(os.path.join(output_dir, 'Combine', fitFolderName, 'postFit', f'SplusBModels_{cat}'))
+            safe_mkdir(os.path.join(output_dir, 'Combine', fitFolderName, 'postFit', f'SplusBModels_{cat}', 'toys'))
+            os.chdir(os.path.join(output_dir, 'Combine', fitFolderName, 'postFit', f'SplusBModels_{cat}', 'toys'))
+        
+            data_syst_fit = os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', f'higgsCombineDataPostFitScanFit_{cat}.MultiDimFit.mH125.38.root')
+
+            f = ROOT.TFile(data_syst_fit)
+            w = f.Get("w")
+            w.loadSnapshot(config['combine_mggToys']['loadSnapshot'])
+            poi_bf = w.var(cat).getVal()
+
+            arguments = [
+                "combine",
+                data_syst_fit,
+                "-M", "GenerateOnly",
+                "-m", "125.38",
+                "--saveWorkspace",
+                "--toysFrequentist",
+                "--bypassFrequentistFit",
+                "-t", "1",
+                "-s", "-1",
+                "-n", f"_{toy}_gen_step"
+                "--setParameters", f"{poi_bf}",
+                "--snapshotName", f"{config['combine_mggToys']['loadSnapshot']}"
+            ]
+            command = arguments
+            # print(command)
+            try:
+                result = subprocess.run(command, check=True, text=True, capture_output=True)
+                print("Script output:", result.stdout)
+                print("Script executed successfully.")
+            except subprocess.CalledProcessError as e:
+                print("Error executing script:", e.stderr)
+                
+            arguments = [
+                "mv",
+                f"higgsCombine_{toy}_gen_step*.root", f"gen_{toy}.root"
+            ]
+            command = arguments
+            # print(command)
+            try:
+                result = subprocess.run(command, check=True, text=True, capture_output=True)
+                print("Script output:", result.stdout)
+                print("Script executed successfully.")
+            except subprocess.CalledProcessError as e:
+                print("Error executing script:", e.stderr)
+
+            arguments = [
+                "combine",
+                f"gen_{toy}.root",
+                "-m", "125.38",
+                "-M", f"{config['combine_mggToys']['loadSnapshot']}",
+                "-P", f"{cat}",
+                "--floatOtherPOIs=1",
+                "--saveWorkspace",
+                "--toysFrequentist",
+                "--bypassFrequentistFit",
+                "-t", "1",
+                "--setParameters", f"{cat}={poi_bf}",
+                "-s", "-1",
+                "-n", f"_{toy}_fit_step",
+                "--cminDefaultMinimizerStrategy", "0",
+                "--X-rtd", "MINIMIZER_freezeDisassociatedParams",
+                "--X-rtd", "MINIMIZER_multiMin_hideConstants",
+                "--X-rtd", "MINIMIZER_multiMin_maskConstraints",
+                "--X-rtd", "MINIMIZER_multiMin_maskChannels=2"
+            ]
+            command = arguments
+            # print(command)
+            try:
+                result = subprocess.run(command, check=True, text=True, capture_output=True)
+                print("Script output:", result.stdout)
+                print("Script executed successfully.")
+            except subprocess.CalledProcessError as e:
+                print("Error executing script:", e.stderr)    
+                
+            arguments = [ 
+                "mv",
+                f"higgsCombine_{toy}_fit_step*.root", f"fit_{toy}.root"
+            ]
+            command = arguments
+            # print(command)
+            try:
+                result = subprocess.run(command, check=True, text=True, capture_output=True)
+                print("Script output:", result.stdout)
+                print("Script executed successfully.")
+            except subprocess.CalledProcessError as e:
+                print("Error executing script:", e.stderr)
+
+            arguments = [
+                "combine",
+                f"fit_{toy}.root",
+                "-m", "125.38",
+                "--snapshotName", f"{config['combine_mggToys']['loadSnapshot']}",
+                "-M", "GenerateOnly",
+                "--saveToys",
+                "--toysFrequentist",
+                "--bypassFrequentistFit",
+                "-t", "-1",
+                "--setParameters", f"{cat}=0",
+                "-n", f"_{toy}_throw_step"
+            ]
+            command = arguments
+            # print(command)
+            try:
+                result = subprocess.run(command, check=True, text=True, capture_output=True)
+                print("Script output:", result.stdout)
+                print("Script executed successfully.")
+            except subprocess.CalledProcessError as e:
+                print("Error executing script:", e.stderr)
+                
+            arguments = [
+                "mv",
+                f"higgsCombine_{toy}_throw_step*.root", f"toy_{toy}.root",
+                ";",
+                "rm", 
+                f"gen_{toy}.root", f"fit_{toy}.root"
+            ]
+            command = arguments
+            # print(command)
+            try:
+                result = subprocess.run(command, check=True, text=True, capture_output=True)
+                print("Script output:", result.stdout)
+                print("Script executed successfully.")
+            except subprocess.CalledProcessError as e:
+                print("Error executing script:", e.stderr)
+
+        else:
+            safe_mkdir(os.path.join(output_dir, 'Combine', fitFolderName, 'preFit'))
+            safe_mkdir(os.path.join(output_dir, 'Combine', fitFolderName, 'preFit', f'SplusBModels_{cat}'))
+            safe_mkdir(os.path.join(output_dir, 'Combine', fitFolderName, 'preFit', f'SplusBModels_{cat}', 'toys'))
+            os.chdir(os.path.join(output_dir, 'Combine', fitFolderName, 'preFit', f'SplusBModels_{cat}', 'toys'))
+        
+            if self.variable == '':
+                params = "r=1"
+            else:
+                params = f"{combineVariableDict[f'{self.variable}']['paramsStr']}"
+
+            arguments = [
+                "combine",
+                "-M", "GenerateOnly",
+                "-d", datacard_path,
+                "-m", "125.38",
+                "--saveWorkspace",
+                "--toysFrequentist",
+                "--bypassFrequentistFit",
+                "-t", "-1",
+                "-s", "-1",
+                "-n", f"_{toy}_gen_step"
+                "--setParameters", f"{params}",
+            ]
+            command = arguments
+            # print(command)
+            try:
+                result = subprocess.run(command, check=True, text=True, capture_output=True)
+                print("Script output:", result.stdout)
+                print("Script executed successfully.")
+            except subprocess.CalledProcessError as e:
+                print("Error executing script:", e.stderr)
+                
+            arguments = [
+                "mv",
+                f"higgsCombine_{toy}_gen_step*.root", f"gen_{toy}.root"
+            ]
+            command = arguments
+            # print(command)
+            try:
+                result = subprocess.run(command, check=True, text=True, capture_output=True)
+                print("Script output:", result.stdout)
+                print("Script executed successfully.")
+            except subprocess.CalledProcessError as e:
+                print("Error executing script:", e.stderr)
+
+            arguments = [
+                "combine",
+                f"gen_{toy}.root",
+                "-m", "125.38",
+                "-M", f"{config['combine_mggToys']['loadSnapshot']}",
+                "-P", f"{cat}",
+                "--floatOtherPOIs=1",
+                "--saveWorkspace",
+                "--toysFrequentist",
+                "--bypassFrequentistFit",
+                "-t", "1",
+                "-s", "-1",
+                "-n", f"_{toy}_fit_step",
+                "--cminDefaultMinimizerStrategy", "0",
+                "--X-rtd", "MINIMIZER_freezeDisassociatedParams",
+                "--X-rtd", "MINIMIZER_multiMin_hideConstants",
+                "--X-rtd", "MINIMIZER_multiMin_maskConstraints",
+                "--X-rtd", "MINIMIZER_multiMin_maskChannels=2"
+            ]
+            arguments.append("--setParameters")
+            if self.variable == '':
+                arguments.append('r=1')
+            else:
+                arguments.append(f"""{",".join(combineVariableDict[f'{self.variable}']['paramStr'])}""")
+            command = arguments
+            # print(command)
+            try:
+                result = subprocess.run(command, check=True, text=True, capture_output=True)
+                print("Script output:", result.stdout)
+                print("Script executed successfully.")
+            except subprocess.CalledProcessError as e:
+                print("Error executing script:", e.stderr)    
+                
+            arguments = [ 
+                "mv",
+                f"higgsCombine_{toy}_fit_step*.root", f"fit_{toy}.root"
+            ]
+            command = arguments
+            # print(command)
+            try:
+                result = subprocess.run(command, check=True, text=True, capture_output=True)
+                print("Script output:", result.stdout)
+                print("Script executed successfully.")
+            except subprocess.CalledProcessError as e:
+                print("Error executing script:", e.stderr)
+                
+            arguments = [
+                "combine",
+                f"fit_{toy}.root",
+                "-m", "125.38",
+                "--snapshotName", f"{config['combine_mggToys']['loadSnapshot']}",
+                "-M", "GenerateOnly",
+                "--saveToys",
+                "--toysFrequentist",
+                "--bypassFrequentistFit",
+                "-t", "1",
+                "-n", f"_{toy}_throw_step"
+            ]
+            arguments.append("--setParameters")
+            if self.variable == '':
+                arguments.append('r=0')
+            else:
+                arguments.append(f"""{(",".join(combineVariableDict[f'{self.variable}']['paramStr'])).replace("=1", "=0")}""")
+            command = arguments
+            # print(command)
+            try:
+                result = subprocess.run(command, check=True, text=True, capture_output=True)
+                print("Script output:", result.stdout)
+                print("Script executed successfully.")
+            except subprocess.CalledProcessError as e:
+                print("Error executing script:", e.stderr)
+                
+            arguments = [
+                "mv",
+                f"higgsCombine_{toy}_throw_step*.root", f"toy_{toy}.root",
+                ";",
+                "rm", 
+                f"gen_{toy}.root", f"fit_{toy}.root"
+            ]
+            command = arguments
+            # print(command)
+            try:
+                result = subprocess.run(command, check=True, text=True, capture_output=True)
+                print("Script output:", result.stdout)
+                print("Script executed successfully.")
+            except subprocess.CalledProcessError as e:
+                print("Error executing script:", e.stderr)
+        
+        os.chdir(cwd)
+        
+class MggDistribution(law.LocalWorkflow): #(law.Task): #(Task, HTCondorWorkflow, law.LocalWorkflow):
+    output_dir = law.Parameter(default = '', description="Path to the output directory")
+    variable = law.Parameter(default="", description="Variable to be used")
+    year = law.Parameter(default='2022', description="Year")
+    is_postfit = law.Parameter(default=False, description="Flag that signifies if toys are created for postfit mass distributions.")
+    
+    # htcondor_job_kwargs_submit = {"spool": True}
+    
+    def requires(self):
+        
+        if self.variable == '':
+            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+        else:
+            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+        
+        #Load central config file
+        with open(configYamlPath, 'r') as file:
+            config = yaml.safe_load(file)
+        
+        if self.output_dir == '':
+            output_dir = config['outputFolder']
+        else:
+            output_dir = self.output_dir
+        
+        if config['combine_mggToys']['doBands']:
+            tasks = [MggToyGeneration(output_dir=output_dir, variable=self.variable, year=self.year, is_postfit=convert_boolean_string(self.is_postfit), version=f"{self.variable if self.variable != '' else 'r'}", workflow="htcondor")]
+        else:
+            if convert_boolean_string(self.is_postfit):
+                tasks = [CreateUnblindedFit(output_dir=output_dir, variable=self.variable, year=self.year)]
+            else:
+                tasks = [RunText2Workspace(output_dir=output_dir, variable=self.variable, year=self.year)]
+        
+        return tasks
+
+    def create_branch_map(self):
+        if self.variable == '':
+            cat_list = ["r"]
+        else:
+            cat_list = combineVariableDict[f'{self.variable}']['paramStrNoOne']
+        branch_map = {i: cat for i, cat in enumerate(cat_list)}
+        return branch_map
+
+    def output(self):
+        cat = self.branch_data
+        
+        if self.variable == '':
+            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+        else:
+            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+
+        #Load central config file
+        with open(configYamlPath, 'r') as file:
+            config = yaml.safe_load(file)
+
+        if self.output_dir == '':
+            output_dir = config['outputFolder']
+        else:
+            output_dir = self.output_dir
+
+        if self.variable == '':
+            fitFolderName = f'runFits_mu_fiducial'
+            reco_cats_with_bmw = ['best_resolution', 'medium_resolution', 'worst_resolution']
+        else:
+            fitFolderName = f'runFits_{self.variable}'
+            reco_cats_with_bmw = [element for element in combineVariableDict[self.variable]['catsStrWithBMW'] if "_".join(cat.split("_")[2:]) in element]
+
+        output = []
+        if convert_boolean_string(self.is_postfit):
+            output += [os.path.join(output_dir, 'Combine', fitFolderName, 'postFit')]
+            output += [os.path.join(output_dir, 'Combine', fitFolderName, 'postFit', 'jsons')]
+            output += [os.path.join(output_dir, 'Combine', fitFolderName, 'postFit', 'jsons', f'catsWeights_sospb_{cat}_CMS_hgg_mass.json')]
+            
+            output += [os.path.join(output_dir, 'Combine', fitFolderName, 'postFit', f'SplusBModels_{cat}')]
+            output += [os.path.join(output_dir, 'Combine', fitFolderName, 'postFit', f'SplusBModels_{cat}', f'_{cat}_{catWithBMW}_CMS_hgg_mass.pdf') for catWithBMW in reco_cats_with_bmw]
+            output += [os.path.join(output_dir, 'Combine', fitFolderName, 'postFit', f'SplusBModels_{cat}', f'_{cat}_{catWithBMW}_CMS_hgg_mass.png') for catWithBMW in reco_cats_with_bmw]
+            output += [os.path.join(output_dir, 'Combine', fitFolderName, 'postFit', f'SplusBModels_{cat}', f'_{cat}_all_CMS_hgg_mass.pdf')]
+            output += [os.path.join(output_dir, 'Combine', fitFolderName, 'postFit', f'SplusBModels_{cat}', f'_{cat}_all_CMS_hgg_mass.png')]
+            output += [os.path.join(output_dir, 'Combine', fitFolderName, 'postFit', f'SplusBModels_{cat}', f'_{cat}_wall_CMS_hgg_mass.pdf')]
+            output += [os.path.join(output_dir, 'Combine', fitFolderName, 'postFit', f'SplusBModels_{cat}', f'_{cat}_wall_CMS_hgg_mass.png')]
+        else:
+            output += [os.path.join(output_dir, 'Combine', fitFolderName, 'preFit')]
+            output += [os.path.join(output_dir, 'Combine', fitFolderName, 'preFit', 'jsons')]
+            output += [os.path.join(output_dir, 'Combine', fitFolderName, 'preFit', 'jsons', f'catsWeights_sospb_{cat}_CMS_hgg_mass.json')]
+            
+            output += [os.path.join(output_dir, 'Combine', fitFolderName, 'preFit', f'SplusBModels_{cat}')]
+            output += [os.path.join(output_dir, 'Combine', fitFolderName, 'preFit', f'SplusBModels_{cat}', f'_{cat}_{catWithBMW}_CMS_hgg_mass.pdf') for catWithBMW in reco_cats_with_bmw]
+            output += [os.path.join(output_dir, 'Combine', fitFolderName, 'preFit', f'SplusBModels_{cat}', f'_{cat}_{catWithBMW}_CMS_hgg_mass.png') for catWithBMW in reco_cats_with_bmw]
+            output += [os.path.join(output_dir, 'Combine', fitFolderName, 'preFit', f'SplusBModels_{cat}', f'_{cat}_all_CMS_hgg_mass.pdf')]
+            output += [os.path.join(output_dir, 'Combine', fitFolderName, 'preFit', f'SplusBModels_{cat}', f'_{cat}_all_CMS_hgg_mass.png')]
+            output += [os.path.join(output_dir, 'Combine', fitFolderName, 'preFit', f'SplusBModels_{cat}', f'_{cat}_wall_CMS_hgg_mass.pdf')]
+            output += [os.path.join(output_dir, 'Combine', fitFolderName, 'preFit', f'SplusBModels_{cat}', f'_{cat}_wall_CMS_hgg_mass.png')]
+                
+        
+        outputFileTargets = []
+                
+        for _, current_output_path in enumerate(output):
+            outputFileTargets.append(law.LocalFileTarget(current_output_path))
+            
+        # print(outputFileTargets)
+
+        return outputFileTargets
+
+    def run(self):
+        cat = self.branch_data
+       
+        if self.variable == '':
+            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            fitFolderName = f'runFits_mu_fiducial'
+
+        else:
+            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            fitFolderName = f'runFits_{self.variable}'
+
+        #Load central config file
+        with open(configYamlPath, 'r') as file:
+            config = yaml.safe_load(file)
+
+        if self.output_dir == '':
+            output_dir = config['outputFolder']
+        else:
+            output_dir = self.output_dir  
+            
+        main_dir = os.getcwd()
+        
+        safe_mkdir(os.path.join(output_dir, 'Combine', fitFolderName))
+        if convert_boolean_string(self.is_postfit):
+            safe_mkdir(os.path.join(output_dir, 'Combine', fitFolderName, 'postFit'))
+            
+            mgg_dir = os.path.join(output_dir, 'Combine', fitFolderName, 'postFit')
+            os.chdir(os.path.join(mgg_dir))
+            
+            firstStep_path = os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', f'higgsCombineDataPostFitScanFit_{cat}.MultiDimFit.mH125.38.root')
+            
+            if self.variable == '':
+                reco_cats_with_bmw = ['best_resolution', 'medium_resolution', 'worst_resolution']
+            else:
+                reco_cats_with_bmw = [element for element in combineVariableDict[self.variable]['catsStrWithBMW'] if "_".join(cat.split("_")[2:]) in element]
+
+            arguments = [
+                "python3",
+                f"{os.path.join(os.environ['ANALYSIS_PATH'], 'Plots', 'makeSplusBModelPlot.py')}",
+                "--inputWSFile", firstStep_path,
+                "--loadSnapshot", f"{config['combine_mggToys']['loadSnapshot']}",
+                "--cats", f"{','.join(reco_cats_with_bmw)}",
+                "--doZeroes",
+                "--unblind",
+                "--translateCats", f"{os.path.join(os.environ['ANALYSIS_PATH'], 'Plots', 'cats.json')}",
+                "--doSumCategories",
+                "--doCatWeights",
+                "--saveWeights",
+                "--ext", f"_{cat}",
+                "--POI", f"{cat}"
+            ]
+            if config['combine_mggToys']['doBands']:
+                arguments.append("--doBands")
+                arguments.append("--doToyVeto")
+                arguments.append("--saveToyYields")
+            command = arguments
+            # print(command)
+            try:
+                result = subprocess.run(command, check=True, text=True, capture_output=True)
+                print("Script output:", result.stdout)
+                print("Script executed successfully.")
+            except subprocess.CalledProcessError as e:
+                print("Error executing script:", e.stderr)
+            
+        else: 
+            
+            safe_mkdir(os.path.join(output_dir, 'Combine', fitFolderName, 'preFit'))
+            # safe_mkdir(os.path.join(output_dir, 'Combine', fitFolderName, 'preFit', f'SplusBModels_{cat}'))
+            
+            mgg_dir = os.path.join(output_dir, 'Combine', fitFolderName, 'preFit')
+            os.chdir(os.path.join(mgg_dir))
+            
+            if self.variable == '':
+                datacard_path = os.path.join(output_dir, 'Combine', f'Datacard_{self.year}.root')
+            else:
+                datacard_path = os.path.join(output_dir, 'Combine', f'Datacard_{self.variable}_{self.year}.root')
+                
+            if self.variable == '':
+                reco_cats_with_bmw = ['best_resolution', 'medium_resolution', 'worst_resolution']
+            else:
+                reco_cats_with_bmw = [element for element in combineVariableDict[self.variable]['catsStrWithBMW'] if "_".join(cat.split("_")[2:]) in element]
+                
+            arguments = [
+                "python3",
+                f"{os.path.join(os.environ['ANALYSIS_PATH'], 'Plots', 'makeSplusBModelPlot.py')}",
+                "--inputWSFile", datacard_path,
+                "--cats", f"{','.join(reco_cats_with_bmw)}",
+                "--doZeroes",
+                "--blindingRegion", "125,125",
+                "--translateCats", f"{os.path.join(os.environ['ANALYSIS_PATH'], 'Plots', 'cats.json')}",
+                "--doSumCategories",
+                "--doCatWeights",
+                "--saveWeights",
+                "--ext", f"_{cat}",
+                "--POI", f"{cat}"
+            ]
+            if config['combine_mggToys']['doBands']:
+                arguments.append("--doBands")
+                arguments.append("--doToyVeto")
+                arguments.append("--saveToyYields")
+            command = arguments
+            # print(command)
+            try:
+                result = subprocess.run(command, check=True, text=True, capture_output=True)
+                print("Script output:", result.stdout)
+                print("Script executed successfully.")
+            except subprocess.CalledProcessError as e:
+                print("Error executing script:", e.stderr)
+
+        
+            
+        os.chdir(main_dir)

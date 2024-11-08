@@ -173,7 +173,7 @@ combine_fit:
   cminApproxPreFitTolerance: 0.01
   rMin: 0.7
   rMax: 1.6
-  execution: 'htcondor'
+  execution: 'local'
 
 combine_impacts:
   exclude: "" # Nuisances that should be excluded from the impact computation
@@ -185,4 +185,10 @@ combine_impacts:
   execution: 'htcondor'
 
 combine_hesse:
+  execution: 'htcondor'
+
+combine_mggToys:
+  nToys: 1000 # Number of toys = nToys * 10
+  loadSnapshot: 'MultiDimFit'
+  doBands: True
   execution: 'htcondor'

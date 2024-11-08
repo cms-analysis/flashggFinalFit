@@ -34,16 +34,18 @@ lumiMap = {
     '2022': 34.70
 }
 
-def CreateVariableParameters(gen_variable, reco_variable, bins, year):
+def CreateVariableParameters(gen_variable, reco_variable, bins, year, BMW):
     paramStr = [f"r_{gen_variable}_{bin}=1" for bin in bins]
     paramStrNoOne = [f"r_{gen_variable}_{bin}" for bin in bins]
     catsStr = [f"RECO_{reco_variable}_{bin}" for bin in bins]
-    pdfIndeces = [f"pdfindex_RECO_{reco_variable}_{bin}_cat{i}_{year}_{sqrts__}" for bin in bins for i in range(3)]
+    catsStrWithBMW = [f"RECO_{reco_variable}_{bin}_{bmw}" for bin in bins for bmw in BMW]
+    pdfIndeces = [f"pdfindex_RECO_{reco_variable}_{bin}_{bmw}_{year}_{sqrts__}" for bin in bins for bmw in BMW]
     
     VariableDict = {
         "paramStr": paramStr,
         "paramStrNoOne": paramStrNoOne,
         "catsStr": catsStr,
+        "catsStrWithBMW": catsStrWithBMW,
         "pdfIndeces": pdfIndeces,
     }
     
@@ -167,9 +169,12 @@ differentialProcTable_ = {
     ]
 }
 
+#BMW == Best Medium Worst
+BMW = ['cat0', 'cat1', 'cat2']
+
 combineVariableDict = {
-    "PTH": CreateVariableParameters(gen_variable="PTH", reco_variable="PTH", bins=["0p0_15p0","15p0_30p0","30p0_45p0","45p0_80p0","80p0_120p0","120p0_200p0","200p0_350p0","350p0_10000p0"], year="2022"),
-    "rapidity": CreateVariableParameters(gen_variable="YH", reco_variable="rapidity", bins=["0p0_0p15", "0p15_0p3", "0p3_0p6", "0p6_0p9", "0p9_2p5"], year="2022"),
-    "Njets2p5": CreateVariableParameters(gen_variable="NJ", reco_variable="Njets2p5", bins=["0p0_1p0", "1p0_2p0", "2p0_3p0", "3p0_100p0"], year="2022"),
-    "PTJ0": CreateVariableParameters(gen_variable="PTJ0", reco_variable="first_jet_pt", bins=["0p0_30p0", "30p0_75p0", "75p0_120p0", "120p0_200p0", "200p0_10000p0"], year="2022")
+    "PTH": CreateVariableParameters(gen_variable="PTH", reco_variable="PTH", bins=["0p0_15p0","15p0_30p0","30p0_45p0","45p0_80p0","80p0_120p0","120p0_200p0","200p0_350p0","350p0_10000p0"], year="2022", BMW=BMW),
+    "rapidity": CreateVariableParameters(gen_variable="YH", reco_variable="rapidity", bins=["0p0_0p15", "0p15_0p3", "0p3_0p6", "0p6_0p9", "0p9_2p5"], year="2022", BMW=BMW),
+    "Njets2p5": CreateVariableParameters(gen_variable="NJ", reco_variable="Njets2p5", bins=["0p0_1p0", "1p0_2p0", "2p0_3p0", "3p0_100p0"], year="2022", BMW=BMW),
+    "PTJ0": CreateVariableParameters(gen_variable="PTJ0", reco_variable="first_jet_pt", bins=["0p0_30p0", "30p0_75p0", "75p0_120p0", "120p0_200p0", "200p0_10000p0"], year="2022", BMW=BMW)
 }
