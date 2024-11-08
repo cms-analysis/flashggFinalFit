@@ -3423,7 +3423,7 @@ class MggToyGeneration(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Task): 
                 "--bypassFrequentistFit",
                 "-t", "1",
                 "-s", "-1",
-                "-n", f"_{toy}_gen_step"
+                "-n", f"_{toy}_gen_step",
                 "--setParameters", f"{poi_bf}",
                 "--snapshotName", f"{config['combine_mggToys']['loadSnapshot']}"
             ]
@@ -3436,18 +3436,24 @@ class MggToyGeneration(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Task): 
             except subprocess.CalledProcessError as e:
                 print("Error executing script:", e.stderr)
                 
-            arguments = [
-                "mv",
-                f"higgsCombine_{toy}_gen_step*.root", f"gen_{toy}.root"
-            ]
-            command = arguments
-            # print(command)
-            try:
-                result = subprocess.run(command, check=True, text=True, capture_output=True)
-                print("Script output:", result.stdout)
-                print("Script executed successfully.")
-            except subprocess.CalledProcessError as e:
-                print("Error executing script:", e.stderr)
+            # Define the source pattern and destination path
+            source_pattern = os.path.join(output_dir, 'Combine', fitFolderName, 'postFit', f'SplusBModels_{cat}', 'toys', f'higgsCombine_{toy}_gen_step*.root')
+            destination = os.path.join(output_dir, 'Combine', fitFolderName, 'postFit', f'SplusBModels_{cat}', 'toys', f'gen_{toy}.root')
+
+            # Use glob to find files matching the source pattern
+            source_files = glob.glob(source_pattern)
+
+            if not source_files:
+                print("No files found matching the pattern.")
+            else:
+                # Move each matched file to the destination
+                for source_file in source_files:
+                    try:
+                        print(f"Moving {source_file} to {destination}")
+                        shutil.move(source_file, destination)
+                        print("File moved successfully.")
+                    except Exception as e:
+                        print(f"Error moving file {source_file}: {e}")
 
             arguments = [
                 "combine",
@@ -3478,18 +3484,24 @@ class MggToyGeneration(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Task): 
             except subprocess.CalledProcessError as e:
                 print("Error executing script:", e.stderr)    
                 
-            arguments = [ 
-                "mv",
-                f"higgsCombine_{toy}_fit_step*.root", f"fit_{toy}.root"
-            ]
-            command = arguments
-            # print(command)
-            try:
-                result = subprocess.run(command, check=True, text=True, capture_output=True)
-                print("Script output:", result.stdout)
-                print("Script executed successfully.")
-            except subprocess.CalledProcessError as e:
-                print("Error executing script:", e.stderr)
+            # Define the source pattern and destination path
+            source_pattern = os.path.join(output_dir, 'Combine', fitFolderName, 'postFit', f'SplusBModels_{cat}', 'toys', f'higgsCombine_{toy}_fit_step*.root')
+            destination = os.path.join(output_dir, 'Combine', fitFolderName, 'postFit', f'SplusBModels_{cat}', 'toys', f'fit_{toy}.root')
+
+            # Use glob to find files matching the source pattern
+            source_files = glob.glob(source_pattern)
+
+            if not source_files:
+                print("No files found matching the pattern.")
+            else:
+                # Move each matched file to the destination
+                for source_file in source_files:
+                    try:
+                        print(f"Moving {source_file} to {destination}")
+                        shutil.move(source_file, destination)
+                        print("File moved successfully.")
+                    except Exception as e:
+                        print(f"Error moving file {source_file}: {e}")
 
             arguments = [
                 "combine",
@@ -3513,21 +3525,38 @@ class MggToyGeneration(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Task): 
             except subprocess.CalledProcessError as e:
                 print("Error executing script:", e.stderr)
                 
-            arguments = [
-                "mv",
-                f"higgsCombine_{toy}_throw_step*.root", f"toy_{toy}.root",
-                ";",
-                "rm", 
-                f"gen_{toy}.root", f"fit_{toy}.root"
-            ]
-            command = arguments
-            # print(command)
-            try:
-                result = subprocess.run(command, check=True, text=True, capture_output=True)
-                print("Script output:", result.stdout)
-                print("Script executed successfully.")
-            except subprocess.CalledProcessError as e:
-                print("Error executing script:", e.stderr)
+            # Define the source pattern and destination path
+            source_pattern = os.path.join(output_dir, 'Combine', fitFolderName, 'postFit', f'SplusBModels_{cat}', 'toys', f'higgsCombine_{toy}_throw_step*.root')
+            destination = os.path.join(output_dir, 'Combine', fitFolderName, 'postFit', f'SplusBModels_{cat}', 'toys', f'toy_{toy}.root')
+
+            # Use glob to find files matching the source pattern
+            source_files = glob.glob(source_pattern)
+
+            if not source_files:
+                print("No files found matching the pattern.")
+            else:
+                # Move each matched file to the destination
+                for source_file in source_files:
+                    try:
+                        print(f"Moving {source_file} to {destination}")
+                        shutil.move(source_file, destination)
+                        print("File moved successfully.")
+                    except Exception as e:
+                        print(f"Error moving file {source_file}: {e}")
+                        
+            # Define the files to remove
+            files_to_remove = [os.path.join(output_dir, 'Combine', fitFolderName, 'postFit', f'SplusBModels_{cat}', 'toys', f'gen_{toy}.root'), os.path.join(output_dir, 'Combine', fitFolderName, 'postFit', f'SplusBModels_{cat}', 'toys', f'fit_{toy}.root')]
+
+            # Remove each specified file
+            for file_path in files_to_remove:
+                try:
+                    if os.path.exists(file_path):
+                        os.remove(file_path)
+                        print(f"{file_path} removed successfully.")
+                    else:
+                        print(f"{file_path} does not exist.")
+                except Exception as e:
+                    print(f"Error removing file {file_path}: {e}")
 
         else:
             safe_mkdir(os.path.join(output_dir, 'Combine', fitFolderName, 'preFit'))
@@ -3538,7 +3567,7 @@ class MggToyGeneration(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Task): 
             if self.variable == '':
                 params = "r=1"
             else:
-                params = f"{combineVariableDict[f'{self.variable}']['paramsStr']}"
+                params = f"{combineVariableDict[f'{self.variable}']['paramStr']}"
 
             arguments = [
                 "combine",
@@ -3550,7 +3579,7 @@ class MggToyGeneration(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Task): 
                 "--bypassFrequentistFit",
                 "-t", "-1",
                 "-s", "-1",
-                "-n", f"_{toy}_gen_step"
+                "-n", f"_{toy}_gen_step",
                 "--setParameters", f"{params}",
             ]
             command = arguments
@@ -3562,18 +3591,24 @@ class MggToyGeneration(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Task): 
             except subprocess.CalledProcessError as e:
                 print("Error executing script:", e.stderr)
                 
-            arguments = [
-                "mv",
-                f"higgsCombine_{toy}_gen_step*.root", f"gen_{toy}.root"
-            ]
-            command = arguments
-            # print(command)
-            try:
-                result = subprocess.run(command, check=True, text=True, capture_output=True)
-                print("Script output:", result.stdout)
-                print("Script executed successfully.")
-            except subprocess.CalledProcessError as e:
-                print("Error executing script:", e.stderr)
+            # Define the source pattern and destination path
+            source_pattern = os.path.join(output_dir, 'Combine', fitFolderName, 'preFit', f'SplusBModels_{cat}', 'toys', f'higgsCombine_{toy}_gen_step*.root')
+            destination = os.path.join(output_dir, 'Combine', fitFolderName, 'preFit', f'SplusBModels_{cat}', 'toys', f'gen_{toy}.root')
+
+            # Use glob to find files matching the source pattern
+            source_files = glob.glob(source_pattern)
+
+            if not source_files:
+                print("No files found matching the pattern.")
+            else:
+                # Move each matched file to the destination
+                for source_file in source_files:
+                    try:
+                        print(f"Moving {source_file} to {destination}")
+                        shutil.move(source_file, destination)
+                        print("File moved successfully.")
+                    except Exception as e:
+                        print(f"Error moving file {source_file}: {e}")
 
             arguments = [
                 "combine",
@@ -3608,18 +3643,24 @@ class MggToyGeneration(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Task): 
             except subprocess.CalledProcessError as e:
                 print("Error executing script:", e.stderr)    
                 
-            arguments = [ 
-                "mv",
-                f"higgsCombine_{toy}_fit_step*.root", f"fit_{toy}.root"
-            ]
-            command = arguments
-            # print(command)
-            try:
-                result = subprocess.run(command, check=True, text=True, capture_output=True)
-                print("Script output:", result.stdout)
-                print("Script executed successfully.")
-            except subprocess.CalledProcessError as e:
-                print("Error executing script:", e.stderr)
+            # Define the source pattern and destination path
+            source_pattern = os.path.join(output_dir, 'Combine', fitFolderName, 'preFit', f'SplusBModels_{cat}', 'toys', f'higgsCombine_{toy}_fit_step*.root')
+            destination = os.path.join(output_dir, 'Combine', fitFolderName, 'preFit', f'SplusBModels_{cat}', 'toys', f'fit_{toy}.root')
+
+            # Use glob to find files matching the source pattern
+            source_files = glob.glob(source_pattern)
+
+            if not source_files:
+                print("No files found matching the pattern.")
+            else:
+                # Move each matched file to the destination
+                for source_file in source_files:
+                    try:
+                        print(f"Moving {source_file} to {destination}")
+                        shutil.move(source_file, destination)
+                        print("File moved successfully.")
+                    except Exception as e:
+                        print(f"Error moving file {source_file}: {e}")
                 
             arguments = [
                 "combine",
@@ -3647,21 +3688,38 @@ class MggToyGeneration(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Task): 
             except subprocess.CalledProcessError as e:
                 print("Error executing script:", e.stderr)
                 
-            arguments = [
-                "mv",
-                f"higgsCombine_{toy}_throw_step*.root", f"toy_{toy}.root",
-                ";",
-                "rm", 
-                f"gen_{toy}.root", f"fit_{toy}.root"
-            ]
-            command = arguments
-            # print(command)
-            try:
-                result = subprocess.run(command, check=True, text=True, capture_output=True)
-                print("Script output:", result.stdout)
-                print("Script executed successfully.")
-            except subprocess.CalledProcessError as e:
-                print("Error executing script:", e.stderr)
+            # Define the source pattern and destination path
+            source_pattern = os.path.join(output_dir, 'Combine', fitFolderName, 'preFit', f'SplusBModels_{cat}', 'toys', f'higgsCombine_{toy}_throw_step*.root')
+            destination = os.path.join(output_dir, 'Combine', fitFolderName, 'preFit', f'SplusBModels_{cat}', 'toys', f'toy_{toy}.root')
+
+            # Use glob to find files matching the source pattern
+            source_files = glob.glob(source_pattern)
+
+            if not source_files:
+                print("No files found matching the pattern.")
+            else:
+                # Move each matched file to the destination
+                for source_file in source_files:
+                    try:
+                        print(f"Moving {source_file} to {destination}")
+                        shutil.move(source_file, destination)
+                        print("File moved successfully.")
+                    except Exception as e:
+                        print(f"Error moving file {source_file}: {e}")
+                        
+            # Define the files to remove
+            files_to_remove = [os.path.join(output_dir, 'Combine', fitFolderName, 'preFit', f'SplusBModels_{cat}', 'toys', f'gen_{toy}.root'), os.path.join(output_dir, 'Combine', fitFolderName, 'preFit', f'SplusBModels_{cat}', 'toys', f'fit_{toy}.root')]
+
+            # Remove each specified file
+            for file_path in files_to_remove:
+                try:
+                    if os.path.exists(file_path):
+                        os.remove(file_path)
+                        print(f"{file_path} removed successfully.")
+                    else:
+                        print(f"{file_path} does not exist.")
+                except Exception as e:
+                    print(f"Error removing file {file_path}: {e}")
         
         os.chdir(cwd)
         
