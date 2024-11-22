@@ -12,6 +12,10 @@ import glob
 import yaml
 import errno
 import shutil
+import warnings
+# Suppress // UserWarning: The value of the smallest subnormal for <class 'numpy.float64'> type is zero // warning.
+warnings.filterwarnings("ignore", category=UserWarning, module="numpy.core.getlimits")
+from scipy.stats import chi2
 
 import pandas
 import numpy as np
@@ -2305,11 +2309,11 @@ class CreateUnblindedFit(law.Task): #(law.Task): #(Task, HTCondorWorkflow, law.L
         tasks = []
         if self.variable == '':
             # cat = "r"
-            tasks += [UnblindedFitCategorySyst(output_dir=output_dir, variable=self.variable, year=self.year, nPoints=config["combine_fit"]["asimov_numPoints"], version=f"inclusive_v1", workflow=config["combine_fit"]["execution"]), UnblindedFitCategoryStat(output_dir=output_dir, variable=self.variable, year=self.year, nPoints=config["combine_fit"]["asimov_numPoints"], version=f"inclusive_v1", workflow=config["combine_fit"]["execution"])]
+            tasks += [UnblindedFitCategorySyst(output_dir=output_dir, variable=self.variable, year=self.year, nPoints=config["combine_fit"]["unblindedFit_numPoints"], version=f"inclusive_v1", workflow=config["combine_fit"]["execution"]), UnblindedFitCategoryStat(output_dir=output_dir, variable=self.variable, year=self.year, nPoints=config["combine_fit"]["unblindedFit_numPoints"], version=f"inclusive_v1", workflow=config["combine_fit"]["execution"])]
         else:
             # version_index = 1
             # for cat in combineVariableDict[f'{self.variable}']['paramStrNoOne']:
-            tasks += [UnblindedFitCategorySyst(output_dir=output_dir, variable=self.variable, year=self.year, nPoints=config["combine_fit"]["asimov_numPoints"], version=f"{self.variable}", workflow=config["combine_fit"]["execution"]), UnblindedFitCategoryStat(output_dir=output_dir, variable=self.variable, year=self.year, nPoints=config["combine_fit"]["asimov_numPoints"], version=f"{self.variable}", workflow=config["combine_fit"]["execution"])]
+            tasks += [UnblindedFitCategorySyst(output_dir=output_dir, variable=self.variable, year=self.year, nPoints=config["combine_fit"]["unblindedFit_numPoints"], version=f"{self.variable}", workflow=config["combine_fit"]["execution"]), UnblindedFitCategoryStat(output_dir=output_dir, variable=self.variable, year=self.year, nPoints=config["combine_fit"]["unblindedFit_numPoints"], version=f"{self.variable}", workflow=config["combine_fit"]["execution"])]
             # version_index += 1
         
         return tasks
@@ -2899,19 +2903,6 @@ class UnblindedImpactSecondStep(Task, HTCondorWorkflow, law.LocalWorkflow): #(la
                     res.append(var.GetName())
                 var = it.Next()
             return res
-        
-        # def list_from_workspace(file, workspace, set):
-        #     """Create a list of strings from a RooWorkspace set"""
-        #     res = []
-        #     wsFile = ROOT.TFile(file)
-        #     ws = wsFile.Get(workspace)
-        #     argSet = ws.set(set)
-        #     it = argSet.createIterator()
-        #     var = it.Next()
-        #     while var:
-        #         res.append(var.GetName())
-        #         var = it.Next()
-        #     return res
 
         if self.variable == '':
             poiList = ["r"]
@@ -2993,6 +2984,25 @@ class UnblindedImpactSecondStep(Task, HTCondorWorkflow, law.LocalWorkflow): #(la
         os.chdir(os.path.join(output_dir, 'Combine', fitFolderName, 'impact', 'unblinded'))
 
         if self.variable == '':
+            
+            initial_fit = os.path.join(output_dir, 'Combine', fitFolderName, 'impact', 'unblinded', f'higgsCombine_initialFit_Test.MultiDimFit.mH125.38.root')
+            
+            f = ROOT.TFile(initial_fit)
+            tree = f.Get("limit")
+            
+            if not tree:
+                print("Error: Tree 'limit' not found in the file.")
+                exit(1)
+            # Access the branch 'r_YH_0p9_2p5' and get its first value
+            if hasattr(tree, 'r'):
+                tree.GetEntry(0)  # Load the first entry
+                poi_bf_value = getattr(tree, 'r')  # Access the branch value
+                poi_bf_string = f'r={poi_bf_value}'
+                print(f"First value of branch 'r': {first_value}")
+            else:
+                print("Error: Branch 'r' not found in the tree.")
+                exit(1)
+
             arguments = [
                 "combine",
                 "-M", "MultiDimFit",
@@ -3002,6 +3012,7 @@ class UnblindedImpactSecondStep(Task, HTCondorWorkflow, law.LocalWorkflow): #(la
                 "--freezeParameters", "MH",
                 "-m", "125.38",
                 "-P", f"{current_param}",
+                "--setParameters", poi_bf_string,
                 "--floatOtherPOIs", "1",
                 "--saveInactivePOI", "1",
                 "--robustFit", "1",
@@ -3014,8 +3025,7 @@ class UnblindedImpactSecondStep(Task, HTCondorWorkflow, law.LocalWorkflow): #(la
                 "--cminApproxPreFitTolerance", f"{config['combine_impacts']['cminApproxPreFitTolerance']}",
                 "--stepSize", f"{config['combine_impacts']['stepSize']}",
                 "--setCrossingTolerance", f"{config['combine_impacts']['setCrossingTolerance']}",
-                "--robustHesse", "1",
-                "--setParameters", f"{config['combine_impacts']['setParameters']}",
+                "--robustHesse", "1"
             ]
             command = arguments
             # print(command)
@@ -3026,12 +3036,38 @@ class UnblindedImpactSecondStep(Task, HTCondorWorkflow, law.LocalWorkflow): #(la
             except subprocess.CalledProcessError as e:
                 print("Error executing script:", e.stderr)
         else:
+
+            initial_fit = os.path.join(output_dir, 'Combine', fitFolderName, 'impact', 'unblinded', f'higgsCombine_initialFit_Test.MultiDimFit.mH125.38.root')
+
+            poi_bf = []
+            
+            f = ROOT.TFile(initial_fit)
+            tree = f.Get("limit")
+            
+            if not tree:
+                print("Error: Tree 'limit' not found in the file.")
+                exit(1)
+
+            for poi in combineVariableDict[f'{self.variable}']['paramStrNoOne']:
+                # Access the branch 'r_YH_0p9_2p5' and get its first value
+                if hasattr(tree, poi):
+                    tree.GetEntry(0)  # Load the first entry
+                    first_value = getattr(tree, poi)  # Access the branch value
+                    poi_bf.append(f'{poi}={first_value}')
+                    print(f"First value of branch '{poi}': {first_value}")
+                else:
+                    print(f"Error: Branch '{poi}' not found in the tree.")
+                    exit(1)
+
+            poi_bf_string = ",".join(poi_bf)
+        
             arguments = [
                 "combine",
                 "-M", "MultiDimFit",
                 "-d", datacard_path,
                 "--algo", "impact",
                 "--redefineSignalPOIs", f"""{",".join(combineVariableDict[f'{self.variable}']['paramStrNoOne'])}""",
+                "--setParameters", poi_bf_string,
                 "--freezeParameters", "MH",
                 "-m", "125.38",
                 "-P", f"{current_param}",
@@ -3254,8 +3290,8 @@ class UnblindedImpactThirdStep(law.Task): #(law.Task): #(Task, HTCondorWorkflow,
             for cat in combineVariableDict[f'{self.variable}']['paramStrNoOne']:
                 arguments = [
                     "plotImpacts.py",
-                    "-i", f"{os.path.join(output_dir, 'Combine', fitFolderName, 'impact', 'unblinded', 'impacts', 'impacts_unblinded.json')}",
-                    "-o", f"impacts/impacts_corrected_dropBkgModelParams_{cat}",
+                    "-i", f"{os.path.join(output_dir, 'Combine', fitFolderName, 'impact', 'unblinded', 'impacts', 'impacts_corrected_dropBkgModelParams.json')}",
+                    "-o", f"impacts/impacts_unblinded_{cat}",
                     "--POI", f"{cat}",
                     "--translate", f"{os.path.join(os.environ['ANALYSIS_PATH'], 'Combine', 'pois.json')}",
                 ]
@@ -3295,11 +3331,8 @@ class MggToyGeneration(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Task): 
             output_dir = config['outputFolder']
         else:
             output_dir = self.output_dir
-        
-        if convert_boolean_string(self.is_postfit):
-            tasks = [RunText2Workspace(output_dir=output_dir, variable=self.variable, year=self.year)]  
-        else:
-            tasks = [RunText2Workspace(output_dir=output_dir, variable=self.variable, year=self.year)]
+
+        tasks = [RunText2Workspace(output_dir=output_dir, variable=self.variable, year=self.year)]
         
         return tasks
 
@@ -3331,7 +3364,7 @@ class MggToyGeneration(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Task): 
 
     def output(self):        
         toy, cat = self.branch_data
-        
+                
         if self.variable == '':
             configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
         else:
@@ -3351,16 +3384,19 @@ class MggToyGeneration(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Task): 
         else:
             fitFolderName = f'runFits_{self.variable}'
             
-        # output = [os.path.join(output_dir, 'Combine', fitFolderName)]
         if convert_boolean_string(self.is_postfit):
             output = [os.path.join(output_dir, 'Combine', fitFolderName, 'postFit')]
             output += [os.path.join(output_dir, 'Combine', fitFolderName, 'postFit', f'SplusBModels_{cat}')]
             output += [os.path.join(output_dir, 'Combine', fitFolderName, 'postFit', f'SplusBModels_{cat}', 'toys')]
+            output += [os.path.join(output_dir, 'Combine', fitFolderName, 'postFit', f'SplusBModels_{cat}', 'toys', 'filechecker')]
+            output += [os.path.join(output_dir, 'Combine', fitFolderName, 'postFit', f'SplusBModels_{cat}', 'toys', 'filechecker', f'toy_{toy}_ok.txt')]
             output += [os.path.join(output_dir, 'Combine', fitFolderName, 'postFit', f'SplusBModels_{cat}', 'toys', f'toy_{toy}.root')]
         else:
             output = [os.path.join(output_dir, 'Combine', fitFolderName, 'preFit')]
             output += [os.path.join(output_dir, 'Combine', fitFolderName, 'preFit', f'SplusBModels_{cat}')]
             output += [os.path.join(output_dir, 'Combine', fitFolderName, 'preFit', f'SplusBModels_{cat}', 'toys')]
+            output += [os.path.join(output_dir, 'Combine', fitFolderName, 'preFit', f'SplusBModels_{cat}', 'toys', 'filechecker')]
+            output += [os.path.join(output_dir, 'Combine', fitFolderName, 'preFit', f'SplusBModels_{cat}', 'toys', 'filechecker', f'toy_{toy}_ok.txt')]
             output += [os.path.join(output_dir, 'Combine', fitFolderName, 'preFit', f'SplusBModels_{cat}', 'toys', f'toy_{toy}.root')]
         
         outputFileTargets = []
@@ -3404,6 +3440,7 @@ class MggToyGeneration(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Task): 
             safe_mkdir(os.path.join(output_dir, 'Combine', fitFolderName, 'postFit'))
             safe_mkdir(os.path.join(output_dir, 'Combine', fitFolderName, 'postFit', f'SplusBModels_{cat}'))
             safe_mkdir(os.path.join(output_dir, 'Combine', fitFolderName, 'postFit', f'SplusBModels_{cat}', 'toys'))
+            safe_mkdir(os.path.join(output_dir, 'Combine', fitFolderName, 'postFit', f'SplusBModels_{cat}', 'toys', 'filechecker'))
             os.chdir(os.path.join(output_dir, 'Combine', fitFolderName, 'postFit', f'SplusBModels_{cat}', 'toys'))
         
             data_syst_fit = os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', f'higgsCombineDataPostFitScanFit_{cat}.MultiDimFit.mH125.38.root')
@@ -3417,18 +3454,18 @@ class MggToyGeneration(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Task): 
                 "combine",
                 data_syst_fit,
                 "-M", "GenerateOnly",
-                "-m", "125.38",
+                "-m", "125.380",
                 "--saveWorkspace",
                 "--toysFrequentist",
                 "--bypassFrequentistFit",
                 "-t", "1",
                 "-s", "-1",
                 "-n", f"_{toy}_gen_step",
-                "--setParameters", f"{poi_bf}",
+                "--setParameters", f"{cat}={poi_bf}",
                 "--snapshotName", f"{config['combine_mggToys']['loadSnapshot']}"
             ]
             command = arguments
-            # print(command)
+            print(command)
             try:
                 result = subprocess.run(command, check=True, text=True, capture_output=True)
                 print("Script output:", result.stdout)
@@ -3458,7 +3495,7 @@ class MggToyGeneration(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Task): 
             arguments = [
                 "combine",
                 f"gen_{toy}.root",
-                "-m", "125.38",
+                "-m", "125.380",
                 "-M", f"{config['combine_mggToys']['loadSnapshot']}",
                 "-P", f"{cat}",
                 "--floatOtherPOIs=1",
@@ -3476,7 +3513,7 @@ class MggToyGeneration(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Task): 
                 "--X-rtd", "MINIMIZER_multiMin_maskChannels=2"
             ]
             command = arguments
-            # print(command)
+            print(command)
             try:
                 result = subprocess.run(command, check=True, text=True, capture_output=True)
                 print("Script output:", result.stdout)
@@ -3506,18 +3543,23 @@ class MggToyGeneration(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Task): 
             arguments = [
                 "combine",
                 f"fit_{toy}.root",
-                "-m", "125.38",
+                "-m", "125.380",
                 "--snapshotName", f"{config['combine_mggToys']['loadSnapshot']}",
                 "-M", "GenerateOnly",
                 "--saveToys",
                 "--toysFrequentist",
                 "--bypassFrequentistFit",
                 "-t", "-1",
-                "--setParameters", f"{cat}=0",
                 "-n", f"_{toy}_throw_step"
             ]
+            if self.variable == '':
+                arguments.append("--setParameters")
+                arguments.append("r=0")
+            else:
+                arguments.append("--setParameters")
+                arguments.append(f"{cat}=0")
             command = arguments
-            # print(command)
+            print(command)
             try:
                 result = subprocess.run(command, check=True, text=True, capture_output=True)
                 print("Script output:", result.stdout)
@@ -3557,11 +3599,23 @@ class MggToyGeneration(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Task): 
                         print(f"{file_path} does not exist.")
                 except Exception as e:
                     print(f"Error removing file {file_path}: {e}")
+            
+            # Check if toy is > 1000 bytes (== file empty)
+            try:
+                file_size = os.path.getsize(os.path.join(output_dir, 'Combine', fitFolderName, 'postFit', f'SplusBModels_{cat}', 'toys', f'toy_{toy}.root'))  # Get the file size in bytes
+                if file_size > 1000:
+                    with open(os.path.join(output_dir, 'Combine', fitFolderName, 'postFit', f'SplusBModels_{cat}', 'toys', 'filechecker', f'toy_{toy}_ok.txt'), 'w') as f:
+                        pass
+            except OSError:
+                # Handle the case where the file does not exist or is inaccessible
+                print(f"Error creating file. Probably I/O error.")
+                return False
 
         else:
             safe_mkdir(os.path.join(output_dir, 'Combine', fitFolderName, 'preFit'))
             safe_mkdir(os.path.join(output_dir, 'Combine', fitFolderName, 'preFit', f'SplusBModels_{cat}'))
             safe_mkdir(os.path.join(output_dir, 'Combine', fitFolderName, 'preFit', f'SplusBModels_{cat}', 'toys'))
+            safe_mkdir(os.path.join(output_dir, 'Combine', fitFolderName, 'preFit', f'SplusBModels_{cat}', 'toys', 'filechecker'))
             os.chdir(os.path.join(output_dir, 'Combine', fitFolderName, 'preFit', f'SplusBModels_{cat}', 'toys'))
         
             if self.variable == '':
@@ -3573,17 +3627,21 @@ class MggToyGeneration(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Task): 
                 "combine",
                 "-M", "GenerateOnly",
                 "-d", datacard_path,
-                "-m", "125.38",
+                "-m", "125.380",
                 "--saveWorkspace",
                 "--toysFrequentist",
                 "--bypassFrequentistFit",
-                "-t", "-1",
+                "-t", "1",
                 "-s", "-1",
                 "-n", f"_{toy}_gen_step",
-                "--setParameters", f"{params}",
             ]
+            arguments.append("--setParameters")
+            if self.variable == '':
+                arguments.append('r=1')
+            else:
+                arguments.append(f"""{",".join(combineVariableDict[f'{self.variable}']['paramStr'])}""")
             command = arguments
-            # print(command)
+            print(command)
             try:
                 result = subprocess.run(command, check=True, text=True, capture_output=True)
                 print("Script output:", result.stdout)
@@ -3613,7 +3671,7 @@ class MggToyGeneration(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Task): 
             arguments = [
                 "combine",
                 f"gen_{toy}.root",
-                "-m", "125.38",
+                "-m", "125.380",
                 "-M", f"{config['combine_mggToys']['loadSnapshot']}",
                 "-P", f"{cat}",
                 "--floatOtherPOIs=1",
@@ -3635,7 +3693,7 @@ class MggToyGeneration(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Task): 
             else:
                 arguments.append(f"""{",".join(combineVariableDict[f'{self.variable}']['paramStr'])}""")
             command = arguments
-            # print(command)
+            print(command)
             try:
                 result = subprocess.run(command, check=True, text=True, capture_output=True)
                 print("Script output:", result.stdout)
@@ -3671,7 +3729,7 @@ class MggToyGeneration(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Task): 
                 "--saveToys",
                 "--toysFrequentist",
                 "--bypassFrequentistFit",
-                "-t", "1",
+                "-t", "-1",
                 "-n", f"_{toy}_throw_step"
             ]
             arguments.append("--setParameters")
@@ -3680,7 +3738,7 @@ class MggToyGeneration(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Task): 
             else:
                 arguments.append(f"""{(",".join(combineVariableDict[f'{self.variable}']['paramStr'])).replace("=1", "=0")}""")
             command = arguments
-            # print(command)
+            print(command)
             try:
                 result = subprocess.run(command, check=True, text=True, capture_output=True)
                 print("Script output:", result.stdout)
@@ -3720,6 +3778,17 @@ class MggToyGeneration(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Task): 
                         print(f"{file_path} does not exist.")
                 except Exception as e:
                     print(f"Error removing file {file_path}: {e}")
+            
+            # Check if toy is > 1000 bytes (== file empty)
+            try:
+                file_size = os.path.getsize(os.path.join(output_dir, 'Combine', fitFolderName, 'preFit', f'SplusBModels_{cat}', 'toys', f'toy_{toy}.root'))  # Get the file size in bytes
+                if file_size > 1000:
+                    with open(os.path.join(output_dir, 'Combine', fitFolderName, 'preFit', f'SplusBModels_{cat}', 'toys', 'filechecker', f'toy_{toy}_ok.txt'), 'w') as f:
+                        pass
+            except OSError:
+                # Handle the case where the file does not exist or is inaccessible
+                print(f"Error creating file. Probably I/O error.")
+                return False
         
         os.chdir(cwd)
         
@@ -3748,7 +3817,10 @@ class MggDistribution(law.LocalWorkflow): #(law.Task): #(Task, HTCondorWorkflow,
             output_dir = self.output_dir
         
         if config['combine_mggToys']['doBands']:
-            tasks = [MggToyGeneration(output_dir=output_dir, variable=self.variable, year=self.year, is_postfit=convert_boolean_string(self.is_postfit), version=f"{self.variable if self.variable != '' else 'r'}", workflow="htcondor")]
+            if convert_boolean_string(self.is_postfit):
+                tasks = [MggToyGeneration(output_dir=output_dir, variable=self.variable, year=self.year, is_postfit=convert_boolean_string(self.is_postfit), version=f"{self.variable if self.variable != '' else 'r'}_postfit", workflow="htcondor")]
+            else:
+                tasks = [MggToyGeneration(output_dir=output_dir, variable=self.variable, year=self.year, is_postfit=convert_boolean_string(self.is_postfit), version=f"{self.variable if self.variable != '' else 'r'}_prefit", workflow="htcondor")]
         else:
             if convert_boolean_string(self.is_postfit):
                 tasks = [CreateUnblindedFit(output_dir=output_dir, variable=self.variable, year=self.year)]
@@ -3788,10 +3860,10 @@ class MggDistribution(law.LocalWorkflow): #(law.Task): #(Task, HTCondorWorkflow,
         else:
             fitFolderName = f'runFits_{self.variable}'
             reco_cats_with_bmw = [element for element in combineVariableDict[self.variable]['catsStrWithBMW'] if "_".join(cat.split("_")[2:]) in element]
-
+            
+        
         output = []
         if convert_boolean_string(self.is_postfit):
-            output += [os.path.join(output_dir, 'Combine', fitFolderName, 'postFit')]
             output += [os.path.join(output_dir, 'Combine', fitFolderName, 'postFit', 'jsons')]
             output += [os.path.join(output_dir, 'Combine', fitFolderName, 'postFit', 'jsons', f'catsWeights_sospb_{cat}_CMS_hgg_mass.json')]
             
@@ -3803,7 +3875,6 @@ class MggDistribution(law.LocalWorkflow): #(law.Task): #(Task, HTCondorWorkflow,
             output += [os.path.join(output_dir, 'Combine', fitFolderName, 'postFit', f'SplusBModels_{cat}', f'_{cat}_wall_CMS_hgg_mass.pdf')]
             output += [os.path.join(output_dir, 'Combine', fitFolderName, 'postFit', f'SplusBModels_{cat}', f'_{cat}_wall_CMS_hgg_mass.png')]
         else:
-            output += [os.path.join(output_dir, 'Combine', fitFolderName, 'preFit')]
             output += [os.path.join(output_dir, 'Combine', fitFolderName, 'preFit', 'jsons')]
             output += [os.path.join(output_dir, 'Combine', fitFolderName, 'preFit', 'jsons', f'catsWeights_sospb_{cat}_CMS_hgg_mass.json')]
             
@@ -3854,11 +3925,11 @@ class MggDistribution(law.LocalWorkflow): #(law.Task): #(Task, HTCondorWorkflow,
             mgg_dir = os.path.join(output_dir, 'Combine', fitFolderName, 'postFit')
             os.chdir(os.path.join(mgg_dir))
             
-            firstStep_path = os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', f'higgsCombineDataPostFitScanFit_{cat}.MultiDimFit.mH125.38.root')
-            
             if self.variable == '':
+                firstStep_path = os.path.join(output_dir, 'Combine', f'Datacard_{self.year}.root')
                 reco_cats_with_bmw = ['best_resolution', 'medium_resolution', 'worst_resolution']
             else:
+                firstStep_path = os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', f'higgsCombineDataPostFitScanFit_{cat}.MultiDimFit.mH125.38.root')
                 reco_cats_with_bmw = [element for element in combineVariableDict[self.variable]['catsStrWithBMW'] if "_".join(cat.split("_")[2:]) in element]
 
             arguments = [
@@ -3881,13 +3952,38 @@ class MggDistribution(law.LocalWorkflow): #(law.Task): #(Task, HTCondorWorkflow,
                 arguments.append("--doToyVeto")
                 arguments.append("--saveToyYields")
             command = arguments
-            # print(command)
+            print(command)
             try:
                 result = subprocess.run(command, check=True, text=True, capture_output=True)
                 print("Script output:", result.stdout)
                 print("Script executed successfully.")
             except subprocess.CalledProcessError as e:
                 print("Error executing script:", e.stderr)
+            
+            # Change directory
+            os.chdir(f"./SplusBModels_{cat}")
+
+            # Extract parts from the parameter
+            parts = cat.split('_')
+            pattern = f"{parts[2]}_{parts[3]}"
+
+            # Define source and target directories
+            source_dir = "."
+            target_dir = "../Plots"
+
+            # Iterate over files in the source directory
+            for filename in os.listdir(source_dir):
+                # Check if the pattern is in the filename
+                if pattern in filename:
+                    # Construct full source and destination paths
+                    source_path = os.path.join(source_dir, filename)
+                    target_path = os.path.join(target_dir, filename)
+                    # Copy the file to the target directory
+                    shutil.copy(source_path, target_path)
+                    print(f"Copied {filename} to {target_dir}")
+
+            # Go back one directory
+            os.chdir("..")
             
         else: 
             
@@ -3926,7 +4022,7 @@ class MggDistribution(law.LocalWorkflow): #(law.Task): #(Task, HTCondorWorkflow,
                 arguments.append("--doToyVeto")
                 arguments.append("--saveToyYields")
             command = arguments
-            # print(command)
+            print(command)
             try:
                 result = subprocess.run(command, check=True, text=True, capture_output=True)
                 print("Script output:", result.stdout)
@@ -3934,6 +4030,176 @@ class MggDistribution(law.LocalWorkflow): #(law.Task): #(Task, HTCondorWorkflow,
             except subprocess.CalledProcessError as e:
                 print("Error executing script:", e.stderr)
 
-        
-            
         os.chdir(main_dir)
+        
+        
+class PValueCalculation(law.Task): #(law.Task): #(Task, HTCondorWorkflow, law.LocalWorkflow):
+    output_dir = law.Parameter(default = '', description="Path to the output directory")
+    variable = law.Parameter(default="", description="Variable to be used")
+    year = law.Parameter(default='2022', description="Year")
+    
+    # htcondor_job_kwargs_submit = {"spool": True}
+    
+    def requires(self):
+        
+        if self.variable == '':
+            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+        else:
+            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+        
+        #Load central config file
+        with open(configYamlPath, 'r') as file:
+            config = yaml.safe_load(file)
+        
+        if self.output_dir == '':
+            output_dir = config['outputFolder']
+        else:
+            output_dir = self.output_dir
+        
+        tasks = [CreateUnblindedFit(output_dir=output_dir, variable=self.variable, year=self.year)]
+        
+        return tasks
+
+    def create_branch_map(self):
+        # if self.variable == '':
+        #     cat_list = ["r"]
+        # else:
+        #     cat_list = combineVariableDict[f'{self.variable}']['paramStrNoOne']
+        # branch_map = {i: cat for i, cat in enumerate(cat_list)}
+        branch_map = {i: value for i, value in enumerate([0])}
+        return branch_map
+
+    def output(self):
+        
+        if self.variable == '':
+            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+        else:
+            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+        
+        #Load central config file
+        with open(configYamlPath, 'r') as file:
+            config = yaml.safe_load(file)
+        
+        if self.output_dir == '':
+            output_dir = config['outputFolder']
+        else:
+            output_dir = self.output_dir
+
+        if self.variable == '':
+            fitFolderName = f'runFits_mu_fiducial'
+            output = []
+        else:
+            fitFolderName = f'runFits_{self.variable}'
+            output = [os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', f'higgsCombine.pvalue.MultiDimFit.mH125.38.root')]
+            output += [os.path.join(output_dir, 'Combine', fitFolderName, f'pvalue.txt')]
+
+        outputFileTargets = []
+                
+        for _, current_output_path in enumerate(output):
+            outputFileTargets.append(law.LocalFileTarget(current_output_path))
+            
+        # print(outputFileTargets)
+
+        return outputFileTargets
+    
+    def run(self):
+       
+        if self.variable == '':
+            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            fitFolderName = f'runFits_mu_fiducial'
+
+        else:
+            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            fitFolderName = f'runFits_{self.variable}'
+
+        #Load central config file
+        with open(configYamlPath, 'r') as file:
+            config = yaml.safe_load(file)
+
+        if self.output_dir == '':
+            output_dir = config['outputFolder']
+        else:
+            output_dir = self.output_dir  
+            
+        cwd = os.getcwd()
+        os.chdir(os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit'))
+                    
+        # Define the file to check
+        pvalue_file = os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', f'higgsCombine.pvalue.MultiDimFit.mH125.38.root')
+
+        # Check if the file exists
+        if not os.path.isfile(pvalue_file):
+            print("The pvalue file does not exist in the current directory. Creating it...")
+            # Iterate over the parameters
+            command = [
+                "combine",
+                "-M", "MultiDimFit",
+                os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', f"higgsCombineDataPostFitScanFit_{combineVariableDict[f'{self.variable}']['paramStrNoOne'][0]}.MultiDimFit.mH125.38.root"),
+                "--algo", "fixed",
+                "--X-rtd", "MINIMIZER_freezeDisassociatedParams",
+                "--X-rtd", "MINIMIZER_multiMin_hideConstants",
+                "--X-rtd", "MINIMIZER_multiMin_maskConstraints",
+                "--X-rtd", "MINIMIZER_multiMin_maskChannels=2",
+                "--freezeParameters", "MH",
+                "--fixedPointPOIs", f"{','.join(combineVariableDict[f'{self.variable}']['paramStr'])},MH=125.38",
+                "-n", ".pvalue",
+                "-m", "125.38",
+                "--saveWorkspace"
+            ]
+            # print(command)
+            try:
+                result = subprocess.run(command, check=True, text=True, capture_output=True)
+                print("Script output:", result.stdout)
+                print("Script executed successfully.")
+            except subprocess.CalledProcessError as e:
+                print("Error executing script:", e.stderr)
+        else:
+            print("The pvalue file exists in the current directory. Skipping the creation.")
+            
+        # Define variables
+        file_path = os.path.realpath(pvalue_file)
+
+
+        # Count the number of elements in paramStrNoOne
+        n_bins = len(combineVariableDict[f'{self.variable}']['paramStrNoOne'])
+
+        # Change directory to the fitFolderName
+        os.chdir("../")
+
+        def calculate_pvalue(filename, n_bins):
+            """
+            Function to calculate the p-value given a ROOT file and number of bins.
+            """
+            try:
+                # Open the ROOT file and read the deltaNLL values
+                nll_data = uproot.open(filename)["limit"].arrays()
+                nll = nll_data['deltaNLL'][1]  # Extract the second value in deltaNLL array
+
+                # Compute the p-value
+                chi2pdf = chi2(n_bins)
+                pval = 1 - chi2pdf.cdf(2 * nll)
+
+                return pval
+            except Exception as e:
+                print(f"Error while calculating p-value: {e}")
+                return None
+        # Calculate the p-value
+        pvalue = calculate_pvalue(file_path, n_bins)
+        
+        # Rounding to two significant digits
+        pvalue = round(pvalue, 2 - int(f"{pvalue:.1e}".split('e')[1]) - 1)
+
+        if pvalue is not None:
+            # Define your differential variable for printing
+            output_file = "pvalue.txt"
+            try:
+                with open(output_file, "w") as f:
+                    f.write(f"{pvalue}\n")
+                print(f"P-value written to {output_file}")
+            except Exception as e:
+                print(f"Error writing to file: {e}")
+            print(f"The p-value of the variable {self.variable} is: {pvalue}")
+        else:
+            print("Failed to calculate the p-value.")
+
+        os.chdir(cwd)
