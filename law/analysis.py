@@ -1,30 +1,13 @@
 import law
 import os
-import subprocess
-import importlib.util
-import ROOT
-import re
-import uproot
-from optparse import OptionParser
-from collections import OrderedDict as od
-from importlib import import_module
-import glob
 import yaml
 import errno
-import shutil
-
-import pandas
-import numpy as np
-import awkward as ak
 
 from commonTools import *
 from commonObjects import *
 
-from Datacard.datacard import *
-from Background.background import *
-
-# from framework import Task
-# from framework import HTCondorWorkflow
+from Datacard.law_datacard import *
+from Background.law_background import *
 
 # Function to safely create a directory
 def safe_mkdir(path):

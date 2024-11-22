@@ -5,7 +5,7 @@ import glob
 from commonObjects import *
 from commonTools import *
 from tools.simultaneousFit import *
-from tools.plottingTools import *
+from plottingTools import *
 from collections import OrderedDict as od
 from optparse import OptionParser
 

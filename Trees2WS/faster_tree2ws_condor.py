@@ -52,7 +52,7 @@ def write_sh(mode, process, mass_era_list):
     _f.write("source /cvmfs/cms.cern.ch/cmsset_default.sh\n")
     _f.write("eval `scramv1 runtime -sh`\n")
     _f.write("cd %s\n"%twd__)
-    _f.write("export PYTHONPATH=$PYTHONPATH:%s/tools:%s/tools\n\n"%(cwd__,twd__))
+    _f.write("export PYTHONPATH=$PYTHONPATH:%s/commonTools:%s/T2WSTools\n\n"%(cwd__,twd__))
     
     i = 0
     for mass, era, variable, path_to_root_files in mass_era_list:

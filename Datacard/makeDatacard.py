@@ -10,9 +10,22 @@ import glob
 import pickle
 from collections import OrderedDict as od
 from systematics import theory_systematics, experimental_systematics, signal_shape_systematics
+import errno
+
+
+# Function to safely create a directory
+def safe_mkdir(path):
+    try:
+        os.makedirs(path)
+    except OSError as exception:
+        if exception.errno != errno.EEXIST:
+            raise
+                
 
 def get_options():
   parser = OptionParser()
+  parser.add_option('--inputFiles', default='./', help="Path to the input .pkl file.")
+  parser.add_option('--outputDir', default='./', help="Path to the output directory.")
   parser.add_option('--ext', dest='ext', default='', help="Extension (used when running RunYields.py)")
   parser.add_option('--years', dest='years', default='2022preEE,2022postEE', help="Comma separated list of years in makeYields output")
   # For pruning processes
@@ -20,7 +33,7 @@ def get_options():
   parser.add_option('--pruneThreshold', dest='pruneThreshold', default=0.001, type='float', help="Threshold with which to prune proc x cat as fraction of total category yield (default=0.1%)")
   parser.add_option('--doTrueYield', dest='doTrueYield', default=False, action="store_true", help="For pruning: use true number of expected events for proc x cat i.e. Product(XS,BR,eff*acc,lumi). Use only if NOTAG dataset has been included. If false then will use nominal_yield (i.e. sumEntries)")
   parser.add_option('--mass', dest='mass', default='125', help="MH mass: required for doTrueYield")
-  parser.add_option('--analysis', dest='analysis', default='STXS', help="Analysis extension: required for doTrueYield (see ./tools/XSBR.py for example)")
+  parser.add_option('--analysis', dest='analysis', default='STXS', help="Analysis extension: required for doTrueYield (see ./datacardTools/XSBR.py for example)")
   # For yield/systematics:
   parser.add_option('--skipCOWCorr', dest='skipCOWCorr', default=False, action="store_true", help="Skip centralObjectWeight correction for events in acceptance")
   parser.add_option('--doSystematics', dest='doSystematics', default=False, action="store_true", help="Include systematics calculations and add to datacard")
@@ -38,14 +51,15 @@ def leave():
   exit(0)
 
 STXSMergingScheme, STXSScaleCorrelationScheme = None, None
-if opt.doSTXSMerging: from tools.STXS_tools import STXSMergingScheme
-if opt.doSTXSScaleCorrelationScheme: from tools.STXS_tools import STXSScaleCorrelationScheme
+if opt.doSTXSMerging: from datacardTools.STXS_tools import STXSMergingScheme
+if opt.doSTXSScaleCorrelationScheme: from datacardTools.STXS_tools import STXSScaleCorrelationScheme
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Concatenate dataframes
 print(" --> Loading per category dataframes into single dataframe")
 extStr = "_%s"%opt.ext if opt.ext != '' else ''
-pkl_files = glob.glob("./yields%s/*.pkl"%extStr)
+pkl_files = glob.glob("%s/yields%s/*.pkl"%(opt.inputFiles,extStr))
+# print("%s/yields%s/*.pkl"%(opt.inputFiles,extStr))
 pkl_files.sort() # Categories in alphabetical order
 data = pd.DataFrame()
 for f_pkl_name in pkl_files:
@@ -56,7 +70,7 @@ for f_pkl_name in pkl_files:
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Systematics: use factory function to calculate yield variations
 if opt.doSystematics:
-  from tools.calcSystematics import factoryType, addConstantSyst, experimentalSystFactory, theorySystFactory, groupSystematics, envelopeSystematics, renameSyst
+  from datacardTools.calcSystematics import factoryType, addConstantSyst, experimentalSystFactory, theorySystFactory, groupSystematics, envelopeSystematics, renameSyst
 
   print(" ..........................................................................................")
 
@@ -108,9 +122,9 @@ if opt.prune:
     print(" --> Using the true yield of process for pruning: N = Product(XS,BR,eff*acc,lumi)")
     mask = (data['type']=='sig')
 
-    # Extract XS*BR using tools.XSBR
+    # Extract XS*BR using datacardTools.XSBR
     data['xsbr'] = '-'
-    from tools.XSBR import *
+    from datacardTools.XSBR import *
     XSBR = extractXSBR(data,mass=opt.mass,analysis=opt.analysis)
     data.loc[mask,'xsbr'] = data[mask].apply(lambda x: XSBR["XS_%s"%x['procOriginal']]*XSBR['BR'], axis=1)
 
@@ -156,15 +170,16 @@ if opt.prune:
 # SAVE DATAFRAME
 if opt.saveDataFrame:
   print(" ..........................................................................................")
-  print(" --> Saving dataFrame: %s.pkl"%opt.output)
-  with open("%s.pkl"%opt.output,"wb") as fD: pickle.dump(data,fD)
+  print(" --> Saving dataFrame: %s/Dataframe/%s.pkl"%(opt.outputDir,opt.output))
+  safe_mkdir("%s/Dataframe/"%(opt.outputDir))
+  with open("%s/Dataframe/%s.pkl"%(opt.outputDir,opt.output),"wb") as fD: pickle.dump(data,fD)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # WRITE TO .TXT FILE
 print(" ..........................................................................................")
-fdataName = "%s.txt"%opt.output
+fdataName = "%s/%s.txt"%(opt.outputDir,opt.output)
 print(" --> Writing to datacard file: %s"%fdataName)
-from tools.writeToDatacard import writePreamble, writeProcesses, writeSystematic, writeMCStatUncertainty, writePdfIndex, writeBreak
+from datacardTools.writeToDatacard import writePreamble, writeProcesses, writeSystematic, writeMCStatUncertainty, writePdfIndex, writeBreak
 fdata = open(fdataName,"w")
 if not writePreamble(fdata,opt): 
   print(" --> [ERROR] in writing preamble. Leaving...")

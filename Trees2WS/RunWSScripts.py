@@ -8,7 +8,7 @@ from collections import OrderedDict as od
 # Import tools from ./tools
 from commonTools import *
 from commonObjects import *
-from tools.submissionTools import *
+from T2WSTools.submissionTools import *
 
 def get_options():
   parser = OptionParser()

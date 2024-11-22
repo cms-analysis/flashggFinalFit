@@ -29,6 +29,7 @@ def get_options():
   parser = OptionParser()
   parser.add_option("--xvar", dest='xvar', default='CMS_hgg_mass', help="Observable to fit")
   parser.add_option("--inputWSDir", dest='inputWSDir', default='', help="Input flashgg WS directory")
+  parser.add_option("--outputDir", dest='outputDir', default=swd__, help="Output directory")
   parser.add_option("--ext", dest='ext', default='', help="Extension")
   parser.add_option("--procs", dest='procs', default='', help="Signal processes")
   parser.add_option("--nProcsToFTest", dest='nProcsToFTest', default=-1, type='int',help="Number of signal processes to fTest (ordered by sum entries), others are set to nRV=1,nWV=1. Set to -1 to run over all")
@@ -48,7 +49,7 @@ def get_options():
 ROOT.gStyle.SetOptStat(0)
 ROOT.gROOT.SetBatch(True)
 if opt.doPlots: 
-  if not os.path.isdir("%s/outdir_%s/fTest/Plots"%(swd__,opt.ext)): os.system("mkdir %s/outdir_%s/fTest/Plots"%(swd__,opt.ext))
+  if not os.path.isdir("%s/outdir_%s/fTest/Plots"%(opt.outputDir,opt.ext)): os.system("mkdir %s/outdir_%s/fTest/Plots"%(opt.outputDir,opt.ext))
 
 # Load xvar to fit
 nominalWSFileName = glob.glob("%s/output*"%(opt.inputWSDir))[0]
@@ -69,6 +70,7 @@ MH.setConstant(True)
 df = pd.DataFrame(columns=['proc','sumEntries','nRV','nWV'])
 procYields = od()
 for proc in opt.procs.split(","):
+  print("%s/output*M%s*%s.root"%(opt.inputWSDir,opt.mass,proc))
   WSFileName = glob.glob("%s/output*M%s*%s.root"%(opt.inputWSDir,opt.mass,proc))[0]
   f = ROOT.TFile(WSFileName,"read")
   inputWS = f.Get(inputWSName__)
@@ -121,8 +123,8 @@ for pidx, proc in enumerate(procsToFTest):
     df.loc[df['proc']==proc,'nRV'] = nGauss_opt
     # Make plots
     if( opt.doPlots )&( len(ssfs.keys())!=0 ):
-      plotFTest(ssfs,_opt=nGauss_opt,_outdir="%s/outdir_%s/fTest/Plots"%(swd__,opt.ext),_extension="RV",_proc=proc,_cat=opt.cat,_mass=opt.mass)
-      plotFTestResults(ssfs,_opt=nGauss_opt,_outdir="%s/outdir_%s/fTest/Plots"%(swd__,opt.ext),_extension="RV",_proc=proc,_cat=opt.cat,_mass=opt.mass)
+      plotFTest(ssfs,_opt=nGauss_opt,_outdir="%s/outdir_%s/fTest/Plots"%(opt.outputDir,opt.ext),_extension="RV",_proc=proc,_cat=opt.cat,_mass=opt.mass)
+      plotFTestResults(ssfs,_opt=nGauss_opt,_outdir="%s/outdir_%s/fTest/Plots"%(opt.outputDir,opt.ext),_extension="RV",_proc=proc,_cat=opt.cat,_mass=opt.mass)
 
   # Run fTest: WV
   # If numEntries below threshold then keep as n = 1
@@ -146,16 +148,16 @@ for pidx, proc in enumerate(procsToFTest):
     df.loc[df['proc']==proc,'nWV'] = nGauss_opt
     # Make plots
     if( opt.doPlots )&( len(ssfs.keys())!=0 ):
-      plotFTest(ssfs,_opt=nGauss_opt,_outdir="%s/outdir_%s/fTest/Plots"%(swd__,opt.ext),_extension="WV",_proc=proc,_cat=opt.cat,_mass=opt.mass)
-      plotFTestResults(ssfs,_opt=nGauss_opt,_outdir="%s/outdir_%s/fTest/Plots"%(swd__,opt.ext),_extension="WV",_proc=proc,_cat=opt.cat,_mass=opt.mass)
+      plotFTest(ssfs,_opt=nGauss_opt,_outdir="%s/outdir_%s/fTest/Plots"%(opt.outputDir,opt.ext),_extension="WV",_proc=proc,_cat=opt.cat,_mass=opt.mass)
+      plotFTestResults(ssfs,_opt=nGauss_opt,_outdir="%s/outdir_%s/fTest/Plots"%(opt.outputDir,opt.ext),_extension="WV",_proc=proc,_cat=opt.cat,_mass=opt.mass)
 
   # Close ROOT file
   inputWS.Delete()
   f.Close()
 
 # Make output
-if not os.path.isdir("%s/outdir_%s/fTest/json"%(swd__,opt.ext)): os.system("mkdir %s/outdir_%s/fTest/json"%(swd__,opt.ext))
-ff = open("%s/outdir_%s/fTest/json/nGauss_%s.json"%(swd__,opt.ext,opt.cat),"w")
+if not os.path.isdir("%s/outdir_%s/fTest/json"%(opt.outputDir,opt.ext)): os.system("mkdir %s/outdir_%s/fTest/json"%(opt.outputDir,opt.ext))
+ff = open("%s/outdir_%s/fTest/json/nGauss_%s.json"%(opt.outputDir,opt.ext,opt.cat),"w")
 ff.write("{\n")
 # Iterate over rows in dataframe: sorted by sumEntries
 pitr = 1

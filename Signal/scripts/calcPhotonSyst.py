@@ -27,6 +27,7 @@ def get_options():
   parser.add_option("--procs", dest='procs', default='', help="Signal processes")
   parser.add_option("--ext", dest='ext', default='', help="Extension")
   parser.add_option("--inputWSDir", dest='inputWSDir', default='', help="Input flashgg WS directory")
+  parser.add_option("--outputDir", dest='outputDir', default=swd__, help="Output directory")
   parser.add_option("--scales", dest='scales', default='', help="Photon shape systematics: scales")
   parser.add_option("--scalesCorr", dest='scalesCorr', default='', help='Photon shape systematics: scalesCorr')
   parser.add_option("--scalesGlobal", dest='scalesGlobal', default='', help='Photon shape systematics: scalesGlobal')
@@ -162,8 +163,8 @@ for ir,r in data.iterrows():
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Output dataFrame as pickle file to be read in by signalFit.py
-if not os.path.isdir("%s/outdir_%s"%(swd__,opt.ext)): os.system("mkdir %s/outdir_%s"%(swd__,opt.ext))
-if not os.path.isdir("%s/outdir_%s/calcPhotonSyst"%(swd__,opt.ext)): os.system("mkdir %s/outdir_%s/calcPhotonSyst"%(swd__,opt.ext))
-if not os.path.isdir("%s/outdir_%s/calcPhotonSyst/pkl"%(swd__,opt.ext)): os.system("mkdir %s/outdir_%s/calcPhotonSyst/pkl"%(swd__,opt.ext))
-with open("%s/outdir_%s/calcPhotonSyst/pkl/%s.pkl"%(swd__,opt.ext,opt.cat),"wb") as f: pickle.dump(data,f) 
-print(" --> Successfully saved photon systematics as pkl file: %s/outdir_%s/calcPhotonSyst/pkl/%s.pkl"%(swd__,opt.ext,opt.cat))
+if not os.path.isdir("%s/outdir_%s"%(opt.outputDir,opt.ext)): os.system("mkdir %s/outdir_%s"%(opt.outputDir,opt.ext))
+if not os.path.isdir("%s/outdir_%s/calcPhotonSyst"%(opt.outputDir,opt.ext)): os.system("mkdir %s/outdir_%s/calcPhotonSyst"%(opt.outputDir,opt.ext))
+if not os.path.isdir("%s/outdir_%s/calcPhotonSyst/pkl"%(opt.outputDir,opt.ext)): os.system("mkdir %s/outdir_%s/calcPhotonSyst/pkl"%(opt.outputDir,opt.ext))
+with open("%s/outdir_%s/calcPhotonSyst/pkl/%s.pkl"%(opt.outputDir,opt.ext,opt.cat),"wb") as f: pickle.dump(data,f) 
+print(" --> Successfully saved photon systematics as pkl file: %s/outdir_%s/calcPhotonSyst/pkl/%s.pkl"%(opt.outputDir,opt.ext,opt.cat))

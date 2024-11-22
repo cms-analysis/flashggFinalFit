@@ -7,7 +7,7 @@ from collections import OrderedDict as od
 # Import tools
 from commonTools import *
 from commonObjects import *
-from tools.submissionTools import *
+from datacardTools.submissionTools import *
 
 def get_options():
   parser = OptionParser()

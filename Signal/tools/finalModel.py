@@ -75,7 +75,7 @@ def initialiseXSBR():
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
 class FinalModel:
   # Constructor
-  def __init__(self,_ssfMap,_proc,_cat,_ext,_year,_sqrts,_datasets,_xvar,_MH,_MHLow,_MHHigh,_massPoints,_xsbrMap,_procSyst,_scales,_scalesCorr,_scalesGlobal,_smears,_doVoigtian,_useDCB,_skipVertexScenarioSplit,_skipSystematics):
+  def __init__(self,_ssfMap,_proc,_cat,_ext,_year,_sqrts,_datasets,_xvar,_MH,_MHLow,_MHHigh,_massPoints,_xsbrMap,_procSyst,_scales,_scalesCorr,_scalesGlobal,_smears,_doVoigtian,_useDCB,_skipVertexScenarioSplit,_skipSystematics, outputDir=swd__):
     self.ssfMap = _ssfMap
     self.proc = _proc
     self.procSyst = _procSyst # Signal process used for systematics (useful for low stat cases)
@@ -93,6 +93,7 @@ class FinalModel:
     self.massPoints = _massPoints
     self.intLumi = ROOT.RooRealVar("IntLumi","IntLumi",1.,0.,999999999.) # in pb^-1
     self.xsbrMap = _xsbrMap
+    self.outputDir = outputDir
     # Systematics
     self.skipSystematics = _skipSystematics
     self.scales = _scales
@@ -187,7 +188,7 @@ class FinalModel:
       if getattr(self,sType) != '': self.NuisanceMap[sType] = od()
 
     # Extract calcPhotonSyst output
-    psname = "%s/outdir_%s/calcPhotonSyst/pkl/%s.pkl"%(swd__,self.ext,self.cat)
+    psname = "%s/outdir_%s/calcPhotonSyst/pkl/%s.pkl"%(self.outputDir,self.ext,self.cat)
     if not os.path.exists(psname):
       print(" --> [ERROR] Photon systematics do not exist (%s). Please run calcPhotonSyst mode first or skip systematics (--skipSystematics)"%psname)
       sys.exit(1)

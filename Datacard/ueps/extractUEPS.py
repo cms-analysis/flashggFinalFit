@@ -16,7 +16,7 @@ def get_options():
   return parser.parse_args()
 (opt,args) = get_options()
 
-from tools.STXS_tools import flashggSTXSDict
+from datacardTools.STXS_tools import flashggSTXSDict
 from commonTools import *
 
 # Analysis categories
