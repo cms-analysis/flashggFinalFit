@@ -27,6 +27,7 @@ def get_options():
   parser.add_option('--inputWSDirMap', dest='inputWSDirMap', default='2016:/vols/cms/jl2117/hgg/ws/UL/Sept20/MC_final/signal_2016', help="Map. Format: year=inputWSDir (separate years by comma)")
   parser.add_option("--outputDir", dest='outputDir', default=swd__, help="Output directory")
   parser.add_option('--cat', dest='cat', default='', help='Analysis category')
+  parser.add_option('--variable', dest='variable', default='', help='Considered variable for the addition of variable specific systematics (e.g. JEC, JES, etc.).')
   parser.add_option('--procs', dest='procs', default='auto', help='Comma separated list of signal processes. auto = automatically inferred from input workspaces')
   parser.add_option('--ext', dest='ext', default='', help='Extension for saving') 
   parser.add_option('--mass', dest='mass', default='125', help='Input workspace mass')
@@ -100,7 +101,7 @@ for year in years:
     if opt.mergeYears: _cat = opt.cat
     else: _cat = "%s_%s"%(opt.cat,year)
 
-    # Input flashgg ws 
+    # Input flashgg ws
     _inputWSFile = glob.glob("%s/*M%s*_%s.root"%(inputWSDirMap[year],opt.mass,proc))[0]
     if (len(proc.split("_")) <= 2) and (proc.split("_")[-1] in ["in", "out"]):
       _nominalDataName = "%s_%s_%s_%s_%s"%(_proc_s0,procToData(proc.split("_")[-1]),opt.mass,sqrts__,opt.cat)  
@@ -187,6 +188,9 @@ if opt.doSystematics:
   # No experimental systematics for NOTAG
   if opt.cat != "NOTAG":
     for s in experimental_systematics: 
+      if opt.variable != '':
+        if (not opt.variable in jetVariables) and ((s['name'] == 'JecSystTotal') or (['name'] == 'JerSyst')):
+          continue
       if s['type'] == 'factory': 
         # Fix for HEM as only in 2018 workspaces
         if s['name'] == 'JetHEM': experimentalFactoryType[s['name']] = "a_h"

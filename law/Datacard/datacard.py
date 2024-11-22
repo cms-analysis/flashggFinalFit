@@ -123,6 +123,7 @@ class MakeYieldsCategory(Task, HTCondorWorkflow, law.LocalWorkflow):#(law.Task):
             "--ext", self.ext,
             "--procs", f"{self.procs}",
             "--mass", f"{self.mass}",
+            "--variable", f"{'r' if self.variable == '' else self.variable}",
             "--bkgScaler", f"{self.bkgScaler}",
             "--sigModelWSDir", f"{self.sigModelWSDir}",
             "--sigModelExt", f"{self.sigModelExt}",

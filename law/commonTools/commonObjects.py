@@ -108,6 +108,15 @@ conversionTable_ = {
     "VHtoGG": "vh",
     }
 
+# List of all jet-related variables. Variables listed here will get the CMS_scale_j and CMS_res_j uncertainty in the datacard step.
+jetVariables = [
+    "Njets2p5",
+    "ptJ0",
+    "YJ0",
+    "AbsPhiHJ0",
+    "AbsYHJ0"
+]
+
 differentialProcTable_ = {
     "PTH": [
         (10, "PTH_0p0_15p0_in"),
