@@ -54,7 +54,7 @@ if opt.ext != "":
   t2w_file_path = "%s/t2w_jobs/t2w_%s"%(outputDir,opt.ext)
 else:
   t2w_file_path = "%s/t2w_jobs/t2w_%s"%(outputDir,opt.mode)
-
+  
 # Open submission file to write to
 fsub = open(t2w_file_path+".sh","w")
 fsub.write("#!/bin/bash\n\n")
@@ -95,6 +95,11 @@ if opt.batch == 'condor':
 # Submit
 if outputDir != '.':
   if opt.batch == "condor": subcmd = "condor_submit -spool %s/t2w_jobs/t2w_%s%s.sub"%(outputDir,opt.mode,opt.ext)
+  elif opt.batch == 'local': subcmd = "bash "+t2w_file_path+".sh"
+  else: subcmd = "qsub -q hep.q -l h_rt=6:0:0 -l h_vmem=24G "+t2w_file_path+".sh"
+  if opt.dryRun: print("[DRY RUN] %s"%subcmd)
+  else: run(subcmd)
+
 else:
   if opt.batch == "condor": 
     if os.path.realpath(os.environ['PWD']).startswith("/eos"):
