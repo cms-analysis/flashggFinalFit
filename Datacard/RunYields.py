@@ -17,6 +17,7 @@ def get_options():
   parser.add_option('--procs', dest='procs', default='auto', help='Comma separated list of signal processes. auto = automatically inferred from input workspaces')
   parser.add_option('--ext', dest='ext', default='test', help='Extension for saving')
   parser.add_option('--mass', dest='mass', default='125', help='Input workspace mass')
+  parser.add_option('--variable', dest='variable', default='', help='Considered variable (if any). Necessary to account for the proper systematic uncertainties.')
   parser.add_option('--mergeYears', dest='mergeYears', default=False, action="store_true", help="Merge category across years")
   parser.add_option('--skipBkg', dest='skipBkg', default=False, action="store_true", help="Only add signal processes to datacard")
   parser.add_option('--bkgScaler', dest='bkgScaler', default=1., type="float", help="Add overall scale factor for background")
@@ -59,6 +60,7 @@ options['sigModelExt'] = opt.sigModelExt
 options['bkgModelWSDir'] = opt.bkgModelWSDir
 options['bkgModelExt'] = opt.bkgModelExt
 options['modeOpts'] = ''
+options['variable'] = opt.variable
 if opt.mergeYears:  options['modeOpts'] += ' --mergeYears'
 if opt.skipBkg: options['modeOpts'] += ' --skipBkg'
 if opt.bkgScaler != 1.: options['modeOpts'] += ' --bkgScaler %.4f'%opt.bkgScaler
