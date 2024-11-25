@@ -143,3 +143,44 @@ globalXSBRMap['STXS']['THQ_FWDH'] = {'mode':'tHq','factor':0.0279}
 globalXSBRMap['STXS']['THQ'] = {'mode':'tHq','factor':0.9721}
 globalXSBRMap['STXS']['THW_FWDH'] = {'mode':'tHW','factor':0.0106}
 globalXSBRMap['STXS']['THW'] = {'mode':'tHW','factor':0.9894}
+
+
+
+# AC analysis: add factor for category composition
+globalXSBRMap['AC'] = od()
+globalXSBRMap['AC']['decay'] = {'mode':'hgg'}
+globalXSBRMap['AC']['GG2H'] = {'mode':'ggH'}
+globalXSBRMap['AC']['VBF'] = {'mode':'qqH'}
+globalXSBRMap['AC']['TTH'] = {'mode':'ttH'}
+globalXSBRMap['AC']['WH'] = {'mode':'WH'} 
+globalXSBRMap['AC']['WMINUSH2HQQ'] = {'mode':'WH','factor':0.5}
+globalXSBRMap['AC']['WPLUSH2HQQ'] = {'mode':'WH','factor':0.5}
+globalXSBRMap['AC']['ZH'] = {'mode':'qqZH'}
+globalXSBRMap['AC']['QQ2HLL'] = {'mode':'qqZH'}
+# not sure the following for the ALT modes is correct. From the spline plot it seems OK: takes the MH=125 GeV value from JHU sample and then extrapolate with the relative ratio of qqH SM. In any case the fit for the fai profiles mu
+globalXSBRMap['AC']['VBF_ALT_0PM'] = {'mode':'qqH'}
+globalXSBRMap['AC']['VBF_ALT_0PH'] = {'mode':'qqH'}
+globalXSBRMap['AC']['VBF_ALT_0PHf05'] = {'mode':'qqH'}
+globalXSBRMap['AC']['VBF_ALT_0M'] = {'mode':'qqH'}
+globalXSBRMap['AC']['VBF_ALT_0Mf05'] = {'mode':'qqH'}
+globalXSBRMap['AC']['VBF_ALT_L1'] = {'mode':'qqH'}
+globalXSBRMap['AC']['VBF_ALT_L1f05'] = {'mode':'qqH'}
+globalXSBRMap['AC']['VBF_ALT_L1Zg'] = {'mode':'qqH'}
+globalXSBRMap['AC']['VBF_ALT_L1Zgf05'] = {'mode':'qqH'}
+globalXSBRMap['AC']['WH_ALT0L1f05ph0'] = {'mode':'WH'}
+globalXSBRMap['AC']['WH_ALT0PHf05ph0'] = {'mode':'WH'}
+globalXSBRMap['AC']['WH_ALT0PH'] = {'mode':'WH'}
+globalXSBRMap['AC']['WH_ALT0PM'] = {'mode':'WH'}
+globalXSBRMap['AC']['ZH_ALT0L1f05ph0'] = {'mode':'qqZH'}
+globalXSBRMap['AC']['ZH_ALT0L1'] = {'mode':'qqZH'}
+globalXSBRMap['AC']['ZH_ALT0L1Zgf05ph0'] = {'mode':'qqZH'}
+globalXSBRMap['AC']['ZH_ALT0L1Zg'] = {'mode':'qqZH'}
+globalXSBRMap['AC']['ZH_ALT0Mf05ph0'] = {'mode':'qqZH'}
+globalXSBRMap['AC']['ZH_ALT0M'] = {'mode':'qqZH'}
+globalXSBRMap['AC']['ZH_ALT0PHf05ph0'] = {'mode':'qqZH'}
+globalXSBRMap['AC']['ZH_ALT0PH'] = {'mode':'qqZH'}
+globalXSBRMap['AC']['ZH_ALT0PM'] = {'mode':'qqZH'}
+globalXSBRMap['AC']['TTH_ALT0Mf05ph0'] = {'mode':'ttH'}
+globalXSBRMap['AC']['TTH_ALT0M'] = {'mode':'ttH'}
+globalXSBRMap['AC']['TTH_ALT0PM'] = {'mode':'ttH'}
+

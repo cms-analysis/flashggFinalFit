@@ -20,9 +20,24 @@ for f in vbf:
   fnew = re.sub("QQ2HQQ","VBF",f)
   os.system("mv %s %s"%(f,fnew))
 
+vbf = glob.glob("%s/*_VBFH*_vbf*"%opt.inputDir)
+for f in vbf:
+  fnew = re.sub("_vbf","_VBF",f)
+  os.system("mv %s %s"%(f,fnew))
+
 wh = glob.glob("%s/*_WHToGG_*_QQ2HQQ_*"%opt.inputDir)
 for f in wh:
   fnew = re.sub("QQ2HQQ","WH2HQQ",f)
+  os.system("mv %s %s"%(f,fnew))
+
+wplush = glob.glob("%s/*_WplusH_HToGG_*_QQ2HLNU*"%opt.inputDir)
+for f in wplush:
+  fnew = re.sub("QQ2HLNU","WPLUSH2HQQ",f)
+  os.system("mv %s %s"%(f,fnew))
+
+wminush = glob.glob("%s/*_WminusH_HToGG_*_QQ2HLNU*"%opt.inputDir)
+for f in wminush:
+  fnew = re.sub("QQ2HLNU","WMINUSH2HQQ",f)
   os.system("mv %s %s"%(f,fnew))
 
 zh = glob.glob("%s/*_ZHToGG_*_QQ2HQQ_*"%opt.inputDir)

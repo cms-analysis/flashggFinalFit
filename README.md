@@ -27,7 +27,7 @@ cmsenv
 scram b -j 9
 
 # Install Flashgg Final Fit packages
-git clone -b dev_fggfinalfits_lite https://github.com/cms-analysis/flashggFinalFit.git
+git clone -b dev_fggfinalfits_lite git@github.com:Higgs-Anomalous-Couplings/flashggFinalFit.git
 cd flashggFinalFit/
 ```
 

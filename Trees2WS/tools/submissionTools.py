@@ -61,9 +61,16 @@ def writeSubFiles(_opts):
       tfiles = glob.glob("%s/*.root"%_opts['inputDir'])
       # Run separate command per file
       for tfidx,tf in enumerate(tfiles):
+        if len(_opts['selectProcess']):
+          skipMe = True
+          for p0 in _opts['selectProcess']:
+            for p in p0.split(","):
+              if os.path.basename(tf).split('.root')[0].replace('output_','') in p: skipMe = False
+          if skipMe: continue
         # Extract production mode (and decay extension if required)
         p, d = signalFromFileName(tf)
-        _cmd = "python %s/trees2ws.py --inputConfig %s --inputTreeFile %s --productionMode %s --year %s"%(twd__,_opts['inputConfig'],tf,p,_opts['year'])
+        m = massFromFileName(tf)
+        _cmd = "python %s/trees2ws.py --inputConfig %s --inputTreeFile %s --productionMode %s --year %s --inputMass %d"%(twd__,_opts['inputConfig'],tf,p,_opts['year'],m)
         if d is not None: _cmd += " --decayExt %s"%d
         if _opts['modeOpts'] != '': _cmd += " %s"%_opts['modeOpts']
         _f.write("if [ $1 -eq %g ]; then\n"%tfidx)
@@ -126,7 +133,7 @@ def writeSubFiles(_opts):
     _fsub.close()
     
   # SGE...
-  if (_opts['batch'] == "IC")|(_opts['batch'] == "SGE")|(_opts['batch'] == "local" ):
+  if (_opts['batch'] == "IC")|(_opts['batch'] == "SGE")|(_opts['batch'] == "Rome")|(_opts['batch'] == "local" ):
     _executable = "sub_%s_%s"%(_opts['mode'],_opts['ext'])
 
     # Write details depending on mode
@@ -135,11 +142,18 @@ def writeSubFiles(_opts):
       tfiles = glob.glob("%s/*.root"%_opts['inputDir'])
       # Create separate submission file per script
       for tfidx,tf in enumerate(tfiles):
+        if len(_opts['selectProcess']):
+          skipMe = True
+          for p0 in _opts['selectProcess']:
+            for p in p0.split(","):
+              if os.path.basename(tf).split('.root')[0].replace('output_','') in p: skipMe = False
+          if skipMe: continue
         _f = open("%s/%s_%g.sh"%(_jobdir,_executable,tfidx),"w")
         writePreamble(_f)
         # Extract production mode (and decay extension if required)
         p, d = signalFromFileName(tf)
-        _cmd = "python %s/trees2ws.py --inputConfig %s --inputTreeFile %s --productionMode %s --year %s"%(twd__,_opts['inputConfig'],tf,p,_opts['year'])
+        m = massFromFileName(tf)
+        _cmd = "python %s/trees2ws.py --inputConfig %s --inputTreeFile %s --productionMode %s --year %s --inputMass %d"%(twd__,_opts['inputConfig'],tf,p,_opts['year'],m)
         if d is not None: _cmd += " --decayExt %s"%d
         if _opts['modeOpts'] != '': _cmd += " %s"%_opts['modeOpts'] 
         _f.write("%s\n"%_cmd)
@@ -211,8 +225,9 @@ def submitFiles(_opts):
     print "  --> Finished submitting files"
 
   # SGE
-  elif _opts['batch'] in ['IC','SGE']:
+  elif _opts['batch'] in ['IC','SGE','Rome']:
     _executable = "sub_%s_%s"%(_opts['mode'],_opts['ext'])
+    _subcmd = 'bsub' if _opts['batch']=='Rome' else 'qsub'
 
     # Extract job opts
     jobOptsStr = _opts['jobOpts']
@@ -220,27 +235,33 @@ def submitFiles(_opts):
     if( _opts['mode'] == "trees2ws" )|( _opts['mode'] == 'trees2ws_data' ):
       tfiles = glob.glob("%s/*.root"%_opts['inputDir'])
       for tfidx in range(len(tfiles)):
+        if len(_opts['selectProcess']):
+          skipMe = True
+          for p0 in _opts['selectProcess']:
+            for p in p0.split(","):
+              if os.path.basename(tfiles[tfidx]).split('.root')[0].replace('output_','') in p: skipMe = False
+          if skipMe: continue
         _subfile = "%s/%s_%g"%(_jobdir,_executable,tfidx)
-        cmdLine = "qsub -q %s %s -o %s.log -e %s.err %s.sh"%(_opts['queue'],jobOptsStr,_subfile,_subfile,_subfile)
+        cmdLine = "%s -q %s %s -o %s.log -e %s.err %s.sh"%(_subcmd,_opts['queue'],jobOptsStr,_subfile,_subfile,_subfile)
         run(cmdLine)
 
     elif( _opts['mode'] == 'haddMC' ):
       wsdirs = glob.glob("%s/ws_*"%_opts['inputDir'])
       for widx in range(len(wsdirs)):
         _subfile = "%s/%s_%g"%(_jobdir,_executable,widx)
-        cmdLine = "qsub -q %s %s -o %s.log -e %s.err %s.sh"%(_opts['queue'],jobOptsStr,_subfile,_subfile,_subfile)
+        cmdLine = "%s -q %s %s -o %s.log -e %s.err %s.sh"%(_subcmd,_opts['queue'],jobOptsStr,_subfile,_subfile,_subfile)
         run(cmdLine)
 
     elif( _opts['mode'] == 'haddData' ):
       _subfile = "%s/%s"%(_jobdir,_executable)
-      cmdLine = "qsub -q %s %s -o %s.log -e %s.err %s.sh"%(_opts['queue'],jobOptsStr,_subfile,_subfile,_subfile)
+      cmdLine = "%s -q %s %s -o %s.log -e %s.err %s.sh"%(_subcmd,_opts['queue'],jobOptsStr,_subfile,_subfile,_subfile)
       run(cmdLine)
 
     elif( _opts['mode'] == 'mass_shift' ):
       wsfiles = glob.glob("%s/*.root"%_opts['inputDir'])
       for fidx in range(len(wsfiles)):
         _subfile = "%s/%s_%g"%(_jobdir,_executable,fidx)
-        cmdLine = "qsub -q %s %s -o %s.log -e %s.err %s.sh"%(_opts['queue'],jobOptsStr,_subfile,_subfile,_subfile)
+        cmdLine = "%s -q %s %s -o %s.log -e %s.err %s.sh"%(_subcmd,_opts['queue'],jobOptsStr,_subfile,_subfile,_subfile)
         run(cmdLine)
 
     print "  --> Finished submitting files"

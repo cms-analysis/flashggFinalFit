@@ -44,6 +44,8 @@ if opt.inputConfig != '':
     options['lumi']         = lumiMap[_cfg['year']]
     options['batch']        = _cfg['batch']
     options['queue']        = _cfg['queue']
+    options['xvar']         = _cfg['xvar']
+    options['plotdir']      = _cfg['plotdir'] if 'plotdir' in _cfg else swd__
 
     # Options from command line
     options['mode']                    = opt.mode
@@ -82,6 +84,7 @@ print " --> Input data file: %s"%options['dataFile']
 print " --> Categories: %s"%options['cats']
 print " --> Extension: %s"%options['ext']
 print " --> Category offset: %g"%options['catOffset']
+print " --> Variable to fit: %s"%options['xvar']
 print " --> Year: %s ::: Corresponds to intLumi = %s fb^-1"%(options['year'],options['lumi'])
 print ""
 print " --> Job information:"

@@ -21,6 +21,7 @@ params['stage0'] = ['r_ggH', 'r_qqH', 'r_WH_lep', 'r_ZH_lep', 'r_ttH', 'r_tH']
 params['stage1p2_maximal'] = ['r_ggH_0J_low', 'r_ggH_0J_high', 'r_ggH_1J_low', 'r_ggH_1J_med', 'r_ggH_1J_high', 'r_ggH_2J_low', 'r_ggH_2J_med', 'r_ggH_2J_high', 'r_ggH_VBFlike', 'r_ggH_BSM', 'r_qqH_VBFlike', 'r_qqH_VHhad', 'r_qqH_BSM', 'r_WH_lep', 'r_ZH_lep', 'r_ttH', 'r_tH']
 params['stage1p2_minimal'] = ['r_ggH_0J_low', 'r_ggH_0J_high', 'r_ggH_1J_low', 'r_ggH_1J_med', 'r_ggH_1J_high', 'r_ggH_2J_low', 'r_ggH_2J_med', 'r_ggH_2J_high', 'r_ggH_BSM_low', 'r_ggH_BSM_high', 'r_qqH_low_mjj_low_pthjj', 'r_qqH_low_mjj_high_pthjj', 'r_qqH_high_mjj_low_pthjj', 'r_qqH_high_mjj_high_pthjj', 'r_qqH_VHhad', 'r_qqH_BSM', 'r_WH_lep_low', 'r_WH_lep_high', 'r_ZH_lep', 'r_ttH_low', 'r_ttH_medlow', 'r_ttH_medhigh', 'r_ttH_high', 'r_tH']
 params['stage1p2_extended'] = ['r_ggH_0J_low', 'r_ggH_0J_high', 'r_ggH_1J_low', 'r_ggH_1J_med', 'r_ggH_1J_high', 'r_ggH_2J_low', 'r_ggH_2J_med', 'r_ggH_2J_high', 'r_ggH_BSM_low', 'r_ggH_BSM_med', 'r_ggH_BSM_high', 'r_qqH_low_mjj_low_pthjj', 'r_qqH_low_mjj_high_pthjj', 'r_qqH_high_mjj_low_pthjj', 'r_qqH_high_mjj_high_pthjj', 'r_qqH_VHhad', 'r_qqH_BSM', 'r_WH_lep_low', 'r_WH_lep_med', 'r_WH_lep_high', 'r_ZH_lep', 'r_ttH_low', 'r_ttH_medlow', 'r_ttH_medhigh', 'r_ttH_high', 'r_ttH_veryhigh', 'r_tH']
+params['cp'] = ['r_ggH', 'r_VBF', 'r_ttH', 'r_VH']
 
 def get_options():
   parser = OptionParser()

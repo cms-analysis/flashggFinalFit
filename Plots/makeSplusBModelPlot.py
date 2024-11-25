@@ -52,6 +52,7 @@ def get_options():
   parser.add_option("--translatePOIs", dest="translatePOIs", default=None, help="JSON to store poi translations")
   parser.add_option("--problematicCats", dest="problematicCats", default='', help='Problematic analysis categories to skip when processing all')
   parser.add_option("--doHHMjjFix", dest="doHHMjjFix", default=False, action="store_true", help="Do fix for HH analysis where some cats have different Mjj var")
+  parser.add_option("--pdir", dest="pdir", default="./", help="Directory where to put the final plots")
   return parser.parse_args()
 (opt,args) = get_options()
 
@@ -211,9 +212,9 @@ if opt.doBands:
     # Create dataframe
     df_bands = pd.DataFrame(columns=_columns)
     # Loop over toys file and add row for each toy dataset
-    toyFiles = glob.glob("./SplusBModels%s/toys/toy_*.root"%opt.ext)
+    toyFiles = glob.glob("./SplusBModels%s/toys/toy_*.root"%(opt.ext))
     if len(toyFiles) == 0:
-      print "     * [ERROR] No toys files of form ./SplusBModels%s/toys/toy_*.root. Skipping bands"%opt.ext
+      print "     * [ERROR] No toys files of form ./SplusBModels%s/toys/toy_*.root. Skipping bands"%(opt.ext)
       opt.doBands = False
     else:
       for tidx in range(len(toyFiles)):
@@ -263,8 +264,8 @@ if opt.doBands:
         else: print "   --> Toy veto: zero entries in first bin"
       # Savin toy yields dataframe to pickle file
       if opt.saveToyYields:
-        print "      * Saving toy yields to: SplusBModels%s/toyYields_%s.pkl"%(opt.ext,opt.xvar.split(",")[0])
-        with open("SplusBModels%s/toyYields_%s.pkl"%(opt.ext,opt.xvar.split(",")[0]),"w") as fD: pickle.dump(df_bands,fD)
+        print "      * Saving toy yields to: ./SplusBModels%s/toyYields_%s.pkl"%(opt.ext,opt.xvar.split(",")[0])
+        with open("./SplusBModels%s/toyYields_%s.pkl"%(opt.ext,opt.xvar.split(",")[0]),"w") as fD: pickle.dump(df_bands,fD)
 
 # Process each category separately
 for cidx in range(len(cats)):
@@ -419,7 +420,9 @@ for cidx in range(len(cats)):
   # Make plot for individual cats
   if not opt.skipIndividualCatPlots:
     print "    * making plot"
-    if not os.path.isdir("./SplusBModels%s"%(opt.ext)): os.system("mkdir ./SplusBModels%s"%(opt.ext))
+    if not os.path.isdir("%s/SplusBModels%s"%(opt.pdir,opt.ext)): 
+      os.system("mkdir %s/SplusBModels%s"%(opt.pdir,opt.ext))
+      if os.path.exists("/afs/cern.ch"): os.system("cp /afs/cern.ch/user/g/gpetrucc/php/index.php %s/SplusBModels%s"%(opt.pdir,opt.ext))
     if opt.doBands: makeSplusBPlot(w,h_data,h_sbpdf,h_bpdf,h_spdf,h_data_ratio,h_bpdf_ratio,h_spdf_ratio,c,opt,df_bands,_reduceRange)
     else: makeSplusBPlot(w,h_data,h_sbpdf,h_bpdf,h_spdf,h_data_ratio,h_bpdf_ratio,h_spdf_ratio,c,opt,None,_reduceRange)
 
@@ -446,7 +449,9 @@ if( len(opt.cats.split(",")) > 1 )|( opt.cats == 'all' ):
   if opt.doHHMjjFix: _reduceRange = [xvarfix.getMin(),xvarfix.getMax()]
   else: _reduceRange = None
   if opt.doSumCategories:
-    if not os.path.isdir("./SplusBModels%s"%(opt.ext)): os.system("mkdir ./SplusBModels%s"%(opt.ext))
+    if not os.path.isdir("%s/SplusBModels%s"%(opt.pdir,opt.ext)): 
+      os.system("mkdir %s/SplusBModels%s"%(opt.pdir,opt.ext))
+      if os.path.exists("/afs/cern.ch"): os.system("cp /afs/cern.ch/user/g/gpetrucc/php/index.php %s/SplusBModels%s"%(opt.pdir,opt.ext))
     print " --> Making plot for sum of categories"
     if opt.doBands: makeSplusBPlot(w,h_data_sum,h_sbpdf_sum,h_bpdf_sum,h_spdf_sum,h_data_ratio_sum,h_bpdf_ratio_sum,h_spdf_ratio_sum,'all',opt, df_bands,_reduceRange)
     else: makeSplusBPlot(w,h_data_sum,h_sbpdf_sum,h_bpdf_sum,h_spdf_sum,h_data_ratio_sum,h_bpdf_ratio_sum,h_spdf_ratio_sum,'all',opt,None,_reduceRange)

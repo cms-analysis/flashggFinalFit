@@ -1,0 +1,4 @@
+SysError in <TFile::TFile>: file higgsCombine_paramFit__bestfit_syst_ALT_0PH_initialFit_shapeBkg_bkg_mass_RECO_VBFTOPO_ACVHHADSM_Tag1__norm.MultiDimFit.mH125.38.root can not be opened (Disk quota exceeded)
+ModelConfig 'ModelConfig' defines more than one parameter of interest. This is not supported in some statistical methods.
+Info in <Minuit2>: Minuit2Minimizer::Minimize : Minimization did NOT converge, Edm is above max
+Error in <TFile::WriteTObject>: Directory higgsCombine_paramFit__bestfit_syst_ALT_0PH_initialFit_shapeBkg_bkg_mass_RECO_VBFTOPO_ACVHHADSM_Tag1__norm.MultiDimFit.mH125.38.root is not writable

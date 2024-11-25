@@ -216,7 +216,7 @@ class SimultaneousFit:
       self.Vars['weight'] = ROOT.RooRealVar("weight","weight",-10000,10000)
       for i in range(0,d.numEntries()):
         self.xvar.setVal(d.get(i).getRealValue(self.xvar.GetName()))
-        self.Vars['weight'].setVal((1/sumw)*d.weight())
+        self.Vars['weight'].setVal(0 if sumw==0 else (1/sumw)*d.weight())
         drw.add(ROOT.RooArgSet(self.xvar,self.Vars['weight']),self.Vars['weight'].getVal())
       # Convert to RooDataHist
       self.DataHists[k] = ROOT.RooDataHist("%s_hist"%d.GetName(),"%s_hist"%d.GetName(),ROOT.RooArgSet(self.xvar),drw)
