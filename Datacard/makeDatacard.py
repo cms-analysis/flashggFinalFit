@@ -28,6 +28,7 @@ def get_options():
   parser.add_option('--outputDir', default='./', help="Path to the output directory.")
   parser.add_option('--ext', dest='ext', default='', help="Extension (used when running RunYields.py)")
   parser.add_option('--years', dest='years', default='2022preEE,2022postEE', help="Comma separated list of years in makeYields output")
+  parser.add_option('--variable', dest='variable', default='', help='Considered variable for the addition of variable specific systematics (e.g. JEC, JES, etc.).')
   # For pruning processes
   parser.add_option('--prune', dest='prune', default=False, action="store_true", help="Prune proc x cat which make up less than pruneThreshold (default 0.1%) of given total category")
   parser.add_option('--pruneThreshold', dest='pruneThreshold', default=0.001, type='float', help="Threshold with which to prune proc x cat as fraction of total category yield (default=0.1%)")
@@ -80,6 +81,12 @@ if opt.doSystematics:
   theoryFactoryType = {}
   mask = (~data['cat'].str.contains("NOTAG"))&(data['type']=='sig')
   for s in experimental_systematics:
+    if opt.variable != '':
+      if (not opt.variable in jetVariables) and ((s['name'] == 'JecSystTotal') or (s['name'] == 'JerSyst')):
+        continue
+    else: # Inclusive run
+      if ((s['name'] == 'JecSystTotal') or (s['name'] == 'JerSyst')):
+        continue
     if s['type'] == 'factory': 
       # Fix for HEM as only in 2018 workspaces
       if s['name'] == 'JetHEM': experimentalFactoryType[s['name']] = "a_h"
@@ -93,8 +100,23 @@ if opt.doSystematics:
   print(" --> Adding experimental systematics variations to dataFrame")
   # Add constant systematics to dataFrame
   for s in experimental_systematics:
+    if opt.variable != '':
+      if (not opt.variable in jetVariables) and ((s['name'] == 'JecSystTotal') or (s['name'] == 'JerSyst')):
+        continue
+    else: # Inclusive run
+      if ((s['name'] == 'JecSystTotal') or (s['name'] == 'JerSyst')):
+        continue
     if s['type'] == 'constant': data = addConstantSyst(data,s,opt)
-  data = experimentalSystFactory(data, experimental_systematics, experimentalFactoryType, opt )
+  
+  if opt.variable == '':
+    # Inclusive run
+    experimentalSystematics = [
+        entry for entry in experimental_systematics
+        if entry['name'] not in {'JecSystTotal', 'JerSyst'}
+    ]
+  else:
+    experimentalSystematics = experimental_systematics
+  data = experimentalSystFactory(data, experimentalSystematics, experimentalFactoryType, opt )
 
   # Theory:
   print(" --> Adding theory systematics variations to dataFrame")
@@ -190,6 +212,12 @@ if not writeProcesses(fdata,data,opt):
 if opt.doSystematics:
   print(" --> Systematics for bins x processes with less than 100 events will be deactivated!")
   for syst in experimental_systematics:
+    if opt.variable != '':
+      if (not opt.variable in jetVariables) and ((syst['name'] == 'JecSystTotal') or (syst['name'] == 'JerSyst')):
+        continue
+    else: # Inclusive run
+      if ((syst['name'] == 'JecSystTotal') or (syst['name'] == 'JerSyst')):
+        continue
     if not writeSystematic(fdata,data,syst,opt):
       print(" --> [ERROR] in writing systematic %s (experiment). Leaving"%syst['name'])
       leave()

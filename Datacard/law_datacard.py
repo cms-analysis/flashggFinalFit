@@ -111,13 +111,15 @@ class MakeYieldsCategory(Task, HTCondorWorkflow, law.LocalWorkflow):#(law.Task):
             "--ext", self.ext,
             "--procs", f"{self.procs}",
             "--mass", f"{self.mass}",
-            "--variable", f"{'r' if self.variable == '' else self.variable}",
             "--bkgScaler", f"{self.bkgScaler}",
             "--sigModelWSDir", f"{self.sigModelWSDir}",
             "--sigModelExt", f"{self.sigModelExt}",
             "--bkgModelWSDir", f"{self.bkgModelWSDir}",
             "--bkgModelExt", f"{self.bkgModelExt}"
             ]
+        if self.variable != '':
+            arguments.append("--variable")
+            arguments.append(f"{self.variable}")
         
         if convert_boolean_string(self.doSystematics): arguments.append("--doSystematics")
         if convert_boolean_string(self.mergeYears): arguments.append("--mergeYears")
@@ -222,16 +224,21 @@ class MakeYields(law.Task):
         else:
             output_dir = self.output_dir
             
+        input_path = config['inputFiles']['Trees2WSData']
+        
         datacard_config = config["datacard_yields"]
         
         output_paths = []
         
         output_paths.append(law.LocalFileTarget(output_dir + f"/Datacards/yields_{datacard_config['ext']}"))
         
-        # if self.variable == '': 
-        #     output_paths.append(law.LocalFileTarget(output_dir + f"/Datacards/yields_{datacard_config['ext']}"))
-        # else:
-        #     output_paths.append(law.LocalFileTarget(output_dir + f"/Datacards/yields_{datacard_config['ext']}_{self.variable}"))                        
+        if datacard_config['cats'] == 'auto':
+            datacard_config['cats'] = (extractListOfCatsFromHiggsDNAAllData(input_path))
+        datacard_config['nCats'] = len(datacard_config['cats'].split(","))
+        
+        for cat in datacard_config['cats'].split(","):
+            output_paths.append(law.LocalFileTarget(self.output_dir + f"/Datacards/yields_{datacard_config['ext']}/{cat}.pkl"))
+                                  
         return output_paths
                 
     
@@ -364,6 +371,9 @@ class MakeDatacard(law.Task):
             "--analysis", f"{datacard_config['analysis']}",
             "--output", f"{datacard_config['output']}"
             ]
+        if self.variable != '':
+            arguments.append("--variable")
+            arguments.append(f"{self.variable}")
         
         if convert_boolean_string(datacard_config["prune"]): arguments.append("--prune")
         if convert_boolean_string(datacard_config["doTrueYield"]): arguments.append("--doTrueYield")
@@ -375,7 +385,7 @@ class MakeDatacard(law.Task):
         if convert_boolean_string(datacard_config["saveDataFrame"]): arguments.append("--saveDataFrame")
     
         command = arguments
-        # print("Output:", command)
+        print("Output:", command)
         try:
             result = subprocess.run(command, check=True, text=True, capture_output=True)
             print("Script output:", result.stdout)
@@ -403,7 +413,7 @@ class MakeDatacard(law.Task):
             if convert_boolean_string(clean_config["verbose"]): arguments.append("--verbose")
         
             command = arguments
-            # print("Output:", command)
+            print("Output:", command)
             try:
                 result = subprocess.run(command, check=True, text=True, capture_output=True)
                 print("Script output:", result.stdout)

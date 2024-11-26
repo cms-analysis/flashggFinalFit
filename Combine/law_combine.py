@@ -3456,7 +3456,7 @@ class MggToyGeneration(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Task): 
                 "--snapshotName", f"{config['combine_mggToys']['loadSnapshot']}"
             ]
             command = arguments
-            print(command)
+            # print(command)
             try:
                 result = subprocess.run(command, check=True, text=True, capture_output=True)
                 print("Script output:", result.stdout)
@@ -3504,7 +3504,7 @@ class MggToyGeneration(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Task): 
                 "--X-rtd", "MINIMIZER_multiMin_maskChannels=2"
             ]
             command = arguments
-            print(command)
+            # print(command)
             try:
                 result = subprocess.run(command, check=True, text=True, capture_output=True)
                 print("Script output:", result.stdout)
@@ -3550,7 +3550,7 @@ class MggToyGeneration(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Task): 
                 arguments.append("--setParameters")
                 arguments.append(f"{cat}=0")
             command = arguments
-            print(command)
+            # print(command)
             try:
                 result = subprocess.run(command, check=True, text=True, capture_output=True)
                 print("Script output:", result.stdout)
@@ -3632,7 +3632,7 @@ class MggToyGeneration(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Task): 
             else:
                 arguments.append(f"""{",".join(combineVariableDict[f'{self.variable}']['paramStr'])}""")
             command = arguments
-            print(command)
+            # print(command)
             try:
                 result = subprocess.run(command, check=True, text=True, capture_output=True)
                 print("Script output:", result.stdout)
@@ -3684,7 +3684,7 @@ class MggToyGeneration(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Task): 
             else:
                 arguments.append(f"""{",".join(combineVariableDict[f'{self.variable}']['paramStr'])}""")
             command = arguments
-            print(command)
+            # print(command)
             try:
                 result = subprocess.run(command, check=True, text=True, capture_output=True)
                 print("Script output:", result.stdout)
@@ -3729,7 +3729,7 @@ class MggToyGeneration(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Task): 
             else:
                 arguments.append(f"""{(",".join(combineVariableDict[f'{self.variable}']['paramStr'])).replace("=1", "=0")}""")
             command = arguments
-            print(command)
+            # print(command)
             try:
                 result = subprocess.run(command, check=True, text=True, capture_output=True)
                 print("Script output:", result.stdout)
@@ -3943,7 +3943,7 @@ class MggDistribution(law.LocalWorkflow): #(law.Task): #(Task, HTCondorWorkflow,
                 arguments.append("--doToyVeto")
                 arguments.append("--saveToyYields")
             command = arguments
-            print(command)
+            # print(command)
             try:
                 result = subprocess.run(command, check=True, text=True, capture_output=True)
                 print("Script output:", result.stdout)
@@ -4013,7 +4013,7 @@ class MggDistribution(law.LocalWorkflow): #(law.Task): #(Task, HTCondorWorkflow,
                 arguments.append("--doToyVeto")
                 arguments.append("--saveToyYields")
             command = arguments
-            print(command)
+            # print(command)
             try:
                 result = subprocess.run(command, check=True, text=True, capture_output=True)
                 print("Script output:", result.stdout)

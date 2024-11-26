@@ -189,9 +189,10 @@ if opt.doSystematics:
   if opt.cat != "NOTAG":
     for s in experimental_systematics: 
       if opt.variable != '':
-        print(s['name'])
-        if (not opt.variable in jetVariables) and ((s['name'] == 'JecSystTotal') or (['name'] == 'JerSyst')):
-          print(opt.variable)
+        if (not opt.variable in jetVariables) and ((s['name'] == 'JecSystTotal') or (s['name'] == 'JerSyst')):
+          continue
+      else: # Inclusive run
+        if ((s['name'] == 'JecSystTotal') or (s['name'] == 'JerSyst')):
           continue
       if s['type'] == 'factory': 
         # Fix for HEM as only in 2018 workspaces

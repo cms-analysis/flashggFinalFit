@@ -154,7 +154,7 @@ class FTestCategory(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Task): #(T
             "--doPlots"
         ]
         command = arguments
-        print(command)
+        # print(command)
         try:
             result = subprocess.run(command, check=True, text=True, capture_output=True)
             print("Script output:", result.stdout)
@@ -647,7 +647,7 @@ class SignalFitCategoryProcess(Task, HTCondorWorkflow, law.LocalWorkflow):#(law.
         if convert_boolean_string(self.doPlots):
             arguments += ["--doPlots"]
         command = arguments
-        print(command)
+        # print(command)
         try:
             result = subprocess.run(command, check=True, text=True, capture_output=True)
             print("Script output:", result.stdout)
