@@ -169,3 +169,23 @@ datacard_clean:
   removeNonDiagonal: False # Remove any nuisances which are affect processes unimportant in that category
   symmetrizeNuisance: 'CMS_hgg_SigmaEOverEShift,CMS_hgg_scale_0_shape,CMS_hgg_scale_1_shape,CMS_hgg_scale_3_shape' # Symmetrizes asymmetric nuisance. Enter in the format nuisance1,nuisance2,nuisance3,etc.
   verbose: False # Spit out all the cleaning being done
+
+combine_fit:
+  asimov_numPoints: 30 # Number of points the Asimov generator should generate for the NLL scan
+  unblindedFit_numPoints: 100 
+  setParameterRange: "r=0,3"
+  execution: 'htcondor'
+
+combine_impacts:
+  exclude: "" # Nuisances that should be excluded from the impact computation
+  not_show_POI: True
+  execution: 'htcondor'
+
+combine_hesse:
+  execution: 'htcondor'
+
+combine_mggToys:
+  nToys: 1000 # Number of toys = nToys * 10
+  loadSnapshot: 'MultiDimFit'
+  doBands: True
+  execution: 'htcondor'
