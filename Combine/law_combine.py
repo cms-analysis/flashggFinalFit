@@ -3299,6 +3299,149 @@ class UnblindedImpactThirdStep(law.Task): #(law.Task): #(Task, HTCondorWorkflow,
             
         os.chdir(cwd)
         
+        
+class MggBestFit(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Task): #(Task, HTCondorWorkflow, law.LocalWorkflow):
+    output_dir = law.Parameter(default = '', description="Path to the output directory")
+    variable = law.Parameter(default="", description="Variable to be used")
+    year = law.Parameter(default='2022', description="Year")
+        
+    # htcondor_job_kwargs_submit = {"spool": True}
+    
+    def requires(self):
+        
+        if self.variable == '':
+            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+        else:
+            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+        
+        #Load central config file
+        with open(configYamlPath, 'r') as file:
+            config = yaml.safe_load(file)
+        
+        if self.output_dir == '':
+            output_dir = config['outputFolder']
+        else:
+            output_dir = self.output_dir
+
+        tasks = [RunText2Workspace(output_dir=output_dir, variable=self.variable, year=self.year)]
+        
+        return tasks
+
+    def create_branch_map(self):
+        
+        if self.variable == '':
+            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+        else:
+            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+                  
+        #Load central config file
+        with open(configYamlPath, 'r') as file:
+            config = yaml.safe_load(file)
+            
+        if self.variable == "":
+            cat_list = ["r"]
+        else:
+            cat_list = combineVariableDict[f'{self.variable}']['paramStrNoOne']
+
+        branch_map = {i: current_cat for i, current_cat in enumerate(cat_list)}
+        return branch_map
+
+    def output(self):        
+        cat = self.branch_data
+                
+        if self.variable == '':
+            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+        else:
+            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+        
+        #Load central config file
+        with open(configYamlPath, 'r') as file:
+            config = yaml.safe_load(file)
+        
+        if self.output_dir == '':
+            output_dir = config['outputFolder']
+        else:
+            output_dir = self.output_dir
+
+        if self.variable == '':
+            fitFolderName = f'runFits_mu_fiducial'
+        else:
+            fitFolderName = f'runFits_{self.variable}'
+            
+        output = [os.path.join(output_dir, 'Combine', fitFolderName, 'postFit')]
+        output += [os.path.join(output_dir, 'Combine', fitFolderName, 'postFit', f'SplusBModels_{cat}')]
+        output += [os.path.join(output_dir, 'Combine', fitFolderName, 'postFit', f'SplusBModels_{cat}', f'higgsCombine_bestfit_syst_obs_{cat}.MultiDimFit.mH125.38.root')]
+        
+        outputFileTargets = []
+                
+        for _, current_output_path in enumerate(output):
+            outputFileTargets.append(law.LocalFileTarget(current_output_path))
+            
+        # print(outputFileTargets)
+
+        return outputFileTargets
+
+    def run(self):
+        cat = self.branch_data
+       
+        if self.variable == '':
+            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            fitFolderName = f'runFits_mu_fiducial'
+            
+        else:
+            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            fitFolderName = f'runFits_{self.variable}'
+                  
+        #Load central config file
+        with open(configYamlPath, 'r') as file:
+            config = yaml.safe_load(file)
+        
+        if self.output_dir == '':
+            output_dir = config['outputFolder']
+        else:
+            output_dir = self.output_dir  
+            
+        if self.variable == '':
+            datacard_path = os.path.join(output_dir, 'Combine', f'Datacard_{self.year}.root')
+        else:
+            datacard_path = os.path.join(output_dir, 'Combine', f'Datacard_{self.variable}_{self.year}.root')
+             
+        cwd = os.getcwd()
+
+        safe_mkdir(os.path.join(output_dir, 'Combine', fitFolderName))
+        safe_mkdir(os.path.join(output_dir, 'Combine', fitFolderName, 'postFit'))
+        safe_mkdir(os.path.join(output_dir, 'Combine', fitFolderName, 'postFit', f'SplusBModels_{cat}'))
+        os.chdir(os.path.join(output_dir, 'Combine', fitFolderName, 'postFit', f'SplusBModels_{cat}'))
+
+        arguments = [
+            "combine",
+            "--floatOtherPOIs", "1",
+            "-P", f"{cat}",
+            "--freezeParameters", "MH",
+            "--saveInactivePOI", "1",
+            "--saveWorkspace",
+            "--saveSpecifiedNuis", "all",
+            "--cminDefaultMinimizerStrategy", "0",
+            "--X-rtd", "MINIMIZER_freezeDisassociatedParams",
+            "--X-rtd", "MINIMIZER_multiMin_hideConstants",
+            "--X-rtd", "MINIMIZER_multiMin_maskConstraints",
+            "--X-rtd", "MINIMIZER_multiMin_maskChannels=2",
+            "-M", f"{config['combine_mggToys']['loadSnapshot']}",
+            "-m", "125.38",
+            "-d", datacard_path,
+            "-n", f"_bestfit_syst_obs_{cat}"
+        ]
+        command = arguments
+        # print(command)
+        try:
+            result = subprocess.run(command, check=True, text=True, capture_output=True)
+            print("Script output:", result.stdout)
+            print("Script executed successfully.")
+        except subprocess.CalledProcessError as e:
+            print("Error executing script:", e.stderr)
+        
+        os.chdir(cwd)
+        
 class MggToyGeneration(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Task): #(Task, HTCondorWorkflow, law.LocalWorkflow):
     output_dir = law.Parameter(default = '', description="Path to the output directory")
     variable = law.Parameter(default="", description="Variable to be used")
@@ -3323,8 +3466,15 @@ class MggToyGeneration(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Task): 
         else:
             output_dir = self.output_dir
 
-        tasks = [RunText2Workspace(output_dir=output_dir, variable=self.variable, year=self.year)]
-        
+        if convert_boolean_string(self.is_postfit):
+            if self.variable == "":
+                version = 'r'
+            else:
+                version = self.variable
+            tasks = [MggBestFit(output_dir=output_dir, variable=self.variable, year=self.year, version=version, workflow='local')]
+        else:
+            tasks = [RunText2Workspace(output_dir=output_dir, variable=self.variable, year=self.year)]
+            
         return tasks
 
     def create_branch_map(self):
@@ -3376,9 +3526,7 @@ class MggToyGeneration(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Task): 
             fitFolderName = f'runFits_{self.variable}'
             
         if convert_boolean_string(self.is_postfit):
-            output = [os.path.join(output_dir, 'Combine', fitFolderName, 'postFit')]
-            output += [os.path.join(output_dir, 'Combine', fitFolderName, 'postFit', f'SplusBModels_{cat}')]
-            output += [os.path.join(output_dir, 'Combine', fitFolderName, 'postFit', f'SplusBModels_{cat}', 'toys')]
+            output = [os.path.join(output_dir, 'Combine', fitFolderName, 'postFit', f'SplusBModels_{cat}', 'toys')]
             output += [os.path.join(output_dir, 'Combine', fitFolderName, 'postFit', f'SplusBModels_{cat}', 'toys', 'filechecker')]
             output += [os.path.join(output_dir, 'Combine', fitFolderName, 'postFit', f'SplusBModels_{cat}', 'toys', 'filechecker', f'toy_{toy}_ok.txt')]
             output += [os.path.join(output_dir, 'Combine', fitFolderName, 'postFit', f'SplusBModels_{cat}', 'toys', f'toy_{toy}.root')]
@@ -3434,16 +3582,16 @@ class MggToyGeneration(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Task): 
             safe_mkdir(os.path.join(output_dir, 'Combine', fitFolderName, 'postFit', f'SplusBModels_{cat}', 'toys', 'filechecker'))
             os.chdir(os.path.join(output_dir, 'Combine', fitFolderName, 'postFit', f'SplusBModels_{cat}', 'toys'))
         
-            data_syst_fit = os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', f'higgsCombineDataPostFitScanFit_{cat}.MultiDimFit.mH125.38.root')
+            best_fit = os.path.join(output_dir, 'Combine', fitFolderName, 'postFit', f'SplusBModels_{cat}', f'higgsCombine_bestfit_syst_obs_{cat}.MultiDimFit.mH125.38.root')
 
-            f = ROOT.TFile(data_syst_fit)
+            f = ROOT.TFile(best_fit)
             w = f.Get("w")
             w.loadSnapshot(config['combine_mggToys']['loadSnapshot'])
             poi_bf = w.var(cat).getVal()
 
             arguments = [
                 "combine",
-                data_syst_fit,
+                best_fit,
                 "-M", "GenerateOnly",
                 "-m", "125.380",
                 "--saveWorkspace",
@@ -3858,7 +4006,6 @@ class MggDistribution(law.LocalWorkflow): #(law.Task): #(Task, HTCondorWorkflow,
             output += [os.path.join(output_dir, 'Combine', fitFolderName, 'postFit', 'jsons')]
             output += [os.path.join(output_dir, 'Combine', fitFolderName, 'postFit', 'jsons', f'catsWeights_sospb_{cat}_CMS_hgg_mass.json')]
             
-            output += [os.path.join(output_dir, 'Combine', fitFolderName, 'postFit', f'SplusBModels_{cat}')]
             output += [os.path.join(output_dir, 'Combine', fitFolderName, 'postFit', f'SplusBModels_{cat}', f'_{cat}_{catWithBMW}_CMS_hgg_mass.pdf') for catWithBMW in reco_cats_with_bmw]
             output += [os.path.join(output_dir, 'Combine', fitFolderName, 'postFit', f'SplusBModels_{cat}', f'_{cat}_{catWithBMW}_CMS_hgg_mass.png') for catWithBMW in reco_cats_with_bmw]
             output += [os.path.join(output_dir, 'Combine', fitFolderName, 'postFit', f'SplusBModels_{cat}', f'_{cat}_all_CMS_hgg_mass.pdf')]
@@ -3869,7 +4016,6 @@ class MggDistribution(law.LocalWorkflow): #(law.Task): #(Task, HTCondorWorkflow,
             output += [os.path.join(output_dir, 'Combine', fitFolderName, 'preFit', 'jsons')]
             output += [os.path.join(output_dir, 'Combine', fitFolderName, 'preFit', 'jsons', f'catsWeights_sospb_{cat}_CMS_hgg_mass.json')]
             
-            output += [os.path.join(output_dir, 'Combine', fitFolderName, 'preFit', f'SplusBModels_{cat}')]
             output += [os.path.join(output_dir, 'Combine', fitFolderName, 'preFit', f'SplusBModels_{cat}', f'_{cat}_{catWithBMW}_CMS_hgg_mass.pdf') for catWithBMW in reco_cats_with_bmw]
             output += [os.path.join(output_dir, 'Combine', fitFolderName, 'preFit', f'SplusBModels_{cat}', f'_{cat}_{catWithBMW}_CMS_hgg_mass.png') for catWithBMW in reco_cats_with_bmw]
             output += [os.path.join(output_dir, 'Combine', fitFolderName, 'preFit', f'SplusBModels_{cat}', f'_{cat}_all_CMS_hgg_mass.pdf')]
@@ -3916,17 +4062,19 @@ class MggDistribution(law.LocalWorkflow): #(law.Task): #(Task, HTCondorWorkflow,
             mgg_dir = os.path.join(output_dir, 'Combine', fitFolderName, 'postFit')
             os.chdir(os.path.join(mgg_dir))
             
+            best_fit = os.path.join(output_dir, 'Combine', fitFolderName, 'postFit', f'SplusBModels_{cat}', f'higgsCombine_bestfit_syst_obs_{cat}.MultiDimFit.mH125.38.root')
+            
             if self.variable == '':
-                firstStep_path = os.path.join(output_dir, 'Combine', f'Datacard_{self.year}.root')
+                # firstStep_path = os.path.join(output_dir, 'Combine', f'Datacard_{self.year}.root')
                 reco_cats_with_bmw = ['best_resolution', 'medium_resolution', 'worst_resolution']
             else:
-                firstStep_path = os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', f'higgsCombineDataPostFitScanFit_{cat}.MultiDimFit.mH125.38.root')
+                # firstStep_path = os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', f'higgsCombineDataPostFitScanFit_{cat}.MultiDimFit.mH125.38.root')
                 reco_cats_with_bmw = [element for element in combineVariableDict[self.variable]['catsStrWithBMW'] if "_".join(cat.split("_")[2:]) in element]
 
             arguments = [
                 "python3",
                 f"{os.path.join(os.environ['ANALYSIS_PATH'], 'Plots', 'makeSplusBModelPlot.py')}",
-                "--inputWSFile", firstStep_path,
+                "--inputWSFile", best_fit,
                 "--loadSnapshot", f"{config['combine_mggToys']['loadSnapshot']}",
                 "--cats", f"{','.join(reco_cats_with_bmw)}",
                 "--doZeroes",
@@ -3954,24 +4102,25 @@ class MggDistribution(law.LocalWorkflow): #(law.Task): #(Task, HTCondorWorkflow,
             # Change directory
             os.chdir(f"./SplusBModels_{cat}")
 
-            # Extract parts from the parameter
-            parts = cat.split('_')
-            pattern = f"{parts[2]}_{parts[3]}"
+            if self.variable != "":
+                # Extract parts from the parameter
+                parts = cat.split('_')
+                pattern = f"{parts[2]}_{parts[3]}"
 
-            # Define source and target directories
-            source_dir = "."
-            target_dir = "../Plots"
+                # Define source and target directories
+                source_dir = "."
+                target_dir = "../Plots"
 
-            # Iterate over files in the source directory
-            for filename in os.listdir(source_dir):
-                # Check if the pattern is in the filename
-                if pattern in filename:
-                    # Construct full source and destination paths
-                    source_path = os.path.join(source_dir, filename)
-                    target_path = os.path.join(target_dir, filename)
-                    # Copy the file to the target directory
-                    shutil.copy(source_path, target_path)
-                    print(f"Copied {filename} to {target_dir}")
+                # Iterate over files in the source directory
+                for filename in os.listdir(source_dir):
+                    # Check if the pattern is in the filename
+                    if pattern in filename:
+                        # Construct full source and destination paths
+                        source_path = os.path.join(source_dir, filename)
+                        target_path = os.path.join(target_dir, filename)
+                        # Copy the file to the target directory
+                        shutil.copy(source_path, target_path)
+                        print(f"Copied {filename} to {target_dir}")
 
             # Go back one directory
             os.chdir("..")
