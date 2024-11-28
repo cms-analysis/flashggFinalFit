@@ -2,7 +2,7 @@
 
 action() {
 
-    cd /eos/home-n/niharrin/PhD/Higgs/law_dev/CMSSW_14_1_0_pre4/src/flashggFinalFit
+    cd /eos/home-n/niharrin/PhD/Higgs/CMSSW_14_1_0_pre4/src/flashggFinalFit
     cmsenv
     local shell_is_zsh="$( [ -z "${ZSH_VERSION}" ] && echo "false" || echo "true" )"
     local this_file="$( ${shell_is_zsh} && echo "${(%):-%x}" || echo "${BASH_SOURCE[0]}" )"
