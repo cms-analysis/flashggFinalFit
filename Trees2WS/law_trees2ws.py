@@ -580,69 +580,8 @@ class Trees2WS(law.Task):
             else:
                 current_output_path = output_dir + "/input_output_{}_{}{}".format(var, self.year, era)
                 
-            outputFolders.append(law.LocalFileTarget(current_output_path))
             outputFolders.append(law.LocalFileTarget(current_output_path + '/ws_signal'))
         
-        mass_era_list = [
-        (mass, era, self.variable, input_paths)
-        for era in allErasMap[f"{self.year}"]
-        for mass in input_masses
-        ]
-    
-        proc_list = [
-            (mode, process)
-            for mode, process in production_modes
-        ]
-        
-        for mode, process in proc_list:
-            
-            for mass, era, var, path_to_root_files in mass_era_list:
-
-                input_path = glob.glob(f"{path_to_root_files}/{process}_M-{mass}_{era}/*.root")[0]
-            
-                if config['trees2wsCfg']["doInOutSplitting"]: fiducialIds = [True, False]
-                else: fiducialIds = [0] # If we do not perform in/out splitting, we want to have one inclusive (for particle-level) process definition, our code int for that is zero
-
-                for fiducialId in fiducialIds:
-                
-                    if config['trees2wsCfg']["doDiffSplitting"]: continue
-
-                    # In the end, the STXS and fiducial in/out splitting should maybe be harmonised, this looks a bit ugly
-                    if (config['trees2wsCfg']["doSTXSSplitting"]): continue
-
-                    if fiducialId == True: fidTag = "in"
-                    elif fiducialId == False: fidTag = "out"
-                    else: fidTag = "incl"
-
-                    # Define output workspace file
-                    if current_output_path is not None:
-                        outputWSDir = current_output_path+"/ws_%s_%s"%(dataToProc(mode), fidTag) # Multiple slashes are normalised away, no worries ("../test/" and "../test" are equivalent)
-                    else:
-                        outputWSDir = "/".join(input_path.split("/")[:-1])+"/ws_%s_%s"%(dataToProc(mode), fidTag)
-                    if not os.path.exists(outputWSDir): os.system("mkdir -p %s"%outputWSDir)
-                    outputWSFile = outputWSDir+"/"+re.sub(".root","_%s_%s.root"%(dataToProc(mode), fidTag),input_path.split("/")[-1])
-                    outputFolders.append(law.LocalFileTarget(outputWSFile))
-                    
-                    
-                if config['trees2wsCfg']["doSTXSSplitting"]:
-                    #STXS currently not implemented
-                    pass
-                        
-                if config['trees2wsCfg']["doDiffSplitting"]:
-                    varBins = [entry[1] for entry in differentialProcTable_[self.variable]]
-                    for currentBin in varBins:
-
-                        # Extract diffBin
-                        diffBin = mode + "_" + currentBin
-
-                        # Define output workspace file
-                        if current_output_path is not None:
-                            outputWSDir = current_output_path + "/ws_%s"%diffBin
-                        else:
-                            outputWSDir = "/".join(input_path.split("/")[:-1])+"/ws_%s"%diffBin
-                        outputWSFile = outputWSDir+"/"+re.sub(".root","_%s.root"%diffBin,input_path.split("/")[-1])
-                        outputFolders.append(law.LocalFileTarget(outputWSFile))
-                    
         return outputFolders
     
     def run(self):
@@ -684,7 +623,10 @@ class Trees2WS(law.Task):
             # Copy files to ws_signal
             src_file_list = glob.glob(currentEra + "/*/*")
             for currentFile in src_file_list:
-                shutil.copy2(currentFile, dst_folder)
+                if not os.path.samefile(currentFile, dst_folder):
+                    shutil.copy2(currentFile, dst_folder)
+                else:
+                    print(f"Skip copying {currentFile} since it is already in ws_signal.")
             
         print("Copy completed.")
 
