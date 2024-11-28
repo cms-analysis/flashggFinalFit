@@ -4,7 +4,7 @@
 
 
 
-outputFolder: '/afs/cern.ch/user/n/niharrin/cernbox/PhD/Higgs/law_dev/CMSSW_14_1_0_pre4/src/flashggFinalFit/output/forPaper_24_10_14/'
+outputFolder: '/afs/cern.ch/user/n/niharrin/cernbox/PhD/Higgs/CMSSW_14_1_0_pre4/src/flashggFinalFit/output/forPaper_24_10_14/'
 
 inputFiles:
   # Trees2WS

@@ -1,6 +1,6 @@
 # Config file: options for signal fitting
 
-outputFolder: '/afs/cern.ch/user/n/niharrin/cernbox/PhD/Higgs/CMSSW_14_1_0_pre4/src/flashggFinalFit/law/output/forPaper_24_10_14_PTH/'
+outputFolder: '/eos/home-n/niharrin/PhD/Higgs/CMSSW_14_1_0_pre4/src/flashggFinalFit/output/forPaper_24_10_14_PTH/'
 
 inputFiles:
   # Trees2WS
