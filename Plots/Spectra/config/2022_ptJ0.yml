@@ -1,0 +1,70 @@
+frame1:
+  custom_xtick_labels:
+    - ""
+    - "50"
+    - "100"
+    - "150"
+    - "200"
+    - "250"
+    - "300"
+    - "350"
+    - "400"
+  custom_xticks:
+    - 15
+    - 50
+    - 100
+    - 150
+    - 200
+    - 250
+    - 300
+    - 350
+    - 400
+  axvline:
+    x: 30
+    color: "black"
+    ls: "dashed"
+    lw: 1
+    alpha: 1
+  fontsize: 14
+  title_fontsize: 14
+
+frame2:
+  xtick_labels:
+    - ""
+    - "50"
+    - "100"
+    - "150"
+    - "200"
+    - "250"
+    - "300"
+    - "350"
+    - "400"
+  xticks:
+    - 15
+    - 50
+    - 100
+    - 150
+    - 200
+    - 250
+    - 300
+    - 350
+    - 400
+  ytick_labels: {}
+  yticks: {}
+  additional_labels:
+    is_data:
+      - text: r"$\sigma(N_{Jets}=0)$"
+        position: [-25, -2]
+        rotation: 45
+        fontsize: 18
+    not_data:
+      - text: r"$\sigma(N_{Jets}=0)$"
+        position: [-25, -1]
+        rotation: 45
+        fontsize: 18
+  axvline:
+    x: 30
+    color: "black"
+    ls: "dashed"
+    lw: 1
+    alpha: 1

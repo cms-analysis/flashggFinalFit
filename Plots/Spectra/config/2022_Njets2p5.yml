@@ -1,0 +1,54 @@
+frame1:
+  custom_xtick_labels:
+    - "0"
+    - "1"
+    - "2"
+    - "3+"
+  custom_xticks:
+    - 0.5
+    - 1.5
+    - 2.5
+    - 3.5
+  ylabel:
+    text: r"$\sigma_{\text{fid}}$ (fb)"
+    fontsize: 20
+  ylim:
+    bottom: 0
+  fontsize: 14
+  title_fontsize: 14
+
+frame2:
+  xtick_labels:
+    - "0"
+    - "1"
+    - "2"
+    - "3+"
+  xticks:
+    - 0.5
+    - 1.5
+    - 2.5
+    - 3.5
+  ytick_labels:
+    is_data: 
+      - "0.0"
+      - "1.0"
+      - "2.0"
+      - "3.0"
+    not_data:
+      - "0.0"
+      - "0.5"
+      - "1.0"
+      - "1.5"
+      - "2.0"
+  yticks:
+    is_data: 
+      - 0
+      - 1
+      - 2
+      - 3
+    not_data:
+      - 0
+      - 0.5
+      - 1
+      - 1.5
+      - 2

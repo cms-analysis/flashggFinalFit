@@ -1,0 +1,10 @@
+frame1:
+  figtext:
+    x: 0.875
+    y: 0.58
+    text: r"$\frac{\sigma_{fid}(p_{T}^{H} > 350.0\ GeV)}{150.0\ GeV}$"
+    horizontalalignment: "right"
+    rotation: 90
+    fontsize: 14
+  fontsize: 13
+  title_fontsize: 13

@@ -28,6 +28,8 @@ action() {
     export PYTHONPATH="${this_dir}/../Datacard:${PYTHONPATH}"
     export PYTHONPATH="${this_dir}/../Datacard/datacardTools:${PYTHONPATH}"
     export PYTHONPATH="${this_dir}/../Combine:${PYTHONPATH}"
+    export PYTHONPATH="${this_dir}/../Plots/Spectra:${PYTHONPATH}"
+    export PYTHONPATH="${this_dir}/../Plots/Spectra/fidXS:${PYTHONPATH}"
     export LAW_HOME="${this_dir}/.law"
     export LAW_CONFIG_FILE="${this_dir}/law.cfg"
     export LAW_DIR="${this_dir}"
