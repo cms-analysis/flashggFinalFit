@@ -56,16 +56,6 @@ class Trees2WSSingleProcess(Task, HTCondorWorkflow, law.LocalWorkflow):#(law.Tas
 
     htcondor_job_kwargs_submit = {"spool": True}  
     
-    # def create_branch_map(self):
-    #     # map branch indexes to ascii numbers from 97 to 122 ("a" to "z")
-    #     if self.variable == '':
-    #         test = [str(i) for i in range(0,(3*4*2))]
-    #     else:
-    #         test = [entry[1] for entry in differentialProcTable_[self.variable]]
-            
-    #     varBins = {i: num for i, num in enumerate(range(0, len(test) + 1))}
-    #     return varBins
-    
     def create_branch_map(self):
         # map branch indexes to ascii numbers from 97 to 122 ("a" to "z")
         mode_proc_mass_list = [
@@ -76,9 +66,6 @@ class Trees2WSSingleProcess(Task, HTCondorWorkflow, law.LocalWorkflow):#(law.Tas
         ]
         branch_map = {i: mode_proc_mass for i, mode_proc_mass in enumerate(mode_proc_mass_list)}
         return branch_map
-    
-    # def create_branch_map(self):
-    #     return {i: num for i, num in enumerate(range(0,1))}
 
     def output(self):
         
@@ -102,7 +89,7 @@ class Trees2WSSingleProcess(Task, HTCondorWorkflow, law.LocalWorkflow):#(law.Tas
         if doInOutSplitting:
 
             for fiducialId in fiducialIds:
-                
+                                
                 # In the end, the STXS and fiducial in/out splitting should maybe be harmonised, this looks a bit ugly
                 
                 if fiducialId == True: fidTag = "in"
@@ -111,13 +98,14 @@ class Trees2WSSingleProcess(Task, HTCondorWorkflow, law.LocalWorkflow):#(law.Tas
 
                 # Define output workspace file
                 if self.output_dir is not None:
-                    outputWSDir = self.output_dir+"/ws_%s_%s"%(dataToProc(productionMode), fidTag) # Multiple slashes are normalised away, no worries ("../test/" and "../test" are equivalent)
+                    outputWSDir = os.path.join(self.output_dir,"ws_{}_{}".format(dataToProc(productionMode), fidTag))
                 else:
-                    outputWSDir = "/".join(input_path.split("/")[:-1])+"/ws_%s_%s"%(dataToProc(productionMode), fidTag)
+                    outputWSDir = os.path.join(os.path.dirname(input_path),"ws_{}_{}".format(dataToProc(productionMode), fidTag))
                 if not os.path.exists(outputWSDir): os.system("mkdir -p %s"%outputWSDir)
-                outputWSFile = outputWSDir+"/"+re.sub(".root","_%s_%s.root"%(dataToProc(productionMode), fidTag),input_path.split("/")[-1])
+                os.system("mkdir -p %s"%os.path.join(self.output_dir, 'filechecker'))
+                outputWSFile = os.path.join(outputWSDir,re.sub(r"\.root","_{}_{}.root".format(dataToProc(productionMode), fidTag),os.path.basename(input_path)))                
+                outputFileTargets.append(law.LocalFileTarget(os.path.join(self.output_dir, 'filechecker', f'{productionMode}_{input_mass}_{fidTag}.txt')))
                 outputFileTargets.append(law.LocalFileTarget(outputWSFile))
-            
             
         elif doSTXSSplitting:
             #STXS currently not implemented
@@ -132,14 +120,17 @@ class Trees2WSSingleProcess(Task, HTCondorWorkflow, law.LocalWorkflow):#(law.Tas
 
                 # Define output workspace file
                 if self.output_dir is not None:
-                    outputWSDir = self.output_dir + "/ws_%s"%diffBin
+                    outputWSDir = os.path.join(self.output_dir,"ws_{}".format(diffBin))
                 else:
-                    outputWSDir = "/".join(input_path.split("/")[:-1])+"/ws_%s"%diffBin
-                outputWSFile = outputWSDir+"/"+re.sub(".root","_%s.root"%diffBin,input_path.split("/")[-1])
+                    outputWSDir = os.path.join(os.path.dirname(input_path),"ws_{}".format(diffBin))
+                outputWSFile = os.path.join(outputWSDir,re.sub(r"\.root","_{}.root".format(diffBin),os.path.basename(input_path)))
+                os.system("mkdir -p %s"%os.path.join(self.output_dir, 'filechecker'))
+                outputFileTargets.append(law.LocalFileTarget(os.path.join(self.output_dir, 'filechecker', f'{productionMode}_{input_mass}_{currentBin}.txt')))
                 outputFileTargets.append(law.LocalFileTarget(outputWSFile))        
         return outputFileTargets
 
     def run(self):
+        
         current_mode_proc_mass = self.branch_data
         
         productionMode = current_mode_proc_mass[0]
@@ -190,7 +181,6 @@ class Trees2WSSingleProcess(Task, HTCondorWorkflow, law.LocalWorkflow):#(law.Tas
         else:
             print( "[ERROR] Please specify config file to run from. Leaving..."%input_config)
             leave()
-            
             
         # Function to add vars to workspace
         def add_vars_to_workspace(_ws=None,_data=None,_stxsVar=None):
@@ -311,7 +301,6 @@ class Trees2WSSingleProcess(Task, HTCondorWorkflow, law.LocalWorkflow):#(law.Tas
                 if "sigma" in tn: continue
                 c = tn.split("_%s_"%sqrts__)[-1].split(";")[0]
                 cats.append(c)
-
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         # 1) Convert tree to pandas dataframe
         # Create dataframe to store all events in file
@@ -339,7 +328,6 @@ class Trees2WSSingleProcess(Task, HTCondorWorkflow, law.LocalWorkflow):#(law.Tas
                     dfs[ts] = pandas.DataFrame(np.reshape(np.array(t[ts].array()),(t.num_entries,len(tsColumns))))
                 dfs[ts].columns = tsColumns
                 
-
             # Main variables to add to nominal RooDataSets
             # For wildcards use filter_name functionality
             mainVars_dropWildcards = []
@@ -429,16 +417,32 @@ class Trees2WSSingleProcess(Task, HTCondorWorkflow, law.LocalWorkflow):#(law.Tas
 
                 # Define output workspace file
                 if self.output_dir is not None:
-                    outputWSDir = self.output_dir+"/ws_%s_%s"%(dataToProc(productionMode), fidTag) # Multiple slashes are normalised away, no worries ("../test/" and "../test" are equivalent)
+                    outputWSDir = os.path.join(self.output_dir, "ws_{}_{}".format(dataToProc(productionMode), fidTag)) # Multiple slashes are normalised away, no worries ("../test/" and "../test" are equivalent)
                 else:
-                    outputWSDir = "/".join(input_path.split("/")[:-1])+"/ws_%s_%s"%(dataToProc(productionMode), fidTag)
+                    outputWSDir = os.path.join(
+                        os.path.dirname(input_path),
+                        "ws_{}_{}".format(dataToProc(productionMode), fidTag)
+                    )
                 if not os.path.exists(outputWSDir): os.system("mkdir -p %s"%outputWSDir)
-                outputWSFile = outputWSDir+"/"+re.sub(".root","_%s_%s.root"%(dataToProc(productionMode), fidTag),input_path.split("/")[-1])
+                os.system("mkdir -p %s"%os.path.join(self.output_dir, 'filechecker'))
+                outputWSFile = os.path.join(outputWSDir,re.sub(r"\.root","_{}_{}.root".format(dataToProc(productionMode), fidTag),os.path.basename(input_path)))
                 print(" --> Creating output workspace: (%s)"%outputWSFile)
                 
                 productionMode_string = productionMode + "_" + fidTag # This is, for example, "ggh_in"
 
                 create_workspace(df, sdf, outputWSFile, productionMode_string)
+                
+                # Check if output workspace is > 2000 bytes (== file empty)
+                try:
+                    file_size = os.path.getsize(outputWSFile)  # Get the file size in bytes
+                    if file_size > 2000:
+                        with open(os.path.join(self.output_dir, 'filechecker', f'{productionMode}_{input_mass}_{fidTag}.txt'), 'w') as f:
+                            pass
+                except OSError:
+                    # Handle the case where the file does not exist or is inaccessible
+                    print(f"Error creating file. Probably I/O error.")
+                    return False
+
 
         elif (doSTXSSplitting):
             
@@ -462,15 +466,29 @@ class Trees2WSSingleProcess(Task, HTCondorWorkflow, law.LocalWorkflow):#(law.Tas
                 elif productionMode == 'thw': stxsBin = re.sub("TH","THW",stxsBin)
 
                 # Define output workspace file
-                outputWSDir = "/".join(input_path.split("/")[:-1])+"/ws_%s"%stxsBin
+                outputWSDir = os.path.join(
+                    os.path.dirname(input_path),
+                    "ws_{}".format(stxsBin)
+                )
                 if not os.path.exists(outputWSDir): os.system("mkdir -p %s"%outputWSDir)
-                outputWSFile = outputWSDir+"/"+re.sub(".root","_%s.root"%stxsBin,input_path.split("/")[-1])
+                os.system("mkdir -p %s"%os.path.join(self.output_dir, 'filechecker'))
+                outputWSFile = os.path.join(outputWSDir,re.sub(r"\.root","_{}.root".format(stxsBin),os.path.basename(input_path)))
                 print(" --> Creating output workspace for STXS bin: %s (%s)"%(stxsBin,outputWSFile))
 
                 productionMode_string = productionMode
 
                 create_workspace(df, sdf, outputWSFile, productionMode_string)
-
+                
+                # Check if output workspace is > 2000 bytes (== file empty)
+                try:
+                    file_size = os.path.getsize(outputWSFile)  # Get the file size in bytes
+                    if file_size > 2000:
+                        with open(os.path.join(self.output_dir, 'filechecker', f'{productionMode}_{input_mass}_{stxsBin}.txt'), 'w') as f:
+                            pass
+                except OSError:
+                    # Handle the case where the file does not exist or is inaccessible
+                    print(f"Error creating file. Probably I/O error.")
+                    return False
 
         elif doDiffSplitting:
             
@@ -484,22 +502,42 @@ class Trees2WSSingleProcess(Task, HTCondorWorkflow, law.LocalWorkflow):#(law.Tas
                 if int(diffId) == 0: continue
 
                 # Extract diffBin
-                diffBin = getBinNameByHiggsDNANumber(self.variable, int(diffId))
-                diffBin = productionMode + "_" + diffBin
+                currentBin = getBinNameByHiggsDNANumber(self.variable, int(diffId))
+                diffBin = productionMode + "_" + currentBin
                 print("diffBin", diffBin)
 
                 # Define output workspace file
                 if self.output_dir is not None:
-                    outputWSDir = self.output_dir + "/ws_%s"%diffBin
+                    outputWSDir = os.path.join(
+                        self.output_dir,
+                        "ws_{}".format(diffBin)
+                    )
                 else:
-                    outputWSDir = "/".join(input_path.split("/")[:-1])+"/ws_%s"%diffBin
+                    outputWSDir = os.path.join(
+                        os.path.dirname(input_path),
+                        "ws_{}".format(diffBin)
+                    )
                 if not os.path.exists(outputWSDir): os.system("mkdir -p %s"%outputWSDir)
-                outputWSFile = outputWSDir+"/"+re.sub(".root","_%s.root"%diffBin,input_path.split("/")[-1])
+                os.system("mkdir -p %s"%os.path.join(self.output_dir, 'filechecker'))
+                outputWSFile = os.path.join(outputWSDir, re.sub(r"\.root","_{}.root".format(diffBin),os.path.basename(input_path)))
                 print(" --> Creating output workspace for differential bin: %s (%s)"%(diffBin,outputWSFile))
 
                 productionMode_string = productionMode
 
                 create_workspace(df, sdf, outputWSFile, productionMode_string)
+        
+                # Check if output workspace is > 2000 bytes (== file empty)
+                try:
+                    file_size = os.path.getsize(outputWSFile)  # Get the file size in bytes
+                    if file_size > 2000:
+                        print(os.path.join(self.output_dir, 'filechecker', f'{productionMode}_{input_mass}_{currentBin}.txt'))
+                        with open(os.path.join(self.output_dir, 'filechecker', f'{productionMode}_{input_mass}_{currentBin}.txt'), 'w') as f:
+                            pass
+                except OSError:
+                    # Handle the case where the file does not exist or is inaccessible
+                    print(f"Error creating file. Probably I/O error.")
+                    return False
+        
 
 class Trees2WS(law.Task):
     output_dir = law.Parameter(default = '', description="Path to the output directory")
@@ -532,7 +570,7 @@ class Trees2WS(law.Task):
         doSystematics = convert_boolean_string(config["doSystematics"])
         mass_cut = convert_boolean_string(config["apply_mass_cut"])
         mass_cut_r = config["mass_cut_range"]
-                       
+
         tasks = []
         
         era_list = [
@@ -621,7 +659,7 @@ class Trees2WS(law.Task):
             safe_mkdir(dst_folder)
             
             # Copy files to ws_signal
-            src_file_list = glob.glob(currentEra + "/*/*")
+            src_file_list = glob.glob(os.path.join(currentEra, "ws_*", "*"))
             for currentFile in src_file_list:
                 if not os.path.samefile(currentFile, dst_folder):
                     shutil.copy2(currentFile, dst_folder)
