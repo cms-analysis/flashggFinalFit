@@ -2462,15 +2462,16 @@ class UnblindedCovCorrHesse(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Ta
             fitFolderName = f'runFits_mu_fiducial'
         else:
             fitFolderName = f'runFits_{self.variable}'
+                  
+        if self.variable == '':
+            output = []
+        else:
+            output = [os.path.join(output_dir, 'Combine', fitFolderName, 'hesse')]
+
+            output += [os.path.join(output_dir, 'Combine', fitFolderName, 'hesse', f'robustHessefirstStep_data.root')]
+            output += [os.path.join(output_dir, 'Combine', fitFolderName, 'hesse', f'multidimfitfirstStep_data.root')]
+            output += [os.path.join(output_dir, 'Combine', fitFolderName, 'hesse', f'higgsCombinefirstStep_data.MultiDimFit.mH125.38.root')]
             
-        # output = [os.path.join(output_dir, 'Combine', fitFolderName)]
-        output = [os.path.join(output_dir, 'Combine', fitFolderName, 'hesse')]
-        
-        
-        output += [os.path.join(output_dir, 'Combine', fitFolderName, 'hesse', f'robustHessefirstStep_data.root')]
-        output += [os.path.join(output_dir, 'Combine', fitFolderName, 'hesse', f'multidimfitfirstStep_data.root')]
-        output += [os.path.join(output_dir, 'Combine', fitFolderName, 'hesse', f'higgsCombinefirstStep_data.MultiDimFit.mH125.38.root')]
-        
         outputFileTargets = []
                 
         for _, current_output_path in enumerate(output):
@@ -2563,7 +2564,12 @@ class UnblindedCovCorr(law.Task): #(law.Task): #(Task, HTCondorWorkflow, law.Loc
         else:
             output_dir = self.output_dir
             
-        tasks = [UnblindedCovCorrHesse(output_dir=output_dir, variable=self.variable, year=self.year, version="v1", workflow=config["combine_hesse"]["execution"])]
+        if self.variable == '':
+            version = 'r'
+        else:
+            version = self.variable
+            
+        tasks = [UnblindedCovCorrHesse(output_dir=output_dir, variable=self.variable, year=self.year, version=version, workflow=config["combine_hesse"]["execution"])]
         
         return tasks
 
