@@ -44,9 +44,9 @@ class PrepareTheDirectory(law.Task):#(law.Task): #(Task, HTCondorWorkflow, law.L
     def requires(self):
         
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
         
         #Load central config file
         with open(configYamlPath, 'r') as file:
@@ -72,10 +72,10 @@ class PrepareTheDirectory(law.Task):#(law.Task): #(Task, HTCondorWorkflow, law.L
     def output(self):
         
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
             fitFolderName = f'runFits_mu_fiducial'
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
             fitFolderName = f'runFits_{self.variable}'
         
         #Load central config file
@@ -122,10 +122,10 @@ class PrepareTheDirectory(law.Task):#(law.Task): #(Task, HTCondorWorkflow, law.L
     def run(self):
         
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
             fitFolderName = f'runFits_mu_fiducial'
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
             fitFolderName = f'runFits_{self.variable}'
         
         #Load central config file
@@ -214,9 +214,9 @@ class RunText2Workspace(law.Task): #(law.Task): #(Task, HTCondorWorkflow, law.Lo
     def requires(self):
         
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
         
         #Load central config file
         with open(configYamlPath, 'r') as file:
@@ -241,9 +241,9 @@ class RunText2Workspace(law.Task): #(law.Task): #(Task, HTCondorWorkflow, law.Lo
     def output(self):
         
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
         
         #Load central config file
         with open(configYamlPath, 'r') as file:
@@ -278,11 +278,11 @@ class RunText2Workspace(law.Task): #(law.Task): #(Task, HTCondorWorkflow, law.Lo
     def run(self):      
         
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
             mode = "mu_fiducial"
             datacard_name = f"Datacard_{self.year}"
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
             mode = self.variable
             datacard_name = f"Datacard_{self.variable}_{self.year}"
         
@@ -329,9 +329,9 @@ class AsimovFitCategoryFirstStep(Task, HTCondorWorkflow, law.LocalWorkflow): #(l
     def requires(self):
         
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
         
         #Load central config file
         with open(configYamlPath, 'r') as file:
@@ -365,9 +365,9 @@ class AsimovFitCategoryFirstStep(Task, HTCondorWorkflow, law.LocalWorkflow): #(l
         current_branch = self.branch_data
         
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
         
         #Load central config file
         with open(configYamlPath, 'r') as file:
@@ -403,11 +403,11 @@ class AsimovFitCategoryFirstStep(Task, HTCondorWorkflow, law.LocalWorkflow): #(l
         current_branch = self.branch_data
         
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
             fitFolderName = f'runFits_mu_fiducial'
             
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
             fitFolderName = f'runFits_{self.variable}'
                   
         #Load central config file
@@ -472,9 +472,9 @@ class CreateAsimovFitFirstStep(law.Task): #(law.Task): #(Task, HTCondorWorkflow,
     def requires(self):
         
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
         
         #Load central config file
         with open(configYamlPath, 'r') as file:
@@ -505,9 +505,9 @@ class CreateAsimovFitFirstStep(law.Task): #(law.Task): #(Task, HTCondorWorkflow,
 
     def output(self):
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
         
         #Load central config file
         with open(configYamlPath, 'r') as file:
@@ -553,9 +553,9 @@ class AsimovFitCategorySyst(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Ta
     def requires(self):
         
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
         
         #Load central config file
         with open(configYamlPath, 'r') as file:
@@ -578,9 +578,9 @@ class AsimovFitCategorySyst(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Ta
         current_point = self.branch_data
         
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
         
         #Load central config file
         with open(configYamlPath, 'r') as file:
@@ -614,11 +614,11 @@ class AsimovFitCategorySyst(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Ta
         current_point = self.branch_data
         
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
             fitFolderName = f'runFits_mu_fiducial'
             
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
             fitFolderName = f'runFits_{self.variable}'
                     
         #Load central config file
@@ -750,9 +750,9 @@ class AsimovFitCategoryStat(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Ta
     def requires(self):
         
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
         
         #Load central config file
         with open(configYamlPath, 'r') as file:
@@ -775,9 +775,9 @@ class AsimovFitCategoryStat(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Ta
         current_point = self.branch_data
         
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
         
         #Load central config file
         with open(configYamlPath, 'r') as file:
@@ -811,11 +811,11 @@ class AsimovFitCategoryStat(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Ta
         current_point = self.branch_data
         
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
             fitFolderName = f'runFits_mu_fiducial'
             
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
             fitFolderName = f'runFits_{self.variable}'
                     
         #Load central config file
@@ -945,9 +945,9 @@ class CreateAsimovFit(law.Task): #(law.Task): #(Task, HTCondorWorkflow, law.Loca
     def requires(self):
         
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
         
         #Load central config file
         with open(configYamlPath, 'r') as file:
@@ -979,9 +979,9 @@ class CreateAsimovFit(law.Task): #(law.Task): #(Task, HTCondorWorkflow, law.Loca
 
     def output(self):
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
         
         #Load central config file
         with open(configYamlPath, 'r') as file:
@@ -1029,10 +1029,10 @@ class CreateAsimovFit(law.Task): #(law.Task): #(Task, HTCondorWorkflow, law.Loca
     def run(self):
         
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
             fitFolderName = f'runFits_mu_fiducial'
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
             fitFolderName = f'runFits_{self.variable}'
             
                     
@@ -1119,9 +1119,9 @@ class AsimovImpactFirstStep(law.Task): #(law.Task): #(Task, HTCondorWorkflow, la
     def requires(self):
         
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
         
         #Load central config file
         with open(configYamlPath, 'r') as file:
@@ -1142,9 +1142,9 @@ class AsimovImpactFirstStep(law.Task): #(law.Task): #(Task, HTCondorWorkflow, la
 
     def output(self):        
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
         
         #Load central config file
         with open(configYamlPath, 'r') as file:
@@ -1177,11 +1177,11 @@ class AsimovImpactFirstStep(law.Task): #(law.Task): #(Task, HTCondorWorkflow, la
     def run(self):
        
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
             fitFolderName = f'runFits_mu_fiducial'
             
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
             fitFolderName = f'runFits_{self.variable}'
                   
         #Load central config file
@@ -1268,9 +1268,9 @@ class AsimovImpactSecondStep(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.T
     def requires(self):
         
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
         
         #Load central config file
         with open(configYamlPath, 'r') as file:
@@ -1288,9 +1288,9 @@ class AsimovImpactSecondStep(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.T
     def create_branch_map(self):
         
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
                   
         #Load central config file
         with open(configYamlPath, 'r') as file:
@@ -1349,9 +1349,9 @@ class AsimovImpactSecondStep(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.T
         current_param = self.branch_data
         
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
         
         #Load central config file
         with open(configYamlPath, 'r') as file:
@@ -1385,11 +1385,11 @@ class AsimovImpactSecondStep(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.T
         current_param = self.branch_data
        
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
             fitFolderName = f'runFits_mu_fiducial'
             
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
             fitFolderName = f'runFits_{self.variable}'
                   
         #Load central config file
@@ -1485,9 +1485,9 @@ class AsimovImpactThirdStep(law.Task): #(law.Task): #(Task, HTCondorWorkflow, la
     def requires(self):
         
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
         
         #Load central config file
         with open(configYamlPath, 'r') as file:
@@ -1509,9 +1509,9 @@ class AsimovImpactThirdStep(law.Task): #(law.Task): #(Task, HTCondorWorkflow, la
 
     def output(self):
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
         
         #Load central config file
         with open(configYamlPath, 'r') as file:
@@ -1553,11 +1553,11 @@ class AsimovImpactThirdStep(law.Task): #(law.Task): #(Task, HTCondorWorkflow, la
     def run(self):
        
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
             fitFolderName = f'runFits_mu_fiducial'
             
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
             fitFolderName = f'runFits_{self.variable}'
                   
         #Load central config file
@@ -1600,7 +1600,7 @@ class AsimovImpactThirdStep(law.Task): #(law.Task): #(Task, HTCondorWorkflow, la
 
             arguments = [
                 "python3",
-                f"{os.path.join(os.environ['ANALYSIS_PATH'], 'Combine', 'correctImpacts.py')}",
+                f"{os.path.join(os.environ['ANALYSIS_PATH'], 'Plots', 'correctImpacts.py')}",
                 "--impactsJson", f"{os.path.join(output_dir, 'Combine', fitFolderName, 'impact', 'impacts', 'impacts.json')}",
                 "--frozenParam", "MH",
                 "--dropBkgModelParams"
@@ -1678,9 +1678,9 @@ class AsimovCovCorrHesse(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Task)
     def requires(self):
         
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
         
         #Load central config file
         with open(configYamlPath, 'r') as file:
@@ -1701,9 +1701,9 @@ class AsimovCovCorrHesse(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Task)
 
     def output(self):        
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
         
         #Load central config file
         with open(configYamlPath, 'r') as file:
@@ -1743,7 +1743,7 @@ class AsimovCovCorrHesse(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Task)
             return True
             
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
             fitFolderName = f'runFits_{self.variable}'
                   
         #Load central config file
@@ -1808,9 +1808,9 @@ class AsimovCovCorr(law.Task): #(law.Task): #(Task, HTCondorWorkflow, law.LocalW
     def requires(self):
         
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
         
         #Load central config file
         with open(configYamlPath, 'r') as file:
@@ -1831,9 +1831,9 @@ class AsimovCovCorr(law.Task): #(law.Task): #(Task, HTCondorWorkflow, law.LocalW
 
     def output(self):        
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
         
         #Load central config file
         with open(configYamlPath, 'r') as file:
@@ -1873,7 +1873,7 @@ class AsimovCovCorr(law.Task): #(law.Task): #(Task, HTCondorWorkflow, law.LocalW
             return True
             
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
             fitFolderName = f'runFits_{self.variable}'
                   
         #Load central config file
@@ -1948,9 +1948,9 @@ class UnblindedFitCategorySyst(Task, HTCondorWorkflow, law.LocalWorkflow): #(law
     def requires(self):
         
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
         
         #Load central config file
         with open(configYamlPath, 'r') as file:
@@ -1977,9 +1977,9 @@ class UnblindedFitCategorySyst(Task, HTCondorWorkflow, law.LocalWorkflow): #(law
         current_cat = self.branch_data
         
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
         
         #Load central config file
         with open(configYamlPath, 'r') as file:
@@ -2013,11 +2013,11 @@ class UnblindedFitCategorySyst(Task, HTCondorWorkflow, law.LocalWorkflow): #(law
         current_cat = self.branch_data
         
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
             fitFolderName = f'runFits_mu_fiducial'
             
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
             fitFolderName = f'runFits_{self.variable}'
                     
         #Load central config file
@@ -2115,9 +2115,9 @@ class UnblindedFitCategoryStat(Task, HTCondorWorkflow, law.LocalWorkflow): #(law
     def requires(self):
         
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
         
         #Load central config file
         with open(configYamlPath, 'r') as file:
@@ -2148,9 +2148,9 @@ class UnblindedFitCategoryStat(Task, HTCondorWorkflow, law.LocalWorkflow): #(law
         cat = self.branch_data
         
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
         
         #Load central config file
         with open(configYamlPath, 'r') as file:
@@ -2184,11 +2184,11 @@ class UnblindedFitCategoryStat(Task, HTCondorWorkflow, law.LocalWorkflow): #(law
         cat = self.branch_data
         
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
             fitFolderName = f'runFits_mu_fiducial'
             
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
             fitFolderName = f'runFits_{self.variable}'
                     
         #Load central config file
@@ -2284,9 +2284,9 @@ class CreateUnblindedFit(law.Task): #(law.Task): #(Task, HTCondorWorkflow, law.L
     def requires(self):
         
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
         
         #Load central config file
         with open(configYamlPath, 'r') as file:
@@ -2318,9 +2318,9 @@ class CreateUnblindedFit(law.Task): #(law.Task): #(Task, HTCondorWorkflow, law.L
 
     def output(self):
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
         
         #Load central config file
         with open(configYamlPath, 'r') as file:
@@ -2364,10 +2364,10 @@ class CreateUnblindedFit(law.Task): #(law.Task): #(Task, HTCondorWorkflow, law.L
     def run(self):
         
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
             fitFolderName = f'runFits_mu_fiducial'
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
             fitFolderName = f'runFits_{self.variable}'
             
                     
@@ -2422,9 +2422,9 @@ class UnblindedCovCorrHesse(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Ta
     def requires(self):
         
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
         
         #Load central config file
         with open(configYamlPath, 'r') as file:
@@ -2445,9 +2445,9 @@ class UnblindedCovCorrHesse(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Ta
 
     def output(self):        
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
         
         #Load central config file
         with open(configYamlPath, 'r') as file:
@@ -2488,7 +2488,7 @@ class UnblindedCovCorrHesse(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Ta
             return True
             
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
             fitFolderName = f'runFits_{self.variable}'
                   
         #Load central config file
@@ -2551,9 +2551,9 @@ class UnblindedCovCorr(law.Task): #(law.Task): #(Task, HTCondorWorkflow, law.Loc
     def requires(self):
         
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
         
         #Load central config file
         with open(configYamlPath, 'r') as file:
@@ -2579,9 +2579,9 @@ class UnblindedCovCorr(law.Task): #(law.Task): #(Task, HTCondorWorkflow, law.Loc
 
     def output(self):        
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
         
         #Load central config file
         with open(configYamlPath, 'r') as file:
@@ -2621,7 +2621,7 @@ class UnblindedCovCorr(law.Task): #(law.Task): #(Task, HTCondorWorkflow, law.Loc
             return True
             
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
             fitFolderName = f'runFits_{self.variable}'
                   
         #Load central config file
@@ -2698,9 +2698,9 @@ class UnblindedImpactFirstStep(law.Task): #(law.Task): #(Task, HTCondorWorkflow,
     def requires(self):
         
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
         
         #Load central config file
         with open(configYamlPath, 'r') as file:
@@ -2721,9 +2721,9 @@ class UnblindedImpactFirstStep(law.Task): #(law.Task): #(Task, HTCondorWorkflow,
 
     def output(self):        
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
         
         #Load central config file
         with open(configYamlPath, 'r') as file:
@@ -2756,11 +2756,11 @@ class UnblindedImpactFirstStep(law.Task): #(law.Task): #(Task, HTCondorWorkflow,
     def run(self):
        
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
             fitFolderName = f'runFits_mu_fiducial'
             
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
             fitFolderName = f'runFits_{self.variable}'
                   
         #Load central config file
@@ -2848,9 +2848,9 @@ class UnblindedImpactSecondStep(Task, HTCondorWorkflow, law.LocalWorkflow): #(la
     def requires(self):
         
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
         
         #Load central config file
         with open(configYamlPath, 'r') as file:
@@ -2868,9 +2868,9 @@ class UnblindedImpactSecondStep(Task, HTCondorWorkflow, law.LocalWorkflow): #(la
     def create_branch_map(self):
         
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
                   
         #Load central config file
         with open(configYamlPath, 'r') as file:
@@ -2916,9 +2916,9 @@ class UnblindedImpactSecondStep(Task, HTCondorWorkflow, law.LocalWorkflow): #(la
         current_param = self.branch_data
         
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
         
         #Load central config file
         with open(configYamlPath, 'r') as file:
@@ -2952,11 +2952,11 @@ class UnblindedImpactSecondStep(Task, HTCondorWorkflow, law.LocalWorkflow): #(la
         current_param = self.branch_data
        
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
             fitFolderName = f'runFits_mu_fiducial'
             
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
             fitFolderName = f'runFits_{self.variable}'
                   
         #Load central config file
@@ -2995,7 +2995,7 @@ class UnblindedImpactSecondStep(Task, HTCondorWorkflow, law.LocalWorkflow): #(la
                 tree.GetEntry(0)  # Load the first entry
                 poi_bf_value = getattr(tree, 'r')  # Access the branch value
                 poi_bf_string = f'r={poi_bf_value}'
-                print(f"First value of branch 'r': {first_value}")
+                print(f"First value of branch 'r': {poi_bf_value}")
             else:
                 print("Error: Branch 'r' not found in the tree.")
                 exit(1)
@@ -3099,9 +3099,11 @@ class UnblindedImpactThirdStep(law.Task): #(law.Task): #(Task, HTCondorWorkflow,
     def requires(self):
         
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
+            version = 'r'
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
+            version = self.variable
         
         #Load central config file
         with open(configYamlPath, 'r') as file:
@@ -3112,7 +3114,7 @@ class UnblindedImpactThirdStep(law.Task): #(law.Task): #(Task, HTCondorWorkflow,
         else:
             output_dir = self.output_dir
             
-        tasks = [UnblindedImpactSecondStep(output_dir=output_dir, variable=self.variable, year=self.year, version=f"{self.variable}", workflow="htcondor")]
+        tasks = [UnblindedImpactSecondStep(output_dir=output_dir, variable=self.variable, year=self.year, version=version, workflow=config["combine_impacts"]["execution"])]
         
         return tasks
 
@@ -3123,9 +3125,9 @@ class UnblindedImpactThirdStep(law.Task): #(law.Task): #(Task, HTCondorWorkflow,
 
     def output(self):
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
         
         #Load central config file
         with open(configYamlPath, 'r') as file:
@@ -3167,11 +3169,11 @@ class UnblindedImpactThirdStep(law.Task): #(law.Task): #(Task, HTCondorWorkflow,
     def run(self):
        
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
             fitFolderName = f'runFits_mu_fiducial'
             
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
             fitFolderName = f'runFits_{self.variable}'
                   
         #Load central config file
@@ -3215,7 +3217,7 @@ class UnblindedImpactThirdStep(law.Task): #(law.Task): #(Task, HTCondorWorkflow,
                 
             arguments = [
                 "python3",
-                f"{os.path.join(os.environ['ANALYSIS_PATH'], 'Combine', 'correctImpacts.py')}",
+                f"{os.path.join(os.environ['ANALYSIS_PATH'], 'Plots', 'correctImpacts.py')}",
                 "--impactsJson", f"{os.path.join(output_dir, 'Combine', fitFolderName, 'impact', 'unblinded', 'impacts', 'impacts.json')}",
                 "--frozenParam", "MH",
                 "--dropBkgModelParams"
@@ -3267,7 +3269,7 @@ class UnblindedImpactThirdStep(law.Task): #(law.Task): #(Task, HTCondorWorkflow,
                 
             arguments = [
                 "python3",
-                f"{os.path.join(os.environ['ANALYSIS_PATH'], 'Combine', 'correctImpacts.py')}",
+                f"{os.path.join(os.environ['ANALYSIS_PATH'], 'Plots', 'correctImpacts.py')}",
                 "--impactsJson", f"{os.path.join(output_dir, 'Combine', fitFolderName, 'impact', 'unblinded', 'impacts', 'impacts.json')}",
                 "--frozenParam", "MH",
                 "--dropBkgModelParams"
@@ -3316,9 +3318,9 @@ class MggBestFit(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Task): #(Task
     def requires(self):
         
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
         
         #Load central config file
         with open(configYamlPath, 'r') as file:
@@ -3336,9 +3338,9 @@ class MggBestFit(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Task): #(Task
     def create_branch_map(self):
         
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
                   
         #Load central config file
         with open(configYamlPath, 'r') as file:
@@ -3356,9 +3358,9 @@ class MggBestFit(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Task): #(Task
         cat = self.branch_data
                 
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
         
         #Load central config file
         with open(configYamlPath, 'r') as file:
@@ -3391,11 +3393,11 @@ class MggBestFit(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Task): #(Task
         cat = self.branch_data
        
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
             fitFolderName = f'runFits_mu_fiducial'
             
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
             fitFolderName = f'runFits_{self.variable}'
                   
         #Load central config file
@@ -3459,9 +3461,9 @@ class MggToyGeneration(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Task): 
     def requires(self):
         
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
         
         #Load central config file
         with open(configYamlPath, 'r') as file:
@@ -3486,9 +3488,9 @@ class MggToyGeneration(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Task): 
     def create_branch_map(self):
         
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
                   
         #Load central config file
         with open(configYamlPath, 'r') as file:
@@ -3513,9 +3515,9 @@ class MggToyGeneration(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Task): 
         toy, cat = self.branch_data
                 
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
         
         #Load central config file
         with open(configYamlPath, 'r') as file:
@@ -3557,11 +3559,11 @@ class MggToyGeneration(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Task): 
         toy, cat = self.branch_data
        
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
             fitFolderName = f'runFits_mu_fiducial'
             
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
             fitFolderName = f'runFits_{self.variable}'
                   
         #Load central config file
@@ -3948,9 +3950,9 @@ class MggDistribution(law.LocalWorkflow): #(law.Task): #(Task, HTCondorWorkflow,
     def requires(self):
         
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
         
         #Load central config file
         with open(configYamlPath, 'r') as file:
@@ -3986,9 +3988,9 @@ class MggDistribution(law.LocalWorkflow): #(law.Task): #(Task, HTCondorWorkflow,
         cat = self.branch_data
         
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
 
         #Load central config file
         with open(configYamlPath, 'r') as file:
@@ -4043,11 +4045,11 @@ class MggDistribution(law.LocalWorkflow): #(law.Task): #(Task, HTCondorWorkflow,
         cat = self.branch_data
        
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
             fitFolderName = f'runFits_mu_fiducial'
 
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
             fitFolderName = f'runFits_{self.variable}'
 
         #Load central config file
@@ -4189,9 +4191,9 @@ class PValueCalculation(law.Task): #(law.Task): #(Task, HTCondorWorkflow, law.Lo
     def requires(self):
         
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
         
         #Load central config file
         with open(configYamlPath, 'r') as file:
@@ -4218,9 +4220,9 @@ class PValueCalculation(law.Task): #(law.Task): #(Task, HTCondorWorkflow, law.Lo
     def output(self):
         
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
         
         #Load central config file
         with open(configYamlPath, 'r') as file:
@@ -4251,11 +4253,11 @@ class PValueCalculation(law.Task): #(law.Task): #(Task, HTCondorWorkflow, law.Lo
     def run(self):
        
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
             fitFolderName = f'runFits_mu_fiducial'
 
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
             fitFolderName = f'runFits_{self.variable}'
 
         #Load central config file
@@ -4340,7 +4342,7 @@ class PValueCalculation(law.Task): #(law.Task): #(Task, HTCondorWorkflow, law.Lo
             output_file = "pvalue.txt"
             try:
                 with open(output_file, "w") as f:
-                    f.write(f"{pvalue}\n")
+                    f.write(f"{pvalue}")
                 print(f"P-value written to {output_file}")
             except Exception as e:
                 print(f"Error writing to file: {e}")
