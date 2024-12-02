@@ -184,3 +184,25 @@ combine_mggToys:
   loadSnapshot: 'MultiDimFit'
   doBands: True
   execution: 'htcondor'
+
+spectra:
+  no_preliminary: True # Flag that determines, if Preliminary label should be printed.
+  ggh_xs: "fidXS_PTH_ggH"
+  vbf_xs: "fidXS_PTH_VBFH"
+  vh_xs: "fidXS_PTH_VH"
+  tth_xs: "fidXS_PTH_ttH"
+  xh_xs: "fidXS_PTH_xH"
+  ggh_powheg_xs: "fidXS_PTH_ggH_powheg"
+  ggh_no_nnlops_xs: "fidXS_PTH_ggH_genWeight"
+  underflow_bin_normalized: False # Underflow bin normalized with binwidth
+  last_bin_center: 425
+  first_bin_center: 7.5
+  plot_log: 1
+  variable: "p_T^H"
+  y_unit: "(fb/GeV)"
+  x_unit: "(GeV)"
+  x_lim: [0, 500]
+  y_lim: [-1,3]
+  y_lim_top: 500
+  overflow: 500
+

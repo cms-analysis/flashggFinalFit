@@ -190,3 +190,24 @@ combine_mggToys:
   loadSnapshot: 'MultiDimFit'
   doBands: True
   execution: 'htcondor'
+
+spectra:
+  no_preliminary: True # Flag that determines, if Preliminary label should be printed.
+  ggh_xs: "fidXS_NJ_ggH"
+  vbf_xs: "fidXS_NJ_VBFH"
+  vh_xs: "fidXS_NJ_VH"
+  tth_xs: "fidXS_NJ_ttH"
+  xh_xs: "fidXS_NJ_xH"
+  ggh_powheg_xs: "fidXS_NJ_ggH_powheg"
+  ggh_no_nnlops_xs: "fidXS_NJ_ggH_genWeight"
+  underflow_bin_normalized: False # Underflow bin normalized with binwidth
+  last_bin_center: 3.5
+  first_bin_center: 0.5
+  plot_log: 0
+  variable: "N_{Jets}"
+  y_unit: "(fb)"
+  x_unit: ""
+  x_lim: [0, 4]
+  y_lim: [-0.5,3.5]
+  y_lim_top: 135
+  overflow: 4

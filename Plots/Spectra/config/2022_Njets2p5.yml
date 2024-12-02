@@ -10,7 +10,7 @@ frame1:
     - 2.5
     - 3.5
   ylabel:
-    text: r"$\sigma_{\text{fid}}$ (fb)"
+    text: '$\sigma_{\text{fid}}$ (fb)'
     fontsize: 20
   ylim:
     bottom: 0

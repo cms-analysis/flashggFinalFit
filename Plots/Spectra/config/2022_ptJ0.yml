@@ -49,16 +49,16 @@ frame2:
     - 300
     - 350
     - 400
-  ytick_labels: {}
-  yticks: {}
+  # ytick_labels: {}
+  # yticks: {}
   additional_labels:
     is_data:
-      - text: r"$\sigma(N_{Jets}=0)$"
+      - text: '$\sigma(N_{Jets}=0)$'
         position: [-25, -2]
         rotation: 45
         fontsize: 18
     not_data:
-      - text: r"$\sigma(N_{Jets}=0)$"
+      - text: '$\sigma(N_{Jets}=0)$'
         position: [-25, -1]
         rotation: 45
         fontsize: 18
