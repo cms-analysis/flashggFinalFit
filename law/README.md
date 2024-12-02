@@ -23,3 +23,10 @@ law run EarlyRun3 --workers 4
 ```
 
 This launches the analysis chain using 4 worker nodes.
+
+Currently, there is a [bug](https://github.com/riga/law/issues/193) in law which prevents launching jobs from HTCondor nodes. As a workaround, all the necessary steps have to run sequentially (while the computationally intensive ones can still be put to condor) for the **differential** results. The **inclusive** results for the cross section can be computed locally.
+In order to start the differentials, one has to call:
+
+```
+Meddl
+```
