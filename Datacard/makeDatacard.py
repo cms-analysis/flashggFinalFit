@@ -12,6 +12,8 @@ from collections import OrderedDict as od
 from systematics import theory_systematics, experimental_systematics, signal_shape_systematics
 import errno
 
+from commonTools import jetVariables
+
 
 # Function to safely create a directory
 def safe_mkdir(path):
@@ -108,7 +110,7 @@ if opt.doSystematics:
         continue
     if s['type'] == 'constant': data = addConstantSyst(data,s,opt)
   
-  if opt.variable == '':
+  if (opt.variable == '') or (opt.variable not in jetVariables):
     # Inclusive run
     experimentalSystematics = [
         entry for entry in experimental_systematics
