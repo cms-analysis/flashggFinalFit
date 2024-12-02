@@ -137,22 +137,24 @@ class CreateDiffSpectra(law.Task):#(law.Task): #(Task, HTCondorWorkflow, law.Loc
             output_dir = self.output_dir
         
         
-        def read(scan, param, files):
+        def read(scan, param, files, ycut):
             goodfiles = [f for f in files if plot.TFileIsGood(f)]
             limit = plot.MakeTChain(goodfiles, 'limit')
             graph = plot.TGraphFromTree(limit, param, '2*deltaNLL', 'quantileExpected > -1.5')
             graph.SetName(scan)
             graph.Sort()
             plot.RemoveGraphXDuplicates(graph)
-            return graph
+            plot.RemoveGraphYAbove(graph, ycut)
+            # graph.Print()
+            return graph    
 
 
         def Eval(obj, x, params):
             return obj.Eval(x[0])
 
 
-        def BuildScan(param, files, yvals):
-            graph = read('1', param, files)
+        def BuildScan(param, files, yvals, ycut):
+            graph = read('1', param, files, ycut)
             if graph.GetN() <= 1:
                 graph.Print()
                 raise RuntimeError(f'Attempting to build {param} scan from TGraph with zero or one point (see above)')
@@ -222,6 +224,10 @@ class CreateDiffSpectra(law.Task):#(law.Task): #(Task, HTCondorWorkflow, law.Loc
         # 1 sigma, 2 sigma
         yvals = [1., 4.]
         
+        rounding_to_digits = 3
+        # Remove points with y > y-cut
+        y_cut = 7.
+        
         if self.variable == '':
             # Spectra with only one POI does not make any sense
             return True
@@ -240,8 +246,8 @@ class CreateDiffSpectra(law.Task):#(law.Task): #(Task, HTCondorWorkflow, law.Loc
                 # oneSigmaDict[f'{cat}'] = {}
                 
                 if convert_boolean_string(self.is_unblinded):
-                    main_scan_syst = BuildScan(cat, [os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', f'higgsCombineDataPostFitScanFit_{cat}.MultiDimFit.mH125.38.root')], yvals)
-                    main_scan_stat = BuildScan(cat, [os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', f'higgsCombineDataPostFitScanStat_{cat}.MultiDimFit.mH125.38.root')], yvals)
+                    main_scan_syst = BuildScan(cat, [os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', f'higgsCombineDataPostFitScanFit_{cat}.MultiDimFit.mH125.38.root')], yvals, y_cut)
+                    main_scan_stat = BuildScan(cat, [os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', f'higgsCombineDataPostFitScanStat_{cat}.MultiDimFit.mH125.38.root')], yvals, y_cut)
                     
                     pvalue_path = os.path.join(output_dir, 'Combine', fitFolderName, 'pvalue.txt')
                     
@@ -249,23 +255,23 @@ class CreateDiffSpectra(law.Task):#(law.Task): #(Task, HTCondorWorkflow, law.Loc
                         pvalue = file.readline()
                     
                 else:
-                    main_scan_syst = BuildScan(cat, [os.path.join(output_dir, 'Combine', fitFolderName, 'asimov', f'higgsCombineAsimovPostFitScanFit_{cat}.root')], yvals)
-                    main_scan_stat = BuildScan(cat, [os.path.join(output_dir, 'Combine', fitFolderName, 'asimov', f'higgsCombineAsimovPostFitScanStat_{cat}.root')], yvals)
+                    main_scan_syst = BuildScan(cat, [os.path.join(output_dir, 'Combine', fitFolderName, 'asimov', f'higgsCombineAsimovPostFitScanFit_{cat}.root')], yvals, y_cut)
+                    main_scan_stat = BuildScan(cat, [os.path.join(output_dir, 'Combine', fitFolderName, 'asimov', f'higgsCombineAsimovPostFitScanStat_{cat}.root')], yvals, y_cut)
                     
                     pvalue = 1
                 
-                stat_up_list.append(abs(round(main_scan_stat['val'][1],4)))
-                stat_down_list.append(abs(round(main_scan_stat['val'][2],4)))
+                stat_up_list.append(abs(round(main_scan_stat['val'][1],rounding_to_digits)))
+                stat_down_list.append(abs(round(main_scan_stat['val'][2],rounding_to_digits)))
                 
-                exp_xs_list.append(round(main_scan_syst['val'][0],4))
-                err_up_list.append(abs(round(main_scan_syst['val'][1],4)))
-                err_down_list.append(abs(round(main_scan_syst['val'][2],4)))
+                exp_xs_list.append(round(main_scan_syst['val'][0],rounding_to_digits))
+                err_up_list.append(abs(round(main_scan_syst['val'][1],rounding_to_digits)))
+                err_down_list.append(abs(round(main_scan_syst['val'][2],rounding_to_digits)))
                 
-        print(exp_xs_list)
-        print(err_up_list)
-        print(err_down_list)
-        print(stat_up_list)
-        print(stat_down_list)
+        # print(exp_xs_list)
+        # print(err_up_list)
+        # print(err_down_list)
+        # print(stat_up_list)
+        # print(stat_down_list)
         
             
         current_config = config['spectra']
@@ -381,8 +387,22 @@ class CreateDiffSpectra(law.Task):#(law.Task): #(Task, HTCondorWorkflow, law.Loc
         stat_up = np.array(stat_up_list) * (ggh_xs_norm + xh_xs_norm)
         stat_down = np.array(stat_down_list) * (ggh_xs_norm + xh_xs_norm)
         
-        sys_up = np.sqrt(err_up**2 - stat_up**2)
-        sys_down = np.sqrt(err_down**2 - stat_down**2)
+        sys_up = []
+        sys_down = []
+        
+        for diff_up in (err_up**2 - stat_up**2):
+            if diff_up >= 0:
+                sys_up.append(np.sqrt(diff_up))
+            else:
+                print(f"(err_up**2 - stat_up**2) == {diff_up}: Setting sys_up == 0")
+                sys_up.append(0)
+        
+        for diff_down in (err_down**2 - stat_down**2):
+            if diff_down >= 0:
+                sys_down.append(np.sqrt(diff_down))
+            else:
+                print(f"(err_down**2 - stat_down**2) == {diff_down}: Setting sys_down == 0")
+                sys_down.append(0)
         
         # #######################################
         # ##### S T A R T   P L O T T I N G #####
@@ -450,7 +470,7 @@ class CreateDiffSpectra(law.Task):#(law.Task): #(Task, HTCondorWorkflow, law.Loc
                 plt.figtext(
                     figtext_params["x"],
                     figtext_params["y"],
-                    figtext_params["text"],
+                    figtext_params['text'],
                     horizontalalignment=figtext_params["horizontalalignment"],
                     rotation=figtext_params["rotation"],
                     fontsize=figtext_params["fontsize"]
@@ -479,6 +499,7 @@ class CreateDiffSpectra(law.Task):#(law.Task): #(Task, HTCondorWorkflow, law.Loc
         
         if "y_lim_top" in current_config.keys(): plt.ylim(top=current_config["y_lim_top"])
         plt.xlim(current_config['x_lim'])
+
         plt.xticks(fontsize=20)
         plt.yticks(fontsize=20)
     
@@ -535,7 +556,7 @@ class CreateDiffSpectra(law.Task):#(law.Task): #(Task, HTCondorWorkflow, law.Loc
 
             # Apply yticks and ytick_labels depending on `is_data`
             if "yticks" in frameTwoSettings and "ytick_labels" in frameTwoSettings:
-                if current_config['is_data']:
+                if convert_boolean_string(self.is_unblinded):
                     custom_yticks = frameTwoSettings["yticks"].get("is_data", [])
                     custom_ytick_labels = frameTwoSettings["ytick_labels"].get("is_data", [])
                 else:
@@ -546,7 +567,7 @@ class CreateDiffSpectra(law.Task):#(law.Task): #(Task, HTCondorWorkflow, law.Loc
 
             # Apply additional labels for specific variables
             if "additional_labels" in frameTwoSettings:
-                additional_labels = frameTwoSettings["additional_labels"]["is_data"] if current_config['is_data'] else frameTwoSettings["additional_labels"]["not_data"]
+                additional_labels = frameTwoSettings["additional_labels"]["is_data"] if convert_boolean_string(self.is_unblinded) else frameTwoSettings["additional_labels"]["not_data"]
                 for label in additional_labels:
                     frame2.text(
                         label["position"][0],
