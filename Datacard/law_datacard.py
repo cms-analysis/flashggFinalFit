@@ -385,7 +385,7 @@ class MakeDatacard(law.Task):
         if convert_boolean_string(datacard_config["saveDataFrame"]): arguments.append("--saveDataFrame")
     
         command = arguments
-        print("Output:", command)
+        # print("Output:", command)
         try:
             result = subprocess.run(command, check=True, text=True, capture_output=True)
             print("Script output:", result.stdout)
@@ -413,7 +413,7 @@ class MakeDatacard(law.Task):
             if convert_boolean_string(clean_config["verbose"]): arguments.append("--verbose")
         
             command = arguments
-            print("Output:", command)
+            # print("Output:", command)
             try:
                 result = subprocess.run(command, check=True, text=True, capture_output=True)
                 print("Script output:", result.stdout)
