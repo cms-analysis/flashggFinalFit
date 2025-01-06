@@ -439,13 +439,13 @@ class CreateDiffSpectra(law.Task):#(law.Task): #(Task, HTCondorWorkflow, law.Loc
         
         plt.rcParams['hatch.linewidth'] = 2
         for center, value, err_low, err_high, width in zip(bins_c, ggh_xs_norm+xh_xs_norm, unc_th_dn, unc_th_up, bin_w):
-            plt.gca().add_patch(plt.Rectangle((center - width/2, value - err_low), width/4, err_low + err_high, fill=False, lw=0, color='tab:blue', hatch='///'))
+            plt.gca().add_patch(plt.Rectangle((center - width/4, value - err_low), width/8, err_low + err_high, fill=False, lw=0, color='tab:blue', hatch='///'))
         # POWHEG
         for center, value, err_low, err_high, width in zip(bins_c, ggh_powheg_xs_norm+xh_xs_norm, unc_th_powheg_dn, unc_th_powheg_up, bin_w):
-            plt.gca().add_patch(plt.Rectangle((center + width/5, value - err_low), width/4, err_low + err_high, fill=False, lw=0, color='brown', hatch='////'))
+            plt.gca().add_patch(plt.Rectangle((center + width/10, value - err_low), width/8, err_low + err_high, fill=False, lw=0, color='brown', hatch='////'))
         # Madgraph w/o NNLOPS
         for center, value, err_low, err_high, width in zip(bins_c, ggh_no_nnlops_xs_norm+xh_xs_norm, unc_th_no_nnlops_dn, unc_th_no_nnlops_up, bin_w):
-            plt.gca().add_patch(plt.Rectangle((center + width/1.8, value - err_low), width/4, err_low + err_high, fill=False, lw=0, color='tab:purple', hatch='////'))
+            plt.gca().add_patch(plt.Rectangle((center + width/3.6, value - err_low), width/8, err_low + err_high, fill=False, lw=0, color='tab:purple', hatch='////'))
             
         # Default font sizes
         fontsize = 14
@@ -531,13 +531,13 @@ class CreateDiffSpectra(law.Task):#(law.Task): #(Task, HTCondorWorkflow, law.Loc
         plt.hlines(1, 0,500, color='tab:blue')
 
         for center, value, err_low, err_high, width in zip(bins_c, ratio_madgraph, ratio_unc_up, ratio_unc_dn, bin_w):
-            plt.gca().add_patch(plt.Rectangle((center - width/2, value - err_low), width/4, err_low + err_high, fill=False, lw=0, color='tab:blue', hatch='/////')) #/2
+            plt.gca().add_patch(plt.Rectangle((center - width/4, value - err_low), width/8, err_low + err_high, fill=False, lw=0, color='tab:blue', hatch='/////')) #/2
         # POWHEG
         for center, value, err_low, err_high, width in zip(bins_c, ratio_powheg, ratio_unc_powheg_dn, ratio_unc_powheg_up, bin_w):
-            plt.gca().add_patch(plt.Rectangle((center + width/5, value - err_low), width/4, err_low + err_high, fill=False, lw=0, color='brown', hatch='/////'))
+            plt.gca().add_patch(plt.Rectangle((center + width/10, value - err_low), width/8, err_low + err_high, fill=False, lw=0, color='brown', hatch='/////'))
         # Madgraph w/o NNLOPS
         for center, value, err_low, err_high, width in zip(bins_c, ratio_no_nnlops, ratio_unc_no_nnlops_dn, ratio_unc_no_nnlops_up, bin_w):
-            plt.gca().add_patch(plt.Rectangle((center + width/1.8, value - err_low), width/4, err_low + err_high, fill=False, lw=0, color='tab:purple', hatch='////'))
+            plt.gca().add_patch(plt.Rectangle((center + width/3.6, value - err_low), width/8, err_low + err_high, fill=False, lw=0, color='tab:purple', hatch='////'))
         
         plt.stairs(ratio_powheg, bins_plot, linewidth=2, color='brown')
         plt.stairs(ratio_no_nnlops, bins_plot, linewidth=2, color='tab:purple')
