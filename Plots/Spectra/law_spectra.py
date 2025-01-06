@@ -289,8 +289,7 @@ class CreateDiffSpectra(law.Task):#(law.Task): #(Task, HTCondorWorkflow, law.Loc
         
         # Calculate bin centers and widths
         bins_c = (bins_plot[1:]+bins_plot[:-1])*0.5
-        bin_w = np.array([bins_plot[k+1]-bins_plot[k] for k in range(len(bins)-1)]) / 2
-        bin_w_half = bin_w / 2
+        bin_w = np.array([bins_plot[k+1]-bins_plot[k] for k in range(len(bins)-1)])
         xs['ggh'] = np.array(ggh_xs.fidXS)
         ggh_xs_norm = xs['ggh'] / bin_w
 

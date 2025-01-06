@@ -15,5 +15,10 @@
   "r_NJ_0p0_1p0":"#sigma_{N_{Jets}, [0,1[}^{fid}",
   "r_NJ_1p0_2p0":"#sigma_{N_{Jets}, [1,2[}^{fid}",
   "r_NJ_2p0_3p0":"#sigma_{N_{Jets}, [2,3[}^{fid}",
-  "r_NJ_3p0_100p0":"#sigma_{N_{Jets}, [3,+inf[}^{fid}"
+  "r_NJ_3p0_100p0":"#sigma_{N_{Jets}, [3,+inf[}^{fid}",
+  "r_PTJ0_0p0_30p0":"#sigma_{p_{T,j0}, (N_{Jets} = 0)}^{fid}",
+  "r_PTJ0_30p0_75p0":"#sigma_{p_{T,j0}, [30,75[ GeV}^{fid}",
+  "r_PTJ0_75p0_120p0":"#sigma_{p_{T,j0}, [75,120[ GeV}^{fid}",
+  "r_PTJ0_120p0_200p0":"#sigma_{p_{T,j0}, [120,200[ GeV}^{fid}",
+  "r_PTJ0_200p0_10000p0":"#sigma_{p_{T,j0}, [200,+inf[ GeV}^{fid}"
 }

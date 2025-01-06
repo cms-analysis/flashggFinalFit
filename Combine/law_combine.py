@@ -1531,15 +1531,16 @@ class AsimovImpactThirdStep(law.Task): #(law.Task): #(Task, HTCondorWorkflow, la
         if self.variable == '':
             cat = "r"
             output += [os.path.join(output_dir, 'Combine', fitFolderName, 'impact', 'impacts')]
-            output += [os.path.join(output_dir, 'Combine', fitFolderName, 'impact', 'impacts', f'impacts_{cat}.pdf')]
+            output += [os.path.join(output_dir, 'Combine', fitFolderName, 'impact', 'impacts', f'impacts.pdf')]
             output += [os.path.join(output_dir, 'Combine', fitFolderName, 'impact', 'impacts', 'impacts_corrected_dropBkgModelParams.json')]
             
         else:
             for cat in combineVariableDict[f'{self.variable}']['paramStrNoOne']:
                 output += [os.path.join(output_dir, 'Combine', fitFolderName, 'impact', 'impacts')]
                 output += [os.path.join(output_dir, 'Combine', fitFolderName, 'impact', 'impacts', f'impacts_{cat}.pdf')]
+                output += [os.path.join(output_dir, 'Combine', fitFolderName, 'impact', 'impacts', 'impacts_corrected_dropBkgModelParams.json')]
                 
-        output += [os.path.join(output_dir, 'Combine', fitFolderName, 'impact', f'impacts.json')]
+        output += [os.path.join(output_dir, 'Combine', fitFolderName, 'impact', 'impacts', f'impacts.json')]
         
         outputFileTargets = []
                 
@@ -1719,13 +1720,16 @@ class AsimovCovCorrHesse(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Task)
         else:
             fitFolderName = f'runFits_{self.variable}'
             
-        # output = [os.path.join(output_dir, 'Combine', fitFolderName)]
-        output = [os.path.join(output_dir, 'Combine', fitFolderName, 'hesse')]
-        
-        
-        output += [os.path.join(output_dir, 'Combine', fitFolderName, 'hesse', f'robustHessefirstStep.root')]
-        output += [os.path.join(output_dir, 'Combine', fitFolderName, 'hesse', f'multidimfitfirstStep.root')]
-        output += [os.path.join(output_dir, 'Combine', fitFolderName, 'hesse', f'higgsCombinefirstStep.MultiDimFit.mH125.38.root')]
+        if self.variable == "":
+            output = []
+        else:
+            # output = [os.path.join(output_dir, 'Combine', fitFolderName)]
+            output = [os.path.join(output_dir, 'Combine', fitFolderName, 'hesse')]
+            
+            
+            output += [os.path.join(output_dir, 'Combine', fitFolderName, 'hesse', f'robustHessefirstStep.root')]
+            output += [os.path.join(output_dir, 'Combine', fitFolderName, 'hesse', f'multidimfitfirstStep.root')]
+            output += [os.path.join(output_dir, 'Combine', fitFolderName, 'hesse', f'higgsCombinefirstStep.MultiDimFit.mH125.38.root')]
         
         outputFileTargets = []
                 
@@ -1802,6 +1806,8 @@ class AsimovCovCorr(law.Task): #(law.Task): #(Task, HTCondorWorkflow, law.LocalW
     output_dir = law.Parameter(default = '', description="Path to the output directory")
     variable = law.Parameter(default="", description="Variable to be used")
     year = law.Parameter(default='2022', description="Year")
+    noPreliminary = law.Parameter(default=False, description="Flag, if final plot should bear the Preliminary.")
+
     
     # htcondor_job_kwargs_submit = {"spool": True}
     
@@ -1820,8 +1826,13 @@ class AsimovCovCorr(law.Task): #(law.Task): #(Task, HTCondorWorkflow, law.LocalW
             output_dir = config['outputFolder']
         else:
             output_dir = self.output_dir
+        
+        if self.variable == "":
+            version = "r"
+        else:
+            version = self.variable
             
-        tasks = [AsimovCovCorrHesse(output_dir=output_dir, variable=self.variable, year=self.year, version="v1", workflow=config["combine_hesse"]["execution"])]
+        tasks = [AsimovCovCorrHesse(output_dir=output_dir, variable=self.variable, year=self.year, version=version, workflow=config["combine_hesse"]["execution"])]
         
         return tasks
 
@@ -1906,6 +1917,8 @@ class AsimovCovCorr(law.Task): #(law.Task): #(Task, HTCondorWorkflow, law.LocalW
             "--output", f"{os.path.join(output_dir, 'Combine', fitFolderName, 'hesse', 'Plots')}",
             "--translate", f"{os.path.join(os.environ['ANALYSIS_PATH'], 'Plots', 'poi_differential_hesse.json')}"
         ]
+        if convert_boolean_string(self.noPreliminary):
+            arguments.append("--noPreliminary")
         command = arguments
         # print(command)
         try:
@@ -1925,6 +1938,8 @@ class AsimovCovCorr(law.Task): #(law.Task): #(Task, HTCondorWorkflow, law.LocalW
             "--translate", f"{os.path.join(os.environ['ANALYSIS_PATH'], 'Plots', 'poi_differential_hesse.json')}",
             "--doCov"
         ]
+        if convert_boolean_string(self.noPreliminary):
+            arguments.append("--noPreliminary")
         command = arguments
         # print(command)
         try:
@@ -2545,6 +2560,7 @@ class UnblindedCovCorr(law.Task): #(law.Task): #(Task, HTCondorWorkflow, law.Loc
     output_dir = law.Parameter(default = '', description="Path to the output directory")
     variable = law.Parameter(default="", description="Variable to be used")
     year = law.Parameter(default='2022', description="Year")
+    noPreliminary = law.Parameter(default=False, description="Flag, if final plot should bear the Preliminary.")
     
     # htcondor_job_kwargs_submit = {"spool": True}
     
@@ -2633,11 +2649,6 @@ class UnblindedCovCorr(law.Task): #(law.Task): #(Task, HTCondorWorkflow, law.Loc
         else:
             output_dir = self.output_dir  
             
-        if self.variable == '':
-            datacard_path = os.path.join(output_dir, 'Combine', f'Datacard_{self.year}.root')
-        else:
-            datacard_path = os.path.join(output_dir, 'Combine', f'Datacard_{self.variable}_{self.year}.root')
-            
         safe_mkdir(os.path.join(output_dir, 'Combine', fitFolderName))
         safe_mkdir(os.path.join(output_dir, 'Combine', fitFolderName, 'hesse'))
         safe_mkdir(os.path.join(output_dir, 'Combine', fitFolderName, 'hesse', 'Plots'))
@@ -2656,6 +2667,8 @@ class UnblindedCovCorr(law.Task): #(law.Task): #(Task, HTCondorWorkflow, law.Loc
             "--translate", f"{os.path.join(os.environ['ANALYSIS_PATH'], 'Plots', 'poi_differential_hesse.json')}",
             "--doObserved"
         ]
+        if convert_boolean_string(self.noPreliminary):
+            arguments.append("--noPreliminary")
         command = arguments
         # print(command)
         try:
@@ -2676,6 +2689,8 @@ class UnblindedCovCorr(law.Task): #(law.Task): #(Task, HTCondorWorkflow, law.Loc
             "--doCov",
             "--doObserved"
         ]
+        if convert_boolean_string(self.noPreliminary):
+            arguments.append("--noPreliminary")
         command = arguments
         # print(command)
         try:
@@ -3147,7 +3162,7 @@ class UnblindedImpactThirdStep(law.Task): #(law.Task): #(Task, HTCondorWorkflow,
         if self.variable == '':
             cat = "r"
             output += [os.path.join(output_dir, 'Combine', fitFolderName, 'impact', 'unblinded', 'impacts')]
-            output += [os.path.join(output_dir, 'Combine', fitFolderName, 'impact', 'unblinded', 'impacts', f'impacts_{cat}.pdf')]
+            output += [os.path.join(output_dir, 'Combine', fitFolderName, 'impact', 'unblinded', 'impacts', f'impacts_unblinded.pdf')]
             output += [os.path.join(output_dir, 'Combine', fitFolderName, 'impact', 'unblinded', 'impacts', 'impacts_corrected_dropBkgModelParams.json')]
             
         else:
@@ -3155,7 +3170,7 @@ class UnblindedImpactThirdStep(law.Task): #(law.Task): #(Task, HTCondorWorkflow,
                 output += [os.path.join(output_dir, 'Combine', fitFolderName, 'impact', 'unblinded', 'impacts')]
                 output += [os.path.join(output_dir, 'Combine', fitFolderName, 'impact', 'unblinded', 'impacts', f'impacts_{cat}.pdf')]
                 
-        output += [os.path.join(output_dir, 'Combine', fitFolderName, 'impact', 'unblinded', f'impacts.json')]
+        output += [os.path.join(output_dir, 'Combine', fitFolderName, 'impact', 'unblinded', 'impacts', f'impacts.json')]
         
         outputFileTargets = []
                 
@@ -3336,15 +3351,6 @@ class MggBestFit(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Task): #(Task
         return tasks
 
     def create_branch_map(self):
-        
-        if self.variable == '':
-            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
-        else:
-            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
-                  
-        #Load central config file
-        with open(configYamlPath, 'r') as file:
-            config = yaml.safe_load(file)
             
         if self.variable == "":
             cat_list = ["r"]
@@ -4099,7 +4105,7 @@ class MggDistribution(law.LocalWorkflow): #(law.Task): #(Task, HTCondorWorkflow,
                 arguments.append("--doToyVeto")
                 arguments.append("--saveToyYields")
             command = arguments
-            # print(command)
+            print(command)
             try:
                 result = subprocess.run(command, check=True, text=True, capture_output=True)
                 print("Script output:", result.stdout)
@@ -4108,27 +4114,27 @@ class MggDistribution(law.LocalWorkflow): #(law.Task): #(Task, HTCondorWorkflow,
                 print("Error executing script:", e.stderr)
             
             # Change directory
-            os.chdir(f"./SplusBModels_{cat}")
+            # os.chdir(f"./SplusBModels_{cat}")
 
-            if self.variable != "":
-                # Extract parts from the parameter
-                parts = cat.split('_')
-                pattern = f"{parts[2]}_{parts[3]}"
+            # if self.variable != "":
+            #     # Extract parts from the parameter
+            #     parts = cat.split('_')
+            #     pattern = f"{parts[2]}_{parts[3]}"
 
-                # Define source and target directories
-                source_dir = "."
-                target_dir = "../Plots"
+            #     # Define source and target directories
+            #     source_dir = "."
+            #     target_dir = "../Plots"
 
-                # Iterate over files in the source directory
-                for filename in os.listdir(source_dir):
-                    # Check if the pattern is in the filename
-                    if pattern in filename:
-                        # Construct full source and destination paths
-                        source_path = os.path.join(source_dir, filename)
-                        target_path = os.path.join(target_dir, filename)
-                        # Copy the file to the target directory
-                        shutil.copy(source_path, target_path)
-                        print(f"Copied {filename} to {target_dir}")
+            #     # Iterate over files in the source directory
+            #     for filename in os.listdir(source_dir):
+            #         # Check if the pattern is in the filename
+            #         if pattern in filename:
+            #             # Construct full source and destination paths
+            #             source_path = os.path.join(source_dir, filename)
+            #             target_path = os.path.join(target_dir, filename)
+            #             # Copy the file to the target directory
+            #             shutil.copy(source_path, target_path)
+            #             print(f"Copied {filename} to {target_dir}")
 
             # Go back one directory
             os.chdir("..")
@@ -4170,7 +4176,7 @@ class MggDistribution(law.LocalWorkflow): #(law.Task): #(Task, HTCondorWorkflow,
                 arguments.append("--doToyVeto")
                 arguments.append("--saveToyYields")
             command = arguments
-            # print(command)
+            print(command)
             try:
                 result = subprocess.run(command, check=True, text=True, capture_output=True)
                 print("Script output:", result.stdout)

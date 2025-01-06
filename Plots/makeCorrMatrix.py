@@ -2,6 +2,7 @@ from optparse import OptionParser
 from shanePalette import set_color_palette
 from usefulStyle import drawCMS, drawEnPu, setCanvasCorr, formatHisto, setCanvas
 from collections import OrderedDict as od
+from commonObjects import *
 import ROOT
 import json
 import os
@@ -18,6 +19,8 @@ def get_options():
   parser.add_option('--output', dest='output', default='', help='Output folder for plotting.')
   parser.add_option('--dropTHQ', dest='dropTHQ', default=False, action="store_true", help='Drop r_tHq from the poi list')
   parser.add_option('--doObserved', dest='doObserved', default=False, action="store_true", help='Do observed correlation')
+  parser.add_option('--noPreliminary', dest='noPreliminary', default=False, action="store_true", help='Flag, if final plot should bear the Preliminary.')
+  parser.add_option('--year', dest='year', default='2022', help='Considered year (necessary for correct integrated luminosity.)')
   return parser.parse_args()
 (opt,args) = get_options() 
 
@@ -30,7 +33,6 @@ def Translate(name, ndict):
 
 ROOT.gROOT.SetBatch(True)
 ROOT.gStyle.SetNumberContours(500)
-lumi = 34.7
 
 if opt.doObserved: obs_ext = "_obs"
 else: obs_ext = ''
@@ -154,11 +156,11 @@ for mode,pois in modes.items():
     theHist.GetXaxis().SetLabelSize(0.025)
     theHist.GetYaxis().SetLabelSize(0.025)
     theHist.SetMarkerSize(0.55)
-  elif mode.count("differential"):
+  elif mode in differentialProcTable_:
     theHist.GetXaxis().SetLabelOffset(0.003)
     theHist.GetXaxis().LabelsOption("v")
     if opt.doCov:
-      if mode.count("differential_PTH"):
+      if mode.count("PTH"):
         label_size = 0.035
         theHist.GetXaxis().SetLabelSize(label_size)
         theHist.GetYaxis().SetLabelSize(label_size)
@@ -169,11 +171,11 @@ for mode,pois in modes.items():
         theHist.GetYaxis().SetLabelSize(label_size)
         theHist.SetMarkerSize(2)
     else:
-      if mode.count("differential_PTH"):
+      if mode.count("PTH"):
         label_size = 0.035
-      elif mode.count("differential_rapidity"):
+      elif mode.count("rapidity"):
         label_size = 0.04
-      elif mode.count("differential_Njets2p5"):
+      elif mode.count("Njets2p5"):
         label_size = 0.045
       else:
         label_size = 0.03
@@ -190,11 +192,17 @@ for mode,pois in modes.items():
   latex.SetTextAlign(32)
   latex.SetTextSize(0.045)
   if opt.doObserved:
-    latex.DrawLatex(1.00-canv.GetRightMargin()-0.02,1.00-canv.GetTopMargin()-0.06,'#bf{CMS} #it{Preliminary}')
+    if opt.noPreliminary:
+      latex.DrawLatex(1.00-canv.GetRightMargin()-0.02,1.00-canv.GetTopMargin()-0.06,'#bf{CMS}')
+    else:
+      latex.DrawLatex(1.00-canv.GetRightMargin()-0.02,1.00-canv.GetTopMargin()-0.06,'#bf{CMS} #it{Preliminary}')
   else:
-    latex.DrawLatex(1.00-canv.GetRightMargin()-0.02,1.00-canv.GetTopMargin()-0.06,'#bf{CMS} #it{Simulation Preliminary}')
+    if opt.noPreliminary:
+      latex.DrawLatex(1.00-canv.GetRightMargin()-0.02,1.00-canv.GetTopMargin()-0.06,'#bf{CMS} #it{Simulation}')
+    else:
+      latex.DrawLatex(1.00-canv.GetRightMargin()-0.02,1.00-canv.GetTopMargin()-0.06,'#bf{CMS} #it{Simulation Preliminary}')
   latex.SetTextSize(0.04)
-  latex.DrawLatex(1.00-canv.GetRightMargin()-0.02,1.00-canv.GetTopMargin()-0.12,'%0.2f fb^{-1} (13.6 TeV)'%lumi)
+  latex.DrawLatex(1.00-canv.GetRightMargin()-0.02,1.00-canv.GetTopMargin()-0.12,'%0.1f fb^{-1} (13.6 TeV)'%lumiMap[f"{opt.year}"])
   latex.SetTextSize(0.025)
   latex.DrawLatex(1.00-canv.GetRightMargin()-0.02,1.00-canv.GetTopMargin()-0.18,'H #rightarrow #gamma#gamma, m_{H} = 125.38 GeV')
   for binx in range(1, theHist.GetNbinsX() + 1):

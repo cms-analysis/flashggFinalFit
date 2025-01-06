@@ -28,5 +28,5 @@ Currently, there is a [bug](https://github.com/riga/law/issues/193) in law which
 In order to start the differentials, one has to call:
 
 ```
-Meddl
+./law_run_htcondor.sh <differential_variable>
 ```
