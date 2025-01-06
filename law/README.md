@@ -30,3 +30,20 @@ In order to start the differentials, one has to call:
 ```
 ./law_run_htcondor.sh <differential_variable>
 ```
+
+to produce the RooWorkspace input for Combine, as well as the first blinded NLL scans.
+
+Once ready for unblinding, one can produce stage 1 to 3 by calling:
+
+```
+./law_run_unblind.sh <differential_variable>
+```
+
+As soon as the (un)blinded fits are produced, one can start the production of the (un)blinded differential spectra with:
+
+```
+law run CreateDiffSpectra --variable <differential_variable> --is-unblinded (True)False
+```
+
+
+
