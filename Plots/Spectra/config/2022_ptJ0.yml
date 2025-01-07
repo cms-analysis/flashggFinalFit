@@ -27,6 +27,13 @@ frame1:
     alpha: 1
   fontsize: 14
   title_fontsize: 14
+  figtext:
+    x: 0.875
+    y: 0.58
+    text: '$\frac{\sigma_{fid}(p_{T}^{j1} > 200.0\ GeV)}{200.0\ GeV}$'
+    horizontalalignment: "right"
+    rotation: 90
+    fontsize: 14
 
 frame2:
   xtick_labels:
