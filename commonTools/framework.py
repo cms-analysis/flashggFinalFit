@@ -84,6 +84,8 @@ class HTCondorWorkflow(law.htcondor.HTCondorWorkflow):
         # configure to run in a "el7" container
         # https://batchdocs.web.cern.ch/local/submit.html#os-selection-via-containers
         config.custom_content.append(("MY.WantOS", "el9"))
+        
+        config.custom_content.append(("RequestMemory", 4)) # 4GB
 
         # maximum runtime
         config.custom_content.append(("+MaxRuntime", int(math.floor(self.max_runtime * 3600)) - 1))

@@ -108,7 +108,7 @@ class Trees2WSData(law.Task):
         f = ROOT.TFile(input_path)
 
         # Create ROOT output workspace
-        output_ws_file = os.path.join(ws_dir, "allData_{self.year}.root")
+        output_ws_file = os.path.join(ws_dir, f"allData_{self.year}.root")
         fout = ROOT.TFile(output_ws_file, "RECREATE")
         foutdir = fout.mkdir(inputWSName__.split("/")[0])
         foutdir.cd()

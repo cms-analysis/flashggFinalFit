@@ -25,7 +25,7 @@ lumiMap = {
     'merged':137.65,
     '2022preEE':8.00,
     '2022postEE':26.70,
-    '2022': 34.70
+    '2022': 34.7
 }
 
 def CreateVariableParameters(gen_variable, reco_variable, bins, year, BMW):

@@ -87,13 +87,17 @@ class BackgroundCategory(Task, HTCondorWorkflow, law.LocalWorkflow):#(law.Task):
         cat, cat_offset = self.branch_data
         
         safe_mkdir(self.output_dir)
+        
+        output_dir = self.output_dir
+        if output_dir[-1] != "/":
+            output_dir += "/"
 
         script_path = os.environ["ANALYSIS_PATH"] + "/Background/runBackgroundScripts.sh"
         arguments = [
             "-i", self.input_path,
             "-p", "none",
             "-f", cat,
-            "--outputFolder", f"{self.output_dir}",
+            "--outputFolder", f"{output_dir}",
             "--ext", self.ext,
             "--catOffset", cat_offset,
             "--intLumi", f"{lumiMap[self.year]}",
@@ -106,12 +110,18 @@ class BackgroundCategory(Task, HTCondorWorkflow, law.LocalWorkflow):#(law.Task):
         ]
         command = [script_path] + arguments
         print("Output:", command)
+        
+        # Move to background folder
+        original_dir = os.getcwd()
+        os.chdir(os.path.join(os.environ["ANALYSIS_PATH"], "Background"))
         try:
             result = subprocess.run(command, check=True, text=True, capture_output=True)
             print("Script output:", result.stdout)
             print("Script executed successfully.")
         except subprocess.CalledProcessError as e:
             print("Error executing script:", e.stderr)
+        os.chdir(original_dir)
+        
 
 class Background(law.Task):
     variable = law.Parameter(default="", description="Variable to be used")
