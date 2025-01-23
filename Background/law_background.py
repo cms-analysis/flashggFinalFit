@@ -91,8 +91,6 @@ class BackgroundCategory(Task, HTCondorWorkflow, law.LocalWorkflow):#(law.Task):
         output_dir = self.output_dir
         if output_dir[-1] != "/":
             output_dir += "/"
-            
-        print("output_dir", output_dir)
 
         script_path = os.environ["ANALYSIS_PATH"] + "/Background/runBackgroundScripts.sh"
         arguments = [
