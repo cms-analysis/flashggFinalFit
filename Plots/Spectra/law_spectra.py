@@ -26,7 +26,7 @@ from commonObjects import *
 from Combine.law_combine import *
 
 from framework import Task
-from framework import HTCondorWorkflow
+from framework import HTCondorWorkflow, SlurmWorkflow
 
 # Function to safely create a directory
 def safe_mkdir(path):
