@@ -91,6 +91,8 @@ class BackgroundCategory(Task, HTCondorWorkflow, law.LocalWorkflow):#(law.Task):
         output_dir = self.output_dir
         if output_dir[-1] != "/":
             output_dir += "/"
+            
+        print("output_dir", output_dir)
 
         script_path = os.environ["ANALYSIS_PATH"] + "/Background/runBackgroundScripts.sh"
         arguments = [
@@ -150,9 +152,9 @@ class Background(law.Task):
         input_path = config['inputFiles']['Trees2WSData']
         
         if self.variable == '':
-            all_data_input_path = output_dir + f"input_output_data_{self.year}/ws/allData.root"
+            all_data_input_path = os.path.join(output_dir, f"input_output_data_{self.year}/ws/allData.root")
         else:
-            all_data_input_path = output_dir + f"input_output_data_{self.variable}_{self.year}/ws/allData.root"
+            all_data_input_path = os.path.join(output_dir, f"input_output_data_{self.variable}_{self.year}/ws/allData.root")
                     
         config = config["backgroundScriptCfg"]
         
@@ -196,13 +198,13 @@ class Background(law.Task):
         output_paths = []
         
         if self.variable == '': 
-            output_paths.append(law.LocalFileTarget(output_dir + f"/outdir_{ext}"))
+            output_paths.append(law.LocalFileTarget(os.path.join(output_dir, f"outdir_{ext}")))
             
-            output_paths.append(law.LocalFileTarget(output_dir + f'/outdir_{ext}/bkgfTest-Data/fTestResults.txt'))
+            output_paths.append(law.LocalFileTarget(os.path.join(output_dir, f'outdir_{ext}/bkgfTest-Data/fTestResults.txt')))
         else:
-            output_paths.append(law.LocalFileTarget(output_dir + f"/outdir_{ext}_{self.variable}"))
+            output_paths.append(law.LocalFileTarget(os.path.join(output_dir, f"outdir_{ext}_{self.variable}")))
             
-            output_paths.append(law.LocalFileTarget(output_dir + f'/outdir_{ext}_{self.variable}/bkgfTest-Data/fTestResults.txt'))
+            output_paths.append(law.LocalFileTarget(os.path.join(output_dir, f'outdir_{ext}_{self.variable}/bkgfTest-Data/fTestResults.txt')))
                         
         return output_paths
                 
