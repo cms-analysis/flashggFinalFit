@@ -1,11 +1,11 @@
 # Config file: options for signal fitting
 
-outputFolder: '/eos/cms/store/group/phys_higgs/cmshgg/niharrin/2024/finalfit/forPaper_24_10_14/law_output/'
+outputFolder: '/work/niharrin/ntuples/2025/slurm_test/inclusives/law_output'
 
 inputFiles:
   # Trees2WS
-  Trees2WSData: '/eos/cms/store/group/phys_higgs/cmshgg/earlyRun3Hgg/analysis_Ntuples/forPaper_24_10_14/data/root/Data/allData_2022.root'
-  Trees2WS: '/eos/cms/store/group/phys_higgs/cmshgg/earlyRun3Hgg/analysis_Ntuples/forPaper_24_10_14/signal/root'
+  Trees2WSData: '/work/niharrin/ntuples/2025/slurm_test/inclusives/data/allData_2022.root'
+  Trees2WS: '/work/niharrin/ntuples/2025/slurm_test/inclusives/signal/root'
 
 backgroundScriptCfg:
   # Setup
@@ -63,7 +63,7 @@ trees2wsCfg:
 
   cats: 'auto'
 
-  execution: 'local'
+  execution: 'slurm'
 
 signalScriptCfg_2022_preEE:
   # Setup
@@ -87,7 +87,7 @@ signalScriptCfg_2022_preEE:
 
 
   # Job submission options
-  execution: 'local'
+  execution: 'slurm'
 
 signalScriptCfg_2022_postEE:
   # Setup
@@ -111,7 +111,7 @@ signalScriptCfg_2022_postEE:
   beamspotWidthMC: '3.732'
 
   # Job submission options
-  execution: 'local'
+  execution: 'slurm'
 
 packaged_2022:
   cats: 'auto' # if auto: inferred automatically from (0) workspace
@@ -136,7 +136,7 @@ datacard_yields:
   skipBkg: False # Only add signal processes to datacard
   bkgScaler: 1. # Add overall scale factor for background
   skipCOWCorr: True # Skip centralObjectWeight correction for events in acceptance. Use if no centralObjectWeight in workspace
-  execution: 'local'
+  execution: 'slurm'
 
 datacard:
   # For pruning processes
@@ -179,7 +179,7 @@ combine_impacts:
   stepSize: 0.05
   setCrossingTolerance: 0.00005 
   not_show_POI: False
-  execution: 'htcondor'
+  execution: 'slurm'
 
 combine_hesse:
   execution: 'local'
@@ -188,4 +188,4 @@ combine_mggToys:
   nToys: 1000 # Number of toys = nToys * 10
   loadSnapshot: 'MultiDimFit'
   doBands: True
-  execution: 'htcondor'
+  execution: 'slurm'
