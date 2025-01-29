@@ -845,8 +845,6 @@ class SignalPackaging(law.Task):
 
             currentConfig = config[f"signalScriptCfg_{self.year}_{currentEra}"]
             
-            
-            
             exts.append(currentConfig['ext'])
         
         exts_string = ''
@@ -880,8 +878,7 @@ class SignalPackaging(law.Task):
         output_paths = []
         
         currentConfig = config[f"packaged_{self.year}"]
-                    
-            
+
         output_paths.append(law.LocalFileTarget(os.path.join(output_dir, f"outdir_packaged{currentConfig['ext']}")))
         output_paths.append(law.LocalFileTarget(os.path.join(output_dir, f"outdir_packaged{currentConfig['ext']}/packageSignal")))
         

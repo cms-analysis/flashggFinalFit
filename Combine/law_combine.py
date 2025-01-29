@@ -295,7 +295,7 @@ class RunText2Workspace(law.Task): #(law.Task): #(Task, HTCondorWorkflow, law.Lo
         else:
             output_dir = self.output_dir  
             
-        script_path = os.environ["ANALYSIS_PATH"] + "/Combine/RunText2Workspace.py"
+        script_path = os.path.join(os.environ["ANALYSIS_PATH"],"Combine/RunText2Workspace.py")
         # script_path = "RunText2Workspace.py"
         arguments = [
             "python3",

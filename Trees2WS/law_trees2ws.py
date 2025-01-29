@@ -151,9 +151,9 @@ class Trees2WSSingleProcess(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWork
         modesToSkipTheoryWeights = ['bbh','thq','thw']
         
         if self.variable == '':
-            input_config = os.environ["ANALYSIS_PATH"] + f"/config/{self.year[:4]}_inclusive.yml"
+            input_config = os.path.join(os.environ["ANALYSIS_PATH"], f"config/{self.year[:4]}_inclusive.yml")
         else:
-            input_config = os.environ["ANALYSIS_PATH"] + f"/config/{self.year[:4]}_{self.variable}.yml"
+            input_config = os.path.join(os.environ["ANALYSIS_PATH"], f"config/{self.year[:4]}_{self.variable}.yml")
 
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         # Extract options from config file:
