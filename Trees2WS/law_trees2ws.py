@@ -561,9 +561,9 @@ class Trees2WS(law.Task):
         
         # Load the input configuration
         if self.variable == '':
-            input_config = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            input_config = os.path.join(os.environ["ANALYSIS_PATH"], f"config/{self.year}_inclusive.yml")
         else:
-            input_config = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            input_config = os.path.join(os.environ["ANALYSIS_PATH"], f"config/{self.year}_{self.variable}.yml")
         
         with open(input_config, 'r') as file:
             config = yaml.safe_load(file)
@@ -602,11 +602,10 @@ class Trees2WS(law.Task):
 
     def output(self):
         
-        # returns output folder
         if self.variable == '':
-            input_config = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            input_config = os.path.join(os.environ["ANALYSIS_PATH"], f"config/{self.year}_inclusive.yml")
         else:
-            input_config = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            input_config = os.path.join(os.environ["ANALYSIS_PATH"], f"config/{self.year}_{self.variable}.yml")
         
         with open(input_config, 'r') as file:
             config = yaml.safe_load(file)
@@ -638,9 +637,9 @@ class Trees2WS(law.Task):
         print("Trees2WS ran through. Moving output to the subdirectory ./ws_signal")
         
         if self.variable == '':
-            input_config = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            input_config = os.path.join(os.environ["ANALYSIS_PATH"], f"config/{self.year}_inclusive.yml")
         else:
-            input_config = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            input_config = os.path.join(os.environ["ANALYSIS_PATH"], f"config/{self.year}_{self.variable}.yml")
         
         with open(input_config, 'r') as file:
             config = yaml.safe_load(file)
@@ -658,9 +657,9 @@ class Trees2WS(law.Task):
         outputFolders = []
         for era, var in era_list_with_variable:
             if var == '':
-                current_output_path = output_dir + "/input_output_{}{}".format(self.year, era)
+                current_output_path = os.path.join(output_dir, "input_output_{}{}".format(self.year, era))
             else:
-                current_output_path = output_dir + "/input_output_{}_{}{}".format(var, self.year, era)
+                current_output_path = os.path.join(output_dir, "input_output_{}_{}{}".format(var, self.year, era))
             outputFolders.append(current_output_path)
 
             
