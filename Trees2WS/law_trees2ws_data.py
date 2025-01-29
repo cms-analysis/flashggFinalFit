@@ -21,9 +21,9 @@ class Trees2WSData(law.Task):
     def output(self):
         # Load the input configuration
         if self.variable == '':
-            input_config = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            input_config = os.path.join(os.environ["ANALYSIS_PATH"], f"config/{self.year}_inclusive.yml")
         else:
-            input_config = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            input_config = os.path.join(os.environ["ANALYSIS_PATH"], f"config/{self.year}_{self.variable}.yml")
 
         if not os.path.exists(input_config):
             print(f"[ERROR] {input_config} does not exist. Exiting...")
@@ -46,9 +46,9 @@ class Trees2WSData(law.Task):
     def run(self):
         # Load the input configuration
         if self.variable == '':
-            input_config = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            input_config = os.path.join(os.environ["ANALYSIS_PATH"], f"config/{self.year}_inclusive.yml")
         else:
-            input_config = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            input_config = os.path.join(os.environ["ANALYSIS_PATH"], f"config/{self.year}_{self.variable}.yml")
 
         if not os.path.exists(input_config):
             print(f"[ERROR] {input_config} does not exist. Exiting...")
@@ -71,9 +71,9 @@ class Trees2WSData(law.Task):
 
         # Load the input configuration
         if self.variable == '':
-            input_config = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            input_config = os.path.join(os.environ["ANALYSIS_PATH"], f"config/{self.year}_inclusive.yml")
         else:
-            input_config = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            input_config = os.path.join(os.environ["ANALYSIS_PATH"], f"config/{self.year}_{self.variable}.yml")
 
         if not os.path.exists(input_config):
             print(f"[ERROR] {input_config} does not exist. Exiting...")

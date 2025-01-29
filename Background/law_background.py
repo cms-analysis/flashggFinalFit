@@ -36,9 +36,9 @@ class BackgroundCategory(Task, HTCondorWorkflow, law.LocalWorkflow):#(law.Task):
     def requires(self):
         
         if self.variable == '':
-            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"], f"/config/{self.year}_inclusive.yml")
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"], f"config/{self.year}_inclusive.yml")
         else:
-            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"], f"/config/{self.year}_{self.variable}.yml")
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"], f"config/{self.year}_{self.variable}.yml")
         
         #Load central config file
         with open(configYamlPath, 'r') as file:
@@ -68,13 +68,13 @@ class BackgroundCategory(Task, HTCondorWorkflow, law.LocalWorkflow):#(law.Task):
 
     def output(self):
         cat, cat_offset = self.branch_data
-        bkg_plots = glob.glob(os.path.join(self.output_dir, f'/outdir_{self.ext}/bkgfTest-Data/*_cat{cat_offset}.png'))
-        bkg_plots += glob.glob(os.path.join(self.output_dir, f'/outdir_{self.ext}/bkgfTest-Data/*_cat{cat_offset}.pdf'))
-        bkg_plots += glob.glob(os.path.join(self.output_dir, f'/outdir_{self.ext}/bkgfTest-Data/*_cat{cat_offset}.pdf_gofTest.pdf'))
+        bkg_plots = glob.glob(os.path.join(self.output_dir, f'outdir_{self.ext}/bkgfTest-Data/*_cat{cat_offset}.png'))
+        bkg_plots += glob.glob(os.path.join(self.output_dir, f'outdir_{self.ext}/bkgfTest-Data/*_cat{cat_offset}.pdf'))
+        bkg_plots += glob.glob(os.path.join(self.output_dir, f'outdir_{self.ext}/bkgfTest-Data/*_cat{cat_offset}.pdf_gofTest.pdf'))
         
         outputFileTargets = []
         
-        output_paths = [os.path.join(self.output_dir, f'/outdir_{self.ext}/CMS-HGG_multipdf_{cat}.root'), os.path.join(self.output_dir, f'/outdir_{self.ext}/bkgfTest-Data/multipdf_{cat}.pdf'), os.path.join(self.output_dir, f'/outdir_{self.ext}/bkgfTest-Data/multipdf_{cat}.png')]
+        output_paths = [os.path.join(self.output_dir, f'outdir_{self.ext}/CMS-HGG_multipdf_{cat}.root'), os.path.join(self.output_dir, f'outdir_{self.ext}/bkgfTest-Data/multipdf_{cat}.pdf'), os.path.join(self.output_dir, f'outdir_{self.ext}/bkgfTest-Data/multipdf_{cat}.png')]
         
         output_paths += bkg_plots
                 
@@ -92,7 +92,7 @@ class BackgroundCategory(Task, HTCondorWorkflow, law.LocalWorkflow):#(law.Task):
         if output_dir[-1] != "/":
             output_dir += "/"
 
-        script_path = os.path.join(os.environ["ANALYSIS_PATH"], "/Background/runBackgroundScripts.sh")
+        script_path = os.path.join(os.environ["ANALYSIS_PATH"], "Background/runBackgroundScripts.sh")
         arguments = [
             "-i", self.input_path,
             "-p", "none",
@@ -133,9 +133,9 @@ class Background(law.Task):
         # common between the required task and the instance (self)
         
         if self.variable == '':
-            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"], f"/config/{self.year}_inclusive.yml")
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"], f"config/{self.year}_inclusive.yml")
         else:
-            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"], f"/config/{self.year}_{self.variable}.yml")
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"], f"config/{self.year}_{self.variable}.yml")
         
         #Load central config file
         with open(configYamlPath, 'r') as file:
@@ -177,9 +177,9 @@ class Background(law.Task):
         # returns output folder
         
         if self.variable == '':
-            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"], f"/config/{self.year}_inclusive.yml")
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"], f"config/{self.year}_inclusive.yml")
         else:
-            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"], f"/config/{self.year}_{self.variable}.yml")
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"], f"config/{self.year}_{self.variable}.yml")
         
         #Load central config file
         with open(configYamlPath, 'r') as file:
@@ -196,13 +196,13 @@ class Background(law.Task):
         output_paths = []
         
         if self.variable == '': 
-            output_paths.append(law.LocalFileTarget(os.path.join(output_dir, f"/outdir_{ext}")))
+            output_paths.append(law.LocalFileTarget(os.path.join(output_dir, f"outdir_{ext}")))
             
-            output_paths.append(law.LocalFileTarget(os.path.join(output_dir, f'/outdir_{ext}/bkgfTest-Data/fTestResults.txt')))
+            output_paths.append(law.LocalFileTarget(os.path.join(output_dir, f'outdir_{ext}/bkgfTest-Data/fTestResults.txt')))
         else:
-            output_paths.append(law.LocalFileTarget(os.path.join(output_dir, f"/outdir_{ext}_{self.variable}")))
+            output_paths.append(law.LocalFileTarget(os.path.join(output_dir, f"outdir_{ext}_{self.variable}")))
             
-            output_paths.append(law.LocalFileTarget(os.path.join(output_dir, f'/outdir_{ext}_{self.variable}/bkgfTest-Data/fTestResults.txt')))
+            output_paths.append(law.LocalFileTarget(os.path.join(output_dir, f'outdir_{ext}_{self.variable}/bkgfTest-Data/fTestResults.txt')))
                         
         return output_paths
                 
