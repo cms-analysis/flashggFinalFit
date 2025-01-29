@@ -237,7 +237,7 @@ class MakeYields(law.Task):
         datacard_config['nCats'] = len(datacard_config['cats'].split(","))
         
         for cat in datacard_config['cats'].split(","):
-            output_paths.append(law.LocalFileTarget(self.output_dir + f"/Datacards/yields_{datacard_config['ext']}/{cat}.pkl"))
+            output_paths.append(law.LocalFileTarget(output_dir + f"/Datacards/yields_{datacard_config['ext']}/{cat}.pkl"))
                                   
         return output_paths
                 
