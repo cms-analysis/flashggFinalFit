@@ -11,7 +11,7 @@ from commonObjects import *
 from Trees2WS.law_trees2ws_data import *
 
 from framework import Task
-from framework import HTCondorWorkflow
+from framework import HTCondorWorkflow, SlurmWorkflow
 
 # Function to safely create a directory
 def safe_mkdir(path):
@@ -22,7 +22,7 @@ def safe_mkdir(path):
             raise
                 
 
-class BackgroundCategory(Task, HTCondorWorkflow, law.LocalWorkflow):#(law.Task): #(Task, HTCondorWorkflow, law.LocalWorkflow):
+class BackgroundCategory(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWorkflow):#(law.Task): #(Task, HTCondorWorkflow, law.LocalWorkflow):
     input_path = law.Parameter(description="Path to the alldata input ROOT file")
     output_dir = law.Parameter(description="Path to the output directory")
     ext = law.Parameter(default="earlyAnalysis", description="Extension to be used for output folder naming")

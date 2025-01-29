@@ -10,7 +10,7 @@ from commonObjects import *
 from Trees2WS.law_trees2ws import *
 
 from framework import Task
-from framework import HTCondorWorkflow
+from framework import HTCondorWorkflow, SlurmWorkflow
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__))+ "/tools")
 
@@ -32,7 +32,7 @@ def convert_boolean_string(string):
         return False
                 
 
-class FTestCategory(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Task): #(Task, HTCondorWorkflow, law.LocalWorkflow):
+class FTestCategory(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWorkflow): #(law.Task): #(Task, HTCondorWorkflow, law.LocalWorkflow):
     input_path = law.Parameter(description="Path to the input ROOT files (/ws_signal)")
     output_dir = law.Parameter(description="Path to the output directory")
     ext = law.Parameter(default="earlyAnalysis", description="Extension to be used for output folder naming")
@@ -43,8 +43,6 @@ class FTestCategory(Task, HTCondorWorkflow, law.LocalWorkflow): #(law.Task): #(T
     
     era = law.Parameter(description="Current Era")    
 
-
-    
     htcondor_job_kwargs_submit = {"spool": True}
     
     def requires(self):
@@ -248,7 +246,7 @@ class FTest(law.Task):
         return True
     
     
-class CalcPhotonSystCategory(Task, HTCondorWorkflow, law.LocalWorkflow):#(law.Task): #(Task, HTCondorWorkflow, law.LocalWorkflow):
+class CalcPhotonSystCategory(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWorkflow):#(law.Task): #(Task, HTCondorWorkflow, law.LocalWorkflow):
     input_path = law.Parameter(description="Path to the input ROOT files (/ws_signal)")
     output_dir = law.Parameter(description="Path to the output directory")
     ext = law.Parameter(default="earlyAnalysis", description="Extension to be used for output folder naming")
@@ -352,7 +350,6 @@ class CalcPhotonSyst(law.Task):
     # ext = law.Parameter(default="earlyAnalysis", description="Descriptor of the background output folder.")
     # era = law.Parameter(default='None', description="Current era (eg. preEE, postEE for 2022), if any.")
 
-    
     def requires(self):
         # req() is defined on all tasks and handles the passing of all parameter values that are
         # common between the required task and the instance (self)
@@ -469,7 +466,7 @@ class CalcPhotonSyst(law.Task):
         return True
     
     
-class SignalFitCategoryProcess(Task, HTCondorWorkflow, law.LocalWorkflow):#(law.Task): #(Task, HTCondorWorkflow, law.LocalWorkflow):
+class SignalFitCategoryProcess(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWorkflow):#(law.Task): #(Task, HTCondorWorkflow, law.LocalWorkflow):
     input_path = law.Parameter(description="Path to the input ROOT files (/ws_signal)")
     output_dir = law.Parameter(description="Path to the output directory")
     ext = law.Parameter(default="earlyAnalysis", description="Extension to be used for output folder naming")
@@ -707,7 +704,7 @@ class SignalFit(law.Task):
         return True
     
     
-class SignalPackagingCategory(Task, HTCondorWorkflow, law.LocalWorkflow):#(law.Task): #(Task, HTCondorWorkflow, law.LocalWorkflow):
+class SignalPackagingCategory(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWorkflow):#(law.Task): #(Task, HTCondorWorkflow, law.LocalWorkflow):
     output_dir = law.Parameter(description="Path to the output directory")
     exts = law.Parameter(default="earlyAnalysis", description="Extension to be used for output folder naming")
     outputExt = law.Parameter(default="", description="Extension to be used for packaged folder naming")

@@ -11,7 +11,7 @@ from commonObjects import *
 from Signal.law_signal import *
 
 from framework import Task
-from framework import HTCondorWorkflow
+from framework import HTCondorWorkflow, SlurmWorkflow
 
 # Function to safely create a directory
 def safe_mkdir(path):
@@ -28,7 +28,7 @@ def convert_boolean_string(string):
         return False
                 
 
-class MakeYieldsCategory(Task, HTCondorWorkflow, law.LocalWorkflow):#(law.Task): #(Task, HTCondorWorkflow, law.LocalWorkflow):
+class MakeYieldsCategory(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWorkflow):#(law.Task): #(Task, HTCondorWorkflow, law.LocalWorkflow):
     inputWSDirMap = law.Parameter(description="Map. Format: year=inputWSDir (separate years by comma)")
     output_dir = law.Parameter(description="Path to the output directory")
     ext = law.Parameter(default="earlyAnalysis", description="Extension to be used for output folder naming")
