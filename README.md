@@ -33,9 +33,12 @@ cmsenv
 scram b clean
 scram b -j 8
 
-# Install Final Fit package and use law
+# Install Final Fit package and install the background functions (only run once)
 git clone -b $FINALFIT_TAG https://github.com/JaLuka98/flashggFinalFit.git
-cd flashggFinalFit/law
+cd flashggFinalFit/Background
+make clean; make
+# Move to Law folder and source the setup file (to be activated every new shell)
+cd ../law
 source setup.sh
 law index --verbose
 ```
