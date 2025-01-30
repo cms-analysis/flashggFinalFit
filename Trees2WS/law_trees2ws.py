@@ -65,6 +65,17 @@ class Trees2WSSingleProcess(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWork
             for input_path in glob.glob(f"{self.input_paths}/{process}_M-{mass}_{self.era}/*.root")
         ]
         branch_map = {i: mode_proc_mass for i, mode_proc_mass in enumerate(mode_proc_mass_list)}
+        # Test if empty, then try naming convention with year in front
+        # Note here: self.year = real year + era string (maybe should be improved)
+        if not branch_map:
+            print("branch_map is empty, trying with year+era at the end.")
+            mode_proc_mass_list = [
+            (mode, mass, input_path)
+            for mode, process in production_modes
+            for mass in input_masses
+            for input_path in glob.glob(f"{self.input_paths}/{process}_M-{mass}_{self.year}/*.root")
+            ]
+        branch_map = {i: mode_proc_mass for i, mode_proc_mass in enumerate(mode_proc_mass_list)}
         return branch_map
 
     def output(self):
@@ -587,8 +598,8 @@ class Trees2WS(law.Task):
                             
             tasks.append(Trees2WSSingleProcess(input_paths=path_to_root_files, era=era, apply_mass_cut=mass_cut, mass_cut_range=mass_cut_r, year=f"{self.year}{era}", doSystematics=doSystematics, doDiffSplitting=doDiffSplitting, doSTXSSplitting=doSTXSSplitting, doInOutSplitting=doInOutSplitting, output_dir=current_output_path, variable=var, version=f"v{i}", workflow=config['execution']))
             i += 1
-        
-        return tasks    
+        return tasks
+
     def output(self):
         
         if self.variable == '':
@@ -618,7 +629,7 @@ class Trees2WS(law.Task):
                 current_output_path = output_dir + "/input_output_{}_{}{}".format(var, self.year, era)
                 
             outputFolders.append(law.LocalFileTarget(current_output_path + '/ws_signal'))
-        
+
         return outputFolders
     
     def run(self):

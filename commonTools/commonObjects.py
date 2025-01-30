@@ -25,7 +25,10 @@ lumiMap = {
     'merged':137.65,
     '2022preEE':8.00,
     '2022postEE':26.70,
-    '2022': 34.7
+    '2022': 34.7,
+    '2023preBPix': 17.8,
+    '2023postBPix': 9.5,
+    '2023': 27.3
 }
 
 def CreateVariableParameters(gen_variable, reco_variable, bins, year, BMW):
@@ -59,7 +62,7 @@ BR_Z_qq = 69.91*0.01
 BR_W_qq = 67.41*0.01
 
 # List of years
-years_to_process = ['2016','2017','2018','2022preEE','2022postEE']
+years_to_process = ['2016','2017','2018','2022preEE','2022postEE','2022preBPix','2022postBPix']
 # Production modes and decay channel: for extract XS from combine
 productionModes = ['ggH','qqH','ttH','tHq','tHW','ggZH', 'WH','ZH','bbH']
 decayMode = 'hgg'
@@ -81,25 +84,38 @@ bkgWSName__ = "multipdf"
 input_masses = [120, 125, 130]
 
 # Define an array of production modes and corresponding process strings
+# JLS 23th Jan 2025, also adding 2G naming conventions
 production_modes = [
     ("ggh", "GluGluHtoGG"),
+    ("ggh", "GluGluHto2G"),
     ("vbf", "VBFHtoGG"),
+    ("vbf", "VBFHto2G"),
     ("vh", "VHtoGG"),
-    ("tth", "ttHtoGG")
+    ("vh", "VHto2G"),
+    ("tth", "ttHtoGG"),
+    ("tth", "ttHto2G"),
 ]
 
 # Define an array of eras
+# JLS 22th of Jan 2025: This syntax looks pretty criminal and should be improved at some point
 TwentyTwentyTwoEras = ["preEE", "postEE"]
+TwentyTwentyThreeEras = ["preBPix", "postBPix"]
+
 
 allErasMap = {
-    '2022': TwentyTwentyTwoEras
+    '2022': TwentyTwentyTwoEras,
+    '2023': TwentyTwentyThreeEras
 }
 
 conversionTable_ = {
     "GluGluHtoGG": "ggh",
+    "GluGluHto2G": "ggh",
     "ttHtoGG": "tth",
+    "ttHto2G": "tth",
     "VBFHtoGG": "vbf",
+    "VBFHto2G": "vbf",
     "VHtoGG": "vh",
+    "VHto2G": "vh",
     }
 
 # List of all jet-related variables. Variables listed here will get the CMS_scale_j and CMS_res_j uncertainty in the datacard step.
