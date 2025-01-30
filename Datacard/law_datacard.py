@@ -11,7 +11,7 @@ from commonObjects import *
 from Signal.law_signal import *
 
 from framework import Task
-from framework import HTCondorWorkflow
+from framework import HTCondorWorkflow, SlurmWorkflow
 
 # Function to safely create a directory
 def safe_mkdir(path):
@@ -28,7 +28,7 @@ def convert_boolean_string(string):
         return False
                 
 
-class MakeYieldsCategory(Task, HTCondorWorkflow, law.LocalWorkflow):#(law.Task): #(Task, HTCondorWorkflow, law.LocalWorkflow):
+class MakeYieldsCategory(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWorkflow):#(law.Task): #(Task, HTCondorWorkflow, law.LocalWorkflow):
     inputWSDirMap = law.Parameter(description="Map. Format: year=inputWSDir (separate years by comma)")
     output_dir = law.Parameter(description="Path to the output directory")
     ext = law.Parameter(default="earlyAnalysis", description="Extension to be used for output folder naming")
@@ -58,9 +58,9 @@ class MakeYieldsCategory(Task, HTCondorWorkflow, law.LocalWorkflow):#(law.Task):
     def requires(self):
         
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"], f"config/{self.year}_inclusive.yml")
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"], f"config/{self.year}_{self.variable}.yml")
         
         #Load central config file
         with open(configYamlPath, 'r') as file:
@@ -92,16 +92,16 @@ class MakeYieldsCategory(Task, HTCondorWorkflow, law.LocalWorkflow):#(law.Task):
         
         cat = self.branch_data
 
-        return [law.LocalFileTarget(self.output_dir + f'/Datacards/yields_{self.ext}/{cat}.pkl')]
+        return [law.LocalFileTarget(os.path.join(self.output_dir, f'Datacards/yields_{self.ext}/{cat}.pkl'))]
 
     def run(self):
         cat = self.branch_data
         
         safe_mkdir(self.output_dir)
-        safe_mkdir(self.output_dir + "/Datacards")
-        safe_mkdir(self.output_dir + f"/Datacards/yields_{self.ext}")
+        safe_mkdir(os.path.join(self.output_dir, "Datacards"))
+        safe_mkdir(os.path.join(self.output_dir, f"Datacards/yields_{self.ext}"))
         
-        script_path = os.environ["ANALYSIS_PATH"] + "/Datacard/makeYields.py"
+        script_path = os.path.join(os.environ["ANALYSIS_PATH"], "Datacard/makeYields.py")
         arguments = [
             "python3",
             script_path,
@@ -148,9 +148,9 @@ class MakeYields(law.Task):
         # common between the required task and the instance (self)
         
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"], f"config/{self.year}_inclusive.yml")
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"], f"config/{self.year}_{self.variable}.yml")
         
         #Load central config file
         with open(configYamlPath, 'r') as file:
@@ -162,7 +162,6 @@ class MakeYields(law.Task):
             output_dir = self.output_dir
                 
         input_path = config['inputFiles']['Trees2WSData']
-        all_data_input_path = output_dir + f"input_output_data_{self.year}/ws/allData.root"
         
         packaged_config = config[f"packaged_{self.year}"]
                     
@@ -179,14 +178,13 @@ class MakeYields(law.Task):
         
         # Create inputWSDirMap
         if datacard_config['year'] == 'all':
-            allYears = list(allErasMap.keys())
             for i, currentYear in enumerate(allErasMap.keys()):
                 for j, currentEra in enumerate(allErasMap[currentYear]):
                     currentYearEra = currentYear + currentEra
                     if self.variable == '':
-                        currentYearEraInputOutput = output_dir + "/input_output_{}{}/ws_signal".format(currentYear, currentEra)
+                        currentYearEraInputOutput = os.path.join(output_dir, "input_output_{}{}/ws_signal".format(currentYear, currentEra))
                     else:
-                        currentYearEraInputOutput = output_dir + "/input_output_{}_{}{}/ws_signal".format(self.variable, currentYear, currentEra)
+                        currentYearEraInputOutput = os.path.join(output_dir, "input_output_{}_{}{}/ws_signal".format(self.variable, currentYear, currentEra))
                     if (i != len(allErasMap.keys()) - 1) and (j != len(allErasMap[currentYear]) - 1):  # Check if it's the last element of the last year
                         inputWSDirMap += currentYearEra + "=" + currentYearEraInputOutput + ","
                     else:
@@ -195,9 +193,9 @@ class MakeYields(law.Task):
             for j, currentEra in enumerate(allErasMap[self.year]):
                 currentYearEra = self.year + currentEra
                 if self.variable == '':
-                    currentYearEraInputOutput = output_dir + "/input_output_{}{}/ws_signal".format(self.year, currentEra)
+                    currentYearEraInputOutput = os.path.join(output_dir, "input_output_{}{}/ws_signal".format(self.year, currentEra))
                 else:
-                    currentYearEraInputOutput = output_dir + "/input_output_{}_{}{}/ws_signal".format(self.variable, self.year, currentEra)
+                    currentYearEraInputOutput = os.path.join(output_dir, "input_output_{}_{}{}/ws_signal".format(self.variable, self.year, currentEra))
                 if (j != len(allErasMap[self.year]) - 1):  # Check if it's the last element of the last year
                     inputWSDirMap += currentYearEra + "=" + currentYearEraInputOutput + ","
                 else:
@@ -211,9 +209,9 @@ class MakeYields(law.Task):
         # returns output folder
         
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"], f"config/{self.year}_inclusive.yml")
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"], f"config/{self.year}_{self.variable}.yml")
         
         #Load central config file
         with open(configYamlPath, 'r') as file:
@@ -230,14 +228,14 @@ class MakeYields(law.Task):
         
         output_paths = []
         
-        output_paths.append(law.LocalFileTarget(output_dir + f"/Datacards/yields_{datacard_config['ext']}"))
+        output_paths.append(law.LocalFileTarget(os.path.join(output_dir, f"Datacards/yields_{datacard_config['ext']}")))
         
         if datacard_config['cats'] == 'auto':
             datacard_config['cats'] = (extractListOfCatsFromHiggsDNAAllData(input_path))
         datacard_config['nCats'] = len(datacard_config['cats'].split(","))
         
         for cat in datacard_config['cats'].split(","):
-            output_paths.append(law.LocalFileTarget(output_dir + f"/Datacards/yields_{datacard_config['ext']}/{cat}.pkl"))
+            output_paths.append(law.LocalFileTarget(os.path.join(output_dir, f"Datacards/yields_{datacard_config['ext']}/{cat}.pkl")))
                                   
         return output_paths
                 
@@ -256,9 +254,9 @@ class MakeDatacard(law.Task):
         # common between the required task and the instance (self)
         
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"], f"config/{self.year}_inclusive.yml")
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"], f"config/{self.year}_{self.variable}.yml")
         
         #Load central config file
         with open(configYamlPath, 'r') as file:
@@ -277,9 +275,9 @@ class MakeDatacard(law.Task):
         # returns output folder
         
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"], f"config/{self.year}_inclusive.yml")
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"], f"config/{self.year}_{self.variable}.yml")
         
         #Load central config file
         with open(configYamlPath, 'r') as file:
@@ -296,15 +294,15 @@ class MakeDatacard(law.Task):
         
         if self.variable == '': 
             if datacard_config['saveDataFrame']:
-                output_paths.append(law.LocalFileTarget(output_dir+ f"/Datacards/Dataframe/Datacard_{self.year}.pkl"))
-                output_paths.append(law.LocalFileTarget(output_dir+ f"/Datacards/Dataframe/Datacard_{self.year}_unsymmetrized.pkl"))
-            output_paths.append(law.LocalFileTarget(output_dir+ f"/Datacards/Datacard_{self.year}.txt"))
+                output_paths.append(law.LocalFileTarget(os.path.join(output_dir,f"Datacards/Dataframe/Datacard_{self.year}.pkl")))
+                output_paths.append(law.LocalFileTarget(os.path.join(output_dir,f"Datacards/Dataframe/Datacard_{self.year}_unsymmetrized.pkl")))
+            output_paths.append(law.LocalFileTarget(os.path.join(output_dir,f"Datacards/Datacard_{self.year}.txt")))
         else:
             if datacard_config['saveDataFrame']:
-                output_paths.append(law.LocalFileTarget(output_dir+ f"/Datacards/Dataframe/Datacard_{self.variable}_{self.year}.pkl"))
-                output_paths.append(law.LocalFileTarget(output_dir+ f"/Datacards/Dataframe/Datacard_{self.variable}_{self.year}_unsymmetrized.pkl"))
-            output_paths.append(law.LocalFileTarget(output_dir+ f"/Datacards/Datacard_{self.variable}_{self.year}.txt"))
-            output_paths.append(law.LocalFileTarget(output_dir+ f"/Datacards/Datacard_{self.variable}_{self.year}_unsymmetrized.txt"))
+                output_paths.append(law.LocalFileTarget(os.path.join(output_dir,f"Datacards/Dataframe/Datacard_{self.variable}_{self.year}.pkl")))
+                output_paths.append(law.LocalFileTarget(os.path.join(output_dir,f"Datacards/Dataframe/Datacard_{self.variable}_{self.year}_unsymmetrized.pkl")))
+            output_paths.append(law.LocalFileTarget(os.path.join(output_dir,f"Datacards/Datacard_{self.variable}_{self.year}.txt")))
+            output_paths.append(law.LocalFileTarget(os.path.join(output_dir,f"Datacards/Datacard_{self.variable}_{self.year}_unsymmetrized.txt")))
         return output_paths
                 
     
@@ -312,9 +310,9 @@ class MakeDatacard(law.Task):
         
         
         if self.variable == '':
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"], f"config/{self.year}_inclusive.yml")
         else:
-            configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_{self.variable}.yml"
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"], f"config/{self.year}_{self.variable}.yml")
         
         #Load central config file
         with open(configYamlPath, 'r') as file:
@@ -326,7 +324,7 @@ class MakeDatacard(law.Task):
             output_dir = self.output_dir
             
         safe_mkdir(output_dir)
-        output_dir = output_dir + "/Datacards/"
+        output_dir = os.path.join(output_dir,"Datacards/")
         safe_mkdir(output_dir)
         
         datacard_config = config["datacard"]
@@ -358,7 +356,7 @@ class MakeDatacard(law.Task):
                 else:
                     years += currentYearEra
         
-        script_path = os.environ["ANALYSIS_PATH"] + "/Datacard/makeDatacard.py"
+        script_path = os.path.join(os.environ["ANALYSIS_PATH"], "Datacard/makeDatacard.py")
         arguments = [
             "python3",
             script_path,
@@ -398,8 +396,8 @@ class MakeDatacard(law.Task):
             
             clean_config = config["datacard_clean"]
             
-            datacard_path = output_dir + datacard_config["output"] + ".txt"
-            script_path = os.environ["ANALYSIS_PATH"] + "/Datacard/cleanDatacard.py"
+            datacard_path = os.path.join(output_dir, datacard_config["output"] + ".txt")
+            script_path = os.path.join(os.environ["ANALYSIS_PATH"], "Datacard/cleanDatacard.py")
             arguments = [
                 "python3",
                 script_path,
@@ -422,6 +420,6 @@ class MakeDatacard(law.Task):
                 print("Error executing script:", e.stderr)
                 
             
-            shutil.move(datacard_path, output_dir + datacard_config["output"] + "_unsymmetrized.txt")
-            shutil.move(output_dir + datacard_config["output"] + "_cleaned.txt", output_dir + datacard_config["output"] + ".txt")
+            shutil.move(datacard_path, os.path.join(output_dir, datacard_config["output"] + "_unsymmetrized.txt"))
+            shutil.move(os.path.join(output_dir, datacard_config["output"] + "_cleaned.txt"), os.path.join(output_dir, datacard_config["output"] + ".txt"))
         

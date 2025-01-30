@@ -17,7 +17,7 @@ from T2WSTools.STXS_tools import *
 from T2WSTools.diff_tools import *
 
 from framework import Task
-from framework import HTCondorWorkflow
+from framework import HTCondorWorkflow, SlurmWorkflow
 
 # Function to safely create a directory
 def safe_mkdir(path):
@@ -37,7 +37,7 @@ def convert_boolean_string(string):
     else:
         return False
 
-class Trees2WSSingleProcess(Task, HTCondorWorkflow, law.LocalWorkflow):#(law.Task): #(Task, HTCondorWorkflow, law.LocalWorkflow):
+class Trees2WSSingleProcess(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWorkflow):#(law.Task): #(Task, HTCondorWorkflow, law.LocalWorkflow):
     input_paths = law.Parameter(description="Paths to the data input ROOT files")
     era = law.Parameter(description="Current era.")
     output_dir = law.Parameter(description="Path to the output directory")
@@ -162,9 +162,9 @@ class Trees2WSSingleProcess(Task, HTCondorWorkflow, law.LocalWorkflow):#(law.Tas
         modesToSkipTheoryWeights = ['bbh','thq','thw']
         
         if self.variable == '':
-            input_config = os.environ["ANALYSIS_PATH"] + f"/config/{self.year[:4]}_inclusive.yml"
+            input_config = os.path.join(os.environ["ANALYSIS_PATH"], f"config/{self.year[:4]}_inclusive.yml")
         else:
-            input_config = os.environ["ANALYSIS_PATH"] + f"/config/{self.year[:4]}_{self.variable}.yml"
+            input_config = os.path.join(os.environ["ANALYSIS_PATH"], f"config/{self.year[:4]}_{self.variable}.yml")
 
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         # Extract options from config file:

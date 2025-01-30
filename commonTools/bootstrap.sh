@@ -7,6 +7,6 @@
 # base tasks in commonTools/framework.py.
 
 action() {
-    source "{{law_dir}}/htcondor_setup.sh" "$@"
+    source "{{law_dir}}/remote_setup.sh" "$@"
 }
 action "$@"
