@@ -38,7 +38,7 @@
         "pois":"r_YH_0p0_0p15,r_YH_0p15_0p3,r_YH_0p3_0p6,r_YH_0p6_0p9,r_YH_0p9_2p5",
         "fits":"profile1D:syst:all+profile1D:statonly:all",
         "points":"40:40+40:40",
-        "fit_opts":"--setParameterRanges r=0,3 --saveSpecifiedNuis all+--setParameterRanges r=0,3 --saveSpecifiedNuis all"
+        "fit_opts":"--setParameterRanges r=-3,3 --saveSpecifiedNuis all+--setParameterRanges r=-3,3 --saveSpecifiedNuis all"
     },
 
     "Njets2p5_5bin":{
@@ -52,7 +52,7 @@
         "pois":"r_NJ_0p0_1p0,r_NJ_1p0_2p0,r_NJ_2p0_3p0,r_NJ_3p0_100p0",
         "fits":"profile1D:syst:all+profile1D:statonly:all",
         "points":"40:40+40:40",
-        "fit_opts":"--setParameterRanges r=0,3 --saveSpecifiedNuis all+--setParameterRanges r=0,3 --saveSpecifiedNuis all"
+        "fit_opts":"--setParameterRanges r=-3,3 --saveSpecifiedNuis all+--setParameterRanges r=-3,3 --saveSpecifiedNuis all"
     },
 
     "Njets2p5_0_3_fine":{

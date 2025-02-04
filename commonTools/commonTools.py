@@ -56,6 +56,55 @@ def extractListOfCatsFromData( _fileName ):
   f.Close()
   return ",".join(cats)
 
+def extractListOfCatsFromHiggsDNAAllData( _fileName ):
+  f = ROOT.TFile(_fileName)
+  trees = f.Get(inputHiggsDNAAllData__)
+  cats = []
+  for key in trees.GetListOfKeys():
+    c = key.GetName().split("Data_%s_"%sqrts__)[-1]
+    cats.append(c)
+  cats.sort()
+  trees.Delete()
+  f.Close()
+  return ",".join(cats)
+
+
+def getBinNameByHiggsDNANumber(key, myNumber):
+    # Loop through the list of tuples in the specified key
+    for entry in differentialProcTable_[key]:
+        if entry[0] == myNumber:
+            return entry[1]
+    return None  # If myNumber isn't found
+
+def extractListOfProcsFromHiggsDNASignal(_listOfSubDirectories, _variable, _inoutSplitting):
+  procs = [] # ggh_in, ggh_out, etc.
+  main_procs = [] # ggh, etc.
+  for dName in _listOfSubDirectories:
+    dName = dName.split("/")[-1]
+    p = conversionTable_[dName.split("_")[0]]
+    if p not in main_procs: 
+      main_procs.append(p)
+      if (_inoutSplitting) and (_variable == ''):
+        # inclusive case
+        procs.append(p+'_in')
+        procs.append(p+'_out')
+      if (_inoutSplitting) and (_variable != ''):
+        # differential case
+        for i, currentTuple in enumerate(differentialProcTable_[_variable]):
+          currentBin = currentTuple[1]
+          procs.append(p+'_'+currentBin)
+      if not (_inoutSplitting) and (_variable == ''):
+        # inclusive case with no inout splitting
+        procs.append(p)
+      if not (_inoutSplitting) and (_variable != ''):
+        # differential case
+        for i, currentTuple in enumerate(differentialProcTable_[_variable]):
+          # Remove in/out label
+          currentBin = "_".join(currentTuple[1].split("_")[:-1])
+          procs.append(p+'_'+currentBin)
+          
+  return ",".join(procs)
+
 def containsNOTAG( _listOfWSFileNames ):
   f0 = ROOT.TFile(_listOfWSFileNames[0]) 
   ws = f0.Get(inputWSName__)

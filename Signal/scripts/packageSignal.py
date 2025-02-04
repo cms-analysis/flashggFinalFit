@@ -5,12 +5,14 @@ import os, re, sys
 import glob
 import ROOT
 from optparse import OptionParser
+from commonObjects import *
 
 def get_options():
   parser = OptionParser()
   parser.add_option("--cat", dest='cat', default='RECO_0J_PTH_0_10_Tag0', help="RECO category to package")
   parser.add_option("--exts", dest='exts', default='', help="Comma separate list of extensions")
   parser.add_option("--outputExt", dest='outputExt', default='packaged', help="Output extension")
+  parser.add_option("--outputDir", dest='outputDir', default=swd__, help="Output directory")
   parser.add_option("--massPoints", dest='massPoints', default='120,125,130', help="Comma separated list of mass points")
   parser.add_option("--mergeYears", dest='mergeYears', default=False, action="store_true", help="Merge specified categories across years")
   parser.add_option("--year", dest="year", default="2016", help="If not merging, then specify year for output file name")
@@ -26,7 +28,10 @@ def rooiter(x):
 
 # Extract all files to be merged
 fNames = {}
-for ext in opt.exts.split(","): fNames[ext] = glob.glob("outdir_%s/signalFit/output/CMS-HGG_sigfit_%s_*_%s.root"%(ext,ext,opt.cat))
+if opt.outputDir == swd__:
+  for ext in opt.exts.split(","): fNames[ext] = glob.glob("outdir_%s/signalFit/output/CMS-HGG_sigfit_%s_*_%s.root"%(ext,ext,opt.cat))
+else:
+  for ext in opt.exts.split(","): fNames[ext] = glob.glob("%s/outdir_%s/signalFit/output/CMS-HGG_sigfit_%s_*_%s.root"%(opt.outputDir,ext,ext,opt.cat))
 
 # Define ouput packaged workspace
 print(" --> Packaging output workspaces")
@@ -74,13 +79,22 @@ for ext, fNames_by_ext in fNames.items():
       else: packagedWS.imp(_data)
 
 # Save to file
-if not os.path.isdir("outdir_%s"%opt.outputExt): os.system("mkdir outdir_%s"%opt.outputExt)
-if opt.mergeYears:
-  print(" --> Writing to: ./outdir_%s/CMS-HGG_sigfit_%s_%s.root"%(opt.outputExt,opt.outputExt,opt.cat))
-  f = ROOT.TFile("./outdir_%s/CMS-HGG_sigfit_%s_%s.root"%(opt.outputExt,opt.outputExt,opt.cat),"RECREATE")
+if opt.outputDir == swd__:
+  if not os.path.isdir("outdir_%s"%opt.outputExt): os.system("mkdir outdir_%s"%opt.outputExt)
+  if opt.mergeYears:
+    print(" --> Writing to: ./outdir_%s/CMS-HGG_sigfit_%s_%s.root"%(opt.outputExt,opt.outputExt,opt.cat))
+    f = ROOT.TFile("./outdir_%s/CMS-HGG_sigfit_%s_%s.root"%(opt.outputExt,opt.outputExt,opt.cat),"RECREATE")
+  else:
+    print(" --> Writing to: ./outdir_%s/CMS-HGG_sigfit_%s_%s_%s.root"%(opt.outputExt,opt.outputExt,opt.cat,opt.year))
+    f = ROOT.TFile("./outdir_%s/CMS-HGG_sigfit_%s_%s_%s.root"%(opt.outputExt,opt.outputExt,opt.cat,opt.year),"RECREATE")
 else:
-  print(" --> Writing to: ./outdir_%s/CMS-HGG_sigfit_%s_%s_%s.root"%(opt.outputExt,opt.outputExt,opt.cat,opt.year))
-  f = ROOT.TFile("./outdir_%s/CMS-HGG_sigfit_%s_%s_%s.root"%(opt.outputExt,opt.outputExt,opt.cat,opt.year),"RECREATE")
+  if not os.path.isdir("%s/outdir_packaged%s"%(opt.outputDir,opt.outputExt)): os.system("mkdir %s/outdir_packaged%s"%(opt.outputDir,opt.outputExt))
+  if opt.mergeYears:
+    print(" --> Writing to: %s/outdir_packaged%s/CMS-HGG_sigfit_packaged%s_%s.root"%(opt.outputDir,opt.outputExt,opt.outputExt,opt.cat))
+    f = ROOT.TFile("%s/outdir_packaged%s/CMS-HGG_sigfit_packaged%s_%s.root"%(opt.outputDir,opt.outputExt,opt.outputExt,opt.cat),"RECREATE")
+  else:
+    print(" --> Writing to: %s/outdir_packaged%s/CMS-HGG_sigfit_packaged%s_%s_%s.root"%(opt.outputDir,opt.outputExt,opt.outputExt,opt.cat,opt.year))
+    f = ROOT.TFile("%s/outdir_packaged%s/CMS-HGG_sigfit_packaged%s_%s_%s.root"%(opt.outputDir,opt.outputExt,opt.outputExt,opt.cat,opt.year),"RECREATE")
 
 packagedWS.Write()
 f.Close()

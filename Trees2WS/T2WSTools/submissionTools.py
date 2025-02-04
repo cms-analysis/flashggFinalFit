@@ -18,7 +18,7 @@ def writePreamble(_file,_otherBase=None):
   _file.write("source /cvmfs/cms.cern.ch/cmsset_default.sh\n")
   _file.write("eval `scramv1 runtime -sh`\n")
   _file.write("cd %s\n"%twd__)
-  _file.write("export PYTHONPATH=$PYTHONPATH:%s/tools:%s/tools\n\n"%(cwd__,twd__))
+  _file.write("export PYTHONPATH=$PYTHONPATH:%s/commonTools:%s/T2WSTools\n\n"%(cwd__,twd__))
 
 def writeCondorSub(_file,_exec,_queue,_nJobs,_jobOpts,doHoldOnFailure=True,doPeriodicRetry=True):
   _file.write("executable = %s.sh\n"%_exec)

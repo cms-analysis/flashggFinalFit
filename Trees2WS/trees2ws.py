@@ -57,8 +57,8 @@ import awkward as ak
 
 from commonTools import *
 from commonObjects import *
-from tools.STXS_tools import *
-from tools.diff_tools import *
+from T2WSTools.STXS_tools import *
+from T2WSTools.diff_tools import *
 
 print(" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG TREES 2 WS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ")
 def leave():

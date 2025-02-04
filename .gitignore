@@ -55,6 +55,7 @@ Combine/impacts*
 Combine/gof*
 runFits_*
 runFits_*
+!runFits_unblinded*
 Models*
 
 t2w_jobs/
@@ -67,3 +68,11 @@ Plots/pkl
 *.sub
 jobs/*.sh
 jobs*
+
+install_dir
+.law
+law/output
+
+htcondor
+
+output

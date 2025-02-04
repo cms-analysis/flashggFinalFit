@@ -25,7 +25,9 @@ def leave():
 def get_options():
   parser = OptionParser()
   parser.add_option('--inputWSDirMap', dest='inputWSDirMap', default='2016:/vols/cms/jl2117/hgg/ws/UL/Sept20/MC_final/signal_2016', help="Map. Format: year=inputWSDir (separate years by comma)")
+  parser.add_option("--outputDir", dest='outputDir', default='.', help="Output directory")
   parser.add_option('--cat', dest='cat', default='', help='Analysis category')
+  parser.add_option('--variable', dest='variable', default='', help='Considered variable for the addition of variable specific systematics (e.g. JEC, JES, etc.).')
   parser.add_option('--procs', dest='procs', default='auto', help='Comma separated list of signal processes. auto = automatically inferred from input workspaces')
   parser.add_option('--ext', dest='ext', default='', help='Extension for saving') 
   parser.add_option('--mass', dest='mass', default='125', help='Input workspace mass')
@@ -39,12 +41,12 @@ def get_options():
   # For yields calculations:
   parser.add_option('--skipZeroes', dest='skipZeroes', default=False, action="store_true", help="Skip signal processes with 0 sum of weights")
   parser.add_option('--skipCOWCorr', dest='skipCOWCorr', default=False, action="store_true", help="Skip centralObjectWeight correction for events in acceptance. Use if no centralObjectWeight in workspace")
-  parser.add_option('--systWeightScheme', dest='systWeightScheme', default='accEff', choices=['legacyHiggsDNA','accEff'], help="""Choose normalisation scheme for weight systematics.
-                    The option legacyHiggsDNA assumes that your samples were produced with a commit from HiggsDNA before c04ff5f2, where the weight systematics were not normalised to the genWeight and normalisation wrt to central_weight is needed.
-                    Defaults to accEff, meaning that all systematic weight branches include the genWeight and sum(weight_*)=acc x eff.""")
   # For systematics:
   parser.add_option('--doSystematics', dest='doSystematics', default=False, action="store_true", help="Include systematics calculations and add to datacard")
   parser.add_option('--ignore-warnings', dest='ignore_warnings', default=False, action="store_true", help="Skip errors for missing systematics. Instead output warning message")
+  parser.add_option('--systWeightScheme', dest='systWeightScheme', default='accEff', choices=['legacyHiggsDNA','accEff'], help="""Choose normalisation scheme for weight systematics.
+                  The option legacyHiggsDNA assumes that your samples were produced with a commit from HiggsDNA before c04ff5f2, where the weight systematics were not normalised to the genWeight and normalisation wrt to central_weight is needed.
+                  Defaults to accEff, meaning that all systematic weight branches include the genWeight and sum(weight_*)=acc x eff.""")
   return parser.parse_args()
 (opt,args) = get_options()
 
@@ -99,7 +101,7 @@ for year in years:
     if opt.mergeYears: _cat = opt.cat
     else: _cat = "%s_%s"%(opt.cat,year)
 
-    # Input flashgg ws 
+    # Input flashgg ws
     _inputWSFile = glob.glob("%s/*M%s*_%s.root"%(inputWSDirMap[year],opt.mass,proc))[0]
     if (len(proc.split("_")) <= 2) and (proc.split("_")[-1] in ["in", "out"]):
       _nominalDataName = "%s_%s_%s_%s_%s"%(_proc_s0,procToData(proc.split("_")[-1]),opt.mass,sqrts__,opt.cat)  
@@ -168,7 +170,7 @@ if( not opt.skipBkg)&( opt.cat != "NOTAG" ):
 # Yields: for each signal row in dataFrame extract the yield
 print(" ..........................................................................................")
 #   * if systematics=True: also extract reweighted yields for each uncertainty source
-from tools.calcSystematics import factoryType, calcSystYields
+from datacardTools.calcSystematics import factoryType, calcSystYields
 
 # Create columns in dataFrame to store yields
 data['nominal_yield'] = '-'
@@ -177,7 +179,7 @@ if not opt.skipCOWCorr: data['nominal_yield_COWCorr'] = '-'
 
 # Add columns in dataFrame for systematic yield variations
 if opt.doSystematics:
-  # Extract type of systematic using factoryType function (defined in tools.calcSystematics)
+  # Extract type of systematic using factoryType function (defined in datacardTools.calcSystematics)
   #  * a_h: anti-symmetric RooDataHist (2 columns in dataframe)
   #  * a_w: anti-symmetric weight in nominal RooDataSet (2 columns in dataframe)
   #  * s_w: symmetric (single) weight in nominal RooDataSet (1 column in dataframe)
@@ -186,6 +188,12 @@ if opt.doSystematics:
   # No experimental systematics for NOTAG
   if opt.cat != "NOTAG":
     for s in experimental_systematics: 
+      if opt.variable != '':
+        if (not opt.variable in jetVariables) and ((s['name'] == 'JecSystTotal') or (s['name'] == 'JerSyst')):
+          continue
+      else: # Inclusive run
+        if ((s['name'] == 'JecSystTotal') or (s['name'] == 'JerSyst')):
+          continue
       if s['type'] == 'factory': 
         # Fix for HEM as only in 2018 workspaces
         if s['name'] == 'JetHEM': experimentalFactoryType[s['name']] = "a_h"
@@ -255,7 +263,7 @@ for ir,r in data[data['type']=='sig'].iterrows():
           data.at[ir,"%s_yield"%s] = experimentalSystYields[s]
 
     # For theoretical systematics:
-    theorySystYields = calcSystYields(r['nominalDataName'],contents,inputWS,theoryFactoryType,skipCOWCorr=opt.skipCOWCorr,proc=r['proc'],year=r['year'],ignoreWarnings=opt.ignore_warnings)
+    theorySystYields = calcSystYields(r['nominalDataName'],contents,inputWS,theoryFactoryType,skipCOWCorr=opt.skipCOWCorr,proc=r['proc'],year=r['year'],systWeightScheme=opt.systWeightScheme,ignoreWarnings=opt.ignore_warnings)
     for s,f in theoryFactoryType.items():
       data.at[ir, 'numEvents'] = theorySystYields["numEvents"]
       if f in ['a_w','a_h']: 
@@ -274,6 +282,11 @@ for ir,r in data[data['type']=='sig'].iterrows():
 # SAVE YIELDS DATAFRAME
 print(" ..........................................................................................")
 extStr = "_%s"%opt.ext if opt.ext != '' else ''
-print(" --> Saving yields dataframe: ./yields%s/%s.pkl"%(extStr,opt.cat))
-if not os.path.isdir("./yields%s"%extStr): os.system("mkdir ./yields%s"%extStr)
-with open("./yields%s/%s.pkl"%(extStr,opt.cat),"wb") as fD: pickle.dump(data,fD)
+if opt.outputDir == '.':
+  print(" --> Saving yields dataframe: ./yields%s/%s.pkl"%(extStr,opt.cat))
+  if not os.path.isdir("./yields%s"%extStr): os.system("mkdir ./yields%s"%extStr)
+  with open("./yields%s/%s.pkl"%(extStr,opt.cat),"wb") as fD: pickle.dump(data,fD)
+else:
+  print(" --> Saving yields dataframe: %s/Datacards/yields%s/%s.pkl"%(opt.outputDir,extStr,opt.cat))
+  if not os.path.isdir("%s/Datacards/yields%s"%(opt.outputDir,extStr)): os.system("mkdir %s/Datacards/yields%s"%(opt.outputDir,extStr))
+  with open("%s/Datacards/yields%s/%s.pkl"%(opt.outputDir,extStr,opt.cat),"wb") as fD: pickle.dump(data,fD)

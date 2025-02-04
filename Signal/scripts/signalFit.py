@@ -16,7 +16,8 @@ from tools.replacementMap import globalReplacementMap
 from tools.XSBRMap import *
 from tools.simultaneousFit import *
 from tools.finalModel import *
-from tools.plottingTools import *
+# from tools.plottingTools import *
+from plottingTools import *
 
 # Constant
 MHLow, MHHigh = '120', '130'
@@ -31,6 +32,7 @@ def get_options():
   parser = OptionParser()
   parser.add_option("--xvar", dest='xvar', default='CMS_hgg_mass', help="Observable to fit")
   parser.add_option("--inputWSDir", dest='inputWSDir', default='', help="Input flashgg WS directory")
+  parser.add_option("--outputDir", dest='outputDir', default=swd__, help="Output directory")
   parser.add_option("--ext", dest='ext', default='', help="Extension")
   parser.add_option("--proc", dest='proc', default='', help="Signal process")
   parser.add_option("--cat", dest='cat', default='', help="RECO category")
@@ -126,10 +128,10 @@ else:
 
 # Options for using diagonal process from getDiagProc output json
 if opt.useDiagonalProcForShape:
-  if not os.path.exists("%s/outdir_%s/getDiagProc/json/diagonal_process.json"%(swd__,opt.ext)):
+  if not os.path.exists("%s/outdir_%s/getDiagProc/json/diagonal_process.json"%(opt.outputDir,opt.ext)):
     print(" --> [ERROR] Diagonal process json from getDiagProc does not exist. Using nominal proc x cat for shape")
   else:
-    with open("%s/outdir_%s/getDiagProc/json/diagonal_process.json"%(swd__,opt.ext),"r") as jf: dproc = json.load(jf)
+    with open("%s/outdir_%s/getDiagProc/json/diagonal_process.json"%(opt.outputDir,opt.ext),"r") as jf: dproc = json.load(jf)
     procRVFit = dproc[opt.cat]
     print(" --> Using diagonal proc (%s,%s) for shape"%(procRVFit,opt.cat))
     if not opt.skipVertexScenarioSplit: procWVFit = dproc[opt.cat]
@@ -137,10 +139,10 @@ if opt.useDiagonalProcForShape:
 # Process for syst
 procSyst = opt.proc
 if opt.useDiagonalProcForSyst:
-  if not os.path.exists("%s/outdir_%s/getDiagProc/json/diagonal_process.json"%(swd__,opt.ext)):
+  if not os.path.exists("%s/outdir_%s/getDiagProc/json/diagonal_process.json"%(opt.outputDir,opt.ext)):
     print(" --> [ERROR] Diagonal process json from getDiagProc does not exist. Using nominal proc x cat for systematics")
   else:
-    with open("%s/outdir_%s/getDiagProc/json/diagonal_process.json"%(swd__,opt.ext),"r") as jf: dproc = json.load(jf)
+    with open("%s/outdir_%s/getDiagProc/json/diagonal_process.json"%(opt.outputDir,opt.ext),"r") as jf: dproc = json.load(jf)
     procSyst = dproc[opt.cat]
     print(" --> Using diagonal proc (%s,%s) for systematics"%(procSyst,opt.cat))
 
@@ -276,11 +278,11 @@ if not opt.skipBeamspotReweigh:
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # If using nGaussian fit then extract nGaussians from fTest json file
 if not opt.useDCB:
-  with open("%s/outdir_%s/fTest/json/nGauss_%s.json"%(swd__,opt.ext,catRVFit)) as jf: ngauss = json.load(jf)
+  with open("%s/outdir_%s/fTest/json/nGauss_%s.json"%(opt.outputDir,opt.ext,catRVFit)) as jf: ngauss = json.load(jf)
   nRV = int(ngauss["%s__%s"%(procRVFit,catRVFit)]['nRV'])
   if opt.skipVertexScenarioSplit: print(" --> Fitting function: convolution of nGaussians (%g)"%nRV)
   else: 
-    with open("%s/outdir_%s/fTest/json/nGauss_%s.json"%(swd__,opt.ext,catWVFit)) as jf: ngauss = json.load(jf)
+    with open("%s/outdir_%s/fTest/json/nGauss_%s.json"%(opt.outputDir,opt.ext,catWVFit)) as jf: ngauss = json.load(jf)
     nWV = int(ngauss["%s__%s"%(procWVFit,catWVFit)]['nWV'])
     print(" --> Fitting function: convolution of nGaussians (RV=%g,WV=%g)"%(nRV,nWV))
 else:
@@ -312,12 +314,12 @@ if not opt.skipVertexScenarioSplit:
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # FINAL MODEL: construction
 print("\n --> Constructing final model")
-fm = FinalModel(ssfMap,opt.proc,opt.cat,opt.ext,opt.year,sqrts__,nominalDatasets,xvar,MH,MHLow,MHHigh,opt.massPoints,xsbrMap,procSyst,opt.scales,opt.scalesCorr,opt.scalesGlobal,opt.smears,opt.doVoigtian,opt.useDCB,opt.skipVertexScenarioSplit,opt.skipSystematics)
+fm = FinalModel(ssfMap,opt.proc,opt.cat,opt.ext,opt.year,sqrts__,nominalDatasets,xvar,MH,MHLow,MHHigh,opt.massPoints,xsbrMap,procSyst,opt.scales,opt.scalesCorr,opt.scalesGlobal,opt.smears,opt.doVoigtian,opt.useDCB,opt.skipVertexScenarioSplit,opt.skipSystematics, opt.outputDir)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # SAVE: to output workspace
-foutDir = "%s/outdir_%s/signalFit/output"%(swd__,opt.ext)
-foutName = "%s/outdir_%s/signalFit/output/CMS-HGG_sigfit_%s_%s_%s_%s.root"%(swd__,opt.ext,opt.ext,opt.proc,opt.year,opt.cat)
+foutDir = "%s/outdir_%s/signalFit/output"%(opt.outputDir,opt.ext)
+foutName = "%s/outdir_%s/signalFit/output/CMS-HGG_sigfit_%s_%s_%s_%s.root"%(opt.outputDir,opt.ext,opt.ext,opt.proc,opt.year,opt.cat)
 print("\n --> Saving output workspace to file: %s"%foutName)
 if not os.path.isdir(foutDir): os.system("mkdir %s"%foutDir)
 fout = ROOT.TFile(foutName,"RECREATE")
@@ -329,13 +331,16 @@ fout.Close()
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # PLOTTING
 if opt.doPlots:
-  print("\n --> Making plots...")
-  if not os.path.isdir("%s/outdir_%s/signalFit/Plots"%(swd__,opt.ext)): os.system("mkdir %s/outdir_%s/signalFit/Plots"%(swd__,opt.ext))
-  if opt.skipVertexScenarioSplit:
-    plotPdfComponents(ssfRV,_outdir="%s/outdir_%s/signalFit/Plots"%(swd__,opt.ext),_extension="total_",_proc=procRVFit,_cat=catRVFit) 
-  if not opt.skipVertexScenarioSplit:
-    plotPdfComponents(ssfRV,_outdir="%s/outdir_%s/signalFit/Plots"%(swd__,opt.ext),_extension="RV_",_proc=procRVFit,_cat=catRVFit) 
-    plotPdfComponents(ssfWV,_outdir="%s/outdir_%s/signalFit/Plots"%(swd__,opt.ext),_extension="WV_",_proc=procWVFit,_cat=catRVFit) 
-  # Plot interpolation
-  plotInterpolation(fm,_outdir="%s/outdir_%s/signalFit/Plots"%(swd__,opt.ext)) 
-  plotSplines(fm,_outdir="%s/outdir_%s/signalFit/Plots"%(swd__,opt.ext),_nominalMass=MHNominal) 
+  try:
+    print("\n --> Making plots...")
+    if not os.path.isdir("%s/outdir_%s/signalFit/Plots"%(opt.outputDir,opt.ext)): os.system("mkdir %s/outdir_%s/signalFit/Plots"%(opt.outputDir,opt.ext))
+    if opt.skipVertexScenarioSplit:
+      plotPdfComponents(ssfRV,_outdir="%s/outdir_%s/signalFit/Plots"%(opt.outputDir,opt.ext),_extension="total_",_proc=procRVFit,_cat=catRVFit) 
+    if not opt.skipVertexScenarioSplit:
+      plotPdfComponents(ssfRV,_outdir="%s/outdir_%s/signalFit/Plots"%(opt.outputDir,opt.ext),_extension="RV_",_proc=procRVFit,_cat=catRVFit) 
+      plotPdfComponents(ssfWV,_outdir="%s/outdir_%s/signalFit/Plots"%(opt.outputDir,opt.ext),_extension="WV_",_proc=procWVFit,_cat=catRVFit) 
+    # Plot interpolation
+    plotInterpolation(fm,_outdir="%s/outdir_%s/signalFit/Plots"%(opt.outputDir,opt.ext)) 
+    plotSplines(fm,_outdir="%s/outdir_%s/signalFit/Plots"%(opt.outputDir,opt.ext),_nominalMass=MHNominal) 
+  except:
+    print("\n --> Creating plots unsuccessful. (Probably due to a empty bin.)")

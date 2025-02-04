@@ -7,7 +7,7 @@ from optparse import OptionParser
 
 from commonTools import *
 from commonObjects import *
-from tools.plottingTools import *
+from plottingTools import *
 
 def get_options():
   parser = OptionParser()
@@ -53,8 +53,8 @@ else:
     catString = opt.cats.split("=")[-1]
   else:
     catString = opt.cats.split(",")
-  #for cat in catString.split(","):
-  for cat in catString:
+  for cat in catString.split(","):
+  # for cat in catString:
     f = "%s/outdir_%s/CMS-HGG_sigfit_%s_%s.root"%(swd__,opt.ext,opt.ext,cat)
     inputFiles[cat] = f
     if citr == 0:

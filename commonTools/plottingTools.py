@@ -1,0 +1,883 @@
+import ROOT
+import json
+import math
+import pandas
+import numpy as np
+import re
+import scipy.stats
+from collections import OrderedDict as od
+from commonObjects import *
+
+
+def Translate(name, ndict):
+    return ndict[name] if name in ndict else name
+
+def LoadTranslations(jsonfilename):
+    with open(jsonfilename) as jsonfile:
+        return json.load(jsonfile)
+      
+def drawCMS(onTop=False, CMSString="Simulation Private Work", sqrts=13.6):
+    text='#bf{CMS} #scale[0.75]{#it{'+CMSString+'}}'
+    latex = ROOT.TLatex()
+    latex.SetNDC()
+    latex.SetTextFont(42)
+    latex.SetTextSize(0.05)
+    latex.DrawLatex(0.1, 0.85 if not onTop else 0.91, text)
+    if sqrts is not None: latex.DrawLatex(1.00-canv.GetRightMargin()-0.02,1.00-canv.GetTopMargin()-0.12,'('+sqrts+' TeV)')
+      
+def plotFTest(ssfs,_opt=1,_outdir='./',_extension='',_proc='',_cat='',_mass='125'):
+  canv = ROOT.TCanvas()
+  canv.SetLeftMargin(0.15)
+  LineColorMap = {'1':ROOT.kAzure+1,'2':ROOT.kRed-4,'3':ROOT.kGreen+2,'4':ROOT.kMagenta-9,'5':ROOT.kOrange}
+  pdfs = od()
+  hists = od()
+  hmax, hmin = 0, 0
+  # Loop over nGauss fits
+  for k,ssf in ssfs.items():
+    ssf.MH.setVal(int(_mass))
+    hists[k] = ssf.Pdfs['final'].createHistogram("h_%s_%s"%(k,_extension),ssf.xvar,ROOT.RooFit.Binning(1600))
+    if int(k.split("_")[-1]) == _opt: hists[k].SetLineWidth(3)
+    else: hists[k].SetLineWidth(1)
+    hists[k].SetLineColor(LineColorMap[k.split("_")[-1]])
+    hists[k].SetTitle("")
+    hists[k].GetXaxis().SetTitle("m_{#gamma#gamma} [GeV]")
+    hists[k].SetMinimum(0)
+    if hists[k].GetMaximum()>hmax: hmax = hists[k].GetMaximum()
+    if hists[k].GetMinimum()<hmin: hmin = hists[k].GetMinimum()
+    hists[k].GetXaxis().SetRangeUser(115,140)
+  # Extract data histogram
+  hists['data'] = ssf.xvar.createHistogram("h_data%s"%_extension,ROOT.RooFit.Binning(ssf.nBins))
+  ssf.DataHists[_mass].fillHistogram(hists['data'],ROOT.RooArgList(ssf.xvar))
+  hists['data'].Scale(float(ssf.nBins)/1600)
+  hists['data'].SetMarkerStyle(20)
+  hists['data'].SetMarkerColor(1)
+  hists['data'].SetLineColor(1)
+  hists['data'].SetTitle("")
+  hists['data'].GetXaxis().SetTitle("m_{#gamma#gamma} [GeV]")
+  hists['data'].SetMinimum(0)
+  hists['data'].GetXaxis().SetRangeUser(115,140)
+  if hists['data'].GetMaximum()>hmax: hmax = hists['data'].GetMaximum()
+  if hists['data'].GetMinimum()<hmin: hmin = hists['data'].GetMinimum()
+
+  # Loop over histograms and plot
+  hists['data'].SetMaximum(1.2*hmax)
+  hists['data'].SetMinimum(1.2*hmin)
+  hists['data'].Draw("PE")
+  for k,h in hists.items():
+    if k == "data": continue
+    h.Draw("HIST SAME")
+
+  # Legend & Text
+  leg = ROOT.TLegend(0.55,0.3,0.86,0.8)
+  leg.SetFillStyle(0)
+  leg.SetLineColor(0)
+  leg.SetTextSize(0.03)
+  leg.AddEntry(hists['data'],"Simulation","ep")
+  for k,ssf in ssfs.items(): 
+    if int(k.split("_")[-1]) == _opt: leg.AddEntry(hists[k],"#bf{N_{gauss} = %s}: #chi^{2}/n(dof) = %.4f"%(k.split("_")[-1],ssf.getReducedChi2()),"L")
+    else: leg.AddEntry(hists[k],"N_{gauss} = %s: #chi^{2}/n(dof) = %.4f"%(k.split("_")[-1],ssf.getReducedChi2()),"L")
+  leg.Draw("Same")
+  # Add Latex
+  lat = ROOT.TLatex()
+  lat.SetTextFont(42)
+  lat.SetTextAlign(31)
+  lat.SetNDC()
+  lat.SetTextSize(0.03)
+  lat.DrawLatex(0.9,0.92,"( %s , %s , %s )"%(_extension,_proc,_cat))
+
+  drawCMS(onTop=True, CMSString="Simulation Private Work", sqrts=None)
+
+  canv.Update()
+  canv.SaveAs("%s/fTest_%s_%s_%s.png"%(_outdir,_cat,_proc,_extension))
+  canv.SaveAs("%s/fTest_%s_%s_%s.pdf"%(_outdir,_cat,_proc,_extension))
+
+# Plot reduced chi2 vs nGauss
+def plotFTestResults(ssfs,_opt,_outdir="./",_extension='',_proc='',_cat='',_mass='125'):
+  canv = ROOT.TCanvas()
+  gr = ROOT.TGraph()
+  # Loop over nGuassians
+  p = 0
+  xmax = 1
+  ymax = -1
+  for k,ssf in ssfs.items():
+    ssf.MH.setVal(int(_mass))
+    x = int(k.split("_")[-1])
+    if x > xmax: xmax = x
+    y = ssf.getReducedChi2()
+    if y > ymax: ymax = y
+    gr.SetPoint(p,x,y)
+    p += 1
+
+  # Draw axes
+  haxes = ROOT.TH1F("h_axes_%s_%s"%(_proc,_extension),"h_axes_%s_%s"%(_proc,_extension),xmax+1,0,xmax+1)
+  haxes.SetTitle("")
+  haxes.GetXaxis().SetTitle("N_{gauss}")
+  haxes.GetXaxis().SetTitleSize(0.05)
+  haxes.GetXaxis().SetTitleOffset(0.85)
+  haxes.GetXaxis().SetLabelSize(0.035)
+  haxes.GetYaxis().SetTitle("#chi^{2} / n(dof)")
+  haxes.GetYaxis().SetTitleOffset(0.85)
+  haxes.GetYaxis().SetTitleSize(0.05)
+  haxes.SetMaximum(1.2*ymax)
+  haxes.SetMinimum(0)
+  haxes.Draw()
+  # Draw graph
+  if "RV" in _extension: gr.SetLineColor(ROOT.kRed-4)
+  elif "WV" in _extension: gr.SetLineColor(ROOT.kAzure+1)
+  else: gr.SetLineColor(1)
+  gr.SetMarkerColor(1)
+  gr.SetMarkerStyle(20)
+  gr.Draw("Same PL")
+  # Add Latex
+  lat = ROOT.TLatex()
+  lat.SetTextFont(42)
+  lat.SetTextAlign(31)
+  lat.SetNDC()
+  lat.SetTextSize(0.03)
+  lat.DrawLatex(0.9,0.92,"( %s , %s , %s )"%(_extension,_proc,_cat))
+  lat.DrawLatex(0.6,0.75,"Optimum N_{gauss} = %s"%_opt)
+
+  drawCMS(onTop=True, CMSString="Simulation Private Work", sqrts=None)
+
+  canv.Update()
+  canv.SaveAs("%s/fTest_%s_%s_%s_chi2_vs_nGauss.png"%(_outdir,_cat,_proc,_extension))
+  canv.SaveAs("%s/fTest_%s_%s_%s_chi2_vs_nGauss.pdf"%(_outdir,_cat,_proc,_extension))
+
+# Function to extract the sigma effective of a histogram
+def getEffSigma(_h):
+  nbins, binw, xmin = _h.GetXaxis().GetNbins(), _h.GetXaxis().GetBinWidth(1), _h.GetXaxis().GetXmin()
+  mu, rms, total = _h.GetMean(), _h.GetRMS(), _h.Integral()
+  # Scan round window of mean: window RMS/binWidth (cannot be bigger than 0.1*number of bins)
+  nWindow = int(rms/binw) if (rms/binw) < 0.1*nbins else int(0.1*nbins)
+  # Determine minimum width of distribution which holds 0.693 of total
+  rlim = 0.683*total
+  wmin, iscanmin = 9999999, -999
+  for iscan in range(-1*nWindow,nWindow+1):
+    # Find bin idx in scan: iscan from mean
+    i_centre = int((mu-xmin)/binw+1+iscan)
+    x_centre = (i_centre-0.5)*binw+xmin # * 0.5 for bin centre
+    x_up, x_down = x_centre, x_centre
+    i_up, i_down = i_centre, i_centre
+    # Define counter for yield in bins: stop when counter > rlim
+    y = _h.GetBinContent(i_centre) # Central bin height
+    r = y
+    reachedLimit = False
+    for j in range(1,nbins):
+      if reachedLimit: continue
+      # Up:
+      if(i_up < nbins)&(not reachedLimit):
+        i_up+=1
+        x_up+=binw
+        y = _h.GetBinContent(i_up) # Current bin height
+        r+=y
+        if r>rlim: reachedLimit = True
+      else:
+        print(" --> Reach nBins in effSigma calc: %s. Returning 0 for effSigma"%_h.GetName())
+        return 0
+      # Down:
+      if( not reachedLimit ):
+        if(i_down > 0):
+          i_down-=1
+          x_down-=binw
+          y = _h.GetBinContent(i_down) #Current bin height
+          r+=y
+          if r>rlim: reachedLimit = True
+        else:
+          print(" --> Reach 0 in effSigma calc: %s. Returning 0 for effSigma"%_h.GetName())
+          return 0
+    # Calculate fractional width in bin takes above limt (assume linear)
+    if y == 0.: dx = 0.
+    else: dx = (r-rlim)*(binw/y)
+    # Total width: half of peak
+    w = (x_up-x_down+binw-dx)*0.5
+    if w < wmin:
+      wmin = w
+      iscanmin = iscan
+  # Return effSigma
+  return wmin
+
+def extractBandProperties(data,category,bidx):
+  props = {}
+  if category == 'all': c = 'sum'
+  elif category == 'wall': c = 'wsum'
+  else: c = category
+  props['median'] = np.median(data['%s_%g'%(c,bidx)].values)
+  props['up1sigma'] = np.percentile(data['%s_%g'%(c,bidx)].values,50*(1+math.erf(1./math.sqrt(2))))
+  props['down1sigma'] = np.percentile(data['%s_%g'%(c,bidx)].values,50*(1+math.erf(-1./math.sqrt(2))))
+  props['up2sigma'] = np.percentile(data['%s_%g'%(c,bidx)].values,50*(1+math.erf(2./math.sqrt(2))))
+  props['down2sigma'] = np.percentile(data['%s_%g'%(c,bidx)].values,50*(1+math.erf(-2./math.sqrt(2))))
+  return props
+
+def makeSplusBPlot(workspace,hD,hSB,hB,hS,hDr,hBr,hSr,cat,options,dB=None,reduceRange=None):
+  translateCats = {} if options.translateCats is None else LoadTranslations(options.translateCats)
+  translatePOIs = {} if options.translatePOIs is None else LoadTranslations(options.translatePOIs)
+  blindingRegion = [float(options.blindingRegion.split(",")[0]),float(options.blindingRegion.split(",")[1])]
+  if reduceRange is not None:
+    for h in [hD,hDr,hBr,hSr]: h.GetXaxis().SetRangeUser(reduceRange[0],reduceRange[1])
+    for h_ipdf in [hSB,hB,hS]:
+      for h in h_ipdf.values(): h.GetXaxis().SetRangeUser(reduceRange[0],reduceRange[1])
+  
+  canv = ROOT.TCanvas("canv_%s"%cat,"canv_%s"%cat,700,700)
+  pad1 = ROOT.TPad("pad1_%s"%cat,"pad1_%s"%cat,0,0.25,1,1)
+  pad1.SetTickx()
+  pad1.SetTicky()
+  pad1.SetBottomMargin(0.18)
+  pad1.SetLeftMargin(0.12)
+  pad1.Draw()
+  pad2 = ROOT.TPad("pad2_%s"%cat,"pad2_%s"%cat,0,0,1,0.35)
+  pad2.SetTickx()
+  pad2.SetTicky()
+  pad2.SetTopMargin(0.03)
+  pad2.SetBottomMargin(0.25)
+  pad2.SetLeftMargin(0.12)
+  pad2.Draw()
+  padSizeRatio = 0.75/0.35
+
+  # Axis options 
+  ROOT.TGaxis.SetMaxDigits(4)
+  ROOT.TGaxis.SetExponentOffset(-0.05,0.00,"y")
+
+  # Nominal plot
+  pad1.cd()
+  h_axes = hD.Clone()
+  h_axes.Reset()
+  if options.doBands: h_axes.SetMaximum((hD.GetMaximum()+hD.GetBinError(hD.GetMaximumBin()))*1.4)
+  else: h_axes.SetMaximum((hD.GetMaximum()+hD.GetBinError(hD.GetMaximumBin()))*1.3)
+  h_axes.SetMinimum(0.)
+  h_axes.SetTitle("")
+  h_axes.GetXaxis().SetTitle("")
+  h_axes.GetXaxis().SetLabelSize(0)
+  h_axes.GetYaxis().SetTitleSize(0.05)
+  h_axes.GetYaxis().SetTitle("Events / GeV")
+  h_axes.GetYaxis().SetTitleOffset(1.1)
+  h_axes.GetYaxis().SetLabelSize(0.035)
+  h_axes.GetYaxis().SetLabelOffset(0.007)
+  #if cat == "wall": h_axes.GetYaxis().SetTitle("S/(S+B) Weighted %s"%h_axes.GetYaxis().GetTitle())
+  if cat == "wall": h_axes.GetYaxis().SetTitle("S/(S+B) Weighted Events / GeV")
+  h_axes.Draw()
+  # Add bands
+  if options.doBands:
+    gr_1sig, gr_1sig_r = ROOT.TGraphAsymmErrors(), ROOT.TGraphAsymmErrors()
+    gr_2sig, gr_2sig_r = ROOT.TGraphAsymmErrors(), ROOT.TGraphAsymmErrors()
+    gr_i = 0
+    # Loop over bins and extract median and +-1/2sigma bands
+    for ibin in range(h_axes.GetXaxis().GetFirst(),h_axes.GetNbinsX()+1):
+      xval = h_axes.GetXaxis().GetBinCenter(ibin)
+      xerr = 0.5*(h_axes.GetXaxis().GetBinWidth(ibin))
+      bkgval = hB['nBins'].GetBinContent(ibin)
+      properties = extractBandProperties(dB,cat,ibin)
+      gr_1sig.SetPoint(gr_i,xval,properties['median'])
+      gr_2sig.SetPoint(gr_i,xval,properties['median'])
+      gr_1sig_r.SetPoint(gr_i,xval,properties['median']-bkgval)
+      gr_2sig_r.SetPoint(gr_i,xval,properties['median']-bkgval)
+      gr_1sig.SetPointError(gr_i,xerr,xerr,properties['median']-properties['down1sigma'],properties['up1sigma']-properties['median'])
+      gr_2sig.SetPointError(gr_i,xerr,xerr,properties['median']-properties['down2sigma'],properties['up2sigma']-properties['median'])
+      gr_1sig_r.SetPointError(gr_i,xerr,xerr,properties['median']-properties['down1sigma'],properties['up1sigma']-properties['median'])
+      gr_2sig_r.SetPointError(gr_i,xerr,xerr,properties['median']-properties['down2sigma'],properties['up2sigma']-properties['median'])
+      gr_i += 1
+    gr_1sig.SetFillColor(ROOT.kGreen+1)
+    gr_1sig.SetFillStyle(1001)
+    gr_2sig.SetFillColor(ROOT.kOrange)
+    gr_2sig.SetFillStyle(1001)
+    gr_1sig_r.SetFillColor(ROOT.kGreen+1)
+    gr_1sig_r.SetFillStyle(1001)
+    gr_2sig_r.SetFillColor(ROOT.kOrange)
+    gr_2sig_r.SetFillStyle(1001)
+    gr_2sig.Draw("LE3SAME")
+    gr_1sig.Draw("LE3SAME")
+  # # Add legend
+  # if options.doBands: leg = ROOT.TLegend(0.58,0.46,0.86,0.76)
+  # else: leg = ROOT.TLegend(0.58,0.52,0.86,0.76)
+  # leg.SetFillStyle(0)
+  # leg.SetLineColor(0)
+  # leg.SetTextSize(0.045)
+  # leg.AddEntry(hD,"Data","ep")
+  # if options.unblind:
+  #   leg.AddEntry(hSB['pdfNBins'],"S+B fit","l")
+  #   leg.AddEntry(hB['pdfNBins'],"B component","l")
+  # else:
+  #   leg.AddEntry(hB['pdfNBins'],"B fit","l")
+  #   leg.AddEntry(hS['pdfNBins'],"S model","fl")
+  # if options.doBands:
+  #   leg.AddEntry(gr_1sig,"#pm1 #sigma","F")
+  #   leg.AddEntry(gr_2sig,"#pm2 #sigma","F")
+  # leg.Draw("Same")
+  # Set pdf style
+  if options.unblind:
+    hSB['pdfNBins'].SetLineWidth(3)
+    hSB['pdfNBins'].SetLineColor(2)
+    hSB['pdfNBins'].Draw("Hist same c")
+    hB['pdfNBins'].SetLineWidth(3)
+    hB['pdfNBins'].SetLineColor(2)
+    hB['pdfNBins'].SetLineStyle(2)
+    hB['pdfNBins'].Draw("Hist same c")
+  else:
+    hS['pdfNBins'].SetLineWidth(3)
+    hS['pdfNBins'].SetLineColor(9)
+    hS['pdfNBins'].SetFillColor(38)
+    hS['pdfNBins'].SetFillStyle(1001)
+    hS['pdfNBins'].GetXaxis().SetRangeUser(blindingRegion[0],blindingRegion[1])
+    hS['pdfNBins'].Draw("Hist same cf")
+    hB['pdfNBins'].SetLineWidth(3)
+    hB['pdfNBins'].SetLineColor(2)
+    hB['pdfNBins'].Draw("Hist same c")
+  # Set data style
+  # hD.SetMarkerStyle(20)
+  # hD.SetMarkerColor(1)
+  # hD.SetLineColor(1)
+  # hD.Draw("Same PE")
+  gD = ROOT.TGraphAsymmErrors()
+  for ibin in range(1,hD.GetNbinsX()+1):
+    gD.SetPoint(ibin-1,hD.GetBinCenter(ibin),hD.GetBinContent(ibin))
+    l = scipy.stats.gamma.interval(0.68,hD.GetBinContent(ibin))[0]
+    # Catch for zero entries
+    if l!=l: l = 0
+    u = scipy.stats.gamma.interval(0.68,hD.GetBinContent(ibin)+1)[1]
+    gD.SetPointError(ibin-1,0,0,abs(hD.GetBinContent(ibin)-l),abs(hD.GetBinContent(ibin)-u))
+  gD.SetMarkerColor(1)
+  gD.SetMarkerStyle(20)
+  gD.SetFillColor(2)
+  gD.Draw("Same PE")
+
+  # Add legend
+  if options.doBands: leg = ROOT.TLegend(0.58,0.46,0.86,0.76)
+  else: leg = ROOT.TLegend(0.58,0.52,0.86,0.76)
+  leg.SetFillStyle(0)
+  leg.SetLineColor(0)
+  leg.SetTextSize(0.045)
+  leg.AddEntry(gD,"Data","ep")
+  if options.unblind:
+    leg.AddEntry(hSB['pdfNBins'],"S+B fit","l")
+    leg.AddEntry(hB['pdfNBins'],"B component","l")
+  else:
+    leg.AddEntry(hB['pdfNBins'],"B fit","l")
+    leg.AddEntry(hS['pdfNBins'],"S model","fl")
+  if options.doBands:
+    leg.AddEntry(gr_1sig,"#pm1 #sigma","F")
+    leg.AddEntry(gr_2sig,"#pm2 #sigma","F")
+  leg.Draw("Same")
+
+
+  # Add TLatex to plot
+  lat0 = ROOT.TLatex()
+  lat0.SetTextFont(42)
+  lat0.SetTextAlign(11)
+  lat0.SetNDC()
+  lat0.SetTextSize(0.06)
+  #lat0.DrawLatex(0.12,0.92,"#bf{CMS} #it{Internal}")
+  lat0.DrawLatex(0.12,0.92,"#bf{CMS} #it{Preliminary}")
+  #lat0.DrawLatex(0.12,0.92,"#bf{CMS}")
+  #lat0.DrawLatex(0.6,0.92,"137 fb^{-1} (13 TeV)")
+  lat0.DrawLatex(0.6,0.92,"34.7 fb^{-1} (13.6 TeV)")
+  lat0.DrawLatex(0.6,0.8,"#scale[0.6]{%s}"%Translate(cat,translateCats))
+  #lat0.DrawLatex(0.15,0.83,"#scale[0.75]{H#rightarrow#gamma#gamma}")
+  lat0.DrawLatex(0.15,0.83,"#scale[0.75]{H #rightarrow #gamma#gamma, m_{H} = 125.38 GeV}")
+  if "PseudoToy" in options.inputWSFile:
+    lat0.DrawLatex(0.15,0.76,"#scale[0.75]{Pseudo data}")
+  if(options.loadSnapshot is not None):
+    #lat0.DrawLatex(0.15,0.77,"#scale[0.6]{#vec{#alpha} = STXS stage 1.2 minimal}")
+    #lat0.DrawLatex(0.15,0.77,"#scale[0.6]{#vec{#alpha} = (#mu_{ggH}, #mu_{VBF}, #mu_{VH}, #mu_{top})}")
+    #lat0.DrawLatex(0.15,0.77,"#scale[0.5]{(#hat{#mu}_{ggH},#hat{#mu}_{VBF},#hat{#mu}_{VH},#hat{#mu}_{top}) = (1.07,1.04,1.34,1.35)}")
+    #lat0.DrawLatex(0.15,0.77,"#scale[0.75]{#hat{#mu} = 1.03}")
+    #muhat_ggh, muhat_vbf, muhat_vh, muhat_top, mhhat = workspace.var("r_ggH").getVal(), workspace.var("r_VBF").getVal(), workspace.var("r_VH").getVal(), workspace.var("r_top").getVal(), workspace.var("MH").getVal()
+    #lat0.DrawLatex(0.13,0.77,"#scale[0.6]{(#hat{#mu}_{ggH},#hat{#mu}_{VBF},#hat{#mu}_{VH},#hat{#mu}_{top}) = (%.2f,%.2f,%.2f,%.2f)}"%(muhat_ggh,muhat_vbf,muhat_vh,muhat_top))
+    if options.POI != '':
+      muhat, mhhat = workspace.var(options.POI).getVal(), workspace.var("MH").getVal()
+      lat0.DrawLatex(0.15,0.77,"#scale[0.75]{#hat{#mu} = %.2f}"%(muhat))
+    else:
+      lat0.DrawLatex(0.15,0.77,"#scale[0.6]{#vec{#alpha} = (#mu_{ggH}, #mu_{VBF}, #mu_{VH}, #mu_{top})}")
+  #elif options.parameterMap is not None:
+  #  poiStr = ''
+  #  for kv in options.parameterMap.split(","):
+  #    [k,v] = kv.split(":")
+  #    poiStr += ' %s = %.1f,'%(Translate(k,translatePOIs),float(v))
+  #  poiStr = poiStr[:-1]
+  #  lat0.DrawLatex(0.13,0.77,"#scale[0.75]{%s}"%poiStr)
+  else: lat0.DrawLatex(0.15,0.77,"#scale[0.75]{#mu = 1.0}")
+  # Ratio plot
+  pad2.cd()
+  h_axes_ratio = hDr.Clone()
+  h_axes_ratio.Reset()
+  h_axes_ratio.SetMaximum(max((hDr.GetMaximum()+hDr.GetBinError(hDr.GetMaximumBin()))*1.5,hSr.GetMaximum()*1.2))
+  h_axes_ratio.SetMinimum((hDr.GetMinimum()-hDr.GetBinError(hDr.GetMinimumBin()))*1.3)
+  h_axes_ratio.SetTitle("")
+  h_axes_ratio.GetXaxis().SetTitleSize(0.05*padSizeRatio)
+  h_axes_ratio.GetXaxis().SetLabelSize(0.035*padSizeRatio)
+  h_axes_ratio.GetXaxis().SetLabelOffset(0.007)
+  h_axes_ratio.GetXaxis().SetTickLength(0.03*padSizeRatio)
+  h_axes_ratio.GetYaxis().SetLabelSize(0.035*padSizeRatio)
+  h_axes_ratio.GetYaxis().SetLabelOffset(0.007)
+  h_axes_ratio.GetYaxis().SetTitle("")
+  h_axes_ratio.Draw()
+  # Draw bands 
+  if options.doBands:
+    gr_2sig_r.Draw("LE3SAME")
+    gr_1sig_r.Draw("LE3SAME")
+  # Set pdf style
+  if options.unblind:
+    hSr.SetLineWidth(3)
+    hSr.SetLineColor(2)
+    hSr.Draw("Hist same c")
+    hBr.SetLineWidth(3)
+    hBr.SetLineStyle(2)
+    hBr.SetLineColor(2)
+    hBr.Draw("Hist same c")
+  else:
+    hSr.SetLineWidth(3)
+    hSr.SetLineColor(9)
+    hSr.SetFillColor(38)
+    hSr.SetFillStyle(1001)
+    hSr.GetXaxis().SetRangeUser(blindingRegion[0],blindingRegion[1])
+    hSr.Draw("Hist same cf")
+    hBr.SetLineWidth(3)
+    hBr.SetLineColor(2)
+    hBr.Draw("Hist same c")
+  # Set data style
+  gDr = ROOT.TGraphAsymmErrors()
+  for ibin in range(1,hDr.GetNbinsX()+1):
+    gDr.SetPoint(ibin-1,hDr.GetBinCenter(ibin),hDr.GetBinContent(ibin))
+    l = scipy.stats.gamma.interval(0.68,hD.GetBinContent(ibin))[0]
+    # Catch for zero entries
+    if l!=l: l = 0
+    u = scipy.stats.gamma.interval(0.68,hD.GetBinContent(ibin)+1)[1]
+    gDr.SetPointError(ibin-1,0,0,abs(hD.GetBinContent(ibin)-l),abs(hD.GetBinContent(ibin)-u))
+  gDr.SetMarkerColor(1)
+  gDr.SetMarkerStyle(20)
+  gDr.SetFillColor(2)
+  gDr.Draw("Same PE")
+
+  # Add TLatex to ratio plot
+  lat1 = ROOT.TLatex()
+  lat1.SetTextFont(42)
+  lat1.SetTextAlign(33)
+  lat1.SetNDC(1)
+  lat1.SetTextSize(0.045*padSizeRatio)
+  lat1.DrawLatex(0.87,0.91,"B component subtracted")
+
+  # Save canvas
+  canv.Update()
+  canv.SaveAs("./SplusBModels%s/%s_%s_%s.png"%(options.ext,options.ext,cat,options.xvar.split(",")[0]))
+  canv.SaveAs("./SplusBModels%s/%s_%s_%s.pdf"%(options.ext,options.ext,cat,options.xvar.split(",")[0]))
+  #raw_input("Press any key to continue...")
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Signal fit plots
+# Plot final pdf at MH = 125 (with data) + individual Pdf components
+def plotPdfComponents(ssf,_outdir='./',_extension='',_proc='',_cat=''):
+  canv = ROOT.TCanvas()
+  canv.SetLeftMargin(0.1)
+  ssf.MH.setVal(125)
+  LineColorMap = {0:ROOT.kAzure+1,1:ROOT.kRed-4,2:ROOT.kOrange,3:ROOT.kGreen+2,4:ROOT.kMagenta-9}
+  pdfs = od()
+  hists = od()
+  hmax, hmin = 0, 0
+  # Total pdf histogram
+  hists['final'] = ssf.Pdfs['final'].createHistogram("h_final%s"%_extension,ssf.xvar,ROOT.RooFit.Binning(1600))
+  hists['final'].SetLineWidth(2)
+  hists['final'].SetLineColor(1)
+  hists['final'].SetTitle("")
+  hists['final'].GetXaxis().SetTitle("m_{#gamma#gamma} [GeV]")
+  hists['final'].SetMinimum(0)
+  if hists['final'].GetMaximum()>hmax: hmax = hists['final'].GetMaximum()
+  if hists['final'].GetMinimum()<hmin: hmin = hists['final'].GetMinimum()
+  #hists['final'].GetXaxis().SetRangeUser(115,140)
+  hists['final'].GetXaxis().SetRangeUser(100,150)
+  # Create data histogram
+  hists['data'] = ssf.xvar.createHistogram("h_data%s"%_extension,ROOT.RooFit.Binning(ssf.nBins))
+  ssf.DataHists['125'].fillHistogram(hists['data'],ROOT.RooArgList(ssf.xvar))
+  hists['data'].SetTitle("")
+  hists['data'].GetXaxis().SetTitle("m_{#gamma#gamma} [GeV]")
+  hists['data'].SetMinimum(0)
+  #hists['data'].GetXaxis().SetRangeUser(115,140)
+  hists['data'].GetXaxis().SetRangeUser(100,150)
+  hists['data'].Scale(float(ssf.nBins)/1600)
+  hists['data'].SetMarkerStyle(20)
+  hists['data'].SetMarkerColor(1)
+  hists['data'].SetLineColor(1)
+  if hists['data'].GetMaximum()>hmax: hmax = hists['data'].GetMaximum()
+  if hists['data'].GetMinimum()<hmin: hmin = hists['data'].GetMinimum()
+  # Draw histograms
+  hists['data'].SetMaximum(1.2*hmax)
+  hists['data'].SetMinimum(1.2*hmin)
+  hists['data'].Draw("PE")
+  hists['final'].Draw("Same HIST")
+  # Individual Gaussian histograms
+  for k,v in ssf.Pdfs.items():
+    if k == 'final': continue
+    pdfs[k] = v
+  if len(pdfs.keys())!=1:
+    pdfItr = 0
+    for k,v in pdfs.items():
+      if pdfItr == 0:
+        if "gaus" in k: frac = ssf.Pdfs['final'].getComponents().getRealValue("frac_g0_constrained")
+        else: frac = ssf.Pdfs['final'].getComponents().getRealValue("frac_constrained")
+      else:
+        frac = ssf.Pdfs['final'].getComponents().getRealValue("%s_%s_recursive_fraction_%s_%s"%(ssf.proc,ssf.cat,k,pdfItr+1))
+      # Create histogram with 1600 bins
+      hists[k] = v.createHistogram("h_%s%s"%(k,_extension),ssf.xvar,ROOT.RooFit.Binning(1600))
+      hists[k].Scale(frac)
+      hists[k].SetLineColor(LineColorMap[pdfItr])
+      hists[k].SetLineWidth(2)
+      hists[k].SetLineStyle(2)
+      hists[k].Draw("HIST SAME")
+      pdfItr += 1
+  # Add legend
+  leg = ROOT.TLegend(0.58,0.6,0.86,0.8)
+  leg.SetFillStyle(0)
+  leg.SetLineColor(0)
+  leg.SetTextSize(0.04)
+  leg.AddEntry(hists['data'],"Simulation","ep")
+  leg.AddEntry(hists['final'],"Parametric Model","L")
+  leg.Draw("Same")
+  if len(pdfs.keys())!=1:
+    leg1 = ROOT.TLegend(0.6,0.4,0.86,0.6)
+    leg1.SetFillStyle(0)
+    leg1.SetLineColor(0)
+    leg1.SetTextSize(0.035)
+    for k,v in pdfs.items(): leg1.AddEntry(hists[k],k,"L")
+    leg1.Draw("Same")
+  # Add Latex
+  lat = ROOT.TLatex()
+  lat.SetTextFont(42)
+  lat.SetTextAlign(31)
+  lat.SetNDC()
+  lat.SetTextSize(0.03)
+  lat.DrawLatex(0.9,0.92,"( %s , %s , %s )"%(ssf.name,_proc,_cat))
+  lat1 = ROOT.TLatex()
+  lat1.SetTextFont(42)
+  lat1.SetTextAlign(11)
+  lat1.SetNDC()
+  lat1.SetTextSize(0.035)
+  lat1.DrawLatex(0.65,0.3,"#chi^{2}/n(dof) = %.4f"%(ssf.getChi2()/ssf.Ndof))
+
+  drawCMS(onTop=True, CMSString="Simulation Private Work", sqrts=None)
+
+  canv.Update()
+  canv.SaveAs("%s/%sshape_pdf_components_%s_%s.png"%(_outdir,_extension,_proc,_cat))
+  canv.SaveAs("%s/%sshape_pdf_components_%s_%s.pdf"%(_outdir,_extension,_proc,_cat))
+
+# Plot final pdf for each mass point
+def plotInterpolation(_finalModel,_outdir='./',_massPoints='120,121,122,123,124,125,126,127,128,129,130'):
+
+  canv = ROOT.TCanvas()
+  colors = [ROOT.kRed,ROOT.kCyan,ROOT.kBlue+1,ROOT.kOrange-3,ROOT.kMagenta-7,ROOT.kGreen+1,ROOT.kYellow-7,ROOT.kViolet+6,ROOT.kTeal+1,ROOT.kPink+1,ROOT.kAzure+1]
+  colorMap = {}
+  for i, mp in enumerate(_massPoints.split(",")): colorMap[mp] = colors[i]
+  # Set luminosity
+  _finalModel.intLumi.setVal(lumiScaleFactor*float(lumiMap[_finalModel.year]))
+  # Total pdf histograms
+  dh = od()
+  hists = od()
+  hmax = 0.0001 
+  for mp in _massPoints.split(","):
+    _finalModel.MH.setVal(int(mp))
+    hists[mp] = _finalModel.Pdfs['final'].createHistogram("h_%s"%mp,_finalModel.xvar,ROOT.RooFit.Binning(3200))
+    norm = _finalModel.Functions['final_normThisLumi'].getVal()
+    if norm == 0.: hists[mp].Scale(0.)
+    else: hists[mp].Scale((norm*3200)/(hists[mp].Integral()*_finalModel.xvar.getBins()))
+    if mp in _finalModel.Datasets:
+      hists[mp].SetLineWidth(2)
+    else:
+      hists[mp].SetLineWidth(1)
+      hists[mp].SetLineStyle(2)
+    hists[mp].SetLineColor(colorMap[mp])
+    hists[mp].SetTitle("")
+    if hists[mp].GetMaximum() > hmax: hmax = hists[mp].GetMaximum()
+
+    # Create ROOT datahists and then histograms
+    if mp in _finalModel.Datasets:
+      dh[mp] = ROOT.RooDataHist("dh_%s"%mp,"dh_%s"%mp,ROOT.RooArgSet(_finalModel.xvar),_finalModel.Datasets[mp])
+      hists['data_%s'%mp] = _finalModel.xvar.createHistogram("h_data_%s"%mp,ROOT.RooFit.Binning(_finalModel.xvar.getBins()))
+      dh[mp].fillHistogram(hists['data_%s'%mp],ROOT.RooArgList(_finalModel.xvar))
+      if norm == 0.: hists['data_%s'%mp].Scale(0)
+      else: hists['data_%s'%mp].Scale(norm/(hists['data_%s'%mp].Integral()))
+      hists['data_%s'%mp].SetMarkerStyle(20)
+      hists['data_%s'%mp].SetMarkerColor(colorMap[mp])
+      hists['data_%s'%mp].SetLineColor(colorMap[mp])
+
+  # Extract first hist and clone for axes
+  haxes = hists[list(hists.keys())[0]].Clone()
+  haxes.GetXaxis().SetTitle("m_{#gamma#gamma} [GeV]")
+  haxes.GetYaxis().SetTitle("Events / %.2f GeV"%((_finalModel.xvar.getMax()-_finalModel.xvar.getMin())/_finalModel.xvar.getBins()))
+  haxes.GetYaxis().SetTitleOffset(0.9)
+  haxes.SetMinimum(0)
+  haxes.SetMaximum(hmax*1.2)
+  haxes.GetXaxis().SetRangeUser(100,150)
+  haxes.Draw("AXIS")
+
+  # Draw rest of histograms
+  for k,h in hists.items(): 
+    if "data" in k: h.Draw("Same EP")
+    else: 
+      h.Draw("Same HIST")
+
+  # Add Latex
+  lat = ROOT.TLatex()
+  lat.SetTextFont(42)
+  lat.SetTextAlign(31)
+  lat.SetNDC()
+  lat.SetTextSize(0.03)
+  lat.DrawLatex(0.9,0.92,"%s"%(_finalModel.name))
+
+  drawCMS(onTop=True, CMSString="Simulation Private Work", sqrts=None)
+
+  canv.Update()
+  canv.SaveAs("%s/%s_model_vs_mH.png"%(_outdir,_finalModel.name))
+  canv.SaveAs("%s/%s_model_vs_mH.pdf"%(_outdir,_finalModel.name))
+
+
+
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Plot splines
+def plotSplines(_finalModel,_outdir="./",_nominalMass='125',splinesToPlot=['xs','br','ea','fracRV']):
+  canv = ROOT.TCanvas()
+  colorMap = {'xs':ROOT.kRed-4,'br':ROOT.kAzure+1,'ea':ROOT.kGreen+1,'fracRV':ROOT.kMagenta-7,'norm':ROOT.kBlack}
+  grs = od()
+  grs['norm'] = ROOT.TGraph()
+  for sp in splinesToPlot: grs[sp] = ROOT.TGraph()
+  # Get value at nominal mass
+  xnom = od()
+  _finalModel.MH.setVal(float(_nominalMass))
+  for sp in splinesToPlot: xnom[sp] = _finalModel.Splines[sp].getVal()
+  _finalModel.intLumi.setVal(lumiScaleFactor*float(lumiMap[_finalModel.year]))
+  xnom['norm'] = _finalModel.Functions['final_normThisLumi'].getVal()
+  # Loop over mass points
+  p = 0
+  xmax, xmin = 0,0.5
+  for mh in range(int(_finalModel.MHLow),int(_finalModel.MHHigh)+1):
+    _finalModel.MH.setVal(float(mh))
+    for sp in splinesToPlot:
+      x = _finalModel.Splines[sp].getVal()
+      if xnom[sp] == 0.: r = 1.
+      else: r = x/xnom[sp]
+      grs[sp].SetPoint(p,int(mh),r)
+      if r > xmax: xmax = r
+      if r < xmin: xmin = r
+    # Overall norm
+    x = _finalModel.Functions['final_normThisLumi'].getVal()
+    if xnom['norm'] == 0.: r = 1.
+    else: r = x/xnom['norm']
+    grs['norm'].SetPoint(p,int(mh),r)
+    if r > xmax: xmax = r
+    if r < xmin: xmin = r
+    p += 1
+  # Draw axes
+  haxes = ROOT.TH1F("h_axes_spl","h_axes_spl",int(_finalModel.MHHigh)-int(_finalModel.MHLow),int(_finalModel.MHLow),int(_finalModel.MHHigh))
+  haxes.SetTitle("")
+  haxes.GetXaxis().SetTitle("m_{H} [GeV]")
+  haxes.GetXaxis().SetTitleSize(0.05)
+  haxes.GetXaxis().SetTitleOffset(0.85)
+  haxes.GetXaxis().SetLabelSize(0.035)
+  haxes.GetYaxis().SetTitle("X/X(m_{H}=125)")
+  haxes.GetYaxis().SetTitleOffset(0.85)
+  haxes.GetYaxis().SetTitleSize(0.05)
+  haxes.SetMaximum(1.2*xmax)
+  haxes.SetMinimum(xmin)
+  haxes.Draw()
+  # Define legend
+  leg = ROOT.TLegend(0.15,0.15,0.4,0.4)
+  leg.SetFillStyle(0)
+  leg.SetLineColor(0)
+  leg.SetTextSize(0.04)
+  # Draw graphs
+  for x, gr in grs.items(): 
+    gr.SetLineColor(colorMap[x])
+    gr.SetMarkerColor(colorMap[x])
+    gr.SetMarkerStyle(20)
+    gr.Draw("Same PL")
+    if x == "norm": leg.AddEntry(gr,"N_{exp}: @%s = %.2f/pb"%(_nominalMass,xnom['norm']))
+    if x == "xs": leg.AddEntry(gr,"#sigma: @%s = %.2f pb"%(_nominalMass,xnom['xs']))
+    if x == "br": leg.AddEntry(gr,"#bf{#it{#Beta}}: @%s = %.2f%%"%(_nominalMass,100*xnom['br']))
+    if x == "ea": leg.AddEntry(gr,"#epsilon x #it{#Alpha}: @%s = %.2f%%"%(_nominalMass,100*xnom['ea']))
+    if x == "fracRV": leg.AddEntry(gr,"RV fraction: @%s = %.2f%%"%(_nominalMass,100*xnom['fracRV']))
+  leg.Draw("Same")
+  grs['norm'].Draw("Same PL")
+  # Add Latex
+  lat = ROOT.TLatex()
+  lat.SetTextFont(42)
+  lat.SetTextAlign(31)
+  lat.SetNDC()
+  lat.SetTextSize(0.03)
+  lat.DrawLatex(0.9,0.92,"%s"%(_finalModel.name))
+  # Decorate with CMS label
+  drawCMS(onTop=True, CMSString="Simulation Private Work", sqrts=None)
+  canv.Update()
+  canv.SaveAs("%s/%s_splines.png"%(_outdir,_finalModel.name))
+  canv.SaveAs("%s/%s_splines.pdf"%(_outdir,_finalModel.name))
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Function for plotting final signal model: neat
+def plotSignalModel(_hists,_opt,_outdir=".",offset=0.02):
+  colorMap = {'2016':38,'2017':30,'2018':46,'2022preEE':38,'2022postEE':30}
+  canv = ROOT.TCanvas("c","c",650,600)
+  canv.SetBottomMargin(0.12)
+  canv.SetLeftMargin(0.15)
+  canv.SetTickx()
+  canv.SetTicky()
+  h_axes = _hists['data'].Clone()
+  h_axes.Reset()
+  h_axes.SetMaximum(_hists['data'].GetMaximum()*1.2)
+  h_axes.SetMinimum(0.)
+  h_axes.GetXaxis().SetRangeUser(105,140)
+  h_axes.SetTitle("")
+  h_axes.GetXaxis().SetTitle("%s (%s)"%(_opt.xvar.split(":")[1],_opt.xvar.split(":")[2]))
+  h_axes.GetXaxis().SetTitleSize(0.05)
+  h_axes.GetXaxis().SetTitleOffset(1.)
+  h_axes.GetYaxis().SetTitleSize(0.05)
+  h_axes.GetYaxis().SetTitleOffset(1.2)
+  h_axes.Draw()
+    
+  # Extract effSigma
+  effSigma = getEffSigma(_hists['pdf'])
+  effSigma_low, effSigma_high = _hists['pdf'].GetMean()-effSigma, _hists['pdf'].GetMean()+effSigma
+  h_effSigma = _hists['pdf'].Clone()
+  h_effSigma.GetXaxis().SetRangeUser(effSigma_low,effSigma_high)
+
+  # Legend
+  if len(_opt.years.split(","))>1 and _opt.plot_years_separate:
+    leg0 = ROOT.TLegend(0.15+offset,0.6,0.5+offset,0.82)
+    leg0.SetFillStyle(0)
+    leg0.SetLineColor(0)
+    leg0.SetTextSize(0.03)
+    leg0.AddEntry(_hists['data'],"Simulation","ep")
+    # leg0.AddEntry(_hists['pdf'],"#splitline{Parametric}{model (%s)}"%year,"l")
+    leg0.AddEntry(_hists['pdf'],"#splitline{Parametric}{model}","l")
+    leg0.Draw("Same")
+
+    leg1 = ROOT.TLegend(0.17+offset,0.45,0.4+offset,0.61)
+    leg1.SetFillStyle(0)
+    leg1.SetLineColor(0)
+    leg1.SetTextSize(0.03)
+    for year in _opt.years.split(","): leg1.AddEntry(_hists['pdf_%s'%year],"#splitline{%s:}{#scale[0.8]{#sigma_{eff} = %1.2f GeV}}"%(year,getEffSigma(_hists['pdf_%s'%year])),"l")
+    leg1.Draw("Same")
+
+    leg2 = ROOT.TLegend(0.15+offset,0.3,0.5+offset,0.45)
+    leg2.SetFillStyle(0)
+    leg2.SetLineColor(0)
+    leg2.SetTextSize(0.03)
+    leg2.AddEntry(h_effSigma,"#sigma_{eff} = %1.2f GeV"%(0.5*(effSigma_high-effSigma_low)),"fl")
+    leg2.Draw("Same")
+  else:
+    year = _opt.years
+    leg = ROOT.TLegend(0.15+offset,0.4,0.5+offset,0.82)
+    leg.SetFillStyle(0)
+    leg.SetLineColor(0)
+    leg.SetTextSize(0.03)
+    leg.AddEntry(_hists['data'],"Simulation","lep")
+    # For publication: Do not display the years for the outside world in the legend
+    leg.AddEntry(_hists['pdf'],"#splitline{Parametric}{model}","l")
+    leg.AddEntry(h_effSigma,"#sigma_{eff} = %1.2f GeV"%(0.5*(effSigma_high-effSigma_low)),"fl")
+    leg.Draw("Same")    
+
+  # Set style effSigma
+  h_effSigma.SetLineColor(15)
+  h_effSigma.SetFillStyle(1001)
+  h_effSigma.SetFillColor(19)
+  h_effSigma.Draw("Same Hist F")
+  vline_effSigma_low = ROOT.TLine(effSigma_low,0,effSigma_low,_hists['pdf'].GetBinContent(_hists['pdf'].FindBin(effSigma_low)))
+  vline_effSigma_high = ROOT.TLine(effSigma_high,0,effSigma_high,_hists['pdf'].GetBinContent(_hists['pdf'].FindBin(effSigma_high)))
+  vline_effSigma_low.SetLineColor(15)
+  vline_effSigma_high.SetLineColor(15)
+  vline_effSigma_low.SetLineWidth(2)
+  vline_effSigma_high.SetLineWidth(2)
+  vline_effSigma_low.Draw("Same")
+  vline_effSigma_high.Draw("Same")
+
+  # Extract FWHM and set style
+  if _opt.doFWHM:
+    fwhm_low = _hists['pdf'].GetBinCenter(_hists['pdf'].FindFirstBinAbove(0.5*_hists['pdf'].GetMaximum()))
+    fwhm_high = _hists['pdf'].GetBinCenter(_hists['pdf'].FindLastBinAbove(0.5*_hists['pdf'].GetMaximum()))
+    fwhmArrow = ROOT.TArrow(fwhm_low,0.5*_hists['pdf'].GetMaximum(),fwhm_high,0.5*_hists['pdf'].GetMaximum(),0.02,"<>")
+    fwhmArrow.SetLineWidth(2)
+    fwhmArrow.Draw("Same <>")
+    fwhmText = ROOT.TLatex()
+    fwhmText.SetTextFont(42)
+    fwhmText.SetTextAlign(11)
+    fwhmText.SetNDC()
+    fwhmText.SetTextSize(0.03)
+    fwhmText.DrawLatex(0.17+offset,0.25,"FWHM = %1.2f GeV"%(fwhm_high-fwhm_low))
+
+  # Set style pdf
+  _hists['pdf'].SetLineColor(4)
+  _hists['pdf'].SetLineWidth(2)
+  _hists['pdf'].Draw("Same Hist C")
+  if len(_opt.years.split(","))>1 and _opt.plot_years_separate:
+    for year in _opt.years.split(","):
+      _hists['pdf_%s'%year].SetLineColor( colorMap[year] )  
+      _hists['pdf_%s'%year].SetLineStyle(2)
+      _hists['pdf_%s'%year].SetLineWidth(2)
+      _hists['pdf_%s'%year].Draw("Same Hist C")
+  # Set style: data
+  _hists['data'].SetMarkerStyle(25)
+  _hists['data'].SetMarkerColor(1)
+  _hists['data'].SetLineColor(1)
+  _hists['data'].SetLineWidth(2)
+  _hists['data'].Draw("Same PE")
+  
+  # Add TLatex to plot
+  lat0 = ROOT.TLatex()
+  lat0.SetTextFont(42)
+  lat0.SetTextAlign(11)
+  lat0.SetNDC()
+  lat0.SetTextSize(0.045)
+  lat0.DrawLatex(0.15,0.92,"#bf{CMS} #it{%s}"%_opt.label)
+  #lat0.DrawLatex(0.77,0.92,"%s TeV"%(sqrts__.split("TeV")[0]))
+  lat0.DrawLatex(0.77,0.92,"13.6 TeV")
+  lat0.DrawLatex(0.16+offset,0.83,"H #rightarrow #gamma#gamma")
+
+  # Load translations
+  translateCats = {} if _opt.translateCats is None else LoadTranslations(_opt.translateCats)
+  translateProcs = {} if _opt.translateProcs is None else LoadTranslations(_opt.translateProcs)
+
+  lat1 = ROOT.TLatex()
+  lat1.SetTextFont(42)
+  lat1.SetTextAlign(33)
+  lat1.SetNDC(1)
+  lat1.SetTextSize(0.035)
+  if _opt.procs == 'all': procStr, procExt = "", ""
+  elif len(_opt.procs.split(","))>1: 
+    if "=" in _opt.procs:
+      # Format: multiProcessName=proc0,proc1,proc2,...
+      procStr, _ = _opt.procs.split("=")
+      procExt = procStr
+    else:
+      procStr, procExt = "Multiple processes", "_multipleProcs"
+  else: procStr, procExt = Translate(_opt.procs,translateProcs), "_%s"%_opt.procs
+ 
+  if len(_opt.years.split(","))>1: yearStr, yearExt = "", ""
+  else: yearStr, yearExt = _opt.years, "_%s"%_opt.years
+
+  if _opt.cats == 'all': catStr, catExt = "All categories", "all"
+  elif _opt.cats == 'wall': catStr, catExt = "#splitline{All categories}{S/(S+B) weighted}", "wall"
+  elif len(_opt.cats.split(","))>1:     
+    if "=" in _opt.cats:
+      # Format: multiCategoryName=cat0,proc1,proc2,...
+      catStr, _ = _opt.cats.split("=")
+      catExt = catStr
+    else:
+      catStr, catExt = "Multiple categories", "multipleCats"
+  else: catStr, catExt = Translate(_opt.cats,translateCats), _opt.cats
+ 
+  if (_opt.translateCats is not None) and not(_opt.cats == "all"):
+    lat1.DrawLatex(0.85,0.86,"%s"%translateCats[catStr])
+  else:
+    lat1.DrawLatex(0.85,0.86,"%s"%catStr)
+  lat1.DrawLatex(0.83,0.8,"%s %s"%(procStr,yearStr))
+
+  # drawCMS(onTop=True, CMSString="Simulation Private Work", sqrts=None)
+
+  canv.Update()
+
+  # Write effSigma to file
+  if len(_opt.years.split(",")) >1:
+    es = {}
+    es['combined'] = effSigma
+    for year in _opt.years.split(","): es[year] = getEffSigma(_hists['pdf_%s'%year])
+    with open("%s/effSigma_%s.json"%(_outdir,catExt),"w") as jf: json.dump(es,jf)
+
+  # Save canvas
+  canv.SaveAs("%s/smodel_%s%s%s.pdf"%(_outdir,catExt,procExt,yearExt))
+  canv.SaveAs("%s/smodel_%s%s%s.png"%(_outdir,catExt,procExt,yearExt))
