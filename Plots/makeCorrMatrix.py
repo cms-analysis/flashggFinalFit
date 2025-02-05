@@ -84,7 +84,7 @@ for mode,pois in modes.items():
 
   # Output json file storing correlaiton and parameters
   #with open("correlations_expected_%s.json"%mode,"w") as jf: json.dump(theMapToJson,jf)
-  
+
   pois_reverse = list(pois)
   pois_reverse.reverse()
   for iBin,iPar in enumerate(pois):
@@ -129,6 +129,7 @@ for mode,pois in modes.items():
     theHist.GetZaxis().SetRangeUser(-1., 1.)
   theHist.GetZaxis().SetTickLength(0.)
   theHist.GetZaxis().SetLabelSize(0.03)
+  theHist.GetZaxis().SetDecimals(True)
   if mode.count('stage1p2'): 
     theHist.GetXaxis().SetLabelOffset(0.003)
     theHist.GetXaxis().LabelsOption("v")
@@ -161,22 +162,24 @@ for mode,pois in modes.items():
     theHist.GetXaxis().LabelsOption("v")
     if opt.doCov:
       if mode.count("PTH"):
-        label_size = 0.035
+        label_size = 0.05
         theHist.GetXaxis().SetLabelSize(label_size)
         theHist.GetYaxis().SetLabelSize(label_size)
         theHist.SetMarkerSize(2)
       else:
-        label_size = 0.04
+        label_size = 0.06
         theHist.GetXaxis().SetLabelSize(label_size)
         theHist.GetYaxis().SetLabelSize(label_size)
         theHist.SetMarkerSize(2)
     else:
       if mode.count("PTH"):
-        label_size = 0.035
+        label_size = 0.05
       elif mode.count("rapidity"):
-        label_size = 0.04
+        label_size = 0.06
       elif mode.count("Njets2p5"):
-        label_size = 0.045
+        label_size = 0.06
+      elif mode.count("ptJ0"):
+        label_size = 0.06
       else:
         label_size = 0.03
       theHist.GetXaxis().SetLabelSize(label_size)
@@ -191,20 +194,26 @@ for mode,pois in modes.items():
   latex.SetTextFont(42)
   latex.SetTextAlign(32)
   latex.SetTextSize(0.045)
+  x_modifier_cms = 0.57 # 0.62
+  if opt.doCov:
+    x_modifier_cms = 0.53 # 0.53
   if opt.doObserved:
     if opt.noPreliminary:
-      latex.DrawLatex(1.00-canv.GetRightMargin()-0.02,1.00-canv.GetTopMargin()-0.06,'#bf{CMS}')
+      latex.DrawLatex(1.00-canv.GetRightMargin()-x_modifier_cms,1.0-canv.GetTopMargin()+0.025,'#bf{CMS}')
     else:
-      latex.DrawLatex(1.00-canv.GetRightMargin()-0.02,1.00-canv.GetTopMargin()-0.06,'#bf{CMS} #it{Preliminary}')
+      latex.DrawLatex(1.00-canv.GetRightMargin()-x_modifier_cms,1.00-canv.GetTopMargin()+0.025,'#bf{CMS} #it{Preliminary}')
   else:
     if opt.noPreliminary:
-      latex.DrawLatex(1.00-canv.GetRightMargin()-0.02,1.00-canv.GetTopMargin()-0.06,'#bf{CMS} #it{Simulation}')
+      latex.DrawLatex(1.00-canv.GetRightMargin()-x_modifier_cms,1.00-canv.GetTopMargin()+0.025,'#bf{CMS} #it{Simulation}')
     else:
-      latex.DrawLatex(1.00-canv.GetRightMargin()-0.02,1.00-canv.GetTopMargin()-0.06,'#bf{CMS} #it{Simulation Preliminary}')
+      latex.DrawLatex(1.00-canv.GetRightMargin()-x_modifier_cms,1.00-canv.GetTopMargin()+0.025,'#bf{CMS} #it{Simulation Preliminary}')
   latex.SetTextSize(0.04)
-  latex.DrawLatex(1.00-canv.GetRightMargin()-0.02,1.00-canv.GetTopMargin()-0.12,'%0.1f fb^{-1} (13.6 TeV)'%lumiMap[f"{opt.year}"])
-  latex.SetTextSize(0.025)
-  latex.DrawLatex(1.00-canv.GetRightMargin()-0.02,1.00-canv.GetTopMargin()-0.18,'H #rightarrow #gamma#gamma, m_{H} = 125.38 GeV')
+  latex.DrawLatex(1.00-canv.GetRightMargin()-0.,1.00-canv.GetTopMargin()+0.025,'%0.1f fb^{-1} (13.6 TeV)'%lumiMap[f"{opt.year}"])
+  latex.SetTextSize(0.04)
+  latex.DrawLatex(1.00-canv.GetRightMargin()-0.02,1.00-canv.GetTopMargin()-0.04,f'{translate[opt.mode]}')
+  latex.DrawLatex(1.00-canv.GetRightMargin()-0.02,1.00-canv.GetTopMargin()-0.10,'H #rightarrow #gamma#gamma')
+  latex.DrawLatex(1.00-canv.GetRightMargin()-0.02,1.00-canv.GetTopMargin()-0.15,'#font[52]{m}_{H} = 125.38 GeV')
+  
   for binx in range(1, theHist.GetNbinsX() + 1):
     for biny in range(1, theHist.GetNbinsY() + 1):
         if (theHist.GetBinContent(binx, biny)) > 0.8:
@@ -214,10 +223,6 @@ for mode,pois in modes.items():
             latex.SetTextSize(0.03)  # Set text size as needed
             latex.SetTextColor(ROOT.kWhite)  # Set text color to white
             latex.DrawLatex(theHist.GetXaxis().GetBinCenter(binx), theHist.GetYaxis().GetBinCenter(biny), label)
-  #canv.Print("/eos/home-j/jlangfor/www/CMS/hgg/stxs_runII/May20/pass0/test/test_%s.png"%opt.mode)
-  #canv.Print("/eos/home-j/jlangfor/www/CMS/hgg/stxs_runII/May20/pass0/test/test_%s.pdf"%opt.mode)
-  #canv.Print('%s/src/flashggFinalFit/Combine/runFits%s_%s/Plots/corrMatrix_%s_%s%s%s.png'%(os.environ['CMSSW_BASE'],opt.ext,mode,mode,name.split("_")[-1],obs_ext,opt.ext))
-  #canv.Print('%s/src/flashggFinalFit/Combine/runFits%s_%s/Plots/corrMatrix_%s_%s%s%s.pdf'%(os.environ['CMSSW_BASE'],opt.ext,mode,mode,name.split("_")[-1],obs_ext,opt.ext))
   output_dir = opt.output
   if opt.doCov:
     output_path_png = os.path.join(opt.output, "covMatrix_%s_%s%s%s.png"%(mode,name.split("_")[-1],obs_ext,opt.ext))

@@ -63,6 +63,6 @@ fi
 
 cd ../../../Plots
 
-python3 makeCorrMatrix.py --inputJson ./inputs_robustHesse.json --mode differential_${differential_variable} --input ../Combine/runFits_${differential_variable}/hesse/robustHessefirstStep_data.root --output ../Combine/runFits_${differential_variable}/hesse/Plots/data --translate ../Combine/poi_differential_hesse.json  --doObserved
-python3 makeCorrMatrix.py --inputJson ./inputs_robustHesse.json --mode differential_${differential_variable} --input ../Combine/runFits_${differential_variable}/hesse/robustHessefirstStep_data.root --output ../Combine/runFits_${differential_variable}/hesse/Plots/data --translate ../Combine/poi_differential_hesse.json  --doObserved --doCov
+python3 makeCorrMatrix.py --inputJson ./inputs_robustHesse.json --mode ${differential_variable} --input ../Combine/runFits_${differential_variable}/hesse/robustHessefirstStep_data.root --output ../Combine/runFits_${differential_variable}/hesse/Plots/data --translate ../Combine/poi_differential_hesse_noLabels.json  --doObserved --year 2022 --noPreliminary
+python3 makeCorrMatrix.py --inputJson ./inputs_robustHesse.json --mode ${differential_variable} --input ../Combine/runFits_${differential_variable}/hesse/robustHessefirstStep_data.root --output ../Combine/runFits_${differential_variable}/hesse/Plots/data --translate ../Combine/poi_differential_hesse_noLabels.json  --doObserved --doCov --year 2022 --noPreliminary
 
