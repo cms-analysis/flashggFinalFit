@@ -253,8 +253,8 @@ class CalcPhotonSystCategory(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWor
     cats = law.Parameter(description="Category string")
     procs = law.Parameter(description="Processes")
     scales = law.Parameter(description="Scales")
-    scalesCorr = law.Parameter(description="Scale corrections")
-    scalesGlobal = law.Parameter(description="Global scales")
+    scalesCorr = law.Parameter(default="", description="Scale corrections")
+    scalesGlobal = law.Parameter(default="", description="Global scales")
     smears = law.Parameter(description="Smearings")
     variable = law.Parameter(default="", description="Variable to be used")
     year = law.Parameter(description="Year")    
@@ -329,10 +329,14 @@ class CalcPhotonSystCategory(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWor
             "--outputDir", f"{self.output_dir}",
             "--inputWSDir", f"{self.input_path}",
             "--scales", f"{self.scales}",
-            "--scalesCorr", f"{self.scalesCorr}",
-            "--scalesGlobal", f"{self.scalesGlobal}",
             "--smears", f"{self.smears}"
         ]
+        if self.scalesCorr != "":
+            arguments.append("--scalesCorr")
+            arguments.append("%s"%self.scalesCorr)
+        if self.scalesCorr != "":
+            arguments.append("--scalesGlobal")
+            arguments.append("%s"%self.scalesGlobal)
         command = arguments
         # print(command)
         try:
@@ -473,11 +477,12 @@ class SignalFitCategoryProcess(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalW
     cats = law.Parameter(description="Category list")
     procs = law.Parameter(description="Process list")
     scales = law.Parameter(description="Scales")
-    scalesCorr = law.Parameter(description="Scale corrections")
-    scalesGlobal = law.Parameter(description="Global scales")
+    scalesCorr = law.Parameter(default="",description="Scale corrections")
+    scalesGlobal = law.Parameter(default="",description="Global scales")
     smears = law.Parameter(description="Smearings")
     year = law.Parameter(description="Year")    
-    analysis = law.Parameter(description="Analysis")    
+    analysis = law.Parameter(description="Analysis")
+    replacementThreshold = law.Parameter(description="replacementThreshold")
     massPoints = law.Parameter(description="Mass Points")
     beamspotWidthData = law.Parameter(description="Beamspot width in Data")
     beamspotWidthMC = law.Parameter(description="Beamspot width in MC")
@@ -493,9 +498,9 @@ class SignalFitCategoryProcess(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalW
         
         # Path should be somewhere centrally...
         if self.variable == '':
-            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"], f"config/{self.year}_inclusive.yml")
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"], f"config/{year}_inclusive.yml")
         else:
-            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"], f"config/{self.year}_{self.variable}.yml")
+            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"], f"config/{year}_{self.variable}.yml")
         
         #Load central config file
         with open(configYamlPath, 'r') as file:
@@ -530,7 +535,7 @@ class SignalFitCategoryProcess(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalW
         return branch_map
 
     def output(self):
-        
+                
         cat, proc = self.branch_data
         
         safe_mkdir(self.output_dir)
@@ -557,7 +562,7 @@ class SignalFitCategoryProcess(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalW
         safe_mkdir(os.path.join(self.output_dir,f"outdir_{self.ext}/signalFit/output"))
         safe_mkdir(os.path.join(self.output_dir,f"outdir_{self.ext}/signalFit/Plots"))
 
-        script_path = os.path.join(os.environ["ANALYSIS_PATH"], "/Signal/scripts/signalFit.py")
+        script_path = os.path.join(os.environ["ANALYSIS_PATH"], "Signal/scripts/signalFit.py")
         arguments = [
             "python3",
             script_path,
@@ -568,18 +573,23 @@ class SignalFitCategoryProcess(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalW
             "--inputWSDir", f"{self.input_path}",
             "--year", f"{self.year}",
             "--scales", f"{self.scales}",
-            "--scalesCorr", f"{self.scalesCorr}",
-            "--scalesGlobal", f"{self.scalesGlobal}",
             "--smears", f"{self.smears}",
             "--analysis", f"{self.analysis}",
             "--massPoints", f"{self.massPoints}",
+            "--replacementThreshold",f"{self.replacementThreshold}",
             "--beamspotWidthData", f"{self.beamspotWidthData}",
             "--beamspotWidthMC", f"{self.beamspotWidthMC}"
         ]
         if convert_boolean_string(self.doPlots):
             arguments += ["--doPlots"]
+        if self.scalesCorr != "":
+            arguments += ["--scalesCorr"]
+            arguments += ["%s"%self.scalesCorr]
+        if self.scalesGlobal != "":
+            arguments += ["--scalesGlobal"]
+            arguments += ["%s"%self.scalesGlobal]
         command = arguments
-        # print(command)
+        print(command)
         try:
             result = subprocess.run(command, check=True, text=True, capture_output=True)
             print("Script output:", result.stdout)
@@ -643,7 +653,7 @@ class SignalFit(law.Task):
             for mp in currentConfig['massPoints'].split(","): mps.append(int(mp))
             currentConfig['massLow'], currentConfig['massHigh'] = '%s'%min(mps), '%s'%max(mps)         
             
-            tasks.append(SignalFitCategoryProcess(input_path=input_path, output_dir=output_dir, ext=currentConfig['ext'], cats=currentConfig['cats'], procs=currentConfig['procs'], scales=currentConfig['scales'], scalesCorr=currentConfig['scalesCorr'], scalesGlobal=currentConfig['scalesGlobal'], smears=currentConfig['smears'], year=currentConfig['year'], analysis=currentConfig['analysis'], massPoints=currentConfig['massPoints'], beamspotWidthData=currentConfig['beamspotWidthData'], beamspotWidthMC=currentConfig['beamspotWidthMC'], doPlots=currentConfig['doPlots'], variable=self.variable, version=f"v{i}", workflow=currentConfig['execution']))
+            tasks.append(SignalFitCategoryProcess(input_path=input_path, output_dir=output_dir, ext=currentConfig['ext'], cats=currentConfig['cats'], procs=currentConfig['procs'], scales=currentConfig['scales'], scalesCorr=currentConfig['scalesCorr'], scalesGlobal=currentConfig['scalesGlobal'], smears=currentConfig['smears'], year=currentConfig['year'], analysis=currentConfig['analysis'], replacementThreshold=currentConfig['replacementThreshold'], massPoints=currentConfig['massPoints'], beamspotWidthData=currentConfig['beamspotWidthData'], beamspotWidthMC=currentConfig['beamspotWidthMC'], doPlots=currentConfig['doPlots'], variable=self.variable, version=f"v{i}", workflow=currentConfig['execution']))
             i += 1
                 
         return tasks
@@ -680,7 +690,7 @@ class SignalFit(law.Task):
             
             # returns output folder
             output_paths.append(law.LocalFileTarget(os.path.join(output_dir, f"outdir_{currentConfig['ext']}/signalFit")))
-            output_paths.append(law.LocalFileTarget(os.path.join(output_dir, f"outdir_{currentConfig['ext']}/signalFit/outut")))
+            output_paths.append(law.LocalFileTarget(os.path.join(output_dir, f"outdir_{currentConfig['ext']}/signalFit/output")))
             output_paths.append(law.LocalFileTarget(os.path.join(output_dir, f"outdir_{currentConfig['ext']}/signalFit/Plots")))
             
             
@@ -789,7 +799,7 @@ class SignalPackagingCategory(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWo
             "--mergeYears", f"{self.mergeYears}",
         ]
         command = arguments
-        # print(command)
+        print(command)
         try:
             result = subprocess.run(command, check=True, text=True, capture_output=True)
             print("Script output:", result.stdout)

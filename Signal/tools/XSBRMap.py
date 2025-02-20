@@ -441,3 +441,52 @@ globalXSBRMap['earlyAnalysisDiffAbsPhiHJ0']['tth_AbsPhiHJ0_2p9_3p03_in'] = {'mod
 globalXSBRMap['earlyAnalysisDiffAbsPhiHJ0']['tth_AbsPhiHJ0_3p03_3p1415926_in'] = {'mode':'constant','factor':0.5638}
 globalXSBRMap['earlyAnalysisDiffAbsPhiHJ0']['tth_AbsPhiHJ0_NJ_in'] = {'mode':'constant','factor':0.5638}
 globalXSBRMap['earlyAnalysisDiffAbsPhiHJ0']['tth_AbsPhiHJ0_0p0_Pi_out'] = {'mode':'constant','factor':0.5638}
+
+
+###################################################################################################################################################################################################
+###################################################################################################################################################################################################
+###################################################################################################################################################################################################
+# Intermediate Run3
+
+# Intermediate Run 3 Hgg analysis with differentials in pt
+globalXSBRMap['earlyAnalysisDiffPt23'] = od()
+globalXSBRMap['earlyAnalysisDiffPt23']['decay'] = {'mode':'hgg'}
+globalXSBRMap['earlyAnalysisDiffPt23']['ggh_PTH_0p0_15p0_in'] = {'mode':'constant','factor':51.96}
+globalXSBRMap['earlyAnalysisDiffPt23']['ggh_PTH_15p0_30p0_in'] = {'mode':'constant','factor':51.96}
+globalXSBRMap['earlyAnalysisDiffPt23']['ggh_PTH_30p0_45p0_in'] = {'mode':'constant','factor':51.96}
+globalXSBRMap['earlyAnalysisDiffPt23']['ggh_PTH_45p0_80p0_in'] = {'mode':'constant','factor':51.96}
+globalXSBRMap['earlyAnalysisDiffPt23']['ggh_PTH_80p0_120p0_in'] = {'mode':'constant','factor':51.96}
+globalXSBRMap['earlyAnalysisDiffPt23']['ggh_PTH_120p0_200p0_in'] = {'mode':'constant','factor':51.96}
+globalXSBRMap['earlyAnalysisDiffPt23']['ggh_PTH_200p0_350p0_in'] = {'mode':'constant','factor':51.96}
+globalXSBRMap['earlyAnalysisDiffPt23']['ggh_PTH_350p0_10000p0_in'] = {'mode':'constant','factor':51.96}
+globalXSBRMap['earlyAnalysisDiffPt23']['ggh_PTH_0p0_10000p0_out'] = {'mode':'constant','factor':51.96}
+
+globalXSBRMap['earlyAnalysisDiffPt23']['vbf_PTH_0p0_15p0_in'] = {'mode':'constant','factor':4.067}
+globalXSBRMap['earlyAnalysisDiffPt23']['vbf_PTH_15p0_30p0_in'] = {'mode':'constant','factor':4.067}
+globalXSBRMap['earlyAnalysisDiffPt23']['vbf_PTH_30p0_45p0_in'] = {'mode':'constant','factor':4.067}
+globalXSBRMap['earlyAnalysisDiffPt23']['vbf_PTH_45p0_80p0_in'] = {'mode':'constant','factor':4.067}
+globalXSBRMap['earlyAnalysisDiffPt23']['vbf_PTH_80p0_120p0_in'] = {'mode':'constant','factor':4.067}
+globalXSBRMap['earlyAnalysisDiffPt23']['vbf_PTH_120p0_200p0_in'] = {'mode':'constant','factor':4.067}
+globalXSBRMap['earlyAnalysisDiffPt23']['vbf_PTH_200p0_350p0_in'] = {'mode':'constant','factor':4.067}
+globalXSBRMap['earlyAnalysisDiffPt23']['vbf_PTH_350p0_10000p0_in'] = {'mode':'constant','factor':4.067}
+globalXSBRMap['earlyAnalysisDiffPt23']['vbf_PTH_0p0_10000p0_out'] = {'mode':'constant','factor':4.067}
+
+globalXSBRMap['earlyAnalysisDiffPt23']['vh_PTH_0p0_15p0_in'] = {'mode':'constant','factor':2.3781}
+globalXSBRMap['earlyAnalysisDiffPt23']['vh_PTH_15p0_30p0_in'] = {'mode':'constant','factor':2.3781}
+globalXSBRMap['earlyAnalysisDiffPt23']['vh_PTH_30p0_45p0_in'] = {'mode':'constant','factor':2.3781}
+globalXSBRMap['earlyAnalysisDiffPt23']['vh_PTH_45p0_80p0_in'] = {'mode':'constant','factor':2.3781}
+globalXSBRMap['earlyAnalysisDiffPt23']['vh_PTH_80p0_120p0_in'] = {'mode':'constant','factor':2.3781}
+globalXSBRMap['earlyAnalysisDiffPt23']['vh_PTH_120p0_200p0_in'] = {'mode':'constant','factor':2.3781}
+globalXSBRMap['earlyAnalysisDiffPt23']['vh_PTH_200p0_350p0_in'] = {'mode':'constant','factor':2.3781}
+globalXSBRMap['earlyAnalysisDiffPt23']['vh_PTH_350p0_10000p0_in'] = {'mode':'constant','factor':2.3781}
+globalXSBRMap['earlyAnalysisDiffPt23']['vh_PTH_0p0_10000p0_out'] = {'mode':'constant','factor':2.3781}
+
+globalXSBRMap['earlyAnalysisDiffPt23']['tth_PTH_0p0_15p0_in'] = {'mode':'constant','factor':0.5638}
+globalXSBRMap['earlyAnalysisDiffPt23']['tth_PTH_15p0_30p0_in'] = {'mode':'constant','factor':0.5638}
+globalXSBRMap['earlyAnalysisDiffPt23']['tth_PTH_30p0_45p0_in'] = {'mode':'constant','factor':0.5638}
+globalXSBRMap['earlyAnalysisDiffPt23']['tth_PTH_45p0_80p0_in'] = {'mode':'constant','factor':0.5638}
+globalXSBRMap['earlyAnalysisDiffPt23']['tth_PTH_80p0_120p0_in'] = {'mode':'constant','factor':0.5638}
+globalXSBRMap['earlyAnalysisDiffPt23']['tth_PTH_120p0_200p0_in'] = {'mode':'constant','factor':0.5638}
+globalXSBRMap['earlyAnalysisDiffPt23']['tth_PTH_200p0_350p0_in'] = {'mode':'constant','factor':0.5638}
+globalXSBRMap['earlyAnalysisDiffPt23']['tth_PTH_350p0_10000p0_in'] = {'mode':'constant','factor':0.5638}
+globalXSBRMap['earlyAnalysisDiffPt23']['tth_PTH_0p0_10000p0_out'] = {'mode':'constant','factor':0.5638}

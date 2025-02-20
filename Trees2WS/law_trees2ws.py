@@ -64,6 +64,8 @@ class Trees2WSSingleProcess(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWork
             for mass in input_masses
             for input_path in glob.glob(f"{self.input_paths}/{process}_M-{mass}_{self.era}/*.root")
         ]
+
+        
         branch_map = {i: mode_proc_mass for i, mode_proc_mass in enumerate(mode_proc_mass_list)}
         # Test if empty, then try naming convention with year in front
         # Note here: self.year = real year + era string (maybe should be improved)
@@ -160,6 +162,10 @@ class Trees2WSSingleProcess(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWork
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         # Production modes to skip theory weights: fill with 1's
         modesToSkipTheoryWeights = ['bbh','thq','thw']
+        
+        if "2023" in self.year:
+            print("Skipping theory weights for 2023 for the moment")
+            modesToSkipTheoryWeights = ['bbh','thq','thw','ggh', 'qqh', 'tth', 'ggzh', 'wh', 'zh', 'vbf', 'vh']
         
         if self.variable == '':
             input_config = os.path.join(os.environ["ANALYSIS_PATH"], f"config/{self.year[:4]}_inclusive.yml")
@@ -588,7 +594,7 @@ class Trees2WS(law.Task):
         (era, self.variable, input_paths)
         for era in allErasMap[f"{self.year}"]
         ]
-    
+            
         i = 1
         for era, var, path_to_root_files in era_list:
             if var == '':
