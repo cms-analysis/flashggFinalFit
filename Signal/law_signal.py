@@ -799,7 +799,7 @@ class SignalPackagingCategory(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWo
             "--mergeYears", f"{self.mergeYears}",
         ]
         command = arguments
-        print(command)
+        # print(command)
         try:
             result = subprocess.run(command, check=True, text=True, capture_output=True)
             print("Script output:", result.stdout)
