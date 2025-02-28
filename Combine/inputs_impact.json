@@ -11,10 +11,9 @@
         "pois":"CMS_zz4l_fai1",
         "fits":"profile1D:syst:all+bestfit:syst:all",
         "points":"31:1+:",
-        "fit_opts":"--freezeParameters MH,rgx{.*smear_2016preVFP.*},rgx{.*scale_2016preVFP.*}   --redefineSignalPOIs muV,muf,CMS_zz4l_fai1 --saveSpecifiedNuis all --saveInactivePOI 1 --setParameterRanges muV=0.0,4.0:muf=0.0,10.0:CMS_zz4l_fai1=-0.008,0.008 --setParameters muV=1.,CMS_zz4l_fai1=0.,muf=1.,MH=125.38,MH=125.38 --robustFit=1 --setRobustFitAlgo=Minuit2,Migrad --X-rtd FITTER_NEW_CROSSING_ALGO --setRobustFitTolerance=0.1  --X-rtd FITTER_NEVER_GIVE_UP --X-rtd FITTER_BOUND --cminFallbackAlgo \"Minuit2,0:1.\"   + --freezeParameters MH,rgx{.*smear_2016preVFP.*},rgx{.*scale_2016preVFP.*}   --redefineSignalPOIs muV,muf,CMS_zz4l_fai1 --setParameterRanges muV=0.0,4.0:muf=0.0,10.0:CMS_zz4l_fai1=-0.008,0.008  --setParameters muV=1.,CMS_zz4l_fai1=0.,muf=1.,MH=125.38 --robustFit=1 --setRobustFitAlgo=Minuit2,Migrad --X-rtd FITTER_NEW_CROSSING_ALGO --setRobustFitTolerance=0.5 --X-rtd FITTER_NEVER_GIVE_UP --X-rtd FITTER_BOUND --cminFallbackAlgo \"Minuit2,0:1.\"  --saveInactivePOI 1 --saveWorkspace"
+        "fit_opts":"--freezeParameters MH,rgx{.*smear_2016preVFP.*},rgx{.*scale_2016preVFP.*}   --redefineSignalPOIs muV,muf,CMS_zz4l_fai1 --saveSpecifiedNuis all --saveInactivePOI 1 --setParameterRanges muV=0.0,4.0:muf=0.0,10.0:CMS_zz4l_fai1=-0.008,0.008 --setParameters muV=1.,CMS_zz4l_fai1=0.,muf=1.,MH=125.38,MH=125.38 --robustFit=1 --setRobustFitAlgo=Minuit2,Migrad --X-rtd FITTER_NEW_CROSSING_ALGO --setRobustFitTolerance=1  --X-rtd FITTER_NEVER_GIVE_UP --X-rtd FITTER_BOUND --cminFallbackAlgo \"Minuit2,0:1.\"   + --freezeParameters MH,rgx{.*smear_2016preVFP.*},rgx{.*scale_2016preVFP.*}   --redefineSignalPOIs muV,muf,CMS_zz4l_fai1 --setParameterRanges muV=0.0,4.0:muf=0.0,10.0:CMS_zz4l_fai1=-0.008,0.008  --setParameters muV=1.,CMS_zz4l_fai1=0.,muf=1.,MH=125.38 --robustFit=1 --setRobustFitAlgo=Minuit2,Migrad --X-rtd FITTER_NEW_CROSSING_ALGO --setRobustFitTolerance=1 --X-rtd FITTER_NEVER_GIVE_UP --X-rtd FITTER_BOUND --cminFallbackAlgo \"Minuit2,0:1.\"  --saveInactivePOI 1 --saveWorkspace"
 
     },
-
 
 
     "ALT_0PH":{
