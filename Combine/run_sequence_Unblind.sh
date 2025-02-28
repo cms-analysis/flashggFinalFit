@@ -34,7 +34,7 @@ if [[ $DR ]]; then
     DROPT=" --dryRun "
 fi
 
-fits=( "ALT_L1" "ALT_L1Zg" "ALT_0PH" "ALT_0M")
+fits=("xsec" "ALT_L1" "ALT_L1Zg" "ALT_0PH" "ALT_0M")
 
 
 if [[ $STEP == "impacts-initial" ]]; then
@@ -62,17 +62,21 @@ elif [[ $STEP == "impacts-collect" ]]; then
 	for poi in ${pois[*]}
 	do
        cd runImpacts${fit}_${fit} 
-       combineTool.py -M Impacts -n _bestfit_syst_obs_${fit}_initialFit -d ../Datacard_${fit}.root -i impacts_${fit}.json -m 125.38 -o impacts_${poi}.json --doObserved 
 	   combineTool.py -M Impacts -n _bestfit_syst_obs_${fit}_initialFit -d ../Datacard_${fit}.root -i impacts_${fit}.json -m 125.38 -o impacts_${poi}.json --doObserved 
-	   #echo " combineTool.py -M Impacts -n _bestfit_syst_${fit}_initialFit -d ../Datacard_${fit}.root -i impacts_${fit}.json -m 125.38 -o impacts_${poi}"
-	   #echo "    ===> Producing impact plots for the *** main-only *** systematics for fit: === $fit === and POI: == $poi === "
+	   echo " combineTool.py -M Impacts -n _bestfit_syst_${fit}_initialFit -d ../Datacard_${fit}.root -i impacts_${fit}.json -m 125.38 -o impacts_${poi}"
+	   echo "    ===> Producing impact plots for the *** main-only *** systematics for fit: === $fit === and POI: == $poi === "
        cd - 
-	     plotImpacts.py -i runImpacts${fit}_${fit}/impacts_${poi}.json  -o  impacts_Unblind/impacts_obs_${poi}_${fit}  --POI ${poi}   --translate "../Plots/${translate}" --blind  --max-pages 1
-       plotImpacts.py -i runImpacts${fit}_${fit}/impacts_${poi}.json -o  impacts_Unblind/impacts_obs_${poi}_${fit}_allpages  --POI ${poi}   --translate "../Plots/${translate}" --blind  
-    
+	
+	   echo "python3 ../Plots/correctImpacts.py --impactsJson runImpacts${fit}_${fit}/impacts_${poi}.json --dropBkgModelParams    --frozenParam MH"
+       python3 ../Plots/correctImpacts.py --impactsJson runImpacts${fit}_${fit}/impacts_${poi}.json --dropBkgModelParams    --frozenParam MH
+       #python3 ../Plots/correctImpacts.py --impactsJson runImpacts${fit}_${fit}/impacts_${poi}.json --dropBkgModelParams --frozenParam MH
+       plotImpacts.py -i runImpacts${fit}_${fit}/impacts_${poi}_corrected_dropBkgModelParams.json  -o  plot_impact_Unblind/impacts_obs_${poi}_${fit}  --POI ${poi}   --translate "../Plots/${translate}" --blind  --max-pages 1
+       plotImpacts.py -i runImpacts${fit}_${fit}/impacts_${poi}_corrected_dropBkgModelParams.json -o  plot_impact_Unblind/impacts_obs_${poi}_${fit}_allpages  --POI ${poi}   --translate "../Plots/${translate}" --blind  
+       
 
 	done
     done
+
 
 
 else
