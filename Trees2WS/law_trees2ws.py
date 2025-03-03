@@ -37,7 +37,7 @@ def convert_boolean_string(string):
     else:
         return False
 
-class Trees2WSSingleProcess(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWorkflow):#(law.Task): #(Task, HTCondorWorkflow, law.LocalWorkflow):
+class Trees2WSSingleProcess(Task, SlurmWorkflow, HTCondorWorkflow, law.LocalWorkflow):#(law.Task): #(Task, HTCondorWorkflow, law.LocalWorkflow):
     input_paths = law.Parameter(description="Paths to the data input ROOT files")
     era = law.Parameter(description="Current era.")
     output_dir = law.Parameter(description="Path to the output directory")

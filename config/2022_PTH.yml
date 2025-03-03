@@ -1,11 +1,11 @@
 # Config file: options for signal fitting
 
-outputFolder: '/eos/home-n/niharrin/PhD/Higgs/CMSSW_14_1_0_pre4/src/flashggFinalFit/output/forPaper_24_10_14_PTH/'
+outputFolder: '/work/niharrin/CMSSW_14_1_0_pre4/src/flashggFinalFit/output/2022_HIG_23_014/'
 
 inputFiles:
   # Trees2WS
-  Trees2WSData: '/afs/cern.ch/user/n/niharrin/cernbox/PhD/Higgs/devel/EOSCMS/2024/ntuples/forPaper_24_10_14/variables/PTH/data_postprocessing/root/Data/allData_2022.root'
-  Trees2WS: '/afs/cern.ch/user/n/niharrin/cernbox/PhD/Higgs/devel/EOSCMS/2024/ntuples/forPaper_24_10_14/variables/PTH/signal_postprocessing/root'
+  Trees2WSData: '/pnfs/psi.ch/cms/trivcat/store/user/niharrin/ntuples/midRun3/samples/2022_HIG_23_014/variables/PTH/data_bootstrapping/allData_2022.root'
+  Trees2WS: '/pnfs/psi.ch/cms/trivcat/store/user/niharrin/ntuples/midRun3/samples/2022_HIG_23_014/variables/PTH/signal/root'
 
 backgroundScriptCfg:
   # Setup
@@ -67,7 +67,7 @@ trees2wsCfg:
 
   cats: 'auto'
 
-  execution: 'htcondor'
+  execution: 'slurm'
 
 signalScriptCfg_2022_preEE:
   # Setup
@@ -76,6 +76,7 @@ signalScriptCfg_2022_preEE:
   ext: 'earlyAnalysis_PTH_2022preEE' # output directory extension
   analysis: 'earlyAnalysisDiffPt' # To specify replacement dataset and XS*BR mapping (defined in ./tools/replacementMap.py and ./tools/XSBRMap.py respectively)
   year: '2022preEE' # Use 'combined' if merging all years: not recommended
+  replacementThreshold: '50'
   massPoints: '120,125,130' # You can now run with a single mass point if necessary
 
   # Photon shape systematics  
@@ -91,7 +92,7 @@ signalScriptCfg_2022_preEE:
 
 
   # Job submission options
-  execution: 'htcondor'
+  execution: 'slurm'
 
 signalScriptCfg_2022_postEE:
   # Setup
@@ -100,6 +101,7 @@ signalScriptCfg_2022_postEE:
   ext: 'earlyAnalysis_PTH_2022postEE' # output directory extension
   analysis: 'earlyAnalysisDiffPt' # To specify replacement dataset and XS*BR mapping (defined in ./tools/replacementMap.py and ./tools/XSBRMap.py respectively)
   year: '2022postEE' # Use 'combined' if merging all years: not recommended
+  replacementThreshold: '50'
   massPoints: '120,125,130' # You can now run with a single mass point if necessary
 
   # Photon shape systematics  
@@ -114,13 +116,15 @@ signalScriptCfg_2022_postEE:
   beamspotWidthMC: '3.732'
 
   # Job submission options
-  execution: 'htcondor'
+  execution: 'slurm'
 
 packaged_2022:
   cats: 'auto' # if auto: inferred automatically from (0) workspace
   massPoints: '120,125,130' # You can now run with a single mass point if necessary
   mergeYears: True # Merges the eras
   ext: ''
+  execution: 'local'
+
 
 datacard_yields:
   cats: 'auto' # if auto: inferred automatically from (0) workspace
@@ -138,7 +142,7 @@ datacard_yields:
   skipBkg: False # Only add signal processes to datacard
   bkgScaler: 1. # Add overall scale factor for background
   skipCOWCorr: False # Skip centralObjectWeight correction for events in acceptance. Use if no centralObjectWeight in workspace
-  execution: 'htcondor'
+  execution: 'slurm'
 
 datacard:
   # For pruning processes
@@ -169,21 +173,21 @@ combine_fit:
   asimov_numPoints: 30 # Number of points the Asimov generator should generate for the NLL scan
   unblindedFit_numPoints: 100 
   setParameterRange: "r=0,3"
-  execution: 'htcondor'
+  execution: 'slurm'
 
 combine_impacts:
   exclude: "" # Nuisances that should be excluded from the impact computation
   not_show_POI: True
-  execution: 'htcondor'
+  execution: 'slurm'
 
 combine_hesse:
-  execution: 'htcondor'
+  execution: 'slurm'
 
 combine_mggToys:
   nToys: 1000 # Number of toys = nToys * 10
   loadSnapshot: 'MultiDimFit'
   doBands: True
-  execution: 'htcondor'
+  execution: 'slurm'
 
 spectra:
   no_preliminary: True # Flag that determines, if Preliminary label should be printed.

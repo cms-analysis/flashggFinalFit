@@ -902,7 +902,7 @@ class SignalPackaging(law.Task):
         for categoryIndex in range(currentConfig['nCats']):
             category = currentConfig['cats'].split(",")[categoryIndex]
 
-            output_paths.append(law.LocalFileTarget(os.path.join(output_dir, f"/outdir_packaged{currentConfig['ext']}/CMS-HGG_sigfit_packaged{currentConfig['ext']}_{category}.root")))
+            output_paths.append(law.LocalFileTarget(os.path.join(output_dir, f"outdir_packaged{currentConfig['ext']}/CMS-HGG_sigfit_packaged{currentConfig['ext']}_{category}.root")))
             
                         
         return output_paths
