@@ -53,6 +53,8 @@ def get_options():
   parser.add_option("--problematicCats", dest="problematicCats", default='', help='Problematic analysis categories to skip when processing all')
   parser.add_option("--doHHMjjFix", dest="doHHMjjFix", default=False, action="store_true", help="Do fix for HH analysis where some cats have different Mjj var")
   parser.add_option("--pdir", dest="pdir", default="./", help="Directory where to put the final plots")
+  parser.add_option("--toydir", dest="toydir", default="./", help="Directory where the toys are")
+
   return parser.parse_args()
 (opt,args) = get_options()
 
@@ -105,8 +107,10 @@ if opt.doHHMjjFix:
     print "     * [ERROR] pdfNBins for Mjj_90GeV is not an integer. Please use appropriate opt.pdfNBins" 
     leave()
 
+
 # Extract the total SB/B models
 sb_model, b_model = w.pdf("model_s"), w.pdf("model_b")
+
 
 # Extract dataset for opt.cats
 d_obs = w.data("data_obs")
@@ -212,9 +216,9 @@ if opt.doBands:
     # Create dataframe
     df_bands = pd.DataFrame(columns=_columns)
     # Loop over toys file and add row for each toy dataset
-    toyFiles = glob.glob("./SplusBModels%s/toys/toy_*.root"%(opt.ext))
+    toyFiles = glob.glob("%s/toy_*.root"%(opt.toydir))
     if len(toyFiles) == 0:
-      print "     * [ERROR] No toys files of form ./SplusBModels%s/toys/toy_*.root. Skipping bands"%(opt.ext)
+      print "     * [ERROR] No toys files of form %s/toy_*.root"%(opt.toydir)
       opt.doBands = False
     else:
       for tidx in range(len(toyFiles)):

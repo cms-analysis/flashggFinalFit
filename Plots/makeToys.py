@@ -16,6 +16,7 @@ def get_options():
   parser.add_option("--batch", dest="batch", default="IC", help="Batch system [IC,condor]")
   parser.add_option("--queue", dest="queue", default="workday", help="Change condor queue")
   parser.add_option('--dryRun',dest='dryRun', default=False, action="store_true", help='Dry run')
+  parser.add_option('--outputDir',dest='outputDir', default='./',  help='Output Directory For Toys')
   return parser.parse_args()
 (opt,args) = get_options()
 
@@ -23,16 +24,19 @@ def get_options():
 if not os.path.isdir("./SplusBModels%s"%(opt.ext)): os.system("mkdir ./SplusBModels%s"%(opt.ext))
 if not os.path.isdir("./SplusBModels%s/toys"%(opt.ext)): os.system("mkdir ./SplusBModels%s/toys"%(opt.ext))
 if not os.path.isdir("./SplusBModels%s/toys/jobs"%(opt.ext)): os.system("mkdir ./SplusBModels%s/toys/jobs"%(opt.ext))
-
+if not os.path.isdir("%s"%(opt.outputDir)): os.system("mkdir %s"%(opt.outputDir))
 # Delete all old jobs
 for job in glob.glob("./SplusBModels%s/toys/jobs/sub*.sh"%opt.ext): os.system("rm %s"%job)
 
 # Open workspace and extract best fit mass and signal strength
 inputWSFile = "%s/%s"%(os.environ['PWD'],opt.inputWSFile)
 f = ROOT.TFile(inputWSFile)
+
 w = f.Get("w")
+
 if opt.loadSnapshot is not None: w.loadSnapshot(opt.loadSnapshot)
 poi_bf = {}
+
 for poi in opt.POIs.split(","): poi_bf[poi] = w.var(poi).getVal()
 setParamStr = "--setParameters "
 setParam0Str = "--setParameters "
@@ -41,7 +45,7 @@ for p,v in poi_bf.iteritems():
   setParam0Str += "%s=0,"%p
 setParamStr = setParamStr[:-1]
 setParam0Str = setParam0Str[:-1]
-mh_bf = w.var("MH").getVal()
+mh_bf = 125.38 #w.var("MH").getVal()
 
 if opt.batch in ['IC','Rome']:
   # Create submission file
@@ -98,17 +102,17 @@ elif opt.batch == 'condor':
   fsub.write("%s\n\n"%gen_cmd)
   # Fit cmd
   fsub.write("#Fit command\n")
-  fsub.write("mv higgsCombine_${itoy}_gen_step*.root gen_${itoy}.root\n")
-  fit_cmd = "combine gen_${itoy}.root -m %.3f -M MultiDimFit -P %s --floatOtherPOIs=1 --saveWorkspace --toysFrequentist --bypassFrequentistFit -t 1 %s -s -1 -n _${itoy}_fit_step --cminDefaultMinimizerStrategy 0 --X-rtd MINIMIZER_freezeDisassociatedParams --X-rtd MINIMIZER_multiMin_hideConstants --X-rtd MINIMIZER_multiMin_maskConstraints --X-rtd MINIMIZER_multiMin_maskChannels=2"%(mh_bf,opt.POIs.split(",")[0],setParamStr)
+  fsub.write("mv higgsCombine_${itoy}_gen_step*.root %s/gen_${itoy}.root\n"%opt.outputDir)
+  fit_cmd = "combine %s/gen_${itoy}.root -m %.3f -M MultiDimFit -P %s --floatOtherPOIs=1 --saveWorkspace --toysFrequentist --bypassFrequentistFit -t 1 %s -s -1 -n _${itoy}_fit_step --cminDefaultMinimizerStrategy 0 --X-rtd MINIMIZER_freezeDisassociatedParams --X-rtd MINIMIZER_multiMin_hideConstants --X-rtd MINIMIZER_multiMin_maskConstraints --X-rtd MINIMIZER_multiMin_maskChannels=2"%(opt.outputDir , mh_bf,opt.POIs.split(",")[0],setParamStr)
   fsub.write("%s\n\n"%fit_cmd)
   # Throw cmd
   fsub.write("#Throw command\n")
-  fsub.write("mv higgsCombine_${itoy}_fit_step*.root fit_${itoy}.root\n")
-  throw_cmd = "combine fit_${itoy}.root -m %.3f --snapshotName MultiDimFit -M GenerateOnly --saveToys --toysFrequentist --bypassFrequentistFit -t -1 -n _${itoy}_throw_step %s"%(mh_bf,setParam0Str)
+  fsub.write("mv higgsCombine_${itoy}_fit_step*.root %s/fit_${itoy}.root\n"%opt.outputDir)
+  throw_cmd = "combine %s/fit_${itoy}.root -m %.3f --snapshotName MultiDimFit -M GenerateOnly --saveToys --toysFrequentist --bypassFrequentistFit -t -1 -n _${itoy}_throw_step %s"%(opt.outputDir, mh_bf,setParam0Str)
   fsub.write("%s\n\n"%throw_cmd)
   # Clean up
-  fsub.write("mv higgsCombine_${itoy}_throw_step*.root toy_${itoy}.root\n")
-  fsub.write("rm gen_${itoy}.root fit_${itoy}.root\n")
+  fsub.write("mv higgsCombine_${itoy}_throw_step*.root %s/toy_${itoy}.root\n"%opt.outputDir)
+  fsub.write("rm %s/gen_${itoy}.root %s/fit_${itoy}.root\n"%(opt.outputDir,opt.outputDir))
   fsub.close()
 
   # Write condor submission file
@@ -125,5 +129,7 @@ elif opt.batch == 'condor':
 
   # Submission
   os.system("chmod 775 ./SplusBModels%s/toys/jobs/sub_toys.sh"%opt.ext)
-  if not opt.dryRun: os.system("cd ./SplusBModels%s/toys/jobs; source /cvmfs/cms.cern.ch/cmsset_default.sh; eval `scramv1 runtime -sh`; condor_submit sub_toys.sub; cd ../../.."%opt.ext)
+  if not opt.dryRun: 
+    print("cd ./SplusBModels%s/toys/jobs; source /cvmfs/cms.cern.ch/cmsset_default.sh; condor_submit sub_toys.sub; cd ../../.."%opt.ext)
+    os.system("cd ./SplusBModels%s/toys/jobs; source /cvmfs/cms.cern.ch/cmsset_default.sh; condor_submit sub_toys.sub; cd ../../.."%opt.ext)
   else: print " --> [DRY-RUN] jobs have not been submitted"  
