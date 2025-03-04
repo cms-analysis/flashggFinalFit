@@ -42,9 +42,9 @@ setParamStr = "--setParameters "
 setParam0Str = "--setParameters "
 for p,v in poi_bf.iteritems(): 
   setParamStr += "%s=%.3f,"%(p,v)
-  setParam0Str += "%s=0,"%p
+  setParam0Str += "%s=0"%p
 setParamStr = setParamStr[:-1]
-setParam0Str = setParam0Str[:-1]
+#setParam0Str = setParam0Str[:-1]
 mh_bf = 125.38 #w.var("MH").getVal()
 
 if opt.batch in ['IC','Rome']:
@@ -97,18 +97,18 @@ elif opt.batch == 'condor':
   fsub.write("itoy=$1\n\n")
   # Generate command
   fsub.write("#Generate command\n")
-  gen_cmd = "combine %s -m %.3f -M GenerateOnly --saveWorkspace --toysFrequentist --bypassFrequentistFit -t 1 %s -s -1 -n _${itoy}_gen_step"%(inputWSFile,mh_bf,setParamStr)
+  gen_cmd = "combine %s -m %.3f -M GenerateOnly --saveWorkspace --toysFrequentist --bypassFrequentistFit -t 1 %s,muV=0,muf=0 -s -1 -n _${itoy}_gen_step"%(inputWSFile,mh_bf,setParamStr)
   if opt.loadSnapshot is not None: gen_cmd += " --snapshotName %s"%opt.loadSnapshot
   fsub.write("%s\n\n"%gen_cmd)
   # Fit cmd
   fsub.write("#Fit command\n")
   fsub.write("mv higgsCombine_${itoy}_gen_step*.root %s/gen_${itoy}.root\n"%opt.outputDir)
-  fit_cmd = "combine %s/gen_${itoy}.root -m %.3f -M MultiDimFit -P %s --floatOtherPOIs=1 --saveWorkspace --toysFrequentist --bypassFrequentistFit -t 1 %s -s -1 -n _${itoy}_fit_step --cminDefaultMinimizerStrategy 0 --X-rtd MINIMIZER_freezeDisassociatedParams --X-rtd MINIMIZER_multiMin_hideConstants --X-rtd MINIMIZER_multiMin_maskConstraints --X-rtd MINIMIZER_multiMin_maskChannels=2"%(opt.outputDir , mh_bf,opt.POIs.split(",")[0],setParamStr)
+  fit_cmd = "combine %s/gen_${itoy}.root -m %.3f -M MultiDimFit -P %s --floatOtherPOIs=1 --saveWorkspace --toysFrequentist --bypassFrequentistFit -t 1 %s,muV=0,muf=0 -s -1 -n _${itoy}_fit_step --cminDefaultMinimizerStrategy 0 --X-rtd MINIMIZER_freezeDisassociatedParams --X-rtd MINIMIZER_multiMin_hideConstants --X-rtd MINIMIZER_multiMin_maskConstraints --X-rtd MINIMIZER_multiMin_maskChannels=2"%(opt.outputDir , mh_bf,opt.POIs.split(",")[0],setParamStr)
   fsub.write("%s\n\n"%fit_cmd)
   # Throw cmd
   fsub.write("#Throw command\n")
   fsub.write("mv higgsCombine_${itoy}_fit_step*.root %s/fit_${itoy}.root\n"%opt.outputDir)
-  throw_cmd = "combine %s/fit_${itoy}.root -m %.3f --snapshotName MultiDimFit -M GenerateOnly --saveToys --toysFrequentist --bypassFrequentistFit -t -1 -n _${itoy}_throw_step %s"%(opt.outputDir, mh_bf,setParam0Str)
+  throw_cmd = "combine %s/fit_${itoy}.root -m %.3f --snapshotName MultiDimFit -M GenerateOnly --saveToys --toysFrequentist --bypassFrequentistFit -t -1 -n _${itoy}_throw_step %s,muV=0,muf=0"%(opt.outputDir, mh_bf,setParam0Str)
   fsub.write("%s\n\n"%throw_cmd)
   # Clean up
   fsub.write("mv higgsCombine_${itoy}_throw_step*.root %s/toy_${itoy}.root\n"%opt.outputDir)
