@@ -139,7 +139,7 @@ for fidx in range(len(fits)):
 
   # For best fit point
   if _fit.split(":")[0] == "bestfit":
-    if( "statonly" in _fit.split(":")[1] )&( "freezeParameters" not in _fit_opts ): _fit_opts += " --freezeParameters allConstrainedNuisances"
+    if( "statonly" in _fit.split(":")[1] )&( "freezeParameters" not in _fit_opts ): _fit_opts += " --freezeParameters allConstrainedNuisances,MH"
     for poi in _fitpois:
       if opt.batch == 'local':
         fitcmd = "combine -M MultiDimFit -m 125.38 %s --floatOtherPOIs 1 %s -n _%s_%s -P %s %s %s %s"%(d_opts,exp_opts,_name,poi,poi,_fit_opts,pdf_opts,common_opts)
@@ -152,9 +152,9 @@ for fidx in range(len(fits)):
     if( "statonly" in _fit.split(":")[1] )&( "freezeParameters" not in _fit_opts ): _fit_opts += " --freezeParameters allConstrainedNuisances"
     for poi in _fitpois:
       if opt.batch == 'local':
-        fitcmd = "combine -M MultiDimFit -m 125.38 %s --floatOtherPOIs 1 %s -n _%s_%s -P %s --algo singles %s %s %s"%(d_opts,exp_opts,_name,poi,poi,_fit_opts,pdf_opts,common_opts)
+        fitcmd = "combine -M MultiDimFit -m 125.38 %s --floatOtherPOIs 1 %s -n _%s_%s  --algo singles %s %s %s"%(d_opts,exp_opts,_name,poi,poi,_fit_opts,pdf_opts,common_opts)
       else:
-        fitcmd = "cd runFits%s_%s; source /cvmfs/cms.cern.ch/crab3/crab.sh; combineTool.py --task-name %s_%s -M MultiDimFit -m 125.38 %s --floatOtherPOIs 1 %s -n _%s_%s -P %s --algo singles %s %s %s %s; cd .."%(opt.ext,opt.mode,_name,poi,d_opts,exp_opts,_name,poi,poi,_fit_opts,pdf_opts,common_opts,job_opts)
+        fitcmd = "cd runFits%s_%s; source /cvmfs/cms.cern.ch/crab3/crab.sh; combineTool.py --task-name %s_%s -M MultiDimFit -m 125.38 %s --floatOtherPOIs 1 %s -n _%s_%s  --algo singles %s %s %s %s; cd .."%(opt.ext,opt.mode,_name,poi,d_opts,exp_opts,_name,poi,poi,_fit_opts,pdf_opts,common_opts,job_opts)
       run(fitcmd,opt)
 
   # For fixed point
@@ -180,7 +180,7 @@ for fidx in range(len(fits)):
   # For 1D scan when profiling other pois
   elif _fit.split(":")[0] == "profile1D":
 
-    if( "statonly" in _fit.split(":")[1] )&( "freezeParameters" not in _fit_opts ): _fit_opts += " --freezeParameters allConstrainedNuisances"
+    if( "statonly" in _fit.split(":")[1] )&( "freezeParameters" not in _fit_opts ): _fit_opts += " --freezeParameters allConstrainedNuisances,MH"
     for poi in _fitpois:
       if opt.batch == 'local':
         fitcmd = "combine -M MultiDimFit -m 125.38 %s --floatOtherPOIs 1 %s -n _%s_%s -P %s --algo grid --points %s --alignEdges 1 %s %s %s"%(d_opts,exp_opts,_name,poi,poi,_points.split(":")[0],_fit_opts,pdf_opts,common_opts)
