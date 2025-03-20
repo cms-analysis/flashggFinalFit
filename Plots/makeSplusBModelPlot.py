@@ -40,6 +40,7 @@ def get_options():
   parser.add_option("--skipIndividualCatPlots", dest="skipIndividualCatPlots", default=False, action="store_true", help="Skip plotting of individual categories")
   parser.add_option("--doSumCategories", dest="doSumCategories", default=False, action="store_true", help="Do plot summing the categories being processed")
   parser.add_option("--doCatWeights", dest="doCatWeights", default=False, action="store_true", help="Do S/S+B weighted plot")
+  parser.add_option("--doYield", dest="doYield", default=False, action="store_true", help="Save Beff and Seff")
   parser.add_option("--loadWeights", dest="loadWeights", default='', help="JSON file storing category weights")
   parser.add_option("--saveWeights", dest="saveWeights", default=False, action='store_true', help="Save category weights to json file")
   parser.add_option("--parameterMap", dest="parameterMap", default=None, help="Comma separated pairs of model parameters:values,...")
@@ -52,17 +53,23 @@ def get_options():
   parser.add_option("--translatePOIs", dest="translatePOIs", default=None, help="JSON to store poi translations")
   parser.add_option("--problematicCats", dest="problematicCats", default='', help='Problematic analysis categories to skip when processing all')
   parser.add_option("--doHHMjjFix", dest="doHHMjjFix", default=False, action="store_true", help="Do fix for HH analysis where some cats have different Mjj var")
+  parser.add_option("--doBSM", dest="doBSM", default=False, action="store_true", help="Do BSM analysys")
   parser.add_option("--pdir", dest="pdir", default="./", help="Directory where to put the final plots")
   parser.add_option("--toydir", dest="toydir", default="./", help="Directory where the toys are")
 
   return parser.parse_args()
 (opt,args) = get_options()
 
+print(opt.saveWeights)
 # Open WS
 if opt.inputWSFile is not None:
   print " --> Opening workspace: %s"%opt.inputWSFile
   f = ROOT.TFile(opt.inputWSFile)
   w = f.Get("w")
+ 
+  if opt.doBSM:
+    var = w.var("CMS_zz4l_fai1")
+    var.setVal(1.)
   # If required loadSnapshot
   if opt.loadSnapshot is not None: 
     print "    * Loading snapshot: %s"%opt.loadSnapshot
@@ -140,6 +147,14 @@ if opt.loadWeights != '':
 else:
   # Loop over categories to extract weights
   catsWeights = {}
+  catsBeff = {}
+  catsSeff = {}
+  catsDataEff = {}
+  catsDataRatioEff = {}
+  cateffSigma = {}
+
+  catErrDataWeight = {}
+  catsDataWeightRatio = {}
   # If option doCatWeights: first extract S/S+B weights for each category
   if opt.doCatWeights:
     print " --> Extracting S/S+B weights for categories"
@@ -170,12 +185,18 @@ else:
       effSigma = getEffSigma(h_spdf_tmp) 
       # Calculate S/B yields in +-1sigma of peak
       rangeName = "effSigma_%s"%c
-      xvar.setRange(rangeName,w.var("MH").getVal()-effSigma,w.var("MH").getVal()+effSigma)
-      Beff = bpdf.createIntegral(_xvar_argset,_xvar_argset,rangeName).getVal()*B
-      Seff = math.erf(1./math.sqrt(2))*S
+      print(w.var("MH").getVal()-effSigma,w.var("MH").getVal()+effSigma)
+      xvar.setRange(rangeName,w.var("MH").getVal()-effSigma,w.var("MH").getVal()+effSigma) #definizione intervallo di integrazione
+
+      Beff = bpdf.createIntegral(_xvar_argset,_xvar_argset,rangeName).getVal()*B #moltiplica l'integrale per B 
+      catsBeff[c] = Beff
+  
+      Seff = math.erf(1./math.sqrt(2))*S #integrale di una caussiana tra +,- una sigma
+      catsSeff[c] = Seff
       # Caclualte weight for cat
       wcat = Seff/(Seff+Beff)
       catsWeights[c] = wcat
+      cateffSigma[c]=effSigma
       print "   * %s: S = %.2f, B = %.2f --> effSigma = %.2f, S_eff = %.2f, B_eff = %.2f"%(c,S,B,effSigma,Seff,Beff)
       Stot += S
       Swtot += S*wcat
@@ -186,18 +207,25 @@ else:
       print "      * Saving S/S+B weights to json file: ./jsons/catsWeights_sospb%s_%s.json"%(opt.ext,opt.xvar.split(",")[0])
       if not os.path.isdir("./jsons"): os.system("mkdir ./jsons")
       with open("./jsons/catsWeights_sospb%s_%s.json"%(opt.ext,opt.xvar.split(",")[0]),'w') as jsonfile: json.dump(catsWeights,jsonfile)
+    if opt.doYield:
+      print "      * Saving Seff,Beff  to json file: ./jsons/catsSeff_sospb%s_%s.json and ./jsons/catsBeff_sospb%s_%s.json"%(opt.ext,opt.xvar.split(",")[0],opt.ext,opt.xvar.split(",")[0])
+      if not os.path.isdir("./jsons"): os.system("mkdir ./jsons")
+      with open("./jsons/catsBeff_sospb%s_%s.json"%(opt.ext,opt.xvar.split(",")[0]),'w') as jsonfile: json.dump(catsBeff,jsonfile)
+      with open("./jsons/catsSeff_sospb%s_%s.json"%(opt.ext,opt.xvar.split(",")[0]),'w') as jsonfile: json.dump(catsSeff,jsonfile)
 
 # Fill datasets
 print " --> Extracting datasets"
 # Loop over bins and add entry for each "weight" to cat datasets 
-for i in range(d_obs.numEntries()):
+
+for i in range(d_obs.numEntries()):#24320
   p = d_obs.get(i)
   if(opt.cats!='all')&(p.getCatLabel("CMS_channel") not in opt.cats.split(",")): continue
   nent = int(d_obs.weight())
+  #print('nent',nent)
   for ient in range(nent): data_cats[p.getCatLabel("CMS_channel")].add(p)
   if opt.doCatWeights: 
     for ient in range(nent): wdata_cats[p.getCatLabel("CMS_channel")].add(p,catsWeights[p.getCatLabel("CMS_channel")])
-
+   
 # if opt.doBands: make dataframe storing toy yields in each bin
 if opt.doBands:
   if opt.loadToyYields != '':
@@ -291,12 +319,20 @@ for cidx in range(len(cats)):
   print "    * creating data histogram"
   h_data = _xvar.createHistogram("h_data_%s"%c, ROOT.RooFit.Binning(opt.nBins,xvar.getMin(),xvar.getMax()))
   h_data.SetBinErrorOption(ROOT.TH1.kPoisson)
+
+  #print(int(round(w.var("MH").getVal()-effSigma)),int(round(w.var("MH").getVal()+effSigma)))
   if opt.unblind: d.fillHistogram(h_data,_xvar_arglist)
   else: d.reduce("%s<%f|%s>%f"%(_xvar.GetName(),blindingRegion[0],_xvar.GetName(),blindingRegion[1])).fillHistogram(h_data,_xvar_arglist)
   if opt.doCatWeights:
     h_wdata = _xvar.createHistogram("h_wdata_%s"%c, ROOT.RooFit.Binning(opt.nBins,xvar.getMin(),xvar.getMax()))
     h_wdata.SetBinErrorOption(ROOT.TH1.kPoisson)
-    if opt.unblind: wd.fillHistogram(h_wdata,_xvar_arglist)
+    if opt.unblind: 
+      wd.fillHistogram(h_wdata,_xvar_arglist)
+
+       
+     
+      
+    
     else: wd.reduce("%s<%f|%s>%f"%(_xvar.GetName(),blindingRegion[0],_xvar.GetName(),blindingRegion[1])).fillHistogram(h_wdata,_xvar_arglist)
 
   # Scale data histogram
@@ -312,6 +348,7 @@ for cidx in range(len(cats)):
       if h_data.GetBinContent(ibin)==0.: 
         h_data.SetBinError(ibin,1)
         if opt.doCatWeights: h_wdata.SetBinError(ibin,catsWeights[c])
+
 
   # Extract pdfs for category and create histograms
   print "    * creating pdf histograms: S+B, B"
@@ -371,6 +408,36 @@ for cidx in range(len(cats)):
     bkgval = h_bpdf['nBins'].GetBinContent(ibin)
     h_data_ratio.SetBinContent(ibin,bval-bkgval)
     h_data_ratio.SetBinError(ibin,berr)
+  
+
+
+  if opt.doYield:
+    Bin_from = h_data_ratio.FindBin(int(round(w.var("MH").getVal()-cateffSigma[cats[cidx]])))
+    Bin_to = h_data_ratio.FindBin(int(round(w.var("MH").getVal()+cateffSigma[cats[cidx]])))-1
+                                         
+    catsDataRatioEff[cats[cidx]] = h_data_ratio.Integral(Bin_from,Bin_to)
+    print "      * Saving yield weighted data to json file: ./jsons/catsDataEff_sospb%s_%s.json"%(opt.ext,opt.xvar.split(",")[0])
+    """
+    if not os.path.isdir("./jsons"): os.system("mkdir ./jsons")
+    with open("./jsons/catsDataRatioeff_sospb%s_%s.json"%(opt.ext,opt.xvar.split(",")[0]),'w') as jsonfile: json.dump(catsDataRatioEff,jsonfile)
+    catsDataEff[cats[cidx]] = h_data.Integral(Bin_from,Bin_to)
+    err_tot = 0
+    for Bin in range(Bin_from, Bin_to+1):
+       err = ( h_data_ratio.GetBinError(Bin))
+       err_tot =  err **2 + err_tot
+    err_tot = err_tot**0.5
+    catErrData[cats[cidx]]=err_tot
+    with open("./jsons/catsDataRatioErr_sospb%s_%s.json"%(opt.ext,opt.xvar.split(",")[0]),'w') as jsonfile: json.dump(catErrData,jsonfile)
+    """
+    
+  
+
+    print "      * Saving yield weighted data to json file: ./jsons/catsDataEff_sospb%s_%s.json"%(opt.ext,opt.xvar.split(",")[0])
+    if not os.path.isdir("./jsons"): os.system("mkdir ./jsons")
+    with open("./jsons/catsDataeff_sospb%s_%s.json"%(opt.ext,opt.xvar.split(",")[0]),'w') as jsonfile: json.dump(catsDataEff,jsonfile)
+
+
+
   if opt.doCatWeights:
     h_wbpdf_ratio = h_wbpdf['pdfNBins']-h_wbpdf['pdfNBins']
     h_wspdf_ratio = h_wspdf['pdfNBins'].Clone()
@@ -383,6 +450,22 @@ for cidx in range(len(cats)):
       wbkgval = h_wbpdf['nBins'].GetBinContent(ibin)
       h_wdata_ratio.SetBinContent(ibin,wbval-wbkgval)
       h_wdata_ratio.SetBinError(ibin,wberr)
+
+
+  
+  if opt.doYield:
+    catsDataWeightRatio[cats[cidx]] = h_wdata_ratio.Integral(Bin_from,Bin_to) 
+    print("catsDataWeightRatio %s"%catsDataWeightRatio[cats[cidx]])
+    print "      * Saving yield weighted data to json file: ./jsons/catsdweighteff_sospb%s_%s.json"%(opt.ext,opt.xvar.split(",")[0])
+    if not os.path.isdir("./jsons"): os.system("mkdir ./jsons")
+    with open("./jsons/catsDataRatioWeighteff_sospb%s_%s.json"%(opt.ext,opt.xvar.split(",")[0]),'w') as jsonfile: json.dump(catsDataWeightRatio,jsonfile)
+    print('-----------')
+    for Bin in range(Bin_from, Bin_to+1):
+       err = ( h_wdata_ratio.GetBinError(Bin))
+       err_tot =  err **2 + err_tot
+    err_tot = err_tot**0.5
+    catErrDataWeight[cats[cidx]]=err_tot
+    with open("./jsons/catsDataRatioWeightErr_sospb%s_%s.json"%(opt.ext,opt.xvar.split(",")[0]),'w') as jsonfile: json.dump(catErrDataWeight,jsonfile)
 
   # Sum histograms if processing multiple categories
   if( len(opt.cats.split(",")) > 1 )|( opt.cats == 'all' ):
