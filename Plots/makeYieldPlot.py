@@ -87,10 +87,21 @@ data_points =[D[cat] for cat in categories]
 data_err =[D_err[cat] for cat in categories] 
 cats_latex =[cats_latex[cat]  for cat in categories] 
 
-fig, ax = plt.subplots(figsize=(15, 10))
-hep.cms.label(loc=0)
-hep.cms.label(data=True, lumi=137.6)
+
 # Istogramma per il segnale MC moltiplicato per il peso
+import matplotlib.pyplot as plt
+import numpy as np
+import matplotlib.gridspec as gridspec
+
+
+
+fig = plt.figure(constrained_layout=True)
+gs = fig.add_gridspec(2, 1, height_ratios=[3, 1], hspace=0)
+# Subplot principale
+
+
+ax = plt.subplot(gs[0])
+hep.cms.label(data=True, lumi=137.6, ax=ax, loc=0, label="Work in Progress")
 ax.bar(
     range(len(categories)),
     signal_weighted,
@@ -98,7 +109,6 @@ ax.bar(
     linewidth=1.5,  
     align='center',
     label=r"$f_{a3}=0$"
-
 )
 
 ax.bar(
@@ -107,7 +117,7 @@ ax.bar(
     width=1,
     linewidth=1.5,  
     align='center',
-    alpha = 0.2,
+    alpha=0.2,
     edgecolor='orange',
     color='orange'
 )
@@ -124,20 +134,44 @@ ax.bar(
     facecolor='none'
 )
 
-ax.set_xticks(range(len(categories)))
-ax.set_xticklabels(labels_latex, rotation=45, ha="right")
-ax.scatter(range(len(categories)),data_points, color='black', label="Data", zorder=3)
-print()
+ax.scatter(range(len(categories)), data_points, color='black', label="Data", zorder=3)
 ax.errorbar(range(len(categories)), data_points, yerr=data_err ,xerr=0.5, fmt='none', ecolor='black', capsize=5, zorder=2)
 
-ax.set_ylabel("Entries")
-ax.set_xlabel("Category")
-plt.legend(fontsize=25)
-ax.set_xticklabels(cats_latex, rotation=45, ha="right")
-#ax.legend()
+ax.set_xticks(range(len(categories)))
+ax.set_xticklabels([])
+plt.setp(ax.get_xticklabels(), visible=False)
+ax.set_ylabel("Entries/Bin")
+
+ax.legend(fontsize=15)
 ax.grid(axis="y", linestyle="--", alpha=0.7)
 
+# Ratio plot
+ax_ratio = plt.subplot(gs[1], sharex=ax)
 
-plt.tight_layout()
-plt.savefig('plots/fa3_%s.pdf'%opt.out)
+
+ratio_fa3_0 = np.array(data_points)/ np.array(signal_weighted)
+ratio_fa3_1 = np.array(data_points) / np.array(signal_bsm_weighted)
+ratio_fa3_1_err = np.array(data_err) / np.array(signal_bsm_weighted)
+ratio_fa3_0_err = np.array(data_err) / np.array(signal_weighted)
+
+ax_ratio.scatter(range(len(categories)), ratio_fa3_0, color='#5790fc', zorder=3)
+ax_ratio.scatter(range(len(categories)), ratio_fa3_1, color='#f89c20', zorder=3)
+ax_ratio.errorbar(range(len(categories)), ratio_fa3_0, yerr=ratio_fa3_0_err, fmt='none', c='#5790fc', capsize=5, zorder=2,xerr=0.5)
+ax_ratio.errorbar(range(len(categories)), ratio_fa3_1, yerr=ratio_fa3_1_err, fmt='none', c='#f89c20', capsize=5, zorder=2,xerr=0.5)
+if opt.out == 'VHLEP':
+    ax_ratio.set_yscale('symlog', linthresh=1)
+  #  ax_ratio.set_ylim([0.00000001,150])
+
+ax_ratio.axhline(1, color="black", linestyle="--", linewidth=1.5)  # Linea guida a y=1
+
+ax_ratio.set_ylabel("Data/MC")
+ax_ratio.set_xlabel("Bin")
+#ax_ratio.legend(fontsize=12)
+ax_ratio.grid(axis="y", linestyle="--", alpha=0.7)
+ax_ratio.set_xticks(range(len(categories)))
+ax_ratio.set_xticklabels(labels_latex, rotation=45, fontsize=15)
+
+#plt.xticks(range(len(categories)), labels_latex, rotation=45, fontsize=15)
+
+plt.savefig('plots/fa3_%s.pdf' % opt.out)
 
