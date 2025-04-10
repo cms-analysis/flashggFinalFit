@@ -3,6 +3,7 @@
 print " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG DATACARD MAKER RUN II ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ "
 import os, sys
 import re
+import json
 from optparse import OptionParser
 import ROOT
 import pandas as pd
@@ -52,8 +53,18 @@ if opt.pruneCat: skipCats = opt.pruneCat.split(",")
 extStr = "_%s"%opt.ext if opt.ext != '' else ''
 print "./yields%s/*.pkl"%extStr
 pkl_files = glob.glob("./yields%s/*.pkl"%extStr)
-
 pkl_files.sort() # Categories in alphabetical order
+
+###################OPEN Json
+with open('../Plots/jsons/catsDataeff_sospbfa3_CMS_hgg_mass.json') as f:
+    D_tot = json.load(f)  
+with open('../Plots/jsons/catsSeff_sospbfa3_CMS_hgg_mass.json') as f:
+    Seff = json.load(f)  
+
+
+
+
+
 data = pd.DataFrame()
 for f_pkl_name in pkl_files:
   if any([skipCat in f_pkl_name for skipCat in skipCats]):
@@ -61,7 +72,10 @@ for f_pkl_name in pkl_files:
     continue
   with open(f_pkl_name,"rb") as f_pkl: 
     df = pickle.load(f_pkl)
+    df['rate']=df['rate']#*D_tot[df['cat'][0]]/Seff[df['cat'][0]]
     data = pd.concat([data,df], ignore_index=True, axis=0, sort=False)
+  #data['rate']=data['rate']*2
+
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Systematics: use factory function to calculate yield variations
@@ -139,6 +153,7 @@ if opt.prune:
 
     # Set prune = 1 if < threshold of total cat yield
     mask = (data['true_yield']<opt.pruneThreshold*data.apply(lambda x: catTrueYields[x['cat']], axis=1))&(data['type']=='sig')&(~data['cat'].str.contains('NOTAG'))
+   
     data.loc[mask,'prune'] = 1
 
   else:
@@ -148,10 +163,13 @@ if opt.prune:
 
     # Extract per category yields
     catYields = od()
-    for cat in data.cat.unique(): catYields[cat] = data[(data['cat']==cat)&(data['type']=='sig')].nominal_yield.sum()
-    
+    for cat in data.cat.unique():  
+      catYields[cat] = data[(data['cat']==cat)&(data['type']=='sig')&(~data['proc'].str.contains('ALT'))].nominal_yield.sum()
+
     # Set prune = 1 if < threshold of total cat yield
     mask = (data['nominal_yield']<opt.pruneThreshold*data.apply(lambda x: catYields[x['cat']], axis=1))&(data['type']=='sig')&(~data['cat'].str.contains('NOTAG'))
+
+
     data.loc[mask,'prune'] = 1
     
 
@@ -163,7 +181,7 @@ if opt.prune:
 if opt.proc != None:
   process = opt.proc.split(',')
   for p in process : 
-    if p not in data['procOriginal'].unique(): print('WARNING the selected process is not in the list!!!!!!')
+    if p not in data['procOriginal'].unique(): print('WARNING the selected process (%s) is not in the list!!!!!!'%p)
   print(data['procOriginal'].unique())
   mask =~data['procOriginal'].apply(lambda x: x in process)
   data.loc[mask,'prune'] = 1
