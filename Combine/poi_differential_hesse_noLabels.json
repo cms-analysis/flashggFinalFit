@@ -20,7 +20,7 @@
   "r_NJ_2p0_3p0":"#sigma_{[2,3)}^{fid}",
   "r_NJ_3p0_100p0":"#sigma_{[3,+inf)}^{fid}",
   "ptJ0":"#font[52]{p}_{T}^{j_{1}}",
-  "r_PTJ0_0p0_30p0":"#sigma_{)#font[52]{N}_{Jets} = 0)}^{fid}",
+  "r_PTJ0_0p0_30p0":"#sigma_{(#font[52]{N}_{Jets} = 0)}^{fid}",
   "r_PTJ0_30p0_75p0":"#sigma_{[30,75) GeV}^{fid}",
   "r_PTJ0_75p0_120p0":"#sigma_{[75,120) GeV}^{fid}",
   "r_PTJ0_120p0_200p0":"#sigma_{[120,200) GeV}^{fid}",

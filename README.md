@@ -16,7 +16,7 @@ cmsenv
 
 COMBINE_TAG=07b56c67ba6e4304b42c3a6cdba710d59c719192
 COMBINEHARVESTER_TAG=94017ba5a3a657f7b88669b1a525b19d34ea41a2
-FINALFIT_TAG=dev_higgsdnafinalfit_law
+FINALFIT_TAG=higgsdnafinalfit
 
 # Install Combine with the latest EL9 compatible branch
 git clone https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit
