@@ -18,7 +18,7 @@ def get_options():
   parser.add_option('--setPdfIndices', dest='setPdfIndices', action="store_true", default=False, help="Set pdf indixes from pdfindex.json")
   parser.add_option('--doObserved', dest='doObserved', action="store_true", default=False, help="Fit to data")
   parser.add_option('--snapshotWSFile', dest='snapshotWSFile', default='', help="Full path to snapshot WS file (use when running observed statonly as nuisances are froze at postfit values)")
-  parser.add_option('--commonOpts', dest='commonOpts', default="--cminDefaultMinimizerStrategy 0 --X-rtd MINIMIZER_freezeDisassociatedParams --X-rtd MINIMIZER_multiMin_hideConstants --X-rtd MINIMIZER_multiMin_maskConstraints --X-rtd MINIMIZER_multiMin_maskChannels=2", help="Common combine options for running fits")
+  parser.add_option('--commonOpts', dest='commonOpts', default=" --X-rtd MINIMIZER_freezeDisassociatedParams --X-rtd MINIMIZER_multiMin_hideConstants --X-rtd MINIMIZER_multiMin_maskConstraints --X-rtd MINIMIZER_multiMin_maskChannels=2", help="Common combine options for running fits")
   parser.add_option('--batch', dest='batch', default='condor', help='Batch: [crab,condor/SGE/IC/lxbatch]')
   parser.add_option('--queue', dest='queue', default='workday', help='Queue e.g. for condor=workday, for IC=hep.q')
   parser.add_option('--subOpts', dest='subOpts', default="", help="Submission options")
@@ -154,7 +154,7 @@ for fidx in range(len(fits)):
       if opt.batch == 'local':
         fitcmd = "combine -M MultiDimFit -m 125.38 %s --floatOtherPOIs 1 %s -n _%s_%s  --algo singles %s %s %s"%(d_opts,exp_opts,_name,poi,poi,_fit_opts,pdf_opts,common_opts)
       else:
-        fitcmd = "cd runFits%s_%s; source /cvmfs/cms.cern.ch/crab3/crab.sh; combineTool.py --task-name %s_%s -M MultiDimFit -m 125.38 %s --floatOtherPOIs 1 %s -n _%s_%s  --algo singles %s %s %s %s; cd .."%(opt.ext,opt.mode,_name,poi,d_opts,exp_opts,_name,poi,poi,_fit_opts,pdf_opts,common_opts,job_opts)
+        fitcmd = "cd runFits%s_%s; source /cvmfs/cms.cern.ch/crab3/crab.sh; combineTool.py --task-name %s_%s -M MultiDimFit -m 125.38 %s --saveWorkspace --saveFitResult --floatOtherPOIs 1 %s -n _%s_%s  --algo singles %s %s %s %s; cd .."%(opt.ext,opt.mode,_name,poi,d_opts,exp_opts,_name,poi,_fit_opts,pdf_opts,common_opts,job_opts)
       run(fitcmd,opt)
 
   # For fixed point
