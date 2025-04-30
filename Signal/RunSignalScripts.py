@@ -120,6 +120,7 @@ print(" --> Mass points: %s --> Low = %s, High = %s"%(options['massPoints'],opti
 print(" --> Extension: %s"%options['ext'])
 print(" --> Analysis: %s"%options['analysis'])
 print(" --> Year: %s ::: Corresponds to intLumi = %.2f fb^-1"%(options['year'],lumiMap[options['year']]))
+print(" --> Fit type: %s"%options['fitType'])
 if options['mode'] in ['calcPhotonSyst']:
   print(" --> Photon shape systematics:")
   print("     * scales       = %s"%options['scales'])
