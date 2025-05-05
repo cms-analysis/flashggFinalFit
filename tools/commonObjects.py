@@ -36,7 +36,9 @@ BR_W_qq = 67.41*0.01
 
 # Production modes and decay channel: for extract XS from combine
 productionModes = ['ggH','qqH','ttH','tHq','tHW','ggZH','WH','ZH','bbH']
-decayMode = 'hgg'
+# decayMode = 'hgg'         # original
+# decayModes = ['hgg']      # for 1D fit
+decayModes = ['hgg', 'hjj'] # for 2D fit
 
 # List of years
 years_to_process = ['2016','2017','2018','2022preEE','2022postEE']
@@ -46,7 +48,9 @@ inputWSName__ = "tagsDumper/cms_hgg_13TeV"
 inputNuisanceExtMap = {'scales':'','scalesCorr':'','smears':''}
 # Signal output WS objects
 outputWSName__ = "wsig"
-outputWSObjectTitle__ = "hggpdfsmrel"
+outputMggWSObjectTitle__ = "hggpdfsmrel" # previous variable name: outputWSObjectTitle__
+outputMjjWSObjectTitle__ = "hjjpdfsmrel" 
+output2DWSObjectTitle__ = "hggpdfsmrel2D" 
 outputWSNuisanceTitle__ = "CMS_hgg_nuisance"
 #outputNuisanceExtMap = {'scales':'%sscale'%sqrts__,'scalesCorr':'%sscaleCorr'%sqrts__,'smears':'%ssmear'%sqrts__,'scalesGlobal':'%sscale'%sqrts__}
 outputNuisanceExtMap = {'scales':'','scalesCorr':'','smears':'','scalesGlobal':''}
