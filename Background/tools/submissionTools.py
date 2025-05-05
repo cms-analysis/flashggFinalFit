@@ -237,12 +237,11 @@ def writeSubFiles(_opts):
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Function for submitting files to batch system
-def submitFiles(_opts):
+def submitFilesMgg(_opts):
   _jobdir = "%s/outdir_%s/%s/jobs"%(bwd__,_opts['ext'],_opts['mode'])
-  _observable = "Mgg" if _opts['fitType'] == "mgg" else "Mjj" # Mgg or Mjj
   # CONDOR
   if _opts['batch'] == "condor":
-    _executable = "condor_%s_%s_%s"%(_observable, _opts['mode'],_opts['ext'])
+    _executable = "condor_Mgg_%s_%s"%(_opts['mode'],_opts['ext'])
     if os.environ['PWD'].startswith("/eos"):
       cmdLine = "cd %s; condor_submit -spool %s.sub; cd %s"%(_jobdir,_executable,bwd__)
     else:
@@ -252,7 +251,7 @@ def submitFiles(_opts):
 
   # SGE
   elif _opts['batch'] in ['IC','SGE']:
-    _executable = "sub_%s_%s_%s"%(_observable, _opts['mode'],_opts['ext'])
+    _executable = "sub_Mgg_%s_%s"%(_opts['mode'],_opts['ext'])
 
     # Extract job opts
     jobOptsStr = _opts['jobOpts']
@@ -268,7 +267,7 @@ def submitFiles(_opts):
   
   # Running locally
   elif _opts['batch'] == 'local':
-    _executable = "sub_%s_%s_%s"%(_observable, _opts['mode'],_opts['ext'])
+    _executable = "sub_Mgg_%s_%s"%(_opts['mode'],_opts['ext'])
 
     # Separate submission per category  
     if( _opts['mode'] == "fTestParallel" ):
@@ -279,4 +278,52 @@ def submitFiles(_opts):
         run(cmdLine)
     print("  --> Finished running files")
 
+
+def submitFilesMjj(_opts):
+  _jobdir = "%s/outdir_%s/%s/jobs"%(bwd__,_opts['ext'],_opts['mode'])
+  # CONDOR
+  if _opts['batch'] == "condor":
+    _executable = "condor_Mjj_%s_%s"%(_opts['mode'],_opts['ext'])
+    if os.environ['PWD'].startswith("/eos"):
+      cmdLine = "cd %s; condor_submit -spool %s.sub; cd %s"%(_jobdir,_executable,bwd__)
+    else:
+      cmdLine = "cd %s; condor_submit %s.sub; cd %s"%(_jobdir,_executable,bwd__)
+    run(cmdLine)
+    print("  --> Finished submitting files")
+
+  # SGE
+  elif _opts['batch'] in ['IC','SGE']:
+    _executable = "sub_Mjj_%s_%s"%(_opts['mode'],_opts['ext'])
+
+    # Extract job opts
+    jobOptsStr = _opts['jobOpts']
+
+    # Separate submission per category  
+    if( _opts['mode'] == "fTestParallel" ):
+      for cidx in range(_opts['nCats']):
+        c = _opts['cats'].split(",")[cidx]
+        _subfile = "%s/%s_%s"%(_jobdir,_executable,c)
+        cmdLine = "qsub -q hep.q %s -o %s.log -e %s.err %s.sh"%(jobOptsStr,_subfile,_subfile,_subfile)
+        run(cmdLine)
+    print("  --> Finished submitting files")
+  
+  # Running locally
+  elif _opts['batch'] == 'local':
+    _executable = "sub_Mjj_%s_%s"%(_opts['mode'],_opts['ext'])
+
+    # Separate submission per category  
+    if( _opts['mode'] == "fTestParallel" ):
+      for cidx in range(_opts['nCats']):
+        c = _opts['cats'].split(",")[cidx]
+        _subfile = "%s/%s_%s"%(_jobdir,_executable,c)
+        cmdLine = "bash %s.sh"%_subfile
+        run(cmdLine)
+    print("  --> Finished running files")
+
+
+def submitFiles(_opts):
+  if _opts['fitType'] == "mgg" or _opts['fitType'] == "2D":
+    submitFilesMgg(_opts)
+  if _opts['fitType'] == "mjj" or _opts['fitType'] == "2D":
+    submitFilesMjj(_opts)
  

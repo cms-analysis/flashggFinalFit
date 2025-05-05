@@ -166,18 +166,20 @@ if options['mode'] == "signalFit" and not os.path.exists(_json_file):
 if not os.path.isdir("%s/outdir_%s"%(swd__,options['ext'])): os.system("mkdir %s/outdir_%s"%(swd__,options['ext']))
 
 # Write submission files: style depends on batch system
-if options['fitType'] == "mgg" or options['fitType'] == "2D":
-  writeSubFilesMgg(options)
-if options['fitType'] == "mjj" or options['fitType'] == "2D":
-  writeSubFilesMjj(options)
+writeSubFiles(options)
+# if options['fitType'] == "mgg" or options['fitType'] == "2D":
+#   writeSubFilesMgg(options)
+# if options['fitType'] == "mjj" or options['fitType'] == "2D":
+#   writeSubFilesMjj(options)
 print("  --> Finished writing submission scripts")
 
 # Submit scripts to batch system
 if not options['printOnly']: 
-  if options["fitType"] == "mgg" or options['fitType'] == "2D":
-    submitFilesMgg(options)
-  if options["fitType"] == "mjj" or options['fitType'] == "2D":
-    submitFilesMjj(options)
+  submitFiles(options)
+  # if options["fitType"] == "mgg" or options['fitType'] == "2D":
+  #   submitFilesMgg(options)
+  # if options["fitType"] == "mjj" or options['fitType'] == "2D":
+  #   submitFilesMjj(options)
 else:
   print("  --> Running with printOnly option. Will not submit scripts")
 
