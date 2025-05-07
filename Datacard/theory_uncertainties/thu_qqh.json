@@ -17,7 +17,7 @@
         "alphaS_qqH":1.005
     },
 
-    "qqH_ALT_0M'":{
+    "qqH_ALT_0M":{
         "QCDscale_qqH":[1.004,0.997],
         "pdf_Higgs_qqH":1.021,
         "alphaS_qqH":1.005
@@ -35,13 +35,13 @@
         "alphaS_qqH":1.005
     },
 
-    "qqH_ALT_L1f05'":{
+    "qqH_ALT_L1f05":{
         "QCDscale_qqH":[1.004,0.997],
         "pdf_Higgs_qqH":1.021,
         "alphaS_qqH":1.005
     },
 
-    "qqH_ALT_L1Zg'":{
+    "qqH_ALT_L1Zg":{
         "QCDscale_qqH":[1.004,0.997],
         "pdf_Higgs_qqH":1.021,
         "alphaS_qqH":1.005
