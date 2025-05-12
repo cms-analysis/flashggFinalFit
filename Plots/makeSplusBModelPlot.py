@@ -66,14 +66,17 @@ if opt.inputWSFile is not None:
   print " --> Opening workspace: %s"%opt.inputWSFile
   f = ROOT.TFile(opt.inputWSFile)
   w = f.Get("w")
+
+  
  
-  if opt.doBSM:
-    var = w.var("CMS_zz4l_fai1")
-    var.setVal(1.)
+
   # If required loadSnapshot
   if opt.loadSnapshot is not None: 
     print "    * Loading snapshot: %s"%opt.loadSnapshot
     w.loadSnapshot(opt.loadSnapshot)
+  if opt.doBSM:
+    var = w.var("CMS_zz4l_fai1")
+    var.setVal(1.)
   # Also loop over parameters in map and set
   if opt.parameterMap is not None:
     if opt.loadSnapshot is not None:
@@ -460,6 +463,7 @@ for cidx in range(len(cats)):
     if not os.path.isdir("./jsons"): os.system("mkdir ./jsons")
     with open("./jsons/catsDataRatioWeighteff_sospb%s_%s.json"%(opt.ext,opt.xvar.split(",")[0]),'w') as jsonfile: json.dump(catsDataWeightRatio,jsonfile)
     print('-----------')
+    err_tot=0
     for Bin in range(Bin_from, Bin_to+1):
        err = ( h_wdata_ratio.GetBinError(Bin))
        err_tot =  err **2 + err_tot
