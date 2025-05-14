@@ -1,11 +1,11 @@
 # Config file: options for signal fitting
 
-outputFolder: '/work/niharrin/CMSSW_14_1_0_pre4/src/flashggFinalFit/output/2025_01_20_intermediateNTuples_2023/PTH/'
+outputFolder: '/eos/user/m/mwrabetz/differentials_14_05_25/'
 
 inputFiles:
   # Trees2WS
-  Trees2WSData: '/pnfs/psi.ch/cms/trivcat/store/user/niharrin/ntuples/midRun3/samples/January/2025_01_20_intermediateNTuples_2023/variables/PTH/merge_root/data/root/Data/allData.root'
-  Trees2WS: '/pnfs/psi.ch/cms/trivcat/store/user/niharrin/ntuples/midRun3/samples/January/2025_01_20_intermediateNTuples_2023/variables/PTH/merge_root/signal/root'
+  Trees2WSData: '/eos/user/m/mwrabetz/differentials_14_05_25/allData.root'
+  Trees2WS: '/eos/user/m/mwrabetz/differentials_14_05_25/root'
 
 backgroundScriptCfg:
   # Setup
@@ -39,7 +39,7 @@ trees2wsCfg:
   dataVars:
     - "CMS_hgg_mass"
     - "weight" # Vars to be added for data
-  
+    
   stxsVar: ''
   diffVar: 'diffVariable_GenPTH'
   notagVars: [] # Vars to add to NOTAG RooDataset
@@ -50,42 +50,37 @@ trees2wsCfg:
     - "fiducialGeometricFlag"
     - "diffVariable_GenPTH"
   
-  theoryWeightContainers:
-    weight_LHEPdf: 101
-    weight_LHEScale: 9
-
+  theoryWeightContainers: {}
+    # weight_LHEPdf: 101
+    # weight_LHEScale: 9
 
   # List of systematics: use string YEAR for year-dependent systematics
   systematics:
     - "ScaleEB"
     - "ScaleEE"
     - "Smearing"
-    # - "Material"
-    # - "FNUF"
     - "energyErrShift"
     - "JerSyst"
     - "JecSystTotal"
 
   cats: 'auto'
 
-  execution: 'slurm'
+  execution: 'local'
 
 signalScriptCfg_2023_preBPix:
   # Setup
   procs: 'auto' # if auto: inferred automatically from filenames (requires names to be of form *pythia8_{PROC}.root)
   cats: 'auto' # if auto: inferred automatically from (0) workspace
   ext: 'earlyAnalysis_PTH_2023preBPix' # output directory extension
-  analysis: 'earlyAnalysisDiffPt23' # To specify replacement dataset and XS*BR mapping (defined in ./tools/replacementMap.py and ./tools/XSBRMap.py respectively)
-  replacementThreshold: '50'
+  analysis: 'earlyAnalysisDiffPt' # To specify replacement dataset and XS*BR mapping (defined in ./tools/replacementMap.py and ./tools/XSBRMap.py respectively)
   year: '2023preBPix' # Use 'combined' if merging all years: not recommended
+  replacementThreshold: '50'
   massPoints: '120,125,130' # You can now run with a single mass point if necessary
 
   # Photon shape systematics  
   scales: 'ScaleEE,ScaleEB' # separate nuisance per year
-  # scalesCorr: 'FNUF,Material' # correlated across years
-  scalesCorr: ''
-  # scalesGlobal: 'NonLinearity,Geant4' # affect all processes equally, correlated across years
-  scalesGlobal: ''
+  scalesCorr: '' # correlated across years
+  scalesGlobal: 'NonLinearity,Geant4' # affect all processes equally, correlated across years
   smears: 'Smearing' # separate nuisance per year
 
   doPlots: True
@@ -95,24 +90,22 @@ signalScriptCfg_2023_preBPix:
 
 
   # Job submission options
-  execution: 'slurm'
+  execution: 'local'
 
 signalScriptCfg_2023_postBPix:
   # Setup
   procs: 'auto' # if auto: inferred automatically from filenames (requires names to be of form *pythia8_{PROC}.root)
   cats: 'auto' # if auto: inferred automatically from (0) workspace
   ext: 'earlyAnalysis_PTH_2023postBPix' # output directory extension
-  analysis: 'earlyAnalysisDiffPt23' # To specify replacement dataset and XS*BR mapping (defined in ./tools/replacementMap.py and ./tools/XSBRMap.py respectively)
-  replacementThreshold: '50'
+  analysis: 'earlyAnalysisDiffPt' # To specify replacement dataset and XS*BR mapping (defined in ./tools/replacementMap.py and ./tools/XSBRMap.py respectively)
   year: '2023postBPix' # Use 'combined' if merging all years: not recommended
+  replacementThreshold: '50'
   massPoints: '120,125,130' # You can now run with a single mass point if necessary
 
   # Photon shape systematics  
   scales: 'ScaleEE,ScaleEB' # separate nuisance per year
-  # scalesCorr: 'FNUF,Material' # correlated across years
-  scalesCorr: ''
-  # scalesGlobal: 'NonLinearity,Geant4' # affect all processes equally, correlated across years
-  scalesGlobal: ''
+  scalesCorr: '' # correlated across years
+  scalesGlobal: 'NonLinearity,Geant4' # affect all processes equally, correlated across years
   smears: 'Smearing' # separate nuisance per year
 
   doPlots: True
@@ -121,7 +114,7 @@ signalScriptCfg_2023_postBPix:
   beamspotWidthMC: '3.732'
 
   # Job submission options
-  execution: 'slurm'
+  execution: 'local'
 
 packaged_2023:
   cats: 'auto' # if auto: inferred automatically from (0) workspace
@@ -146,7 +139,7 @@ datacard_yields:
   skipBkg: False # Only add signal processes to datacard
   bkgScaler: 1. # Add overall scale factor for background
   skipCOWCorr: False # Skip centralObjectWeight correction for events in acceptance. Use if no centralObjectWeight in workspace
-  execution: 'slurm'
+  execution: 'local'
 
 datacard:
   # For pruning processes
@@ -177,21 +170,21 @@ combine_fit:
   asimov_numPoints: 30 # Number of points the Asimov generator should generate for the NLL scan
   unblindedFit_numPoints: 100 
   setParameterRange: "r=0,3"
-  execution: 'slurm'
+  execution: 'local'
 
 combine_impacts:
   exclude: "" # Nuisances that should be excluded from the impact computation
   not_show_POI: True
-  execution: 'slurm'
+  execution: 'local'
 
 combine_hesse:
-  execution: 'slurm'
+  execution: 'local'
 
 combine_mggToys:
   nToys: 1000 # Number of toys = nToys * 10
   loadSnapshot: 'MultiDimFit'
   doBands: True
-  execution: 'slurm'
+  execution: 'local'
 
 spectra:
   no_preliminary: True # Flag that determines, if Preliminary label should be printed.
