@@ -366,8 +366,8 @@ def writeSGESubFilesMgg(_opts):
       c = _opts['cats'].split(",")[cidx]
       _f = open("%s/%s_%s.sh"%(_jobdir,_executable,c),"w")
       writePreamble(_f)
-      _f.write("python3 " +
-           f"{swd__}/scripts/calcPhotonSyst.py " +
+      _f.write(
+           f"python3 {swd__}/scripts/calcPhotonSyst.py " +
            f"--cat {c} " +
            f"--procs {_opts['procs']} " +
            f"--ext {_opts['ext']} " +
@@ -496,8 +496,8 @@ def writeSGESubFilesMjj(_opts):
       c = _opts['cats'].split(",")[cidx]
       _f = open("%s/%s_%s.sh"%(_jobdir,_executable,c),"w")
       writePreamble(_f)
-      _f.write("python3 " +
-           f"{swd__}/scripts/calcPhotonSyst.py " +
+      _f.write(
+           f"python3 {swd__}/scripts/calcPhotonSyst.py " +
            f"--cat {c} " +
            f"--procs {_opts['procs']} " +
            f"--ext {_opts['ext']} " +

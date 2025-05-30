@@ -80,6 +80,32 @@ if options['mode'] not in ['fTestParallel']:
   print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ RUNNING BACKGROUND SCRIPTS (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
   sys.exit(1)
 
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Remove existing root files
+if options["fitType"] == "2D" and options["mode"] == "fTestParallel":
+  pattern = f"{bwd__}/outdir_{options['ext']}/CMS-*.root"
+elif options["fitType"] == "mgg" and options["mode"] == "fTestParallel":
+  pattern = f"{bwd__}/outdir_{options['ext']}/CMS-HGG*.root"
+elif options["fitType"] == "mjj" and options["mode"] == "fTestParallel":
+  pattern = f"{bwd__}/outdir_{options['ext']}/CMS-HBB*.root"
+else:
+  print(" --> Invalid fitType. Exiting to avoid accidental deletion.")
+  sys.exit(1)
+root_files = glob.glob(pattern)
+
+if len(co.bwd__) < 5:  # change this number if needed
+  print(" --> Directory name too short. Exiting to avoid accidental deletion.")
+  leave()
+if len(options["ext"]) == 0:
+  print(" --> Extension name blank. Exiting to avoid accidental deletion.")
+  leave()
+
+if len(root_files) > 0:
+  print(" --> Removing existing root files")
+  for f in root_files:
+    print(f"   --> Removing {f}")
+    os.remove(f)
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # If cat == auto: extract list of categories from datafile
 if options['cats'] == 'auto':
@@ -136,7 +162,7 @@ if options['fitType'] == "2D":
   if options['mode'] == "fTestParallel":
     collect_models(
       json_file=f"{output_path_base}/models.json",
-      output_path=f"{output_path_base}/CMS-2D_multipdf_{options['ext']}_%YEAR_%CAT.root",
+      output_path=f"{output_path_base}/CMS-2D_multipdf_{options['ext']}_%CAT.root",
       ws_type="bkg-nonres",
       no_clear=options['noClean'],
     )

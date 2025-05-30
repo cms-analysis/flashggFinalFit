@@ -148,6 +148,49 @@ elif options['mode'] == "packageOnly": print(" --> Packaging signal fits (one fi
 print(" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Remove existing plots
+if options["fitType"] == "2D":
+  plot_fittype_prefix = "M*"
+elif options["fitType"] == "mgg":
+  plot_fittype_prefix = "Mgg*"
+elif options["fitType"] == "mjj":
+  plot_fittype_prefix = "Mjj*"
+else:
+  print(f" --> Invalid fitType {options['fitType']}. Exiting to avoid accidental deletion.")
+  sys.exit(1)
+
+if options["mode"] == "fTest" and not options["noClean"]:
+  # Signal fTest
+  _plotdir = f"{swd__}/outdir_{options['ext']}/fTest/Plots"
+  pattern = f"{_plotdir}/{plot_fittype_prefix}"
+  files = glob.glob(pattern)
+  if len(files) == 0:
+    print(" --> No existing plots found")
+  else:
+    print(f" --> Archiving {len(files)} existing plots")
+    if not os.path.isdir(f"{_plotdir}/archive"):
+      os.system(f"mkdir -p {_plotdir}/archive")
+    for f in files:
+      os.system(f"mv {f} {_plotdir}/archive")
+elif options["mode"] == "signalFit" and not options["noClean"]:
+  # Signal Fit
+  _plotdir = f"{swd__}/outdir_{options['ext']}/signalFit/Plots"
+  pattern = f"{_plotdir}/{plot_fittype_prefix}"
+  files = glob.glob(pattern)
+  if len(files) == 0:
+    print(" --> No existing plots found")
+  else:
+    print(f" --> Archiving {len(files)} existing plots")
+    if not os.path.isdir(f"{_plotdir}/archive"):
+      os.system(f"mkdir -p {_plotdir}/archive")
+    for f in files:
+      print(f"   --> Archiving {f.split('/')[-1]}")
+      os.system(f"mv {f} {_plotdir}/archive")
+elif not options["noClean"]:
+  print(f" --> Invalid mode {options['mode']}. Exiting to avoid accidental deletion.")
+  sys.exit(1)
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Remove old models.json file
 _json_file = "%s/outdir_%s/signalFit/output/models.json"%(swd__,options['ext'])
 if options["mode"] == "signalFit" and not options['noClean']:

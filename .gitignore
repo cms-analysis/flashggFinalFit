@@ -37,3 +37,6 @@ AutoDict_*
 # Output dirs in signal and bkg
 Signal/outdir_*
 Background/outdir_*
+
+# Lint and formatting
+*.pylintrc
