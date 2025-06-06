@@ -321,6 +321,7 @@ if  args.Not_show1sigma :
 
 plot.DrawCMSLogo(pads[0], args.logo, args.logo_sub, 11, 0.045, 0.035, 1.2,  cmsTextSize = 1.)
 plot.DrawInfo(pad, r'137.6 fb^{-1} (13 TeV)','', 13, 0.39, 0.035, 1.2, extraText2='', cmsTextSize=0.8)
+plot.DrawInfo(pad, r'H #rightarrow #gamma#gamma, m_{H} = 125.38 GeV','', 13, 1, 0.06, 2, extraText2='', cmsTextSize=0.5)
 
 legend_l = 0.69
 if len(other_scans) > 0:
