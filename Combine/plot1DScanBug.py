@@ -10,6 +10,8 @@ import argparse
 import os.path
 from six.moves import range
 
+
+
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 ROOT.gROOT.SetBatch(ROOT.kTRUE)
 
@@ -116,14 +118,16 @@ parser.add_argument('--output', '-o', help='output name without file extension',
 parser.add_argument('--POI', help='use this parameter of interest', default='r')
 parser.add_argument('--translate', default=None, help='json file with POI name translation')
 parser.add_argument('--main-label', default='Observed', type=str, help='legend label for the main scan')
+parser.add_argument('--legend-size', type=float, default=0.045, help='legendsize')
 parser.add_argument('--main-color', default=1, type=int, help='line and marker color for main scan')
 parser.add_argument('--others',type=lambda s: s.split(','), help='add secondary scans processed as main: FILE:LABEL:COLOR')
 parser.add_argument('--breakdown', help='do quadratic error subtraction using --others')
 parser.add_argument('--Not_show1sigma', action='store_false', help='show the 1 sigma label')
 parser.add_argument('--Not_showPoints', action='store_true', help='show the 1 sigma label')
 parser.add_argument('--showFunction', action='store_true', help='show the 1 sigma label')
+parser.add_argument('--dashedExp', action='store_false', help='show the 1 sigma label')
 parser.add_argument('--logo', default='CMS')
-parser.add_argument('--logo-sub', default='Internal')
+parser.add_argument('--logo-sub', default='Preliminary')
 args = parser.parse_args()
 
 print('--------------------------------------')
@@ -166,7 +170,7 @@ else :main_scan['graph'].SetLineColor(args.main_color)
 
 #main_scan['graph'].SetLineColor(ROOT.kBlack)
 main_scan['graph'].SetMarkerSize(0.6)
-if "Exp" in args.main_label :
+if "Exp" in args.main_label and args.dashedExp:
     main_scan['graph'].SetLineStyle(2)
 else:main_scan['graph'].SetLineStyle(1)
 main_scan['graph'].SetLineWidth(2)
@@ -239,7 +243,7 @@ if args.showFunction : main_scan['func'].Draw('SAME')
 
 
 
-box = ROOT.TBox(axishist.GetXaxis().GetXmin(), 0.625*args.y_max, axishist.GetXaxis().GetXmax(), args.y_max)
+box = ROOT.TBox(axishist.GetXaxis().GetXmin(), 0.75*args.y_max, 0, args.y_max)
 box.Draw()
 pads[0].GetFrame().Draw()
 
@@ -257,23 +261,24 @@ if args.POI == 'CMS_zz4l_fai1': textfit = ' %s = %.2f{}^{#plus %.2f}_{#minus %.2
 else : textfit = ' %s = %.2g{}^{#plus %.2g}_{#minus %.2g} ' % (fixed_name, val_nom[0], val_nom[1], abs(val_nom[2]))
 if not args.Not_show1sigma : textfit =''
 
-if not args.Not_show1sigma : pt = ROOT.TPaveText(0.50, 0.82 , 0.85, 0.91, 'NDCNB')
-else: pt = ROOT.TPaveText(0.5, 0.82 - len(other_scans)*0.1, 0.85, 0.91, 'NDCNB')
-pt.AddText(textfit)
+if  args.Not_show1sigma :
+    pt = ROOT.TPaveText(0.5, 0.82 - len(other_scans)*0.1, 0.85, 0.91, 'NDCNB')
+    pt.AddText(textfit)
 
 print("\\begin{table}[h!] \n \\centering \n \\begin{tabular}{|c|c|c|} \n \\hline")
 print('$%s$ &  $\\times 10^{-4}$ &  95 \\%% CL Interval [$\\times 10^{-4}$]$ \\\\'%fixed_name.replace("#",'\\'))
 
-print('%s & $%.2g_{-%.2g}^{+%.2g} $ & [$%.2g$,$%.2g$] \\\\'%( args.main_label.replace("_",' '),0 if val_nom[0]*10**4<0.00001 else val_nom[0]*10**4 ,  abs(val_nom[2])*10**4,val_nom[1]*10**4,  abs(val_2sig[2])*10**4,val_2sig[1]*10**4))
+print('%s & $%.2g_{-%.2g}^{+%.2g} $ & [$%.2g$,$%.2g$] \\\\'%( args.main_label.replace("_",' ').replace("mu",'mu_'),0 if val_nom[0]*10**4<0.00001 else val_nom[0]*10**4 ,  abs(val_nom[2])*10**4,val_nom[1]*10**4,  abs(val_2sig[2])*10**4,val_2sig[1]*10**4))
 if args.breakdown is None:
     for i, other in enumerate(other_scans):
 
         textfit = '#color[%s]{%s = %.2f{}^{#plus %.2f}_{#minus %.2f}}' % (other_scans_opts[i][2], fixed_name, other['val'][0], other['val'][1], abs(other['val'][2]))
         if 'CMS_zz4l_' in  args.POI: textfit = '#color[%s]{%s = %.2f{}^{#plus %.2f}_{#minus %.2f}  #times 10^{-4}}' % (other_scans_opts[i][2], fixed_name, other['val'][0]*10**4, 0 if val_nom[0]*10**4<0.00009 else val_nom[0]*10**4, abs(other['val'][2])*10**4)
         if not args.Not_show1sigma : textfit =''
-        pt.AddText(textfit)
+        if  args.Not_show1sigma :
+            pt.AddText(textfit)
 
-        print('%s &  $ %.2g_{-%.2g}^{+%.2g}$ &  [$%.2g$,$%.2g$] \\\\'%(other_scans_opts[i][1].replace("_",' '),  0 if other['val'][0]*10**4*10**4<0.009 else other['val'][0]*10**4,  abs(other['val'][2])*10**4,other['val'][1]*10**4, abs(other['val_2sig'][2])*10**4,other['val_2sig'][1]*10**4 ) )
+        print('%s &  $ %.2g_{-%.2g}^{+%.2g}$ &  [$%.2g$,$%.2g$] \\\\'%(other_scans_opts[i][1].replace("_",' ').replace("mu",'mu_'),  0 if other['val'][0]*10**4*10**4<0.009 else other['val'][0]*10**4,  abs(other['val'][2])*10**4,other['val'][1]*10**4, abs(other['val_2sig'][2])*10**4,other['val_2sig'][1]*10**4 ) )
 
 print("\\hline \n \n \\end{tabular} \n \\end{table}")
 if args.breakdown is not None:
@@ -309,12 +314,13 @@ if args.breakdown is not None:
         textfit += '{}^{#plus %.3f}_{#minus %.3f}(%s)' % (hi, abs(lo), br)
     pt.AddText(textfit)
 
-
-pt.SetTextAlign(11)
-pt.SetTextFont(42)
-pt.Draw()
+if  args.Not_show1sigma :
+    pt.SetTextAlign(11)
+    pt.SetTextFont(42)
+    pt.Draw()
 
 plot.DrawCMSLogo(pads[0], args.logo, args.logo_sub, 11, 0.045, 0.035, 1.2,  cmsTextSize = 1.)
+plot.DrawInfo(pad, r'137.6 fb^{-1} (13 TeV)','', 13, 0.39, 0.035, 1.2, extraText2='', cmsTextSize=0.8)
 
 legend_l = 0.69
 if len(other_scans) > 0:
@@ -324,10 +330,10 @@ if len(other_scans) >= 3:
     legend = ROOT.TLegend(0.36, 0.73, 0.85, 0.93, '', 'NBNDC')
     legend.SetNColumns(1)
 
-legend.AddEntry(main_scan['graph'], args.main_label.replace("_",' '), 'L')
-legend.SetTextSize(0.03)
+legend.AddEntry(main_scan['graph'], args.main_label.replace("_",' ').replace("mu ",'mu_'), 'L')
+legend.SetTextSize(args.legend_size)
 for i, other in enumerate(other_scans):
-    legend.AddEntry(other['graph'], other_scans_opts[i][1].replace("_",' '), 'L')
+    legend.AddEntry(other['graph'], other_scans_opts[i][1].replace("_",' ').replace("mu ",'mu_'), 'L')
 legend.Draw()
 
 save_graph = main_scan['graph'].Clone()
