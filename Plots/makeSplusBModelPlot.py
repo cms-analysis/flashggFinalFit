@@ -420,7 +420,7 @@ for cidx in range(len(cats)):
                                          
     catsDataRatioEff[cats[cidx]] = h_data_ratio.Integral(Bin_from,Bin_to)
     print "      * Saving yield weighted data to json file: ./jsons/catsDataEff_sospb%s_%s.json"%(opt.ext,opt.xvar.split(",")[0])
-    """
+    catErrData = []
     if not os.path.isdir("./jsons"): os.system("mkdir ./jsons")
     with open("./jsons/catsDataRatioeff_sospb%s_%s.json"%(opt.ext,opt.xvar.split(",")[0]),'w') as jsonfile: json.dump(catsDataRatioEff,jsonfile)
     catsDataEff[cats[cidx]] = h_data.Integral(Bin_from,Bin_to)
@@ -429,9 +429,9 @@ for cidx in range(len(cats)):
        err = ( h_data_ratio.GetBinError(Bin))
        err_tot =  err **2 + err_tot
     err_tot = err_tot**0.5
-    catErrData[cats[cidx]]=err_tot
-    with open("./jsons/catsDataRatioErr_sospb%s_%s.json"%(opt.ext,opt.xvar.split(",")[0]),'w') as jsonfile: json.dump(catErrData,jsonfile)
-    """
+    #catErrData[cats[cidx]]=err_tot
+    #with open("./jsons/catsDataRatioErr_sospb%s_%s.json"%(opt.ext,opt.xvar.split(",")[0]),'w') as jsonfile: json.dump(catErrData,jsonfile)
+ 
     
   
 
