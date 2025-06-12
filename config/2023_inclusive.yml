@@ -1,6 +1,6 @@
 # Config file: options for signal fitting
 
-outputFolder: '/.automount/net_rw/net__data_cms3a-1/spaeh/private/PhD/analyses/partial_Run3_differential/Hgg-PartialRun3-3A-ETH-Analysis/fitting/CMSSW_14_1_0_pre4/src/flashggFinalFit/test_law_branch_2023'
+outputFolder: '/net/data_cms3a-1/wrabetz/CMSSW_14_1_0_pre4/src/flashggFinalFit/output_inclusive_2023'
 
 inputFiles:
   # Trees2WS
@@ -75,7 +75,7 @@ signalScriptCfg_2023_preBPix:
   analysis: 'earlyAnalysisInOut' # To specify replacement dataset and XS*BR mapping (defined in ./tools/replacementMap.py and ./tools/XSBRMap.py respectively)
   year: '2023preBPix' # Use 'combined' if merging all years: not recommended
   massPoints: '120,125,130' # You can now run with a single mass point if necessary
-
+  replacementThreshold: '50'
   # Photon shape systematics  
   scales: 'ScaleEE,ScaleEB' # separate nuisance per year
   scalesCorr: ''
@@ -100,7 +100,7 @@ signalScriptCfg_2023_postBPix:
   analysis: 'earlyAnalysisInOut' # To specify replacement dataset and XS*BR mapping (defined in ./tools/replacementMap.py and ./tools/XSBRMap.py respectively)
   year: '2023postBPix' # Use 'combined' if merging all years: not recommended
   massPoints: '120,125,130' # You can now run with a single mass point if necessary
-
+  replacementThreshold: '50'
   # Photon shape systematics  
   scales: 'ScaleEE,ScaleEB' # separate nuisance per year
   scalesCorr: ''
@@ -128,7 +128,7 @@ datacard_yields:
   cats: 'auto' # if auto: inferred automatically from (0) workspace
   procs: 'auto' # if auto: inferred automatically from (0) workspace
   ext: 'earlyAnalysis' # Extension for saving
-  # inputWSDirMap: '2023preBPix,2023postBPix'
+  inputWSDirMap: '2023preBPix,2023postBPix'
   sigModelWSDir: './Models/signal' # Input signal model WS directory
   bkgModelWSDir: './Models/background' # Input background model WS directory
   bkgModelExt: 'multipdf' # Extension used when saving background model
@@ -183,7 +183,7 @@ combine_impacts:
   stepSize: 0.05
   setCrossingTolerance: 0.00005 
   not_show_POI: False
-  execution: 'htcondor'
+  execution: 'local'
 
 combine_hesse:
   execution: 'local'
@@ -192,4 +192,4 @@ combine_mggToys:
   nToys: 1000 # Number of toys = nToys * 10
   loadSnapshot: 'MultiDimFit'
   doBands: True
-  execution: 'htcondor'
+  execution: 'local'

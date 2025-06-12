@@ -1,11 +1,11 @@
 # Config file: options for signal fitting
 
-outputFolder: '/eos/user/m/mwrabetz/differentials_14_05_25/'
+outputFolder: '/net/data_cms3a-1/wrabetz/CMSSW_14_1_0_pre4/src/flashggFinalFit/output_diff_PTH_2023/'
 
 inputFiles:
   # Trees2WS
-  Trees2WSData: '/eos/user/m/mwrabetz/differentials_14_05_25/allData.root'
-  Trees2WS: '/eos/user/m/mwrabetz/differentials_14_05_25/root'
+  Trees2WSData: '/net/data_cms3a-1/wrabetz/CMSSW_14_1_0_pre4/src/flashggFinalFit/input_differentials_2023/allData.root'
+  Trees2WS: '/net/data_cms3a-1/wrabetz/CMSSW_14_1_0_pre4/src/flashggFinalFit/input_differentials_2023/root'
 
 backgroundScriptCfg:
   # Setup
@@ -50,9 +50,9 @@ trees2wsCfg:
     - "fiducialGeometricFlag"
     - "diffVariable_GenPTH"
   
-  theoryWeightContainers: {}
-    # weight_LHEPdf: 101
-    # weight_LHEScale: 9
+  theoryWeightContainers:
+    weight_LHEPdf: 101
+    weight_LHEScale: 9
 
   # List of systematics: use string YEAR for year-dependent systematics
   systematics:
