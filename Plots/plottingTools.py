@@ -203,13 +203,13 @@ def makeSplusBPlot(workspace,hD,hSB,hB,hS,hDr,hBr,hSr,cat,options,dB=None,reduce
   lat0.SetTextSize(0.06)
   lat0.DrawLatex(0.12,0.92,"#bf{CMS} #it{Preliminary}")
   #lat0.DrawLatex(0.12,0.92,"#bf{CMS}")
-  lat0.DrawLatex(0.55,0.92,"137.6 fb^{-1} (13 TeV)")
+  lat0.DrawLatex(0.6,0.92,"138 fb^{-1} (13 TeV)")
   lat0.DrawLatex(0.6,0.8,"#scale[0.6]{%s}"%Translate(cat,translateCats))
   #lat0.DrawLatex(0.15,0.83,"#scale[0.75]{H#rightarrow#gamma#gamma}")
   lat0.DrawLatex(0.15,0.83,"#scale[0.75]{H #rightarrow #gamma#gamma, m_{H} = 125.38 GeV}")
   if(options.loadSnapshot is not None):
     #lat0.DrawLatex(0.15,0.77,"#scale[0.6]{#vec{#alpha} = STXS stage 1.2 minimal}")
-    lat0.DrawLatex(0.15,0.77,"#scale[0.6]{#vec{#alpha} = (#mu_{f}, #mu_{V})}")
+    lat0.DrawLatex(0.15,0.77,"#scale[0.6]{#vec{#alpha} = (#mu_{f}, #mu_{V}, f_{a3})}")
     #lat0.DrawLatex(0.15,0.77,"#scale[0.5]{(#hat{#mu}_{ggH},#hat{#mu}_{VBF},#hat{#mu}_{VH},#hat{#mu}_{top}) = (1.07,1.04,1.34,1.35)}")
     #lat0.DrawLatex(0.15,0.77,"#scale[0.75]{#hat{#mu} = 1.03}")
     #muhat_ggh, muhat_vbf, muhat_vh, muhat_top, mhhat = workspace.var("r_ggH").getVal(), workspace.var("r_VBF").getVal(), workspace.var("r_VH").getVal(), workspace.var("r_top").getVal(), workspace.var("MH").getVal()
@@ -237,7 +237,10 @@ def makeSplusBPlot(workspace,hD,hSB,hB,hS,hDr,hBr,hSr,cat,options,dB=None,reduce
   h_axes_ratio.GetXaxis().SetTickLength(0.03*padSizeRatio)
   h_axes_ratio.GetYaxis().SetLabelSize(0.035*padSizeRatio)
   h_axes_ratio.GetYaxis().SetLabelOffset(0.007)
-  h_axes_ratio.GetYaxis().SetTitle("")
+  h_axes_ratio.GetYaxis().SetTitleOffset(0.45)
+  h_axes_ratio.GetYaxis().SetTitleSize(0.11)
+
+  h_axes_ratio.GetYaxis().SetTitle("Data - B")
   h_axes_ratio.Draw()
   # Draw bands 
   if options.doBands:
