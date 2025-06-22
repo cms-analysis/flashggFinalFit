@@ -31,11 +31,19 @@ def read(scan, param, files, ycut):
     shift =0
     if ymin < 0:
         shift = -ymin
+
+
+    
     for i in range(graph.GetN()):
             if shift != 0 and graph.GetY()[i] ==0 :continue
             x = graph.GetX()[i]
             y = graph.GetY()[i] + shift
             graph.SetPoint(i, x, y)
+ 
+        
+        
+   
+    
     plot.RemoveGraphXDuplicates(graph)
     plot.RemoveGraphYAbove(graph, ycut)
     # graph.Print()
@@ -186,17 +194,14 @@ axishist.GetYaxis().SetTitle("- 2 #Delta ln L")
 axishist.GetXaxis().SetTitle("%s" % fixed_name)
 
 for other in other_scans:
-    if '0M' in other_scans_opts[0][0]: 
-        new_min = 0
-    else:new_min = axishist.GetXaxis().GetXmin()
+    new_min = axishist.GetXaxis().GetXmin()
 
 new_max = axishist.GetXaxis().GetXmax()
 mins = []
 maxs = []
 
 for other in other_scans:
-    if '0M' in other_scans_opts[0][0]: mins.append(0)
-    else: mins.append(other['graph'].GetX()[0])
+    mins.append(other['graph'].GetX()[0])
     maxs.append(other['graph'].GetX()[other['graph'].GetN()-1])
 
 
@@ -205,12 +210,12 @@ if len(other_scans) > 0:
         new_min = min(mins) - (main_scan['graph'].GetX()[0] - new_min)
     if max(maxs) > main_scan['graph'].GetX()[main_scan['graph'].GetN()-1]:
         new_max = max(maxs) + (new_max - main_scan['graph'].GetX()[main_scan['graph'].GetN()-1])
-        axishist.GetXaxis().SetLabelSize(0.03)
+        axishist.GetXaxis().SetLabelSize(0.04)
 
     axishist.GetXaxis().SetLimits(new_min, new_max)
 
 
-axishist.GetXaxis().SetLabelSize(0.03)
+axishist.GetXaxis().SetLabelSize(0.04)
 
 for i,other in enumerate(other_scans):
     #if args.breakdown is not None:
@@ -320,7 +325,7 @@ if  args.Not_show1sigma :
     pt.Draw()
 
 plot.DrawCMSLogo(pads[0], args.logo, args.logo_sub, 11, 0.045, 0.035, 1.2,  cmsTextSize = 1.)
-plot.DrawInfo(pad, r'137.6 fb^{-1} (13 TeV)','', 13, 0.39, 0.035, 1.2, extraText2='', cmsTextSize=0.8)
+plot.DrawInfo(pad, r'138 fb^{-1} (13 TeV)','', 13, 0.39, 0.035, 1.2, extraText2='', cmsTextSize=0.8)
 plot.DrawInfo(pad, r'H #rightarrow #gamma#gamma, m_{H} = 125.38 GeV','', 13, 1, 0.06, 2, extraText2='', cmsTextSize=0.5)
 
 legend_l = 0.69
@@ -339,7 +344,7 @@ legend.Draw()
 
 save_graph = main_scan['graph'].Clone()
 save_graph.GetXaxis().SetTitle('%s = %.3f %+.3f/%+.3f' % (fixed_name, val_nom[0], val_nom[2], val_nom[1]))
-save_graph.GetXaxis().SetLabelSize(0.02)
+save_graph.GetXaxis().SetLabelSize(0.1)
 outfile = ROOT.TFile(args.output+'.root', 'RECREATE')
 outfile.WriteTObject(save_graph)
 outfile.Close()
