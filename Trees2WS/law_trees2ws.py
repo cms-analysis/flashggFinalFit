@@ -7,6 +7,7 @@ from collections import OrderedDict as od
 import glob, shutil
 import errno
 import yaml
+import subprocess
 
 import pandas
 import numpy as np
@@ -27,6 +28,19 @@ def safe_mkdir(path):
         if exception.errno != errno.EEXIST:
             raise
 
+def execute_command(command, return_output=False, shell=False, print_statements=False):
+    try:
+        result = subprocess.run(command, check=True, text=True, capture_output=True, shell=shell, env=os.environ)
+        # if print_statements:
+        #     print("Script output:", result.stdout)
+        #     print("Script executed successfully.")
+        print("Script output:", result.stdout)
+        print("Script executed successfully.")
+        if return_output:
+            return (result.stdout).split("\n")[0]
+    except subprocess.CalledProcessError as e:
+        print("Error executing script:", e.stderr)
+
 def leave():
   print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG TREES 2 WS (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
   exit(0)
@@ -37,7 +51,7 @@ def convert_boolean_string(string):
     else:
         return False
 
-class Trees2WSSingleProcess(Task, SlurmWorkflow, HTCondorWorkflow, law.LocalWorkflow):#(law.Task): #(Task, HTCondorWorkflow, law.LocalWorkflow):
+class Trees2WSSingleProcess(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWorkflow):#(law.Task): #(Task, HTCondorWorkflow, law.LocalWorkflow):
     input_paths = law.Parameter(description="Paths to the data input ROOT files")
     era = law.Parameter(description="Current era.")
     output_dir = law.Parameter(description="Path to the output directory")
@@ -53,6 +67,8 @@ class Trees2WSSingleProcess(Task, SlurmWorkflow, HTCondorWorkflow, law.LocalWork
     doSTXSSplitting = law.Parameter(default=False, description="Split output WS per STXS bin")
     doDiffSplitting = law.Parameter(default=False, description="Split output WS per differential bin")
     doInOutSplitting = law.Parameter(default=False, description="Split output WS into in/out fiducial based on some variable in the input trees (to be improved).")
+    
+    batch_flavor = law.Parameter(default="slurm", description="Batch system to use")
 
     htcondor_job_kwargs_submit = {"spool": True}  
     
@@ -114,8 +130,16 @@ class Trees2WSSingleProcess(Task, SlurmWorkflow, HTCondorWorkflow, law.LocalWork
                     outputWSDir = os.path.join(self.output_dir,"ws_{}_{}".format(dataToProc(productionMode), fidTag))
                 else:
                     outputWSDir = os.path.join(os.path.dirname(input_path),"ws_{}_{}".format(dataToProc(productionMode), fidTag))
-                if not os.path.exists(outputWSDir): os.system("mkdir -p %s"%outputWSDir)
-                os.system("mkdir -p %s"%os.path.join(self.output_dir, 'filechecker'))
+                if not os.path.exists(outputWSDir): 
+                    if self.batch_flavor == "slurm/psi":
+                        execute_command([f'xrdfs root://t3dcachedb.psi.ch:1094/ mkdir -p {outputWSDir}'], shell=True)
+                    else:
+                        os.system("mkdir -p %s"%outputWSDir)
+                if not os.path.exists(os.path.join(self.output_dir, "filechecker")): 
+                    if self.batch_flavor == "slurm/psi":
+                        execute_command([f'xrdfs root://t3dcachedb.psi.ch:1094/ mkdir -p {os.path.join(self.output_dir, "filechecker")}'], shell=True)
+                    else:
+                        os.system("mkdir -p %s"%os.path.join(self.output_dir, 'filechecker'))
                 outputWSFile = os.path.join(outputWSDir,re.sub(r"\.root","_{}_{}.root".format(dataToProc(productionMode), fidTag),os.path.basename(input_path)))                
                 outputFileTargets.append(law.LocalFileTarget(os.path.join(self.output_dir, 'filechecker', f'{productionMode}_{input_mass}_{fidTag}.txt')))
                 outputFileTargets.append(law.LocalFileTarget(outputWSFile))
@@ -137,7 +161,11 @@ class Trees2WSSingleProcess(Task, SlurmWorkflow, HTCondorWorkflow, law.LocalWork
                 else:
                     outputWSDir = os.path.join(os.path.dirname(input_path),"ws_{}".format(diffBin))
                 outputWSFile = os.path.join(outputWSDir,re.sub(r"\.root","_{}.root".format(diffBin),os.path.basename(input_path)))
-                os.system("mkdir -p %s"%os.path.join(self.output_dir, 'filechecker'))
+                if not os.path.exists(os.path.join(self.output_dir, 'filechecker')): 
+                    if self.batch_flavor == "slurm/psi":
+                        execute_command([f'xrdfs root://t3dcachedb.psi.ch:1094/ mkdir -p {os.path.join(self.output_dir, "filechecker")}'], shell=True)
+                    else:
+                        os.system("mkdir -p %s"%os.path.join(self.output_dir, 'filechecker'))
                 outputFileTargets.append(law.LocalFileTarget(os.path.join(self.output_dir, 'filechecker', f'{productionMode}_{input_mass}_{currentBin}.txt')))
                 outputFileTargets.append(law.LocalFileTarget(outputWSFile))        
         return outputFileTargets
@@ -158,7 +186,13 @@ class Trees2WSSingleProcess(Task, SlurmWorkflow, HTCondorWorkflow, law.LocalWork
         doInOutSplitting = convert_boolean_string(self.doInOutSplitting)
                 
         # Create output path if it does not exist
-        os.makedirs(self.output_dir, exist_ok=True)
+        if self.batch_flavor == "slurm/psi":
+            execute_command([f'xrdfs root://t3dcachedb.psi.ch:1094/ mkdir -p {self.output_dir}'], shell=True)
+            os.environ["TARGET_PATH"] = f"/scratch/{os.environ['USER']}/{os.environ['SLURM_JOB_ID']}/{(self.output_dir).split('/')[-1]}"
+            temp_output_dir = os.environ["TARGET_PATH"]
+            safe_mkdir(temp_output_dir)
+        else:
+            os.makedirs(self.output_dir, exist_ok=True)
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         # Production modes to skip theory weights: fill with 1's
         modesToSkipTheoryWeights = ['bbh','thq','thw']
@@ -434,14 +468,22 @@ class Trees2WSSingleProcess(Task, SlurmWorkflow, HTCondorWorkflow, law.LocalWork
 
                 # Define output workspace file
                 if self.output_dir is not None:
-                    outputWSDir = os.path.join(self.output_dir, "ws_{}_{}".format(dataToProc(productionMode), fidTag)) # Multiple slashes are normalised away, no worries ("../test/" and "../test" are equivalent)
+                    # Multiple slashes are normalised away, no worries ("../test/" and "../test" are equivalent)
+                    if self.batch_flavor == "slurm/psi":
+                        outputWSDir = os.path.join(temp_output_dir, "ws_{}_{}".format(dataToProc(productionMode), fidTag))
+                    else:
+                        outputWSDir = os.path.join(self.output_dir, "ws_{}_{}".format(dataToProc(productionMode), fidTag)) 
                 else:
-                    outputWSDir = os.path.join(
-                        os.path.dirname(input_path),
-                        "ws_{}_{}".format(dataToProc(productionMode), fidTag)
-                    )
-                if not os.path.exists(outputWSDir): os.system("mkdir -p %s"%outputWSDir)
-                os.system("mkdir -p %s"%os.path.join(self.output_dir, 'filechecker'))
+                    if self.batch_flavor == "slurm/psi":
+                        outputWSDir = os.path.join(temp_output_dir, "ws_{}_{}".format(dataToProc(productionMode), fidTag))
+                    else:
+                        outputWSDir = os.path.join(os.path.dirname(input_path), "ws_{}_{}".format(dataToProc(productionMode), fidTag))
+                if not os.path.exists(outputWSDir):
+                    os.system("mkdir -p %s"%outputWSDir)
+                if self.batch_flavor == "slurm/psi":
+                    os.system("mkdir -p %s"%os.path.join(temp_output_dir, 'filechecker'))
+                else:
+                    os.system("mkdir -p %s"%os.path.join(self.output_dir, 'filechecker'))
                 outputWSFile = os.path.join(outputWSDir,re.sub(r"\.root","_{}_{}.root".format(dataToProc(productionMode), fidTag),os.path.basename(input_path)))
                 print(" --> Creating output workspace: (%s)"%outputWSFile)
                 
@@ -453,8 +495,12 @@ class Trees2WSSingleProcess(Task, SlurmWorkflow, HTCondorWorkflow, law.LocalWork
                 try:
                     file_size = os.path.getsize(outputWSFile)  # Get the file size in bytes
                     if file_size > 2000:
-                        with open(os.path.join(self.output_dir, 'filechecker', f'{productionMode}_{input_mass}_{fidTag}.txt'), 'w') as f:
-                            pass
+                        if self.batch_flavor == "slurm/psi":
+                            with open(os.path.join(temp_output_dir, 'filechecker', f'{productionMode}_{input_mass}_{fidTag}.txt'), 'w') as f:
+                                pass
+                        else:
+                            with open(os.path.join(self.output_dir, 'filechecker', f'{productionMode}_{input_mass}_{fidTag}.txt'), 'w') as f:
+                                pass
                 except OSError:
                     # Handle the case where the file does not exist or is inaccessible
                     print(f"Error creating file. Probably I/O error.")
@@ -483,12 +529,18 @@ class Trees2WSSingleProcess(Task, SlurmWorkflow, HTCondorWorkflow, law.LocalWork
                 elif productionMode == 'thw': stxsBin = re.sub("TH","THW",stxsBin)
 
                 # Define output workspace file
-                outputWSDir = os.path.join(
-                    os.path.dirname(input_path),
-                    "ws_{}".format(stxsBin)
-                )
-                if not os.path.exists(outputWSDir): os.system("mkdir -p %s"%outputWSDir)
-                os.system("mkdir -p %s"%os.path.join(self.output_dir, 'filechecker'))
+                if self.batch_flavor == "slurm/psi":
+                    outputWSDir = os.path.join(temp_output_dir, "ws_{}".format(stxsBin))
+                else:
+                    outputWSDir = os.path.join(os.path.dirname(input_path), "ws_{}".format(stxsBin))
+
+                if not os.path.exists(outputWSDir): 
+                    os.system("mkdir -p %s"%outputWSDir)
+
+                if self.batch_flavor == "slurm/psi":
+                    os.system("mkdir -p %s"%os.path.join(temp_output_dir, 'filechecker'))
+                else:
+                    os.system("mkdir -p %s"%os.path.join(self.output_dir, 'filechecker'))
                 outputWSFile = os.path.join(outputWSDir,re.sub(r"\.root","_{}.root".format(stxsBin),os.path.basename(input_path)))
                 print(" --> Creating output workspace for STXS bin: %s (%s)"%(stxsBin,outputWSFile))
 
@@ -500,8 +552,12 @@ class Trees2WSSingleProcess(Task, SlurmWorkflow, HTCondorWorkflow, law.LocalWork
                 try:
                     file_size = os.path.getsize(outputWSFile)  # Get the file size in bytes
                     if file_size > 2000:
-                        with open(os.path.join(self.output_dir, 'filechecker', f'{productionMode}_{input_mass}_{stxsBin}.txt'), 'w') as f:
-                            pass
+                        if self.batch_flavor == "slurm/psi":
+                            with open(os.path.join(temp_output_dir, 'filechecker', f'{productionMode}_{input_mass}_{stxsBin}.txt'), 'w') as f:
+                                pass
+                        else:
+                            with open(os.path.join(self.output_dir, 'filechecker', f'{productionMode}_{input_mass}_{stxsBin}.txt'), 'w') as f:
+                                pass
                 except OSError:
                     # Handle the case where the file does not exist or is inaccessible
                     print(f"Error creating file. Probably I/O error.")
@@ -525,17 +581,23 @@ class Trees2WSSingleProcess(Task, SlurmWorkflow, HTCondorWorkflow, law.LocalWork
 
                 # Define output workspace file
                 if self.output_dir is not None:
-                    outputWSDir = os.path.join(
-                        self.output_dir,
-                        "ws_{}".format(diffBin)
-                    )
+                    if self.batch_flavor == "slurm/psi":
+                        outputWSDir = os.path.join(temp_output_dir, "ws_{}".format(diffBin))
+                    else:
+                        outputWSDir = os.path.join(self.output_dir, "ws_{}".format(diffBin))
                 else:
-                    outputWSDir = os.path.join(
-                        os.path.dirname(input_path),
-                        "ws_{}".format(diffBin)
-                    )
-                if not os.path.exists(outputWSDir): os.system("mkdir -p %s"%outputWSDir)
-                os.system("mkdir -p %s"%os.path.join(self.output_dir, 'filechecker'))
+                    if self.batch_flavor == "slurm/psi":
+                        outputWSDir = os.path.join(temp_output_dir, "ws_{}".format(diffBin))
+                    else:    
+                        outputWSDir = os.path.join(os.path.dirname(input_path), "ws_{}".format(diffBin))
+
+                if not os.path.exists(outputWSDir): 
+                    os.system("mkdir -p %s"%outputWSDir)
+
+                if self.batch_flavor == "slurm/psi":
+                    os.system("mkdir -p %s"%os.path.join(temp_output_dir, 'filechecker'))
+                else:
+                    os.system("mkdir -p %s"%os.path.join(self.output_dir, 'filechecker'))
                 outputWSFile = os.path.join(outputWSDir, re.sub(r"\.root","_{}.root".format(diffBin),os.path.basename(input_path)))
                 print(" --> Creating output workspace for differential bin: %s (%s)"%(diffBin,outputWSFile))
 
@@ -547,19 +609,51 @@ class Trees2WSSingleProcess(Task, SlurmWorkflow, HTCondorWorkflow, law.LocalWork
                 try:
                     file_size = os.path.getsize(outputWSFile)  # Get the file size in bytes
                     if file_size > 2000:
-                        print(os.path.join(self.output_dir, 'filechecker', f'{productionMode}_{input_mass}_{currentBin}.txt'))
-                        with open(os.path.join(self.output_dir, 'filechecker', f'{productionMode}_{input_mass}_{currentBin}.txt'), 'w') as f:
-                            pass
+                        if self.batch_flavor == "slurm/psi":
+                            print(os.path.join(temp_output_dir, 'filechecker', f'{productionMode}_{input_mass}_{currentBin}.txt'))
+                            with open(os.path.join(temp_output_dir, 'filechecker', f'{productionMode}_{input_mass}_{currentBin}.txt'), 'w') as f:
+                                pass
+                        else:
+                            print(os.path.join(self.output_dir, 'filechecker', f'{productionMode}_{input_mass}_{currentBin}.txt'))
+                            with open(os.path.join(self.output_dir, 'filechecker', f'{productionMode}_{input_mass}_{currentBin}.txt'), 'w') as f:
+                                pass
                 except OSError:
                     # Handle the case where the file does not exist or is inaccessible
                     print(f"Error creating file. Probably I/O error.")
                     return False
-        
+
+        if self.batch_flavor == "slurm/psi":
+            execute_command([f"ls -al {temp_output_dir}/*"], shell=True)
+            if "/work" in self.output_dir:
+                slurm_copy_command = [
+                    f'cp -rf {temp_output_dir}/ {self.output_dir}/'
+                ]
+            else:
+                # Copying output files to final destination on the /pnfs.
+                # /../ necessary for this weird-ass copy problem of xrdcp
+                slurm_copy_command = [
+                    f'xrdcp -rf {temp_output_dir}/* root://t3dcachedb.psi.ch:1094/{self.output_dir}/'
+                ]
+                # slurm_copy_command = []
+                # for item in os.listdir(os.path.join(temp_output_dir, '/Trees2WS')):
+                #     src = os.path.join(temp_output_dir, item)
+                #     slurm_copy_command.extend([
+                #         'xrdcp', '-rf',
+                #         src,
+                #         f'root://t3dcachedb.psi.ch:1094//{self.output_dir}/'
+                #     ])
+            # execute_command(slurm_copy_command, print_statements=True)
+            execute_command(slurm_copy_command, shell=True)
+            # Cleaning up scratch space.
+            shutil.rmtree(temp_output_dir)  
+
 
 class Trees2WS(law.Task):
     output_dir = law.Parameter(default = '', description="Path to the output directory")
     variable = law.Parameter(default='', description="Variable to be used for output folder naming")
     year = law.Parameter(default='2022', description="Year")
+    
+    batch_flavor = law.Parameter(default="slurm", description="Batch system to use")
     
     def requires(self):
         # req() is defined on all tasks and handles the passing of all parameter values that are
@@ -602,7 +696,7 @@ class Trees2WS(law.Task):
             else:
                 current_output_path = output_dir + "/input_output_{}_{}{}".format(var, self.year, era)
                             
-            tasks.append(Trees2WSSingleProcess(input_paths=path_to_root_files, era=era, apply_mass_cut=mass_cut, mass_cut_range=mass_cut_r, year=f"{self.year}{era}", doSystematics=doSystematics, doDiffSplitting=doDiffSplitting, doSTXSSplitting=doSTXSSplitting, doInOutSplitting=doInOutSplitting, output_dir=current_output_path, variable=var, version=f"v{i}", workflow=config['execution']))
+            tasks.append(Trees2WSSingleProcess(input_paths=path_to_root_files, era=era, apply_mass_cut=mass_cut, mass_cut_range=mass_cut_r, year=f"{self.year}{era}", doSystematics=doSystematics, doDiffSplitting=doDiffSplitting, doSTXSSplitting=doSTXSSplitting, doInOutSplitting=doInOutSplitting, output_dir=current_output_path, variable=var, version=f"v{i}", workflow=config['execution'], batch_flavor=self.batch_flavor))
             i += 1
         return tasks
 
@@ -672,13 +766,24 @@ class Trees2WS(law.Task):
         for currentEra in outputFolders:
             # Create ws_signal folder
             dst_folder = currentEra + "/ws_signal"
-            safe_mkdir(dst_folder)
+            if not os.path.exists(dst_folder):
+                if self.batch_flavor == "slurm/psi":
+                    execute_command([f'xrdfs root://t3dcachedb.psi.ch:1094/ mkdir -p {dst_folder}'], shell=True)
+                else:
+                    safe_mkdir(dst_folder)
             
             # Copy files to ws_signal
             src_file_list = glob.glob(os.path.join(currentEra, "ws_*", "*"))
             for currentFile in src_file_list:
                 if not os.path.samefile(currentFile, dst_folder):
-                    shutil.copy2(currentFile, dst_folder)
+                    if self.batch_flavor == "slurm/psi":
+                        if '/pnfs' in currentFile:
+                            currentFile = currentFile.replace('/pnfs', 'root://t3dcachedb.psi.ch:1094//pnfs')
+                        elif '/pnfs' in dst_folder:
+                            dst_folder = dst_folder.replace('/pnfs', 'root://t3dcachedb.psi.ch:1094//pnfs')
+                        execute_command([f'xrdcp -rf {currentFile} {dst_folder}'], shell=True)
+                    else:
+                        shutil.copy2(currentFile, dst_folder)
                 else:
                     print(f"Skip copying {currentFile} since it is already in ws_signal.")
             
