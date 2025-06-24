@@ -34,6 +34,7 @@ def execute_command(command, return_output=False, shell=False, print_statements=
         # if print_statements:
         #     print("Script output:", result.stdout)
         #     print("Script executed successfully.")
+        # print("Executing command:", command)
         print("Script output:", result.stdout)
         print("Script executed successfully.")
         if return_output:
@@ -115,6 +116,12 @@ class Trees2WSSingleProcess(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWork
         if doInOutSplitting: fiducialIds = [True, False]
         else: fiducialIds = [0] # If we do not perform in/out splitting, we want to have one inclusive (for particle-level) process definition, our code int for that is zero
 
+        if not os.path.exists(os.path.join(self.output_dir, 'filechecker')): 
+            if self.batch_flavor == "slurm/psi":
+                execute_command([f'xrdfs root://t3dcachedb.psi.ch:1094/ mkdir -p {os.path.join(self.output_dir, "filechecker")}'], shell=True)
+            else:
+                os.system("mkdir -p %s"%os.path.join(self.output_dir, 'filechecker'))
+
         if doInOutSplitting:
 
             for fiducialId in fiducialIds:
@@ -135,11 +142,6 @@ class Trees2WSSingleProcess(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWork
                         execute_command([f'xrdfs root://t3dcachedb.psi.ch:1094/ mkdir -p {outputWSDir}'], shell=True)
                     else:
                         os.system("mkdir -p %s"%outputWSDir)
-                if not os.path.exists(os.path.join(self.output_dir, "filechecker")): 
-                    if self.batch_flavor == "slurm/psi":
-                        execute_command([f'xrdfs root://t3dcachedb.psi.ch:1094/ mkdir -p {os.path.join(self.output_dir, "filechecker")}'], shell=True)
-                    else:
-                        os.system("mkdir -p %s"%os.path.join(self.output_dir, 'filechecker'))
                 outputWSFile = os.path.join(outputWSDir,re.sub(r"\.root","_{}_{}.root".format(dataToProc(productionMode), fidTag),os.path.basename(input_path)))                
                 outputFileTargets.append(law.LocalFileTarget(os.path.join(self.output_dir, 'filechecker', f'{productionMode}_{input_mass}_{fidTag}.txt')))
                 outputFileTargets.append(law.LocalFileTarget(outputWSFile))
@@ -161,11 +163,7 @@ class Trees2WSSingleProcess(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWork
                 else:
                     outputWSDir = os.path.join(os.path.dirname(input_path),"ws_{}".format(diffBin))
                 outputWSFile = os.path.join(outputWSDir,re.sub(r"\.root","_{}.root".format(diffBin),os.path.basename(input_path)))
-                if not os.path.exists(os.path.join(self.output_dir, 'filechecker')): 
-                    if self.batch_flavor == "slurm/psi":
-                        execute_command([f'xrdfs root://t3dcachedb.psi.ch:1094/ mkdir -p {os.path.join(self.output_dir, "filechecker")}'], shell=True)
-                    else:
-                        os.system("mkdir -p %s"%os.path.join(self.output_dir, 'filechecker'))
+
                 outputFileTargets.append(law.LocalFileTarget(os.path.join(self.output_dir, 'filechecker', f'{productionMode}_{input_mass}_{currentBin}.txt')))
                 outputFileTargets.append(law.LocalFileTarget(outputWSFile))        
         return outputFileTargets
