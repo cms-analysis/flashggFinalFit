@@ -23,6 +23,8 @@ class Trees2WSAndBackground(law.Task):
     output_dir = law.Parameter(default = '', description="Path to the output directory")
     year = law.Parameter(default='2022', description="Year")
     
+    batch_flavor = law.Parameter(default="slurm", description="Batch system to use")
+    
     def requires(self):
         # req() is defined on all tasks and handles the passing of all parameter values that are
         # common between the required task and the instance (self)
@@ -43,7 +45,7 @@ class Trees2WSAndBackground(law.Task):
         else:
             output_dir = self.output_dir
         
-        tasks = [Trees2WS(variable=self.variable, output_dir=output_dir, year=self.year), Background(variable=self.variable, output_dir=output_dir, year=self.year)]
+        tasks = [Trees2WS(variable=self.variable, output_dir=output_dir, year=self.year, batch_flavor=self.batch_flavor), Background(variable=self.variable, output_dir=output_dir, year=self.year, batch_flavor=self.batch_flavor)]
         
         return tasks
 
@@ -133,6 +135,8 @@ class PhotonSystAndFTest(law.Task):
     output_dir = law.Parameter(default = '', description="Path to the output directory")
     year = law.Parameter(default='2022', description="Year")
     
+    batch_flavor = law.Parameter(default="slurm", description="Batch system to use")
+    
     def requires(self):
         # req() is defined on all tasks and handles the passing of all parameter values that are
         # common between the required task and the instance (self)
@@ -153,7 +157,7 @@ class PhotonSystAndFTest(law.Task):
         else:
             output_dir = self.output_dir
         
-        tasks = [CalcPhotonSyst(variable=self.variable, output_dir=output_dir, year=self.year), FTest(variable=self.variable, output_dir=output_dir, year=self.year)]
+        tasks = [CalcPhotonSyst(variable=self.variable, output_dir=output_dir, year=self.year, batch_flavor=self.batch_flavor), FTest(variable=self.variable, output_dir=output_dir, year=self.year, batch_flavor=self.batch_flavor)]
         
         return tasks
 
@@ -213,10 +217,12 @@ class PhotonSystAndFTest(law.Task):
 
 
 
-class EarlyRun3(law.Task):
+class FinalFits(law.Task):
     variable = law.Parameter(default="", description="Variable to be used")
     output_dir = law.Parameter(default = '', description="Path to the output directory")
     year = law.Parameter(default='2022', description="Year")
+    
+    batch_flavor = law.Parameter(default="slurm", description="Batch system to use")
     
     def requires(self):
         # req() is defined on all tasks and handles the passing of all parameter values that are
@@ -238,7 +244,7 @@ class EarlyRun3(law.Task):
         else:
             output_dir = self.output_dir
         
-        tasks = [Trees2WS(variable=self.variable, output_dir=output_dir, year=self.year), Background(variable=self.variable, output_dir=output_dir, year=self.year), MakeDatacard(variable=self.variable, output_dir=output_dir, year=self.year)]
+        tasks = [Trees2WS(variable=self.variable, output_dir=output_dir, year=self.year, batch_flavor=self.batch_flavor), Background(variable=self.variable, output_dir=output_dir, year=self.year, batch_flavor=self.batch_flavor), MakeDatacard(variable=self.variable, output_dir=output_dir, year=self.year, batch_flavor=self.batch_flavor, version="v1")]
         
         return sorted(tasks)
 
