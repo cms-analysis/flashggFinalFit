@@ -4,6 +4,7 @@ import subprocess
 import glob
 import yaml
 import errno
+import time
 
 from commonTools import *
 from commonObjects import *
@@ -29,8 +30,7 @@ def convert_boolean_string(string):
     if (string == "True") or (string == "true") or (string == True):
         return True
     else:
-        return False
-                
+        return False              
 
 class FTestCategory(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWorkflow): #(law.Task): #(Task, HTCondorWorkflow, law.LocalWorkflow):
     input_path = law.Parameter(description="Path to the input ROOT files (/ws_signal)")
@@ -582,8 +582,7 @@ class SignalFitCategoryProcess(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalW
             
         tasks.append(FTest(variable=self.variable, output_dir=output_dir, year=year, batch_flavor=self.batch_flavor))
         tasks.append(CalcPhotonSyst(variable=self.variable, output_dir=output_dir, year=year, batch_flavor=self.batch_flavor))
-                    
-                
+
         return tasks
     
     def create_branch_map(self):
@@ -634,12 +633,10 @@ class SignalFitCategoryProcess(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalW
             execute_command([f'mkdir -p $TARGET_PATH/outdir_{self.ext}/signalFit/output'], shell=True)
             execute_command([f'mkdir -p $TARGET_PATH/outdir_{self.ext}/signalFit/Plots'], shell=True)
             output_dir = os.environ["TARGET_PATH"]
-            # os.chdir(os.path.join(os.environ["TARGET_PATH"], 'Combine', fitFolderName, 'impact'))
         else:
             execute_command([f'mkdir -p {self.output_dir}/outdir_{self.ext}/signalFit/output'], shell=True)
             execute_command([f'mkdir -p {self.output_dir}/outdir_{self.ext}/signalFit/Plots'], shell=True)
             output_dir = self.output_dir
-            # os.chdir(os.path.join(self.output_dir, 'Combine', fitFolderName, 'impact'))
 
         script_path = os.path.join(os.environ["ANALYSIS_PATH"], "Signal/scripts/signalFit.py")
         arguments = [
@@ -667,6 +664,9 @@ class SignalFitCategoryProcess(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalW
         if self.scalesGlobal != "":
             arguments += ["--scalesGlobal"]
             arguments += ["%s"%self.scalesGlobal]
+        if (self.batch_flavor == "slurm/psi"):
+            arguments += ["--ingredientsDir"]
+            arguments += ["%s"%self.output_dir]
         command = arguments
         print(command)
         try:
