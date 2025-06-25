@@ -319,10 +319,7 @@ class RunText2Workspace(Task, SlurmWorkflow, law.LocalWorkflow): #(law.Task): #(
         if self.variable == '':
             output = [os.path.join(output_dir, 'Combine', f'Datacard_{self.year}.root')]
         else:
-            if self.eft_variable == '':
-                output = [os.path.join(output_dir, 'Combine', f'Datacard_{self.variable}_{self.year}.root')]
-            else:
-                output = [os.path.join(output_dir, 'Combine', f'EFT_Datacard_{self.variable}_{self.eft_variable}_{self.year}.root')]
+            output = [os.path.join(output_dir, 'Combine', f'Datacard_{self.variable}_{self.year}.root')]
 
         outputFileTargets = []
 
@@ -1177,6 +1174,8 @@ class CreateAsimovFit(Task, SlurmWorkflow, HTCondorWorkflow, law.LocalWorkflow):
                 tasks += [AsimovFitCategoryStat(output_dir=output_dir, variable=self.variable, year=self.year, cat=cat, nPoints=config["combine_fit"]["asimov_numPoints"], version=f"inclusive_v1", workflow=config["combine_fit"]["execution"], batch_flavor=self.batch_flavor)]
             elif "slurm" in self.batch_flavor:
                 tasks += [AsimovFitCategorySyst(output_dir=output_dir, variable=self.variable, year=self.year, cat=cat, nPoints=config["combine_fit"]["asimov_numPoints"], version=f"inclusive_v1", workflow=config["combine_fit"]["execution"], batch_flavor=self.batch_flavor, slurm_partition="short", slurm_memory=4000, slurm_max_runtime="01:00:00"), AsimovFitCategoryStat(output_dir=output_dir, variable=self.variable, year=self.year, cat=cat, nPoints=config["combine_fit"]["asimov_numPoints"], version=f"inclusive_v1", workflow=config["combine_fit"]["execution"], batch_flavor=self.batch_flavor, slurm_partition="short", slurm_memory=4000, slurm_max_runtime="01:00:00")]
+            else:
+                tasks += [AsimovFitCategorySyst(output_dir=output_dir, variable=self.variable, year=self.year, cat=cat, nPoints=config["combine_fit"]["asimov_numPoints"], version=f"inclusive_v1", workflow=config["combine_fit"]["execution"], batch_flavor=self.batch_flavor), AsimovFitCategoryStat(output_dir=output_dir, variable=self.variable, year=self.year, cat=cat, nPoints=config["combine_fit"]["asimov_numPoints"], version=f"inclusive_v1", workflow=config["combine_fit"]["execution"], batch_flavor=self.batch_flavor)]
         else:
             version_index = 1
             for cat in combineVariableDict[f'{self.year}'][f'{self.variable}']['paramStrNoOne']:
@@ -1185,6 +1184,8 @@ class CreateAsimovFit(Task, SlurmWorkflow, HTCondorWorkflow, law.LocalWorkflow):
                     tasks += [AsimovFitCategoryStat(output_dir=output_dir, variable=self.variable, year=self.year, cat=cat, nPoints=config["combine_fit"]["asimov_numPoints"], version=f"{self.variable}_v{version_index}", workflow=config["combine_fit"]["execution"], batch_flavor=self.batch_flavor)]
                 elif "slurm" in self.batch_flavor:
                     tasks += [AsimovFitCategorySyst(output_dir=output_dir, variable=self.variable, year=self.year, cat=cat, nPoints=config["combine_fit"]["asimov_numPoints"], version=f"{self.variable}_v{version_index}", workflow=config["combine_fit"]["execution"], batch_flavor=self.batch_flavor, slurm_partition="short", slurm_memory=4000, slurm_max_runtime="01:00:00"), AsimovFitCategoryStat(output_dir=output_dir, variable=self.variable, year=self.year, cat=cat, nPoints=config["combine_fit"]["asimov_numPoints"], version=f"{self.variable}_v{version_index}", workflow=config["combine_fit"]["execution"], batch_flavor=self.batch_flavor, slurm_partition="short", slurm_memory=4000, slurm_max_runtime="01:00:00")]
+                else:
+                    tasks += [AsimovFitCategorySyst(output_dir=output_dir, variable=self.variable, year=self.year, cat=cat, nPoints=config["combine_fit"]["asimov_numPoints"], version=f"{self.variable}_v{version_index}", workflow=config["combine_fit"]["execution"], batch_flavor=self.batch_flavor, slurm_partition="short"), AsimovFitCategoryStat(output_dir=output_dir, variable=self.variable, year=self.year, cat=cat, nPoints=config["combine_fit"]["asimov_numPoints"], version=f"{self.variable}_v{version_index}", workflow=config["combine_fit"]["execution"], batch_flavor=self.batch_flavor, slurm_partition="short")]
                 version_index += 1
         
         return tasks
@@ -1350,7 +1351,12 @@ class CreateAsimovFit(Task, SlurmWorkflow, HTCondorWorkflow, law.LocalWorkflow):
             except subprocess.CalledProcessError as e:
                 print("Error executing script:", e.stderr)
 
-            # os.chdir('os.path.join(output_dir, 'Combine', fitFolderName, 'asimov')')
+            # change to the scans directory
+            if self.batch_flavor == "slurm/psi":
+                os.chdir(os.path.join(os.environ["TARGET_PATH"], 'Combine', fitFolderName, 'asimov', 'scans'))
+            else:
+                os.chdir(os.path.join(output_dir, 'Combine', fitFolderName, 'asimov', 'scans'))
+
             arguments = [
                 "python3", f"{os.environ['CMSSW_BASE']}/bin/slc7_amd64_gcc12/plot1DScan.py",
                 # "plot1DScan.py",

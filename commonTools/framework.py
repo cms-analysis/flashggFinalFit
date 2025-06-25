@@ -124,6 +124,11 @@ class SlurmWorkflow(law.slurm.SlurmWorkflow):
         significant=False,
         description="the maximum job runtime; default unit is hours; default: 1h",
     )
+    slurm_memory = law.Parameter(
+        default=4000,
+        significant=False,
+        description="Job memory. Default: 4000MB",
+    )
 
     def slurm_output_directory(self):
         # the directory where submission meta data should be stored
@@ -151,7 +156,7 @@ class SlurmWorkflow(law.slurm.SlurmWorkflow):
         )
         
         config.custom_content.append(("time", job_time))
-        config.custom_content.append(("mem", 8000))
+        config.custom_content.append(("mem", self.slurm_memory))
         config.custom_content.append(("nodes", 1))
 
         return config
