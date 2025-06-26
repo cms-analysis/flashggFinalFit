@@ -64,8 +64,11 @@ class HTCondorWorkflow(law.htcondor.HTCondorWorkflow):
         significant=False,
         description="transfer job logs to the output directory; default: True",
     )
-    
-    htcondor_job_kwargs_submit = {"spool": True}
+
+    htcondor_job_kwargs_submit = {}
+
+    if "lxplus" in os.uname().nodename.lower() or os.environ['PWD'].startswith("/eos"):
+        htcondor_job_kwargs_submit = {"spool": True}
 
     def htcondor_output_directory(self):
         # the directory where submission meta data should be stored
@@ -102,6 +105,17 @@ class HTCondorWorkflow(law.htcondor.HTCondorWorkflow):
         config.custom_content.append(("log", "/dev/null"))
 
         return config
+
+    def submit(self, job_script, **kwargs):
+        # call the original submit method that returns a process result
+        ret = super().submit(job_script, **kwargs)
+        # Attempt to parse the job id from the condor_submit output
+        match = re.search(r"submitted\sto\scluster\s(\d+)", ret.stdout)
+        if match:
+            return match.group(1)
+        else:
+            self.logger.error("Failed to parse job id from condor_submit output:\n%s", ret.stdout)
+            raise RuntimeError("Could not determine condor job id")
 
 
 class SlurmWorkflow(law.slurm.SlurmWorkflow):

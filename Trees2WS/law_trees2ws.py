@@ -68,11 +68,9 @@ class Trees2WSSingleProcess(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWork
     doSTXSSplitting = law.Parameter(default=False, description="Split output WS per STXS bin")
     doDiffSplitting = law.Parameter(default=False, description="Split output WS per differential bin")
     doInOutSplitting = law.Parameter(default=False, description="Split output WS into in/out fiducial based on some variable in the input trees (to be improved).")
-    
+
     batch_flavor = law.Parameter(default="slurm", description="Batch system to use")
 
-    htcondor_job_kwargs_submit = {"spool": True}  
-    
     def create_branch_map(self):
         # map branch indexes to ascii numbers from 97 to 122 ("a" to "z")
         mode_proc_mass_list = [

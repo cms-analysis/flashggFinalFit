@@ -17,12 +17,11 @@ def safe_mkdir(path):
     except OSError as exception:
         if exception.errno != errno.EEXIST:
             raise
-    
+
 class Trees2WSAndBackground(law.Task):
     variable = law.Parameter(default="", description="Variable to be used")
     output_dir = law.Parameter(default = '', description="Path to the output directory")
     year = law.Parameter(default='2022', description="Year")
-    
     batch_flavor = law.Parameter(default="slurm", description="Batch system to use")
     
     def requires(self):
@@ -97,7 +96,10 @@ class Trees2WSAndBackground(law.Task):
                 
     
     def run(self):
-        
+        # Suggestion by ChatGPT: We should ensure that the run() method produces a non-empty payload, otherwise the executable for htcondor could sometimes be empty and the submission fails
+        with self.output()[0].open("w") as f:
+            f.write("echo Running Trees2WSAndBackground\n")
+
         # if self.variable == '':
         #     # configYamlPath = os.path.dirname(os.path.abspath(__file__)) + f"/../config/{self.year}_inclusive.yml"
         #     configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"

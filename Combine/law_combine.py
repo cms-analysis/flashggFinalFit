@@ -71,12 +71,9 @@ class PrepareTheDirectory(Task, SlurmWorkflow, law.LocalWorkflow):#(law.Task): #
     output_dir = law.Parameter(default = '', description="Path to the output directory")
     variable = law.Parameter(default="", description="Variable to be used")
     year = law.Parameter(default='2022', description="Year")
-    
+
     batch_flavor = law.Parameter(default="htcondor", description="Batch system to use")
 
-    
-    # htcondor_job_kwargs_submit = {"spool": True}
-    
     def requires(self):
         
         if self.variable == '':
@@ -272,9 +269,7 @@ class RunText2Workspace(Task, SlurmWorkflow, law.LocalWorkflow): #(law.Task): #(
     year = law.Parameter(default='2022', description="Year")
 
     batch_flavor = law.Parameter(default="htcondor", description="Batch system to use")
-    
-    # htcondor_job_kwargs_submit = {"spool": True}
-    
+
     def requires(self):
         
         if self.variable == '':
@@ -428,9 +423,7 @@ class AsimovFitCategoryFirstStep(Task, SlurmWorkflow, HTCondorWorkflow, law.Loca
     cats = law.Parameter(description="Current category")
     
     batch_flavor = law.Parameter(default="htcondor", description="Batch system to use")
-    
-    htcondor_job_kwargs_submit = {"spool": True}
-    
+
     def requires(self):
         
         if self.variable == '':
@@ -687,9 +680,7 @@ class AsimovFitCategorySyst(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWork
     nPoints = law.Parameter(default=30, description="Number of points for the LL scan")
     
     batch_flavor = law.Parameter(default="htcondor", description="Batch system to use")
-    
-    htcondor_job_kwargs_submit = {"spool": True}
-    
+
     def requires(self):
         
         if self.variable == '':
@@ -917,9 +908,7 @@ class AsimovFitCategoryStat(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWork
     nPoints = law.Parameter(default=30, description="Number of points for the LL scan")
     
     batch_flavor = law.Parameter(default="htcondor", description="Batch system to use")
-    
-    htcondor_job_kwargs_submit = {"spool": True}
-    
+
     def requires(self):
         
         if self.variable == '':
@@ -1147,9 +1136,7 @@ class CreateAsimovFit(Task, SlurmWorkflow, HTCondorWorkflow, law.LocalWorkflow):
     year = law.Parameter(default='2022', description="Year")
     
     batch_flavor = law.Parameter(default="htcondor", description="Batch system to use")
-    
-    # htcondor_job_kwargs_submit = {"spool": True}
-    
+
     def requires(self):
         
         if self.variable == '':
@@ -1417,9 +1404,6 @@ class AsimovImpactFirstStep(law.Task): #(law.Task): #(Task, HTCondorWorkflow, la
     
     batch_flavor = law.Parameter(default="htcondor", description="Batch system to use")
 
-    
-    # htcondor_job_kwargs_submit = {"spool": True}
-    
     def requires(self):
         
         if self.variable == '':
@@ -1599,9 +1583,7 @@ class AsimovImpactSecondStep(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWor
     year = law.Parameter(default='2022', description="Year")
 
     batch_flavor = law.Parameter(default="htcondor", description="Batch system to use")
-    
-    htcondor_job_kwargs_submit = {"spool": True}
-    
+
     def requires(self):
         
         if self.variable == '':
@@ -1848,9 +1830,7 @@ class AsimovImpactThirdStep(law.Task): #(law.Task): #(Task, HTCondorWorkflow, la
     year = law.Parameter(default='2022', description="Year")
 
     batch_flavor = law.Parameter(default="htcondor", description="Batch system to use")
-    
-    # htcondor_job_kwargs_submit = {"spool": True}
-    
+
     def requires(self):
         
         if self.variable == '':
@@ -2081,9 +2061,7 @@ class AsimovCovCorrHesse(Task, SlurmWorkflow, HTCondorWorkflow, law.LocalWorkflo
     year = law.Parameter(default='2022', description="Year")
 
     batch_flavor = law.Parameter(default="htcondor", description="Batch system to use")
-    
-    htcondor_job_kwargs_submit = {"spool": True}
-    
+
     def requires(self):
         
         if self.variable == '':
@@ -2254,9 +2232,8 @@ class AsimovCovCorr(Task, SlurmWorkflow, HTCondorWorkflow, law.LocalWorkflow): #
     noPreliminary = law.Parameter(default=False, description="Flag, if final plot should bear the Preliminary.")
 
     batch_flavor = law.Parameter(default="htcondor", description="Batch system to use")
-    
-    # htcondor_job_kwargs_submit = {"spool": True}
-    
+
+
     def requires(self):
         
         if self.variable == '':
@@ -2437,9 +2414,7 @@ class UnblindedFitSystSingle(Task, SlurmWorkflow, HTCondorWorkflow, law.LocalWor
     year = law.Parameter(default='2022', description="Year")
 
     batch_flavor = law.Parameter(default="htcondor", description="Batch system to use")
-    
-    htcondor_job_kwargs_submit = {"spool": True}
-    
+
     def requires(self):
         
         if self.variable == '':
@@ -2620,9 +2595,7 @@ class UnblindedFitStatSingle(Task,SlurmWorkflow, HTCondorWorkflow, law.LocalWork
     output_dir = law.Parameter(default = '', description="Path to the output directory")
     variable = law.Parameter(default="", description="Variable to be used")
     year = law.Parameter(default='2022', description="Year")
-    
-    htcondor_job_kwargs_submit = {"spool": True}
-    
+
     def requires(self):
         
         if self.variable == '':
@@ -2817,9 +2790,7 @@ class UnblindedFitCategorySyst(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalW
     nPoints = law.Parameter(default=30, description="Number of points for the LL scan")
     bootstrap_flag = law.Parameter(default=False, description="Bootstrap flag")
     number_of_bootstraps = law.Parameter(default=1000, description="Number of bootstraps")
-    
-    htcondor_job_kwargs_submit = {"spool": True}
-    
+
     def requires(self):
         
         if self.variable == '':
@@ -3013,9 +2984,7 @@ class UnblindedFitCategoryStat(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalW
     nPoints = law.Parameter(default=30, description="Number of points for the LL scan")
     bootstrap_flag = law.Parameter(default=False, description="Bootstrap flag")
     number_of_bootstraps = law.Parameter(default=1000, description="Number of bootstraps")
-    
-    htcondor_job_kwargs_submit = {"spool": True}
-    
+
     def requires(self):
         
         if self.variable == '':
@@ -3209,9 +3178,8 @@ class CreateUnblindedFit(law.Task): #(law.Task): #(Task, HTCondorWorkflow, law.L
     year = law.Parameter(default='2022', description="Year")
     bootstrap_flag = law.Parameter(default=False, description="Bootstrap flag")
     number_of_bootstraps = law.Parameter(default=1000, description="Number of bootstraps")
-    
-    # htcondor_job_kwargs_submit = {"spool": True}
-    
+
+
     def requires(self):
         
         if self.variable == '':
@@ -3396,9 +3364,8 @@ class UnblindedCovCorrHesse(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWork
     output_dir = law.Parameter(default = '', description="Path to the output directory")
     variable = law.Parameter(default="", description="Variable to be used")
     year = law.Parameter(default='2022', description="Year")
-    
-    htcondor_job_kwargs_submit = {"spool": True}
-    
+
+
     def requires(self):
         
         if self.variable == '':
@@ -3526,9 +3493,7 @@ class UnblindedCovCorr(law.Task): #(law.Task): #(Task, HTCondorWorkflow, law.Loc
     variable = law.Parameter(default="", description="Variable to be used")
     year = law.Parameter(default='2022', description="Year")
     noPreliminary = law.Parameter(default=False, description="Flag, if final plot should bear the Preliminary.")
-    
-    # htcondor_job_kwargs_submit = {"spool": True}
-    
+
     def requires(self):
         
         if self.variable == '':
@@ -3672,9 +3637,7 @@ class UnblindedImpactFirstStep(law.Task): #(law.Task): #(Task, HTCondorWorkflow,
     output_dir = law.Parameter(default = '', description="Path to the output directory")
     variable = law.Parameter(default="", description="Variable to be used")
     year = law.Parameter(default='2022', description="Year")
-    
-    # htcondor_job_kwargs_submit = {"spool": True}
-    
+
     def requires(self):
         
         if self.variable == '':
@@ -3822,9 +3785,7 @@ class UnblindedImpactSecondStep(Task, HTCondorWorkflow, SlurmWorkflow, law.Local
     output_dir = law.Parameter(default = '', description="Path to the output directory")
     variable = law.Parameter(default="", description="Variable to be used")
     year = law.Parameter(default='2022', description="Year")
-    
-    htcondor_job_kwargs_submit = {"spool": True}
-    
+
     def requires(self):
         
         if self.variable == '':
@@ -4073,9 +4034,7 @@ class UnblindedImpactThirdStep(law.Task): #(law.Task): #(Task, HTCondorWorkflow,
     output_dir = law.Parameter(default = '', description="Path to the output directory")
     variable = law.Parameter(default="", description="Variable to be used")
     year = law.Parameter(default='2022', description="Year")
-    
-    # htcondor_job_kwargs_submit = {"spool": True}
-    
+
     def requires(self):
         
         if self.variable == '':
@@ -4292,9 +4251,7 @@ class MggBestFit(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWorkflow): #(la
     output_dir = law.Parameter(default = '', description="Path to the output directory")
     variable = law.Parameter(default="", description="Variable to be used")
     year = law.Parameter(default='2022', description="Year")
-        
-    # htcondor_job_kwargs_submit = {"spool": True}
-    
+
     def requires(self):
         
         if self.variable == '':
@@ -4426,9 +4383,7 @@ class MggToyGeneration(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWorkflow)
     variable = law.Parameter(default="", description="Variable to be used")
     year = law.Parameter(default='2022', description="Year")
     is_postfit = law.Parameter(default=False, description="Flag that signifies if toys are created for postfit mass distributions.")
-    
-    htcondor_job_kwargs_submit = {"spool": True}
-    
+
     def requires(self):
         
         if self.variable == '':
@@ -4915,9 +4870,7 @@ class MggDistribution(law.LocalWorkflow): #(law.Task): #(Task, HTCondorWorkflow,
     variable = law.Parameter(default="", description="Variable to be used")
     year = law.Parameter(default='2022', description="Year")
     is_postfit = law.Parameter(default=False, description="Flag that signifies if toys are created for postfit mass distributions.")
-    
-    # htcondor_job_kwargs_submit = {"spool": True}
-    
+
     def requires(self):
         
         if self.variable == '':
@@ -5156,9 +5109,7 @@ class PValueCalculation(law.Task): #(law.Task): #(Task, HTCondorWorkflow, law.Lo
     output_dir = law.Parameter(default = '', description="Path to the output directory")
     variable = law.Parameter(default="", description="Variable to be used")
     year = law.Parameter(default='2022', description="Year")
-    
-    # htcondor_job_kwargs_submit = {"spool": True}
-    
+
     def requires(self):
         
         if self.variable == '':

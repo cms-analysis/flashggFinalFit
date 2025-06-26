@@ -65,9 +65,7 @@ class MakeYieldsCategory(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWorkflo
     mass = law.Parameter(default='125', description="Input workspace mass")
     nCats = law.Parameter(description="Number of Categories")
     variable = law.Parameter(default="", description="Variable to be used")
-    
-    htcondor_job_kwargs_submit = {"spool": True}
-    
+
     def requires(self):
         
         if self.variable == '':

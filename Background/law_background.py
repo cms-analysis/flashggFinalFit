@@ -44,8 +44,6 @@ class BackgroundCategory(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWorkflo
 
     batch_flavor = law.Parameter(default="htcondor", description="Batch system to use")
 
-    htcondor_job_kwargs_submit = {"spool": True}
-    
     def requires(self):
         
         if self.variable == '':
@@ -265,8 +263,6 @@ class OneBackground(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWorkflow):#(
 
     batch_flavor = law.Parameter(default="htcondor", description="Batch system to use")
 
-    htcondor_job_kwargs_submit = {"spool": True}
-    
     def requires(self):
         
         if self.variable == '':
