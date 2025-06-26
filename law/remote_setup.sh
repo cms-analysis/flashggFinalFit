@@ -2,8 +2,12 @@
 
 action() {
 
-    cd /work/niharrin/CMSSW_14_1_0_pre4/src/flashggFinalFit
+    cd /net/data_cms3a-1/spaeh/private/PhD/analyses/partial_Run3_differential/Hgg-PartialRun3-3A-ETH-Analysis/fitting/CMSSW_14_1_0_pre4/src/flashggFinalFit
+    # The following source of cmsset_default.sh is needed on architectures other than lxplus, when the default cms commands are not sourced at startup
+    export VO_CMS_SW_DIR="/cvmfs/cms.cern.ch"
+    source $VO_CMS_SW_DIR/cmsset_default.sh
     cmsenv
+    source setup.sh
     local shell_is_zsh="$( [ -z "${ZSH_VERSION}" ] && echo "false" || echo "true" )"
     local this_file="$( ${shell_is_zsh} && echo "${(%):-%x}" || echo "${BASH_SOURCE[0]}" )"
     local this_dir="$( cd "$( dirname "${this_file}" )" && pwd )"
