@@ -88,15 +88,15 @@ class HTCondorWorkflow(law.htcondor.HTCondorWorkflow):
         # configure to run in a "el7" container
         # https://batchdocs.web.cern.ch/local/submit.html#os-selection-via-containers
         config.custom_content.append(("MY.WantOS", "el9"))
-        
-        config.custom_content.append(("RequestMemory", 4)) # 4GB
+
+        config.custom_content.append(("RequestMemory", "4GB")) # 4GB
 
         # maximum runtime
         config.custom_content.append(("+MaxRuntime", int(math.floor(self.htcondor_max_runtime * 3600)) - 1))
 
         # copy the entire environment
-        config.custom_content.append(("getenv", "false"))
-        
+        config.custom_content.append(("getenv", "true")) # We would to inherit the environment variables from the user
+
         # config.custom_content.append(("+AccountingGroup", "'group_u_CMS.u_zh.users'"))
         config.custom_content.append(("+AccountingGroup", '"group_u_CMS.u_zh.users"'))
 
