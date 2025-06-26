@@ -9,6 +9,7 @@ from commonObjects import *
 
 from Datacard.law_datacard import *
 from Background.law_background import *
+from Trees2WS.law_trees2ws import *
 
 # Function to safely create a directory
 def safe_mkdir(path):
