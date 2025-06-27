@@ -8,7 +8,7 @@ action() {
     local this_dir="$( cd "$( dirname "${this_file}" )" && pwd )"
 
     if [ ! -d "${PWD}/install_dir" ] || [ -z "$(ls -A "${PWD}/install_dir")" ]; then
-        PYTHONUSERBASE="${PWD}/install_dir" pip3 install --user --no-cache-dir --force-reinstall "git+https://github.com/riga/law.git@master"
+        PYTHONUSERBASE="${PWD}/law/install_dir" pip3 install --user --no-cache-dir --force-reinstall "git+https://github.com/JaLuka98/law.git@master"
     else
         echo "Directory ${PWD}/install_dir already exists and is not empty. Using local law installation..."
     fi
