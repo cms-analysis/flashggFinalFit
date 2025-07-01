@@ -1,16 +1,18 @@
 #!/usr/bin/env bash
 
 action() {
-    cmsenv
 
+    cd /work/niharrin/t35/CMSSW_14_1_0_pre4/src/flashggFinalFit
+    export ANALYSIS_PATH="$(pwd)"
+    cmsenv
     local shell_is_zsh="$( [ -z "${ZSH_VERSION}" ] && echo "false" || echo "true" )"
     local this_file="$( ${shell_is_zsh} && echo "${(%):-%x}" || echo "${BASH_SOURCE[0]}" )"
     local this_dir="$( cd "$( dirname "${this_file}" )" && pwd )"
 
-    if [ ! -d "${PWD}/install_dir" ] || [ -z "$(ls -A "${PWD}/install_dir")" ]; then
-        PYTHONUSERBASE="${PWD}/install_dir" pip3 install --user --no-cache-dir --force-reinstall "git+https://github.com/riga/law.git@master"
+    if [ ! -d "${PWD}/law/install_dir" ] || [ -z "$(ls -A "${PWD}/law/install_dir")" ]; then
+        PYTHONUSERBASE="${PWD}/law/install_dir" pip3 install --user --no-cache-dir --force-reinstall "git+https://github.com/riga/law.git@master"
     else
-        echo "Directory ${PWD}/install_dir already exists and is not empty. Using local law installation..."
+        echo "Directory ${PWD}/law/install_dir already exists and is not empty. Using local law installation..."
     fi
 
     export INSTALL_DIR="${PWD}/install_dir"
@@ -33,8 +35,6 @@ action() {
     export LAW_HOME="${this_dir}/.law"
     export LAW_CONFIG_FILE="${this_dir}/law.cfg"
     export LAW_DIR="${this_dir}"
-
-    export ANALYSIS_PATH="${this_dir}/../"
 
     source "$( law completion )" ""
 }

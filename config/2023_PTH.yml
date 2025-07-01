@@ -59,6 +59,8 @@ trees2wsCfg:
     - "ScaleEB"
     - "ScaleEE"
     - "Smearing"
+    - "Material"
+    - "FNUF"
     - "energyErrShift"
     - "JerSyst"
     - "JecSystTotal"
@@ -74,12 +76,12 @@ signalScriptCfg_2023_preBPix:
   ext: 'earlyAnalysis_PTH_2023preBPix' # output directory extension
   analysis: 'earlyAnalysisDiffPt' # To specify replacement dataset and XS*BR mapping (defined in ./tools/replacementMap.py and ./tools/XSBRMap.py respectively)
   year: '2023preBPix' # Use 'combined' if merging all years: not recommended
-  replacementThreshold: '50'
+  replacementThreshold: '25' # 50
   massPoints: '120,125,130' # You can now run with a single mass point if necessary
 
   # Photon shape systematics  
   scales: 'ScaleEE,ScaleEB' # separate nuisance per year
-  scalesCorr: '' # correlated across years
+  scalesCorr: 'FNUF,Material' # correlated across years
   scalesGlobal: 'NonLinearity,Geant4' # affect all processes equally, correlated across years
   smears: 'Smearing' # separate nuisance per year
 
@@ -99,12 +101,12 @@ signalScriptCfg_2023_postBPix:
   ext: 'earlyAnalysis_PTH_2023postBPix' # output directory extension
   analysis: 'earlyAnalysisDiffPt' # To specify replacement dataset and XS*BR mapping (defined in ./tools/replacementMap.py and ./tools/XSBRMap.py respectively)
   year: '2023postBPix' # Use 'combined' if merging all years: not recommended
-  replacementThreshold: '50'
+  replacementThreshold: '25' # 50
   massPoints: '120,125,130' # You can now run with a single mass point if necessary
 
   # Photon shape systematics  
   scales: 'ScaleEE,ScaleEB' # separate nuisance per year
-  scalesCorr: '' # correlated across years
+  scalesCorr: 'FNUF,Material' # correlated across years
   scalesGlobal: 'NonLinearity,Geant4' # affect all processes equally, correlated across years
   smears: 'Smearing' # separate nuisance per year
 
@@ -139,7 +141,7 @@ datacard_yields:
   skipBkg: False # Only add signal processes to datacard
   bkgScaler: 1. # Add overall scale factor for background
   skipCOWCorr: False # Skip centralObjectWeight correction for events in acceptance. Use if no centralObjectWeight in workspace
-  execution: 'local'
+  execution: 'slurm'
 
 datacard:
   # For pruning processes
@@ -167,10 +169,10 @@ datacard_clean:
   verbose: False # Spit out all the cleaning being done
 
 combine_fit:
-  asimov_numPoints: 30 # Number of points the Asimov generator should generate for the NLL scan
+  asimov_numPoints: 100 # Number of points the Asimov generator should generate for the NLL scan
   unblindedFit_numPoints: 100 
   setParameterRange: "r=0,3"
-  execution: 'local'
+  execution: 'slurm'
 
 combine_impacts:
   exclude: "" # Nuisances that should be excluded from the impact computation

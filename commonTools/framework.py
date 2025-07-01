@@ -77,7 +77,7 @@ class HTCondorWorkflow(law.htcondor.HTCondorWorkflow):
     def htcondor_bootstrap_file(self):
         # each job can define a bootstrap file that is executed prior to the actual job
         # configure it to be shared across jobs and rendered as part of the job itself
-        bootstrap_file = law.util.rel_path(__file__, "bootstrap.sh")
+        bootstrap_file = law.util.rel_path(__file__, "htcondor_bootstrap.sh")
         return law.JobInputFile(bootstrap_file, share=True, render_job=True)
 
     def htcondor_job_config(self, config, job_num, branches):
@@ -151,7 +151,7 @@ class SlurmWorkflow(law.slurm.SlurmWorkflow):
     def slurm_bootstrap_file(self):
         # each job can define a bootstrap file that is executed prior to the actual job
         # configure it to be shared across jobs and rendered as part of the job itself
-        bootstrap_file = law.util.rel_path(__file__, "bootstrap.sh")
+        bootstrap_file = law.util.rel_path(__file__, "slurm_bootstrap.sh")
         return law.JobInputFile(bootstrap_file, share=True, render_job=True)
     
     def htcondor_log_directory(self):
