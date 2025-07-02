@@ -1345,7 +1345,7 @@ class CreateAsimovFit(Task, SlurmWorkflow, HTCondorWorkflow, law.LocalWorkflow):
                 os.chdir(os.path.join(output_dir, 'Combine', fitFolderName, 'asimov', 'scans'))
 
             arguments = [
-                "python3", f"{os.environ['CMSSW_BASE']}/bin/slc7_amd64_gcc12/plot1DScan.py",
+                "python3", f"{os.environ['CMSSW_BASE']}/bin/{os.environ['SCRAM_ARCH']}/plot1DScan.py",
                 # "plot1DScan.py",
                 os.path.join(output_dir, 'Combine', fitFolderName, 'asimov', f'higgsCombineAsimovPostFitScanFit_{cat}.root'),
                 "-o", f"scan_{cat}",
@@ -1356,7 +1356,7 @@ class CreateAsimovFit(Task, SlurmWorkflow, HTCondorWorkflow, law.LocalWorkflow):
             ]
             if self.batch_flavor == "slurm/psi":
                 arguments = [
-                    "python3", f"{os.environ['CMSSW_BASE']}/bin/slc7_amd64_gcc12/plot1DScan.py",
+                    "python3", f"{os.environ['CMSSW_BASE']}/bin/{os.environ['SCRAM_ARCH']}/plot1DScan.py",
                     # "plot1DScan.py",
                     os.path.join(os.environ['TARGET_PATH'], 'Combine', fitFolderName, 'asimov', f'higgsCombineAsimovPostFitScanFit_{cat}.root'),
                     "-o", f"scan_{cat}",
