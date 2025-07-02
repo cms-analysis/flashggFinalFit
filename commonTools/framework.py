@@ -84,6 +84,7 @@ class HTCondorWorkflow(law.htcondor.HTCondorWorkflow):
         # render_variables are rendered into all files sent with a job
         config.render_variables["analysis_path"] = os.getenv("ANALYSIS_PATH")
         config.render_variables["law_dir"] = os.getenv("LAW_DIR")
+        config.render_variables["python_exe"] = "/cvmfs/cms.cern.ch/el9_amd64_gcc12/cms/cmssw/CMSSW_14_1_0_pre4/external/el9_amd64_gcc12/bin/python3"
 
         # configure to run in a "el7" container
         # https://batchdocs.web.cern.ch/local/submit.html#os-selection-via-containers
