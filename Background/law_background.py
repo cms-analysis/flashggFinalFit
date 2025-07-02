@@ -263,7 +263,14 @@ class OneBackground(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWorkflow):#(
 
     batch_flavor = law.Parameter(default="htcondor", description="Batch system to use")
 
-    def requires(self):
+    # def requires(self):
+    def workflow_requires(self):
+        workflow_reqs = super().workflow_requires()
+
+        tasks = {}
+
+        if workflow_reqs:
+            tasks.update(workflow_reqs)
         
         if self.variable == '':
             configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"], f"config/{self.year}_inclusive.yml")
@@ -278,8 +285,10 @@ class OneBackground(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWorkflow):#(
             output_dir = config['outputFolder']
         else:
             output_dir = self.output_dir
+        
+        config = config["backgroundScriptCfg"]
             
-        tasks = [Trees2WSData(output_dir=output_dir, variable=self.variable, year=self.year, version='v1', workflow='local', batch_flavor=self.batch_flavor)]
+        tasks["Trees2WSData"] = Trees2WSData(output_dir=output_dir, variable=self.variable, year=self.year, version='v1', workflow=config['execution'], batch_flavor=self.batch_flavor)
         
         return tasks
     
