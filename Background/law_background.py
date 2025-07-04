@@ -59,8 +59,10 @@ class BackgroundCategory(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWorkflo
             output_dir = config['outputFolder']
         else:
             output_dir = self.output_dir
-            
-        tasks = [Trees2WSData(output_dir=output_dir, variable=self.variable, year=self.year, version='v1', workflow='local', batch_flavor=self.batch_flavor)]
+        
+        config = config["backgroundScriptCfg"]
+        
+        tasks = [Trees2WSData(output_dir=output_dir, variable=self.variable, year=self.year, version='v1', workflow='local', batch_flavor=self.batch_flavor, slurm_partition=config['batchPartition'], slurm_memory=config['batchMemory'], slurm_max_runtime=config['batchMaxRuntime'], htcondor_partition=config['batchPartition'], htcondor_memory=config['batchMemory'], htcondor_max_runtime=config['batchMaxRuntime'])]
         
         return tasks
     
@@ -164,99 +166,8 @@ class BackgroundCategory(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWorkflo
             # Cleaning up scratch space.
             shutil.rmtree(temp_output_dir)
         
-        
 
-class Background(law.Task):
-    variable = law.Parameter(default="", description="Variable to be used")
-    output_dir = law.Parameter(default = '', description="Path to the output directory")
-    year = law.Parameter(default='2022', description="Year")
-
-    batch_flavor = law.Parameter(default="htcondor", description="Batch system to use")
-    
-    def requires(self):
-        # req() is defined on all tasks and handles the passing of all parameter values that are
-        # common between the required task and the instance (self)
-        
-        if self.variable == '':
-            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"], f"config/{self.year}_inclusive.yml")
-        else:
-            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"], f"config/{self.year}_{self.variable}.yml")
-        
-        #Load central config file
-        with open(configYamlPath, 'r') as file:
-            config = yaml.safe_load(file)
-        
-        if self.output_dir == '':
-            output_dir = config['outputFolder']
-        else:
-            output_dir = self.output_dir
-            
-        
-        input_path = config['inputFiles']['Trees2WSData']
-                    
-        config = config["backgroundScriptCfg"]
-        
-        if config['cats'] == 'auto':
-            config['cats'] = (extractListOfCatsFromHiggsDNAAllData(input_path))
-        config['nCats'] = len(config['cats'].split(","))
-    
-        # Add dummy entries for procs and signalFitWSFile (used in old plotting script)
-        config['signalFitWSFile'] = 'none'
-        config['procs'] = 'none'
-        config['batch'] = 'local'
-        config['queue'] = 'none'
-        if self.year == 'combined': config['year'] = 'all'
-        else: config['year'] = self.year     
-        config['intLumi'] = lumiMap[self.year]
-                
-        if self.variable == '':
-            all_data_input_path = os.path.join(output_dir, "input_output_data", f"input_output_data_{self.year}/ws/allData.root")
-        else:
-            all_data_input_path = os.path.join(output_dir, "input_output_data", f"input_output_data_{self.variable}_{self.year}/ws/allData.root")
-            
-        tasks = [BackgroundCategory(input_path=all_data_input_path, output_dir=output_dir, year=self.year, cats=config['cats'], cat_offset=config['catOffset'], variable=self.variable, ext=config['ext'], version='v1', workflow=config['execution'], batch_flavor=self.batch_flavor, slurm_partition="short", slurm_max_runtime=1)]
-        return tasks
-
-    def output(self):
-        # returns output folder
-        
-        if self.variable == '':
-            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"], f"config/{self.year}_inclusive.yml")
-        else:
-            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"], f"config/{self.year}_{self.variable}.yml")
-        
-        #Load central config file
-        with open(configYamlPath, 'r') as file:
-            config = yaml.safe_load(file)
-            
-        if self.output_dir == '':
-            output_dir = config['outputFolder']
-        else:
-            output_dir = self.output_dir
-            
-        config = config["backgroundScriptCfg"]
-        ext=config['ext']
-        
-        output_paths = []
-
-        if self.variable == '': 
-            output_paths.append(law.LocalFileTarget(os.path.join(output_dir, "Background", f"outdir_{ext}")))
-            
-            output_paths.append(law.LocalFileTarget(os.path.join(output_dir, "Background", f'outdir_{ext}/bkgfTest-Data/fTestResults.txt')))
-        else:
-            output_paths.append(law.LocalFileTarget(os.path.join(output_dir, "Background", f"outdir_{ext}_{self.variable}")))
-            
-            output_paths.append(law.LocalFileTarget(os.path.join(output_dir, "Background", f'outdir_{ext}_{self.variable}/bkgfTest-Data/fTestResults.txt')))
-                        
-        return output_paths
-                
-    
-    def run(self):
-        
-        return True
-
-
-class OneBackground(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWorkflow):#(law.Task): #(Task, HTCondorWorkflow, law.LocalWorkflow):
+class Background(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWorkflow):#(law.Task): #(Task, HTCondorWorkflow, law.LocalWorkflow):
     output_dir = law.Parameter(default="", description="Path to the output directory")
     year = law.Parameter(default='2022', description="Year")
     variable = law.Parameter(default="", description="Variable to be used")
@@ -288,7 +199,7 @@ class OneBackground(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWorkflow):#(
         
         config = config["backgroundScriptCfg"]
             
-        tasks["Trees2WSData"] = Trees2WSData(output_dir=output_dir, variable=self.variable, year=self.year, version='v1', workflow=config['execution'], batch_flavor=self.batch_flavor)
+        tasks["Trees2WSData"] = Trees2WSData(output_dir=output_dir, variable=self.variable, year=self.year, version=self.variable if self.variable != "" else "inclusive", workflow=config['execution'], batch_flavor=self.batch_flavor, slurm_partition=config['batchPartition'], slurm_memory=config['batchMemory'], slurm_max_runtime=config['batchMaxRuntime'], htcondor_partition=config['batchPartition'], htcondor_memory=config['batchMemory'], htcondor_max_runtime=config['batchMaxRuntime'])
         
         return tasks
     

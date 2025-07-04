@@ -1,6 +1,7 @@
 # Config file: options for signal fitting
 
-outputFolder: '/pnfs/psi.ch/cms/trivcat/store/user/niharrin/ntuples/midRun3/samples/2025_06_12/intermediateRun3/finalfits/PTH'
+# outputFolder: '/pnfs/psi.ch/cms/trivcat/store/user/niharrin/ntuples/midRun3/samples/2025_06_12/intermediateRun3/finalfits/PTH'
+outputFolder: '/pnfs/psi.ch/cms/trivcat/store/user/niharrin/ntuples/midRun3/samples/2025_06_12/intermediateRun3/finalfits/PTH_workflow_requires_thirdTest'
 
 inputFiles:
   # Trees2WS
@@ -14,6 +15,9 @@ backgroundScriptCfg:
   ext: 'earlyAnalysis_PTH' # extension to add to output directory
   # year: '2023' # Use combined when merging all years in category (for plots)
   execution: 'slurm'
+  batchPartition: "short" # Slurm partition to use for job submission
+  batchMemory: 4000 # Slurm memory to use for job submission
+  batchMaxRuntime: "01:00:00" # Slurm max runtime to use
 
 trees2wsCfg:
   inputTreeDir: 'DiphotonTree' # Name of RooDirectory storing input tree
@@ -68,6 +72,9 @@ trees2wsCfg:
   cats: 'auto'
 
   execution: 'slurm'
+  batchPartition: "short" # Slurm partition to use for job submission
+  batchMemory: 4000 # Slurm memory to use for job submission
+  batchMaxRuntime: "01:00:00" # Slurm max runtime to use
 
 signalScriptCfg_2023_preBPix:
   # Setup
@@ -93,6 +100,9 @@ signalScriptCfg_2023_preBPix:
 
   # Job submission options
   execution: 'slurm'
+  batchPartition: "short" # Slurm partition to use for job submission
+  batchMemory: 4000 # Slurm memory to use for job submission
+  batchMaxRuntime: "01:00:00" # Slurm max runtime to use
 
 signalScriptCfg_2023_postBPix:
   # Setup
@@ -117,6 +127,9 @@ signalScriptCfg_2023_postBPix:
 
   # Job submission options
   execution: 'slurm'
+  batchPartition: "short" # Slurm partition to use for job submission
+  batchMemory: 4000 # Slurm memory to use for job submission
+  batchMaxRuntime: "01:00:00" # Slurm max runtime to use
 
 packaged_2023:
   cats: 'auto' # if auto: inferred automatically from (0) workspace
@@ -124,6 +137,9 @@ packaged_2023:
   mergeYears: True # Merges the eras
   ext: ''
   execution: 'local'
+  batchPartition: "short" # Slurm partition to use for job submission
+  batchMemory: 4000 # Slurm memory to use for job submission
+  batchMaxRuntime: "01:00:00" # Slurm max runtime to use
 
 datacard_yields:
   cats: 'auto' # if auto: inferred automatically from (0) workspace
@@ -142,6 +158,9 @@ datacard_yields:
   bkgScaler: 1. # Add overall scale factor for background
   skipCOWCorr: False # Skip centralObjectWeight correction for events in acceptance. Use if no centralObjectWeight in workspace
   execution: 'slurm'
+  batchPartition: "short" # Slurm partition to use for job submission
+  batchMemory: 4000 # Slurm memory to use for job submission
+  batchMaxRuntime: "01:00:00" # Slurm max runtime to use
 
 datacard:
   # For pruning processes
@@ -173,20 +192,32 @@ combine_fit:
   unblindedFit_numPoints: 100 
   setParameterRange: "r=0,3"
   execution: 'slurm'
+  batchPartition: "short" # Slurm partition to use for job submission
+  batchMemory: 4000 # Slurm memory to use for job submission
+  batchMaxRuntime: "01:00:00" # Slurm max runtime to use
 
 combine_impacts:
   exclude: "" # Nuisances that should be excluded from the impact computation
   not_show_POI: True
-  execution: 'local'
+  execution: 'slurm'
+  batchPartition: "short" # Slurm partition to use for job submission
+  batchMemory: 4000 # Slurm memory to use for job submission
+  batchMaxRuntime: "01:00:00" # Slurm max runtime to use
 
 combine_hesse:
   execution: 'local'
+  batchPartition: "short" # Slurm partition to use for job submission
+  batchMemory: 4000 # Slurm memory to use for job submission
+  batchMaxRuntime: "01:00:00" # Slurm max runtime to use
 
 combine_mggToys:
   nToys: 1000 # Number of toys = nToys * 10
   loadSnapshot: 'MultiDimFit'
   doBands: True
   execution: 'local'
+  batchPartition: "short" # Slurm partition to use for job submission
+  batchMemory: 4000 # Slurm memory to use for job submission
+  batchMaxRuntime: "01:00:00" # Slurm max runtime to use
 
 spectra:
   no_preliminary: True # Flag that determines, if Preliminary label should be printed.

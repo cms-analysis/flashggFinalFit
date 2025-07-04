@@ -53,11 +53,21 @@ class HTCondorWorkflow(law.htcondor.HTCondorWorkflow):
     configuration is required.
     """
 
+    htcondor_partition = luigi.Parameter(
+        default="workday",
+        significant=False,
+        description="target queue partition; default: workday",
+    )
     htcondor_max_runtime = law.DurationParameter(
-        default=16.0,
+        default=8.0,
         unit="h",
         significant=False,
         description="maximum runtime; default unit is hours; default: 1",
+    )
+    htcondor_memory = law.Parameter(
+        default=4000,
+        significant=False,
+        description="Job memory in MB. Default: 4000MB",
     )
     transfer_logs = luigi.BoolParameter(
         default=True,
@@ -90,15 +100,19 @@ class HTCondorWorkflow(law.htcondor.HTCondorWorkflow):
         # https://batchdocs.web.cern.ch/local/submit.html#os-selection-via-containers
         config.custom_content.append(("MY.WantOS", "el9"))
 
-        config.custom_content.append(("RequestMemory", "4GB")) # 4GB
+        # memory requirements
+        memory_gb = self.htcondor_memory / 1000
+        config.custom_content.append(("RequestMemory", f"{memory_gb}GB")) 
 
         # maximum runtime
         config.custom_content.append(("+MaxRuntime", int(math.floor(self.htcondor_max_runtime * 3600)) - 1))
 
+        # job flavor
+        config.custom_content.append(("+JobFlavour", f'"{self.htcondor_partition}"'))
+
         # copy the entire environment
         config.custom_content.append(("getenv", "true")) # We would to inherit the environment variables from the user
 
-        # config.custom_content.append(("+AccountingGroup", "'group_u_CMS.u_zh.users'"))
         config.custom_content.append(("+AccountingGroup", '"group_u_CMS.u_zh.users"'))
 
         # the CERN htcondor setup requires a "log" config, but we can safely set it to /dev/null
@@ -155,7 +169,7 @@ class SlurmWorkflow(law.slurm.SlurmWorkflow):
         bootstrap_file = law.util.rel_path(__file__, "slurm_bootstrap.sh")
         return law.JobInputFile(bootstrap_file, share=True, render_job=True)
     
-    def htcondor_log_directory(self):
+    def slurm_log_directory(self):
         # the directory where submission meta data should be stored
         return law.LocalDirectoryTarget(self.local_path())
 

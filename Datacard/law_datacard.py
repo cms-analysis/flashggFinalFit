@@ -66,7 +66,14 @@ class MakeYieldsCategory(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWorkflo
     nCats = law.Parameter(description="Number of Categories")
     variable = law.Parameter(default="", description="Variable to be used")
 
-    def requires(self):
+    # def requires(self):
+    def workflow_requires(self):
+        workflow_reqs = super().workflow_requires()
+
+        tasks = {}
+
+        if workflow_reqs:
+            tasks.update(workflow_reqs)
         
         if self.variable == '':
             configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"], f"config/{self.year}_inclusive.yml")
@@ -82,7 +89,7 @@ class MakeYieldsCategory(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWorkflo
         else:
             output_dir = self.output_dir
             
-        tasks = [SignalPackaging(output_dir=output_dir, variable=self.variable, year=self.year)]
+        tasks["SignalPackaging"] = SignalPackaging(output_dir=output_dir, variable=self.variable, year=self.year, batch_flavor=self.batch_flavor)
         
         return tasks
     
@@ -179,7 +186,6 @@ class MakeYields(law.Task): #law.Task
     year = law.Parameter(default='2022', description="Year")
     
     batch_flavor = law.Parameter(default="slurm", description="Batch system to use")
-    # batch_username = law.Parameter(default="niharrin", description="Username for batch system. Currently only used when batch_flavor is slurm/psi.")
     
     def requires(self):
         # req() is defined on all tasks and handles the passing of all parameter values that are
@@ -239,7 +245,7 @@ class MakeYields(law.Task): #law.Task
                 else:
                     inputWSDirMap += currentYearEra + "=" + currentYearEraInputOutput
         
-        tasks = [MakeYieldsCategory(inputWSDirMap=inputWSDirMap, output_dir=output_dir, year=self.year, cats=datacard_config['cats'], procs=datacard_config['procs'], nCats=datacard_config['nCats'], ext=datacard_config['ext'], mergeYears=datacard_config['mergeYears'], skipBkg=datacard_config['skipBkg'], bkgScaler=datacard_config['bkgScaler'], sigModelWSDir=datacard_config['sigModelWSDir'], sigModelExt=f"packaged{packaged_config['ext']}", bkgModelWSDir=datacard_config['bkgModelWSDir'], bkgModelExt=datacard_config['bkgModelExt'], skipZeroes=datacard_config['skipZeroes'], skipCOWCorr=datacard_config['skipCOWCorr'], doSystematics=datacard_config['doSystematics'], ignore_warnings=datacard_config['ignore_warnings'], mass=datacard_config['mass'], variable=self.variable, version='v1', workflow=datacard_config['execution'], batch_flavor=self.batch_flavor)]
+        tasks = [MakeYieldsCategory(inputWSDirMap=inputWSDirMap, output_dir=output_dir, year=self.year, cats=datacard_config['cats'], procs=datacard_config['procs'], nCats=datacard_config['nCats'], ext=datacard_config['ext'], mergeYears=datacard_config['mergeYears'], skipBkg=datacard_config['skipBkg'], bkgScaler=datacard_config['bkgScaler'], sigModelWSDir=datacard_config['sigModelWSDir'], sigModelExt=f"packaged{packaged_config['ext']}", bkgModelWSDir=datacard_config['bkgModelWSDir'], bkgModelExt=datacard_config['bkgModelExt'], skipZeroes=datacard_config['skipZeroes'], skipCOWCorr=datacard_config['skipCOWCorr'], doSystematics=datacard_config['doSystematics'], ignore_warnings=datacard_config['ignore_warnings'], mass=datacard_config['mass'], variable=self.variable, version='v1', workflow=datacard_config['execution'], batch_flavor=self.batch_flavor, slurm_partition=datacard_config['batchPartition'], slurm_memory=datacard_config['batchMemory'], slurm_max_runtime=datacard_config['batchMaxRuntime'], htcondor_partition=datacard_config['batchPartition'], htcondor_memory=datacard_config['batchMemory'], htcondor_max_runtime=datacard_config['batchMaxRuntime'])]
         
         return tasks
         
@@ -288,6 +294,9 @@ class MakeDatacard(Task, SlurmWorkflow, HTCondorWorkflow, law.LocalWorkflow): #l
     year = law.Parameter(default='2022', description="Year")
 
     batch_flavor = law.Parameter(default="slurm", description="Batch system to use")
+    # batch_partition = law.Parameter(default="short", description="Partition to use for the batch job submission")
+    # batch_memory = law.Parameter(default=4000, description="Memory to use for the batch job submission")
+    # batch_max_runtime = law.Parameter(default="01:00:00", description="Max runtime to use for the batch job submission")
 
     
     def create_branch_map(self):
@@ -296,9 +305,16 @@ class MakeDatacard(Task, SlurmWorkflow, HTCondorWorkflow, law.LocalWorkflow): #l
         branch_map = {i: i for i in range(1)}
         return branch_map
     
-    def requires(self):
+    # def requires(self):
+    def workflow_requires(self):
         # req() is defined on all tasks and handles the passing of all parameter values that are
         # common between the required task and the instance (self)
+        workflow_reqs = super().workflow_requires()
+
+        tasks = {}
+
+        if workflow_reqs:
+            tasks.update(workflow_reqs)
         
         if self.variable == '':
             configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"], f"config/{self.year}_inclusive.yml")
@@ -314,7 +330,7 @@ class MakeDatacard(Task, SlurmWorkflow, HTCondorWorkflow, law.LocalWorkflow): #l
         else:
             output_dir = self.output_dir
         
-        tasks = [MakeYields(variable=self.variable, output_dir=output_dir, year=self.year, batch_flavor=self.batch_flavor)]
+        tasks["MakeYields"] = MakeYields(variable=self.variable, output_dir=output_dir, year=self.year, batch_flavor=self.batch_flavor)
         
         return tasks    
 

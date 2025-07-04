@@ -74,7 +74,14 @@ class PrepareTheDirectory(Task, SlurmWorkflow, law.LocalWorkflow):#(law.Task): #
 
     batch_flavor = law.Parameter(default="htcondor", description="Batch system to use")
 
-    def requires(self):
+    # def requires(self):
+    def workflow_requires(self):
+        workflow_reqs = super().workflow_requires()
+
+        tasks = {}
+
+        if workflow_reqs:
+            tasks.update(workflow_reqs)
         
         if self.variable == '':
             configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
@@ -90,7 +97,7 @@ class PrepareTheDirectory(Task, SlurmWorkflow, law.LocalWorkflow):#(law.Task): #
         else:
             output_dir = self.output_dir
             
-        tasks = [MakeDatacard(output_dir=output_dir, variable=self.variable, year=self.year, version="v1", batch_flavor=self.batch_flavor)]
+        tasks["MakeDatacard"] = MakeDatacard(output_dir=output_dir, variable=self.variable, year=self.year, version="v1", batch_flavor=self.batch_flavor)
         
         return tasks
     
@@ -270,7 +277,14 @@ class RunText2Workspace(Task, SlurmWorkflow, law.LocalWorkflow): #(law.Task): #(
 
     batch_flavor = law.Parameter(default="htcondor", description="Batch system to use")
 
-    def requires(self):
+    # def requires(self):
+    def workflow_requires(self):
+        workflow_reqs = super().workflow_requires()
+
+        tasks = {}
+
+        if workflow_reqs:
+            tasks.update(workflow_reqs)
         
         if self.variable == '':
             configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
@@ -286,7 +300,7 @@ class RunText2Workspace(Task, SlurmWorkflow, law.LocalWorkflow): #(law.Task): #(
         else:
             output_dir = self.output_dir
             
-        tasks = [PrepareTheDirectory(output_dir=output_dir, variable=self.variable, year=self.year, version="v1", batch_flavor=self.batch_flavor)]
+        tasks["PrepareTheDirectory"] = PrepareTheDirectory(output_dir=output_dir, variable=self.variable, year=self.year, version="v1", batch_flavor=self.batch_flavor)
         
         return tasks
     
@@ -424,7 +438,14 @@ class AsimovFitCategoryFirstStep(Task, SlurmWorkflow, HTCondorWorkflow, law.Loca
     
     batch_flavor = law.Parameter(default="htcondor", description="Batch system to use")
 
-    def requires(self):
+    # def requires(self):
+    def workflow_requires(self):
+        workflow_reqs = super().workflow_requires()
+
+        tasks = {}
+
+        if workflow_reqs:
+            tasks.update(workflow_reqs)
         
         if self.variable == '':
             configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
@@ -440,7 +461,7 @@ class AsimovFitCategoryFirstStep(Task, SlurmWorkflow, HTCondorWorkflow, law.Loca
         else:
             output_dir = self.output_dir
             
-        tasks = [RunText2Workspace(output_dir=output_dir, variable=self.variable, year=self.year, version='v1', batch_flavor=self.batch_flavor)]
+        tasks["RunT2WS"] = RunText2Workspace(output_dir=output_dir, variable=self.variable, year=self.year, version='v1', batch_flavor=self.batch_flavor)
         
         return tasks
 
@@ -622,10 +643,9 @@ class CreateAsimovFitFirstStep(law.Task): #(law.Task): #(Task, HTCondorWorkflow,
             cats = ",".join(combineVariableDict[f'{self.year}'][f'{self.variable}']['paramStrNoOne'])
             version = f"{self.variable}_v1"
         
-        if self.batch_flavor == "htcondor":
-            tasks += [AsimovFitCategoryFirstStep(output_dir=output_dir, variable=self.variable, year=self.year, cats=cats, version=version, workflow="htcondor", batch_flavor=self.batch_flavor)]
-        elif "slurm" in self.batch_flavor:
-            tasks += [AsimovFitCategoryFirstStep(output_dir=output_dir, variable=self.variable, year=self.year, cats=cats, version=version, workflow="slurm", batch_flavor=self.batch_flavor, slurm_partition="short", slurm_memory=4000, slurm_max_runtime="01:00:00")]
+        impactConfig = config['combine_impacts']
+        
+        tasks += [AsimovFitCategoryFirstStep(output_dir=output_dir, variable=self.variable, year=self.year, cats=cats, version=version, workflow=impactConfig["execution"], batch_flavor=self.batch_flavor, slurm_partition=impactConfig['batchPartition'], slurm_memory=impactConfig['batchMemory'], slurm_max_runtime=impactConfig['batchMaxRuntime'], htcondor_partition=impactConfig['batchPartition'], htcondor_memory=impactConfig['batchMemory'], htcondor_max_runtime=impactConfig['batchMaxRuntime'])]
             
         return tasks
     
@@ -681,7 +701,14 @@ class AsimovFitCategorySyst(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWork
     
     batch_flavor = law.Parameter(default="htcondor", description="Batch system to use")
 
-    def requires(self):
+    # def requires(self):
+    def workflow_requires(self):
+        workflow_reqs = super().workflow_requires()
+
+        tasks = {}
+
+        if workflow_reqs:
+            tasks.update(workflow_reqs)
         
         if self.variable == '':
             configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
@@ -697,7 +724,7 @@ class AsimovFitCategorySyst(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWork
         else:
             output_dir = self.output_dir
                
-        tasks = [CreateAsimovFitFirstStep(output_dir=output_dir, variable=self.variable, year=self.year, batch_flavor=self.batch_flavor)]
+        tasks["CreateAsimovFitFirstStep"] = CreateAsimovFitFirstStep(output_dir=output_dir, variable=self.variable, year=self.year, batch_flavor=self.batch_flavor)
         
         return tasks
     
@@ -909,7 +936,14 @@ class AsimovFitCategoryStat(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWork
     
     batch_flavor = law.Parameter(default="htcondor", description="Batch system to use")
 
-    def requires(self):
+    # def requires(self):
+    def workflow_requires(self):
+        workflow_reqs = super().workflow_requires()
+
+        tasks = {}
+
+        if workflow_reqs:
+            tasks.update(workflow_reqs)
         
         if self.variable == '':
             configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
@@ -925,7 +959,7 @@ class AsimovFitCategoryStat(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWork
         else:
             output_dir = self.output_dir
                 
-        tasks = [CreateAsimovFitFirstStep(output_dir=output_dir, variable=self.variable, year=self.year, batch_flavor=self.batch_flavor)]
+        tasks["CreateAsimovFitFirstStep"] = CreateAsimovFitFirstStep(output_dir=output_dir, variable=self.variable, year=self.year, batch_flavor=self.batch_flavor)
         
         return tasks
     
@@ -1137,7 +1171,14 @@ class CreateAsimovFit(Task, SlurmWorkflow, HTCondorWorkflow, law.LocalWorkflow):
     
     batch_flavor = law.Parameter(default="htcondor", description="Batch system to use")
 
-    def requires(self):
+    # def requires(self):
+    def workflow_requires(self):
+        workflow_reqs = super().workflow_requires()
+
+        tasks = {}
+
+        if workflow_reqs:
+            tasks.update(workflow_reqs)
         
         if self.variable == '':
             configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
@@ -1153,26 +1194,15 @@ class CreateAsimovFit(Task, SlurmWorkflow, HTCondorWorkflow, law.LocalWorkflow):
         else:
             output_dir = self.output_dir
                         
-        tasks = []
         if self.variable == '':
             cat = "r"
-            if self.batch_flavor == "htcondor":
-                tasks += [AsimovFitCategorySyst(output_dir=output_dir, variable=self.variable, year=self.year, cat=cat, nPoints=config["combine_fit"]["asimov_numPoints"], version=f"inclusive_v1", workflow=config["combine_fit"]["execution"], batch_flavor=self.batch_flavor)]
-                tasks += [AsimovFitCategoryStat(output_dir=output_dir, variable=self.variable, year=self.year, cat=cat, nPoints=config["combine_fit"]["asimov_numPoints"], version=f"inclusive_v1", workflow=config["combine_fit"]["execution"], batch_flavor=self.batch_flavor)]
-            elif "slurm" in self.batch_flavor:
-                tasks += [AsimovFitCategorySyst(output_dir=output_dir, variable=self.variable, year=self.year, cat=cat, nPoints=config["combine_fit"]["asimov_numPoints"], version=f"inclusive_v1", workflow=config["combine_fit"]["execution"], batch_flavor=self.batch_flavor, slurm_partition="short", slurm_memory=4000, slurm_max_runtime="01:00:00"), AsimovFitCategoryStat(output_dir=output_dir, variable=self.variable, year=self.year, cat=cat, nPoints=config["combine_fit"]["asimov_numPoints"], version=f"inclusive_v1", workflow=config["combine_fit"]["execution"], batch_flavor=self.batch_flavor, slurm_partition="short", slurm_memory=4000, slurm_max_runtime="01:00:00")]
-            else:
-                tasks += [AsimovFitCategorySyst(output_dir=output_dir, variable=self.variable, year=self.year, cat=cat, nPoints=config["combine_fit"]["asimov_numPoints"], version=f"inclusive_v1", workflow=config["combine_fit"]["execution"], batch_flavor=self.batch_flavor), AsimovFitCategoryStat(output_dir=output_dir, variable=self.variable, year=self.year, cat=cat, nPoints=config["combine_fit"]["asimov_numPoints"], version=f"inclusive_v1", workflow=config["combine_fit"]["execution"], batch_flavor=self.batch_flavor)]
+            tasks["AsimovFitCategorySyst"] = AsimovFitCategorySyst(output_dir=output_dir, variable=self.variable, year=self.year, cat=cat, nPoints=config["combine_fit"]["asimov_numPoints"], version=f"inclusive_v1", workflow=config["combine_fit"]["execution"], batch_flavor=self.batch_flavor, slurm_partition=config["combine_fit"]['batchPartition'], slurm_memory=config["combine_fit"]['batchMemory'], slurm_max_runtime=config["combine_fit"]['batchMaxRuntime'], htcondor_partition=config["combine_fit"]['batchPartition'], htcondor_memory=config["combine_fit"]['batchMemory'], htcondor_max_runtime=config["combine_fit"]['batchMaxRuntime'])
+            tasks["AsimovFitCategoryStat"] = AsimovFitCategoryStat(output_dir=output_dir, variable=self.variable, year=self.year, cat=cat, nPoints=config["combine_fit"]["asimov_numPoints"], version=f"inclusive_v1", workflow=config["combine_fit"]["execution"], batch_flavor=self.batch_flavor, slurm_partition=config["combine_fit"]['batchPartition'], slurm_memory=config["combine_fit"]['batchMemory'], slurm_max_runtime=config["combine_fit"]['batchMaxRuntime'], htcondor_partition=config["combine_fit"]['batchPartition'], htcondor_memory=config["combine_fit"]['batchMemory'], htcondor_max_runtime=config["combine_fit"]['batchMaxRuntime'])
         else:
             version_index = 1
             for cat in combineVariableDict[f'{self.year}'][f'{self.variable}']['paramStrNoOne']:
-                if self.batch_flavor == "htcondor":
-                    tasks += [AsimovFitCategorySyst(output_dir=output_dir, variable=self.variable, year=self.year, cat=cat, nPoints=config["combine_fit"]["asimov_numPoints"], version=f"{self.variable}_v{version_index}", workflow=config["combine_fit"]["execution"], batch_flavor=self.batch_flavor)]
-                    tasks += [AsimovFitCategoryStat(output_dir=output_dir, variable=self.variable, year=self.year, cat=cat, nPoints=config["combine_fit"]["asimov_numPoints"], version=f"{self.variable}_v{version_index}", workflow=config["combine_fit"]["execution"], batch_flavor=self.batch_flavor)]
-                elif "slurm" in self.batch_flavor:
-                    tasks += [AsimovFitCategorySyst(output_dir=output_dir, variable=self.variable, year=self.year, cat=cat, nPoints=config["combine_fit"]["asimov_numPoints"], version=f"{self.variable}_v{version_index}", workflow=config["combine_fit"]["execution"], batch_flavor=self.batch_flavor, slurm_partition="short", slurm_memory=4000, slurm_max_runtime="01:00:00"), AsimovFitCategoryStat(output_dir=output_dir, variable=self.variable, year=self.year, cat=cat, nPoints=config["combine_fit"]["asimov_numPoints"], version=f"{self.variable}_v{version_index}", workflow=config["combine_fit"]["execution"], batch_flavor=self.batch_flavor, slurm_partition="short", slurm_memory=4000, slurm_max_runtime="01:00:00")]
-                else:
-                    tasks += [AsimovFitCategorySyst(output_dir=output_dir, variable=self.variable, year=self.year, cat=cat, nPoints=config["combine_fit"]["asimov_numPoints"], version=f"{self.variable}_v{version_index}", workflow=config["combine_fit"]["execution"], batch_flavor=self.batch_flavor, slurm_partition="short"), AsimovFitCategoryStat(output_dir=output_dir, variable=self.variable, year=self.year, cat=cat, nPoints=config["combine_fit"]["asimov_numPoints"], version=f"{self.variable}_v{version_index}", workflow=config["combine_fit"]["execution"], batch_flavor=self.batch_flavor, slurm_partition="short")]
+                tasks[f"AsimovFitCategorySyst_{cat}"] = AsimovFitCategorySyst(output_dir=output_dir, variable=self.variable, year=self.year, cat=cat, nPoints=config["combine_fit"]["asimov_numPoints"], version=f"{self.variable}_v{version_index}", workflow=config["combine_fit"]["execution"], batch_flavor=self.batch_flavor, slurm_partition=config["combine_fit"]['batchPartition'], slurm_memory=config["combine_fit"]['batchMemory'], slurm_max_runtime=config["combine_fit"]['batchMaxRuntime'], htcondor_partition=config["combine_fit"]['batchPartition'], htcondor_memory=config["combine_fit"]['batchMemory'], htcondor_max_runtime=config["combine_fit"]['batchMaxRuntime'])
+                tasks[f"AsimovFitCategoryStat_{cat}"] = AsimovFitCategoryStat(output_dir=output_dir, variable=self.variable, year=self.year, cat=cat, nPoints=config["combine_fit"]["asimov_numPoints"], version=f"{self.variable}_v{version_index}", workflow=config["combine_fit"]["execution"], batch_flavor=self.batch_flavor, slurm_partition=config["combine_fit"]['batchPartition'], slurm_memory=config["combine_fit"]['batchMemory'], slurm_max_runtime=config["combine_fit"]['batchMaxRuntime'], htcondor_partition=config["combine_fit"]['batchPartition'], htcondor_memory=config["combine_fit"]['batchMemory'], htcondor_max_runtime=config["combine_fit"]['batchMaxRuntime'])
                 version_index += 1
         
         return tasks
@@ -1584,7 +1614,14 @@ class AsimovImpactSecondStep(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWor
 
     batch_flavor = law.Parameter(default="htcondor", description="Batch system to use")
 
-    def requires(self):
+    # def requires(self):
+    def workflow_requires(self):
+        workflow_reqs = super().workflow_requires()
+
+        tasks = {}
+
+        if workflow_reqs:
+            tasks.update(workflow_reqs)
         
         if self.variable == '':
             configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
@@ -1600,7 +1637,7 @@ class AsimovImpactSecondStep(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWor
         else:
             output_dir = self.output_dir
             
-        tasks = [AsimovImpactFirstStep(output_dir=output_dir, variable=self.variable, year=self.year, batch_flavor=self.batch_flavor)]
+        tasks["AsimovImpactFirstStep"] = AsimovImpactFirstStep(output_dir=output_dir, variable=self.variable, year=self.year, batch_flavor=self.batch_flavor)
         
         return tasks
 
@@ -1831,7 +1868,14 @@ class AsimovImpactThirdStep(law.Task): #(law.Task): #(Task, HTCondorWorkflow, la
 
     batch_flavor = law.Parameter(default="htcondor", description="Batch system to use")
 
-    def requires(self):
+    # def requires(self):
+    def workflow_requires(self):
+        workflow_reqs = super().workflow_requires()
+
+        tasks = {}
+
+        if workflow_reqs:
+            tasks.update(workflow_reqs)
         
         if self.variable == '':
             configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
@@ -1842,17 +1886,14 @@ class AsimovImpactThirdStep(law.Task): #(law.Task): #(Task, HTCondorWorkflow, la
         with open(configYamlPath, 'r') as file:
             config = yaml.safe_load(file)
         
+        impactConfig = config["combine_impacts"]
+        
         if self.output_dir == '':
             output_dir = config['outputFolder']
         else:
             output_dir = self.output_dir
         
-        if self.batch_flavor == "slurm/psi":
-            tasks = [AsimovImpactSecondStep(output_dir=output_dir, variable=self.variable, year=self.year, version="v1", workflow="slurm")]
-        elif self.batch_flavor == "htcondor":
-            tasks = [AsimovImpactSecondStep(output_dir=output_dir, variable=self.variable, year=self.year, version="v1", workflow="htcondor")]
-        else:
-            tasks = [AsimovImpactSecondStep(output_dir=output_dir, variable=self.variable, year=self.year, version="v1", workflow="local")]
+        tasks["AsimovImpactSecondStep"] = AsimovImpactSecondStep(output_dir=output_dir, variable=self.variable, year=self.year, batch_flavor=self.batch_flavor, workflow=impactConfig["execution"], version=self.variable if self.variable != '' else 'inclusive', slurm_partition=impactConfig['batchPartition'], slurm_memory=impactConfig['batchMemory'], slurm_max_runtime=impactConfig['batchMaxRuntime'], htcondor_partition=impactConfig['batchPartition'], htcondor_memory=impactConfig['batchMemory'], htcondor_max_runtime=impactConfig['batchMaxRuntime'])
         
         return tasks
 
@@ -1926,12 +1967,7 @@ class AsimovImpactThirdStep(law.Task): #(law.Task): #(Task, HTCondorWorkflow, la
             datacard_path = os.path.join(output_dir, 'Combine', f'Datacard_{self.year}.root')
         else:
             datacard_path = os.path.join(output_dir, 'Combine', f'Datacard_{self.variable}_{self.year}.root')
-            
-        safe_mkdir(os.path.join(output_dir, 'Combine', fitFolderName))
-        safe_mkdir(os.path.join(output_dir, 'Combine', fitFolderName, 'impact'))
-        safe_mkdir(os.path.join(output_dir, 'Combine', fitFolderName, 'impact', 'impacts'))
-        
-        
+
         cwd = os.getcwd()
         if self.batch_flavor == "slurm/psi":
             # Have to use /scratch/batch_username/ for slurm/psi
@@ -2062,10 +2098,18 @@ class AsimovCovCorrHesse(Task, SlurmWorkflow, HTCondorWorkflow, law.LocalWorkflo
 
     batch_flavor = law.Parameter(default="htcondor", description="Batch system to use")
 
-    def requires(self):
+    # def requires(self):
+    def workflow_requires(self):
+        workflow_reqs = super().workflow_requires()
+
+        tasks = {}
+
+        if workflow_reqs:
+            tasks.update(workflow_reqs)
         
         if self.variable == '':
-            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
+            print("Running AsimovCovCorrHesse for inclusive does not make sense. Please specify a variable.")
+            exit(1)
         else:
             configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
         
@@ -2073,17 +2117,14 @@ class AsimovCovCorrHesse(Task, SlurmWorkflow, HTCondorWorkflow, law.LocalWorkflo
         with open(configYamlPath, 'r') as file:
             config = yaml.safe_load(file)
         
+        hesseConfig = config["combine_hesse"]
+        
         if self.output_dir == '':
             output_dir = config['outputFolder']
         else:
             output_dir = self.output_dir
         
-        if self.batch_flavor == "slurm/psi":
-            tasks = [RunText2Workspace(output_dir=output_dir, variable=self.variable, year=self.year, batch_flavor=self.batch_flavor, version='v1', workflow='slurm')]
-        elif self.batch_flavor == "htcondor":
-            tasks = [RunText2Workspace(output_dir=output_dir, variable=self.variable, year=self.year, batch_flavor=self.batch_flavor, version='v1', workflow='htcondor')]
-        else:
-            tasks = [RunText2Workspace(output_dir=output_dir, variable=self.variable, year=self.year, batch_flavor=self.batch_flavor, version='v1', workflow='local')]
+        tasks["RunT2WS"] = RunText2Workspace(output_dir=output_dir, variable=self.variable, year=self.year, batch_flavor=self.batch_flavor, workflow=hesseConfig["execution"], version=self.variable, slurm_partition=hesseConfig['batchPartition'], slurm_memory=hesseConfig['batchMemory'], slurm_max_runtime=hesseConfig['batchMaxRuntime'], htcondor_partition=hesseConfig['batchPartition'], htcondor_memory=hesseConfig['batchMemory'], htcondor_max_runtime=hesseConfig['batchMaxRuntime'])
         
         return tasks
 
@@ -2093,7 +2134,8 @@ class AsimovCovCorrHesse(Task, SlurmWorkflow, HTCondorWorkflow, law.LocalWorkflo
 
     def output(self):        
         if self.variable == '':
-            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
+            print("Running AsimovCovCorrHesse for inclusive does not make sense. Please specify a variable.")
+            exit(1)
         else:
             configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
         
@@ -2134,8 +2176,8 @@ class AsimovCovCorrHesse(Task, SlurmWorkflow, HTCondorWorkflow, law.LocalWorkflo
     def run(self):
        
         if self.variable == '':
-            # Does not make sense inclusively
-            return True
+            print("Running AsimovCovCorrHesse for inclusive does not make sense. Please specify a variable.")
+            exit(1)
             
         else:
             configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
@@ -2234,7 +2276,14 @@ class AsimovCovCorr(Task, SlurmWorkflow, HTCondorWorkflow, law.LocalWorkflow): #
     batch_flavor = law.Parameter(default="htcondor", description="Batch system to use")
 
 
-    def requires(self):
+    # def requires(self):
+    def workflow_requires(self):
+        workflow_reqs = super().workflow_requires()
+
+        tasks = {}
+
+        if workflow_reqs:
+            tasks.update(workflow_reqs)
         
         if self.variable == '':
             configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
@@ -2250,15 +2299,12 @@ class AsimovCovCorr(Task, SlurmWorkflow, HTCondorWorkflow, law.LocalWorkflow): #
         else:
             output_dir = self.output_dir
         
-        if self.variable == "":
-            version = "r"
+        if self.variable == '':
+            print("Running AsimovCovCorrHesse for inclusive does not make sense. Please specify a variable.")
+            exit(1)
         else:
             version = self.variable
-            
-        if self.batch_flavor == "slurm/psi":
-            tasks = [AsimovCovCorrHesse(output_dir=output_dir, variable=self.variable, year=self.year, version=version, workflow=config["combine_hesse"]["execution"], batch_flavor=self.batch_flavor, slurm_partition="short", slurm_memory=4000, slurm_max_runtime="01:00:00")]
-        else:
-            tasks = [AsimovCovCorrHesse(output_dir=output_dir, variable=self.variable, year=self.year, version=version, workflow=config["combine_hesse"]["execution"], batch_flavor=self.batch_flavor)]
+            tasks["AsimovCovCorrHesse"] = AsimovCovCorrHesse(output_dir=output_dir, variable=self.variable, year=self.year, version=version, workflow=config["combine_hesse"]["execution"], batch_flavor=self.batch_flavor, slurm_partition=config["combine_hesse"]['batchPartition'], slurm_memory=config["combine_hesse"]['batchMemory'], slurm_max_runtime=config["combine_hesse"]['batchMaxRuntime'], htcondor_partition=config["combine_hesse"]['batchPartition'], htcondor_memory=config["combine_hesse"]['batchMemory'], htcondor_max_runtime=config["combine_hesse"]['batchMaxRuntime'])
         
         return tasks
 
@@ -2268,7 +2314,8 @@ class AsimovCovCorr(Task, SlurmWorkflow, HTCondorWorkflow, law.LocalWorkflow): #
 
     def output(self):        
         if self.variable == '':
-            configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
+            print("Running AsimovCovCorrHesse for inclusive does not make sense. Please specify a variable.")
+            exit(1)
         else:
             configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_{self.variable}.yml")
         
@@ -2611,12 +2658,13 @@ class UnblindedFitStatSingle(Task,SlurmWorkflow, HTCondorWorkflow, law.LocalWork
             output_dir = config['outputFolder']
         else:
             output_dir = self.output_dir
-                
-                
+        
+        fitConfig = config["combine_fit"]        
+        
         if self.variable == '':
             tasks = [RunText2Workspace(output_dir=output_dir, variable=self.variable, year=self.year, version='r')]
         else:
-            tasks = [UnblindedFitSystSingle(output_dir=output_dir, variable=self.variable, year=self.year, version=f'{self.variable}', workflow='local')]
+            tasks = [UnblindedFitSystSingle(output_dir=output_dir, variable=self.variable, year=self.year, version=f'{self.variable}', workflow=fitConfig['execution'], slurm_partition=fitConfig['batchPartition'], slurm_memory=fitConfig['batchMemory'], slurm_max_runtime=fitConfig['batchMaxRuntime'], htcondor_partition=fitConfig['batchPartition'], htcondor_memory=fitConfig['batchMemory'], htcondor_max_runtime=fitConfig['batchMaxRuntime'])]
         
         return tasks
     
@@ -3000,12 +3048,13 @@ class UnblindedFitCategoryStat(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalW
             output_dir = config['outputFolder']
         else:
             output_dir = self.output_dir
-                
+        
+        fitConfig = config["combine_fit"]
                 
         if self.variable == '':
             tasks = [RunText2Workspace(output_dir=output_dir, variable=self.variable, year=self.year, bootstrap_flag=self.bootstrap_flag, number_of_bootstraps=self.number_of_bootstraps, version='r')]
         else:
-            tasks = [UnblindedFitCategorySyst(output_dir=output_dir, variable=self.variable, year=self.year, nPoints=self.nPoints, version=f'{self.variable}', workflow='local', bootstrap_flag=self.bootstrap_flag, number_of_bootstraps=self.number_of_bootstraps)]
+            tasks = [UnblindedFitCategorySyst(output_dir=output_dir, variable=self.variable, year=self.year, nPoints=self.nPoints, version=f'{self.variable}', workflow=fitConfig["execution"], slurm_partition=fitConfig['batchPartition'], slurm_memory=fitConfig['batchMemory'], slurm_max_runtime=fitConfig['batchMaxRuntime'], htcondor_partition=fitConfig['batchPartition'], htcondor_memory=fitConfig['batchMemory'], htcondor_max_runtime=fitConfig['batchMaxRuntime'], bootstrap_flag=self.bootstrap_flag, number_of_bootstraps=self.number_of_bootstraps)]
         
         return tasks
     
@@ -3195,15 +3244,17 @@ class CreateUnblindedFit(law.Task): #(law.Task): #(Task, HTCondorWorkflow, law.L
             output_dir = config['outputFolder']
         else:
             output_dir = self.output_dir
+
+        fitConfig = config["combine_fit"]
             
         tasks = []
         if self.variable == '':
             # cat = "r"
-            tasks += [UnblindedFitCategorySyst(output_dir=output_dir, variable=self.variable, year=self.year, nPoints=config["combine_fit"]["unblindedFit_numPoints"], version=f"inclusive_v1", workflow=config["combine_fit"]["execution"]), UnblindedFitCategoryStat(output_dir=output_dir, variable=self.variable, year=self.year, nPoints=config["combine_fit"]["unblindedFit_numPoints"], version=f"inclusive_v1", workflow=config["combine_fit"]["execution"], bootstrap_flag=self.bootstrap_flag, number_of_bootstraps=self.number_of_bootstraps)]
+            tasks += [UnblindedFitCategorySyst(output_dir=output_dir, variable=self.variable, year=self.year, nPoints=fitConfig["unblindedFit_numPoints"], version=f"inclusive_v1", workflow=fitConfig["execution"], slurm_partition=fitConfig['batchPartition'], slurm_memory=fitConfig['batchMemory'], slurm_max_runtime=fitConfig['batchMaxRuntime'], htcondor_partition=fitConfig['batchPartition'], htcondor_memory=fitConfig['batchMemory'], htcondor_max_runtime=fitConfig['batchMaxRuntime']), UnblindedFitCategoryStat(output_dir=output_dir, variable=self.variable, year=self.year, nPoints=fitConfig["unblindedFit_numPoints"], version=f"inclusive_v1", workflow=fitConfig["execution"], slurm_partition=fitConfig['batchPartition'], slurm_memory=fitConfig['batchMemory'], slurm_max_runtime=fitConfig['batchMaxRuntime'], htcondor_partition=fitConfig['batchPartition'], htcondor_memory=fitConfig['batchMemory'], htcondor_max_runtime=fitConfig['batchMaxRuntime'], bootstrap_flag=self.bootstrap_flag, number_of_bootstraps=self.number_of_bootstraps)]
         else:
             # version_index = 1
             # for cat in combineVariableDict[f'{self.year}'][f'{self.variable}']['paramStrNoOne']:
-            tasks += [UnblindedFitCategorySyst(output_dir=output_dir, variable=self.variable, year=self.year, nPoints=config["combine_fit"]["unblindedFit_numPoints"], version=f"{self.variable}", workflow=config["combine_fit"]["execution"]), UnblindedFitCategoryStat(output_dir=output_dir, variable=self.variable, year=self.year, nPoints=config["combine_fit"]["unblindedFit_numPoints"], version=f"{self.variable}", workflow=config["combine_fit"]["execution"], bootstrap_flag=self.bootstrap_flag, number_of_bootstraps=self.number_of_bootstraps)]
+            tasks += [UnblindedFitCategorySyst(output_dir=output_dir, variable=self.variable, year=self.year, nPoints=fitConfig["unblindedFit_numPoints"], version=f"{self.variable}", workflow=fitConfig["execution"], slurm_partition=fitConfig['batchPartition'], slurm_memory=fitConfig['batchMemory'], slurm_max_runtime=fitConfig['batchMaxRuntime'], htcondor_partition=fitConfig['batchPartition'], htcondor_memory=fitConfig['batchMemory'], htcondor_max_runtime=fitConfig['batchMaxRuntime']), UnblindedFitCategoryStat(output_dir=output_dir, variable=self.variable, year=self.year, nPoints=fitConfig["unblindedFit_numPoints"], version=f"{self.variable}", workflow=fitConfig["execution"], slurm_partition=fitConfig['batchPartition'], slurm_memory=fitConfig['batchMemory'], slurm_max_runtime=fitConfig['batchMaxRuntime'], htcondor_partition=fitConfig['batchPartition'], htcondor_memory=fitConfig['batchMemory'], htcondor_max_runtime=fitConfig['batchMaxRuntime'], bootstrap_flag=self.bootstrap_flag, number_of_bootstraps=self.number_of_bootstraps)]
             # version_index += 1
         
         return tasks
@@ -3514,8 +3565,10 @@ class UnblindedCovCorr(law.Task): #(law.Task): #(Task, HTCondorWorkflow, law.Loc
             version = 'r'
         else:
             version = self.variable
+
+        corrConfig = config["combine_hesse"]
             
-        tasks = [UnblindedCovCorrHesse(output_dir=output_dir, variable=self.variable, year=self.year, version=version, workflow=config["combine_hesse"]["execution"])]
+        tasks = [UnblindedCovCorrHesse(output_dir=output_dir, variable=self.variable, year=self.year, version=version, workflow=corrConfig["execution"], slurm_partition=corrConfig['batchPartition'], slurm_memory=corrConfig['batchMemory'], slurm_max_runtime=corrConfig['batchMaxRuntime'], htcondor_partition=corrConfig['batchPartition'], htcondor_memory=corrConfig['batchMemory'], htcondor_max_runtime=corrConfig['batchMaxRuntime'])]
         
         return tasks
 
@@ -4052,8 +4105,10 @@ class UnblindedImpactThirdStep(law.Task): #(law.Task): #(Task, HTCondorWorkflow,
             output_dir = config['outputFolder']
         else:
             output_dir = self.output_dir
+
+        impactConfig = config["combine_impacts"]
             
-        tasks = [UnblindedImpactSecondStep(output_dir=output_dir, variable=self.variable, year=self.year, version=version, workflow=config["combine_impacts"]["execution"])]
+        tasks = [UnblindedImpactSecondStep(output_dir=output_dir, variable=self.variable, year=self.year, version=version, workflow=impactConfig["execution"], slurm_partition=impactConfig['batchPartition'], slurm_memory=impactConfig['batchMemory'], slurm_max_runtime=impactConfig['batchMaxRuntime'], htcondor_partition=impactConfig['batchPartition'], htcondor_memory=impactConfig['batchMemory'], htcondor_max_runtime=impactConfig['batchMaxRuntime'])]
         
         return tasks
 
@@ -4394,6 +4449,8 @@ class MggToyGeneration(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWorkflow)
         #Load central config file
         with open(configYamlPath, 'r') as file:
             config = yaml.safe_load(file)
+
+        mggConfig = config['combine_mggToys']
         
         if self.output_dir == '':
             output_dir = config['outputFolder']
@@ -4405,7 +4462,7 @@ class MggToyGeneration(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWorkflow)
                 version = 'r'
             else:
                 version = self.variable
-            tasks = [MggBestFit(output_dir=output_dir, variable=self.variable, year=self.year, version=version, workflow='local')]
+            tasks = [MggBestFit(output_dir=output_dir, variable=self.variable, year=self.year, version=version, workflow=mggConfig['execution'], slurm_partition=mggConfig['batchPartition'], slurm_memory=mggConfig['batchMemory'], slurm_max_runtime=mggConfig['batchMaxRuntime'], htcondor_partition=mggConfig['batchPartition'], htcondor_memory=mggConfig['batchMemory'], htcondor_max_runtime=mggConfig['batchMaxRuntime'])]
         else:
             tasks = [RunText2Workspace(output_dir=output_dir, variable=self.variable, year=self.year)]
             
@@ -4882,6 +4939,8 @@ class MggDistribution(law.LocalWorkflow): #(law.Task): #(Task, HTCondorWorkflow,
         with open(configYamlPath, 'r') as file:
             config = yaml.safe_load(file)
         
+        mggConfig = config['combine_mggToys']
+        
         if self.output_dir == '':
             output_dir = config['outputFolder']
         else:
@@ -4889,9 +4948,9 @@ class MggDistribution(law.LocalWorkflow): #(law.Task): #(Task, HTCondorWorkflow,
         
         if config['combine_mggToys']['doBands']:
             if convert_boolean_string(self.is_postfit):
-                tasks = [MggToyGeneration(output_dir=output_dir, variable=self.variable, year=self.year, is_postfit=convert_boolean_string(self.is_postfit), version=f"{self.variable if self.variable != '' else 'r'}_postfit", workflow="htcondor")]
+                tasks = [MggToyGeneration(output_dir=output_dir, variable=self.variable, year=self.year, is_postfit=convert_boolean_string(self.is_postfit), version=f"{self.variable if self.variable != '' else 'r'}_postfit", workflow=mggConfig["execution"], slurm_partition=mggConfig['batchPartition'], slurm_memory=mggConfig['batchMemory'], slurm_max_runtime=mggConfig['batchMaxRuntime'], htcondor_partition=mggConfig['batchPartition'], htcondor_memory=mggConfig['batchMemory'], htcondor_max_runtime=mggConfig['batchMaxRuntime'])]
             else:
-                tasks = [MggToyGeneration(output_dir=output_dir, variable=self.variable, year=self.year, is_postfit=convert_boolean_string(self.is_postfit), version=f"{self.variable if self.variable != '' else 'r'}_prefit", workflow="htcondor")]
+                tasks = [MggToyGeneration(output_dir=output_dir, variable=self.variable, year=self.year, is_postfit=convert_boolean_string(self.is_postfit), version=f"{self.variable if self.variable != '' else 'r'}_prefit", workflow=mggConfig["execution"], slurm_partition=mggConfig['batchPartition'], slurm_memory=mggConfig['batchMemory'], slurm_max_runtime=mggConfig['batchMaxRuntime'], htcondor_partition=mggConfig['batchPartition'], htcondor_memory=mggConfig['batchMemory'], htcondor_max_runtime=mggConfig['batchMaxRuntime'])]
         else:
             if convert_boolean_string(self.is_postfit):
                 tasks = [CreateUnblindedFit(output_dir=output_dir, variable=self.variable, year=self.year)]
