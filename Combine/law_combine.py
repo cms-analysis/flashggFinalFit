@@ -67,7 +67,7 @@ def manually_copy_t3(src, dst):
             print(f"cp -rf {file_path} {dst}/{filename}")
             execute_command([f"cp -rf {file_path} {dst}/{filename}"], shell=True)
     
-class PrepareTheDirectory(Task, SlurmWorkflow, law.LocalWorkflow):#(law.Task): #(Task, HTCondorWorkflow, law.LocalWorkflow):
+class PrepareTheDirectory(Task,HTCondorWorkflow, SlurmWorkflow, law.LocalWorkflow):#(law.Task): #(Task, HTCondorWorkflow, law.LocalWorkflow):
     output_dir = law.Parameter(default = '', description="Path to the output directory")
     variable = law.Parameter(default="", description="Variable to be used")
     year = law.Parameter(default='2022', description="Year")
@@ -270,7 +270,7 @@ class PrepareTheDirectory(Task, SlurmWorkflow, law.LocalWorkflow):#(law.Task): #
         print("Combine directory sucessfully prepared.")
 
 
-class RunText2Workspace(Task, SlurmWorkflow, law.LocalWorkflow): #(law.Task): #(Task, HTCondorWorkflow, law.LocalWorkflow):
+class RunText2Workspace(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWorkflow): #(law.Task): #(Task, HTCondorWorkflow, law.LocalWorkflow):
     output_dir = law.Parameter(default = '', description="Path to the output directory")
     variable = law.Parameter(default="", description="Variable to be used")
     year = law.Parameter(default='2022', description="Year")
@@ -2462,7 +2462,14 @@ class UnblindedFitSystSingle(Task, SlurmWorkflow, HTCondorWorkflow, law.LocalWor
 
     batch_flavor = law.Parameter(default="htcondor", description="Batch system to use")
 
-    def requires(self):
+    # def requires(self):
+    def workflow_requires(self):
+        workflow_reqs = super().workflow_requires()
+
+        tasks = {}
+
+        if workflow_reqs:
+            tasks.update(workflow_reqs)
         
         if self.variable == '':
             configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
@@ -2478,7 +2485,7 @@ class UnblindedFitSystSingle(Task, SlurmWorkflow, HTCondorWorkflow, law.LocalWor
         else:
             output_dir = self.output_dir
                
-        tasks = [RunText2Workspace(output_dir=output_dir, variable=self.variable, year=self.year, version='v1', batch_flavor=self.batch_flavor)]
+        tasks["RunT2WS"] = RunText2Workspace(output_dir=output_dir, variable=self.variable, year=self.year, version=self.variable if self.variable != "" else "inclusive", batch_flavor=self.batch_flavor, slurm_partition=config["combine_fit"]['batchPartition'], slurm_memory=config["combine_fit"]['batchMemory'], slurm_max_runtime=config["combine_fit"]['batchMaxRuntime'], htcondor_partition=config["combine_fit"]['batchPartition'], htcondor_memory=config["combine_fit"]['batchMemory'], htcondor_max_runtime=config["combine_fit"]['batchMaxRuntime'])
         
         return tasks
     
@@ -2642,8 +2649,17 @@ class UnblindedFitStatSingle(Task,SlurmWorkflow, HTCondorWorkflow, law.LocalWork
     output_dir = law.Parameter(default = '', description="Path to the output directory")
     variable = law.Parameter(default="", description="Variable to be used")
     year = law.Parameter(default='2022', description="Year")
+    
+    batch_flavor = law.Parameter(default="htcondor", description="Batch system to use")
 
-    def requires(self):
+    # def requires(self):
+    def workflow_requires(self):
+        workflow_reqs = super().workflow_requires()
+
+        tasks = {}
+
+        if workflow_reqs:
+            tasks.update(workflow_reqs)
         
         if self.variable == '':
             configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
@@ -2662,36 +2678,22 @@ class UnblindedFitStatSingle(Task,SlurmWorkflow, HTCondorWorkflow, law.LocalWork
         fitConfig = config["combine_fit"]        
         
         if self.variable == '':
-            tasks = [RunText2Workspace(output_dir=output_dir, variable=self.variable, year=self.year, version='r')]
+            tasks["RunT2WS"] = RunText2Workspace(output_dir=output_dir, variable=self.variable, year=self.year, batch_flavor=self.batch_flavor, version="inclusive", workflow=fitConfig['execution'], slurm_partition=fitConfig['batchPartition'], slurm_memory=fitConfig['batchMemory'], slurm_max_runtime=fitConfig['batchMaxRuntime'], htcondor_partition=fitConfig['batchPartition'], htcondor_memory=fitConfig['batchMemory'], htcondor_max_runtime=fitConfig['batchMaxRuntime'])
         else:
-            tasks = [UnblindedFitSystSingle(output_dir=output_dir, variable=self.variable, year=self.year, version=f'{self.variable}', workflow=fitConfig['execution'], slurm_partition=fitConfig['batchPartition'], slurm_memory=fitConfig['batchMemory'], slurm_max_runtime=fitConfig['batchMaxRuntime'], htcondor_partition=fitConfig['batchPartition'], htcondor_memory=fitConfig['batchMemory'], htcondor_max_runtime=fitConfig['batchMaxRuntime'])]
+            tasks["UnblindedFitSystSingle"] = UnblindedFitSystSingle(output_dir=output_dir, variable=self.variable, year=self.year, batch_flavor=self.batch_flavor, version=f'{self.variable}', workflow=fitConfig['execution'], slurm_partition=fitConfig['batchPartition'], slurm_memory=fitConfig['batchMemory'], slurm_max_runtime=fitConfig['batchMaxRuntime'], htcondor_partition=fitConfig['batchPartition'], htcondor_memory=fitConfig['batchMemory'], htcondor_max_runtime=fitConfig['batchMaxRuntime'])
         
         return tasks
     
     def create_branch_map(self):
-        if convert_boolean_string(self.bootstrap_flag) == True:
-            if self.variable == '':
-                param_list = ["r"]
-            else:
-                param_list = combineVariableDict[f'{self.year}'][f'{self.variable}']['paramStrNoOne']
-            branch_map = {
-                i * int(self.number_of_bootstraps) + j: (current_cat, bootstrap_index)
-                for i, current_cat in enumerate(param_list)
-                for j, bootstrap_index in enumerate(range(int(self.number_of_bootstraps)))
-            }
+        if self.variable == '':
+            param_list = ["r"]
         else:
-            if self.variable == '':
-                param_list = ["r"]
-            else:
-                param_list = combineVariableDict[f'{self.year}'][f'{self.variable}']['paramStrNoOne']
-            branch_map = {i: current_cat for i, current_cat in enumerate(param_list)}
+            param_list = combineVariableDict[f'{self.year}'][f'{self.variable}']['paramStrNoOne']
+        branch_map = {i: current_cat for i, current_cat in enumerate(param_list)}
         return branch_map
 
     def output(self):
-        if convert_boolean_string(self.bootstrap_flag) == True:
-            cat, bootstrap_index = self.branch_data
-        else:
-            cat = self.branch_data
+        cat = self.branch_data
         
         if self.variable == '':
             configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
@@ -2714,25 +2716,17 @@ class UnblindedFitStatSingle(Task,SlurmWorkflow, HTCondorWorkflow, law.LocalWork
             
         output = []
 
-        if convert_boolean_string(self.bootstrap_flag) == True:
-            output += [os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', f'bootstrap_{bootstrap_index}', f'higgsCombineDataPostFitBestFitStat_{cat}.MultiDimFit.mH125.38.root')]
-        else:    
-            output = [os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', f'higgsCombineDataPostFitBestFitStat_{cat}.MultiDimFit.mH125.38.root')]
+        output = [os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', f'higgsCombineDataPostFitBestFitStat_{cat}.MultiDimFit.mH125.38.root')]
         
         outputFileTargets = []
                 
         for _, current_output_path in enumerate(output):
             outputFileTargets.append(law.LocalFileTarget(current_output_path))
-            
-        # print("AsimovFitCategoryStat", outputFileTargets)
-        
+                    
         return outputFileTargets
 
     def run(self):
-        if convert_boolean_string(self.bootstrap_flag) == True:
-            cat, bootstrap_index = self.branch_data
-        else:
-            cat = self.branch_data
+        cat = self.branch_data
 
         if self.variable == '':
             configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
@@ -2750,23 +2744,24 @@ class UnblindedFitStatSingle(Task,SlurmWorkflow, HTCondorWorkflow, law.LocalWork
             output_dir = config['outputFolder']
         else:
             output_dir = self.output_dir  
-            
-        safe_mkdir(os.path.join(output_dir, 'Combine', fitFolderName))
-        safe_mkdir(os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit'))
-        
+
         cwd = os.getcwd()
-        os.chdir(os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit'))
+        if self.batch_flavor == "slurm/psi":
+            # Have to use /scratch/batch_username/ for slurm/psi
+            if "/work" in output_dir:
+                execute_command([f'mkdir -p {output_dir}/Combine/{fitFolderName}/dataFit'], shell=True)
+            else:   
+                execute_command([f'xrdfs root://t3dcachedb.psi.ch:1094/ mkdir -p {output_dir}/Combine/{fitFolderName}/dataFit'], shell=True)
+
+            os.environ["TARGET_PATH"] = f"/scratch/{os.environ['USER']}/{os.environ['SLURM_JOB_ID']}"
+            execute_command([f'mkdir -p $TARGET_PATH/Combine/{fitFolderName}/dataFit'], shell=True)
+            os.chdir(os.path.join(os.environ["TARGET_PATH"], 'Combine', fitFolderName, 'dataFit'))
+        else:
+            execute_command([f'mkdir -p {output_dir}/Combine/{fitFolderName}/dataFit'], shell=True)
+            os.chdir(os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit'))
     
         firstStepPath = os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', f"higgsCombineDataPostFitBestFit_{cat}.MultiDimFit.mH125.38.root")
-        
-        
-        if convert_boolean_string(self.bootstrap_flag) == True:
-            firstStepPath = os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', f'bootstrap_{bootstrap_index}', f"higgsCombineDataPostFitBestFit_{cat}.MultiDimFit.mH125.38.root")
-            safe_mkdir(os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', f'bootstrap_{bootstrap_index}'))
-            os.chdir(os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', f'bootstrap_{bootstrap_index}'))
-        else:
-            firstStepPath = os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', f"higgsCombineDataPostFitBestFit_{cat}.MultiDimFit.mH125.38.root")
-        
+                
         if self.variable == '':
             arguments = [
                 "combine",
@@ -2827,6 +2822,27 @@ class UnblindedFitStatSingle(Task,SlurmWorkflow, HTCondorWorkflow, law.LocalWork
                 print("Script executed successfully.")
             except subprocess.CalledProcessError as e:
                 print("Error executing script:", e.stderr)
+            
+        # Copy the files back to pnfs if we are on slurm/psi
+        if self.batch_flavor == "slurm/psi":
+            # Have to copy over the output to the final directory
+            # Don't forget to VOMS!
+            if "/work" in output_dir:
+                slurm_copy_command = [
+                    'cp', '-rf',
+                    f"{os.environ['TARGET_PATH']}/Combine/",
+                    output_dir
+                ]
+            else:
+                slurm_copy_command = [
+                    'xrdcp', '-rf',
+                    f"{os.environ['TARGET_PATH']}/Combine/",
+                    'root://t3dcachedb.psi.ch:1094//'+output_dir
+                ]
+            print(slurm_copy_command)
+            execute_command(slurm_copy_command)
+            # Clean up the temporary directory
+            shutil.rmtree(os.environ["TARGET_PATH"])
                 
         
         os.chdir(cwd)
@@ -2836,10 +2852,17 @@ class UnblindedFitCategorySyst(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalW
     variable = law.Parameter(default="", description="Variable to be used")
     year = law.Parameter(default='2022', description="Year")
     nPoints = law.Parameter(default=30, description="Number of points for the LL scan")
-    bootstrap_flag = law.Parameter(default=False, description="Bootstrap flag")
-    number_of_bootstraps = law.Parameter(default=1000, description="Number of bootstraps")
+    
+    batch_flavor = law.Parameter(default="htcondor", description="Batch system to use")
 
-    def requires(self):
+    # def requires(self):
+    def workflow_requires(self):
+        workflow_reqs = super().workflow_requires()
+
+        tasks = {}
+
+        if workflow_reqs:
+            tasks.update(workflow_reqs)
         
         if self.variable == '':
             configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
@@ -2855,34 +2878,20 @@ class UnblindedFitCategorySyst(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalW
         else:
             output_dir = self.output_dir
                
-        tasks = [RunText2Workspace(output_dir=output_dir, variable=self.variable, year=self.year, bootstrap_flag=self.bootstrap_flag, number_of_bootstraps=self.number_of_bootstraps)]
+        tasks["RunT2WS"] = RunText2Workspace(output_dir=output_dir, variable=self.variable, year=self.year, batch_flavor=self.batch_flavor, workflow=config["combine_fit"]["execution"], version=self.variable if self.variable != "" else "inclusive", slurm_partition=config["combine_fit"]['batchPartition'], slurm_memory=config["combine_fit"]['batchMemory'], slurm_max_runtime=config["combine_fit"]['batchMaxRuntime'], htcondor_partition=config["combine_fit"]['batchPartition'], htcondor_memory=config["combine_fit"]['batchMemory'], htcondor_max_runtime=config["combine_fit"]['batchMaxRuntime'])
         
         return tasks
     
     def create_branch_map(self):
-        if convert_boolean_string(self.bootstrap_flag) == True:
-            if self.variable == '':
-                param_list = ["r"]
-            else:
-                param_list = combineVariableDict[f'{self.year}'][f'{self.variable}']['paramStrNoOne']
-            branch_map = {
-                i * int(self.number_of_bootstraps) + j: (current_cat, bootstrap_index)
-                for i, current_cat in enumerate(param_list)
-                for j, bootstrap_index in enumerate(range(int(self.number_of_bootstraps)))
-            }
+        if self.variable == '':
+            param_list = ["r"]
         else:
-            if self.variable == '':
-                param_list = ["r"]
-            else:
-                param_list = combineVariableDict[f'{self.year}'][f'{self.variable}']['paramStrNoOne']
-            branch_map = {i: current_cat for i, current_cat in enumerate(param_list)}
+            param_list = combineVariableDict[f'{self.year}'][f'{self.variable}']['paramStrNoOne']
+        branch_map = {i: current_cat for i, current_cat in enumerate(param_list)}
         return branch_map
 
     def output(self):
-        if convert_boolean_string(self.bootstrap_flag) == True:
-            current_cat, bootstrap_index = self.branch_data
-        else:
-            current_cat = self.branch_data
+        current_cat = self.branch_data
         
         if self.variable == '':
             configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
@@ -2903,12 +2912,8 @@ class UnblindedFitCategorySyst(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalW
         else:
             fitFolderName = f'runFits_{self.variable}'
         
-        if convert_boolean_string(self.bootstrap_flag) == True:
-            output = [os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', f'bootstrap_{bootstrap_index}')]
-            output += [os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', f'bootstrap_{bootstrap_index}', f'higgsCombineDataPostFitScanFit_{current_cat}.MultiDimFit.mH125.38.root')]
-        else:
-            output = [os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit')]
-            output += [os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', f'higgsCombineDataPostFitScanFit_{current_cat}.MultiDimFit.mH125.38.root')]
+        output = [os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit')]
+        output += [os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', f'higgsCombineDataPostFitScanFit_{current_cat}.MultiDimFit.mH125.38.root')]
         
         outputFileTargets = []
                 
@@ -2920,10 +2925,7 @@ class UnblindedFitCategorySyst(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalW
         return outputFileTargets
 
     def run(self):
-        if convert_boolean_string(self.bootstrap_flag) == True:
-            current_cat, bootstrap_index = self.branch_data
-        else:
-            current_cat = self.branch_data
+        current_cat = self.branch_data
         
         if self.variable == '':
             configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
@@ -2942,24 +2944,25 @@ class UnblindedFitCategorySyst(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalW
         else:
             output_dir = self.output_dir  
         
-        safe_mkdir(os.path.join(output_dir, 'Combine', fitFolderName))
-        safe_mkdir(os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit'))
-        
         cwd = os.getcwd()
-        os.chdir(os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit'))
-        
-        if convert_boolean_string(self.bootstrap_flag) == True:
-            if self.variable == '':
-                datacard_path = os.path.join(output_dir, 'Combine', 'Workspaces', f'Datacard_{self.year}_{bootstrap_index}.root')
-            else:
-                datacard_path = os.path.join(output_dir, 'Combine', 'Workspaces', f'Datacard_{self.variable}_{self.year}_{bootstrap_index}.root')
-            safe_mkdir(os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', f'bootstrap_{bootstrap_index}'))
-            os.chdir(os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', f'bootstrap_{bootstrap_index}'))
+        if self.batch_flavor == "slurm/psi":
+            # Have to use /scratch/batch_username/ for slurm/psi
+            if "/work" in output_dir:
+                execute_command([f'mkdir -p {output_dir}/Combine/{fitFolderName}/dataFit'], shell=True)
+            else:   
+                execute_command([f'xrdfs root://t3dcachedb.psi.ch:1094/ mkdir -p {output_dir}/Combine/{fitFolderName}/dataFit'], shell=True)
+
+            os.environ["TARGET_PATH"] = f"/scratch/{os.environ['USER']}/{os.environ['SLURM_JOB_ID']}"
+            execute_command([f'mkdir -p $TARGET_PATH/Combine/{fitFolderName}/dataFit'], shell=True)
+            os.chdir(os.path.join(os.environ["TARGET_PATH"], 'Combine', fitFolderName, 'dataFit'))
         else:
-            if self.variable == '':
-                datacard_path = os.path.join(output_dir, 'Combine', f'Datacard_{self.year}.root')
-            else:
-                datacard_path = os.path.join(output_dir, 'Combine', f'Datacard_{self.variable}_{self.year}.root')
+            execute_command([f'mkdir -p {output_dir}/Combine/{fitFolderName}/dataFit'], shell=True)
+            os.chdir(os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit'))
+        
+        if self.variable == '':
+            datacard_path = os.path.join(output_dir, 'Combine', f'Datacard_{self.year}.root')
+        else:
+            datacard_path = os.path.join(output_dir, 'Combine', f'Datacard_{self.variable}_{self.year}.root')
             
         if self.variable == '':
             arguments = [
@@ -3022,6 +3025,27 @@ class UnblindedFitCategorySyst(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalW
                 print("Script executed successfully.")
             except subprocess.CalledProcessError as e:
                 print("Error executing script:", e.stderr)
+        
+        # Copy the files back to pnfs if we are on slurm/psi
+        if self.batch_flavor == "slurm/psi":
+            # Have to copy over the output to the final directory
+            # Don't forget to VOMS!
+            if "/work" in output_dir:
+                slurm_copy_command = [
+                    'cp', '-rf',
+                    f"{os.environ['TARGET_PATH']}/Combine/",
+                    output_dir
+                ]
+            else:
+                slurm_copy_command = [
+                    'xrdcp', '-rf',
+                    f"{os.environ['TARGET_PATH']}/Combine/",
+                    'root://t3dcachedb.psi.ch:1094//'+output_dir
+                ]
+            print(slurm_copy_command)
+            execute_command(slurm_copy_command)
+            # Clean up the temporary directory
+            shutil.rmtree(os.environ["TARGET_PATH"])
             
         os.chdir(cwd)
         
@@ -3030,10 +3054,17 @@ class UnblindedFitCategoryStat(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalW
     variable = law.Parameter(default="", description="Variable to be used")
     year = law.Parameter(default='2022', description="Year")
     nPoints = law.Parameter(default=30, description="Number of points for the LL scan")
-    bootstrap_flag = law.Parameter(default=False, description="Bootstrap flag")
-    number_of_bootstraps = law.Parameter(default=1000, description="Number of bootstraps")
+    
+    batch_flavor = law.Parameter(default="htcondor", description="Batch system to use")
 
-    def requires(self):
+    # def requires(self):
+    def workflow_requires(self):
+        workflow_reqs = super().workflow_requires()
+
+        tasks = {}
+
+        if workflow_reqs:
+            tasks.update(workflow_reqs)
         
         if self.variable == '':
             configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
@@ -3052,36 +3083,22 @@ class UnblindedFitCategoryStat(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalW
         fitConfig = config["combine_fit"]
                 
         if self.variable == '':
-            tasks = [RunText2Workspace(output_dir=output_dir, variable=self.variable, year=self.year, bootstrap_flag=self.bootstrap_flag, number_of_bootstraps=self.number_of_bootstraps, version='r')]
+            tasks["RunT2WS"] = RunText2Workspace(output_dir=output_dir, variable=self.variable, year=self.year, batch_flavor=self.batch_flavor, version='inclusive', workflow=fitConfig["execution"], slurm_partition=fitConfig['batchPartition'], slurm_memory=fitConfig['batchMemory'], slurm_max_runtime=fitConfig['batchMaxRuntime'], htcondor_partition=fitConfig['batchPartition'], htcondor_memory=fitConfig['batchMemory'], htcondor_max_runtime=fitConfig['batchMaxRuntime'])
         else:
-            tasks = [UnblindedFitCategorySyst(output_dir=output_dir, variable=self.variable, year=self.year, nPoints=self.nPoints, version=f'{self.variable}', workflow=fitConfig["execution"], slurm_partition=fitConfig['batchPartition'], slurm_memory=fitConfig['batchMemory'], slurm_max_runtime=fitConfig['batchMaxRuntime'], htcondor_partition=fitConfig['batchPartition'], htcondor_memory=fitConfig['batchMemory'], htcondor_max_runtime=fitConfig['batchMaxRuntime'], bootstrap_flag=self.bootstrap_flag, number_of_bootstraps=self.number_of_bootstraps)]
+            tasks["UnblindedFitCategorySyst"] = UnblindedFitCategorySyst(output_dir=output_dir, variable=self.variable, year=self.year, nPoints=self.nPoints, batch_flavor=self.batch_flavor, version=f'{self.variable}', workflow=fitConfig["execution"], slurm_partition=fitConfig['batchPartition'], slurm_memory=fitConfig['batchMemory'], slurm_max_runtime=fitConfig['batchMaxRuntime'], htcondor_partition=fitConfig['batchPartition'], htcondor_memory=fitConfig['batchMemory'], htcondor_max_runtime=fitConfig['batchMaxRuntime'])
         
         return tasks
     
     def create_branch_map(self):
-        if convert_boolean_string(self.bootstrap_flag) == True:
-            if self.variable == '':
-                param_list = ["r"]
-            else:
-                param_list = combineVariableDict[f'{self.year}'][f'{self.variable}']['paramStrNoOne']
-            branch_map = {
-                i * int(self.number_of_bootstraps) + j: (current_cat, bootstrap_index)
-                for i, current_cat in enumerate(param_list)
-                for j, bootstrap_index in enumerate(range(int(self.number_of_bootstraps)))
-            }
+        if self.variable == '':
+            param_list = ["r"]
         else:
-            if self.variable == '':
-                param_list = ["r"]
-            else:
-                param_list = combineVariableDict[f'{self.year}'][f'{self.variable}']['paramStrNoOne']
-            branch_map = {i: current_cat for i, current_cat in enumerate(param_list)}
+            param_list = combineVariableDict[f'{self.year}'][f'{self.variable}']['paramStrNoOne']
+        branch_map = {i: current_cat for i, current_cat in enumerate(param_list)}
         return branch_map
 
     def output(self):
-        if convert_boolean_string(self.bootstrap_flag) == True:
-            cat, bootstrap_index = self.branch_data
-        else:
-            cat = self.branch_data
+        cat = self.branch_data
         
         if self.variable == '':
             configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
@@ -3101,26 +3118,17 @@ class UnblindedFitCategoryStat(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalW
             fitFolderName = f'runFits_mu_fiducial'
         else:
             fitFolderName = f'runFits_{self.variable}'
-
-        if convert_boolean_string(self.bootstrap_flag) == True:
-            output += [os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', f'bootstrap_{bootstrap_index}', f'higgsCombineDataPostFitScanStat_{cat}.MultiDimFit.mH125.38.root')]
-        else:    
-            output = [os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', f'higgsCombineDataPostFitScanStat_{cat}.MultiDimFit.mH125.38.root')]
+        output = [os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', f'higgsCombineDataPostFitScanStat_{cat}.MultiDimFit.mH125.38.root')]
         
         outputFileTargets = []
                 
         for _, current_output_path in enumerate(output):
             outputFileTargets.append(law.LocalFileTarget(current_output_path))
-            
-        # print("AsimovFitCategoryStat", outputFileTargets)
-        
+
         return outputFileTargets
 
     def run(self):
-        if convert_boolean_string(self.bootstrap_flag) == True:
-            cat, bootstrap_index = self.branch_data
-        else:
-            cat = self.branch_data
+        cat = self.branch_data
 
         if self.variable == '':
             configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
@@ -3138,23 +3146,24 @@ class UnblindedFitCategoryStat(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalW
             output_dir = config['outputFolder']
         else:
             output_dir = self.output_dir  
-            
-        safe_mkdir(os.path.join(output_dir, 'Combine', fitFolderName))
-        safe_mkdir(os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit'))
-        
+
         cwd = os.getcwd()
-        os.chdir(os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit'))
+        if self.batch_flavor == "slurm/psi":
+            # Have to use /scratch/batch_username/ for slurm/psi
+            if "/work" in output_dir:
+                execute_command([f'mkdir -p {output_dir}/Combine/{fitFolderName}/dataFit'], shell=True)
+            else:   
+                execute_command([f'xrdfs root://t3dcachedb.psi.ch:1094/ mkdir -p {output_dir}/Combine/{fitFolderName}/dataFit'], shell=True)
+
+            os.environ["TARGET_PATH"] = f"/scratch/{os.environ['USER']}/{os.environ['SLURM_JOB_ID']}"
+            execute_command([f'mkdir -p $TARGET_PATH/Combine/{fitFolderName}/dataFit'], shell=True)
+            os.chdir(os.path.join(os.environ["TARGET_PATH"], 'Combine', fitFolderName, 'dataFit'))
+        else:
+            execute_command([f'mkdir -p {output_dir}/Combine/{fitFolderName}/dataFit'], shell=True)
+            os.chdir(os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit'))
     
         firstStepPath = os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', f"higgsCombineDataPostFitScanFit_{cat}.MultiDimFit.mH125.38.root")
-        
-        
-        if convert_boolean_string(self.bootstrap_flag) == True:
-            firstStepPath = os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', f'bootstrap_{bootstrap_index}', f"higgsCombineDataPostFitScanFit_{cat}.MultiDimFit.mH125.38.root")
-            safe_mkdir(os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', f'bootstrap_{bootstrap_index}'))
-            os.chdir(os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', f'bootstrap_{bootstrap_index}'))
-        else:
-            firstStepPath = os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', f"higgsCombineDataPostFitScanFit_{cat}.MultiDimFit.mH125.38.root")
-        
+                
         if self.variable == '':
             arguments = [
                 "combine",
@@ -3217,7 +3226,27 @@ class UnblindedFitCategoryStat(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalW
                 print("Script executed successfully.")
             except subprocess.CalledProcessError as e:
                 print("Error executing script:", e.stderr)
-                
+            
+        # Copy the files back to pnfs if we are on slurm/psi
+        if self.batch_flavor == "slurm/psi":
+            # Have to copy over the output to the final directory
+            # Don't forget to VOMS!
+            if "/work" in output_dir:
+                slurm_copy_command = [
+                    'cp', '-rf',
+                    f"{os.environ['TARGET_PATH']}/Combine/",
+                    output_dir
+                ]
+            else:
+                slurm_copy_command = [
+                    'xrdcp', '-rf',
+                    f"{os.environ['TARGET_PATH']}/Combine/",
+                    'root://t3dcachedb.psi.ch:1094//'+output_dir
+                ]
+            print(slurm_copy_command)
+            execute_command(slurm_copy_command)
+            # Clean up the temporary directory
+            shutil.rmtree(os.environ["TARGET_PATH"])
         
         os.chdir(cwd)
         
@@ -3225,9 +3254,8 @@ class CreateUnblindedFit(law.Task): #(law.Task): #(Task, HTCondorWorkflow, law.L
     output_dir = law.Parameter(default = '', description="Path to the output directory")
     variable = law.Parameter(default="", description="Variable to be used")
     year = law.Parameter(default='2022', description="Year")
-    bootstrap_flag = law.Parameter(default=False, description="Bootstrap flag")
-    number_of_bootstraps = law.Parameter(default=1000, description="Number of bootstraps")
 
+    batch_flavor = law.Parameter(default="htcondor", description="Batch system to use")
 
     def requires(self):
         
@@ -3248,14 +3276,7 @@ class CreateUnblindedFit(law.Task): #(law.Task): #(Task, HTCondorWorkflow, law.L
         fitConfig = config["combine_fit"]
             
         tasks = []
-        if self.variable == '':
-            # cat = "r"
-            tasks += [UnblindedFitCategorySyst(output_dir=output_dir, variable=self.variable, year=self.year, nPoints=fitConfig["unblindedFit_numPoints"], version=f"inclusive_v1", workflow=fitConfig["execution"], slurm_partition=fitConfig['batchPartition'], slurm_memory=fitConfig['batchMemory'], slurm_max_runtime=fitConfig['batchMaxRuntime'], htcondor_partition=fitConfig['batchPartition'], htcondor_memory=fitConfig['batchMemory'], htcondor_max_runtime=fitConfig['batchMaxRuntime']), UnblindedFitCategoryStat(output_dir=output_dir, variable=self.variable, year=self.year, nPoints=fitConfig["unblindedFit_numPoints"], version=f"inclusive_v1", workflow=fitConfig["execution"], slurm_partition=fitConfig['batchPartition'], slurm_memory=fitConfig['batchMemory'], slurm_max_runtime=fitConfig['batchMaxRuntime'], htcondor_partition=fitConfig['batchPartition'], htcondor_memory=fitConfig['batchMemory'], htcondor_max_runtime=fitConfig['batchMaxRuntime'], bootstrap_flag=self.bootstrap_flag, number_of_bootstraps=self.number_of_bootstraps)]
-        else:
-            # version_index = 1
-            # for cat in combineVariableDict[f'{self.year}'][f'{self.variable}']['paramStrNoOne']:
-            tasks += [UnblindedFitCategorySyst(output_dir=output_dir, variable=self.variable, year=self.year, nPoints=fitConfig["unblindedFit_numPoints"], version=f"{self.variable}", workflow=fitConfig["execution"], slurm_partition=fitConfig['batchPartition'], slurm_memory=fitConfig['batchMemory'], slurm_max_runtime=fitConfig['batchMaxRuntime'], htcondor_partition=fitConfig['batchPartition'], htcondor_memory=fitConfig['batchMemory'], htcondor_max_runtime=fitConfig['batchMaxRuntime']), UnblindedFitCategoryStat(output_dir=output_dir, variable=self.variable, year=self.year, nPoints=fitConfig["unblindedFit_numPoints"], version=f"{self.variable}", workflow=fitConfig["execution"], slurm_partition=fitConfig['batchPartition'], slurm_memory=fitConfig['batchMemory'], slurm_max_runtime=fitConfig['batchMaxRuntime'], htcondor_partition=fitConfig['batchPartition'], htcondor_memory=fitConfig['batchMemory'], htcondor_max_runtime=fitConfig['batchMaxRuntime'], bootstrap_flag=self.bootstrap_flag, number_of_bootstraps=self.number_of_bootstraps)]
-            # version_index += 1
+        tasks += [UnblindedFitCategorySyst(output_dir=output_dir, variable=self.variable, year=self.year, batch_flavor=self.batch_flavor, nPoints=fitConfig["unblindedFit_numPoints"], version=self.variable if self.variable != "" else "inclusive", workflow=fitConfig["execution"], slurm_partition=fitConfig['batchPartition'], slurm_memory=fitConfig['batchMemory'], slurm_max_runtime=fitConfig['batchMaxRuntime'], htcondor_partition=fitConfig['batchPartition'], htcondor_memory=fitConfig['batchMemory'], htcondor_max_runtime=fitConfig['batchMaxRuntime']), UnblindedFitCategoryStat(output_dir=output_dir, variable=self.variable, year=self.year, batch_flavor=self.batch_flavor, nPoints=fitConfig["unblindedFit_numPoints"], version=self.variable if self.variable != "" else "inclusive", workflow=fitConfig["execution"], slurm_partition=fitConfig['batchPartition'], slurm_memory=fitConfig['batchMemory'], slurm_max_runtime=fitConfig['batchMaxRuntime'], htcondor_partition=fitConfig['batchPartition'], htcondor_memory=fitConfig['batchMemory'], htcondor_max_runtime=fitConfig['batchMaxRuntime'])]
         
         return tasks
     
@@ -3287,46 +3308,26 @@ class CreateUnblindedFit(law.Task): #(law.Task): #(Task, HTCondorWorkflow, law.L
             fitFolderName = f'runFits_{self.variable}'
             
         output = []
-    
-        if convert_boolean_string(self.bootstrap_flag) == True:
-            for bootstrap_index in range(int(self.number_of_bootstraps)):
-                output += [os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', f'bootstrap_{bootstrap_index}', 'scans')]
-                
-                if self.variable == '':
-                    cat = "r"
-                    output += [os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', f'bootstrap_{bootstrap_index}', 'scans', f'scan_{cat}_observed.root')]
-                    output += [os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', f'bootstrap_{bootstrap_index}', 'scans', f'scan_{cat}_observed.pdf')]
-                    output += [os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', f'bootstrap_{bootstrap_index}', 'scans', f'scan_{cat}_observed.png')]
-                else:
-                    for cat in combineVariableDict[f'{self.year}'][f'{self.variable}']['paramStrNoOne']:
-                        
-                        output += [os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', f'bootstrap_{bootstrap_index}', 'scans', f'scan_{cat}_observed.root')]
-                        output += [os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', f'bootstrap_{bootstrap_index}', 'scans', f'scan_{cat}_observed.pdf')]
-                        output += [os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', f'bootstrap_{bootstrap_index}', 'scans', f'scan_{cat}_observed.png')]
 
+        output += [os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', 'scans')]
         
+        if self.variable == '':
+            cat = "r"
+            output += [os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', 'scans', f'scan_{cat}_observed.root')]
+            output += [os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', 'scans', f'scan_{cat}_observed.pdf')]
+            output += [os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', 'scans', f'scan_{cat}_observed.png')]
         else:
-            output += [os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', 'scans')]
-            
-            if self.variable == '':
-                cat = "r"
+            for cat in combineVariableDict[f'{self.year}'][f'{self.variable}']['paramStrNoOne']:
+                
                 output += [os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', 'scans', f'scan_{cat}_observed.root')]
                 output += [os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', 'scans', f'scan_{cat}_observed.pdf')]
                 output += [os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', 'scans', f'scan_{cat}_observed.png')]
-            else:
-                for cat in combineVariableDict[f'{self.year}'][f'{self.variable}']['paramStrNoOne']:
-                    
-                    output += [os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', 'scans', f'scan_{cat}_observed.root')]
-                    output += [os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', 'scans', f'scan_{cat}_observed.pdf')]
-                    output += [os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', 'scans', f'scan_{cat}_observed.png')]
 
         outputFileTargets = []
                 
         for _, current_output_path in enumerate(output):
             outputFileTargets.append(law.LocalFileTarget(current_output_path))
             
-        # print(outputFileTargets)
-
         return outputFileTargets
 
     def run(self):
@@ -3348,68 +3349,85 @@ class CreateUnblindedFit(law.Task): #(law.Task): #(Task, HTCondorWorkflow, law.L
         else:
             output_dir = self.output_dir  
 
-        if convert_boolean_string(self.bootstrap_flag) == True:
-            for bootstrap_index in range(int(self.number_of_bootstraps)):
-                safe_mkdir(os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', f'bootstrap_{bootstrap_index}', 'scans'))
-                cwd = os.getcwd()
-                os.chdir(os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', f'bootstrap_{bootstrap_index}'))
-                
-                if self.variable == '':
-                    cats = ["r"]
-                else:
-                    cats = combineVariableDict[f'{self.year}'][f'{self.variable}']['paramStrNoOne']
-                
-                for cat in cats:
-                    arguments = [
-                        "plot1DScan.py",
-                        os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', f'bootstrap_{bootstrap_index}', f'higgsCombineDataPostFitScanFit_{cat}.MultiDimFit.mH125.38.root'),
-                        "-o", f"scans/scan_{cat}_observed",
-                        "--POI", f"{cat}",
-                        "--others", os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', f'bootstrap_{bootstrap_index}', f'higgsCombineDataPostFitScanStat_{cat}.MultiDimFit.mH125.38.root')+":stat-only:2",
-                        "--main-label", "Observed",
-                        "--translate", os.path.join(os.environ["ANALYSIS_PATH"], 'Combine', 'pois.json')
-                    ]
-                    command = arguments
-                    # print(command)
-                    try:
-                        result = subprocess.run(command, check=True, text=True, capture_output=True)
-                        print("Script output:", result.stdout)
-                        print("Script executed successfully.")
-                    except subprocess.CalledProcessError as e:
-                        print("Error executing script:", e.stderr)
-                    
-                os.chdir(cwd)
+        cwd = os.getcwd()
+        if self.batch_flavor == "slurm/psi":
+            # Have to use /scratch/batch_username/ for slurm/psi
+            if "/work" in output_dir:
+                execute_command([f'mkdir -p {output_dir}/Combine/{fitFolderName}/dataFit/scans'], shell=True)
+            else:   
+                execute_command([f'xrdfs root://t3dcachedb.psi.ch:1094/ mkdir -p {output_dir}/Combine/{fitFolderName}/dataFit/scans'], shell=True)
 
+            os.environ["TARGET_PATH"] = f"/scratch/{os.environ['USER']}/{os.environ['SLURM_JOB_ID']}"
+            execute_command([f'mkdir -p $TARGET_PATH/Combine/{fitFolderName}/dataFit/scans'], shell=True)
+            os.chdir(os.path.join(os.environ["TARGET_PATH"], 'Combine', fitFolderName, 'dataFit'))
         else:
-            safe_mkdir(os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', 'scans'))
-            cwd = os.getcwd()
+            execute_command([f'mkdir -p {output_dir}/Combine/{fitFolderName}/dataFit/scans'], shell=True)
             os.chdir(os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit'))
-            
-            if self.variable == '':
-                cats = ["r"]
-            else:
-                cats = combineVariableDict[f'{self.year}'][f'{self.variable}']['paramStrNoOne']
-            
-            for cat in cats:
-                arguments = [
-                    "plot1DScan.py",
-                    os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', f'higgsCombineDataPostFitScanFit_{cat}.MultiDimFit.mH125.38.root'),
-                    "-o", f"scans/scan_{cat}_observed",
-                    "--POI", f"{cat}",
-                    "--others", os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', f'higgsCombineDataPostFitScanStat_{cat}.MultiDimFit.mH125.38.root')+":stat-only:2",
-                    "--main-label", "Observed",
-                    "--translate", os.path.join(os.environ["ANALYSIS_PATH"], 'Combine', 'pois.json')
+        
+        if self.variable == '':
+            cats = ["r"]
+        else:
+            cats = combineVariableDict[f'{self.year}'][f'{self.variable}']['paramStrNoOne']
+        
+        if self.batch_flavor == "slurm/psi":
+            # Have to copy over the input to the JOB directory
+            # Don't forget to VOMS!
+            if "/work" in output_dir:
+                slurm_copy_command = [
+                    'cp', '-rf',
+                    f'{output_dir}/Combine/{fitFolderName}/dataFit',
+                    f"{os.environ['TARGET_PATH']}/Combine/{fitFolderName}"
                 ]
-                command = arguments
-                # print(command)
-                try:
-                    result = subprocess.run(command, check=True, text=True, capture_output=True)
-                    print("Script output:", result.stdout)
-                    print("Script executed successfully.")
-                except subprocess.CalledProcessError as e:
-                    print("Error executing script:", e.stderr)
+            else:
+                slurm_copy_command = [
+                    'xrdcp', '-rf',
+                    'root://t3dcachedb.psi.ch:1094//'+f'{output_dir}/Combine/{fitFolderName}/dataFit',
+                    f"{os.environ['TARGET_PATH']}/Combine/{fitFolderName}"
+                ]
+            print(slurm_copy_command)
+            execute_command(slurm_copy_command)
+        
+        for cat in cats:
+            arguments = [
+                "plot1DScan.py",
+                os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', f'higgsCombineDataPostFitScanFit_{cat}.MultiDimFit.mH125.38.root'),
+                "-o", f"scans/scan_{cat}_observed",
+                "--POI", f"{cat}",
+                "--others", os.path.join(output_dir, 'Combine', fitFolderName, 'dataFit', f'higgsCombineDataPostFitScanStat_{cat}.MultiDimFit.mH125.38.root')+":stat-only:2",
+                "--main-label", "Observed",
+                "--translate", os.path.join(os.environ["ANALYSIS_PATH"], 'Combine', 'pois.json')
+            ]
+            command = arguments
+            # print(command)
+            try:
+                result = subprocess.run(command, check=True, text=True, capture_output=True)
+                print("Script output:", result.stdout)
+                print("Script executed successfully.")
+            except subprocess.CalledProcessError as e:
+                print("Error executing script:", e.stderr)
+        
+        # Copy the files back to pnfs if we are on slurm/psi
+        if self.batch_flavor == "slurm/psi":
+            # Have to copy over the output to the final directory
+            # Don't forget to VOMS!
+            if "/work" in output_dir:
+                slurm_copy_command = [
+                    'cp', '-rf',
+                    f"{os.environ['TARGET_PATH']}/Combine/",
+                    output_dir
+                ]
+            else:
+                slurm_copy_command = [
+                    'xrdcp', '-rf',
+                    f"{os.environ['TARGET_PATH']}/Combine/",
+                    'root://t3dcachedb.psi.ch:1094//'+output_dir
+                ]
+            print(slurm_copy_command)
+            execute_command(slurm_copy_command)
+            # Clean up the temporary directory
+            shutil.rmtree(os.environ["TARGET_PATH"])
                 
-            os.chdir(cwd)
+        os.chdir(cwd)
 
 class UnblindedCovCorrHesse(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWorkflow): #(law.Task): #(Task, HTCondorWorkflow, law.LocalWorkflow):
     output_dir = law.Parameter(default = '', description="Path to the output directory")
