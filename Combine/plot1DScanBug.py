@@ -120,6 +120,7 @@ def BuildScan(scan, param, files, color, yvals, ycut):
 parser = argparse.ArgumentParser()
 
 parser.add_argument('main', help='Main input file for the scan')
+parser.add_argument('--pvalue', type=float, default=0., help='pValue')
 parser.add_argument('--y-cut', type=float, default=7., help='Remove points with y > y-cut')
 parser.add_argument('--y-max', type=float, default=8., help='y-axis maximum')
 parser.add_argument('--output', '-o', help='output name without file extension', default='scan')
@@ -161,13 +162,16 @@ if args.others is not None:
         splitargs = oargs.split(':')
         other_scans_opts.append(splitargs)
         if len(splitargs) > 3: other_scans.append(BuildScan(args.output, splitargs[3], [splitargs[0]], int(splitargs[2]), yvals, args.y_cut))
-        else : other_scans.append(BuildScan(args.output, args.POI, [splitargs[0]], int(splitargs[2]), yvals, args.y_cut))
+        else : 
+            print(splitargs)
+            other_scans.append(BuildScan(args.output, args.POI, [splitargs[0]], int(splitargs[2]), yvals, args.y_cut))
 
 
 canv = ROOT.TCanvas(args.output, args.output )
 pads = plot.OnePad()
 pad = ROOT.gPad
 pad.SetRightMargin(0.11) 
+#pad.SetBottomMargin(0.11) 
 #pads.SetRightMargin(0.2) 
 #main_scan['graph'].SetLineColor(3);
 #main_scan['graph'].SetLineWidth(2);
@@ -192,6 +196,7 @@ axishist.SetMinimum(min(main_scan['graph'].GetY()))
 axishist.SetMaximum(args.y_max)
 axishist.GetYaxis().SetTitle("- 2 #Delta ln L")
 axishist.GetXaxis().SetTitle("%s" % fixed_name)
+#axishist.GetXaxis().SetNoExponent(False)
 
 for other in other_scans:
     new_min = axishist.GetXaxis().GetXmin()
@@ -215,7 +220,7 @@ if len(other_scans) > 0:
     axishist.GetXaxis().SetLimits(new_min, new_max)
 
 
-axishist.GetXaxis().SetLabelSize(0.04)
+axishist.GetXaxis().SetLabelSize(0.032)
 
 for i,other in enumerate(other_scans):
     #if args.breakdown is not None:
@@ -324,7 +329,8 @@ if  args.Not_show1sigma :
     pt.SetTextFont(42)
     pt.Draw()
 
-plot.DrawCMSLogo(pads[0], args.logo, args.logo_sub, 11, 0.045, 0.035, 1.2,  cmsTextSize = 1.)
+plot.DrawCMSLogo(pads[0], args.logo, args.logo_sub, 11, 0.045, 0.038, 0.9,  cmsTextSize = 0.8)
+plot.DrawInfo(pad,r'p-value^{SM} = %s' % name_translate['pvalue'],'', 0, 0.057, 0.18, 0.5, extraText2='', cmsTextSize = 0.5)
 plot.DrawInfo(pad, r'138 fb^{-1} (13 TeV)','', 13, 0.39, 0.035, 1.2, extraText2='', cmsTextSize=0.8)
 plot.DrawInfo(pad, r'H #rightarrow #gamma#gamma, m_{H} = 125.38 GeV','', 13, 1, 0.06, 2, extraText2='', cmsTextSize=0.5)
 
@@ -336,10 +342,10 @@ if len(other_scans) >= 3:
     legend = ROOT.TLegend(0.36, 0.73, 0.85, 0.93, '', 'NBNDC')
     legend.SetNColumns(1)
 
-legend.AddEntry(main_scan['graph'], args.main_label.replace("_",' ').replace("mu ",'mu_'), 'L')
+legend.AddEntry(main_scan['graph'], args.main_label.replace("_",' ').replace("mu ",'mu_').replace("-",','), 'L')
 legend.SetTextSize(args.legend_size)
 for i, other in enumerate(other_scans):
-    legend.AddEntry(other['graph'], other_scans_opts[i][1].replace("_",' ').replace("mu ",'mu_'), 'L')
+    legend.AddEntry(other['graph'], other_scans_opts[i][1].replace("_",' ').replace("mu ",'mu_').replace("-",','), 'L')
 legend.Draw()
 
 save_graph = main_scan['graph'].Clone()
