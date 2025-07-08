@@ -52,9 +52,14 @@ class CreateDiffSpectra(law.Task):#(law.Task): #(Task, HTCondorWorkflow, law.Loc
     year = law.Parameter(default='2022', description="Year")
     is_unblinded = law.Parameter(default=False, description="Flag that signifies if spectrum is created for the unblinded results.")
 
+    batch_flavor = law.Parameter(default="slurm", description="Special treatment for PSI Slurm batch system")
+    batch_system = law.Parameter(default="slurm", description="Batch system to use")
+
     # htcondor_job_kwargs_submit = {"spool": True}  
     
     def requires(self):
+        
+        tasks = {}
         
         if self.variable == '':
             configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
@@ -71,9 +76,11 @@ class CreateDiffSpectra(law.Task):#(law.Task): #(Task, HTCondorWorkflow, law.Loc
             output_dir = self.output_dir
             
         if convert_boolean_string(self.is_unblinded):
-            tasks = [PValueCalculation(output_dir=output_dir, variable=self.variable, year=self.year)]
+            hesseConfig = config["combine_hesse"]
+            tasks["PValueCalculation"] = PValueCalculation(variable=self.variable, output_dir=output_dir, year=self.year, batch_flavor=self.batch_flavor, version=self.variable if self.variable != '' else 'inclusive', workflow=self.batch_system, slurm_partition=hesseConfig['batchPartition'], slurm_memory=hesseConfig['batchMemory'], slurm_max_runtime=hesseConfig['batchMaxRuntime'], htcondor_partition=hesseConfig['batchPartition'], htcondor_memory=hesseConfig['batchMemory'], htcondor_max_runtime=hesseConfig['batchMaxRuntime'])
+            tasks["CreateUnblindedFit"] = CreateUnblindedFit(variable=self.variable, output_dir=output_dir, year=self.year, batch_flavor=self.batch_flavor, version=self.variable if self.variable != "" else "inclusive", workflow=self.batch_system)
         else:
-            tasks = [CreateAsimovFit(output_dir=output_dir, variable=self.variable, year=self.year)]
+            tasks["CreateAsimovFit"] = CreateAsimovFit(variable=self.variable, output_dir=output_dir, year=self.year, batch_flavor=self.batch_flavor, version=self.variable if self.variable != '' else 'inclusive', workflow=self.batch_system)
         
         return tasks
     
@@ -230,9 +237,10 @@ class CreateDiffSpectra(law.Task):#(law.Task): #(Task, HTCondorWorkflow, law.Loc
         
         if self.variable == '':
             # Spectra with only one POI does not make any sense
-            return True
+            print("Variable is not set. Please set the variable parameter to a valid value.")
+            exit(1)
         else:
-            cat_list = combineVariableDict[f'{self.variable}']['paramStrNoOne'] #has to be in the correct order
+            cat_list = combineVariableDict[f'{self.year}'][f'{self.variable}']['paramStrNoOne'] #has to be in the correct order
             fitFolderName = f'runFits_{self.variable}'
             
             oneSigmaDict = {}

@@ -37,7 +37,7 @@ def writeCondorSub(_file,_exec,_queue,_nJobs,_jobOpts,doHoldOnFailure=True,doPer
     _file.write("periodic_release =  (NumJobStarts < 3) && ((CurrentTime - EnteredCurrentStatus) > 600)\n\n")
   _file.write("+JobFlavour = \"%s\"\n"%_queue)
   _file.write("Requirements = (OpSysAndVer =?= \"AlmaLinux9\")\n")
-  _file.write("queue %g"%_nJobs)
+  _file.write("queue %g\n" % _nJobs)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 def writeSubFiles(_opts):

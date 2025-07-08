@@ -32,6 +32,7 @@ def get_options():
   parser = OptionParser()
   parser.add_option("--xvar", dest='xvar', default='CMS_hgg_mass', help="Observable to fit")
   parser.add_option("--inputWSDir", dest='inputWSDir', default='', help="Input flashgg WS directory")
+  parser.add_option("--ingredientsDir", dest='ingredientsDir', default='', help="Ingredients directory containing gaussian jsons and photon systematics")
   parser.add_option("--outputDir", dest='outputDir', default=swd__, help="Output directory")
   parser.add_option("--ext", dest='ext', default='', help="Extension")
   parser.add_option("--proc", dest='proc', default='', help="Signal process")
@@ -67,6 +68,12 @@ def get_options():
 
 ROOT.gStyle.SetOptStat(0)
 ROOT.gROOT.SetBatch(True)
+
+# Necessary for shitty T3 copy problem. But also a nice addition in general
+if opt.ingredientsDir == '':
+  ingredientsDir = opt.outputDir
+else:
+  ingredientsDir = opt.ingredientsDir
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # SETUP: signal fit
@@ -128,10 +135,10 @@ else:
 
 # Options for using diagonal process from getDiagProc output json
 if opt.useDiagonalProcForShape:
-  if not os.path.exists("%s/outdir_%s/getDiagProc/json/diagonal_process.json"%(opt.outputDir,opt.ext)):
+  if not os.path.exists("%s/outdir_%s/getDiagProc/json/diagonal_process.json"%(ingredientsDir,opt.ext)):
     print(" --> [ERROR] Diagonal process json from getDiagProc does not exist. Using nominal proc x cat for shape")
   else:
-    with open("%s/outdir_%s/getDiagProc/json/diagonal_process.json"%(opt.outputDir,opt.ext),"r") as jf: dproc = json.load(jf)
+    with open("%s/outdir_%s/getDiagProc/json/diagonal_process.json"%(ingredientsDir,opt.ext),"r") as jf: dproc = json.load(jf)
     procRVFit = dproc[opt.cat]
     print(" --> Using diagonal proc (%s,%s) for shape"%(procRVFit,opt.cat))
     if not opt.skipVertexScenarioSplit: procWVFit = dproc[opt.cat]
@@ -139,10 +146,10 @@ if opt.useDiagonalProcForShape:
 # Process for syst
 procSyst = opt.proc
 if opt.useDiagonalProcForSyst:
-  if not os.path.exists("%s/outdir_%s/getDiagProc/json/diagonal_process.json"%(opt.outputDir,opt.ext)):
+  if not os.path.exists("%s/outdir_%s/getDiagProc/json/diagonal_process.json"%(ingredientsDir,opt.ext)):
     print(" --> [ERROR] Diagonal process json from getDiagProc does not exist. Using nominal proc x cat for systematics")
   else:
-    with open("%s/outdir_%s/getDiagProc/json/diagonal_process.json"%(opt.outputDir,opt.ext),"r") as jf: dproc = json.load(jf)
+    with open("%s/outdir_%s/getDiagProc/json/diagonal_process.json"%(ingredientsDir,opt.ext),"r") as jf: dproc = json.load(jf)
     procSyst = dproc[opt.cat]
     print(" --> Using diagonal proc (%s,%s) for systematics"%(procSyst,opt.cat))
 
@@ -278,11 +285,11 @@ if not opt.skipBeamspotReweigh:
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # If using nGaussian fit then extract nGaussians from fTest json file
 if not opt.useDCB:
-  with open("%s/outdir_%s/fTest/json/nGauss_%s.json"%(opt.outputDir,opt.ext,catRVFit)) as jf: ngauss = json.load(jf)
+  with open("%s/outdir_%s/fTest/json/nGauss_%s.json"%(ingredientsDir,opt.ext,catRVFit)) as jf: ngauss = json.load(jf)
   nRV = int(ngauss["%s__%s"%(procRVFit,catRVFit)]['nRV'])
   if opt.skipVertexScenarioSplit: print(" --> Fitting function: convolution of nGaussians (%g)"%nRV)
   else: 
-    with open("%s/outdir_%s/fTest/json/nGauss_%s.json"%(opt.outputDir,opt.ext,catWVFit)) as jf: ngauss = json.load(jf)
+    with open("%s/outdir_%s/fTest/json/nGauss_%s.json"%(ingredientsDir,opt.ext,catWVFit)) as jf: ngauss = json.load(jf)
     nWV = int(ngauss["%s__%s"%(procWVFit,catWVFit)]['nWV'])
     print(" --> Fitting function: convolution of nGaussians (RV=%g,WV=%g)"%(nRV,nWV))
 else:
@@ -314,7 +321,7 @@ if not opt.skipVertexScenarioSplit:
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # FINAL MODEL: construction
 print("\n --> Constructing final model")
-fm = FinalModel(ssfMap,opt.proc,opt.cat,opt.ext,opt.year,sqrts__,nominalDatasets,xvar,MH,MHLow,MHHigh,opt.massPoints,xsbrMap,procSyst,opt.scales,opt.scalesCorr,opt.scalesGlobal,opt.smears,opt.doVoigtian,opt.useDCB,opt.skipVertexScenarioSplit,opt.skipSystematics, opt.outputDir)
+fm = FinalModel(ssfMap,opt.proc,opt.cat,opt.ext,opt.year,sqrts__,nominalDatasets,xvar,MH,MHLow,MHHigh,opt.massPoints,xsbrMap,procSyst,opt.scales,opt.scalesCorr,opt.scalesGlobal,opt.smears,opt.doVoigtian,opt.useDCB,opt.skipVertexScenarioSplit,opt.skipSystematics, ingredientsDir)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # SAVE: to output workspace
