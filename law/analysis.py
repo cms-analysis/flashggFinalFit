@@ -12,6 +12,7 @@ from Background.law_background import *
 from Trees2WS.law_trees2ws import *
 from Signal.law_signal import *
 from Combine.law_combine import *
+from Plots.Spectra.law_spectra import *
 
 # Function to safely create a directory
 def safe_mkdir(path):
@@ -44,6 +45,10 @@ class FinalFits(law.Task):
     asimov_fits = law.Parameter(default=False, description="Produce the Asimov fits")
     asimov_impacts = law.Parameter(default=False, description="Produce the Asimov impacts")
     asimov_covcorr = law.Parameter(default=False, description="Produce the Asimov covariance and correlation matrices")
+
+    # Differentials
+    unblinded_diff_spectra = law.Parameter(default=False, description="Produce unblinded differential spectra for the given variable")
+    asimov_diff_spectra = law.Parameter(default=False, description="Produce Asimov differential spectra for the given variable")
     
     batch_system = law.Parameter(default="slurm", description="Batch system to use")
     batch_flavor = law.Parameter(default="slurm", description="Special treatment for PSI Slurm batch system")
@@ -102,6 +107,13 @@ class FinalFits(law.Task):
         elif convert_boolean_string(self.asimov_covcorr):
             hesseConfig = config["combine_hesse"]
             tasks["AsimovCovCorr"] = AsimovCovCorr(variable=self.variable, output_dir=output_dir, year=self.year, batch_flavor=self.batch_flavor, version=self.variable if self.variable != '' else 'inclusive', workflow=hesseConfig["execution"], slurm_partition=hesseConfig['batchPartition'], slurm_memory=hesseConfig['batchMemory'], slurm_max_runtime=hesseConfig['batchMaxRuntime'], htcondor_partition=hesseConfig['batchPartition'], htcondor_memory=hesseConfig['batchMemory'], htcondor_max_runtime=hesseConfig['batchMaxRuntime'])
+        elif convert_boolean_string(self.asimov_diff_spectra) and (self.variable != ''):
+            tasks["CreateAsimovDiffSpectra"] = CreateDiffSpectra(variable=self.variable, output_dir=output_dir, year=self.year, batch_flavor=self.batch_flavor, batch_system=self.batch_system, is_unblinded=False)
+        elif convert_boolean_string(self.unblinded_diff_spectra) and (self.variable != ''):
+            tasks["CreateUnblindedDiffSpectra"] = CreateDiffSpectra(variable=self.variable, output_dir=output_dir, year=self.year, batch_flavor=self.batch_flavor, batch_system=self.batch_system, is_unblinded=True)
+        elif (convert_boolean_string(self.asimov_diff_spectra) or convert_boolean_string(self.unblinded_diff_spectra)) and (self.variable == ''):
+            print("Differential spectra can only be created for a specific variable. Please set the variable parameter to a valid value.")
+            exit(1)
         else:
             print("No final fit tasks selected. Please set the appropriate parameters to True.")
             exit(1)
