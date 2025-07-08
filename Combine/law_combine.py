@@ -4337,7 +4337,7 @@ class UnblindedImpactThirdStep(Task, SlurmWorkflow, HTCondorWorkflow, law.LocalW
 
         impactConfig = config["combine_impacts"]
             
-        tasks["UnblindedImpactSecondStep"] = UnblindedImpactSecondStep(output_dir=output_dir, variable=self.variable, year=self.year, version=version, workflow=impactConfig["execution"], slurm_partition=impactConfig['batchPartition'], slurm_memory=impactConfig['batchMemory'], slurm_max_runtime=impactConfig['batchMaxRuntime'], htcondor_partition=impactConfig['batchPartition'], htcondor_memory=impactConfig['batchMemory'], htcondor_max_runtime=impactConfig['batchMaxRuntime'])
+        tasks["UnblindedImpactSecondStep"] = UnblindedImpactSecondStep(output_dir=output_dir, variable=self.variable, year=self.year, version=version, workflow=impactConfig["execution"], slurm_partition=impactConfig['batchPartition'], slurm_memory=impactConfig['batchMemory'], slurm_max_runtime=impactConfig['batchMaxRuntime'], htcondor_partition=impactConfig['batchPartition'], htcondor_memory=impactConfig['batchMemory'], htcondor_max_runtime=impactConfig['batchMaxRuntime'], batch_flavor=self.batch_flavor)
         
         return tasks
 
