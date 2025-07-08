@@ -291,7 +291,6 @@ class FinalFits(law.Task):
                 for cat in combineVariableDict[f'{self.year}'][f'{self.variable}']['paramStrNoOne']:
                     output += [os.path.join(output_dir, 'Combine', fitFolderName, 'impact', 'impacts')]
                     output += [os.path.join(output_dir, 'Combine', fitFolderName, 'impact', 'impacts', f'impacts_{cat}.pdf')]
-                    output += [os.path.join(output_dir, 'Combine', fitFolderName, 'impact', 'impacts', 'impacts_corrected_dropBkgModelParams.json')]
                     
             output += [os.path.join(output_dir, 'Combine', fitFolderName, 'impact', 'impacts', f'impacts.json')]
 
