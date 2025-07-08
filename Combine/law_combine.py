@@ -1973,7 +1973,6 @@ class AsimovImpactThirdStep(Task, SlurmWorkflow, HTCondorWorkflow, law.LocalWork
             for cat in combineVariableDict[f'{self.year}'][f'{self.variable}']['paramStrNoOne']:
                 output += [os.path.join(output_dir, 'Combine', fitFolderName, 'impact', 'impacts')]
                 output += [os.path.join(output_dir, 'Combine', fitFolderName, 'impact', 'impacts', f'impacts_{cat}.pdf')]
-                output += [os.path.join(output_dir, 'Combine', fitFolderName, 'impact', 'impacts', 'impacts_corrected_dropBkgModelParams.json')]
                 
         output += [os.path.join(output_dir, 'Combine', fitFolderName, 'impact', 'impacts', f'impacts.json')]
         
@@ -2017,6 +2016,8 @@ class AsimovImpactThirdStep(Task, SlurmWorkflow, HTCondorWorkflow, law.LocalWork
             else:   
                 execute_command([f'xrdfs root://t3dcachedb.psi.ch:1094/ mkdir -p {output_dir}/Combine/{fitFolderName}/impact/impacts'], shell=True)
 
+            os.environ["TARGET_PATH"] = f"/scratch/{os.environ['USER']}/{os.environ['SLURM_JOB_ID']}"
+            execute_command([f'mkdir -p $TARGET_PATH/Combine/{fitFolderName}/impact/impacts'], shell=True)
             if "/work" in output_dir:
                 slurm_copy_command = [
                     'cp', '-rf',
@@ -2030,8 +2031,6 @@ class AsimovImpactThirdStep(Task, SlurmWorkflow, HTCondorWorkflow, law.LocalWork
                     f'{os.environ["TARGET_PATH"]}/Combine/{fitFolderName}'
                 ]
             execute_command(slurm_copy_command)
-            os.environ["TARGET_PATH"] = f"/scratch/{os.environ['USER']}/{os.environ['SLURM_JOB_ID']}"
-            execute_command([f'mkdir -p $TARGET_PATH/Combine/{fitFolderName}/impact/impacts'], shell=True)
             os.chdir(os.path.join(os.environ["TARGET_PATH"], 'Combine', fitFolderName, 'impact'))
             temp_output_dir = os.environ["TARGET_PATH"]
         else:
