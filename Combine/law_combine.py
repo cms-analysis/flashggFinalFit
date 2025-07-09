@@ -133,9 +133,7 @@ class PrepareTheDirectory(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWorkfl
         return branch_map
 
     def output(self):
-        
-        background_suffix = ""
-        
+                
         if self.variable == '':
             configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"],"config",f"{self.year}_inclusive.yml")
             fitFolderName = f'runFits_mu_fiducial'
@@ -151,34 +149,49 @@ class PrepareTheDirectory(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWorkfl
             output_dir = config['outputFolder']
         else:
             output_dir = self.output_dir
-        
+
+        input_path = config['inputFiles']['Trees2WSData']
+
+        bkgConfig = config["backgroundScriptCfg"]
+        if bkgConfig['cats'] == 'auto':
+            bkgConfig['cats'] = (extractListOfCatsFromHiggsDNAAllData(input_path))
+
+        packagedConfig = config[f"packaged_{self.year}"]
+        outputExt = packagedConfig['ext']
+
+        cat_list = bkgConfig['cats'].split(",")
+
         signal_model_folder_name = config['datacard_yields']['sigModelWSDir'].split('/')[-2]
         background_model_folder_name = config['datacard_yields']['bkgModelWSDir'].split('/')[-2]
-        
+
         output_data = []
-        
+
         output_data.append(os.path.join(output_dir, 'Combine'))
-            
+
         output_data.append(os.path.join(output_dir, 'Combine', fitFolderName))
-        
+
         if signal_model_folder_name == background_model_folder_name:
             model_folder_name = signal_model_folder_name
             output_data.append(os.path.join(output_dir, 'Combine', model_folder_name))
-            output_data.append(os.path.join(output_dir, 'Combine', model_folder_name, 'background'+background_suffix))
+            output_data.append(os.path.join(output_dir, 'Combine', model_folder_name, 'background'))
             output_data.append(os.path.join(output_dir, 'Combine', model_folder_name, 'signal'))
         else:
             output_data.append(os.path.join(output_dir, 'Combine', signal_model_folder_name))
             output_data.append(os.path.join(output_dir, 'Combine', signal_model_folder_name, 'signal'))
-            
+
             output_data.append(os.path.join(output_dir, 'Combine', background_model_folder_name))
-            output_data.append(os.path.join(output_dir, 'Combine', background_model_folder_name, 'background'+background_suffix))
-        
+            output_data.append(os.path.join(output_dir, 'Combine', background_model_folder_name, 'background'))
+
+        for cat in cat_list:
+            output_data.append(os.path.join(output_dir, 'Combine', background_model_folder_name, 'background', f'CMS-HGG_multipdf_{cat}.root'))
+            output_data.append(os.path.join(output_dir, 'Combine', model_folder_name, 'signal', f'CMS-HGG_sigfit_packaged{outputExt}_{cat}.root'))
+
         # Define the file paths
         if self.variable == '':
             output_data.append(os.path.join(output_dir, 'Combine', f'Datacard_{self.year}.txt'))
         else:
             output_data.append(os.path.join(output_dir, 'Combine', f'Datacard_{self.variable}_{self.year}.txt'))
-        
+
         for i, output in enumerate(output_data):
             output_data[i] = law.LocalFileTarget(output)
 
