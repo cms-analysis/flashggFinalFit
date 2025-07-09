@@ -21,6 +21,16 @@ def safe_mkdir(path):
         if exception.errno != errno.EEXIST:
             raise
         
+def execute_command(command, return_output=False, shell=False):
+    try:
+        result = subprocess.run(command, check=True, text=True, capture_output=True, shell=shell, env=os.environ)
+        print("Script output:", result.stdout)
+        print("Script executed successfully.")
+        if return_output:
+            return (result.stdout).split("\n")[0]
+    except subprocess.CalledProcessError as e:
+        print("Error executing script:", e.stderr)
+        
 def convert_boolean_string(string):
     if (string == "True") or (string == "true") or (string == True):
         return True
@@ -48,14 +58,22 @@ class MakeYieldsCategory(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWorkflo
     # For systematics:
     doSystematics = law.Parameter(default=False, description="Include systematics calculations and add to datacard")
     ignore_warnings = law.Parameter(default=False, description="Skip errors for missing systematics. Instead output warning message")
+
+    batch_flavor = law.Parameter(default="slurm", description="Batch system to use")
+    # batch_username = law.Parameter(default="niharrin", description="Username for batch system. Currently only used when batch_flavor is slurm/psi.")
     
     mass = law.Parameter(default='125', description="Input workspace mass")
     nCats = law.Parameter(description="Number of Categories")
     variable = law.Parameter(default="", description="Variable to be used")
-    
-    htcondor_job_kwargs_submit = {"spool": True}
-    
-    def requires(self):
+
+    # def requires(self):
+    def workflow_requires(self):
+        workflow_reqs = super().workflow_requires()
+
+        tasks = {}
+
+        if workflow_reqs:
+            tasks.update(workflow_reqs)
         
         if self.variable == '':
             configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"], f"config/{self.year}_inclusive.yml")
@@ -71,7 +89,7 @@ class MakeYieldsCategory(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWorkflo
         else:
             output_dir = self.output_dir
             
-        tasks = [SignalPackaging(output_dir=output_dir, variable=self.variable, year=self.year)]
+        tasks["SignalPackaging"] = SignalPackaging(output_dir=output_dir, variable=self.variable, year=self.year, batch_flavor=self.batch_flavor)
         
         return tasks
     
@@ -91,30 +109,40 @@ class MakeYieldsCategory(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWorkflo
     def output(self):
         
         cat = self.branch_data
-
-        return [law.LocalFileTarget(os.path.join(self.output_dir, f'Datacards/yields_{self.ext}/{cat}.pkl'))]
+        output = [law.LocalFileTarget(os.path.join(self.output_dir, f'Datacards/yields_{self.ext}/{cat}.pkl'))]
+        return output
 
     def run(self):
+
         cat = self.branch_data
-        
-        safe_mkdir(self.output_dir)
-        safe_mkdir(os.path.join(self.output_dir, "Datacards"))
-        safe_mkdir(os.path.join(self.output_dir, f"Datacards/yields_{self.ext}"))
-        
+        execute_command([f'mkdir -p {os.path.join(self.output_dir, f"Datacards/yields_{self.ext}")}'], shell=True)
+        if self.batch_flavor == "slurm/psi":
+            # Have to use /scratch/batch_username/ for slurm/psi
+            os.environ["TARGET_PATH"] = f"/scratch/{os.environ['USER']}/{os.environ['SLURM_JOB_ID']}"
+            execute_command([f'mkdir -p $TARGET_PATH/Datacards/yields_{self.ext}'], shell=True)
+            temp_output_dir = os.environ["TARGET_PATH"]
+            # safe_mkdir(temp_output_dir)
+            # safe_mkdir(os.path.join(temp_output_dir, "Datacards"))
+            # safe_mkdir(os.path.join(temp_output_dir, f"Datacards/yields_{self.ext}"))
+        else:
+            temp_output_dir = self.output_dir
+        ext = self.ext
+        bkgModelWSDir = self.bkgModelWSDir
+                
         script_path = os.path.join(os.environ["ANALYSIS_PATH"], "Datacard/makeYields.py")
         arguments = [
             "python3",
             script_path,
             "--inputWSDirMap", f"{self.inputWSDirMap}",
             "--cat", cat,
-            "--outputDir", f"{self.output_dir}",
-            "--ext", self.ext,
+            "--outputDir", f"{temp_output_dir}",
+            "--ext", ext,
             "--procs", f"{self.procs}",
             "--mass", f"{self.mass}",
             "--bkgScaler", f"{self.bkgScaler}",
             "--sigModelWSDir", f"{self.sigModelWSDir}",
             "--sigModelExt", f"{self.sigModelExt}",
-            "--bkgModelWSDir", f"{self.bkgModelWSDir}",
+            "--bkgModelWSDir", f"{bkgModelWSDir}",
             "--bkgModelExt", f"{self.bkgModelExt}"
             ]
         if self.variable != '':
@@ -128,20 +156,36 @@ class MakeYieldsCategory(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWorkflo
         if convert_boolean_string(self.skipBkg): arguments.append("--skipBkg")
         if convert_boolean_string(self.skipCOWCorr): arguments.append("--skipCOWCorr")
 
-    
         command = arguments
-        print("Output:", command)
-        try:
-            result = subprocess.run(command, check=True, text=True, capture_output=True)
-            print("Script output:", result.stdout)
-            print("Script executed successfully.")
-        except subprocess.CalledProcessError as e:
-            print("Error executing script:", e.stderr)
+        # print("Output:", command)
+        execute_command(command)
+        
+        if self.batch_flavor == "slurm/psi":
+            if "/work" in self.output_dir:
+                slurm_copy_command = [
+                    'cp', '-rf',
+                    f'{temp_output_dir}/Datacards',
+                    self.output_dir
+                ]
+            # Have to copy over the output to the final directory
+            # Don't forget to VOMS!
+            else:
+                slurm_copy_command = [
+                    'xrdcp', '-r',
+                    f"{temp_output_dir+'/Datacards'}",
+                    'root://t3dcachedb.psi.ch:1094//'+self.output_dir
+                ]
+            execute_command(slurm_copy_command)
+            # Clean up the temporary directory
+            shutil.rmtree(temp_output_dir)
+            
 
-class MakeYields(law.Task):
+class MakeYields(law.Task): #law.Task
     variable = law.Parameter(default="", description="Variable to be used")
     output_dir = law.Parameter(default = '', description="Path to the output directory")
     year = law.Parameter(default='2022', description="Year")
+    
+    batch_flavor = law.Parameter(default="slurm", description="Batch system to use")
     
     def requires(self):
         # req() is defined on all tasks and handles the passing of all parameter values that are
@@ -201,7 +245,7 @@ class MakeYields(law.Task):
                 else:
                     inputWSDirMap += currentYearEra + "=" + currentYearEraInputOutput
         
-        tasks = [MakeYieldsCategory(inputWSDirMap=inputWSDirMap, output_dir=output_dir, year=self.year, cats=datacard_config['cats'], procs=datacard_config['procs'], nCats=datacard_config['nCats'], ext=datacard_config['ext'], mergeYears=datacard_config['mergeYears'], skipBkg=datacard_config['skipBkg'], bkgScaler=datacard_config['bkgScaler'], sigModelWSDir=datacard_config['sigModelWSDir'], sigModelExt=f"packaged{packaged_config['ext']}", bkgModelWSDir=datacard_config['bkgModelWSDir'], bkgModelExt=datacard_config['bkgModelExt'], skipZeroes=datacard_config['skipZeroes'], skipCOWCorr=datacard_config['skipCOWCorr'], doSystematics=datacard_config['doSystematics'], ignore_warnings=datacard_config['ignore_warnings'], mass=datacard_config['mass'], variable=self.variable, version='v1', workflow=datacard_config['execution'])]
+        tasks = [MakeYieldsCategory(inputWSDirMap=inputWSDirMap, output_dir=output_dir, year=self.year, cats=datacard_config['cats'], procs=datacard_config['procs'], nCats=datacard_config['nCats'], ext=datacard_config['ext'], mergeYears=datacard_config['mergeYears'], skipBkg=datacard_config['skipBkg'], bkgScaler=datacard_config['bkgScaler'], sigModelWSDir=datacard_config['sigModelWSDir'], sigModelExt=f"packaged{packaged_config['ext']}", bkgModelWSDir=datacard_config['bkgModelWSDir'], bkgModelExt=datacard_config['bkgModelExt'], skipZeroes=datacard_config['skipZeroes'], skipCOWCorr=datacard_config['skipCOWCorr'], doSystematics=datacard_config['doSystematics'], ignore_warnings=datacard_config['ignore_warnings'], mass=datacard_config['mass'], variable=self.variable, version='v1', workflow=datacard_config['execution'], batch_flavor=self.batch_flavor, slurm_partition=datacard_config['batchPartition'], slurm_memory=datacard_config['batchMemory'], slurm_max_runtime=datacard_config['batchMaxRuntime'], htcondor_partition=datacard_config['batchPartition'], htcondor_memory=datacard_config['batchMemory'], htcondor_max_runtime=datacard_config['batchMaxRuntime'])]
         
         return tasks
         
@@ -233,7 +277,7 @@ class MakeYields(law.Task):
         if datacard_config['cats'] == 'auto':
             datacard_config['cats'] = (extractListOfCatsFromHiggsDNAAllData(input_path))
         datacard_config['nCats'] = len(datacard_config['cats'].split(","))
-        
+
         for cat in datacard_config['cats'].split(","):
             output_paths.append(law.LocalFileTarget(os.path.join(output_dir, f"Datacards/yields_{datacard_config['ext']}/{cat}.pkl")))
                                   
@@ -244,14 +288,33 @@ class MakeYields(law.Task):
         
         return True
     
-class MakeDatacard(law.Task):
+class MakeDatacard(Task, SlurmWorkflow, HTCondorWorkflow, law.LocalWorkflow): #law.Task
     variable = law.Parameter(default="", description="Variable to be used")
     output_dir = law.Parameter(default = '', description="Path to the output directory")
     year = law.Parameter(default='2022', description="Year")
+
+    batch_flavor = law.Parameter(default="slurm", description="Batch system to use")
+    # batch_partition = law.Parameter(default="short", description="Partition to use for the batch job submission")
+    # batch_memory = law.Parameter(default=4000, description="Memory to use for the batch job submission")
+    # batch_max_runtime = law.Parameter(default="01:00:00", description="Max runtime to use for the batch job submission")
+
     
-    def requires(self):
+    def create_branch_map(self):
+        # map branch indexes to ascii numbers from 97 to 122 ("a" to "z")
+                    
+        branch_map = {i: i for i in range(1)}
+        return branch_map
+    
+    # def requires(self):
+    def workflow_requires(self):
         # req() is defined on all tasks and handles the passing of all parameter values that are
         # common between the required task and the instance (self)
+        workflow_reqs = super().workflow_requires()
+
+        tasks = {}
+
+        if workflow_reqs:
+            tasks.update(workflow_reqs)
         
         if self.variable == '':
             configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"], f"config/{self.year}_inclusive.yml")
@@ -267,13 +330,12 @@ class MakeDatacard(law.Task):
         else:
             output_dir = self.output_dir
         
-        tasks = [MakeYields(variable=self.variable, output_dir=output_dir, year=self.year)]
+        tasks["MakeYields"] = MakeYields(variable=self.variable, output_dir=output_dir, year=self.year, batch_flavor=self.batch_flavor)
         
         return tasks    
 
     def output(self):
         # returns output folder
-        
         if self.variable == '':
             configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"], f"config/{self.year}_inclusive.yml")
         else:
@@ -307,8 +369,6 @@ class MakeDatacard(law.Task):
                 
     
     def run(self):
-        
-        
         if self.variable == '':
             configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"], f"config/{self.year}_inclusive.yml")
         else:
@@ -317,22 +377,40 @@ class MakeDatacard(law.Task):
         #Load central config file
         with open(configYamlPath, 'r') as file:
             config = yaml.safe_load(file)
+            
+        datacard_config = config["datacard"]
+        yields_config = config["datacard_yields"]
         
         if self.output_dir == '':
             output_dir = config['outputFolder']
         else:
             output_dir = self.output_dir
-            
-        safe_mkdir(output_dir)
-        output_dir = os.path.join(output_dir,"Datacards/")
-        safe_mkdir(output_dir)
-        
-        datacard_config = config["datacard"]
-        yields_config = config["datacard_yields"]
+
+    
+        if self.batch_flavor == "slurm/psi":
+            if "/work" in output_dir:
+                execute_command([f'mkdir -p {output_dir}'], shell=True)
+            else:
+                execute_command([f'xrdfs root://t3dcachedb.psi.ch:1094/ mkdir -p {output_dir}'], shell=True)
+            output_dir = os.path.join(output_dir,"Datacards/")
+            if "/work" in output_dir:
+                execute_command([f'mkdir -p {output_dir}'], shell=True)
+            else:
+                execute_command([f'xrdfs root://t3dcachedb.psi.ch:1094/ mkdir -p {output_dir}'], shell=True)
+            # Have to use /scratch/batch_username/ for slurm/psi
+            os.environ["TARGET_PATH"] = f"/scratch/{os.environ['USER']}/MakeDatacard"
+            execute_command(['mkdir -p $TARGET_PATH'], shell=True)
+            temp_output_dir = os.environ["TARGET_PATH"]
+            # safe_mkdir(temp_output_dir)
+            # safe_mkdir(os.path.join(temp_output_dir, "Datacards"))
+        else:
+            safe_mkdir(output_dir)
+            output_dir = os.path.join(output_dir,"Datacards/")
+            safe_mkdir(output_dir)
+            temp_output_dir = output_dir
+        # In this case, the Pickle input files are already in the final output directory
         pklInputFiles = output_dir
-        
-        # if self.variable != '':
-        #     yields_config["ext"] = yields_config["ext"]+'_'+self.variable
+        ext = yields_config["ext"]
                     
         # Create years string
         years = ''
@@ -340,7 +418,6 @@ class MakeDatacard(law.Task):
         else: datacard_config['year'] = self.year   
         
         if datacard_config['year'] == 'all':
-            allYears = list(allErasMap.keys())
             for i, currentYear in enumerate(allErasMap.keys()):
                 for j, currentEra in enumerate(allErasMap[currentYear]):
                     currentYearEra = currentYear + currentEra
@@ -361,8 +438,8 @@ class MakeDatacard(law.Task):
             "python3",
             script_path,
             "--inputFiles", f"{pklInputFiles}",
-            "--outputDir", f"{output_dir}",
-            "--ext", yields_config["ext"],
+            "--outputDir", f"{temp_output_dir}",
+            "--ext", ext,
             "--years", f"{years}",
             "--mass", f"{yields_config['mass']}",
             "--pruneThreshold", f"{datacard_config['pruneThreshold']}",
@@ -383,20 +460,19 @@ class MakeDatacard(law.Task):
         if convert_boolean_string(datacard_config["saveDataFrame"]): arguments.append("--saveDataFrame")
     
         command = arguments
-        # print("Output:", command)
+        print("Output:", command)
         try:
             result = subprocess.run(command, check=True, text=True, capture_output=True)
             print("Script output:", result.stdout)
             print("Script executed successfully.")
         except subprocess.CalledProcessError as e:
             print("Error executing script:", e.stderr)
-            
         
         if self.variable != '':
             
             clean_config = config["datacard_clean"]
             
-            datacard_path = os.path.join(output_dir, datacard_config["output"] + ".txt")
+            datacard_path = os.path.join(temp_output_dir, datacard_config["output"] + ".txt")
             script_path = os.path.join(os.environ["ANALYSIS_PATH"], "Datacard/cleanDatacard.py")
             arguments = [
                 "python3",
@@ -418,8 +494,34 @@ class MakeDatacard(law.Task):
                 print("Script executed successfully.")
             except subprocess.CalledProcessError as e:
                 print("Error executing script:", e.stderr)
-                
+                            
+            # Move the datacard to the final directory
+            if self.batch_flavor == "slurm/psi":
+                if "/work" in output_dir:
+                    slurm_copy_command = [
+                        f'cp -rf {temp_output_dir}/* {output_dir}'
+                    ]
+                # Have to copy over the output to the final directory
+                # Don't forget to VOMS!
+                else:
+                    slurm_copy_command = [
+                        f'xrdcp -rf {temp_output_dir}/* root://t3dcachedb.psi.ch:1094//'+output_dir
+                    ]
+                print("Copy command:", slurm_copy_command)
+                execute_command(slurm_copy_command, shell=True)
+                # Clean up the temporary directory
+                # shutil.rmtree(temp_output_dir)
             
-            shutil.move(datacard_path, os.path.join(output_dir, datacard_config["output"] + "_unsymmetrized.txt"))
-            shutil.move(os.path.join(output_dir, datacard_config["output"] + "_cleaned.txt"), os.path.join(output_dir, datacard_config["output"] + ".txt"))
+                # After datacard has been moved to pnfs, the datacard_path has to be changed.
+                datacard_path = os.path.join(output_dir, datacard_config["output"] + ".txt")
+            
+                if "/work" in output_dir:
+                    execute_command([f'mv {datacard_path} {os.path.join(output_dir, datacard_config["output"] + "_unsymmetrized.txt")}'], shell=True)
+                    execute_command([f'mv {os.path.join(output_dir, datacard_config["output"] + "_cleaned.txt")} {os.path.join(output_dir, datacard_config["output"] + ".txt")}'], shell=True)
+                else:
+                    execute_command([f'xrdfs root://t3dcachedb.psi.ch:1094/ mv {datacard_path} {os.path.join(output_dir, datacard_config["output"] + "_unsymmetrized.txt")}'], shell=True)
+                    execute_command([f'xrdfs root://t3dcachedb.psi.ch:1094/ mv {os.path.join(output_dir, datacard_config["output"] + "_cleaned.txt")} {os.path.join(output_dir, datacard_config["output"] + ".txt")}'], shell=True)
+            else:
+                execute_command([f'mv {datacard_path} {os.path.join(output_dir, datacard_config["output"] + "_unsymmetrized.txt")}'], shell=True)
+                execute_command([f'mv {os.path.join(output_dir, datacard_config["output"] + "_cleaned.txt")} {os.path.join(output_dir, datacard_config["output"] + ".txt")}'], shell=True)
         

@@ -7,7 +7,8 @@ print(" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG T2W RUN II ~~~~~~~~~~~~~~~~~~~~~~~
 def get_options():
   parser = OptionParser()
   parser.add_option("--outputDir", dest='outputDir', default='.', help="Output directory")
-  parser.add_option("--outputName", dest='outputName', default='Datacard', help="Name of the datacard. Can be custom.")
+  parser.add_option("--inputName", dest='inputName', default='Datacard', help="Name of the datacard. Can be custom.")
+  parser.add_option("--outputName", dest='outputName', default='Datacard', help="Name of the workspace. Can be custom.")
   parser.add_option('--mode', dest='mode', default='mu_inclusive', help="Physics Model (specified in models.py)")
   parser.add_option('--ext',dest='ext', default="", help='In case running over datacard with extension')
   parser.add_option('--common_opts',dest='common_opts', default="-m 125 higgsMassRange=122,128", help='Common options')
@@ -38,15 +39,15 @@ if opt.mode not in models:
 
 print(" --> Running text2workspace for model: %s"%opt.mode)
 if opt.ext != "":
-  if opt.outputName == "Datacard":
+  if opt.inputName == "Datacard":
     print(" --> Input: Datacard_%s.txt --> Output: Datacard_%s.root"%(opt.ext,opt.ext))
   else:
-    print(" --> Input: %s.txt --> Output: %s.root"%(opt.outputName,opt.outputName))
+    print(" --> Input: %s.txt --> Output: %s.root"%(opt.inputName,opt.outputName))
 else:
-  if opt.outputName == "Datacard":
+  if opt.inputName == "Datacard":
     print(" --> Input: Datacard%s.txt --> Output: Datacard%s_%s.root"%(opt.ext,opt.ext,opt.mode))
   else:
-    print(" --> Input: %s.txt --> Output: %s.root"%(opt.outputName,opt.outputName))
+    print(" --> Input: %s.txt --> Output: %s.root"%(opt.inputName,opt.outputName))
 
 if not os.path.isdir(f"{outputDir}/t2w_jobs"): os.system(f"mkdir {outputDir}/t2w_jobs")
 
@@ -54,22 +55,22 @@ if opt.ext != "":
   t2w_file_path = "%s/t2w_jobs/t2w_%s"%(outputDir,opt.ext)
 else:
   t2w_file_path = "%s/t2w_jobs/t2w_%s"%(outputDir,opt.mode)
-  
+
 # Open submission file to write to
 fsub = open(t2w_file_path+".sh","w")
 fsub.write("#!/bin/bash\n\n")
 fsub.write("cd %s\n\n"%os.environ['PWD'])
 fsub.write("eval `scramv1 runtime -sh`\n\n")
 if opt.ext != "":
-  if opt.outputName == "Datacard":
+  if opt.inputName == "Datacard":
     fsub.write("text2workspace.py %s/Datacard_%s.txt -o %s/Datacard_%s.root %s %s"%(outputDir,opt.ext,outputDir,opt.ext,opt.common_opts,models[opt.mode]))
   else:
-    fsub.write("text2workspace.py %s/%s.txt -o %s/%s.root %s %s"%(outputDir,opt.outputName,outputDir,opt.outputName,opt.common_opts,models[opt.mode]))
+    fsub.write("text2workspace.py %s/%s.txt -o %s/%s.root %s %s"%(outputDir,opt.inputName,outputDir,opt.outputName,opt.common_opts,models[opt.mode]))
 else:
-  if opt.outputName == "Datacard":
+  if opt.inputName == "Datacard":
     fsub.write("text2workspace.py %s/Datacard%s.txt -o %s/Datacard%s_%s.root %s %s"%(outputDir,opt.ext,outputDir,opt.ext,opt.mode,opt.common_opts,models[opt.mode]))
   else:
-    fsub.write("text2workspace.py %s/%s.txt -o %s/%s.root %s %s"%(outputDir,opt.outputName,outputDir,opt.outputName,opt.common_opts,models[opt.mode]))
+    fsub.write("text2workspace.py %s/%s.txt -o %s/%s.root %s %s"%(outputDir,opt.inputName,outputDir,opt.outputName,opt.common_opts,models[opt.mode]))
 fsub.close()
 
 # Change permission for file

@@ -4,6 +4,7 @@ import subprocess
 import glob
 import yaml
 import errno
+import time
 
 from commonTools import *
 from commonObjects import *
@@ -29,8 +30,7 @@ def convert_boolean_string(string):
     if (string == "True") or (string == "true") or (string == True):
         return True
     else:
-        return False
-                
+        return False              
 
 class FTestCategory(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWorkflow): #(law.Task): #(Task, HTCondorWorkflow, law.LocalWorkflow):
     input_path = law.Parameter(description="Path to the input ROOT files (/ws_signal)")
@@ -42,10 +42,19 @@ class FTestCategory(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWorkflow): #
     year = law.Parameter(description="Year")    
     
     era = law.Parameter(description="Current Era")    
+    
+    batch_flavor = law.Parameter(default="htcondor", description="Batch system to use")
 
     htcondor_job_kwargs_submit = {"spool": True}
     
-    def requires(self):
+    # def requires(self):
+    def workflow_requires(self):
+        workflow_reqs = super().workflow_requires()
+
+        tasks = {}
+
+        if workflow_reqs:
+            tasks.update(workflow_reqs)
         
         if self.variable == '':
             configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"], f"config/{self.year}_inclusive.yml")
@@ -61,7 +70,7 @@ class FTestCategory(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWorkflow): #
         else:
             output_dir = self.output_dir
             
-        tasks = [Trees2WS(output_dir=output_dir, variable=self.variable, year=self.year)]
+        tasks["Trees2WS"] = Trees2WS(output_dir=output_dir, variable=self.variable, year=self.year, batch_flavor=self.batch_flavor)
         
         return tasks
     
@@ -81,8 +90,6 @@ class FTestCategory(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWorkflow): #
         
         cat = self.branch_data
 
-        safe_mkdir(self.output_dir)
-
         ftest_output = [os.path.join(self.output_dir, f'outdir_{self.ext}/fTest/json/nGauss_{cat}.json')]
                 
         outputFileTargets = []
@@ -96,12 +103,26 @@ class FTestCategory(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWorkflow): #
         cat = self.branch_data
         
         sys.path.append(os.path.dirname(os.path.abspath(__file__))+ "/tools")
-        
-        safe_mkdir(self.output_dir)
-        safe_mkdir(os.path.join(self.output_dir,f"outdir_{self.ext}"))
-        safe_mkdir(os.path.join(self.output_dir,f"outdir_{self.ext}/fTest"))
-        safe_mkdir(os.path.join(self.output_dir,f"outdir_{self.ext}/fTest/Plots"))
-        safe_mkdir(os.path.join(self.output_dir,f"outdir_{self.ext}/fTest/json"))
+
+        if self.batch_flavor == "slurm/psi":
+            # Have to use /scratch/batch_username/ for slurm/psi
+            if "/work" in self.output_dir:
+                execute_command([f'mkdir -p {self.output_dir}/outdir_{self.ext}/fTest/Plots'], shell=True)
+                execute_command([f'mkdir -p {self.output_dir}/outdir_{self.ext}/fTest/json'], shell=True)
+            else:   
+                execute_command([f'xrdfs root://t3dcachedb.psi.ch:1094/ mkdir -p {self.output_dir}/outdir_{self.ext}/fTest/Plots'], shell=True)
+                execute_command([f'xrdfs root://t3dcachedb.psi.ch:1094/ mkdir -p {self.output_dir}/outdir_{self.ext}/fTest/json'], shell=True)
+
+            os.environ["TARGET_PATH"] = f"/scratch/{os.environ['USER']}/{os.environ['SLURM_JOB_ID']}"
+            execute_command([f'mkdir -p $TARGET_PATH/outdir_{self.ext}/fTest/Plots'], shell=True)
+            execute_command([f'mkdir -p $TARGET_PATH/outdir_{self.ext}/fTest/json'], shell=True)
+            output_dir = os.environ["TARGET_PATH"]
+            # os.chdir(os.path.join(os.environ["TARGET_PATH"], 'Combine', fitFolderName, 'impact'))
+        else:
+            execute_command([f'mkdir -p {self.output_dir}/outdir_{self.ext}/fTest/Plots'], shell=True)
+            execute_command([f'mkdir -p {self.output_dir}/outdir_{self.ext}/fTest/json'], shell=True)
+            output_dir = self.output_dir
+            # os.chdir(os.path.join(self.output_dir, 'Combine', fitFolderName, 'impact'))
 
         script_path = os.path.join(os.environ["ANALYSIS_PATH"], "Signal/scripts/fTest.py")
         arguments = [
@@ -110,12 +131,12 @@ class FTestCategory(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWorkflow): #
             "--cat", cat,
             "--procs", self.procs,
             "--ext", self.ext,
-            "--outputDir", f"{self.output_dir}",
+            "--outputDir", f"{output_dir}",
             "--inputWSDir", f"{self.input_path}",
             "--doPlots"
         ]
         command = arguments
-        # print(command)
+        print(command)
         try:
             result = subprocess.run(command, check=True, text=True, capture_output=True)
             print("Script output:", result.stdout)
@@ -123,10 +144,33 @@ class FTestCategory(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWorkflow): #
         except subprocess.CalledProcessError as e:
             print("Error executing script:", e.stderr)
 
+        # Copy the files back to pnfs if we are on slurm/psi
+        if self.batch_flavor == "slurm/psi":
+            # Have to copy over the output to the final directory
+            # Don't forget to VOMS!
+            if "/work" in self.output_dir:
+                slurm_copy_command = [
+                    'cp', '-rf',
+                    f"{os.environ['TARGET_PATH']}/outdir_{self.ext}/",
+                    self.output_dir
+                ]
+            else:
+                slurm_copy_command = [
+                    'xrdcp', '-rf',
+                    f"{os.environ['TARGET_PATH']}/outdir_{self.ext}/",
+                    'root://t3dcachedb.psi.ch:1094//'+self.output_dir
+                ]
+            print(slurm_copy_command)
+            execute_command(slurm_copy_command)
+            # Clean up the temporary directory
+            shutil.rmtree(os.environ["TARGET_PATH"])
+
 class FTest(law.Task):
     variable = law.Parameter(default="", description="Variable to be used")
     output_dir = law.Parameter(default="", description="Path to the output directory")
     year = law.Parameter(default='2022', description="Year")
+    
+    batch_flavor = law.Parameter(default="htcondor", description="Batch system to use")
     
     def requires(self):
         # req() is defined on all tasks and handles the passing of all parameter values that are
@@ -185,15 +229,12 @@ class FTest(law.Task):
             if currentConfig['procs'] == "auto":
                 currentConfig['procs'] = extractListOfProcsFromHiggsDNASignal(signal_input_path, self.variable, inOutSplittingFlag)
             currentConfig['nProcs'] = len(currentConfig['procs'].split(","))
-            
-            
-            tasks.append(FTestCategory(input_path=input_path, output_dir=output_dir, ext=currentConfig['ext'], cats=currentConfig['cats'], procs=currentConfig['procs'], variable=self.variable, year=self.year, version=f"v{i}", workflow=currentConfig['execution'], era=currentEra))
-            i += 1
-        
-        return tasks
-        
 
-    
+            tasks.append(FTestCategory(input_path=input_path, output_dir=output_dir, ext=currentConfig['ext'], cats=currentConfig['cats'], procs=currentConfig['procs'], variable=self.variable, year=self.year, version=f"v{i}", workflow=currentConfig['execution'], era=currentEra, batch_flavor=self.batch_flavor, slurm_partition=currentConfig['batchPartition'], slurm_memory=currentConfig['batchMemory'], slurm_max_runtime=currentConfig['batchMaxRuntime'], htcondor_partition=currentConfig['batchPartition'], htcondor_memory=currentConfig['batchMemory'], htcondor_max_runtime=currentConfig['batchMaxRuntime']))
+            i += 1
+
+        return tasks
+
     def output(self):
         # Path should be somewhere centrally...
         if self.variable == '':
@@ -259,8 +300,18 @@ class CalcPhotonSystCategory(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWor
     variable = law.Parameter(default="", description="Variable to be used")
     year = law.Parameter(description="Year")    
     
+    batch_flavor = law.Parameter(default="htcondor", description="Batch system to use")
+    
     htcondor_job_kwargs_submit = {"spool": True}
-    def requires(self):
+
+    # def requires(self):
+    def workflow_requires(self):
+        workflow_reqs = super().workflow_requires()
+
+        tasks = {}
+
+        if workflow_reqs:
+            tasks.update(workflow_reqs)
         
         if self.variable == '':
             configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"], f"config/{self.year}_inclusive.yml")
@@ -276,7 +327,7 @@ class CalcPhotonSystCategory(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWor
         else:
             output_dir = self.output_dir
             
-        tasks = [Trees2WS(output_dir=output_dir, variable=self.variable, year=self.year)]
+        tasks["Trees2WS"] = Trees2WS(output_dir=output_dir, variable=self.variable, year=self.year, batch_flavor=self.batch_flavor)
         
         return tasks
     
@@ -296,8 +347,6 @@ class CalcPhotonSystCategory(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWor
         
         cat = self.branch_data
         
-        safe_mkdir(self.output_dir)
-
         ftest_output = [os.path.join(self.output_dir, f'outdir_{self.ext}/calcPhotonSyst/pkl/{cat}.pkl')]
                 
         outputFileTargets = []
@@ -313,11 +362,22 @@ class CalcPhotonSystCategory(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWor
         cat = self.branch_data
 
         sys.path.append(os.path.dirname(os.path.abspath(__file__))+ "/tools")
-        
-        safe_mkdir(self.output_dir)
-        safe_mkdir(os.path.join(self.output_dir,f"outdir_{self.ext}"))
-        safe_mkdir(os.path.join(self.output_dir,f"outdir_{self.ext}/calcPhotonSyst"))
-        safe_mkdir(os.path.join(self.output_dir,f"outdir_{self.ext}/calcPhotonSyst/pkl"))
+
+        if self.batch_flavor == "slurm/psi":
+            # Have to use /scratch/batch_username/ for slurm/psi
+            if "/work" in self.output_dir:
+                execute_command([f'mkdir -p {self.output_dir}/outdir_{self.ext}/calcPhotonSyst/pkl'], shell=True)
+            else:   
+                execute_command([f'xrdfs root://t3dcachedb.psi.ch:1094/ mkdir -p {self.output_dir}/calcPhotonSyst/pkl'], shell=True)
+
+            os.environ["TARGET_PATH"] = f"/scratch/{os.environ['USER']}/{os.environ['SLURM_JOB_ID']}"
+            execute_command([f'mkdir -p $TARGET_PATH/outdir_{self.ext}/calcPhotonSyst/pkl'], shell=True)
+            output_dir = os.environ["TARGET_PATH"]
+            # os.chdir(os.path.join(os.environ["TARGET_PATH"], 'Combine', fitFolderName, 'impact'))
+        else:
+            execute_command([f'mkdir -p {self.output_dir}/outdir_{self.ext}/calcPhotonSyst/pkl'], shell=True)
+            output_dir = self.output_dir
+            # os.chdir(os.path.join(self.output_dir, 'Combine', fitFolderName, 'impact'))
 
         script_path = os.path.join(os.environ["ANALYSIS_PATH"], "Signal/scripts/calcPhotonSyst.py")
         arguments = [
@@ -326,7 +386,7 @@ class CalcPhotonSystCategory(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWor
             "--cat", cat,
             "--procs", self.procs,
             "--ext", self.ext,
-            "--outputDir", f"{self.output_dir}",
+            "--outputDir", f"{output_dir}",
             "--inputWSDir", f"{self.input_path}",
             "--scales", f"{self.scales}",
             "--smears", f"{self.smears}"
@@ -346,13 +406,33 @@ class CalcPhotonSystCategory(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWor
         except subprocess.CalledProcessError as e:
             print("Error executing script:", e.stderr)
 
+        # Copy the files back to pnfs if we are on slurm/psi
+        if self.batch_flavor == "slurm/psi":
+            # Have to copy over the output to the final directory
+            # Don't forget to VOMS!
+            if "/work" in self.output_dir:
+                slurm_copy_command = [
+                    'cp', '-rf',
+                    f"{os.environ['TARGET_PATH']}/outdir_{self.ext}/",
+                    self.output_dir
+                ]
+            else:
+                slurm_copy_command = [
+                    'xrdcp', '-rf',
+                    f"{os.environ['TARGET_PATH']}/outdir_{self.ext}/",
+                    'root://t3dcachedb.psi.ch:1094//'+self.output_dir
+                ]
+            print(slurm_copy_command)
+            execute_command(slurm_copy_command)
+            # Clean up the temporary directory
+            shutil.rmtree(os.environ["TARGET_PATH"])
+
 class CalcPhotonSyst(law.Task):
-    # input_path = law.Parameter(description="Path to the input ROOT files (/ws_signal)")
     variable = law.Parameter(default="", description="Variable to be used")
     output_dir = law.Parameter(default="", description="Path to the output directory")
     year = law.Parameter(default='2022', description="Year")
-    # ext = law.Parameter(default="earlyAnalysis", description="Descriptor of the background output folder.")
-    # era = law.Parameter(default='None', description="Current era (eg. preEE, postEE for 2022), if any.")
+
+    batch_flavor = law.Parameter(default="htcondor", description="Batch system to use")
 
     def requires(self):
         # req() is defined on all tasks and handles the passing of all parameter values that are
@@ -411,12 +491,10 @@ class CalcPhotonSyst(law.Task):
             for mp in currentConfig['massPoints'].split(","): mps.append(int(mp))
             currentConfig['massLow'], currentConfig['massHigh'] = '%s'%min(mps), '%s'%max(mps)
                     
-            tasks.append(CalcPhotonSystCategory(input_path=input_path, output_dir=output_dir, ext=currentConfig['ext'], cats=currentConfig['cats'], procs=currentConfig['procs'], scales=currentConfig['scales'], scalesCorr=currentConfig['scalesCorr'], scalesGlobal=currentConfig['scalesGlobal'], smears=currentConfig['smears'], variable=self.variable, year=self.year, version=f"v{i}", workflow=currentConfig['execution']))
+            tasks.append(CalcPhotonSystCategory(input_path=input_path, output_dir=output_dir, ext=currentConfig['ext'], cats=currentConfig['cats'], procs=currentConfig['procs'], scales=currentConfig['scales'], scalesCorr=currentConfig['scalesCorr'], scalesGlobal=currentConfig['scalesGlobal'], smears=currentConfig['smears'], variable=self.variable, year=self.year, version=f"v{i}", workflow=currentConfig['execution'], batch_flavor=self.batch_flavor, slurm_partition=currentConfig['batchPartition'], slurm_memory=currentConfig['batchMemory'], slurm_max_runtime=currentConfig['batchMaxRuntime'], htcondor_partition=currentConfig['batchPartition'], htcondor_memory=currentConfig['batchMemory'], htcondor_max_runtime=currentConfig['batchMaxRuntime']))
             i += 1
 
         return tasks
-        
-
     
     def output(self):
               
@@ -426,7 +504,6 @@ class CalcPhotonSyst(law.Task):
         else:
             configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"], f"config/{self.year}_{self.variable}.yml")
 
-        
         #Load central config file
         with open(configYamlPath, 'r') as file:
             config = yaml.safe_load(file)
@@ -490,9 +567,18 @@ class SignalFitCategoryProcess(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalW
     
     variable = law.Parameter(default="", description="Variable to be used")
     
+    batch_flavor = law.Parameter(default="htcondor", description="Batch system to use")
+    
     htcondor_job_kwargs_submit = {"spool": True}
       
-    def requires(self):
+    # def requires(self):
+    def workflow_requires(self):
+        workflow_reqs = super().workflow_requires()
+
+        tasks = {}
+
+        if workflow_reqs:
+            tasks.update(workflow_reqs)
         
         year = self.year[:4]
         
@@ -511,12 +597,9 @@ class SignalFitCategoryProcess(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalW
         else:
             output_dir = self.output_dir
             
-        tasks = []
-            
-        tasks.append(FTest(variable=self.variable, output_dir=output_dir, year=year))
-        tasks.append(CalcPhotonSyst(variable=self.variable, output_dir=output_dir, year=year))
-                    
-                
+        tasks["FTest"] = FTest(variable=self.variable, output_dir=output_dir, year=year, batch_flavor=self.batch_flavor)
+        tasks["CalcPhotonSyst"] = CalcPhotonSyst(variable=self.variable, output_dir=output_dir, year=year, batch_flavor=self.batch_flavor)
+
         return tasks
     
     def create_branch_map(self):
@@ -538,8 +621,6 @@ class SignalFitCategoryProcess(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalW
                 
         cat, proc = self.branch_data
         
-        safe_mkdir(self.output_dir)
-
         signal_output = [os.path.join(self.output_dir, f'outdir_{self.ext}/signalFit/output/CMS-HGG_sigfit_{self.ext}_{proc}_{self.year}_{cat}.root')]
         signal_output += glob.glob(os.path.join(self.output_dir, f'outdir_{self.ext}/signalFit/Plots/{proc}_{self.year}_{cat}*'))
                 
@@ -555,12 +636,24 @@ class SignalFitCategoryProcess(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalW
         cat, proc = self.branch_data
         
         sys.path.append(os.path.dirname(os.path.abspath(__file__))+ "/tools")
-        
-        safe_mkdir(self.output_dir)
-        safe_mkdir(os.path.join(self.output_dir,f"outdir_{self.ext}"))
-        safe_mkdir(os.path.join(self.output_dir,f"outdir_{self.ext}/signalFit"))
-        safe_mkdir(os.path.join(self.output_dir,f"outdir_{self.ext}/signalFit/output"))
-        safe_mkdir(os.path.join(self.output_dir,f"outdir_{self.ext}/signalFit/Plots"))
+
+        if self.batch_flavor == "slurm/psi":
+            # Have to use /scratch/batch_username/ for slurm/psi
+            if "/work" in self.output_dir:
+                execute_command([f'mkdir -p {self.output_dir}/outdir_{self.ext}/signalFit/output'], shell=True)
+                execute_command([f'mkdir -p {self.output_dir}/outdir_{self.ext}/signalFit/Plots'], shell=True)
+            else:   
+                execute_command([f'xrdfs root://t3dcachedb.psi.ch:1094/ mkdir -p {self.output_dir}/signalFit/output'], shell=True)
+                execute_command([f'xrdfs root://t3dcachedb.psi.ch:1094/ mkdir -p {self.output_dir}/signalFit/Plots'], shell=True)
+
+            os.environ["TARGET_PATH"] = f"/scratch/{os.environ['USER']}/{os.environ['SLURM_JOB_ID']}"
+            execute_command([f'mkdir -p $TARGET_PATH/outdir_{self.ext}/signalFit/output'], shell=True)
+            execute_command([f'mkdir -p $TARGET_PATH/outdir_{self.ext}/signalFit/Plots'], shell=True)
+            output_dir = os.environ["TARGET_PATH"]
+        else:
+            execute_command([f'mkdir -p {self.output_dir}/outdir_{self.ext}/signalFit/output'], shell=True)
+            execute_command([f'mkdir -p {self.output_dir}/outdir_{self.ext}/signalFit/Plots'], shell=True)
+            output_dir = self.output_dir
 
         script_path = os.path.join(os.environ["ANALYSIS_PATH"], "Signal/scripts/signalFit.py")
         arguments = [
@@ -569,7 +662,7 @@ class SignalFitCategoryProcess(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalW
             "--cat", cat,
             "--proc", proc,
             "--ext", self.ext,
-            "--outputDir", f"{self.output_dir}",
+            "--outputDir", f"{output_dir}",
             "--inputWSDir", f"{self.input_path}",
             "--year", f"{self.year}",
             "--scales", f"{self.scales}",
@@ -588,6 +681,9 @@ class SignalFitCategoryProcess(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalW
         if self.scalesGlobal != "":
             arguments += ["--scalesGlobal"]
             arguments += ["%s"%self.scalesGlobal]
+        if (self.batch_flavor == "slurm/psi"):
+            arguments += ["--ingredientsDir"]
+            arguments += ["%s"%self.output_dir]
         command = arguments
         print(command)
         try:
@@ -597,10 +693,33 @@ class SignalFitCategoryProcess(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalW
         except subprocess.CalledProcessError as e:
             print("Error executing script:", e.stderr)
 
+        # Copy the files back to pnfs if we are on slurm/psi
+        if self.batch_flavor == "slurm/psi":
+            # Have to copy over the output to the final directory
+            # Don't forget to VOMS!
+            if "/work" in self.output_dir:
+                slurm_copy_command = [
+                    'cp', '-rf',
+                    f"{os.environ['TARGET_PATH']}/outdir_{self.ext}/",
+                    self.output_dir
+                ]
+            else:
+                slurm_copy_command = [
+                    'xrdcp', '-rf',
+                    f"{os.environ['TARGET_PATH']}/outdir_{self.ext}/",
+                    'root://t3dcachedb.psi.ch:1094//'+self.output_dir
+                ]
+            print(slurm_copy_command)
+            execute_command(slurm_copy_command)
+            # Clean up the temporary directory
+            shutil.rmtree(os.environ["TARGET_PATH"])
+
 class SignalFit(law.Task):
     variable = law.Parameter(default="", description="Variable to be used")
     output_dir = law.Parameter(default="", description="Path to the output directory")
     year = law.Parameter(default='2022', description="Year")
+
+    batch_flavor = law.Parameter(default="htcondor", description="Batch system to use")
     
     def requires(self):
         
@@ -653,11 +772,10 @@ class SignalFit(law.Task):
             for mp in currentConfig['massPoints'].split(","): mps.append(int(mp))
             currentConfig['massLow'], currentConfig['massHigh'] = '%s'%min(mps), '%s'%max(mps)         
             
-            tasks.append(SignalFitCategoryProcess(input_path=input_path, output_dir=output_dir, ext=currentConfig['ext'], cats=currentConfig['cats'], procs=currentConfig['procs'], scales=currentConfig['scales'], scalesCorr=currentConfig['scalesCorr'], scalesGlobal=currentConfig['scalesGlobal'], smears=currentConfig['smears'], year=currentConfig['year'], analysis=currentConfig['analysis'], replacementThreshold=currentConfig['replacementThreshold'], massPoints=currentConfig['massPoints'], beamspotWidthData=currentConfig['beamspotWidthData'], beamspotWidthMC=currentConfig['beamspotWidthMC'], doPlots=currentConfig['doPlots'], variable=self.variable, version=f"v{i}", workflow=currentConfig['execution']))
+            tasks.append(SignalFitCategoryProcess(input_path=input_path, output_dir=output_dir, ext=currentConfig['ext'], cats=currentConfig['cats'], procs=currentConfig['procs'], scales=currentConfig['scales'], scalesCorr=currentConfig['scalesCorr'], scalesGlobal=currentConfig['scalesGlobal'], smears=currentConfig['smears'], year=currentConfig['year'], analysis=currentConfig['analysis'], replacementThreshold=currentConfig['replacementThreshold'], massPoints=currentConfig['massPoints'], beamspotWidthData=currentConfig['beamspotWidthData'], beamspotWidthMC=currentConfig['beamspotWidthMC'], doPlots=currentConfig['doPlots'], variable=self.variable, version=f"v{i}", workflow=currentConfig['execution'], batch_flavor=self.batch_flavor, slurm_partition=currentConfig['batchPartition'], slurm_memory=currentConfig['batchMemory'], slurm_max_runtime=currentConfig['batchMaxRuntime'], htcondor_partition=currentConfig['batchPartition'], htcondor_memory=currentConfig['batchMemory'], htcondor_max_runtime=currentConfig['batchMaxRuntime']))
             i += 1
                 
         return tasks
-
     
     def output(self):
         # Path should be somewhere centrally...
@@ -722,13 +840,22 @@ class SignalPackagingCategory(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWo
     year = law.Parameter(description="Year")    
     massPoints = law.Parameter(description="Mass Points")
     mergeYears = law.Parameter(default=True, description="Flag if one should merge the years or eras.")
+    
+    batch_flavor = law.Parameter(default="htcondor", description="Batch system to use")
 
     variable = law.Parameter(default="", description="Variable to be used")
     
     htcondor_job_kwargs_submit = {"spool": True}
     
-    def requires(self):
-        
+    # def requires(self):
+    def workflow_requires(self):
+        workflow_reqs = super().workflow_requires()
+
+        tasks = {}
+
+        if workflow_reqs:
+            tasks.update(workflow_reqs)
+
         year = self.year[:4]
         
         # Path should be somewhere centrally...
@@ -745,10 +872,8 @@ class SignalPackagingCategory(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWo
             output_dir = config["outputFolder"]
         else:
             output_dir = self.output_dir
-                        
-        tasks = []
-        
-        tasks.append(SignalFit(variable=self.variable, output_dir=output_dir, year=year))
+                                
+        tasks["SignalFit"] = SignalFit(variable=self.variable, output_dir=output_dir, year=year, batch_flavor=self.batch_flavor)
                     
         return tasks
     
@@ -767,7 +892,6 @@ class SignalPackagingCategory(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWo
 
     def output(self):
         cat = self.branch_data
-        safe_mkdir(self.output_dir)
         
         signal_output = [os.path.join(self.output_dir, f'outdir_packaged{self.outputExt}/CMS-HGG_sigfit_packaged{self.outputExt}_{cat}.root')]
                 
@@ -782,9 +906,51 @@ class SignalPackagingCategory(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWo
         cat = self.branch_data
         sys.path.append(os.path.dirname(os.path.abspath(__file__))+ "/tools")
         
-        safe_mkdir(self.output_dir)
-        safe_mkdir(os.path.join(self.output_dir,f"outdir_packaged{self.outputExt}"))
-        safe_mkdir(os.path.join(self.output_dir,f"outdir_packaged{self.outputExt}/packageSignal"))
+        on_slurm_node = os.environ.get("SLURM_JOB_ID", False)
+
+        if self.batch_flavor == "slurm/psi" and on_slurm_node:
+            # Have to use /scratch/batch_username/ for slurm/psi
+            if "/work" in self.output_dir:
+                execute_command([f'mkdir -p {self.output_dir}/outdir_packaged{self.outputExt}/packageSignal'], shell=True)
+            else:   
+                execute_command([f'xrdfs root://t3dcachedb.psi.ch:1094/ mkdir -p {self.output_dir}/outdir_packaged{self.outputExt}/packageSignal'], shell=True)
+
+            os.environ["TARGET_PATH"] = f"/scratch/{os.environ['USER']}/{os.environ['SLURM_JOB_ID']}"
+            execute_command([f'mkdir -p $TARGET_PATH/outdir_packaged{self.outputExt}/packageSignal'], shell=True)
+            output_dir = os.environ["TARGET_PATH"]
+            # os.chdir(os.path.join(os.environ["TARGET_PATH"], 'Combine', fitFolderName, 'impact'))
+        else:
+            execute_command([f'mkdir -p {self.output_dir}/outdir_packaged{self.outputExt}/packageSignal'], shell=True)
+            output_dir = self.output_dir
+            # os.chdir(os.path.join(self.output_dir, 'Combine', fitFolderName, 'impact'))
+        
+        if self.batch_flavor == "slurm/psi" and on_slurm_node:
+            if self.variable == '':
+                configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"], f"config/{self.year}_inclusive.yml")
+            else:
+                configYamlPath = os.path.join(os.environ["ANALYSIS_PATH"], f"config/{self.year}_{self.variable}.yml")
+            
+            #Load central config file
+            with open(configYamlPath, 'r') as file:
+                config = yaml.safe_load(file)
+            for currentEra in allErasMap[f"{self.year}"]:
+                signalScriptCfg = config[f"signalScriptCfg_{self.year}_{currentEra}"]
+                # Have to copy over the input to the JOB directory
+                # Don't forget to VOMS!
+                if "/work" in self.output_dir:
+                    slurm_copy_command = [
+                        'cp', '-rf',
+                        f"{self.output_dir}/outdir_{signalScriptCfg['ext']}",
+                        f"{os.environ['TARGET_PATH']}/"
+                    ]
+                else:
+                    slurm_copy_command = [
+                        'xrdcp', '-rf',
+                        'root://t3dcachedb.psi.ch:1094//'+f"{self.output_dir}/outdir_{signalScriptCfg['ext']}",
+                        f"{os.environ['TARGET_PATH']}/"
+                    ]
+                print(slurm_copy_command)
+                execute_command(slurm_copy_command)
 
         script_path = os.path.join(os.environ["ANALYSIS_PATH"], "Signal/scripts/packageSignal.py")
         arguments = [
@@ -793,7 +959,7 @@ class SignalPackagingCategory(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWo
             "--cat", cat,
             "--outputExt", self.outputExt,
             "--exts", self.exts,
-            "--outputDir", f"{self.output_dir}",
+            "--outputDir", f"{output_dir}",
             "--year", f"{self.year}",
             "--massPoints", f"{self.massPoints}",
             "--mergeYears", f"{self.mergeYears}",
@@ -807,10 +973,33 @@ class SignalPackagingCategory(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWo
         except subprocess.CalledProcessError as e:
             print("Error executing script:", e.stderr)
 
+        # Copy the files back to pnfs if we are on slurm/psi
+        if self.batch_flavor == "slurm/psi" and on_slurm_node:
+            # Have to copy over the output to the final directory
+            # Don't forget to VOMS!
+            if "/work" in self.output_dir:
+                slurm_copy_command = [
+                    'cp', '-rf',
+                    f"{os.environ['TARGET_PATH']}/outdir_packaged{self.outputExt}/",
+                    self.output_dir
+                ]
+            else:
+                slurm_copy_command = [
+                    'xrdcp', '-rf',
+                    f"{os.environ['TARGET_PATH']}/outdir_packaged{self.outputExt}/",
+                    'root://t3dcachedb.psi.ch:1094//'+self.output_dir
+                ]
+            print(slurm_copy_command)
+            execute_command(slurm_copy_command)
+            # Clean up the temporary directory
+            shutil.rmtree(os.environ["TARGET_PATH"])
+
 class SignalPackaging(law.Task):
     variable = law.Parameter(default="", description="Variable to be used")
     output_dir = law.Parameter(default="", description="Path to the output directory")
     year = law.Parameter(default='2022', description="Year")
+    
+    batch_flavor = law.Parameter(default="htcondor", description="Batch system to use")
     
     def requires(self):
         
@@ -863,7 +1052,7 @@ class SignalPackaging(law.Task):
             if i < (len(exts) - 1):
                 exts_string += ','
             
-        tasks.append(SignalPackagingCategory(output_dir=output_dir, exts=exts_string, outputExt=outputExt, cats=packagedConfig['cats'], year=self.year, massPoints=packagedConfig['massPoints'], mergeYears=mergeYears, variable=self.variable, version=f"v1", workflow=packagedConfig['execution']))
+        tasks.append(SignalPackagingCategory(output_dir=output_dir, exts=exts_string, outputExt=outputExt, cats=packagedConfig['cats'], year=self.year, massPoints=packagedConfig['massPoints'], mergeYears=mergeYears, variable=self.variable, version=f"v1", workflow=packagedConfig['execution'], batch_flavor=self.batch_flavor, slurm_partition=packagedConfig['batchPartition'], slurm_memory=packagedConfig['batchMemory'], slurm_max_runtime=packagedConfig['batchMaxRuntime'], htcondor_partition=packagedConfig['batchPartition'], htcondor_memory=packagedConfig['batchMemory'], htcondor_max_runtime=packagedConfig['batchMaxRuntime']))
                 
         return tasks
 
