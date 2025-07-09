@@ -110,8 +110,10 @@ class BackgroundCategory(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWorkflo
             execute_command([f'xrdfs root://t3dcachedb.psi.ch:1094/ mkdir -p {self.output_dir}/Background/outdir_{self.ext}'], shell=True)
             safe_mkdir(temp_output_dir)
         else:
-            temp_output_dir = self.output_dir
-            safe_mkdir(temp_output_dir)
+            safe_mkdir(self.output_dir)
+            safe_mkdir(os.path.join(self.output_dir, "Background"))
+            safe_mkdir(os.path.join(self.output_dir, "Background", f"outdir_{self.ext}"))
+            temp_output_dir = os.path.join(self.output_dir, "Background")
         
         if temp_output_dir[-1] != "/":
             temp_output_dir += "/"
@@ -315,8 +317,10 @@ class Background(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWorkflow):#(law
             execute_command([f'xrdfs root://t3dcachedb.psi.ch:1094/ mkdir -p {output_dir}/Background/outdir_{config["ext"]}'], shell=True)
             safe_mkdir(temp_output_dir)
         else:
-            temp_output_dir = output_dir
-            safe_mkdir(temp_output_dir)
+            safe_mkdir(output_dir)
+            safe_mkdir(os.path.join(output_dir, "Background"))
+            safe_mkdir(os.path.join(output_dir, "Background", f"outdir_{config['ext']}"))
+            temp_output_dir = os.path.join(output_dir, "Background")
         
         if temp_output_dir[-1] != "/":
             temp_output_dir += "/"
