@@ -17,7 +17,10 @@ backgroundScriptCfg:
   catOffset: 0 # add offset to category numbers (useful for categories from different allData.root files)
   ext: 'earlyAnalysis_rapidity' # extension to add to output directory
   # year: '2022' # Use combined when merging all years in category (for plots)
-  execution: 'local'
+  execution: 'slurm'
+  batchPartition: "short" # Slurm partition to use for job submission
+  batchMemory: 4000 # Slurm memory to use for job submission
+  batchMaxRuntime: "01:00:00" # Slurm max runtime to use
 
 trees2wsCfg:
   inputTreeDir: 'DiphotonTree' # Name of RooDirectory storing input tree
@@ -71,7 +74,10 @@ trees2wsCfg:
 
   cats: 'auto'
 
-  execution: 'htcondor'
+  execution: 'slurm'
+  batchPartition: "standard" # Slurm partition to use for job submission
+  batchMemory: 12000 # Slurm memory to use for job submission
+  batchMaxRuntime: "05:00:00" # Slurm max runtime to use
 
 signalScriptCfg_2022_preEE:
   # Setup
@@ -95,7 +101,10 @@ signalScriptCfg_2022_preEE:
 
 
   # Job submission options
-  execution: 'htcondor'
+  execution: 'slurm'
+  batchPartition: "short" # Slurm partition to use for job submission
+  batchMemory: 4000 # Slurm memory to use for job submission
+  batchMaxRuntime: "01:00:00" # Slurm max runtime to use
 
 signalScriptCfg_2022_postEE:
   # Setup
@@ -119,7 +128,10 @@ signalScriptCfg_2022_postEE:
   beamspotWidthMC: '3.732'
 
   # Job submission options
-  execution: 'htcondor'
+  execution: 'slurm'
+  batchPartition: "short" # Slurm partition to use for job submission
+  batchMemory: 4000 # Slurm memory to use for job submission
+  batchMaxRuntime: "01:00:00" # Slurm max runtime to use
 
 packaged_2022:
   cats: 'auto' # if auto: inferred automatically from (0) workspace
@@ -127,7 +139,10 @@ packaged_2022:
   mergeYears: True # Merges the eras
   ext: ''
   # Job submission options
-  execution: 'local'
+  execution: 'slurm'
+  batchPartition: "short" # Slurm partition to use for job submission
+  batchMemory: 4000 # Slurm memory to use for job submission
+  batchMaxRuntime: "01:00:00" # Slurm max runtime to use
 
 datacard_yields:
   cats: 'auto' # if auto: inferred automatically from (0) workspace
@@ -145,7 +160,10 @@ datacard_yields:
   skipBkg: False # Only add signal processes to datacard
   bkgScaler: 1. # Add overall scale factor for background
   skipCOWCorr: False # Skip centralObjectWeight correction for events in acceptance. Use if no centralObjectWeight in workspace
-  execution: 'local'
+  execution: 'slurm'
+  batchPartition: "short" # Slurm partition to use for job submission
+  batchMemory: 4000 # Slurm memory to use for job submission
+  batchMaxRuntime: "01:00:00" # Slurm max runtime to use
 
 datacard:
   # For pruning processes
@@ -173,24 +191,36 @@ datacard_clean:
   verbose: False # Spit out all the cleaning being done
 
 combine_fit:
-  asimov_numPoints: 30 # Number of points the Asimov generator should generate for the NLL scan
+  asimov_numPoints: 100 # Number of points the Asimov generator should generate for the NLL scan
   unblindedFit_numPoints: 100 
   setParameterRange: "r=0,3"
-  execution: 'htcondor'
+  execution: 'slurm'
+  batchPartition: "short" # Slurm partition to use for job submission
+  batchMemory: 4000 # Slurm memory to use for job submission
+  batchMaxRuntime: "01:00:00" # Slurm max runtime to use
 
 combine_impacts:
   exclude: "" # Nuisances that should be excluded from the impact computation
   not_show_POI: True
-  execution: 'htcondor'
+  execution: 'slurm'
+  batchPartition: "standard" # Slurm partition to use for job submission
+  batchMemory: 8000 # Slurm memory to use for job submission
+  batchMaxRuntime: "08:00:00" # Slurm max runtime to use
 
 combine_hesse:
-  execution: 'htcondor'
+  execution: 'slurm'
+  batchPartition: "short" # Slurm partition to use for job submission
+  batchMemory: 4000 # Slurm memory to use for job submission
+  batchMaxRuntime: "01:00:00" # Slurm max runtime to use
 
 combine_mggToys:
   nToys: 1000 # Number of toys = nToys * 10
   loadSnapshot: 'MultiDimFit'
   doBands: True
-  execution: 'htcondor'
+  execution: 'slurm'
+  batchPartition: "short" # Slurm partition to use for job submission
+  batchMemory: 4000 # Slurm memory to use for job submission
+  batchMaxRuntime: "01:00:00" # Slurm max runtime to use
 
 spectra:
   no_preliminary: True # Flag that determines, if Preliminary label should be printed.
