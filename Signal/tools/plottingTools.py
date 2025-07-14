@@ -403,11 +403,11 @@ def plotSplines(_finalModel,_outdir="./",_nominalMass='125',splinesToPlot=['xs',
     gr.SetMarkerColor(colorMap[x])
     gr.SetMarkerStyle(20)
     gr.Draw("Same PL")
-    if x == "norm": leg.AddEntry(gr,"N_{exp}: @%s = %.2f"%(_nominalMass,xnom['norm']))
-    if x == "xs": leg.AddEntry(gr,"#sigma: @%s = %.2f pb"%(_nominalMass,xnom['xs']))
-    if x == "br": leg.AddEntry(gr,"#bf{#it{#Beta}}: @%s = %.2f%%"%(_nominalMass,100*xnom['br']))
-    if x == "ea": leg.AddEntry(gr,"#epsilon x #it{#Alpha}: @%s = %.2f%%"%(_nominalMass,100*xnom['ea']))
-    if x == "fracRV": leg.AddEntry(gr,"RV fraction: @%s = %.2f%%"%(_nominalMass,100*xnom['fracRV']))
+    if x == "norm": leg.AddEntry(gr,"N_{exp}: @%s = %.3f"%(_nominalMass,xnom['norm']))
+    if x == "xs": leg.AddEntry(gr,"#sigma: @%s = %.3f pb"%(_nominalMass,xnom['xs']))
+    if x == "br": leg.AddEntry(gr,"#bf{#it{#Beta}}: @%s = %.3f%%"%(_nominalMass,100*xnom['br']))
+    if x == "ea": leg.AddEntry(gr,"#epsilon x #it{#Alpha}: @%s = %.3f%%"%(_nominalMass,100*xnom['ea']))
+    if x == "fracRV": leg.AddEntry(gr,"RV fraction: @%s = %.3f%%"%(_nominalMass,100*xnom['fracRV']))
   leg.Draw("Same")
   grs['norm'].Draw("Same PL")
   # Add Latex
@@ -424,7 +424,7 @@ def plotSplines(_finalModel,_outdir="./",_nominalMass='125',splinesToPlot=['xs',
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Function for plotting final signal model: neat
 def plotSignalModel(_hists,_opt,_outdir=".",offset=0.02):
-  colorMap = {'2016':38,'2017':30,'2018':46,'2022preEE':38,'2022postEE':30}
+  colorMap = {'2016':38,'2017':30,'2018':46,'preEE':38,'postEE':30,'postBPix':46,'preBPix':28}
   canv = ROOT.TCanvas("c","c",650,600)
   canv.SetBottomMargin(0.12)
   canv.SetLeftMargin(0.15)

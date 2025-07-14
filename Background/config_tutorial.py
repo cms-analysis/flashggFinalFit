@@ -3,7 +3,7 @@
 backgroundScriptCfg = {
   
   # Setup
-  'inputWS':"/eos/user/p/pkrueper/STXS3_2025/src/run3hggstxs/classification/multiclassifier_extended_eval17marchon30may_176_finalfits/data/root/Data/ws/allData_data.root", # location of 'allData.root' file
+  'inputWS':"/eos/user/p/pkrueper/STXS_test/run3hggstxs/toms_12julybetterprototype/data/root/Data/ws/allData_data.root", # location of 'allData.root' file
   'cats':'auto', # auto: automatically inferred from input ws
   'catOffset':0, # add offset to category numbers (useful for categories from different allData.root files)  
   'ext':'STXS0', # extension to add to output directory

@@ -13,6 +13,12 @@
         "fit_opts":"--saveInactivePOI 1 --setParameterRanges r_ggH=0,3:r_VBF=0,5 --saveSpecifiedNuis all --freezeParameters MH"
     },
     "mu_STXS0":{
+        "pois":"r_GG2H,r_QQ2HQQ,r_WH2HLNU,r_ZH2HLL,r_TTH,r_TH",
+        "fits":"profile1D:statonly:r_GG2H,r_QQ2HQQ,r_WH2HLNU,r_ZH2HLL,r_TTH,r_TH",
+        "points":"40:40",
+        "fit_opts":"--saveInactivePOI 1 --setParameters r_GG2H=1,r_QQ2HQQ=1,r_WH2HLNU=1,r_ZH2HLL=1,r_TTH=1,r_TH=1 --setParameterRanges r_GG2H=0,3:r_QQ2HQQ=0,3:r_WH2HLNU=0,3:r_ZH2HLL=0,3:r_TTH=0,3:r_TH=0,3 --saveSpecifiedNuis all --freezeParameters MH"
+    },
+    "mu_STXS0_old":{
         "pois":"r_gghtruth,r_tthtruth,r_thtruth,r_whltruth,r_zhltruth,r_vbftruth",
         "fits":"profile1D:statonly:r_gghtruth,r_tthtruth,r_thtruth,r_whltruth,r_zhltruth,r_vbftruth",
         "points":"40:40",

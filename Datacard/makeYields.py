@@ -63,16 +63,28 @@ if opt.procs == 'auto':
   for y,iWSDir in inputWSDirMap.items():
     WSFileNames = extractWSFileNames(iWSDir)
     procsMap[y] = extractListOfProcs(WSFileNames)
+
   # Require common procs for each year
-  for i,iy in enumerate(years):
-    for j,jy in enumerate(years):
-      if j > i:
-        if set(procsMap[iy].split(",")) != set(procsMap[jy].split(",")):
-          print(" --> [ERROR] Mis-match in list of process for %s and %s. Intersection = %s"%(iy,jy,(set(procsMap[jy]).symmetric_difference(set(procsMap[iy])))))
-          leave()
+  # for i,iy in enumerate(years):
+  #   for j,jy in enumerate(years):
+  #     if j > i:
+  #       if set(procsMap[iy].split(",")) != set(procsMap[jy].split(",")):
+  #         print(" --> [ERROR] Mis-match in list of process for %s and %s. Intersection = %s"%(iy,jy,(set(procsMap[jy]).symmetric_difference(set(procsMap[iy])))))
+  #         leave()
   # Define list of procs (alphabetically ordered)
   procs = procsMap[years[0]].split(",")
+
+
 else: procs = opt.procs.split(",")
+procs.remove('ZH2HQQ_FWDH')
+procs.remove('WMINUSH2HQQ_FWDH')
+
+procs.remove('GG2HNUNU_FWDH')
+procs.remove('WPLUSH2HLNU_PTV_150_250_0J')
+procs.remove('GG2HQQ_PTH_200_300')
+procs.remove('GG2HQQ_PTH_GT650')
+procs.remove('THW_FWDH')
+procs.remove('ZH2HNUNU_FWDH')
 procs.sort()
 
 # Initiate pandas dataframe
@@ -92,7 +104,7 @@ for year in years:
 
     # Mapping to STXS definition here
     _procOriginal = proc
-    _proc = proc #"%s_%s_%s"%(procToDatacardName(proc),year,decayMode)
+    _proc = "%s_%s_%s"%(proc,year,decayMode)
     _proc_s0 = proc
     print(proc)
 
@@ -102,7 +114,7 @@ for year in years:
 
     # Input flashgg ws 
     _inputWSFile = glob.glob("%s/*M%s*_%s.root"%(inputWSDirMap[year],opt.mass,proc))[0]
-    _nominalDataName = "%s_%s_%s_%s"%(_proc_s0,opt.mass,sqrts__,opt.cat)
+    _nominalDataName = "%s_%s_hgg_%s_%s_%s"%(_proc_s0,year, opt.mass,sqrts__,opt.cat)
     print(_nominalDataName)
 
     # If opt.skipZeroes check nominal yield if 0 then do not add
