@@ -270,9 +270,9 @@ int main(int argc, char *argv[]) {
   
   std::vector<double> sigmaeffs;
   
-  RooDataSet *wdata = new RooDataSet("wdata","",RooArgSet(*chan,*mass,*sobres),"sobres");
-  RooDataSet *wdatarel = new RooDataSet("wdata","",RooArgSet(*chan,*massrel,*sob),"sob");  
-  RooDataSet *wdatallr = new RooDataSet("wdata","",RooArgSet(*chan,*mass,*llrweight),"llrweight");
+  RooDataSet *wdata = new RooDataSet("wdata","",RooArgSet(*chan,*mass,*sobres), WeightVar("sobres"));
+  RooDataSet *wdatarel = new RooDataSet("wdata","",RooArgSet(*chan,*massrel,*sob), WeightVar("sob"));  
+  RooDataSet *wdatallr = new RooDataSet("wdata","",RooArgSet(*chan,*mass,*llrweight), WeightVar("llrweight"));
   
   
   double nbweight = 0;

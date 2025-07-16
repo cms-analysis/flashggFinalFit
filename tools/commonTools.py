@@ -7,12 +7,12 @@ from collections import OrderedDict as od
 from commonObjects import *
 
 # Function for iterating over ROOT argsets in workspace
-def rooiter(x):
-  iter = x.iterator()
-  ret = iter.Next()
-  while ret:
-    yield ret
-    ret = iter.Next()
+# def rooiter(x):
+#   iter = x.iterator()
+#   ret = iter.Next()
+#   while ret:
+#     yield ret
+#     ret = iter.Next()
 
 def extractWSFileNames( _inputWSDir ): 
   if not os.path.isdir(_inputWSDir):

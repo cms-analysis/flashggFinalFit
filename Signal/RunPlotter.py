@@ -86,7 +86,7 @@ for cat,f in inputFiles.items():
   for year in opt.years.split(","):
     if opt.procs == 'all':
       allNorms = w.allFunctions().selectByName("*%s*normThisLumi"%year)
-      for norm in rooiter(allNorms):
+      for norm in allNorms:
         proc = norm.GetName().split("%s_"%outputWSObjectTitle__)[-1].split("_%s"%year)[0]
         k  =  "%s__%s"%(proc,year)
         _id = "%s_%s_%s_%s"%(proc,year,cat,sqrts__)

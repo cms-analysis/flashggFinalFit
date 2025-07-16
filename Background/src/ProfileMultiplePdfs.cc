@@ -92,18 +92,20 @@ double ProfileMultiplePdfs::getGlobalMinNLL(){
 }
 
 void ProfileMultiplePdfs::saveValues(map<string,double> &vals, RooArgSet *params){
-  RooRealVar *parg;
-  TIterator *iter = params->createIterator();
-  while ((parg=(RooRealVar*)iter->Next())) {
-    vals.insert(pair<string,double>(parg->GetName(),parg->getVal()));
+  for (auto obj : *params) {
+    auto *parg = dynamic_cast<RooRealVar *>(obj);
+    if (parg) {
+      vals.insert({parg->GetName(), parg->getVal()});
+    }
   }
 }
 
 void ProfileMultiplePdfs::setValues(map<string,double> vals, RooArgSet *params){
-  RooRealVar *parg;
-  TIterator *iter = params->createIterator();
-  while ((parg=(RooRealVar*)iter->Next())) {
-    parg->setVal(vals[parg->GetName()]);
+  for (auto obj: *params) {
+    auto *parg = dynamic_cast<RooRealVar *>(obj);
+    if (parg) {
+      parg->setVal(vals[parg->GetName()]);
+    }
   }
 }
 

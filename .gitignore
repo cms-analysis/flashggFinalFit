@@ -37,3 +37,9 @@ AutoDict_*
 # Output dirs in signal and bkg
 Signal/outdir_*
 Background/outdir_*
+
+# Background build files
+Background/bin
+Background/lib
+Background/obj
+RootDict.cxx

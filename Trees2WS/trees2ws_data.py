@@ -126,7 +126,7 @@ for cat in cats:
 
   # Define dataset for cat
   dname = "Data_%s_%s"%(sqrts__,cat)  
-  d = ROOT.RooDataSet(dname,dname,aset,'weight')
+  d = ROOT.RooDataSet(dname,dname,aset,ROOT.RooFit.WeightVar('weight'))
 
   # Loop over events in tree and add to dataset with weight 1
   for ev in t:

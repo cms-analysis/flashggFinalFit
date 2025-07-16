@@ -42,7 +42,7 @@
 RooExponentialSum::RooExponentialSum()
 {
   // coverity[UNINIT_CTOR]
-  coefIter = coefList.createIterator() ;
+  // coefIter = coefList.createIterator() ;
 }
 
 //_____________________________________________________________________________
@@ -52,19 +52,14 @@ RooExponentialSum::RooExponentialSum(const char *name, const char *title,
   x("x","Dependent",this,_x),
   coefList("coefList","List of coefficients",this)
 {
-  coefIter = coefList.createIterator();
-
-  TIterator* _coefIter = _coefList.createIterator();
-  RooAbsArg* coef;
-  while ((coef = (RooAbsArg*)_coefIter->Next())) {
+  for (auto coef: _coefList) {
     if (!dynamic_cast<RooAbsReal*>(coef)){
-      std::cout << "RooExponentialSum::ctor(" << GetName() << ") ERROR: coefficient " << coef->GetName() 
-	   << " is not of type RooAbsReal" << std::endl ;
+      std::cout << "RooExponentialSum::ctor(" << GetName() << ") ERROR: coefficient " << coef->GetName()
+    << " is not of type RooAbsReal" << std::endl ;
       assert(0) ;
     }
     coefList.add(*coef);
   }
-  delete _coefIter; 
 }
 
 RooExponentialSum::RooExponentialSum(const char *name, const char *title,
@@ -73,7 +68,7 @@ RooExponentialSum::RooExponentialSum(const char *name, const char *title,
   x("x","Dependent",this,_x),
   coefList("coefList","List of coefficients",this)
 {
-  coefIter = coefList.createIterator();
+  // coefIter = coefList.createIterator();
 }
 
 //_____________________________________________________________________________
@@ -82,7 +77,7 @@ RooExponentialSum::RooExponentialSum(const RooExponentialSum& other, const char*
   x("x",this,other.x), 
   coefList("coefList",this,other.coefList)
 {
-  coefIter = coefList.createIterator();
+  // coefIter = coefList.createIterator();
 }
 
 //_____________________________________________________________________________

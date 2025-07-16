@@ -1,0 +1,12 @@
+name: flashggFinalFit
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  - python=3.10
+  - root_base
+  - cms-combine
+  - libboost-headers
+  - scipy
+  - mkl
+  - uproot

@@ -17,12 +17,12 @@ def get_options():
   return parser.parse_args()
 (opt,args) = get_options()
 
-def rooiter(x):
-  iter = x.iterator()
-  ret = iter.Next()
-  while ret:
-    yield ret
-    ret = iter.Next()
+# def rooiter(x):
+#   iter = x.iterator()
+#   ret = iter.Next()
+#   while ret:
+#     yield ret
+#     ret = iter.Next()
 
 # Extract all files to be merged
 fNames = {}
@@ -58,9 +58,9 @@ for ext, fNames_by_ext in fNames.items():
     wsin = fin.Get("wsig_13TeV")
     if not wsin: continue
     allVars, allFunctions, allPdfs = {}, {}, {}
-    for _var in rooiter(wsin.allVars()): allVars[_var.GetName()] = _var
-    for _func in rooiter(wsin.allFunctions()): allFunctions[_func.GetName()] = _func
-    for _pdf in rooiter(wsin.allPdfs()): allPdfs[_pdf.GetName()] = _pdf
+    for _var in wsin.allVars(): allVars[_var.GetName()] = _var
+    for _func in wsin.allFunctions(): allFunctions[_func.GetName()] = _func
+    for _pdf in wsin.allPdfs(): allPdfs[_pdf.GetName()] = _pdf
     allData = wsin.allData()
 
     # Import objects into output workspace

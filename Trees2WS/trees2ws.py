@@ -263,7 +263,7 @@ for stxsId in data[stxsVar].unique():
 
     # Define RooDataSet
     dName = "%s_%s_%s_%s"%(opt.productionMode,opt.inputMass,sqrts__,cat)
-    d = ROOT.RooDataSet(dName,dName,aset,'weight') 
+    d = ROOT.RooDataSet(dName,dName,aset,ROOT.RooFit.WeightVar('weight'))
 
     # Loop over events in dataframe and add entry
     for row in df[mask][varNames].to_numpy():

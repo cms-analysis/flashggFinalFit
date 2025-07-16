@@ -374,9 +374,9 @@ int main(int argc, char *argv[]) {
     std::vector<double> sigmaeffs;
     
     //new datasets used for calculations
-    RooDataSet *wdata = new RooDataSet("wdata","",RooArgSet(*chan,*mass,*sobres),"sobres");
-    RooDataSet *wdatarel = new RooDataSet("wdata","",RooArgSet(*chan,*massrel,*sob),"sob");  
-    RooDataSet *wdatallr = new RooDataSet("wdata","",RooArgSet(*chan,*mass,*llrweight),"llrweight");
+    RooDataSet *wdata = new RooDataSet("wdata","",RooArgSet(*chan,*mass,*sobres), WeightVar("sobres"));
+    RooDataSet *wdatarel = new RooDataSet("wdata","",RooArgSet(*chan,*massrel,*sob), WeightVar("sob"));  
+    RooDataSet *wdatallr = new RooDataSet("wdata","",RooArgSet(*chan,*mass,*llrweight), WeightVar("llrweight"));
     
 
     // some doubles and vectors needed for calculations

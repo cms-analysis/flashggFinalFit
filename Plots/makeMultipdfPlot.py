@@ -114,7 +114,7 @@ if opt.inputSignalWSFile is not None:
   spdfs = od()
   for year in years_to_process:
     allNorms = wsig.allFunctions().selectByName("*%s*normThisLumi"%year)
-    for norm in rooiter(allNorms):
+    for norm in allNorms:
       # Set integrated lumi
       wsig.var("IntLumi").setVal(lumiMap[year]*lumiScaleFactor)
       proc = norm.GetName().split("hggpdfsmrel_")[-1].split("_%s_"%year)[0]
