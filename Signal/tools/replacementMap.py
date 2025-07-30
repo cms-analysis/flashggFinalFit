@@ -246,13 +246,13 @@ globalReplacementMap["STXS"]["catRVMap"]["RECO_ZH_LEP_Tag1"] = "RECO_ZH_LEP_Tag1
 globalReplacementMap["earlyAnalysis"] = od()
 # Wrong vertex stuff
 globalReplacementMap["earlyAnalysis"]['procWV'] = "GG2H"
-globalReplacementMap["earlyAnalysis"]['catWV'] = "worst_resolution"
+globalReplacementMap["earlyAnalysis"]['catWV'] = "cat2"
 # Relacement processes for RV
 globalReplacementMap["earlyAnalysis"]['procRVMap'] = od()
-globalReplacementMap["earlyAnalysis"]["procRVMap"]["best_resolution"] = "GG2H"
-globalReplacementMap["earlyAnalysis"]["procRVMap"]["best_resolution"] = "VBF"
-globalReplacementMap["earlyAnalysis"]["procRVMap"]["best_resolution"] = "VH"
-globalReplacementMap["earlyAnalysis"]["procRVMap"]["best_resolution"] = "TTH"
+globalReplacementMap["earlyAnalysis"]["procRVMap"]["cat0"] = "GG2H"
+globalReplacementMap["earlyAnalysis"]["procRVMap"]["cat0"] = "VBF"
+globalReplacementMap["earlyAnalysis"]["procRVMap"]["cat0"] = "VH"
+globalReplacementMap["earlyAnalysis"]["procRVMap"]["cat0"] = "TTH"
 # Replacement categories for RV
 globalReplacementMap["earlyAnalysis"]["catRVMap"] = od()
 globalReplacementMap["earlyAnalysis"]["catRVMap"]["GG2H"] = "GG2H"
@@ -267,21 +267,21 @@ globalReplacementMap["earlyAnalysisInOut"] = od()
 #globalReplacementMap["earlyAnalysisInOut"]['procWV'] = "GG2H_in"
 # With nico convention (ggh instead of GG2H)
 globalReplacementMap["earlyAnalysisInOut"]['procWV'] = "ggh_in"
-globalReplacementMap["earlyAnalysisInOut"]['catWV'] = "worst_resolution"
+globalReplacementMap["earlyAnalysisInOut"]['catWV'] = "cat2"
 # Relacement processes for RV
 globalReplacementMap["earlyAnalysisInOut"]['procRVMap'] = od()
-#globalReplacementMap["earlyAnalysisInOut"]["procRVMap"]["best_resolution"] = "GG2H_in"
-#globalReplacementMap["earlyAnalysisInOut"]["procRVMap"]["medium_resolution"] = "GG2H_in"
-#globalReplacementMap["earlyAnalysisInOut"]["procRVMap"]["worst_resolution"] = "GG2H_in"
+#globalReplacementMap["earlyAnalysisInOut"]["procRVMap"]["cat0"] = "GG2H_in"
+#globalReplacementMap["earlyAnalysisInOut"]["procRVMap"]["cat1"] = "GG2H_in"
+#globalReplacementMap["earlyAnalysisInOut"]["procRVMap"]["cat2"] = "GG2H_in"
 # With nico convention (ggh instead of GG2H)
-globalReplacementMap["earlyAnalysisInOut"]["procRVMap"]["best_resolution"] = "ggh_in"
-globalReplacementMap["earlyAnalysisInOut"]["procRVMap"]["medium_resolution"] = "ggh_in"
-globalReplacementMap["earlyAnalysisInOut"]["procRVMap"]["worst_resolution"] = "ggh_in"
+globalReplacementMap["earlyAnalysisInOut"]["procRVMap"]["cat0"] = "ggh_in"
+globalReplacementMap["earlyAnalysisInOut"]["procRVMap"]["cat1"] = "ggh_in"
+globalReplacementMap["earlyAnalysisInOut"]["procRVMap"]["cat2"] = "ggh_in"
 # Replacement categories for RV
 globalReplacementMap["earlyAnalysisInOut"]["catRVMap"] = od()
-globalReplacementMap["earlyAnalysisInOut"]["catRVMap"]["best_resolution"] = "best_resolution"
-globalReplacementMap["earlyAnalysisInOut"]["catRVMap"]["medium_resolution"]  = "medium_resolution"
-globalReplacementMap["earlyAnalysisInOut"]["catRVMap"]["worst_resolution"]   = "worst_resolution"
+globalReplacementMap["earlyAnalysisInOut"]["catRVMap"]["cat0"] = "cat0"
+globalReplacementMap["earlyAnalysisInOut"]["catRVMap"]["cat1"]  = "cat1"
+globalReplacementMap["earlyAnalysisInOut"]["catRVMap"]["cat2"]   = "cat2"
 
 
 ###################################################################################################################################################################################################

@@ -50,8 +50,8 @@ class FinalFits(law.Task):
     unblinded_diff_spectra = law.Parameter(default=False, description="Produce unblinded differential spectra for the given variable")
     asimov_diff_spectra = law.Parameter(default=False, description="Produce Asimov differential spectra for the given variable")
     
-    batch_system = law.Parameter(default="slurm", description="Batch system to use")
-    batch_flavor = law.Parameter(default="slurm", description="Special treatment for PSI Slurm batch system")
+    batch_system = law.Parameter(default="htcondor", description="Batch system to use")
+    batch_flavor = law.Parameter(default="htcondor", description="Special treatment for PSI Slurm batch system")
     
     def requires(self):
         # req() is defined on all tasks and handles the passing of all parameter values that are
@@ -74,47 +74,44 @@ class FinalFits(law.Task):
             output_dir = config['outputFolder']
         else:
             output_dir = self.output_dir
-        
-        tasks["Background"] = Background(variable=self.variable, output_dir=output_dir, year=self.year, batch_flavor=self.batch_flavor, version=self.variable if self.variable != "" else "inclusive", workflow=self.batch_system)
 
-        
         if convert_boolean_string(self.unblinded_fits):
             tasks["CreateUnblindedFit"] = CreateUnblindedFit(variable=self.variable, output_dir=output_dir, year=self.year, batch_flavor=self.batch_flavor, version=self.variable if self.variable != "" else "inclusive", workflow=self.batch_system)
-        elif convert_boolean_string(self.unblinded_stage_one):
+        if convert_boolean_string(self.unblinded_stage_one):
             impactConfig = config["combine_impacts"]
             tasks["UnblindedImpactThirdStep"] = UnblindedImpactThirdStep(variable=self.variable, output_dir=output_dir, year=self.year, batch_flavor=self.batch_flavor, version=self.variable if self.variable != "" else "inclusive", workflow=impactConfig["execution"], slurm_partition=impactConfig['batchPartition'], slurm_memory=impactConfig['batchMemory'], slurm_max_runtime=impactConfig['batchMaxRuntime'], htcondor_partition=impactConfig['batchPartition'], htcondor_memory=impactConfig['batchMemory'], htcondor_max_runtime=impactConfig['batchMaxRuntime'])
-        elif convert_boolean_string(self.unblinded_stage_two):
+        if convert_boolean_string(self.unblinded_stage_two):
             impactConfig = config["combine_impacts"]
             mggConfig = config["combine_mggToys"]
             tasks["UnblindedImpactThirdStep"] = UnblindedImpactThirdStep(variable=self.variable, output_dir=output_dir, year=self.year, batch_flavor=self.batch_flavor, version=self.variable if self.variable != "" else "inclusive", workflow=impactConfig["execution"], slurm_partition=impactConfig['batchPartition'], slurm_memory=impactConfig['batchMemory'], slurm_max_runtime=impactConfig['batchMaxRuntime'], htcondor_partition=impactConfig['batchPartition'], htcondor_memory=impactConfig['batchMemory'], htcondor_max_runtime=impactConfig['batchMaxRuntime'])
             tasks["MggDistribution"] = MggDistribution(variable=self.variable, output_dir=output_dir, year=self.year, batch_flavor=self.batch_flavor, version=self.variable if self.variable != "" else "inclusive", workflow=mggConfig["execution"], slurm_partition=mggConfig['batchPartition'], slurm_memory=mggConfig['batchMemory'], slurm_max_runtime=mggConfig['batchMaxRuntime'], htcondor_partition=mggConfig['batchPartition'], htcondor_memory=mggConfig['batchMemory'], htcondor_max_runtime=mggConfig['batchMaxRuntime'], is_postfit=False)
-        elif convert_boolean_string(self.unblinded_stage_three):
+        if convert_boolean_string(self.unblinded_stage_three):
             impactConfig = config["combine_impacts"]
             mggConfig = config["combine_mggToys"]
             tasks["UnblindedImpactThirdStep"] = UnblindedImpactThirdStep(variable=self.variable, output_dir=output_dir, year=self.year, batch_flavor=self.batch_flavor, version=self.variable if self.variable != "" else "inclusive", workflow=impactConfig["execution"], slurm_partition=impactConfig['batchPartition'], slurm_memory=impactConfig['batchMemory'], slurm_max_runtime=impactConfig['batchMaxRuntime'], htcondor_partition=impactConfig['batchPartition'], htcondor_memory=impactConfig['batchMemory'], htcondor_max_runtime=impactConfig['batchMaxRuntime'])
             tasks["CreateUnblindedFit"] = CreateUnblindedFit(variable=self.variable, output_dir=output_dir, year=self.year, batch_flavor=self.batch_flavor, version=self.variable if self.variable != '' else 'inclusive', workflow=self.batch_system)
             tasks["MggDistribution"] = MggDistribution(variable=self.variable, output_dir=output_dir, year=self.year, batch_flavor=self.batch_flavor, version=self.variable if self.variable != "" else "inclusive", workflow=mggConfig["execution"], slurm_partition=mggConfig['batchPartition'], slurm_memory=mggConfig['batchMemory'], slurm_max_runtime=mggConfig['batchMaxRuntime'], htcondor_partition=mggConfig['batchPartition'], htcondor_memory=mggConfig['batchMemory'], htcondor_max_runtime=mggConfig['batchMaxRuntime'], is_postfit=True)
-        elif convert_boolean_string(self.unblinded_covcorr):
+        if convert_boolean_string(self.unblinded_covcorr):
             hesseConfig = config["combine_hesse"]
             tasks["UnblindedCovCorr"] = UnblindedCovCorr(variable=self.variable, output_dir=output_dir, year=self.year, batch_flavor=self.batch_flavor, version=self.variable if self.variable != '' else 'inclusive', workflow=hesseConfig["execution"], slurm_partition=hesseConfig['batchPartition'], slurm_memory=hesseConfig['batchMemory'], slurm_max_runtime=hesseConfig['batchMaxRuntime'], htcondor_partition=hesseConfig['batchPartition'], htcondor_memory=hesseConfig['batchMemory'], htcondor_max_runtime=hesseConfig['batchMaxRuntime'])
-        elif convert_boolean_string(self.pvalue):
+        if convert_boolean_string(self.pvalue):
             hesseConfig = config["combine_hesse"]
             tasks["PValueCalculation"] = PValueCalculation(variable=self.variable, output_dir=output_dir, year=self.year, batch_flavor=self.batch_flavor, version=self.variable if self.variable != '' else 'inclusive', workflow=self.batch_system, slurm_partition=hesseConfig['batchPartition'], slurm_memory=hesseConfig['batchMemory'], slurm_max_runtime=hesseConfig['batchMaxRuntime'], htcondor_partition=hesseConfig['batchPartition'], htcondor_memory=hesseConfig['batchMemory'], htcondor_max_runtime=hesseConfig['batchMaxRuntime'])
-        elif convert_boolean_string(self.asimov_fits):
+        if convert_boolean_string(self.asimov_fits):
             tasks["CreateAsimovFit"] = CreateAsimovFit(variable=self.variable, output_dir=output_dir, year=self.year, batch_flavor=self.batch_flavor, version=self.variable if self.variable != '' else 'inclusive', workflow=self.batch_system)
-        elif convert_boolean_string(self.asimov_impacts):
+        if convert_boolean_string(self.asimov_impacts):
             tasks["AsimovImpactThirdStep"] = AsimovImpactThirdStep(variable=self.variable, output_dir=output_dir, year=self.year, batch_flavor=self.batch_flavor, version=self.variable if self.variable != '' else 'inclusive', workflow=self.batch_system)
-        elif convert_boolean_string(self.asimov_covcorr):
+        if convert_boolean_string(self.asimov_covcorr):
             hesseConfig = config["combine_hesse"]
             tasks["AsimovCovCorr"] = AsimovCovCorr(variable=self.variable, output_dir=output_dir, year=self.year, batch_flavor=self.batch_flavor, version=self.variable if self.variable != '' else 'inclusive', workflow=hesseConfig["execution"], slurm_partition=hesseConfig['batchPartition'], slurm_memory=hesseConfig['batchMemory'], slurm_max_runtime=hesseConfig['batchMaxRuntime'], htcondor_partition=hesseConfig['batchPartition'], htcondor_memory=hesseConfig['batchMemory'], htcondor_max_runtime=hesseConfig['batchMaxRuntime'])
-        elif convert_boolean_string(self.asimov_diff_spectra) and (self.variable != ''):
+        if convert_boolean_string(self.asimov_diff_spectra) and (self.variable != ''):
             tasks["CreateAsimovDiffSpectra"] = CreateDiffSpectra(variable=self.variable, output_dir=output_dir, year=self.year, batch_flavor=self.batch_flavor, batch_system=self.batch_system, is_unblinded=False)
-        elif convert_boolean_string(self.unblinded_diff_spectra) and (self.variable != ''):
+        if convert_boolean_string(self.unblinded_diff_spectra) and (self.variable != ''):
             tasks["CreateUnblindedDiffSpectra"] = CreateDiffSpectra(variable=self.variable, output_dir=output_dir, year=self.year, batch_flavor=self.batch_flavor, batch_system=self.batch_system, is_unblinded=True)
-        elif (convert_boolean_string(self.asimov_diff_spectra) or convert_boolean_string(self.unblinded_diff_spectra)) and (self.variable == ''):
+        if (convert_boolean_string(self.asimov_diff_spectra) or convert_boolean_string(self.unblinded_diff_spectra)) and (self.variable == ''):
             print("Differential spectra can only be created for a specific variable. Please set the variable parameter to a valid value.")
             exit(1)
-        else:
+        if tasks == {}:
             print("No final fit tasks selected. Please set the appropriate parameters to True.")
             exit(1)
 

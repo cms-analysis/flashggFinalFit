@@ -16,7 +16,7 @@ twd__ = "%s/Trees2WS"%cwd__
 # Centre of mass energy string
 sqrts__ = "13TeV"
 
-# Luminosity map in fb^-1: for using UL 2018
+# Luminosity map in fb^-1
 lumiMap = {
     '2016':36.33, 
     '2017':41.48, 
@@ -24,11 +24,17 @@ lumiMap = {
     'combined':137.65, 
     'merged':137.65,
     '2022preEE':8.00,
+    '2223preEE':8.00,
     '2022postEE':26.70,
+    '2223postEE':26.70,
     '2022': 34.7,
     '2023preBPix': 17.8,
+    '2223preBPix': 17.8,
     '2023postBPix': 9.5,
-    '2023': 27.3
+    '2223postBPix': 9.5,
+    '2023': 27.3,
+    '2223': 61.9,
+    'Run3': 61.9 # Up to 2023, this does NOT include 2024.
 }
 
 def CreateVariableParameters(gen_variable, reco_variable, bins, year, BMW):
@@ -62,7 +68,7 @@ BR_Z_qq = 69.91*0.01
 BR_W_qq = 67.41*0.01
 
 # List of years
-years_to_process = ['2016','2017','2018','2022preEE','2022postEE','2022preBPix','2022postBPix']
+years_to_process = ['2016','2017','2018','2022preEE','2022postEE','2023preBPix','2023postBPix']
 # Production modes and decay channel: for extract XS from combine
 productionModes = ['ggH','qqH','ttH','tHq','tHW','ggZH', 'WH','ZH','bbH']
 decayMode = 'hgg'
@@ -104,7 +110,9 @@ TwentyTwentyThreeEras = ["preBPix", "postBPix"]
 
 allErasMap = {
     '2022': TwentyTwentyTwoEras,
-    '2023': TwentyTwentyThreeEras
+    '2023': TwentyTwentyThreeEras,
+    '2223': TwentyTwentyTwoEras + TwentyTwentyThreeEras,
+    'Run3': TwentyTwentyTwoEras + TwentyTwentyThreeEras,
 }
 
 conversionTable_ = {

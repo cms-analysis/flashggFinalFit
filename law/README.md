@@ -122,3 +122,16 @@ As soon as the (un)blinded fits are produced, one can start the production of th
 ```
 law run CreateDiffSpectra --variable <differential_variable> --is-unblinded (True)False
 ```
+
+## FAQ
+
+### Jobs stuck in suspended
+
+Q: My job is stuck in suspended, what should I do?
+
+A: It is often a good option to delibatery hold the job and release it to force a re-distribution to a different machine, this should solve the issue most of the time:
+```
+condor_hold 156.9
+sleep 2
+condor_release 156.9
+```
