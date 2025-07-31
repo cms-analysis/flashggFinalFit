@@ -143,7 +143,7 @@ datacard_yields:
   mass: '125' # Input workspace mass
   skipBkg: False # Only add signal processes to datacard
   bkgScaler: 1. # Add overall scale factor for background
-  skipCOWCorr: False # Skip centralObjectWeight correction for events in acceptance. Use if no centralObjectWeight in workspace
+  skipCOWCorr: True # Skip centralObjectWeight correction for events in acceptance. Use if no centralObjectWeight in workspace
   execution: 'htcondor'
 
 datacard:
@@ -154,7 +154,7 @@ datacard:
   analysis: 'earlyAnalysis' # Analysis extension: required for doTrueYield (see ./tools/XSBR.py for example)
 
   # For yield/systematics:
-  skipCOWCorr: False # Skip centralObjectWeight correction for events in acceptance
+  skipCOWCorr: True # Skip centralObjectWeight correction for events in acceptance
   doSystematics: True # Include systematics calculations and add to datacard
   doMCStatUncertainty: True # Add uncertainty for MC stats
   doSTXSMerging: False # Calculate additional migrations uncertainties for merged STXS bins (for 'mnorm' tier in systematics)
