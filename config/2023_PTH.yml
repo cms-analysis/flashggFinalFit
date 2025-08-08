@@ -82,9 +82,8 @@ signalScriptCfg_2023_preBPix:
   ext: 'earlyAnalysis_PTH_2023preBPix' # output directory extension
   analysis: 'earlyAnalysisDiffPt' # To specify replacement dataset and XS*BR mapping (defined in ./tools/replacementMap.py and ./tools/XSBRMap.py respectively)
   year: '2023preBPix' # Use 'combined' if merging all years: not recommended
-  replacementThreshold: '25' # 50
   massPoints: '120,125,130' # You can now run with a single mass point if necessary
-
+  replacementThreshold: '50'
   # Photon shape systematics  
   scales: 'ScaleEE,ScaleEB' # separate nuisance per year
   scalesCorr: 'FNUF,Material' # correlated across years
@@ -110,9 +109,8 @@ signalScriptCfg_2023_postBPix:
   ext: 'earlyAnalysis_PTH_2023postBPix' # output directory extension
   analysis: 'earlyAnalysisDiffPt' # To specify replacement dataset and XS*BR mapping (defined in ./tools/replacementMap.py and ./tools/XSBRMap.py respectively)
   year: '2023postBPix' # Use 'combined' if merging all years: not recommended
-  replacementThreshold: '25' # 50
   massPoints: '120,125,130' # You can now run with a single mass point if necessary
-
+  replacementThreshold: '50'
   # Photon shape systematics  
   scales: 'ScaleEE,ScaleEB' # separate nuisance per year
   scalesCorr: 'FNUF,Material' # correlated across years

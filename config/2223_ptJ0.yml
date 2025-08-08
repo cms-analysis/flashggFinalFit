@@ -83,7 +83,7 @@ signalScriptCfg_2223_preEE:
   analysis: 'earlyAnalysisDiffPTJ0' # To specify replacement dataset and XS*BR mapping (defined in ./tools/replacementMap.py and ./tools/XSBRMap.py respectively)
   year: '2223preEE' # Use 'combined' if merging all years: not recommended
   massPoints: '120,125,130' # You can now run with a single mass point if necessary
-  replacementThreshold: '1'
+  replacementThreshold: '50'
   # Photon shape systematics  
   scales: 'ScaleEE,ScaleEB' # separate nuisance per year
   scalesCorr: 'FNUF,Material' # correlated across years
@@ -110,7 +110,7 @@ signalScriptCfg_2223_postEE:
   analysis: 'earlyAnalysisDiffPTJ0' # To specify replacement dataset and XS*BR mapping (defined in ./tools/replacementMap.py and ./tools/XSBRMap.py respectively)
   year: '2223postEE' # Use 'combined' if merging all years: not recommended
   massPoints: '120,125,130' # You can now run with a single mass point if necessary
-  replacementThreshold: '1'
+  replacementThreshold: '50'
   # Photon shape systematics  
   scales: 'ScaleEE,ScaleEB' # separate nuisance per year
   scalesCorr: 'FNUF,Material' # correlated across years
@@ -137,7 +137,7 @@ signalScriptCfg_2223_preBPix:
   analysis: 'earlyAnalysisDiffPTJ0' # To specify replacement dataset and XS*BR mapping (defined in ./tools/replacementMap.py and ./tools/XSBRMap.py respectively)
   year: '2223preBPix' # Use 'combined' if merging all years: not recommended
   massPoints: '120,125,130' # You can now run with a single mass point if necessary
-  replacementThreshold: '1'
+  replacementThreshold: '50'
   # Photon shape systematics  
   scales: 'ScaleEE,ScaleEB' # separate nuisance per year
   scalesCorr: 'FNUF,Material' # correlated across years
@@ -164,7 +164,7 @@ signalScriptCfg_2223_postBPix:
   analysis: 'earlyAnalysisDiffPTJ0' # To specify replacement dataset and XS*BR mapping (defined in ./tools/replacementMap.py and ./tools/XSBRMap.py respectively)
   year: '2223postBPix' # Use 'combined' if merging all years: not recommended
   massPoints: '120,125,130' # You can now run with a single mass point if necessary
-  replacementThreshold: '1'
+  replacementThreshold: '50'
   # Photon shape systematics  
   scales: 'ScaleEE,ScaleEB' # separate nuisance per year
   scalesCorr: 'FNUF,Material' # correlated across years

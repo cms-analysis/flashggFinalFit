@@ -14,6 +14,9 @@ backgroundScriptCfg:
   ext: 'backgroundEarlyAnalysis' # extension to add to output directory
   # year: '2022' # Use combined when merging all years in category (for plots)
   execution: 'htcondor'
+  batchPartition: "short" # Slurm partition to use for job submission
+  batchMemory: 4000 # Slurm memory to use for job submission
+  batchMaxRuntime: "01:00:00" # Slurm max runtime to use
 
 trees2wsCfg:
   inputTreeDir: 'DiphotonTree' # Name of RooDirectory storing input tree
@@ -64,6 +67,9 @@ trees2wsCfg:
   cats: 'auto'
 
   execution: 'htcondor'
+  batchPartition: "short" # Slurm partition to use for job submission
+  batchMemory: 4000 # Slurm memory to use for job submission
+  batchMaxRuntime: "01:00:00" # Slurm max runtime to use
 
 signalScriptCfg_2022_preEE:
   # Setup
@@ -73,7 +79,7 @@ signalScriptCfg_2022_preEE:
   analysis: 'earlyAnalysisInOut' # To specify replacement dataset and XS*BR mapping (defined in ./tools/replacementMap.py and ./tools/XSBRMap.py respectively)
   year: '2022preEE' # Use 'combined' if merging all years: not recommended
   massPoints: '120,125,130' # You can now run with a single mass point if necessary
-
+  replacementThreshold: '50'
   # Photon shape systematics  
   scales: 'ScaleEE,ScaleEB' # separate nuisance per year
   scalesCorr: 'FNUF,Material' # correlated across years
@@ -88,6 +94,9 @@ signalScriptCfg_2022_preEE:
 
   # Job submission options
   execution: 'htcondor'
+  batchPartition: "short" # Slurm partition to use for job submission
+  batchMemory: 4000 # Slurm memory to use for job submission
+  batchMaxRuntime: "01:00:00" # Slurm max runtime to use
 
 signalScriptCfg_2022_postEE:
   # Setup
@@ -97,7 +106,7 @@ signalScriptCfg_2022_postEE:
   analysis: 'earlyAnalysisInOut' # To specify replacement dataset and XS*BR mapping (defined in ./tools/replacementMap.py and ./tools/XSBRMap.py respectively)
   year: '2022postEE' # Use 'combined' if merging all years: not recommended
   massPoints: '120,125,130' # You can now run with a single mass point if necessary
-
+  replacementThreshold: '50'
   # Photon shape systematics  
   scales: 'ScaleEE,ScaleEB' # separate nuisance per year
   scalesCorr: 'FNUF,Material' # correlated across years
@@ -112,6 +121,9 @@ signalScriptCfg_2022_postEE:
 
   # Job submission options
   execution: 'htcondor'
+  batchPartition: "short" # Slurm partition to use for job submission
+  batchMemory: 4000 # Slurm memory to use for job submission
+  batchMaxRuntime: "01:00:00" # Slurm max runtime to use
 
 packaged_2022:
   cats: 'auto' # if auto: inferred automatically from (0) workspace
@@ -119,6 +131,9 @@ packaged_2022:
   mergeYears: True # Merges the eras
   ext: ''
   execution: 'htcondor'
+  batchPartition: "short" # Slurm partition to use for job submission
+  batchMemory: 4000 # Slurm memory to use for job submission
+  batchMaxRuntime: "01:00:00" # Slurm max runtime to use
 
 datacard_yields:
   cats: 'auto' # if auto: inferred automatically from (0) workspace
@@ -137,6 +152,9 @@ datacard_yields:
   bkgScaler: 1. # Add overall scale factor for background
   skipCOWCorr: True # Skip centralObjectWeight correction for events in acceptance. Use if no centralObjectWeight in workspace
   execution: 'htcondor'
+  batchPartition: "short" # Slurm partition to use for job submission
+  batchMemory: 4000 # Slurm memory to use for job submission
+  batchMaxRuntime: "01:00:00" # Slurm max runtime to use
 
 datacard:
   # For pruning processes
@@ -171,6 +189,9 @@ combine_fit:
   rMin: 0.7
   rMax: 1.6
   execution: 'htcondor'
+  batchPartition: "short" # Slurm partition to use for job submission
+  batchMemory: 4000 # Slurm memory to use for job submission
+  batchMaxRuntime: "01:00:00" # Slurm max runtime to use
 
 combine_impacts:
   exclude: "" # Nuisances that should be excluded from the impact computation
@@ -180,9 +201,15 @@ combine_impacts:
   setCrossingTolerance: 0.00005 
   not_show_POI: False
   execution: 'htcondor'
+  batchPartition: "short" # Slurm partition to use for job submission
+  batchMemory: 4000 # Slurm memory to use for job submission
+  batchMaxRuntime: "01:00:00" # Slurm max runtime to use
 
 combine_hesse:
   execution: 'htcondor'
+  batchPartition: "short" # Slurm partition to use for job submission
+  batchMemory: 4000 # Slurm memory to use for job submission
+  batchMaxRuntime: "01:00:00" # Slurm max runtime to use
 
 combine_mggToys:
   nToys: 1000 # Number of toys = nToys * 10
