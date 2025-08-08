@@ -1,15 +1,11 @@
 # Config file: options for signal fitting
 
-
-# Tests
-# Test Trees2WS: law run Trees2WS --variable ptJ0 --workers 4 --output-dir /afs/cern.ch/user/n/niharrin/cernbox/PhD/Higgs/CMSSW_14_1_0_pre4/src/flashggFinalFit/law/output/test_t2w_diff/t2w --doDiffSplitting True --doSystematic True
-
-outputFolder: '/eos/home-n/niharrin/PhD/Higgs/CMSSW_14_1_0_pre4/src/flashggFinalFit/output/forPaper_24_10_14_ptJ0/'
+outputFolder: '/net/data_cms3a-1/wrabetz/CMSSW_14_1_0_pre4/src/flashggFinalFit/output_2022_ptJ0/'
 
 inputFiles:
   # Trees2WS
-  Trees2WSData: '/afs/cern.ch/user/n/niharrin/cernbox/PhD/Higgs/devel/EOSCMS/2024/ntuples/forPaper_24_10_07/variables/ptJ0/data_postprocessing/root/Data/allData_2022.root'
-  Trees2WS: '/afs/cern.ch/user/n/niharrin/cernbox/PhD/Higgs/devel/EOSCMS/2024/ntuples/forPaper_24_10_07/variables/ptJ0/signal_postprocessing/root'
+  Trees2WSData: '/net/data_cms3a-2/nobackup/group_JE_CMS/Hgg_PartialRun3/stat_analysis/differential/2025_07_18/ptJ0/allData_2022.root'
+  Trees2WS: '/net/data_cms3a-2/nobackup/group_JE_CMS/Hgg_PartialRun3/stat_analysis/differential/2025_07_18/ptJ0/root/'
 
 backgroundScriptCfg:
   # Setup
@@ -45,7 +41,7 @@ trees2wsCfg:
     - "weight" # Vars to be added for data
     
   stxsVar: ''
-  diffVar: 'diffVariable_GenYH'
+  diffVar: 'diffVariable_GenPTJ0'
   notagVars: [] # Vars to add to NOTAG RooDataset
   
   systematicsVars:

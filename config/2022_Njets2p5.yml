@@ -1,15 +1,11 @@
 # Config file: options for signal fitting
 
-
-# Tests
-# Test Trees2WS: law run Trees2WS --variable Njets2p5 --workers 4 --output-dir /afs/cern.ch/user/n/niharrin/cernbox/PhD/Higgs/CMSSW_14_1_0_pre4/src/flashggFinalFit/law/output/test_t2w_diff/t2w --doDiffSplitting True --doSystematic True
-
-outputFolder: '/eos/home-n/niharrin/PhD/Higgs/CMSSW_14_1_0_pre4/src/flashggFinalFit/output/forPaper_24_10_14_Njets2p5/'
+outputFolder: '/net/data_cms3a-1/wrabetz/CMSSW_14_1_0_pre4/src/flashggFinalFit/output_2022_Njets2p5/'
 
 inputFiles:
   # Trees2WS
-  Trees2WSData: '/eos/cms/store/group/phys_higgs/cmshgg/niharrin/2024/ntuples/forPaper_24_10_14/variables/Njets2p5/data_postprocessing/root/Data/allData_2022.root'
-  Trees2WS: '/eos/cms/store/group/phys_higgs/cmshgg/niharrin/2024/ntuples/forPaper_24_10_14/variables/Njets2p5/signal_postprocessing/root'
+  Trees2WSData: '/net/data_cms3a-2/nobackup/group_JE_CMS/Hgg_PartialRun3/stat_analysis/differential/2025_07_18/Njets2p5/allData_2022.root'
+  Trees2WS: '/net/data_cms3a-2/nobackup/group_JE_CMS/Hgg_PartialRun3/stat_analysis/differential/2025_07_18/Njets2p5/root/'
 
 backgroundScriptCfg:
   # Setup
@@ -17,7 +13,13 @@ backgroundScriptCfg:
   catOffset: 0 # add offset to category numbers (useful for categories from different allData.root files)
   ext: 'earlyAnalysis_Njets2p5' # extension to add to output directory
   # year: '2022' # Use combined when merging all years in category (for plots)
-  execution: 'local'
+  execution: 'htcondor'
+  batchPartition: "short" # Slurm partition to use for job submission
+  batchMemory: 4000 # Slurm memory to use for job submission
+  batchMaxRuntime: "01:00:00" # Slurm max runtime to use
+  batchPartition: "short" # Slurm partition to use for job submission
+  batchMemory: 4000 # Slurm memory to use for job submission
+  batchMaxRuntime: "01:00:00" # Slurm max runtime to use
 
 trees2wsCfg:
   inputTreeDir: 'DiphotonTree' # Name of RooDirectory storing input tree
@@ -72,6 +74,9 @@ trees2wsCfg:
   cats: 'auto'
 
   execution: 'htcondor'
+  batchPartition: "short" # Slurm partition to use for job submission
+  batchMemory: 4000 # Slurm memory to use for job submission
+  batchMaxRuntime: "01:00:00" # Slurm max runtime to use
 
 signalScriptCfg_2022_preEE:
   # Setup
@@ -81,7 +86,7 @@ signalScriptCfg_2022_preEE:
   analysis: 'earlyAnalysisDiffNJ' # To specify replacement dataset and XS*BR mapping (defined in ./tools/replacementMap.py and ./tools/XSBRMap.py respectively)
   year: '2022preEE' # Use 'combined' if merging all years: not recommended
   massPoints: '120,125,130' # You can now run with a single mass point if necessary
-
+  replacementThreshold: '50'
   # Photon shape systematics  
   scales: 'ScaleEE,ScaleEB' # separate nuisance per year
   scalesCorr: 'FNUF,Material' # correlated across years
@@ -95,7 +100,10 @@ signalScriptCfg_2022_preEE:
 
 
   # Job submission options
-  execution: 'htcondor' 
+  execution: 'htcondor'
+  batchPartition: "short" # Slurm partition to use for job submission
+  batchMemory: 4000 # Slurm memory to use for job submission
+  batchMaxRuntime: "01:00:00" # Slurm max runtime to use 
 
 signalScriptCfg_2022_postEE:
   # Setup
@@ -105,7 +113,7 @@ signalScriptCfg_2022_postEE:
   analysis: 'earlyAnalysisDiffNJ' # To specify replacement dataset and XS*BR mapping (defined in ./tools/replacementMap.py and ./tools/XSBRMap.py respectively)
   year: '2022postEE' # Use 'combined' if merging all years: not recommended
   massPoints: '120,125,130' # You can now run with a single mass point if necessary
-
+  replacementThreshold: '50'
   # Photon shape systematics  
   scales: 'ScaleEE,ScaleEB' # separate nuisance per year
   scalesCorr: 'FNUF,Material' # correlated across years
@@ -120,13 +128,22 @@ signalScriptCfg_2022_postEE:
 
   # Job submission options
   execution: 'htcondor'
+  batchPartition: "short" # Slurm partition to use for job submission
+  batchMemory: 4000 # Slurm memory to use for job submission
+  batchMaxRuntime: "01:00:00" # Slurm max runtime to use
 
 packaged_2022:
   cats: 'auto' # if auto: inferred automatically from (0) workspace
   massPoints: '120,125,130' # You can now run with a single mass point if necessary
   mergeYears: True # Merges the eras
   ext: ''
-  execution: 'local'
+  execution: 'htcondor'
+  batchPartition: "short" # Slurm partition to use for job submission
+  batchMemory: 4000 # Slurm memory to use for job submission
+  batchMaxRuntime: "01:00:00" # Slurm max runtime to use
+  batchPartition: "short" # Slurm partition to use for job submission
+  batchMemory: 4000 # Slurm memory to use for job submission
+  batchMaxRuntime: "01:00:00" # Slurm max runtime to use
 
 datacard_yields:
   cats: 'auto' # if auto: inferred automatically from (0) workspace
@@ -145,6 +162,9 @@ datacard_yields:
   bkgScaler: 1. # Add overall scale factor for background
   skipCOWCorr: True # Skip centralObjectWeight correction for events in acceptance. Use if no centralObjectWeight in workspace
   execution: 'htcondor'
+  batchPartition: "short" # Slurm partition to use for job submission
+  batchMemory: 4000 # Slurm memory to use for job submission
+  batchMaxRuntime: "01:00:00" # Slurm max runtime to use
 
 datacard:
   # For pruning processes
@@ -176,20 +196,32 @@ combine_fit:
   unblindedFit_numPoints: 100 
   setParameterRange: "r=0,3"
   execution: 'htcondor'
+  batchPartition: "short" # Slurm partition to use for job submission
+  batchMemory: 4000 # Slurm memory to use for job submission
+  batchMaxRuntime: "01:00:00" # Slurm max runtime to use
 
 combine_impacts:
   exclude: "" # Nuisances that should be excluded from the impact computation
   not_show_POI: True
   execution: 'htcondor'
+  batchPartition: "short" # Slurm partition to use for job submission
+  batchMemory: 4000 # Slurm memory to use for job submission
+  batchMaxRuntime: "01:00:00" # Slurm max runtime to use
 
 combine_hesse:
   execution: 'htcondor'
+  batchPartition: "short" # Slurm partition to use for job submission
+  batchMemory: 4000 # Slurm memory to use for job submission
+  batchMaxRuntime: "01:00:00" # Slurm max runtime to use
 
 combine_mggToys:
   nToys: 1000 # Number of toys = nToys * 10
   loadSnapshot: 'MultiDimFit'
   doBands: True
   execution: 'htcondor'
+  batchPartition: "short" # Slurm partition to use for job submission
+  batchMemory: 4000 # Slurm memory to use for job submission
+  batchMaxRuntime: "01:00:00" # Slurm max runtime to use
 
 spectra:
   no_preliminary: True # Flag that determines, if Preliminary label should be printed.

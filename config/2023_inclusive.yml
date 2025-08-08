@@ -1,11 +1,11 @@
 # Config file: options for signal fitting
 
-outputFolder: '/net/data_cms3a-1/wrabetz/CMSSW_14_1_0_pre4/src/flashggFinalFit/output_inclusive_2023'
+outputFolder: '/net/data_cms3a-1/wrabetz/CMSSW_14_1_0_pre4/src/flashggFinalFit/output_2023_inclusive'
 
 inputFiles:
   # Trees2WS
-  Trees2WSData: '/eos/cms/store/group/phys_higgs/cmshgg/2023_2022_Hgg_differentials/2025_01_20_intermediateNTuples_2023/data/root/Data/allData_2023.root'
-  Trees2WS: '/eos/cms/store/group/phys_higgs/cmshgg/2023_2022_Hgg_differentials/2025_01_20_intermediateNTuples_2023/signal/root'
+  Trees2WSData: '/net/data_cms3a-2/nobackup/group_JE_CMS/Hgg_PartialRun3/stat_analysis/inclusive/2025_07_18/data/allData_2023.root'
+  Trees2WS: '/net/data_cms3a-2/nobackup/group_JE_CMS/Hgg_PartialRun3/stat_analysis/inclusive/2025_07_18/signal'
 
 backgroundScriptCfg:
   # Setup
@@ -13,7 +13,7 @@ backgroundScriptCfg:
   catOffset: 0 # add offset to category numbers (useful for categories from different allData.root files)
   ext: 'backgroundPartialAnalysis' # extension to add to output directory
   year: '2023' # Use combined when merging all years in category (for plots)
-  execution: 'local'
+  execution: 'htcondor'
 
 trees2wsCfg:
   inputTreeDir: 'DiphotonTree' # Name of RooDirectory storing input tree
@@ -65,7 +65,7 @@ trees2wsCfg:
 
   cats: 'auto'
 
-  execution: 'local'
+  execution: 'htcondor'
 
 signalScriptCfg_2023_preBPix:
   # Setup
@@ -90,7 +90,7 @@ signalScriptCfg_2023_preBPix:
 
 
   # Job submission options
-  execution: 'local'
+  execution: 'htcondor'
 
 signalScriptCfg_2023_postBPix:
   # Setup
@@ -115,14 +115,14 @@ signalScriptCfg_2023_postBPix:
   beamspotWidthMC: '3.732'
 
   # Job submission options
-  execution: 'local'
+  execution: 'htcondor'
 
 packaged_2023:
   cats: 'auto' # if auto: inferred automatically from (0) workspace
   massPoints: '120,125,130' # You can now run with a single mass point if necessary
   mergeYears: True # Merges the eras
   ext: ''
-  execution: 'local'
+  execution: 'htcondor'
 
 datacard_yields:
   cats: 'auto' # if auto: inferred automatically from (0) workspace
@@ -140,7 +140,7 @@ datacard_yields:
   skipBkg: False # Only add signal processes to datacard
   bkgScaler: 1. # Add overall scale factor for background
   skipCOWCorr: True # Skip centralObjectWeight correction for events in acceptance. Use if no centralObjectWeight in workspace
-  execution: 'local'
+  execution: 'htcondor'
 
 datacard:
   # For pruning processes
@@ -174,7 +174,7 @@ combine_fit:
   cminApproxPreFitTolerance: 0.01
   rMin: 0.7
   rMax: 1.6
-  execution: 'local'
+  execution: 'htcondor'
 
 combine_impacts:
   exclude: "" # Nuisances that should be excluded from the impact computation
@@ -183,13 +183,13 @@ combine_impacts:
   stepSize: 0.05
   setCrossingTolerance: 0.00005 
   not_show_POI: False
-  execution: 'local'
+  execution: 'htcondor'
 
 combine_hesse:
-  execution: 'local'
+  execution: 'htcondor'
 
 combine_mggToys:
   nToys: 1000 # Number of toys = nToys * 10
   loadSnapshot: 'MultiDimFit'
   doBands: True
-  execution: 'local'
+  execution: 'htcondor'
