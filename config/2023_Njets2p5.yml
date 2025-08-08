@@ -17,9 +17,6 @@ backgroundScriptCfg:
   batchPartition: "short" # Slurm partition to use for job submission
   batchMemory: 4000 # Slurm memory to use for job submission
   batchMaxRuntime: "01:00:00" # Slurm max runtime to use
-  batchPartition: "short" # Slurm partition to use for job submission
-  batchMemory: 4000 # Slurm memory to use for job submission
-  batchMaxRuntime: "01:00:00" # Slurm max runtime to use
 
 trees2wsCfg:
   inputTreeDir: 'DiphotonTree' # Name of RooDirectory storing input tree
@@ -138,9 +135,6 @@ packaged_2023:
   mergeYears: True # Merges the eras
   ext: ''
   execution: 'htcondor'
-  batchPartition: "short" # Slurm partition to use for job submission
-  batchMemory: 4000 # Slurm memory to use for job submission
-  batchMaxRuntime: "01:00:00" # Slurm max runtime to use
   batchPartition: "short" # Slurm partition to use for job submission
   batchMemory: 4000 # Slurm memory to use for job submission
   batchMaxRuntime: "01:00:00" # Slurm max runtime to use

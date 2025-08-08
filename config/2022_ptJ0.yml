@@ -138,6 +138,10 @@ packaged_2022:
   massPoints: '120,125,130' # You can now run with a single mass point if necessary
   mergeYears: True # Merges the eras
   ext: ''
+  execution: 'htcondor'
+  batchPartition: "short" # Slurm partition to use for job submission
+  batchMemory: 4000 # Slurm memory to use for job submission
+  batchMaxRuntime: "01:00:00" # Slurm max runtime to use
 
 datacard_yields:
   cats: 'auto' # if auto: inferred automatically from (0) workspace
