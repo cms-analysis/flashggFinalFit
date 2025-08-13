@@ -92,8 +92,8 @@ signalScriptCfg_2023_preBPix:
 
   doPlots: True
 
-  beamspotWidthData: '3.2'
-  beamspotWidthMC: '3.732'
+  beamspotWidthData: '3.703'
+  beamspotWidthMC: '3.597'
 
 
   # Job submission options
@@ -120,8 +120,8 @@ signalScriptCfg_2023_postBPix:
   doPlots: True
 
   
-  beamspotWidthData: '3.5'
-  beamspotWidthMC: '3.732'
+  beamspotWidthData: '3.737'
+  beamspotWidthMC: '3.597'
 
   # Job submission options
   execution: 'htcondor'
