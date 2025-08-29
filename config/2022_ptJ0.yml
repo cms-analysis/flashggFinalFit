@@ -169,7 +169,7 @@ datacard:
   # For pruning processes
   prune: True # Prune proc x cat which make up less than pruneThreshold (default 0.1%) of given total category
   pruneThreshold: 0.001 # Threshold with which to prune proc x cat as fraction of total category yield (default=0.1%)
-  doTrueYield: False # For pruning: use true number of expected events for proc x cat i.e. Product(XS,BR,eff*acc,lumi). Use only if NOTAG dataset has been included. If false then will use nominal_yield (i.e. sumEntries)
+  doTrueYield: True # For pruning: use true number of expected events for proc x cat i.e. Product(XS,BR,eff*acc,lumi). If false then will use nominal_yield (i.e. sumEntries)
   analysis: 'earlyAnalysis' # Analysis extension: required for doTrueYield (see ./tools/XSBR.py for example)
 
   # For yield/systematics:
