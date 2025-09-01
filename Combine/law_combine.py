@@ -550,7 +550,11 @@ class AsimovFitCategoryFirstStep(Task, SlurmWorkflow, HTCondorWorkflow, law.Loca
             
         output = [os.path.join(output_dir, 'Combine', fitFolderName, 'asimov')]
 
-        if self.variable != '':
+        if self.variable == '':
+            output += [os.path.join(output_dir, 'Combine', fitFolderName, 'asimov', f'higgsCombinefirstStep.MultiDimFit.mH125.38.root')]
+            output += [os.path.join(output_dir, 'Combine', fitFolderName, 'asimov', f'multidimfitfirstStep.root')]
+
+        elif self.variable != '':
             output += [os.path.join(output_dir, 'Combine', fitFolderName, 'asimov', f'higgsCombinefirstStep_{current_branch}.MultiDimFit.mH125.38.root')]
             output += [os.path.join(output_dir, 'Combine', fitFolderName, 'asimov', f'multidimfitfirstStep_{current_branch}.root')]
         
@@ -601,8 +605,38 @@ class AsimovFitCategoryFirstStep(Task, SlurmWorkflow, HTCondorWorkflow, law.Loca
         else:
             execute_command([f'mkdir -p {output_dir}/Combine/{fitFolderName}/asimov'], shell=True)
             os.chdir(os.path.join(output_dir, 'Combine', fitFolderName, 'asimov'))
+
+        if self.variable == '':
+            arguments = [
+                "combine",
+                "-M", "MultiDimFit",
+                datacard_path,
+                "--freezeParameters", "MH",
+                "-m", "125.38",
+                "-n", f"firstStep",
+                "--cminDefaultMinimizerStrategy=0",
+                "--expectSignal", "1",
+                "--saveWorkspace",
+                "--X-rtd", "MINIMIZER_freezeDisassociatedParams",
+                "--X-rtd", "MINIMIZER_multiMin_hideConstants",
+                "--X-rtd", "MINIMIZER_multiMin_maskConstraints",
+                "--X-rtd", "MINIMIZER_multiMin_maskChannels=2",
+                # "--X-rtd", "MINIMIZER_skipDiscreteIterations", # According to Mauro: Try without profiling
+                "-t", "-1",
+                "--saveFitResult", #pdfindex_cat0_{self.year}_13TeV,pdfindex_cat1_2022_13TeV,pdfindex_cat2_2022_13TeV}
+                "--saveSpecifiedIndex", f"""{",".join([f"pdfindex_{bmw}_{self.year}_13TeV" for bmw in BMW])}""",
+                "--floatOtherPOIs", "1"
+            ]
+            command = arguments
+            # print(command)
+            try:
+                result = subprocess.run(command, check=True, text=True, capture_output=True)
+                print("Script output:", result.stdout)
+                print("Script executed successfully.")
+            except subprocess.CalledProcessError as e:
+                print("Error executing script:", e.stderr)
             
-        if self.variable != '':
+        elif self.variable != '':
             arguments = [
                 "combine",
                 "-M", "MultiDimFit",
@@ -744,6 +778,7 @@ class AsimovFitCategorySyst(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWork
     year = law.Parameter(default='2022', description="Year")
     cat = law.Parameter(description="Current category")
     nPoints = law.Parameter(default=30, description="Number of points for the LL scan")
+    set_pdfidx_inclusives = law.Parameter(default=False, description="Year") # convert_boolean_string
     
     batch_flavor = law.Parameter(default="htcondor", description="Batch system to use")
 
@@ -902,6 +937,9 @@ class AsimovFitCategorySyst(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWork
                 "--setParameterRanges", f"{config['combine_fit']['setParameterRange']}",
                 "--saveSpecifiedNuis", "all"
             ]
+            if convert_boolean_string(self.set_pdfidx_inclusives):
+                arguments.append("--setParameters")
+                arguments.append(f"""{pdfIdx}""")
             command = arguments
             # print(command)
             try:
@@ -979,6 +1017,7 @@ class AsimovFitCategoryStat(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWork
     year = law.Parameter(default='2022', description="Year")
     cat = law.Parameter(description="Current category")
     nPoints = law.Parameter(default=30, description="Number of points for the LL scan")
+    set_pdfidx_inclusives = law.Parameter(default=False, description="Year")
     
     batch_flavor = law.Parameter(default="htcondor", description="Batch system to use")
 
@@ -1140,6 +1179,9 @@ class AsimovFitCategoryStat(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWork
                 "--setParameterRanges", f"{config['combine_fit']['setParameterRange']}",
                 "--saveSpecifiedNuis", "all"
             ]
+            if convert_boolean_string(self.set_pdfidx_inclusives):
+                arguments.append("--setParameters")
+                arguments.append(f"""{pdfIdx}""")
             command = arguments
             # print(command)
             try:
@@ -1214,6 +1256,7 @@ class CreateAsimovFit(Task, SlurmWorkflow, HTCondorWorkflow, law.LocalWorkflow):
     output_dir = law.Parameter(default = '', description="Path to the output directory")
     variable = law.Parameter(default="", description="Variable to be used")
     year = law.Parameter(default='2022', description="Year")
+    set_pdfidx_inclusives = law.Parameter(default=False, description="Year")
     
     batch_flavor = law.Parameter(default="htcondor", description="Batch system to use")
 
@@ -1242,8 +1285,8 @@ class CreateAsimovFit(Task, SlurmWorkflow, HTCondorWorkflow, law.LocalWorkflow):
                         
         if self.variable == '':
             cat = "r"
-            tasks["AsimovFitCategorySyst"] = AsimovFitCategorySyst(output_dir=output_dir, variable=self.variable, year=self.year, cat=cat, nPoints=config["combine_fit"]["asimov_numPoints"], version=f"inclusive_v1", workflow=config["combine_fit"]["execution"], batch_flavor=self.batch_flavor, slurm_partition=config["combine_fit"]['batchPartition'], slurm_memory=config["combine_fit"]['batchMemory'], slurm_max_runtime=config["combine_fit"]['batchMaxRuntime'], htcondor_partition=config["combine_fit"]['batchPartition'], htcondor_memory=config["combine_fit"]['batchMemory'], htcondor_max_runtime=config["combine_fit"]['batchMaxRuntime'])
-            tasks["AsimovFitCategoryStat"] = AsimovFitCategoryStat(output_dir=output_dir, variable=self.variable, year=self.year, cat=cat, nPoints=config["combine_fit"]["asimov_numPoints"], version=f"inclusive_v1", workflow=config["combine_fit"]["execution"], batch_flavor=self.batch_flavor, slurm_partition=config["combine_fit"]['batchPartition'], slurm_memory=config["combine_fit"]['batchMemory'], slurm_max_runtime=config["combine_fit"]['batchMaxRuntime'], htcondor_partition=config["combine_fit"]['batchPartition'], htcondor_memory=config["combine_fit"]['batchMemory'], htcondor_max_runtime=config["combine_fit"]['batchMaxRuntime'])
+            tasks["AsimovFitCategorySyst"] = AsimovFitCategorySyst(output_dir=output_dir, variable=self.variable, year=self.year, cat=cat, nPoints=config["combine_fit"]["asimov_numPoints"], version=f"inclusive_v1", workflow=config["combine_fit"]["execution"], batch_flavor=self.batch_flavor, slurm_partition=config["combine_fit"]['batchPartition'], slurm_memory=config["combine_fit"]['batchMemory'], slurm_max_runtime=config["combine_fit"]['batchMaxRuntime'], htcondor_partition=config["combine_fit"]['batchPartition'], htcondor_memory=config["combine_fit"]['batchMemory'], htcondor_max_runtime=config["combine_fit"]['batchMaxRuntime'], set_pdfidx_inclusives=self.set_pdfidx_inclusives)
+            tasks["AsimovFitCategoryStat"] = AsimovFitCategoryStat(output_dir=output_dir, variable=self.variable, year=self.year, cat=cat, nPoints=config["combine_fit"]["asimov_numPoints"], version=f"inclusive_v1", workflow=config["combine_fit"]["execution"], batch_flavor=self.batch_flavor, slurm_partition=config["combine_fit"]['batchPartition'], slurm_memory=config["combine_fit"]['batchMemory'], slurm_max_runtime=config["combine_fit"]['batchMaxRuntime'], htcondor_partition=config["combine_fit"]['batchPartition'], htcondor_memory=config["combine_fit"]['batchMemory'], htcondor_max_runtime=config["combine_fit"]['batchMaxRuntime'], set_pdfidx_inclusives=self.set_pdfidx_inclusives)
         else:
             version_index = 1
             for cat in combineVariableDict[f'{self.year}'][f'{self.variable}']['paramStrNoOne']:
