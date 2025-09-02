@@ -552,13 +552,8 @@ class AsimovFitCategoryFirstStep(Task, SlurmWorkflow, HTCondorWorkflow, law.Loca
             
         output = [os.path.join(output_dir, 'Combine', fitFolderName, 'asimov')]
 
-        if self.variable == '':
-            output += [os.path.join(output_dir, 'Combine', fitFolderName, 'asimov', f'higgsCombinefirstStep.MultiDimFit.mH125.38.root')]
-            output += [os.path.join(output_dir, 'Combine', fitFolderName, 'asimov', f'multidimfitfirstStep.root')]
-
-        elif self.variable != '':
-            output += [os.path.join(output_dir, 'Combine', fitFolderName, 'asimov', f'higgsCombinefirstStep_{current_branch}.MultiDimFit.mH125.38.root')]
-            output += [os.path.join(output_dir, 'Combine', fitFolderName, 'asimov', f'multidimfitfirstStep_{current_branch}.root')]
+        output += [os.path.join(output_dir, 'Combine', fitFolderName, 'asimov', f'higgsCombinefirstStep_{current_branch}.MultiDimFit.mH125.38.root')]
+        output += [os.path.join(output_dir, 'Combine', fitFolderName, 'asimov', f'multidimfitfirstStep_{current_branch}.root')]
         
         outputFileTargets = []
                 
@@ -615,7 +610,7 @@ class AsimovFitCategoryFirstStep(Task, SlurmWorkflow, HTCondorWorkflow, law.Loca
                 datacard_path,
                 "--freezeParameters", "MH",
                 "-m", "125.38",
-                "-n", f"firstStep",
+                "-n", f"firstStep_{current_branch}",
                 "--cminDefaultMinimizerStrategy=0",
                 "--expectSignal", "1",
                 "--saveWorkspace",
@@ -780,7 +775,7 @@ class AsimovFitCategorySyst(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWork
     year = law.Parameter(default='2022', description="Year")
     cat = law.Parameter(description="Current category")
     nPoints = law.Parameter(default=30, description="Number of points for the LL scan")
-    set_pdfidx_inclusives = law.Parameter(default=False, description="Year") # convert_boolean_string
+    set_pdfidx_inclusives = law.Parameter(default=True, description="Year") # convert_boolean_string
     
     batch_flavor = law.Parameter(default="htcondor", description="Batch system to use")
 
@@ -945,7 +940,7 @@ class AsimovFitCategorySyst(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWork
                 arguments.append("--setParameters")
                 arguments.append(f"""{pdfIdx}""")
             command = arguments
-            # print(command)
+            print(command)
             try:
                 result = subprocess.run(command, check=True, text=True, capture_output=True)
                 print("Script output:", result.stdout)
@@ -1021,7 +1016,7 @@ class AsimovFitCategoryStat(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWork
     year = law.Parameter(default='2022', description="Year")
     cat = law.Parameter(description="Current category")
     nPoints = law.Parameter(default=30, description="Number of points for the LL scan")
-    set_pdfidx_inclusives = law.Parameter(default=False, description="Year")
+    set_pdfidx_inclusives = law.Parameter(default=True, description="Year")
     
     batch_flavor = law.Parameter(default="htcondor", description="Batch system to use")
 
@@ -1187,7 +1182,7 @@ class AsimovFitCategoryStat(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWork
                 arguments.append("--setParameters")
                 arguments.append(f"""{pdfIdx}""")
             command = arguments
-            # print(command)
+            print(command)
             try:
                 result = subprocess.run(command, check=True, text=True, capture_output=True)
                 print("Script output:", result.stdout)
