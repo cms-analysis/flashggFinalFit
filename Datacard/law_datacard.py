@@ -173,7 +173,7 @@ class MakeYieldsCategory(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWorkflo
                 slurm_copy_command = [
                     'xrdcp', '-r',
                     f"{temp_output_dir+'/Datacards'}",
-                    'root://t3dcachedb.psi.ch:1094//'+self.output_dir
+                    'root://t3dcachedb03.psi.ch:1094//'+self.output_dir
                 ]
             execute_command(slurm_copy_command)
             # Clean up the temporary directory
@@ -357,7 +357,6 @@ class MakeDatacard(Task, SlurmWorkflow, HTCondorWorkflow, law.LocalWorkflow): #l
         if self.variable == '': 
             if datacard_config['saveDataFrame']:
                 output_paths.append(law.LocalFileTarget(os.path.join(output_dir,f"Datacards/Dataframe/Datacard_{self.year}.pkl")))
-                output_paths.append(law.LocalFileTarget(os.path.join(output_dir,f"Datacards/Dataframe/Datacard_{self.year}_unsymmetrized.pkl")))
             output_paths.append(law.LocalFileTarget(os.path.join(output_dir,f"Datacards/Datacard_{self.year}.txt")))
         else:
             if datacard_config['saveDataFrame']:
@@ -391,12 +390,12 @@ class MakeDatacard(Task, SlurmWorkflow, HTCondorWorkflow, law.LocalWorkflow): #l
             if "/work" in output_dir:
                 execute_command([f'mkdir -p {output_dir}'], shell=True)
             else:
-                execute_command([f'xrdfs root://t3dcachedb.psi.ch:1094/ mkdir -p {output_dir}'], shell=True)
+                execute_command([f'xrdfs root://t3dcachedb03.psi.ch:1094/ mkdir -p {output_dir}'], shell=True)
             output_dir = os.path.join(output_dir,"Datacards/")
             if "/work" in output_dir:
                 execute_command([f'mkdir -p {output_dir}'], shell=True)
             else:
-                execute_command([f'xrdfs root://t3dcachedb.psi.ch:1094/ mkdir -p {output_dir}'], shell=True)
+                execute_command([f'xrdfs root://t3dcachedb03.psi.ch:1094/ mkdir -p {output_dir}'], shell=True)
             # Have to use /scratch/batch_username/ for slurm/psi
             os.environ["TARGET_PATH"] = f"/scratch/{os.environ['USER']}/MakeDatacard"
             execute_command(['mkdir -p $TARGET_PATH'], shell=True)
@@ -487,7 +486,7 @@ class MakeDatacard(Task, SlurmWorkflow, HTCondorWorkflow, law.LocalWorkflow): #l
             if convert_boolean_string(clean_config["verbose"]): arguments.append("--verbose")
         
             command = arguments
-            # print("Output:", command)
+            print("Output:", command)
             try:
                 result = subprocess.run(command, check=True, text=True, capture_output=True)
                 print("Script output:", result.stdout)
@@ -495,33 +494,36 @@ class MakeDatacard(Task, SlurmWorkflow, HTCondorWorkflow, law.LocalWorkflow): #l
             except subprocess.CalledProcessError as e:
                 print("Error executing script:", e.stderr)
                             
-            # Move the datacard to the final directory
-            if self.batch_flavor == "slurm/psi":
-                if "/work" in output_dir:
-                    slurm_copy_command = [
-                        f'cp -rf {temp_output_dir}/* {output_dir}'
-                    ]
-                # Have to copy over the output to the final directory
-                # Don't forget to VOMS!
-                else:
-                    slurm_copy_command = [
-                        f'xrdcp -rf {temp_output_dir}/* root://t3dcachedb.psi.ch:1094//'+output_dir
-                    ]
-                print("Copy command:", slurm_copy_command)
-                execute_command(slurm_copy_command, shell=True)
-                # Clean up the temporary directory
-                # shutil.rmtree(temp_output_dir)
+        # Move the datacard to the final directory
+        if self.batch_flavor == "slurm/psi":
+            if "/work" in output_dir:
+                slurm_copy_command = [
+                    f'cp -rf {temp_output_dir}/* {output_dir}'
+                ]
+            # Have to copy over the output to the final directory
+            # Don't forget to VOMS!
+            else:
+                slurm_copy_command = [
+                    f'xrdcp -rf {temp_output_dir}/* root://t3dcachedb03.psi.ch:1094//'+output_dir
+                ]
+            print("Copy command:", slurm_copy_command)
+            execute_command(slurm_copy_command, shell=True)
+            # Clean up the temporary directory
+            # shutil.rmtree(temp_output_dir)
+        
+            # After datacard has been moved to pnfs, the datacard_path has to be changed.
+            datacard_path = os.path.join(output_dir, datacard_config["output"] + ".txt")
             
-                # After datacard has been moved to pnfs, the datacard_path has to be changed.
-                datacard_path = os.path.join(output_dir, datacard_config["output"] + ".txt")
-            
+            if self.variable != '':
+        
                 if "/work" in output_dir:
                     execute_command([f'mv {datacard_path} {os.path.join(output_dir, datacard_config["output"] + "_unsymmetrized.txt")}'], shell=True)
                     execute_command([f'mv {os.path.join(output_dir, datacard_config["output"] + "_cleaned.txt")} {os.path.join(output_dir, datacard_config["output"] + ".txt")}'], shell=True)
                 else:
-                    execute_command([f'xrdfs root://t3dcachedb.psi.ch:1094/ mv {datacard_path} {os.path.join(output_dir, datacard_config["output"] + "_unsymmetrized.txt")}'], shell=True)
-                    execute_command([f'xrdfs root://t3dcachedb.psi.ch:1094/ mv {os.path.join(output_dir, datacard_config["output"] + "_cleaned.txt")} {os.path.join(output_dir, datacard_config["output"] + ".txt")}'], shell=True)
-            else:
+                    execute_command([f'xrdfs root://t3dcachedb03.psi.ch:1094/ mv {datacard_path} {os.path.join(output_dir, datacard_config["output"] + "_unsymmetrized.txt")}'], shell=True)
+                    execute_command([f'xrdfs root://t3dcachedb03.psi.ch:1094/ mv {os.path.join(output_dir, datacard_config["output"] + "_cleaned.txt")} {os.path.join(output_dir, datacard_config["output"] + ".txt")}'], shell=True)
+        else:
+            if self.variable != '':
                 execute_command([f'mv {datacard_path} {os.path.join(output_dir, datacard_config["output"] + "_unsymmetrized.txt")}'], shell=True)
                 execute_command([f'mv {os.path.join(output_dir, datacard_config["output"] + "_cleaned.txt")} {os.path.join(output_dir, datacard_config["output"] + ".txt")}'], shell=True)
-        
+            

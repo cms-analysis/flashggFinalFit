@@ -108,7 +108,7 @@ class Trees2WSData(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWorkflow):
             else:
                 final_ws_dir = os.path.join(output_dir, 'input_output_data', f"input_output_data_{self.variable}_{self.year}/ws/")
             # Have to use the xrdfs for the pnfs file system while on PSI Tier 3.
-            execute_command([f'xrdfs root://t3dcachedb.psi.ch:1094/ mkdir -p {final_ws_dir}'], shell=True)
+            execute_command([f'xrdfs root://t3dcachedb03.psi.ch:1094/ mkdir -p {final_ws_dir}'], shell=True)
 
         os.makedirs(temp_ws_dir, exist_ok=True)
             
@@ -231,7 +231,7 @@ class Trees2WSData(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWorkflow):
                 slurm_copy_command = [
                     'xrdcp', '-rf',
                     f'{all_data_file}',
-                    'root://t3dcachedb.psi.ch:1094//' + f'{final_ws_dir}' + 'allData.root'
+                    'root://t3dcachedb03.psi.ch:1094//' + f'{final_ws_dir}' + 'allData.root'
                 ]
             print(slurm_copy_command)
             execute_command(slurm_copy_command)
