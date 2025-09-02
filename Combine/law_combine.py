@@ -914,6 +914,8 @@ class AsimovFitCategorySyst(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWork
             print(pdfIdx)
             return pdfIdx
 
+        pdfIdx = check_pdf_idx(self.cat)
+
         if self.variable == '':
             arguments = [
                 "combine",
@@ -1258,7 +1260,7 @@ class CreateAsimovFit(Task, SlurmWorkflow, HTCondorWorkflow, law.LocalWorkflow):
     output_dir = law.Parameter(default = '', description="Path to the output directory")
     variable = law.Parameter(default="", description="Variable to be used")
     year = law.Parameter(default='2022', description="Year")
-    set_pdfidx_inclusives = law.Parameter(default=False, description="Year")
+    set_pdfidx_inclusives = law.Parameter(default=True, description="Year")
     
     batch_flavor = law.Parameter(default="htcondor", description="Batch system to use")
 
