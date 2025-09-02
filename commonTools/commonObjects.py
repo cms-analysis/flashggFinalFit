@@ -100,7 +100,27 @@ production_modes = [
     ("vh", "VHto2G"),
     ("tth", "ttHtoGG"),
     ("tth", "ttHto2G"),
+    ("bbh", "bbHtoGG"),
+    ("bbh", "bbHto2G")
 ]
+
+# Getting production XS from https://twiki.cern.ch/twiki/bin/view/LHCPhysics/LHCHWG136TeVxsec_extrap, for 125.38 @ 13.6 TeV
+production_XS = {
+    "GluGluHtoGG": 51.96,
+    "GluGluHto2G": 51.96,
+    "VBFHtoGG": 4.067,
+    "VBFHto2G": 4.067,
+    "VHtoGG": 2.3781,
+    "VHto2G": 2.3781,
+    "ttHtoGG": 0.5638,
+    "ttHto2G": 0.5638,
+    "bbHtoGG": 0.49,
+    "bbHto2G": 0.49,
+}
+
+short_production_modes = ["ggh", "vbf", "vh", "tth", "bbh"]
+
+eft_variables = ["chg", "chb", "chw", "chwb", "chbox", "chd", "chl3", "cll1", "ctbre", "cthre", "ctwre"]
 
 # Define an array of eras
 # JLS 22th of Jan 2025: This syntax looks pretty criminal and should be improved at some point
@@ -120,6 +140,8 @@ conversionTable_ = {
     "GluGluHto2G": "ggh",
     "ttHtoGG": "tth",
     "ttHto2G": "tth",
+    "bbHtoGG": "bbh",
+    "bbHto2G": "bbh",
     "VBFHtoGG": "vbf",
     "VBFHto2G": "vbf",
     "VHtoGG": "vh",

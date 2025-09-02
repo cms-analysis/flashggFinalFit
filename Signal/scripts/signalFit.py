@@ -11,9 +11,9 @@ from collections import OrderedDict as od
 
 from commonTools import *
 from commonObjects import *
+from XSBRMap import *
 from tools.signalTools import *
 from tools.replacementMap import globalReplacementMap
-from tools.XSBRMap import *
 from tools.simultaneousFit import *
 from tools.finalModel import *
 # from tools.plottingTools import *
