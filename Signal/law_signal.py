@@ -110,8 +110,8 @@ class FTestCategory(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWorkflow): #
                 execute_command([f'mkdir -p {self.output_dir}/outdir_{self.ext}/fTest/Plots'], shell=True)
                 execute_command([f'mkdir -p {self.output_dir}/outdir_{self.ext}/fTest/json'], shell=True)
             else:   
-                execute_command([f'xrdfs root://t3dcachedb.psi.ch:1094/ mkdir -p {self.output_dir}/outdir_{self.ext}/fTest/Plots'], shell=True)
-                execute_command([f'xrdfs root://t3dcachedb.psi.ch:1094/ mkdir -p {self.output_dir}/outdir_{self.ext}/fTest/json'], shell=True)
+                execute_command([f'xrdfs root://t3dcachedb03.psi.ch:1094/ mkdir -p {self.output_dir}/outdir_{self.ext}/fTest/Plots'], shell=True)
+                execute_command([f'xrdfs root://t3dcachedb03.psi.ch:1094/ mkdir -p {self.output_dir}/outdir_{self.ext}/fTest/json'], shell=True)
 
             os.environ["TARGET_PATH"] = f"/scratch/{os.environ['USER']}/{os.environ['SLURM_JOB_ID']}"
             execute_command([f'mkdir -p $TARGET_PATH/outdir_{self.ext}/fTest/Plots'], shell=True)
@@ -158,7 +158,7 @@ class FTestCategory(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWorkflow): #
                 slurm_copy_command = [
                     'xrdcp', '-rf',
                     f"{os.environ['TARGET_PATH']}/outdir_{self.ext}/",
-                    'root://t3dcachedb.psi.ch:1094//'+self.output_dir
+                    'root://t3dcachedb03.psi.ch:1094//'+self.output_dir
                 ]
             print(slurm_copy_command)
             execute_command(slurm_copy_command)
@@ -368,7 +368,7 @@ class CalcPhotonSystCategory(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWor
             if "/work" in self.output_dir:
                 execute_command([f'mkdir -p {self.output_dir}/outdir_{self.ext}/calcPhotonSyst/pkl'], shell=True)
             else:   
-                execute_command([f'xrdfs root://t3dcachedb.psi.ch:1094/ mkdir -p {self.output_dir}/calcPhotonSyst/pkl'], shell=True)
+                execute_command([f'xrdfs root://t3dcachedb03.psi.ch:1094/ mkdir -p {self.output_dir}/calcPhotonSyst/pkl'], shell=True)
 
             os.environ["TARGET_PATH"] = f"/scratch/{os.environ['USER']}/{os.environ['SLURM_JOB_ID']}"
             execute_command([f'mkdir -p $TARGET_PATH/outdir_{self.ext}/calcPhotonSyst/pkl'], shell=True)
@@ -420,7 +420,7 @@ class CalcPhotonSystCategory(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWor
                 slurm_copy_command = [
                     'xrdcp', '-rf',
                     f"{os.environ['TARGET_PATH']}/outdir_{self.ext}/",
-                    'root://t3dcachedb.psi.ch:1094//'+self.output_dir
+                    'root://t3dcachedb03.psi.ch:1094//'+self.output_dir
                 ]
             print(slurm_copy_command)
             execute_command(slurm_copy_command)
@@ -643,8 +643,8 @@ class SignalFitCategoryProcess(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalW
                 execute_command([f'mkdir -p {self.output_dir}/outdir_{self.ext}/signalFit/output'], shell=True)
                 execute_command([f'mkdir -p {self.output_dir}/outdir_{self.ext}/signalFit/Plots'], shell=True)
             else:   
-                execute_command([f'xrdfs root://t3dcachedb.psi.ch:1094/ mkdir -p {self.output_dir}/signalFit/output'], shell=True)
-                execute_command([f'xrdfs root://t3dcachedb.psi.ch:1094/ mkdir -p {self.output_dir}/signalFit/Plots'], shell=True)
+                execute_command([f'xrdfs root://t3dcachedb03.psi.ch:1094/ mkdir -p {self.output_dir}/signalFit/output'], shell=True)
+                execute_command([f'xrdfs root://t3dcachedb03.psi.ch:1094/ mkdir -p {self.output_dir}/signalFit/Plots'], shell=True)
 
             os.environ["TARGET_PATH"] = f"/scratch/{os.environ['USER']}/{os.environ['SLURM_JOB_ID']}"
             execute_command([f'mkdir -p $TARGET_PATH/outdir_{self.ext}/signalFit/output'], shell=True)
@@ -707,7 +707,7 @@ class SignalFitCategoryProcess(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalW
                 slurm_copy_command = [
                     'xrdcp', '-rf',
                     f"{os.environ['TARGET_PATH']}/outdir_{self.ext}/",
-                    'root://t3dcachedb.psi.ch:1094//'+self.output_dir
+                    'root://t3dcachedb03.psi.ch:1094//'+self.output_dir
                 ]
             print(slurm_copy_command)
             execute_command(slurm_copy_command)
@@ -913,7 +913,7 @@ class SignalPackagingCategory(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWo
             if "/work" in self.output_dir:
                 execute_command([f'mkdir -p {self.output_dir}/outdir_packaged{self.outputExt}/packageSignal'], shell=True)
             else:   
-                execute_command([f'xrdfs root://t3dcachedb.psi.ch:1094/ mkdir -p {self.output_dir}/outdir_packaged{self.outputExt}/packageSignal'], shell=True)
+                execute_command([f'xrdfs root://t3dcachedb03.psi.ch:1094/ mkdir -p {self.output_dir}/outdir_packaged{self.outputExt}/packageSignal'], shell=True)
 
             os.environ["TARGET_PATH"] = f"/scratch/{os.environ['USER']}/{os.environ['SLURM_JOB_ID']}"
             execute_command([f'mkdir -p $TARGET_PATH/outdir_packaged{self.outputExt}/packageSignal'], shell=True)
@@ -946,7 +946,7 @@ class SignalPackagingCategory(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWo
                 else:
                     slurm_copy_command = [
                         'xrdcp', '-rf',
-                        'root://t3dcachedb.psi.ch:1094//'+f"{self.output_dir}/outdir_{signalScriptCfg['ext']}",
+                        'root://t3dcachedb03.psi.ch:1094//'+f"{self.output_dir}/outdir_{signalScriptCfg['ext']}",
                         f"{os.environ['TARGET_PATH']}/"
                     ]
                 print(slurm_copy_command)
@@ -987,7 +987,7 @@ class SignalPackagingCategory(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWo
                 slurm_copy_command = [
                     'xrdcp', '-rf',
                     f"{os.environ['TARGET_PATH']}/outdir_packaged{self.outputExt}/",
-                    'root://t3dcachedb.psi.ch:1094//'+self.output_dir
+                    'root://t3dcachedb03.psi.ch:1094//'+self.output_dir
                 ]
             print(slurm_copy_command)
             execute_command(slurm_copy_command)
