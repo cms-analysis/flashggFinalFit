@@ -146,9 +146,9 @@ if opt.prune:
     print(" --> Using the true yield of process for pruning: N = Product(XS,BR,eff*acc,lumi)")
     mask = (data['type']=='sig')
 
-    # Extract XS*BR using datacardTools.XSBR
+    # Extract XS*BR using XSBR
     data['xsbr'] = '-'
-    from datacardTools.XSBR import *
+    from XSBR import *
     XSBR = extractXSBR(data,mass=opt.mass,analysis=opt.analysis)
     data.loc[mask,'xsbr'] = data[mask].apply(lambda x: XSBR["XS_%s"%x['procOriginal']]*XSBR['BR'], axis=1)
 
