@@ -42,7 +42,8 @@ if opt.inputConfig != '':
     options['procs']        = _cfg['procs']
     options['cats']         = _cfg['cats']
     options['ext']          = _cfg['ext']
-    options['analysis']     = _cfg['analysis']
+    options['analysisRM']     = _cfg['analysisRM']
+    options['analysisXSBR']     = _cfg['analysisXSBR']
     options['year']         = _cfg['year']
     options['massPoints']   = _cfg['massPoints']
     options['scales']       = _cfg['scales']
@@ -103,7 +104,8 @@ print(" --> Processes: %s"%options['procs'])
 print(" --> Categories: %s"%options['cats'])
 print(" --> Mass points: %s --> Low = %s, High = %s"%(options['massPoints'],options['massLow'],options['massHigh']))
 print(" --> Extension: %s"%options['ext'])
-print(" --> Analysis: %s"%options['analysis'])
+print(" --> Replacement Map Analysis: %s"%options['analysisRM'])
+print(" --> XSBR Analysis: %s"%options['analysisXSBR'])
 print(" --> Year: %s ::: Corresponds to intLumi = %.2f fb^-1"%(options['year'],lumiMap[options['year']]))
 if options['mode'] in ['calcPhotonSyst']:
   print(" --> Photon shape systematics:")

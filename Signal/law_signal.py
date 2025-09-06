@@ -558,7 +558,8 @@ class SignalFitCategoryProcess(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalW
     scalesGlobal = law.Parameter(default="",description="Global scales")
     smears = law.Parameter(description="Smearings")
     year = law.Parameter(description="Year")    
-    analysis = law.Parameter(description="Analysis")
+    analysisXSBR = law.Parameter(description="XSBR Analysis")
+    analysisRM = law.Parameter(description="Replacement Map Analysis")
     replacementThreshold = law.Parameter(description="replacementThreshold")
     massPoints = law.Parameter(description="Mass Points")
     beamspotWidthData = law.Parameter(description="Beamspot width in Data")
@@ -667,7 +668,8 @@ class SignalFitCategoryProcess(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalW
             "--year", f"{self.year}",
             "--scales", f"{self.scales}",
             "--smears", f"{self.smears}",
-            "--analysis", f"{self.analysis}",
+            "--analysisXSBR", f"{self.analysisXSBR}",
+            "--analysisRM", f"{self.analysisRM}",
             "--massPoints", f"{self.massPoints}",
             "--replacementThreshold",f"{self.replacementThreshold}",
             "--beamspotWidthData", f"{self.beamspotWidthData}",
@@ -772,7 +774,7 @@ class SignalFit(law.Task):
             for mp in currentConfig['massPoints'].split(","): mps.append(int(mp))
             currentConfig['massLow'], currentConfig['massHigh'] = '%s'%min(mps), '%s'%max(mps)         
             
-            tasks.append(SignalFitCategoryProcess(input_path=input_path, output_dir=output_dir, ext=currentConfig['ext'], cats=currentConfig['cats'], procs=currentConfig['procs'], scales=currentConfig['scales'], scalesCorr=currentConfig['scalesCorr'], scalesGlobal=currentConfig['scalesGlobal'], smears=currentConfig['smears'], year=currentConfig['year'], analysis=currentConfig['analysis'], replacementThreshold=currentConfig['replacementThreshold'], massPoints=currentConfig['massPoints'], beamspotWidthData=currentConfig['beamspotWidthData'], beamspotWidthMC=currentConfig['beamspotWidthMC'], doPlots=currentConfig['doPlots'], variable=self.variable, version=f"v{i}", workflow=currentConfig['execution'], batch_flavor=self.batch_flavor, slurm_partition=currentConfig['batchPartition'], slurm_memory=currentConfig['batchMemory'], slurm_max_runtime=currentConfig['batchMaxRuntime'], htcondor_partition=currentConfig['batchPartition'], htcondor_memory=currentConfig['batchMemory'], htcondor_max_runtime=currentConfig['batchMaxRuntime']))
+            tasks.append(SignalFitCategoryProcess(input_path=input_path, output_dir=output_dir, ext=currentConfig['ext'], cats=currentConfig['cats'], procs=currentConfig['procs'], scales=currentConfig['scales'], scalesCorr=currentConfig['scalesCorr'], scalesGlobal=currentConfig['scalesGlobal'], smears=currentConfig['smears'], year=currentConfig['year'], analysisXSBR=currentConfig['analysisXSBR'], analysisRM=currentConfig['analysisRM'], replacementThreshold=currentConfig['replacementThreshold'], massPoints=currentConfig['massPoints'], beamspotWidthData=currentConfig['beamspotWidthData'], beamspotWidthMC=currentConfig['beamspotWidthMC'], doPlots=currentConfig['doPlots'], variable=self.variable, version=f"v{i}", workflow=currentConfig['execution'], batch_flavor=self.batch_flavor, slurm_partition=currentConfig['batchPartition'], slurm_memory=currentConfig['batchMemory'], slurm_max_runtime=currentConfig['batchMaxRuntime'], htcondor_partition=currentConfig['batchPartition'], htcondor_memory=currentConfig['batchMemory'], htcondor_max_runtime=currentConfig['batchMaxRuntime']))
             i += 1
                 
         return tasks

@@ -1,22 +1,23 @@
 # Config file: options for signal fitting
 
-outputFolder: '/net/data_cms3a-1/wrabetz/CMSSW_14_1_0_pre4/src/flashggFinalFit/output_2023_Njets2p5/'
+outputFolder: '/net/data_cms3a-1/wrabetz/CMSSW_14_1_0_pre4/src/flashggFinalFit/output_2022_ptJ0/'
 
 inputFiles:
   # Trees2WS
-  Trees2WSData: '/net/data_cms3a-2/nobackup/group_JE_CMS/Hgg_PartialRun3/stat_analysis/differential/2025_07_18/Njets2p5/allData_2023.root'
-  Trees2WS: '/net/data_cms3a-2/nobackup/group_JE_CMS/Hgg_PartialRun3/stat_analysis/differential/2025_07_18/Njets2p5/root/'
+  Trees2WSData: '/net/data_cms3a-2/nobackup/group_JE_CMS/Hgg_PartialRun3/stat_analysis/differential/2025_07_18/ptJ0/allData_2022.root'
+  Trees2WS: '/net/data_cms3a-2/nobackup/group_JE_CMS/Hgg_PartialRun3/stat_analysis/differential/2025_07_18/ptJ0/root/'
 
 backgroundScriptCfg:
   # Setup
   cats: 'auto' # auto: automatically inferred from input ws
   catOffset: 0 # add offset to category numbers (useful for categories from different allData.root files)
-  ext: 'earlyAnalysis_Njets2p5' # extension to add to output directory
-  # year: '2023' # Use combined when merging all years in category (for plots)
+  ext: 'Run3FidXSAnalysis_PTJ0' # extension to add to output directory
+  # year: '2022' # Use combined when merging all years in category (for plots)
   execution: 'htcondor'
   batchPartition: "short" # Slurm partition to use for job submission
   batchMemory: 4000 # Slurm memory to use for job submission
   batchMaxRuntime: "01:00:00" # Slurm max runtime to use
+
 
 trees2wsCfg:
   inputTreeDir: 'DiphotonTree' # Name of RooDirectory storing input tree
@@ -37,21 +38,21 @@ trees2wsCfg:
     - "*Up"
     - "*Down"
     - "fiducialGeometricFlag"
-    - "diffVariable_GenNJ"
+    - "diffVariable_GenPTJ0"
   
   dataVars:
     - "CMS_hgg_mass"
     - "weight" # Vars to be added for data
     
   stxsVar: ''
-  diffVar: 'diffVariable_GenNJ'
+  diffVar: 'diffVariable_GenPTJ0'
   notagVars: [] # Vars to add to NOTAG RooDataset
   
   systematicsVars:
     - "CMS_hgg_mass"
     - "weight"
     - "fiducialGeometricFlag"
-    - "diffVariable_GenNJ"
+    - "diffVariable_GenPTJ0"
   
   theoryWeightContainers:
     weight_LHEPdf: 101
@@ -75,13 +76,15 @@ trees2wsCfg:
   batchMemory: 4000 # Slurm memory to use for job submission
   batchMaxRuntime: "01:00:00" # Slurm max runtime to use
 
-signalScriptCfg_2023_preBPix:
+
+signalScriptCfg_2022_preEE:
   # Setup
   procs: 'auto' # if auto: inferred automatically from filenames (requires names to be of form *pythia8_{PROC}.root)
   cats: 'auto' # if auto: inferred automatically from (0) workspace
-  ext: 'earlyAnalysis_Njets2p5_2023preBPix' # output directory extension
-  analysis: 'earlyAnalysisDiffNJ' # To specify replacement dataset and XS*BR mapping (defined in ./tools/replacementMap.py and ./tools/XSBRMap.py respectively)
-  year: '2023preBPix' # Use 'combined' if merging all years: not recommended
+  ext: 'Run3FidXSAnalysis_PTJ0_2022preEE' # output directory extension
+  analysisRM: 'Run3FidXSAnalysisPTJ0' # To specify replacement dataset (defined in ./commonTools/replacementMap.py)
+  analysisXSBR: 'Run3FidXSAnalysis' # To specify XSBR dataset (defined in ./commonTools/XSBRMap.py)
+  year: '2022preEE' # Use 'combined' if merging all years: not recommended
   massPoints: '120,125,130' # You can now run with a single mass point if necessary
   replacementThreshold: '50'
   # Photon shape systematics  
@@ -92,23 +95,25 @@ signalScriptCfg_2023_preBPix:
 
   doPlots: True
 
-  beamspotWidthData: '3.703'
-  beamspotWidthMC: '3.597'
+  beamspotWidthData: '3.2'
+  beamspotWidthMC: '3.732'
 
 
   # Job submission options
   execution: 'htcondor'
   batchPartition: "short" # Slurm partition to use for job submission
   batchMemory: 4000 # Slurm memory to use for job submission
-  batchMaxRuntime: "01:00:00" # Slurm max runtime to use 
+  batchMaxRuntime: "01:00:00" # Slurm max runtime to use
 
-signalScriptCfg_2023_postBPix:
+
+signalScriptCfg_2022_postEE:
   # Setup
   procs: 'auto' # if auto: inferred automatically from filenames (requires names to be of form *pythia8_{PROC}.root)
   cats: 'auto' # if auto: inferred automatically from (0) workspace
-  ext: 'earlyAnalysis_Njets2p5_2023postBPix' # output directory extension
-  analysis: 'earlyAnalysisDiffNJ' # To specify replacement dataset and XS*BR mapping (defined in ./tools/replacementMap.py and ./tools/XSBRMap.py respectively)
-  year: '2023postBPix' # Use 'combined' if merging all years: not recommended
+  ext: 'Run3FidXSAnalysis_PTJ0_2022postEE' # output directory extension
+  analysisRM: 'Run3FidXSAnalysisPTJ0' # To specify replacement dataset (defined in ./commonTools/replacementMap.py)
+  analysisXSBR: 'Run3FidXSAnalysis' # To specify XSBR dataset (defined in ./commonTools/XSBRMap.py)
+  year: '2022postEE' # Use 'combined' if merging all years: not recommended
   massPoints: '120,125,130' # You can now run with a single mass point if necessary
   replacementThreshold: '50'
   # Photon shape systematics  
@@ -120,8 +125,8 @@ signalScriptCfg_2023_postBPix:
   doPlots: True
 
   
-  beamspotWidthData: '3.737'
-  beamspotWidthMC: '3.597'
+  beamspotWidthData: '3.5'
+  beamspotWidthMC: '3.732'
 
   # Job submission options
   execution: 'htcondor'
@@ -129,7 +134,8 @@ signalScriptCfg_2023_postBPix:
   batchMemory: 4000 # Slurm memory to use for job submission
   batchMaxRuntime: "01:00:00" # Slurm max runtime to use
 
-packaged_2023:
+
+packaged_2022:
   cats: 'auto' # if auto: inferred automatically from (0) workspace
   massPoints: '120,125,130' # You can now run with a single mass point if necessary
   mergeYears: True # Merges the eras
@@ -142,10 +148,10 @@ packaged_2023:
 datacard_yields:
   cats: 'auto' # if auto: inferred automatically from (0) workspace
   procs: 'auto' # if auto: inferred automatically from (0) workspace
-  ext: 'earlyAnalysis' # Extension for saving
-  # inputWSDirMap: '2023preBPix,2023postBPix'
-  sigModelWSDir: './Models_Njets2p5/signal' # Input signal model WS directory
-  bkgModelWSDir: './Models_Njets2p5/background' # Input background model WS directory
+  ext: 'Run3FidXSAnalysis' # Extension for saving
+  # inputWSDirMap: '2022preEE,2022postEE'
+  sigModelWSDir: './Models_PTJ0/signal' # Input signal model WS directory
+  bkgModelWSDir: './Models_PTJ0/background' # Input background model WS directory
   bkgModelExt: 'multipdf' # Extension used when saving background model
   doSystematics: True # Include systematics calculations and add to datacard
   mergeYears: True # Merge category across years
@@ -160,12 +166,13 @@ datacard_yields:
   batchMemory: 4000 # Slurm memory to use for job submission
   batchMaxRuntime: "01:00:00" # Slurm max runtime to use
 
+
 datacard:
   # For pruning processes
   prune: True # Prune proc x cat which make up less than pruneThreshold (default 0.1%) of given total category
   pruneThreshold: 0.001 # Threshold with which to prune proc x cat as fraction of total category yield (default=0.1%)
   doTrueYield: True # For pruning: use true number of expected events for proc x cat i.e. Product(XS,BR,eff*acc,lumi). If false then will use nominal_yield (i.e. sumEntries)
-  analysis: 'earlyAnalysis' # Analysis extension: required for doTrueYield (see ./tools/XSBR.py for example)
+  analysis: 'Run3FidXSAnalysis' # To specify XSBR dataset (defined in ./commonTools/XSBRMap.py)
 
   # For yield/systematics:
   skipCOWCorr: True # Skip centralObjectWeight correction for events in acceptance
@@ -176,7 +183,7 @@ datacard:
 
   # For output:
   saveDataFrame: False # Save final dataframe as pkl file
-  output: 'Datacard_Njets2p5_2023' # Datacard name
+  output: 'Datacard_PTJ0_2022' # Datacard name
 
 datacard_clean:
   factor: 10000 # Factor beyond which uncertainty is considered incorrect and is removed
@@ -194,6 +201,7 @@ combine_fit:
   batchMemory: 4000 # Slurm memory to use for job submission
   batchMaxRuntime: "01:00:00" # Slurm max runtime to use
 
+
 combine_impacts:
   exclude: "" # Nuisances that should be excluded from the impact computation
   not_show_POI: True
@@ -202,11 +210,13 @@ combine_impacts:
   batchMemory: 4000 # Slurm memory to use for job submission
   batchMaxRuntime: "01:00:00" # Slurm max runtime to use
 
+
 combine_hesse:
   execution: 'htcondor'
   batchPartition: "short" # Slurm partition to use for job submission
   batchMemory: 4000 # Slurm memory to use for job submission
   batchMaxRuntime: "01:00:00" # Slurm max runtime to use
+
 
 combine_mggToys:
   nToys: 1000 # Number of toys = nToys * 10
@@ -217,23 +227,23 @@ combine_mggToys:
   batchMemory: 4000 # Slurm memory to use for job submission
   batchMaxRuntime: "01:00:00" # Slurm max runtime to use
 
+
 spectra:
   no_preliminary: True # Flag that determines, if Preliminary label should be printed.
-  ggh_xs: "fidXS_NJ_ggH"
-  vbf_xs: "fidXS_NJ_VBFH"
-  vh_xs: "fidXS_NJ_VH"
-  tth_xs: "fidXS_NJ_ttH"
-  xh_xs: "fidXS_NJ_xH"
-  ggh_powheg_xs: "fidXS_NJ_ggH_powheg"
-  ggh_no_nnlops_xs: "fidXS_NJ_ggH_genWeight"
-  underflow_bin_normalized: False # Underflow bin normalized with binwidth
-  last_bin_center: 3.5
-  first_bin_center: 0.5
-  plot_log: 0
-  variable: "N_{Jets}"
-  y_unit: "(fb)"
-  x_unit: ""
-  x_lim: [0, 4]
-  y_lim: [-0.5,3.5]
-  y_lim_top: 135
-  overflow: 4
+  ggh_xs: "fidXS_PTJ0_ggH"
+  vbf_xs: "fidXS_PTJ0_VBFH"
+  vh_xs: "fidXS_PTJ0_VH"
+  tth_xs: "fidXS_PTJ0_ttH"
+  xh_xs: "fidXS_PTJ0_xH"
+  ggh_powheg_xs: "fidXS_PTJ0_ggH_powheg"
+  ggh_no_nnlops_xs: "fidXS_PTJ0_ggH_genWeight"
+  underflow_bin_normalized: True # Underflow bin normalized with binwidth
+  last_bin_center: 300
+  first_bin_center: 15
+  plot_log: 1
+  variable: "p_{T}^{j_{1}}"
+  y_unit: "(fb/GeV)"
+  x_unit: "(GeV)"
+  x_lim: [0, 400]
+  y_lim: [-0.5,2.5]
+  y_lim_top: 250

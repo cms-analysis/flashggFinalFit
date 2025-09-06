@@ -38,7 +38,8 @@ def get_options():
   parser.add_option("--proc", dest='proc', default='', help="Signal process")
   parser.add_option("--cat", dest='cat', default='', help="RECO category")
   parser.add_option("--year", dest='year', default='2016', help="Year")
-  parser.add_option("--analysis", dest='analysis', default='STXS', help="Analysis handle: used to specify replacement map and XS*BR normalisations")
+  parser.add_option("--analysisXSBR", dest='analysisXSBR', default='STXS', help="Analysis handle: used to specify XS*BR normalisations")
+  parser.add_option("--analysisRM", dest='analysisRM', default='STXS', help="Analysis handle replacementMap: used to specify replacement map normalisations")
   parser.add_option('--massPoints', dest='massPoints', default='120,125,130', help="Mass points to fit")
   parser.add_option('--skipBeamspotReweigh', dest='skipBeamspotReweigh', default=False, action="store_true", help="Skip beamspot reweigh to match beamspot distribution in data")
   parser.add_option('--doPlots', dest='doPlots', default=False, action="store_true", help="Produce Signal Fitting plots")
@@ -85,16 +86,16 @@ if( len(opt.massPoints.split(",")) == 1 )&( opt.MHPolyOrder > 0 ):
 # Add stopwatch function
 
 # Load replacement map
-if opt.analysis not in globalReplacementMap:
-  print(" --> [ERROR] replacement map does not exist for analysis (%s). Please add to tools/replacementMap.py"%opt.analysis)
+if opt.analysisRM not in globalReplacementMap:
+  print(" --> [ERROR] replacement map does not exist for analysis (%s). Please add to tools/replacementMap.py"%opt.analysisRM)
   leave()
-else: rMap = globalReplacementMap[opt.analysis]
+else: rMap = globalReplacementMap[opt.analysisRM]
 
 # Load XSBR map
-if opt.analysis not in globalXSBRMap:
-  print(" --> [ERROR] XS * BR map does not exist for analysis (%s). Please add to tools/XSBRMap.py"%opt.analysis)
+if opt.analysisXSBR not in globalXSBRMap:
+  print(" --> [ERROR] XS * BR map does not exist for analysis (%s). Please add to tools/XSBRMap.py"%opt.analysisXSBR)
   leave()
-else: xsbrMap = globalXSBRMap[opt.analysis]
+else: xsbrMap = globalXSBRMap[opt.analysisXSBR]
 
 # Load RooRealVars
 nominalWSFileName = glob.glob("%s/output*M%s*%s.root"%(opt.inputWSDir,MHNominal,opt.proc))[0]
