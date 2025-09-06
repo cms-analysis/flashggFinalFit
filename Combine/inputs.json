@@ -48,7 +48,7 @@
         "fit_opts":"--setParameterRanges r=0,3 --saveSpecifiedNuis all+--setParameterRanges r=0,3 --saveSpecifiedNuis all"
     },
 
-    "Njets2p5":{
+    "NJ":{
         "pois":"r_NJ_0p0_1p0,r_NJ_1p0_2p0,r_NJ_2p0_3p0,r_NJ_3p0_100p0",
         "fits":"profile1D:syst:all+profile1D:statonly:all",
         "points":"40:40+40:40",
@@ -62,7 +62,7 @@
         "fit_opts":"--setParameterRanges r=0,3 --saveSpecifiedNuis all+--setParameterRanges r=0,3 --saveSpecifiedNuis all"
     },
 
-    "ptJ0":{
+    "PTJ0":{
         "pois":"r_PTJ0_0p0_30p0,r_PTJ0_30p0_75p0,r_PTJ0_75p0_120p0,r_PTJ0_120p0_200p0,r_PTJ0_200p0_10000p0",
         "fits":"profile1D:syst:all+profile1D:statonly:all",
         "points":"40:40+40:40",
