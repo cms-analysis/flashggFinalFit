@@ -23,18 +23,18 @@ lumiMap = {
     '2018':59.83, 
     'combined':137.65, 
     'merged':137.65,
-    '2022preEE':8.00,
-    '2223preEE':8.00,
-    '2022postEE':26.70,
-    '2223postEE':26.70,
-    '2022': 34.7,
-    '2023preBPix': 18.1,
-    '2223preBPix': 18.1,
-    '2023postBPix': 9.7,
-    '2223postBPix': 9.7,
-    '2023': 27.8,
-    '2223': 62.5,
-    'Run3': 62.5 # Up to 2023, this does NOT include 2024.
+    '2022preEE':7.9804,
+    '2223preEE':7.9804,
+    '2022postEE':26.6717,
+    '2223postEE':26.6717,
+    '2022': 34.6521,
+    '2023preBPix': 18.063,
+    '2223preBPix': 18.063,
+    '2023postBPix': 9.693,
+    '2223postBPix': 9.693,
+    '2023': 27.756,
+    '2223': 62.4081,
+    'Run3': 62.4081 # Up to 2023, this does NOT include 2024.
 }
 
 def CreateVariableParameters(gen_variable, reco_variable, bins, year, BMW):
