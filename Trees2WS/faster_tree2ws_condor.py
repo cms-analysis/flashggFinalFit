@@ -88,6 +88,16 @@ def write_sh(mode, process, mass_era_list):
     _fsub.write("# Periodically retry the jobs every 10 minutes, up to a maximum of 5 retries.\n")
     _fsub.write("periodic_release =  (NumJobStarts < 3) && ((CurrentTime - EnteredCurrentStatus) > 600)\n\n")
     _fsub.write("+JobFlavour = \"longlunch\"\n")
+
+    # Need to activate the transport plugin while on eos
+    if ("/eos/home-" in os.path.realpath(_jobdir)) or ("/eos/user" in os.path.realpath(_jobdir)):
+        job_file_dir = "root://eosuser.cern.ch/" + os.path.realpath(_jobdir)
+    elif ("/eos/cms" in os.path.realpath(_jobdir)):
+        job_file_dir = "root://eoscms.cern.ch/" + os.path.realpath(_jobdir)
+    else:
+        job_file_dir = os.path.realpath(_jobdir)
+    _fsub.write(f"output_destination = {job_file_dir}\n")
+
     _fsub.write("queue %g"%i)
     _fsub.close()
 

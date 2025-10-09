@@ -18,7 +18,7 @@ def writePreamble(_file):
   _file.write("cd %s\n"%bwd__)
   _file.write("export PYTHONPATH=$PYTHONPATH:%s/tools:%s/tools\n\n"%(cwd__,bwd__))
 
-def writeCondorSub(_file,_exec,_queue,_nJobs,_jobOpts,doHoldOnFailure=True,doPeriodicRetry=True):
+def writeCondorSub(_file,_jobdir,_exec,_queue,_nJobs,_jobOpts,doHoldOnFailure=True,doPeriodicRetry=True):
   _file.write("executable = %s.sh\n"%_exec)
   _file.write("arguments  = $(ProcId)\n")
   _file.write("output     = %s.$(ClusterId).$(ProcId).out\n"%_exec)
@@ -34,6 +34,16 @@ def writeCondorSub(_file,_exec,_queue,_nJobs,_jobOpts,doHoldOnFailure=True,doPer
     _file.write("# Periodically retry the jobs every 10 minutes, up to a maximum of 5 retries.\n")
     _file.write("periodic_release =  (NumJobStarts < 3) && ((CurrentTime - EnteredCurrentStatus) > 600)\n\n")
   _file.write("+AccountingGroup = 'group_u_CMS.u_zh.users'\n")
+
+  # Need to activate the transport plugin while on eos
+  if ("/eos/home-" in os.path.realpath(_jobdir)) or ("/eos/user" in os.path.realpath(_jobdir)):
+      job_file_dir = "root://eosuser.cern.ch/" + os.path.realpath(_jobdir)
+  elif ("/eos/cms" in os.path.realpath(_jobdir)):
+      job_file_dir = "root://eoscms.cern.ch/" + os.path.realpath(_jobdir)
+  else:
+      job_file_dir = os.path.realpath(_jobdir)
+  _file.write(f"output_destination = {job_file_dir}\n")
+  
   _file.write("+JobFlavour = \"%s\"\n"%_queue)
   _file.write("queue %g"%_nJobs)
 
@@ -70,7 +80,7 @@ def writeSubFiles(_opts):
 
     # Condor submission file
     _fsub = open("%s/%s.sub"%(_jobdir,_executable),"w")
-    if( _opts['mode'] == "fTestParallel" ): writeCondorSub(_fsub,_executable,_opts['queue'],_opts['nCats'],_opts['jobOpts'])
+    if( _opts['mode'] == "fTestParallel" ): writeCondorSub(_fsub, _jobdir,_executable,_opts['queue'],_opts['nCats'],_opts['jobOpts'])
     _fsub.close()
     
   # SGE...
