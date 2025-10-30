@@ -177,10 +177,7 @@ double getProbabilityFtest(double chi2, int ndof,RooAbsPdf *pdfNull, RooAbsPdf *
 
         params_null->assignValueOnly(preParams_null);
         params_test->assignValueOnly(preParams_test);
-  	RooDataHist *binnedtoy = pdfNull->generateBinned(RooArgSet(*mass),
-        RooFit::NumEvents(toyFullYield),
-        0,
-        1);
+  	    RooDataHist *binnedtoy = pdfNull->generateBinned(RooArgSet(*mass), toyFullYield, 0, 1);
 
 	int stat_n=1;
         int stat_t=1;
@@ -301,11 +298,7 @@ double getGoodnessOfFit(RooRealVar *mass, RooAbsPdf *mpdf, RooDataSet *data, std
     //  std::cout << "[INFO] " <<Form("\t.. %.1f %% complete\r",100*float(itoy)/ntoys) << std::flush;
       params->assignValueOnly(preParams);
       int nToyEvents = RandomGen->Poisson(ndata);
-      RooDataHist *binnedtoy = pdf->generateBinned(RooArgSet(*mass),
-        RooFit::NumEvents(nToyEvents),
-        RooFit::Range(MASS_FIT_RANGE),
-        RooFit::ExpectedData(false),
-        RooFit::Extended(false));
+      RooDataHist *binnedtoy = pdf->generateBinned(RooArgSet(*mass), nToyEvents, 0, 1);
       pdf->fitTo(*binnedtoy,RooFit::Minimizer("Minuit2","minimize"),RooFit::Minos(0),RooFit::Hesse(0),RooFit::PrintLevel(-1),RooFit::Strategy(0),RooFit::SumW2Error(kTRUE),RooFit::Range(MASS_FIT_RANGE)); //FIXME
 
       RooPlot *plot_t = mass->frame();
