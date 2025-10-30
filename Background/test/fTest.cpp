@@ -6,7 +6,6 @@
 #include <memory>
 #include <algorithm>
 #include <cmath>
-#include <sstream>
 
 #include "boost/program_options.hpp"
 #include "boost/lexical_cast.hpp"
@@ -457,7 +456,7 @@ void plot(RooRealVar *mass, RooMultiPdf *pdfs, RooCategory *catIndex, RooDataSet
   if (BLIND) plot->SetMinimum(0.0001);
   plot->Draw();
   leg->Draw("same");
-  CMS_lumi(canv, 2022, 0); // second argument is iperiod
+  CMS_lumi(canv, 0, 0);
   ///start extra bit for ratio plot///
   std::unique_ptr<TH1> pdfHist;
   if (pdf){
@@ -588,7 +587,7 @@ void plot(RooRealVar *mass, map<string,RooAbsPdf*> pdfs, RooDataSet *data, strin
   if (BLIND) plot->SetMinimum(0.0001);
   plot->Draw();
   leg->Draw("same");
-  CMS_lumi(canv, 2022, 0); // second argument is iperiod
+  CMS_lumi(canv, 0, 0);
   canv->SaveAs(Form("%s.pdf",name.c_str()));
   canv->SaveAs(Form("%s.png",name.c_str()));
   delete canv;
@@ -758,47 +757,6 @@ int main(int argc, char* argv[]){
 	ncats= flashggCats_.size();
 
 	}
-
-  const std::map<std::string,double> lumiByYear = {
-    {"2016",36.33},
-    {"2017",41.48},
-    {"2018",59.83},
-    {"combined",137.65},
-    {"merged",137.65},
-    {"2022preEE",7.9804},
-    {"2223preEE",7.9804},
-    {"2022postEE",26.6717},
-    {"2223postEE",26.6717},
-    {"2022",34.6521},
-    {"2023preBPix",18.063},
-    {"2223preBPix",18.063},
-    {"2023postBPix",9.693},
-    {"2223postBPix",9.693},
-    {"2023",27.756},
-    {"2223",62.4081},
-    {"2024",108.9},
-    {"2024all",108.9},
-    {"Run3",171.4081}
-  };
-  auto setLumiLabel = [&](const std::string &label) {
-    auto it = lumiByYear.find(label);
-    if (it == lumiByYear.end()) {
-      return false;
-    }
-    std::ostringstream lumiStream;
-    lumiStream.setf(std::ios::fixed);
-    if (it->second >= 100.) {
-      lumiStream << std::setprecision(1);
-    } else if (it->second >= 10.) {
-      lumiStream << std::setprecision(2);
-    } else {
-      lumiStream << std::setprecision(3);
-    }
-    lumiStream << it->second << " fb^{-1}";
-    lumi_13p6TeV = lumiStream.str();
-    return true;
-  };
-  setLumiLabel(year_);
 
   if(verbose) std::cout << "[INFO] SaveMultiPdf? " << saveMultiPdf << std::endl;
   TFile *outputfile;
