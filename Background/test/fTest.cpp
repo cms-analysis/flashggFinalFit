@@ -130,8 +130,12 @@ double getProbabilityFtest(double chi2, int ndof,RooAbsPdf *pdfNull, RooAbsPdf *
   double prob_asym = TMath::Prob(chi2,ndof);
   if (!runFtestCheckWithToys) return prob_asym;
 
-  int ndata = data->sumEntries();
-  
+  const double sidebandDataYield = data->sumEntries();
+  double toyFullYield = computeSidebandScaledYield(pdfNull, mass, sidebandDataYield);
+  if (toyFullYield <= 0.) {
+    toyFullYield = sidebandDataYield;
+  }
+
   // fit the pdfs to the data and keep this fit Result (for randomizing)
   RooFitResult *fitNullData = pdfNull->fitTo(*data,RooFit::Save(1),RooFit::Strategy(1)
 		,RooFit::Minimizer("Minuit2","minimize"),RooFit::SumW2Error(kTRUE),RooFit::PrintLevel(-1),RooFit::Range(MASS_FIT_RANGE)); //FIXME
@@ -174,10 +178,9 @@ double getProbabilityFtest(double chi2, int ndof,RooAbsPdf *pdfNull, RooAbsPdf *
         params_null->assignValueOnly(preParams_null);
         params_test->assignValueOnly(preParams_test);
   	RooDataHist *binnedtoy = pdfNull->generateBinned(RooArgSet(*mass),
-        RooFit::NumEvents(ndata),
-        RooFit::Range(MASS_FIT_RANGE),
-        RooFit::ExpectedData(false),
-        RooFit::Extended(false));
+        RooFit::NumEvents(toyFullYield),
+        0,
+        1);
 
 	int stat_n=1;
         int stat_t=1;
