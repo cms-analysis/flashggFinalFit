@@ -456,7 +456,7 @@ void plot(RooRealVar *mass, RooMultiPdf *pdfs, RooCategory *catIndex, RooDataSet
   if (BLIND) plot->SetMinimum(0.0001);
   plot->Draw();
   leg->Draw("same");
-  CMS_lumi(canv, 0, 0);
+  CMS_lumi(canv, 2022, 0); // second argument is iperiod
   ///start extra bit for ratio plot///
   std::unique_ptr<TH1> pdfHist;
   if (pdf){
@@ -587,7 +587,7 @@ void plot(RooRealVar *mass, map<string,RooAbsPdf*> pdfs, RooDataSet *data, strin
   if (BLIND) plot->SetMinimum(0.0001);
   plot->Draw();
   leg->Draw("same");
-  CMS_lumi(canv, 0, 0);
+  CMS_lumi(canv, 2022, 0); // second argument is iperiod
   canv->SaveAs(Form("%s.pdf",name.c_str()));
   canv->SaveAs(Form("%s.png",name.c_str()));
   delete canv;
@@ -686,11 +686,11 @@ int main(int argc, char* argv[]){
  
   setTDRStyle();
   writeExtraText = true;       // if extra text
-  extraText  = "Preliminary";  // default extra text is "Preliminary"
+  extraText  = "Private Work";  // default extra text is "Preliminary"
   lumi_13p6TeV = "61.9 fb^{-1}";
   lumi_8TeV  = "19.1 fb^{-1}"; // default is "19.7 fb^{-1}"
   lumi_7TeV  = "4.9 fb^{-1}";  // default is "5.1 fb^{-1}"
-  lumi_sqrtS = "13 TeV";       // used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
+  lumi_sqrtS = "";       // used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
   string year_ = "2016";
   //int year_ = 2017;
 
@@ -1006,7 +1006,8 @@ int main(int argc, char* argv[]){
 
 						// Calculate goodness of fit for the thing to be included (will use toys for lowstats)!
 						double gofProb =0; 
-						plot(mass,bkgPdf,data,Form("%s/%s%d_cat%d.pdf",outDir.c_str(),funcType->c_str(),order,(cat+catOffset)),flashggCats_,fitStatus,&gofProb);
+            // Deactivate Goodness of Fit plots for now
+						// plot(mass,bkgPdf,data,Form("%s/%s%d_cat%d.pdf",outDir.c_str(),funcType->c_str(),order,(cat+catOffset)),flashggCats_,fitStatus,&gofProb);
 
 						if ((prob < upperEnvThreshold) ) { // Looser requirements for the envelope
 

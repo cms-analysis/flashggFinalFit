@@ -1,0 +1,191 @@
+# coding: utf-8
+
+"""
+Law example tasks to demonstrate HTCondor workflows at CERN.
+
+In this file, some really basic tasks are defined that can be inherited by
+other tasks to receive the same features. This is usually called "framework"
+and only needs to be defined once per user / group / etc.
+"""
+
+
+import os
+import math
+
+import luigi
+import law
+
+
+# the htcondor workflow implementation is part of a law contrib package
+# so we need to explicitly load it
+law.contrib.load("htcondor")
+law.contrib.load("slurm")
+
+
+class Task(law.Task):
+    """
+    Base task that we use to force a version parameter on all inheriting tasks, and that provides
+    some convenience methods to create local file and directory targets at the default data path.
+    """
+
+    version = luigi.Parameter()
+
+    def store_parts(self):
+        return (self.__class__.__name__, self.version)
+
+    def local_path(self, *path):
+        # DATA_PATH is defined in setup.sh
+        output_folder = "$ANALYSIS_PATH/law/remote"
+        # os.mkdir(output_folder)
+        parts = (output_folder,) + self.store_parts() + path
+        return os.path.join(*parts)
+
+    def local_target(self, *path):
+        return law.LocalFileTarget(self.local_path(*path))
+
+
+class HTCondorWorkflow(law.htcondor.HTCondorWorkflow):
+    """
+    Batch systems are typically very heterogeneous by design, and so is HTCondor. Law does not aim
+    to "magically" adapt to all possible HTCondor setups which would certainly end in a mess.
+    Therefore we have to configure the base HTCondor workflow in law.contrib.htcondor to work with
+    the CERN HTCondor environment. In most cases, like in this example, only a minimal amount of
+    configuration is required.
+    """
+
+    htcondor_partition = luigi.Parameter(
+        default="workday",
+        significant=False,
+        description="target queue partition; default: workday",
+    )
+    htcondor_max_runtime = law.DurationParameter(
+        default=8.0,
+        unit="h",
+        significant=False,
+        description="maximum runtime; default unit is hours; default: 1",
+    )
+    htcondor_memory = law.Parameter(
+        default=4000,
+        significant=False,
+        description="Job memory in MB. Default: 4000MB",
+    )
+    transfer_logs = luigi.BoolParameter(
+        default=True,
+        significant=False,
+        description="transfer job logs to the output directory; default: True",
+    )
+
+    htcondor_job_kwargs_submit = {}
+
+    if "lxplus" in os.uname().nodename.lower() or os.environ['PWD'].startswith("/eos"):
+        htcondor_job_kwargs_submit = {"spool": True}
+
+    def htcondor_output_directory(self):
+        # the directory where submission meta data should be stored
+        return law.LocalDirectoryTarget(self.local_path())
+
+    def htcondor_bootstrap_file(self):
+        # each job can define a bootstrap file that is executed prior to the actual job
+        # configure it to be shared across jobs and rendered as part of the job itself
+        bootstrap_file = law.util.rel_path(__file__, "htcondor_bootstrap.sh")
+        return law.JobInputFile(bootstrap_file, share=True, render_job=True)
+
+    def htcondor_job_config(self, config, job_num, branches):
+        # render_variables are rendered into all files sent with a job
+        config.render_variables["analysis_path"] = os.getenv("ANALYSIS_PATH")
+        config.render_variables["law_dir"] = os.getenv("LAW_DIR")
+        config.render_variables["python_exe"] = "/cvmfs/cms.cern.ch/el9_amd64_gcc12/cms/cmssw/CMSSW_14_1_0_pre4/external/el9_amd64_gcc12/bin/python3"
+
+        # configure to run in a "el7" container
+        # https://batchdocs.web.cern.ch/local/submit.html#os-selection-via-containers
+        config.custom_content.append(("MY.WantOS", "el9"))
+
+        # memory requirements
+        memory_gb = self.htcondor_memory / 1000
+        config.custom_content.append(("RequestMemory", f"{memory_gb}GB")) 
+
+        # maximum runtime
+        config.custom_content.append(("+MaxRuntime", int(math.floor(self.htcondor_max_runtime * 3600)) - 1))
+
+        # job flavor
+        config.custom_content.append(("+JobFlavour", f'"{self.htcondor_partition}"'))
+
+        # copy the entire environment
+        config.custom_content.append(("getenv", "true")) # We would to inherit the environment variables from the user
+
+        config.custom_content.append(("+AccountingGroup", '"group_u_CMS.u_zh.users"'))
+
+        # the CERN htcondor setup requires a "log" config, but we can safely set it to /dev/null
+        # if you are interested in the logs of the batch system itself, set a meaningful value here
+        config.custom_content.append(("log", "/dev/null"))
+
+        return config
+
+    def submit(self, job_script, **kwargs):
+        # call the original submit method that returns a process result
+        ret = super().submit(job_script, **kwargs)
+        # Attempt to parse the job id from the condor_submit output
+        match = re.search(r"submitted\sto\scluster\s(\d+)", ret.stdout)
+        if match:
+            return match.group(1)
+        else:
+            self.logger.error("Failed to parse job id from condor_submit output:\n%s", ret.stdout)
+            raise RuntimeError("Could not determine condor job id")
+
+
+class SlurmWorkflow(law.slurm.SlurmWorkflow):
+    """
+    Batch systems are typically very heterogeneous by design, and so is Slurm. Law does not aim
+    to "magically" adapt to all possible Slurm setups which would certainly end in a mess.
+    Therefore we have to configure the base Slurm workflow in law.contrib.slurm to work with
+    the Maxwell cluster environment. In most cases, like in this example, only a minimal amount of
+    configuration is required.
+    """
+
+    slurm_partition = luigi.Parameter(
+        default="standard",
+        significant=False,
+        description="target queue partition; default: standard",
+    )
+    slurm_max_runtime = law.DurationParameter(
+        default=2,
+        unit="h",
+        significant=False,
+        description="the maximum job runtime; default unit is hours; default: 1h",
+    )
+    slurm_memory = law.Parameter(
+        default=4000,
+        significant=False,
+        description="Job memory. Default: 4000MB",
+    )
+
+    def slurm_output_directory(self):
+        # the directory where submission meta data should be stored
+        return law.LocalDirectoryTarget(self.local_path())
+
+    def slurm_bootstrap_file(self):
+        # each job can define a bootstrap file that is executed prior to the actual job
+        # configure it to be shared across jobs and rendered as part of the job itself
+        bootstrap_file = law.util.rel_path(__file__, "slurm_bootstrap.sh")
+        return law.JobInputFile(bootstrap_file, share=True, render_job=True)
+    
+    def slurm_log_directory(self):
+        # the directory where submission meta data should be stored
+        return law.LocalDirectoryTarget(self.local_path())
+
+    def slurm_job_config(self, config, job_num, branches):
+        # render_variables are rendered into all files sent with a job
+        config.render_variables["analysis_path"] = os.getenv("ANALYSIS_PATH")
+        config.render_variables["law_dir"] = os.getenv("LAW_DIR")
+
+        # useful defaults
+        job_time = law.util.human_duration(
+            seconds=law.util.parse_duration(self.slurm_max_runtime, input_unit="h") - 1,
+            colon_format=True,
+        )
+        
+        config.custom_content.append(("time", job_time))
+        config.custom_content.append(("mem", self.slurm_memory))
+        config.custom_content.append(("nodes", 1))
+
+        return config

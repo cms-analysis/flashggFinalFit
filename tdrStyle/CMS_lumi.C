@@ -2,7 +2,7 @@
 #include <iostream>
 
   void 
-CMS_lumi( TPad* pad, int iPeriod, int iPosX , TString extraExtraText)
+CMS_lumi(TPad* pad, int iPeriod, int iPosX , TString extraExtraText)
 {            
 
   bool outOfFrame    = false;
@@ -72,6 +72,11 @@ CMS_lumi( TPad* pad, int iPeriod, int iPosX , TString extraExtraText)
   {
     lumiText += "8 TeV";
   }
+  else if (iPeriod == 2022)
+  {
+    lumiText += lumi_13p6TeV;
+    lumiText += " (13.6 TeV)";
+  }
   else if ( iPeriod==0 )
   {
     lumiText += lumi_sqrtS;
@@ -88,14 +93,14 @@ CMS_lumi( TPad* pad, int iPeriod, int iPosX , TString extraExtraText)
 
   latex.SetTextFont(42);
   latex.SetTextAlign(31); 
-  latex.SetTextSize(lumiTextSize*t);    
+  latex.SetTextSize(0.9*lumiTextSize*t);    
   latex.DrawLatex(1-r,1-t+lumiTextOffset*t,lumiText);
 
   if( outOfFrame )
   {
     latex.SetTextFont(cmsTextFont);
     latex.SetTextAlign(11); 
-    latex.SetTextSize(cmsTextSize*t);    
+    latex.SetTextSize(0.9*cmsTextSize*t);    
     latex.DrawLatex(l,1-t+lumiTextOffset*t,cmsText);
   }
 
@@ -132,18 +137,19 @@ CMS_lumi( TPad* pad, int iPeriod, int iPosX , TString extraExtraText)
       //CMS_logo->Draw("X");
       pad_logo->Modified();
       pad->cd();
+      delete pad_logo;
     }
     else
     {
       latex.SetTextFont(cmsTextFont);
-      latex.SetTextSize(cmsTextSize*t);
+      latex.SetTextSize(0.9*cmsTextSize*t);
       latex.SetTextAlign(align_);
       latex.DrawLatex(posX_, posY_, cmsText);
       if( writeExtraText ) 
       {
         latex.SetTextFont(extraTextFont);
         latex.SetTextAlign(align_);
-        latex.SetTextSize(extraTextSize*t);
+        latex.SetTextSize(0.9*extraTextSize*t);
         latex.DrawLatex(posX_, posY_- relExtraDY*cmsTextSize*t, extraText+" "+extraExtraText);
       }
     }
@@ -156,7 +162,7 @@ CMS_lumi( TPad* pad, int iPeriod, int iPosX , TString extraExtraText)
       posY_ =   1-t+lumiTextOffset*t;
     }
     latex.SetTextFont(extraTextFont);
-    latex.SetTextSize(extraTextSize*t);
+    latex.SetTextSize(0.9*extraTextSize*t);
     latex.SetTextAlign(align_);
     latex.DrawLatex(posX_+0.1, posY_, extraText+" "+extraExtraText);      
   }

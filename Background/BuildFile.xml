@@ -12,7 +12,6 @@
 <export>
 <lib name="1"/>
 </export>
-<architecture name="slc6_amd64_gcc481">
+<architecture name="slc7_amd64_gcc700">
 	<flags REM_CXXFLAGS="-Werror=unused-variable -Werror=maybe-uninitialized"/>
 </architecture>
-

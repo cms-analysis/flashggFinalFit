@@ -1,0 +1,37 @@
+{
+    "mu":{
+        "pois":"r_ggH,r_VBF,r_VH,r_top",
+        "fits":"robustHesse:syst:r_ggH",
+        "points":"",
+        "fit_opts":"--saveSpecifiedNuis all --saveInactivePOI 1 --freezeParameters rgx{STXS_constrain_.*},rgx{MergeUnc_.*}"      
+    },
+
+    "mu_extended":{
+        "pois":"r_ggH,r_VBF,r_WH,r_ZH,r_top",
+        "fits":"robustHesse:syst:r_ggH",
+        "points":"",
+        "fit_opts":"--saveSpecifiedNuis all --saveInactivePOI 1 --freezeParameters rgx{STXS_constrain_.*},rgx{MergeUnc_.*}"      
+    },
+
+    "stage0":{
+        "pois":"r_ggH,r_qqH,r_WH_lep,r_ZH_lep,r_ttH,r_tH",
+        "fits":"robustHesse:syst:r_ggH",
+        "points":"",
+        "fit_opts":"--saveSpecifiedNuis all --saveInactivePOI 1 --freezeParameters BR_hgg,rgx{THU_ggH.*},rgx{THU_qqH.*},rgx{QCDscale_.*},rgx{pdf_Higgs_.*},rgx{alphaS_.*},rgx{MergeUnc.*},UnderlyingEvent_norm,PartonShower_norm,rgx{CMS_hgg_tth_.*}"
+    },
+
+    "stage1p2_maximal":{
+        "pois":"r_ggH_0J_low,r_ggH_0J_high,r_ggH_1J_low,r_ggH_1J_med,r_ggH_1J_high,r_ggH_2J_low,r_ggH_2J_med,r_ggH_2J_high,r_ggH_BSM,r_ggH_VBFlike,r_qqH_VBFlike,r_qqH_BSM,r_qqH_VHhad,r_WH_lep,r_ZH_lep,r_ttH,r_tH",
+        "fits":"robustHesse:syst:r_ggH_0J_low",
+        "points":"",
+        "fit_opts":"--saveSpecifiedNuis all --saveInactivePOI 1 --freezeParameters BR_hgg,rgx{THU_ggH.*},rgx{THU_qqH.*},rgx{QCDscale_.*},rgx{pdf_Higgs_.*},rgx{alphaS_.*},rgx{MergeUnc_minimal.*},UnderlyingEvent_norm,PartonShower_norm,rgx{CMS_hgg_tth_.*}"
+    },
+
+    "stage1p2_minimal":{
+        "pois":"r_ggH_0J_low,r_ggH_0J_high,r_ggH_1J_low,r_ggH_1J_med,r_ggH_1J_high,r_ggH_2J_low,r_ggH_2J_med,r_ggH_2J_high,r_ggH_BSM_low,r_ggH_BSM_high,r_qqH_low_mjj_low_pthjj,r_qqH_low_mjj_high_pthjj,r_qqH_high_mjj_low_pthjj,r_qqH_high_mjj_high_pthjj,r_qqH_BSM,r_qqH_VHhad,r_WH_lep_low,r_WH_lep_high,r_ZH_lep,r_ttH_low,r_ttH_medlow,r_ttH_medhigh,r_ttH_high,r_tH",
+        "fits":"robustHesse:syst:r_ggH_0J_low",
+        "points":"",
+        "fit_opts":"--saveSpecifiedNuis all --saveInactivePOI 1 --freezeParameters BR_hgg,rgx{THU_ggH.*},rgx{THU_qqH.*},rgx{QCDscale_.*},rgx{pdf_Higgs_.*},rgx{alphaS_.*},rgx{MergeUnc_maximal.*},UnderlyingEvent_norm,PartonShower_norm,rgx{CMS_hgg_tth_.*},rgx{MergeUnc_minimal_VBFlike.*}"
+    }
+
+}

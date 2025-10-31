@@ -1,0 +1,3184 @@
+{
+    "emptyProcessShape": {
+        "RECO_rapidity_0p9_2p5_cat0": [
+            "vh_YH_0p0_0p15_in_2022preEE_hgg",
+            "vh_YH_0p0_2p5_out_2022postEE_hgg"
+        ]
+    },
+    "largeNormEff": {
+        "CMS_hgg_PS_FSR_shape": {
+            "RECO_rapidity_0p0_0p15_cat0": {
+                "vbf_YH_0p9_2p5_in_2022postEE_hgg": {
+                    "value_d": 1.074,
+                    "value_u": 0.848
+                }
+            },
+            "RECO_rapidity_0p0_0p15_cat1": {
+                "tth_YH_0p3_0p6_in_2022postEE_hgg": {
+                    "value_d": 1.231,
+                    "value_u": 0.893
+                },
+                "tth_YH_0p6_0p9_in_2022postEE_hgg": {
+                    "value_d": 1.0,
+                    "value_u": 1.153
+                },
+                "vbf_YH_0p0_2p5_out_2022postEE_hgg": {
+                    "value_d": 1.0,
+                    "value_u": 1.117
+                },
+                "vbf_YH_0p3_0p6_in_2022postEE_hgg": {
+                    "value_d": 0.861,
+                    "value_u": 1.124
+                },
+                "vbf_YH_0p6_0p9_in_2022postEE_hgg": {
+                    "value_d": 0.758,
+                    "value_u": 1.111
+                },
+                "vbf_YH_0p9_2p5_in_2022postEE_hgg": {
+                    "value_d": 1.156,
+                    "value_u": 0.854
+                }
+            },
+            "RECO_rapidity_0p0_0p15_cat2": {
+                "tth_YH_0p0_0p15_in_2022preEE_hgg": {
+                    "value_d": 0.719,
+                    "value_u": 1.204
+                },
+                "tth_YH_0p0_2p5_out_2022postEE_hgg": {
+                    "value_d": 0.0,
+                    "value_u": 1.163
+                },
+                "vbf_YH_0p6_0p9_in_2022postEE_hgg": {
+                    "value_d": 0.0,
+                    "value_u": 0.853
+                }
+            },
+            "RECO_rapidity_0p15_0p3_cat1": {
+                "tth_YH_0p0_2p5_out_2022postEE_hgg": {
+                    "value_d": 1.276,
+                    "value_u": 0.887
+                },
+                "tth_YH_0p6_0p9_in_2022postEE_hgg": {
+                    "value_d": 1.0,
+                    "value_u": 1.361
+                },
+                "vbf_YH_0p0_2p5_out_2022postEE_hgg": {
+                    "value_d": 0.715,
+                    "value_u": 1.138
+                },
+                "vbf_YH_0p9_2p5_in_2022postEE_hgg": {
+                    "value_d": 0.796,
+                    "value_u": 1.157
+                },
+                "vh_YH_0p0_2p5_out_2022postEE_hgg": {
+                    "value_d": 0.0,
+                    "value_u": 1.101
+                }
+            },
+            "RECO_rapidity_0p15_0p3_cat2": {
+                "tth_YH_0p0_0p15_in_2022postEE_hgg": {
+                    "value_d": 0.0,
+                    "value_u": 1.215
+                },
+                "tth_YH_0p0_2p5_out_2022postEE_hgg": {
+                    "value_d": 0.0,
+                    "value_u": 1.18
+                },
+                "tth_YH_0p3_0p6_in_2022postEE_hgg": {
+                    "value_d": 1.275,
+                    "value_u": 0.872
+                },
+                "vbf_YH_0p6_0p9_in_2022postEE_hgg": {
+                    "value_d": 0.921,
+                    "value_u": 1.117
+                }
+            },
+            "RECO_rapidity_0p3_0p6_cat0": {
+                "ggh_YH_0p0_2p5_out_2022postEE_hgg": {
+                    "value_d": 1.0,
+                    "value_u": 1.153
+                },
+                "tth_YH_0p0_2p5_out_2022preEE_hgg": {
+                    "value_d": 1.157,
+                    "value_u": 0.869
+                }
+            },
+            "RECO_rapidity_0p3_0p6_cat1": {
+                "tth_YH_0p0_0p15_in_2022postEE_hgg": {
+                    "value_d": 1.121,
+                    "value_u": 0.868
+                },
+                "tth_YH_0p0_2p5_out_2022postEE_hgg": {
+                    "value_d": 0.0,
+                    "value_u": 0.817
+                },
+                "tth_YH_0p9_2p5_in_2022postEE_hgg": {
+                    "value_d": 0.826,
+                    "value_u": 1.157
+                },
+                "vbf_YH_0p0_0p15_in_2022postEE_hgg": {
+                    "value_d": 0.716,
+                    "value_u": 1.109
+                }
+            },
+            "RECO_rapidity_0p3_0p6_cat2": {
+                "ggh_YH_0p9_2p5_in_2022postEE_hgg": {
+                    "value_d": 1.098,
+                    "value_u": 0.898
+                },
+                "tth_YH_0p0_2p5_out_2022postEE_hgg": {
+                    "value_d": 1.0,
+                    "value_u": 1.127
+                },
+                "tth_YH_0p15_0p3_in_2022postEE_hgg": {
+                    "value_d": 1.211,
+                    "value_u": 0.75
+                },
+                "tth_YH_0p6_0p9_in_2022postEE_hgg": {
+                    "value_d": 0.0,
+                    "value_u": 0.8
+                },
+                "tth_YH_0p9_2p5_in_2022postEE_hgg": {
+                    "value_d": 1.0,
+                    "value_u": 1.189
+                },
+                "vbf_YH_0p9_2p5_in_2022postEE_hgg": {
+                    "value_d": 0.837,
+                    "value_u": 1.112
+                }
+            },
+            "RECO_rapidity_0p6_0p9_cat1": {
+                "ggh_YH_0p0_2p5_out_2022preEE_hgg": {
+                    "value_d": 0.847,
+                    "value_u": 1.135
+                },
+                "tth_YH_0p0_2p5_out_2022postEE_hgg": {
+                    "value_d": 0.986,
+                    "value_u": 1.13
+                },
+                "tth_YH_0p9_2p5_in_2022postEE_hgg": {
+                    "value_d": 0.825,
+                    "value_u": 1.106
+                },
+                "vbf_YH_0p0_0p15_in_2022postEE_hgg": {
+                    "value_d": 0.74,
+                    "value_u": 1.172
+                },
+                "vbf_YH_0p0_2p5_out_2022postEE_hgg": {
+                    "value_d": 1.198,
+                    "value_u": 0.89
+                },
+                "vbf_YH_0p9_2p5_in_2022postEE_hgg": {
+                    "value_d": 0.95,
+                    "value_u": 1.103
+                }
+            },
+            "RECO_rapidity_0p6_0p9_cat2": {
+                "tth_YH_0p9_2p5_in_2022preEE_hgg": {
+                    "value_d": 0.683,
+                    "value_u": 1.138
+                },
+                "vbf_YH_0p0_0p15_in_2022postEE_hgg": {
+                    "value_d": 0.82,
+                    "value_u": 1.1
+                },
+                "vbf_YH_0p0_2p5_out_2022preEE_hgg": {
+                    "value_d": 0.0,
+                    "value_u": 1.206
+                },
+                "vbf_YH_0p3_0p6_in_2022preEE_hgg": {
+                    "value_d": 0.0,
+                    "value_u": 0.892
+                }
+            },
+            "RECO_rapidity_0p9_2p5_cat0": {
+                "tth_YH_0p9_2p5_in_2022preEE_hgg": {
+                    "value_d": 0.825,
+                    "value_u": 1.12
+                }
+            },
+            "RECO_rapidity_0p9_2p5_cat1": {
+                "tth_YH_0p0_2p5_out_2022preEE_hgg": {
+                    "value_d": 1.0,
+                    "value_u": 1.291
+                }
+            },
+            "RECO_rapidity_0p9_2p5_cat2": {
+                "tth_YH_0p3_0p6_in_2022postEE_hgg": {
+                    "value_d": 0.864,
+                    "value_u": 1.134
+                },
+                "tth_YH_0p6_0p9_in_2022preEE_hgg": {
+                    "value_d": 0.956,
+                    "value_u": 1.245
+                },
+                "vbf_YH_0p0_0p15_in_2022postEE_hgg": {
+                    "value_d": 0.83,
+                    "value_u": 1.119
+                }
+            }
+        },
+        "CMS_hgg_PS_ISR_shape": {
+            "RECO_rapidity_0p9_2p5_cat1": {
+                "vbf_YH_0p3_0p6_in_2022postEE_hgg": {
+                    "value_d": 0.862,
+                    "value_u": 1.106
+                }
+            }
+        },
+        "CMS_hgg_PileupWeight": {
+            "RECO_rapidity_0p0_0p15_cat0": {
+                "vbf_YH_0p9_2p5_in_2022postEE_hgg": {
+                    "value_d": 1.159,
+                    "value_u": 0.807
+                }
+            },
+            "RECO_rapidity_0p0_0p15_cat1": {
+                "vbf_YH_0p0_2p5_out_2022postEE_hgg": {
+                    "value_d": 1.0,
+                    "value_u": 1.164
+                }
+            },
+            "RECO_rapidity_0p0_0p15_cat2": {
+                "vbf_YH_0p0_2p5_out_2022postEE_hgg": {
+                    "value_d": 1.081,
+                    "value_u": 0.891
+                },
+                "vbf_YH_0p6_0p9_in_2022postEE_hgg": {
+                    "value_d": 0.975,
+                    "value_u": 1.133
+                }
+            },
+            "RECO_rapidity_0p15_0p3_cat2": {
+                "tth_YH_0p0_0p15_in_2022postEE_hgg": {
+                    "value_d": 0.844,
+                    "value_u": 1.212
+                }
+            },
+            "RECO_rapidity_0p3_0p6_cat0": {
+                "tth_YH_0p0_2p5_out_2022postEE_hgg": {
+                    "value_d": 0.887,
+                    "value_u": 1.185
+                }
+            },
+            "RECO_rapidity_0p3_0p6_cat1": {
+                "tth_YH_0p0_2p5_out_2022postEE_hgg": {
+                    "value_d": 1.132,
+                    "value_u": 0.841
+                }
+            },
+            "RECO_rapidity_0p3_0p6_cat2": {
+                "tth_YH_0p15_0p3_in_2022postEE_hgg": {
+                    "value_d": 0.913,
+                    "value_u": 1.112
+                },
+                "vh_YH_0p0_2p5_out_2022postEE_hgg": {
+                    "value_d": 0.933,
+                    "value_u": 1.113
+                }
+            },
+            "RECO_rapidity_0p6_0p9_cat0": {
+                "ggh_YH_0p9_2p5_in_2022postEE_hgg": {
+                    "value_d": 1.276,
+                    "value_u": 0.682
+                }
+            },
+            "RECO_rapidity_0p6_0p9_cat2": {
+                "tth_YH_0p0_2p5_out_2022postEE_hgg": {
+                    "value_d": 1.122,
+                    "value_u": 0.846
+                },
+                "vbf_YH_0p15_0p3_in_2022postEE_hgg": {
+                    "value_d": 1.05,
+                    "value_u": 0.838
+                }
+            },
+            "RECO_rapidity_0p9_2p5_cat0": {
+                "vbf_YH_0p9_2p5_in_2022postEE_hgg": {
+                    "value_d": 1.11,
+                    "value_u": 0.865
+                },
+                "vh_YH_0p9_2p5_in_2022postEE_hgg": {
+                    "value_d": 1.094,
+                    "value_u": 0.895
+                }
+            },
+            "RECO_rapidity_0p9_2p5_cat1": {
+                "tth_YH_0p6_0p9_in_2022postEE_hgg": {
+                    "value_d": 0.912,
+                    "value_u": 1.107
+                }
+            },
+            "RECO_rapidity_0p9_2p5_cat2": {
+                "tth_YH_0p15_0p3_in_2022postEE_hgg": {
+                    "value_d": 0.959,
+                    "value_u": 1.14
+                },
+                "tth_YH_0p3_0p6_in_2022postEE_hgg": {
+                    "value_d": 1.149,
+                    "value_u": 0.816
+                }
+            }
+        },
+        "CMS_hgg_SigmaEOverEShift": {
+            "RECO_rapidity_0p0_0p15_cat0": {
+                "tth_YH_0p0_0p15_in_2022postEE_hgg": {
+                    "value_d": 1.315,
+                    "value_u": 0.685
+                }
+            },
+            "RECO_rapidity_0p0_0p15_cat1": {
+                "ggh_YH_0p0_0p15_in_2022preEE_hgg": {
+                    "value_d": 0.892,
+                    "value_u": 1.108
+                },
+                "tth_YH_0p6_0p9_in_2022postEE_hgg": {
+                    "value_d": 0.869,
+                    "value_u": 1.131
+                }
+            },
+            "RECO_rapidity_0p0_0p15_cat2": {
+                "ggh_YH_0p0_0p15_in_2022postEE_hgg": {
+                    "value_d": 0.845,
+                    "value_u": 1.155
+                },
+                "ggh_YH_0p0_0p15_in_2022preEE_hgg": {
+                    "value_d": 0.862,
+                    "value_u": 1.138
+                },
+                "ggh_YH_0p0_2p5_out_2022preEE_hgg": {
+                    "value_d": 0.893,
+                    "value_u": 1.107
+                },
+                "ggh_YH_0p15_0p3_in_2022postEE_hgg": {
+                    "value_d": 0.892,
+                    "value_u": 1.108
+                },
+                "ggh_YH_0p15_0p3_in_2022preEE_hgg": {
+                    "value_d": 0.9,
+                    "value_u": 1.1
+                },
+                "tth_YH_0p0_0p15_in_2022postEE_hgg": {
+                    "value_d": 0.88,
+                    "value_u": 1.12
+                },
+                "tth_YH_0p0_0p15_in_2022preEE_hgg": {
+                    "value_d": 0.871,
+                    "value_u": 1.129
+                },
+                "tth_YH_0p0_2p5_out_2022postEE_hgg": {
+                    "value_d": 0.721,
+                    "value_u": 1.279
+                },
+                "tth_YH_0p15_0p3_in_2022postEE_hgg": {
+                    "value_d": 0.891,
+                    "value_u": 1.109
+                },
+                "vbf_YH_0p0_0p15_in_2022postEE_hgg": {
+                    "value_d": 0.859,
+                    "value_u": 1.141
+                },
+                "vbf_YH_0p0_0p15_in_2022preEE_hgg": {
+                    "value_d": 0.854,
+                    "value_u": 1.146
+                },
+                "vbf_YH_0p15_0p3_in_2022postEE_hgg": {
+                    "value_d": 0.816,
+                    "value_u": 1.184
+                },
+                "vbf_YH_0p3_0p6_in_2022postEE_hgg": {
+                    "value_d": 0.812,
+                    "value_u": 1.188
+                },
+                "vbf_YH_0p9_2p5_in_2022postEE_hgg": {
+                    "value_d": 0.879,
+                    "value_u": 1.121
+                },
+                "vh_YH_0p0_0p15_in_2022postEE_hgg": {
+                    "value_d": 0.869,
+                    "value_u": 1.131
+                },
+                "vh_YH_0p0_0p15_in_2022preEE_hgg": {
+                    "value_d": 0.889,
+                    "value_u": 1.111
+                },
+                "vh_YH_0p15_0p3_in_2022postEE_hgg": {
+                    "value_d": 0.897,
+                    "value_u": 1.103
+                }
+            },
+            "RECO_rapidity_0p15_0p3_cat1": {
+                "ggh_YH_0p0_0p15_in_2022preEE_hgg": {
+                    "value_d": 0.872,
+                    "value_u": 1.128
+                }
+            },
+            "RECO_rapidity_0p15_0p3_cat2": {
+                "ggh_YH_0p0_0p15_in_2022postEE_hgg": {
+                    "value_d": 0.854,
+                    "value_u": 1.146
+                },
+                "ggh_YH_0p0_0p15_in_2022preEE_hgg": {
+                    "value_d": 0.872,
+                    "value_u": 1.128
+                },
+                "ggh_YH_0p15_0p3_in_2022postEE_hgg": {
+                    "value_d": 0.873,
+                    "value_u": 1.127
+                },
+                "ggh_YH_0p15_0p3_in_2022preEE_hgg": {
+                    "value_d": 0.896,
+                    "value_u": 1.104
+                },
+                "ggh_YH_0p3_0p6_in_2022preEE_hgg": {
+                    "value_d": 0.877,
+                    "value_u": 1.123
+                },
+                "tth_YH_0p0_0p15_in_2022postEE_hgg": {
+                    "value_d": 0.849,
+                    "value_u": 1.151
+                },
+                "tth_YH_0p15_0p3_in_2022postEE_hgg": {
+                    "value_d": 0.859,
+                    "value_u": 1.141
+                },
+                "vbf_YH_0p0_0p15_in_2022postEE_hgg": {
+                    "value_d": 0.871,
+                    "value_u": 1.129
+                },
+                "vbf_YH_0p0_2p5_out_2022postEE_hgg": {
+                    "value_d": 0.892,
+                    "value_u": 1.108
+                },
+                "vbf_YH_0p15_0p3_in_2022postEE_hgg": {
+                    "value_d": 0.877,
+                    "value_u": 1.123
+                },
+                "vbf_YH_0p9_2p5_in_2022postEE_hgg": {
+                    "value_d": 0.87,
+                    "value_u": 1.13
+                },
+                "vh_YH_0p0_0p15_in_2022postEE_hgg": {
+                    "value_d": 0.883,
+                    "value_u": 1.117
+                },
+                "vh_YH_0p15_0p3_in_2022postEE_hgg": {
+                    "value_d": 0.888,
+                    "value_u": 1.112
+                },
+                "vh_YH_0p15_0p3_in_2022preEE_hgg": {
+                    "value_d": 0.895,
+                    "value_u": 1.105
+                }
+            },
+            "RECO_rapidity_0p3_0p6_cat0": {
+                "tth_YH_0p0_2p5_out_2022postEE_hgg": {
+                    "value_d": 1.218,
+                    "value_u": 0.782
+                },
+                "tth_YH_0p0_2p5_out_2022preEE_hgg": {
+                    "value_d": 1.111,
+                    "value_u": 0.889
+                },
+                "tth_YH_0p3_0p6_in_2022postEE_hgg": {
+                    "value_d": 1.33,
+                    "value_u": 0.67
+                },
+                "vbf_YH_0p9_2p5_in_2022postEE_hgg": {
+                    "value_d": 1.333,
+                    "value_u": 0.667
+                }
+            },
+            "RECO_rapidity_0p3_0p6_cat1": {
+                "ggh_YH_0p9_2p5_in_2022postEE_hgg": {
+                    "value_d": 1.142,
+                    "value_u": 0.858
+                }
+            },
+            "RECO_rapidity_0p3_0p6_cat2": {
+                "ggh_YH_0p15_0p3_in_2022preEE_hgg": {
+                    "value_d": 0.827,
+                    "value_u": 1.173
+                },
+                "ggh_YH_0p9_2p5_in_2022postEE_hgg": {
+                    "value_d": 0.673,
+                    "value_u": 1.327
+                },
+                "tth_YH_0p15_0p3_in_2022postEE_hgg": {
+                    "value_d": 0.867,
+                    "value_u": 1.133
+                },
+                "tth_YH_0p6_0p9_in_2022postEE_hgg": {
+                    "value_d": 0.859,
+                    "value_u": 1.141
+                },
+                "tth_YH_0p9_2p5_in_2022postEE_hgg": {
+                    "value_d": 0.798,
+                    "value_u": 1.202
+                },
+                "vbf_YH_0p15_0p3_in_2022postEE_hgg": {
+                    "value_d": 0.874,
+                    "value_u": 1.126
+                },
+                "vbf_YH_0p9_2p5_in_2022postEE_hgg": {
+                    "value_d": 0.898,
+                    "value_u": 1.102
+                }
+            },
+            "RECO_rapidity_0p6_0p9_cat0": {
+                "tth_YH_0p6_0p9_in_2022postEE_hgg": {
+                    "value_d": 1.317,
+                    "value_u": 0.683
+                }
+            },
+            "RECO_rapidity_0p6_0p9_cat1": {
+                "tth_YH_0p9_2p5_in_2022postEE_hgg": {
+                    "value_d": 1.157,
+                    "value_u": 0.843
+                }
+            },
+            "RECO_rapidity_0p6_0p9_cat2": {
+                "tth_YH_0p0_2p5_out_2022preEE_hgg": {
+                    "value_d": 0.872,
+                    "value_u": 1.128
+                },
+                "tth_YH_0p9_2p5_in_2022postEE_hgg": {
+                    "value_d": 0.872,
+                    "value_u": 1.128
+                },
+                "tth_YH_0p9_2p5_in_2022preEE_hgg": {
+                    "value_d": 0.896,
+                    "value_u": 1.104
+                },
+                "vbf_YH_0p3_0p6_in_2022postEE_hgg": {
+                    "value_d": 0.894,
+                    "value_u": 1.106
+                }
+            },
+            "RECO_rapidity_0p9_2p5_cat0": {
+                "tth_YH_0p9_2p5_in_2022postEE_hgg": {
+                    "value_d": 1.272,
+                    "value_u": 0.728
+                },
+                "tth_YH_0p9_2p5_in_2022preEE_hgg": {
+                    "value_d": 1.231,
+                    "value_u": 0.769
+                },
+                "vbf_YH_0p9_2p5_in_2022preEE_hgg": {
+                    "value_d": 1.26,
+                    "value_u": 0.74
+                },
+                "vh_YH_0p9_2p5_in_2022preEE_hgg": {
+                    "value_d": 1.277,
+                    "value_u": 0.723
+                }
+            },
+            "RECO_rapidity_0p9_2p5_cat1": {
+                "ggh_YH_0p0_2p5_out_2022postEE_hgg": {
+                    "value_d": 1.262,
+                    "value_u": 0.738
+                },
+                "ggh_YH_0p0_2p5_out_2022preEE_hgg": {
+                    "value_d": 1.215,
+                    "value_u": 0.785
+                },
+                "ggh_YH_0p9_2p5_in_2022postEE_hgg": {
+                    "value_d": 1.245,
+                    "value_u": 0.755
+                },
+                "ggh_YH_0p9_2p5_in_2022preEE_hgg": {
+                    "value_d": 1.115,
+                    "value_u": 0.885
+                },
+                "tth_YH_0p0_2p5_out_2022postEE_hgg": {
+                    "value_d": 1.18,
+                    "value_u": 0.82
+                },
+                "tth_YH_0p0_2p5_out_2022preEE_hgg": {
+                    "value_d": 1.243,
+                    "value_u": 0.757
+                },
+                "tth_YH_0p6_0p9_in_2022postEE_hgg": {
+                    "value_d": 1.116,
+                    "value_u": 0.884
+                },
+                "tth_YH_0p9_2p5_in_2022postEE_hgg": {
+                    "value_d": 1.204,
+                    "value_u": 0.796
+                },
+                "tth_YH_0p9_2p5_in_2022preEE_hgg": {
+                    "value_d": 1.114,
+                    "value_u": 0.886
+                },
+                "vbf_YH_0p0_2p5_out_2022postEE_hgg": {
+                    "value_d": 1.238,
+                    "value_u": 0.762
+                },
+                "vbf_YH_0p0_2p5_out_2022preEE_hgg": {
+                    "value_d": 1.188,
+                    "value_u": 0.812
+                },
+                "vbf_YH_0p6_0p9_in_2022postEE_hgg": {
+                    "value_d": 1.156,
+                    "value_u": 0.844
+                },
+                "vbf_YH_0p9_2p5_in_2022postEE_hgg": {
+                    "value_d": 1.235,
+                    "value_u": 0.765
+                },
+                "vbf_YH_0p9_2p5_in_2022preEE_hgg": {
+                    "value_d": 1.118,
+                    "value_u": 0.882
+                },
+                "vh_YH_0p0_2p5_out_2022postEE_hgg": {
+                    "value_d": 1.275,
+                    "value_u": 0.725
+                },
+                "vh_YH_0p0_2p5_out_2022preEE_hgg": {
+                    "value_d": 1.131,
+                    "value_u": 0.869
+                },
+                "vh_YH_0p9_2p5_in_2022postEE_hgg": {
+                    "value_d": 1.225,
+                    "value_u": 0.775
+                },
+                "vh_YH_0p9_2p5_in_2022preEE_hgg": {
+                    "value_d": 1.107,
+                    "value_u": 0.893
+                }
+            },
+            "RECO_rapidity_0p9_2p5_cat2": {
+                "tth_YH_0p6_0p9_in_2022preEE_hgg": {
+                    "value_d": 0.767,
+                    "value_u": 1.233
+                }
+            }
+        },
+        "CMS_hgg_scale_0_shape": {
+            "RECO_rapidity_0p0_0p15_cat0": {
+                "ggh_YH_0p3_0p6_in_2022preEE_hgg": {
+                    "value_d": 1.14,
+                    "value_u": 0.883
+                },
+                "ggh_YH_0p9_2p5_in_2022preEE_hgg": {
+                    "value_d": 1.13,
+                    "value_u": 0.891
+                },
+                "tth_YH_0p0_2p5_out_2022preEE_hgg": {
+                    "value_d": 1.3,
+                    "value_u": 0.89
+                },
+                "tth_YH_0p3_0p6_in_2022postEE_hgg": {
+                    "value_d": 1.0,
+                    "value_u": 1.229
+                },
+                "tth_YH_0p3_0p6_in_2022preEE_hgg": {
+                    "value_d": 1.232,
+                    "value_u": 0.879
+                },
+                "tth_YH_0p6_0p9_in_2022postEE_hgg": {
+                    "value_d": 1.275,
+                    "value_u": 0.867
+                },
+                "tth_YH_0p9_2p5_in_2022postEE_hgg": {
+                    "value_d": 1.468,
+                    "value_u": 0.78
+                },
+                "tth_YH_0p9_2p5_in_2022preEE_hgg": {
+                    "value_d": 1.302,
+                    "value_u": 0.855
+                },
+                "vbf_YH_0p6_0p9_in_2022postEE_hgg": {
+                    "value_d": 1.0,
+                    "value_u": 1.26
+                },
+                "vbf_YH_0p6_0p9_in_2022preEE_hgg": {
+                    "value_d": 1.146,
+                    "value_u": 0.889
+                },
+                "vh_YH_0p0_2p5_out_2022postEE_hgg": {
+                    "value_d": 1.177,
+                    "value_u": 0.891
+                },
+                "vh_YH_0p3_0p6_in_2022postEE_hgg": {
+                    "value_d": 1.168,
+                    "value_u": 0.876
+                },
+                "vh_YH_0p3_0p6_in_2022preEE_hgg": {
+                    "value_d": 1.155,
+                    "value_u": 0.878
+                },
+                "vh_YH_0p6_0p9_in_2022preEE_hgg": {
+                    "value_d": 1.22,
+                    "value_u": 0.847
+                }
+            },
+            "RECO_rapidity_0p0_0p15_cat1": {
+                "tth_YH_0p15_0p3_in_2022preEE_hgg": {
+                    "value_d": 1.0,
+                    "value_u": 1.447
+                },
+                "vbf_YH_0p3_0p6_in_2022preEE_hgg": {
+                    "value_d": 1.317,
+                    "value_u": 0.771
+                },
+                "vbf_YH_0p9_2p5_in_2022preEE_hgg": {
+                    "value_d": 0.692,
+                    "value_u": 1.21
+                },
+                "vh_YH_0p0_2p5_out_2022preEE_hgg": {
+                    "value_d": 1.0,
+                    "value_u": 1.283
+                },
+                "vh_YH_0p6_0p9_in_2022postEE_hgg": {
+                    "value_d": 0.711,
+                    "value_u": 1.143
+                }
+            },
+            "RECO_rapidity_0p0_0p15_cat2": {
+                "tth_YH_0p15_0p3_in_2022postEE_hgg": {
+                    "value_d": 1.0,
+                    "value_u": 1.303
+                },
+                "tth_YH_0p3_0p6_in_2022preEE_hgg": {
+                    "value_d": 1.0,
+                    "value_u": 1.408
+                },
+                "tth_YH_0p6_0p9_in_2022preEE_hgg": {
+                    "value_d": 1.432,
+                    "value_u": 0.826
+                },
+                "tth_YH_0p9_2p5_in_2022postEE_hgg": {
+                    "value_d": 1.366,
+                    "value_u": 0.831
+                },
+                "tth_YH_0p9_2p5_in_2022preEE_hgg": {
+                    "value_d": 1.307,
+                    "value_u": 0.856
+                },
+                "vh_YH_0p6_0p9_in_2022postEE_hgg": {
+                    "value_d": 1.155,
+                    "value_u": 0.889
+                },
+                "vh_YH_0p6_0p9_in_2022preEE_hgg": {
+                    "value_d": 0.73,
+                    "value_u": 1.174
+                },
+                "vh_YH_0p9_2p5_in_2022preEE_hgg": {
+                    "value_d": 1.0,
+                    "value_u": 0.687
+                }
+            },
+            "RECO_rapidity_0p15_0p3_cat0": {
+                "tth_YH_0p0_0p15_in_2022postEE_hgg": {
+                    "value_d": 1.309,
+                    "value_u": 0.867
+                },
+                "tth_YH_0p0_0p15_in_2022preEE_hgg": {
+                    "value_d": 1.235,
+                    "value_u": 0.882
+                },
+                "tth_YH_0p0_2p5_out_2022postEE_hgg": {
+                    "value_d": 1.423,
+                    "value_u": 0.849
+                },
+                "tth_YH_0p0_2p5_out_2022preEE_hgg": {
+                    "value_d": 0.669,
+                    "value_u": 1.156
+                },
+                "tth_YH_0p6_0p9_in_2022postEE_hgg": {
+                    "value_d": 1.0,
+                    "value_u": 1.218
+                },
+                "tth_YH_0p6_0p9_in_2022preEE_hgg": {
+                    "value_d": 1.305,
+                    "value_u": 0.873
+                },
+                "tth_YH_0p9_2p5_in_2022preEE_hgg": {
+                    "value_d": 1.0,
+                    "value_u": 1.155
+                },
+                "vbf_YH_0p6_0p9_in_2022preEE_hgg": {
+                    "value_d": 0.739,
+                    "value_u": 1.196
+                }
+            },
+            "RECO_rapidity_0p15_0p3_cat1": {
+                "ggh_YH_0p0_2p5_out_2022preEE_hgg": {
+                    "value_d": 0.727,
+                    "value_u": 1.193
+                },
+                "ggh_YH_0p9_2p5_in_2022postEE_hgg": {
+                    "value_d": 1.363,
+                    "value_u": 0.773
+                },
+                "tth_YH_0p0_0p15_in_2022preEE_hgg": {
+                    "value_d": 1.0,
+                    "value_u": 1.192
+                },
+                "tth_YH_0p9_2p5_in_2022postEE_hgg": {
+                    "value_d": 1.196,
+                    "value_u": 0.896
+                },
+                "vbf_YH_0p3_0p6_in_2022preEE_hgg": {
+                    "value_d": 1.0,
+                    "value_u": 1.416
+                },
+                "vh_YH_0p3_0p6_in_2022preEE_hgg": {
+                    "value_d": 1.144,
+                    "value_u": 0.899
+                }
+            },
+            "RECO_rapidity_0p15_0p3_cat2": {
+                "ggh_YH_0p9_2p5_in_2022postEE_hgg": {
+                    "value_d": 1.288,
+                    "value_u": 0.82
+                },
+                "tth_YH_0p0_0p15_in_2022postEE_hgg": {
+                    "value_d": 1.0,
+                    "value_u": 1.123
+                },
+                "tth_YH_0p0_0p15_in_2022preEE_hgg": {
+                    "value_d": 1.313,
+                    "value_u": 0.862
+                },
+                "tth_YH_0p0_2p5_out_2022postEE_hgg": {
+                    "value_d": 1.272,
+                    "value_u": 0.897
+                },
+                "tth_YH_0p0_2p5_out_2022preEE_hgg": {
+                    "value_d": 1.0,
+                    "value_u": 0.705
+                },
+                "tth_YH_0p9_2p5_in_2022preEE_hgg": {
+                    "value_d": 1.0,
+                    "value_u": 0.779
+                },
+                "vbf_YH_0p9_2p5_in_2022preEE_hgg": {
+                    "value_d": 0.775,
+                    "value_u": 1.178
+                },
+                "vh_YH_0p0_2p5_out_2022postEE_hgg": {
+                    "value_d": 1.242,
+                    "value_u": 0.841
+                },
+                "vh_YH_0p0_2p5_out_2022preEE_hgg": {
+                    "value_d": 1.178,
+                    "value_u": 0.877
+                },
+                "vh_YH_0p6_0p9_in_2022preEE_hgg": {
+                    "value_d": 1.248,
+                    "value_u": 0.825
+                },
+                "vh_YH_0p9_2p5_in_2022postEE_hgg": {
+                    "value_d": 1.201,
+                    "value_u": 0.859
+                }
+            },
+            "RECO_rapidity_0p3_0p6_cat0": {
+                "ggh_YH_0p0_0p15_in_2022preEE_hgg": {
+                    "value_d": 1.205,
+                    "value_u": 0.854
+                },
+                "ggh_YH_0p9_2p5_in_2022preEE_hgg": {
+                    "value_d": 1.214,
+                    "value_u": 0.841
+                },
+                "tth_YH_0p15_0p3_in_2022postEE_hgg": {
+                    "value_d": 1.0,
+                    "value_u": 1.153
+                },
+                "tth_YH_0p6_0p9_in_2022postEE_hgg": {
+                    "value_d": 1.0,
+                    "value_u": 1.242
+                }
+            },
+            "RECO_rapidity_0p3_0p6_cat1": {
+                "ggh_YH_0p0_0p15_in_2022preEE_hgg": {
+                    "value_d": 1.354,
+                    "value_u": 0.8
+                },
+                "tth_YH_0p9_2p5_in_2022postEE_hgg": {
+                    "value_d": 1.221,
+                    "value_u": 0.888
+                },
+                "tth_YH_0p9_2p5_in_2022preEE_hgg": {
+                    "value_d": 1.433,
+                    "value_u": 0.805
+                },
+                "vbf_YH_0p0_0p15_in_2022preEE_hgg": {
+                    "value_d": 1.147,
+                    "value_u": 0.886
+                },
+                "vh_YH_0p0_0p15_in_2022preEE_hgg": {
+                    "value_d": 1.226,
+                    "value_u": 0.848
+                }
+            },
+            "RECO_rapidity_0p3_0p6_cat2": {
+                "ggh_YH_0p15_0p3_in_2022preEE_hgg": {
+                    "value_d": 1.245,
+                    "value_u": 0.876
+                },
+                "ggh_YH_0p9_2p5_in_2022postEE_hgg": {
+                    "value_d": 1.116,
+                    "value_u": 0.885
+                },
+                "tth_YH_0p0_2p5_out_2022preEE_hgg": {
+                    "value_d": 1.0,
+                    "value_u": 1.303
+                },
+                "tth_YH_0p15_0p3_in_2022preEE_hgg": {
+                    "value_d": 1.253,
+                    "value_u": 0.897
+                },
+                "tth_YH_0p6_0p9_in_2022preEE_hgg": {
+                    "value_d": 1.25,
+                    "value_u": 0.894
+                },
+                "vh_YH_0p0_2p5_out_2022preEE_hgg": {
+                    "value_d": 1.0,
+                    "value_u": 1.304
+                },
+                "vh_YH_0p9_2p5_in_2022postEE_hgg": {
+                    "value_d": 1.114,
+                    "value_u": 0.893
+                }
+            },
+            "RECO_rapidity_0p6_0p9_cat0": {
+                "ggh_YH_0p9_2p5_in_2022postEE_hgg": {
+                    "value_d": 0.791,
+                    "value_u": 1.127
+                },
+                "ggh_YH_0p9_2p5_in_2022preEE_hgg": {
+                    "value_d": 1.268,
+                    "value_u": 0.832
+                },
+                "tth_YH_0p0_0p15_in_2022postEE_hgg": {
+                    "value_d": 1.0,
+                    "value_u": 0.788
+                },
+                "tth_YH_0p0_2p5_out_2022preEE_hgg": {
+                    "value_d": 1.0,
+                    "value_u": 1.154
+                },
+                "tth_YH_0p15_0p3_in_2022preEE_hgg": {
+                    "value_d": 1.472,
+                    "value_u": 0.793
+                },
+                "tth_YH_0p3_0p6_in_2022postEE_hgg": {
+                    "value_d": 0.723,
+                    "value_u": 1.111
+                },
+                "vh_YH_0p0_0p15_in_2022preEE_hgg": {
+                    "value_d": 1.23,
+                    "value_u": 0.821
+                },
+                "vh_YH_0p0_2p5_out_2022postEE_hgg": {
+                    "value_d": 0.798,
+                    "value_u": 1.143
+                },
+                "vh_YH_0p15_0p3_in_2022preEE_hgg": {
+                    "value_d": 1.283,
+                    "value_u": 0.816
+                },
+                "vh_YH_0p3_0p6_in_2022preEE_hgg": {
+                    "value_d": 1.0,
+                    "value_u": 1.26
+                }
+            },
+            "RECO_rapidity_0p6_0p9_cat1": {
+                "tth_YH_0p0_0p15_in_2022preEE_hgg": {
+                    "value_d": 0.667,
+                    "value_u": 1.136
+                },
+                "tth_YH_0p15_0p3_in_2022preEE_hgg": {
+                    "value_d": 1.0,
+                    "value_u": 1.198
+                },
+                "tth_YH_0p3_0p6_in_2022preEE_hgg": {
+                    "value_d": 1.263,
+                    "value_u": 0.877
+                },
+                "tth_YH_0p9_2p5_in_2022postEE_hgg": {
+                    "value_d": 1.269,
+                    "value_u": 0.874
+                },
+                "vh_YH_0p0_0p15_in_2022postEE_hgg": {
+                    "value_d": 1.221,
+                    "value_u": 0.845
+                },
+                "vh_YH_0p15_0p3_in_2022preEE_hgg": {
+                    "value_d": 1.207,
+                    "value_u": 0.898
+                },
+                "vh_YH_0p3_0p6_in_2022preEE_hgg": {
+                    "value_d": 0.789,
+                    "value_u": 1.145
+                }
+            },
+            "RECO_rapidity_0p6_0p9_cat2": {
+                "tth_YH_0p3_0p6_in_2022preEE_hgg": {
+                    "value_d": 1.403,
+                    "value_u": 0.837
+                },
+                "vbf_YH_0p0_0p15_in_2022preEE_hgg": {
+                    "value_d": 1.17,
+                    "value_u": 0.871
+                },
+                "vbf_YH_0p15_0p3_in_2022preEE_hgg": {
+                    "value_d": 0.888,
+                    "value_u": 1.114
+                },
+                "vh_YH_0p0_0p15_in_2022preEE_hgg": {
+                    "value_d": 1.217,
+                    "value_u": 0.826
+                },
+                "vh_YH_0p15_0p3_in_2022postEE_hgg": {
+                    "value_d": 1.232,
+                    "value_u": 0.846
+                }
+            },
+            "RECO_rapidity_0p9_2p5_cat0": {
+                "ggh_YH_0p0_0p15_in_2022preEE_hgg": {
+                    "value_d": 1.095,
+                    "value_u": 0.871
+                },
+                "ggh_YH_0p0_2p5_out_2022preEE_hgg": {
+                    "value_d": 0.747,
+                    "value_u": 1.183
+                },
+                "tth_YH_0p0_2p5_out_2022postEE_hgg": {
+                    "value_d": 1.473,
+                    "value_u": 0.823
+                },
+                "tth_YH_0p15_0p3_in_2022preEE_hgg": {
+                    "value_d": 1.471,
+                    "value_u": 0.788
+                },
+                "tth_YH_0p3_0p6_in_2022preEE_hgg": {
+                    "value_d": 1.0,
+                    "value_u": 0.699
+                },
+                "tth_YH_0p6_0p9_in_2022postEE_hgg": {
+                    "value_d": 1.0,
+                    "value_u": 0.734
+                },
+                "vh_YH_0p15_0p3_in_2022preEE_hgg": {
+                    "value_d": 1.239,
+                    "value_u": 0.815
+                }
+            },
+            "RECO_rapidity_0p9_2p5_cat1": {
+                "tth_YH_0p0_0p15_in_2022preEE_hgg": {
+                    "value_d": 1.426,
+                    "value_u": 0.802
+                },
+                "tth_YH_0p0_2p5_out_2022preEE_hgg": {
+                    "value_d": 1.0,
+                    "value_u": 1.189
+                },
+                "tth_YH_0p3_0p6_in_2022postEE_hgg": {
+                    "value_d": 1.275,
+                    "value_u": 0.872
+                },
+                "tth_YH_0p6_0p9_in_2022postEE_hgg": {
+                    "value_d": 1.251,
+                    "value_u": 0.886
+                },
+                "tth_YH_0p6_0p9_in_2022preEE_hgg": {
+                    "value_d": 1.272,
+                    "value_u": 0.892
+                },
+                "vbf_YH_0p6_0p9_in_2022preEE_hgg": {
+                    "value_d": 1.192,
+                    "value_u": 0.853
+                }
+            },
+            "RECO_rapidity_0p9_2p5_cat2": {
+                "tth_YH_0p0_0p15_in_2022postEE_hgg": {
+                    "value_d": 1.28,
+                    "value_u": 0.866
+                },
+                "tth_YH_0p0_0p15_in_2022preEE_hgg": {
+                    "value_d": 1.375,
+                    "value_u": 0.819
+                },
+                "tth_YH_0p15_0p3_in_2022preEE_hgg": {
+                    "value_d": 1.483,
+                    "value_u": 0.783
+                }
+            }
+        },
+        "CMS_hgg_scale_1_shape": {
+            "RECO_rapidity_0p0_0p15_cat0": {
+                "tth_YH_0p3_0p6_in_2022postEE_hgg": {
+                    "value_d": 1.0,
+                    "value_u": 1.212
+                },
+                "tth_YH_0p6_0p9_in_2022postEE_hgg": {
+                    "value_d": 1.244,
+                    "value_u": 0.866
+                },
+                "tth_YH_0p9_2p5_in_2022postEE_hgg": {
+                    "value_d": 1.358,
+                    "value_u": 0.804
+                },
+                "vbf_YH_0p3_0p6_in_2022preEE_hgg": {
+                    "value_d": 0.851,
+                    "value_u": 1.123
+                },
+                "vbf_YH_0p6_0p9_in_2022postEE_hgg": {
+                    "value_d": 0.86,
+                    "value_u": 1.117
+                },
+                "vh_YH_0p3_0p6_in_2022postEE_hgg": {
+                    "value_d": 1.193,
+                    "value_u": 0.865
+                }
+            },
+            "RECO_rapidity_0p0_0p15_cat1": {
+                "tth_YH_0p15_0p3_in_2022preEE_hgg": {
+                    "value_d": 1.0,
+                    "value_u": 1.438
+                },
+                "tth_YH_0p6_0p9_in_2022preEE_hgg": {
+                    "value_d": 1.0,
+                    "value_u": 1.379
+                },
+                "vbf_YH_0p3_0p6_in_2022preEE_hgg": {
+                    "value_d": 0.875,
+                    "value_u": 1.102
+                },
+                "vbf_YH_0p9_2p5_in_2022preEE_hgg": {
+                    "value_d": 1.0,
+                    "value_u": 1.341
+                },
+                "vh_YH_0p0_2p5_out_2022preEE_hgg": {
+                    "value_d": 1.0,
+                    "value_u": 1.25
+                },
+                "vh_YH_0p3_0p6_in_2022postEE_hgg": {
+                    "value_d": 0.767,
+                    "value_u": 1.134
+                }
+            },
+            "RECO_rapidity_0p0_0p15_cat2": {
+                "ggh_YH_0p3_0p6_in_2022preEE_hgg": {
+                    "value_d": 1.178,
+                    "value_u": 0.878
+                },
+                "tth_YH_0p0_2p5_out_2022preEE_hgg": {
+                    "value_d": 1.281,
+                    "value_u": 0.872
+                },
+                "tth_YH_0p15_0p3_in_2022postEE_hgg": {
+                    "value_d": 0.755,
+                    "value_u": 1.118
+                },
+                "tth_YH_0p3_0p6_in_2022preEE_hgg": {
+                    "value_d": 1.0,
+                    "value_u": 1.232
+                },
+                "tth_YH_0p6_0p9_in_2022preEE_hgg": {
+                    "value_d": 1.294,
+                    "value_u": 0.854
+                },
+                "vh_YH_0p6_0p9_in_2022postEE_hgg": {
+                    "value_d": 1.184,
+                    "value_u": 0.874
+                },
+                "vh_YH_0p9_2p5_in_2022preEE_hgg": {
+                    "value_d": 1.376,
+                    "value_u": 0.755
+                }
+            },
+            "RECO_rapidity_0p15_0p3_cat0": {
+                "tth_YH_0p0_2p5_out_2022preEE_hgg": {
+                    "value_d": 0.697,
+                    "value_u": 1.158
+                },
+                "tth_YH_0p6_0p9_in_2022postEE_hgg": {
+                    "value_d": 0.75,
+                    "value_u": 1.124
+                },
+                "vh_YH_0p0_2p5_out_2022preEE_hgg": {
+                    "value_d": 0.796,
+                    "value_u": 1.12
+                }
+            },
+            "RECO_rapidity_0p15_0p3_cat1": {
+                "ggh_YH_0p0_2p5_out_2022preEE_hgg": {
+                    "value_d": 1.0,
+                    "value_u": 1.209
+                },
+                "ggh_YH_0p9_2p5_in_2022postEE_hgg": {
+                    "value_d": 1.231,
+                    "value_u": 0.843
+                },
+                "tth_YH_0p0_0p15_in_2022preEE_hgg": {
+                    "value_d": 1.0,
+                    "value_u": 1.193
+                },
+                "tth_YH_0p9_2p5_in_2022postEE_hgg": {
+                    "value_d": 1.193,
+                    "value_u": 0.89
+                },
+                "vbf_YH_0p3_0p6_in_2022preEE_hgg": {
+                    "value_d": 1.0,
+                    "value_u": 1.33
+                }
+            },
+            "RECO_rapidity_0p15_0p3_cat2": {
+                "tth_YH_0p0_0p15_in_2022preEE_hgg": {
+                    "value_d": 1.219,
+                    "value_u": 0.881
+                },
+                "tth_YH_0p0_2p5_out_2022preEE_hgg": {
+                    "value_d": 1.329,
+                    "value_u": 0.854
+                },
+                "tth_YH_0p9_2p5_in_2022postEE_hgg": {
+                    "value_d": 0.756,
+                    "value_u": 1.129
+                },
+                "tth_YH_0p9_2p5_in_2022preEE_hgg": {
+                    "value_d": 1.458,
+                    "value_u": 0.767
+                },
+                "vh_YH_0p0_2p5_out_2022preEE_hgg": {
+                    "value_d": 1.175,
+                    "value_u": 0.882
+                },
+                "vh_YH_0p9_2p5_in_2022postEE_hgg": {
+                    "value_d": 1.136,
+                    "value_u": 0.898
+                },
+                "vh_YH_0p9_2p5_in_2022preEE_hgg": {
+                    "value_d": 1.231,
+                    "value_u": 0.842
+                }
+            },
+            "RECO_rapidity_0p3_0p6_cat0": {
+                "tth_YH_0p0_0p15_in_2022postEE_hgg": {
+                    "value_d": 0.693,
+                    "value_u": 1.156
+                },
+                "tth_YH_0p15_0p3_in_2022postEE_hgg": {
+                    "value_d": 0.754,
+                    "value_u": 1.124
+                },
+                "tth_YH_0p6_0p9_in_2022postEE_hgg": {
+                    "value_d": 0.677,
+                    "value_u": 1.184
+                }
+            },
+            "RECO_rapidity_0p3_0p6_cat1": {
+                "ggh_YH_0p0_0p15_in_2022preEE_hgg": {
+                    "value_d": 1.219,
+                    "value_u": 0.851
+                },
+                "tth_YH_0p9_2p5_in_2022preEE_hgg": {
+                    "value_d": 1.259,
+                    "value_u": 0.859
+                },
+                "vh_YH_0p0_0p15_in_2022preEE_hgg": {
+                    "value_d": 1.186,
+                    "value_u": 0.868
+                },
+                "vh_YH_0p15_0p3_in_2022preEE_hgg": {
+                    "value_d": 0.84,
+                    "value_u": 1.108
+                }
+            },
+            "RECO_rapidity_0p3_0p6_cat2": {
+                "ggh_YH_0p15_0p3_in_2022preEE_hgg": {
+                    "value_d": 0.736,
+                    "value_u": 1.164
+                },
+                "tth_YH_0p0_2p5_out_2022preEE_hgg": {
+                    "value_d": 1.0,
+                    "value_u": 1.229
+                },
+                "tth_YH_0p15_0p3_in_2022preEE_hgg": {
+                    "value_d": 1.238,
+                    "value_u": 0.875
+                },
+                "vh_YH_0p0_2p5_out_2022preEE_hgg": {
+                    "value_d": 1.0,
+                    "value_u": 1.287
+                }
+            },
+            "RECO_rapidity_0p6_0p9_cat0": {
+                "ggh_YH_0p0_2p5_out_2022postEE_hgg": {
+                    "value_d": 1.216,
+                    "value_u": 0.861
+                },
+                "ggh_YH_0p9_2p5_in_2022postEE_hgg": {
+                    "value_d": 0.845,
+                    "value_u": 1.108
+                },
+                "tth_YH_0p0_0p15_in_2022postEE_hgg": {
+                    "value_d": 1.374,
+                    "value_u": 0.806
+                },
+                "tth_YH_0p0_0p15_in_2022preEE_hgg": {
+                    "value_d": 1.222,
+                    "value_u": 0.873
+                },
+                "tth_YH_0p15_0p3_in_2022preEE_hgg": {
+                    "value_d": 1.234,
+                    "value_u": 0.869
+                },
+                "vh_YH_0p15_0p3_in_2022preEE_hgg": {
+                    "value_d": 1.174,
+                    "value_u": 0.881
+                },
+                "vh_YH_0p3_0p6_in_2022preEE_hgg": {
+                    "value_d": 0.745,
+                    "value_u": 1.179
+                }
+            },
+            "RECO_rapidity_0p6_0p9_cat1": {
+                "tth_YH_0p0_0p15_in_2022preEE_hgg": {
+                    "value_d": 0.779,
+                    "value_u": 1.118
+                },
+                "tth_YH_0p15_0p3_in_2022preEE_hgg": {
+                    "value_d": 1.0,
+                    "value_u": 1.182
+                },
+                "tth_YH_0p3_0p6_in_2022preEE_hgg": {
+                    "value_d": 1.228,
+                    "value_u": 0.877
+                },
+                "vh_YH_0p0_0p15_in_2022postEE_hgg": {
+                    "value_d": 1.152,
+                    "value_u": 0.884
+                },
+                "vh_YH_0p3_0p6_in_2022preEE_hgg": {
+                    "value_d": 1.0,
+                    "value_u": 1.26
+                }
+            },
+            "RECO_rapidity_0p6_0p9_cat2": {
+                "vbf_YH_0p15_0p3_in_2022preEE_hgg": {
+                    "value_d": 0.811,
+                    "value_u": 1.154
+                },
+                "vh_YH_0p15_0p3_in_2022postEE_hgg": {
+                    "value_d": 1.142,
+                    "value_u": 0.899
+                }
+            },
+            "RECO_rapidity_0p9_2p5_cat0": {
+                "tth_YH_0p0_0p15_in_2022preEE_hgg": {
+                    "value_d": 1.278,
+                    "value_u": 0.842
+                },
+                "tth_YH_0p0_2p5_out_2022postEE_hgg": {
+                    "value_d": 1.294,
+                    "value_u": 0.852
+                },
+                "tth_YH_0p15_0p3_in_2022preEE_hgg": {
+                    "value_d": 1.279,
+                    "value_u": 0.85
+                },
+                "tth_YH_0p3_0p6_in_2022preEE_hgg": {
+                    "value_d": 1.459,
+                    "value_u": 0.752
+                },
+                "tth_YH_0p6_0p9_in_2022postEE_hgg": {
+                    "value_d": 1.322,
+                    "value_u": 0.819
+                },
+                "vh_YH_0p0_2p5_out_2022preEE_hgg": {
+                    "value_d": 0.844,
+                    "value_u": 1.103
+                },
+                "vh_YH_0p15_0p3_in_2022preEE_hgg": {
+                    "value_d": 1.271,
+                    "value_u": 0.807
+                }
+            },
+            "RECO_rapidity_0p9_2p5_cat1": {
+                "tth_YH_0p0_0p15_in_2022preEE_hgg": {
+                    "value_d": 1.284,
+                    "value_u": 0.841
+                },
+                "tth_YH_0p0_2p5_out_2022preEE_hgg": {
+                    "value_d": 1.0,
+                    "value_u": 1.191
+                },
+                "tth_YH_0p3_0p6_in_2022preEE_hgg": {
+                    "value_d": 1.0,
+                    "value_u": 1.309
+                },
+                "tth_YH_0p6_0p9_in_2022preEE_hgg": {
+                    "value_d": 1.287,
+                    "value_u": 0.851
+                }
+            },
+            "RECO_rapidity_0p9_2p5_cat2": {
+                "tth_YH_0p0_0p15_in_2022postEE_hgg": {
+                    "value_d": 1.216,
+                    "value_u": 0.883
+                },
+                "tth_YH_0p0_0p15_in_2022preEE_hgg": {
+                    "value_d": 1.271,
+                    "value_u": 0.847
+                },
+                "tth_YH_0p15_0p3_in_2022preEE_hgg": {
+                    "value_d": 1.366,
+                    "value_u": 0.802
+                }
+            }
+        },
+        "CMS_hgg_scale_3_shape": {
+            "RECO_rapidity_0p0_0p15_cat0": {
+                "tth_YH_0p9_2p5_in_2022preEE_hgg": {
+                    "value_d": 1.139,
+                    "value_u": 0.891
+                },
+                "vbf_YH_0p6_0p9_in_2022postEE_hgg": {
+                    "value_d": 0.825,
+                    "value_u": 1.165
+                }
+            },
+            "RECO_rapidity_0p0_0p15_cat1": {
+                "tth_YH_0p6_0p9_in_2022preEE_hgg": {
+                    "value_d": 0.858,
+                    "value_u": 1.157
+                },
+                "vbf_YH_0p9_2p5_in_2022preEE_hgg": {
+                    "value_d": 1.134,
+                    "value_u": 0.889
+                }
+            },
+            "RECO_rapidity_0p0_0p15_cat2": {
+                "tth_YH_0p15_0p3_in_2022postEE_hgg": {
+                    "value_d": 1.0,
+                    "value_u": 1.254
+                },
+                "tth_YH_0p3_0p6_in_2022preEE_hgg": {
+                    "value_d": 0.679,
+                    "value_u": 1.254
+                },
+                "tth_YH_0p9_2p5_in_2022postEE_hgg": {
+                    "value_d": 1.138,
+                    "value_u": 0.89
+                },
+                "vbf_YH_0p9_2p5_in_2022preEE_hgg": {
+                    "value_d": 0.853,
+                    "value_u": 1.102
+                },
+                "vh_YH_0p6_0p9_in_2022preEE_hgg": {
+                    "value_d": 0.862,
+                    "value_u": 1.103
+                },
+                "vh_YH_0p9_2p5_in_2022postEE_hgg": {
+                    "value_d": 1.143,
+                    "value_u": 0.874
+                }
+            },
+            "RECO_rapidity_0p15_0p3_cat0": {
+                "tth_YH_0p0_2p5_out_2022postEE_hgg": {
+                    "value_d": 1.172,
+                    "value_u": 0.862
+                },
+                "tth_YH_0p6_0p9_in_2022postEE_hgg": {
+                    "value_d": 0.807,
+                    "value_u": 1.146
+                },
+                "tth_YH_0p9_2p5_in_2022preEE_hgg": {
+                    "value_d": 0.753,
+                    "value_u": 1.212
+                },
+                "vbf_YH_0p6_0p9_in_2022preEE_hgg": {
+                    "value_d": 0.835,
+                    "value_u": 1.156
+                }
+            },
+            "RECO_rapidity_0p15_0p3_cat1": {
+                "vbf_YH_0p3_0p6_in_2022preEE_hgg": {
+                    "value_d": 0.964,
+                    "value_u": 1.102
+                },
+                "vbf_YH_0p6_0p9_in_2022preEE_hgg": {
+                    "value_d": 0.787,
+                    "value_u": 1.155
+                }
+            },
+            "RECO_rapidity_0p15_0p3_cat2": {
+                "tth_YH_0p0_2p5_out_2022preEE_hgg": {
+                    "value_d": 1.265,
+                    "value_u": 0.799
+                },
+                "vbf_YH_0p9_2p5_in_2022preEE_hgg": {
+                    "value_d": 0.771,
+                    "value_u": 1.221
+                },
+                "vh_YH_0p0_2p5_out_2022postEE_hgg": {
+                    "value_d": 1.249,
+                    "value_u": 0.767
+                },
+                "vh_YH_0p6_0p9_in_2022postEE_hgg": {
+                    "value_d": 1.205,
+                    "value_u": 0.846
+                },
+                "vh_YH_0p6_0p9_in_2022preEE_hgg": {
+                    "value_d": 1.162,
+                    "value_u": 0.87
+                }
+            },
+            "RECO_rapidity_0p3_0p6_cat2": {
+                "tth_YH_0p0_2p5_out_2022preEE_hgg": {
+                    "value_d": 0.85,
+                    "value_u": 1.121
+                }
+            },
+            "RECO_rapidity_0p6_0p9_cat0": {
+                "ggh_YH_0p9_2p5_in_2022preEE_hgg": {
+                    "value_d": 1.219,
+                    "value_u": 0.803
+                },
+                "tth_YH_0p15_0p3_in_2022preEE_hgg": {
+                    "value_d": 1.138,
+                    "value_u": 0.893
+                },
+                "vbf_YH_0p0_2p5_out_2022postEE_hgg": {
+                    "value_d": 1.139,
+                    "value_u": 0.89
+                },
+                "vbf_YH_0p9_2p5_in_2022preEE_hgg": {
+                    "value_d": 1.134,
+                    "value_u": 0.877
+                }
+            },
+            "RECO_rapidity_0p6_0p9_cat1": {
+                "tth_YH_0p9_2p5_in_2022preEE_hgg": {
+                    "value_d": 1.165,
+                    "value_u": 0.864
+                },
+                "vh_YH_0p15_0p3_in_2022preEE_hgg": {
+                    "value_d": 1.157,
+                    "value_u": 0.88
+                },
+                "vh_YH_0p3_0p6_in_2022preEE_hgg": {
+                    "value_d": 1.129,
+                    "value_u": 0.877
+                }
+            },
+            "RECO_rapidity_0p6_0p9_cat2": {
+                "tth_YH_0p3_0p6_in_2022preEE_hgg": {
+                    "value_d": 1.179,
+                    "value_u": 0.863
+                },
+                "vh_YH_0p0_0p15_in_2022preEE_hgg": {
+                    "value_d": 1.131,
+                    "value_u": 0.89
+                }
+            },
+            "RECO_rapidity_0p9_2p5_cat0": {
+                "ggh_YH_0p0_2p5_out_2022preEE_hgg": {
+                    "value_d": 0.859,
+                    "value_u": 1.133
+                },
+                "ggh_YH_0p6_0p9_in_2022postEE_hgg": {
+                    "value_d": 1.12,
+                    "value_u": 0.877
+                },
+                "tth_YH_0p0_0p15_in_2022preEE_hgg": {
+                    "value_d": 0.772,
+                    "value_u": 1.152
+                },
+                "tth_YH_0p0_2p5_out_2022preEE_hgg": {
+                    "value_d": 0.729,
+                    "value_u": 1.209
+                },
+                "tth_YH_0p6_0p9_in_2022postEE_hgg": {
+                    "value_d": 1.164,
+                    "value_u": 0.881
+                },
+                "vh_YH_0p0_2p5_out_2022preEE_hgg": {
+                    "value_d": 1.147,
+                    "value_u": 0.886
+                }
+            },
+            "RECO_rapidity_0p9_2p5_cat1": {
+                "tth_YH_0p3_0p6_in_2022preEE_hgg": {
+                    "value_d": 0.749,
+                    "value_u": 1.196
+                },
+                "vbf_YH_0p6_0p9_in_2022preEE_hgg": {
+                    "value_d": 1.127,
+                    "value_u": 0.885
+                }
+            }
+        }
+    },
+    "smallSignalProc": {
+        "RECO_rapidity_0p0_0p15_cat0": {
+            "ggh_YH_0p3_0p6_in_2022preEE_hgg": {
+                "procrate": 0.03210454177417163,
+                "sigrate_tot": 33.06084808075194
+            },
+            "ggh_YH_0p6_0p9_in_2022preEE_hgg": {
+                "procrate": 0.0179701114592695,
+                "sigrate_tot": 33.06084808075194
+            },
+            "ggh_YH_0p9_2p5_in_2022preEE_hgg": {
+                "procrate": 0.02210328822336402,
+                "sigrate_tot": 33.06084808075194
+            },
+            "tth_YH_0p0_2p5_out_2022postEE_hgg": {
+                "procrate": 0.000781588115687454,
+                "sigrate_tot": 33.06084808075194
+            },
+            "tth_YH_0p0_2p5_out_2022preEE_hgg": {
+                "procrate": 0.0037362299196904356,
+                "sigrate_tot": 33.06084808075194
+            },
+            "tth_YH_0p15_0p3_in_2022postEE_hgg": {
+                "procrate": 0.0005195033928605023,
+                "sigrate_tot": 33.06084808075194
+            },
+            "tth_YH_0p15_0p3_in_2022preEE_hgg": {
+                "procrate": 0.00523023664455895,
+                "sigrate_tot": 33.06084808075194
+            },
+            "tth_YH_0p3_0p6_in_2022postEE_hgg": {
+                "procrate": 0.0027982040743037566,
+                "sigrate_tot": 33.06084808075194
+            },
+            "tth_YH_0p3_0p6_in_2022preEE_hgg": {
+                "procrate": 0.004349579915618239,
+                "sigrate_tot": 33.06084808075194
+            },
+            "tth_YH_0p6_0p9_in_2022postEE_hgg": {
+                "procrate": 0.0004926803789242226,
+                "sigrate_tot": 33.06084808075194
+            },
+            "tth_YH_0p9_2p5_in_2022postEE_hgg": {
+                "procrate": -8.998320160240634e-05,
+                "sigrate_tot": 33.06084808075194
+            },
+            "tth_YH_0p9_2p5_in_2022preEE_hgg": {
+                "procrate": 0.0010638113637387995,
+                "sigrate_tot": 33.06084808075194
+            },
+            "vbf_YH_0p0_2p5_out_2022preEE_hgg": {
+                "procrate": 0.0088703823630231,
+                "sigrate_tot": 33.06084808075194
+            },
+            "vbf_YH_0p15_0p3_in_2022postEE_hgg": {
+                "procrate": 0.01571552568744866,
+                "sigrate_tot": 33.06084808075194
+            },
+            "vbf_YH_0p3_0p6_in_2022preEE_hgg": {
+                "procrate": 0.010676451367274365,
+                "sigrate_tot": 33.06084808075194
+            },
+            "vbf_YH_0p6_0p9_in_2022postEE_hgg": {
+                "procrate": 0.008202450199244269,
+                "sigrate_tot": 33.06084808075194
+            },
+            "vbf_YH_0p6_0p9_in_2022preEE_hgg": {
+                "procrate": 0.008562638705949203,
+                "sigrate_tot": 33.06084808075194
+            },
+            "vbf_YH_0p9_2p5_in_2022postEE_hgg": {
+                "procrate": 0.008474214331944745,
+                "sigrate_tot": 33.06084808075194
+            },
+            "vbf_YH_0p9_2p5_in_2022preEE_hgg": {
+                "procrate": 0.014861758905715864,
+                "sigrate_tot": 33.06084808075194
+            },
+            "vh_YH_0p0_2p5_out_2022postEE_hgg": {
+                "procrate": 0.0018555877816145794,
+                "sigrate_tot": 33.06084808075194
+            },
+            "vh_YH_0p0_2p5_out_2022preEE_hgg": {
+                "procrate": -1.9579210756019404e-05,
+                "sigrate_tot": 33.06084808075194
+            },
+            "vh_YH_0p15_0p3_in_2022postEE_hgg": {
+                "procrate": 0.0023857611577805015,
+                "sigrate_tot": 33.06084808075194
+            },
+            "vh_YH_0p15_0p3_in_2022preEE_hgg": {
+                "procrate": 0.014457881244256876,
+                "sigrate_tot": 33.06084808075194
+            },
+            "vh_YH_0p3_0p6_in_2022postEE_hgg": {
+                "procrate": 0.0012508212108088528,
+                "sigrate_tot": 33.06084808075194
+            },
+            "vh_YH_0p3_0p6_in_2022preEE_hgg": {
+                "procrate": 0.0015169635271511607,
+                "sigrate_tot": 33.06084808075194
+            },
+            "vh_YH_0p6_0p9_in_2022preEE_hgg": {
+                "procrate": 0.0013890129569359177,
+                "sigrate_tot": 33.06084808075194
+            }
+        },
+        "RECO_rapidity_0p0_0p15_cat1": {
+            "ggh_YH_0p3_0p6_in_2022postEE_hgg": {
+                "procrate": 0.05649841526421574,
+                "sigrate_tot": 102.41301679111116
+            },
+            "tth_YH_0p0_0p15_in_2022preEE_hgg": {
+                "procrate": 0.06801677189185115,
+                "sigrate_tot": 102.41301679111116
+            },
+            "tth_YH_0p0_2p5_out_2022postEE_hgg": {
+                "procrate": 0.017513081881917705,
+                "sigrate_tot": 102.41301679111116
+            },
+            "tth_YH_0p0_2p5_out_2022preEE_hgg": {
+                "procrate": 0.004080911123190077,
+                "sigrate_tot": 102.41301679111116
+            },
+            "tth_YH_0p15_0p3_in_2022postEE_hgg": {
+                "procrate": 0.015929388880740674,
+                "sigrate_tot": 102.41301679111116
+            },
+            "tth_YH_0p15_0p3_in_2022preEE_hgg": {
+                "procrate": 0.0010774056884426167,
+                "sigrate_tot": 102.41301679111116
+            },
+            "tth_YH_0p3_0p6_in_2022postEE_hgg": {
+                "procrate": 0.015734423957816508,
+                "sigrate_tot": 102.41301679111116
+            },
+            "tth_YH_0p6_0p9_in_2022postEE_hgg": {
+                "procrate": 0.00615231625317552,
+                "sigrate_tot": 102.41301679111116
+            },
+            "tth_YH_0p6_0p9_in_2022preEE_hgg": {
+                "procrate": 0.0009755577267174625,
+                "sigrate_tot": 102.41301679111116
+            },
+            "tth_YH_0p9_2p5_in_2022postEE_hgg": {
+                "procrate": 0.004699864496833208,
+                "sigrate_tot": 102.41301679111116
+            },
+            "tth_YH_0p9_2p5_in_2022preEE_hgg": {
+                "procrate": 0.00019505822457244515,
+                "sigrate_tot": 102.41301679111116
+            },
+            "vbf_YH_0p0_2p5_out_2022postEE_hgg": {
+                "procrate": 0.021704771654075226,
+                "sigrate_tot": 102.41301679111116
+            },
+            "vbf_YH_0p0_2p5_out_2022preEE_hgg": {
+                "procrate": 0.004523915524453767,
+                "sigrate_tot": 102.41301679111116
+            },
+            "vbf_YH_0p15_0p3_in_2022preEE_hgg": {
+                "procrate": 0.014519558488984808,
+                "sigrate_tot": 102.41301679111116
+            },
+            "vbf_YH_0p3_0p6_in_2022postEE_hgg": {
+                "procrate": 0.04380945075761562,
+                "sigrate_tot": 102.41301679111116
+            },
+            "vbf_YH_0p3_0p6_in_2022preEE_hgg": {
+                "procrate": 0.0017433789849555046,
+                "sigrate_tot": 102.41301679111116
+            },
+            "vbf_YH_0p6_0p9_in_2022postEE_hgg": {
+                "procrate": 0.0343962552121042,
+                "sigrate_tot": 102.41301679111116
+            },
+            "vbf_YH_0p9_2p5_in_2022postEE_hgg": {
+                "procrate": 0.03848588778886905,
+                "sigrate_tot": 102.41301679111116
+            },
+            "vbf_YH_0p9_2p5_in_2022preEE_hgg": {
+                "procrate": 0.00725021676721329,
+                "sigrate_tot": 102.41301679111116
+            },
+            "vh_YH_0p0_2p5_out_2022postEE_hgg": {
+                "procrate": 0.020525381911580515,
+                "sigrate_tot": 102.41301679111116
+            },
+            "vh_YH_0p0_2p5_out_2022preEE_hgg": {
+                "procrate": 0.0024029337246759736,
+                "sigrate_tot": 102.41301679111116
+            },
+            "vh_YH_0p15_0p3_in_2022postEE_hgg": {
+                "procrate": 0.06081236678965623,
+                "sigrate_tot": 102.41301679111116
+            },
+            "vh_YH_0p15_0p3_in_2022preEE_hgg": {
+                "procrate": 0.005909989035482687,
+                "sigrate_tot": 102.41301679111116
+            },
+            "vh_YH_0p3_0p6_in_2022postEE_hgg": {
+                "procrate": 0.00591651662379335,
+                "sigrate_tot": 102.41301679111116
+            },
+            "vh_YH_0p3_0p6_in_2022preEE_hgg": {
+                "procrate": 0.0013893053210962795,
+                "sigrate_tot": 102.41301679111116
+            },
+            "vh_YH_0p6_0p9_in_2022postEE_hgg": {
+                "procrate": 0.004152474344900953,
+                "sigrate_tot": 102.41301679111116
+            },
+            "vh_YH_0p9_2p5_in_2022preEE_hgg": {
+                "procrate": 0.0007344045087474858,
+                "sigrate_tot": 102.41301679111116
+            }
+        },
+        "RECO_rapidity_0p0_0p15_cat2": {
+            "ggh_YH_0p3_0p6_in_2022postEE_hgg": {
+                "procrate": 0.010774743704348683,
+                "sigrate_tot": 20.212652084727885
+            },
+            "ggh_YH_0p3_0p6_in_2022preEE_hgg": {
+                "procrate": -0.0035062072857576804,
+                "sigrate_tot": 20.212652084727885
+            },
+            "tth_YH_0p0_2p5_out_2022postEE_hgg": {
+                "procrate": 0.00594883611529226,
+                "sigrate_tot": 20.212652084727885
+            },
+            "tth_YH_0p0_2p5_out_2022preEE_hgg": {
+                "procrate": 0.0017882609133135414,
+                "sigrate_tot": 20.212652084727885
+            },
+            "tth_YH_0p15_0p3_in_2022postEE_hgg": {
+                "procrate": 0.010299214784916343,
+                "sigrate_tot": 20.212652084727885
+            },
+            "tth_YH_0p15_0p3_in_2022preEE_hgg": {
+                "procrate": 0.001675483918724843,
+                "sigrate_tot": 20.212652084727885
+            },
+            "tth_YH_0p3_0p6_in_2022postEE_hgg": {
+                "procrate": 0.003173804549102949,
+                "sigrate_tot": 20.212652084727885
+            },
+            "tth_YH_0p3_0p6_in_2022preEE_hgg": {
+                "procrate": 0.00037753684733194786,
+                "sigrate_tot": 20.212652084727885
+            },
+            "tth_YH_0p6_0p9_in_2022postEE_hgg": {
+                "procrate": 0.0032764083460215428,
+                "sigrate_tot": 20.212652084727885
+            },
+            "tth_YH_0p6_0p9_in_2022preEE_hgg": {
+                "procrate": 0.0008535367849705084,
+                "sigrate_tot": 20.212652084727885
+            },
+            "tth_YH_0p9_2p5_in_2022postEE_hgg": {
+                "procrate": 0.0028657546030498604,
+                "sigrate_tot": 20.212652084727885
+            },
+            "tth_YH_0p9_2p5_in_2022preEE_hgg": {
+                "procrate": -0.00025290128820808694,
+                "sigrate_tot": 20.212652084727885
+            },
+            "vbf_YH_0p0_2p5_out_2022postEE_hgg": {
+                "procrate": 0.010524079470694316,
+                "sigrate_tot": 20.212652084727885
+            },
+            "vbf_YH_0p0_2p5_out_2022preEE_hgg": {
+                "procrate": 0.0003463692039841098,
+                "sigrate_tot": 20.212652084727885
+            },
+            "vbf_YH_0p15_0p3_in_2022preEE_hgg": {
+                "procrate": 0.014883041901205022,
+                "sigrate_tot": 20.212652084727885
+            },
+            "vbf_YH_0p3_0p6_in_2022postEE_hgg": {
+                "procrate": 0.015898037065447814,
+                "sigrate_tot": 20.212652084727885
+            },
+            "vbf_YH_0p3_0p6_in_2022preEE_hgg": {
+                "procrate": 0.0027077106420597182,
+                "sigrate_tot": 20.212652084727885
+            },
+            "vbf_YH_0p6_0p9_in_2022postEE_hgg": {
+                "procrate": 0.00936407328093194,
+                "sigrate_tot": 20.212652084727885
+            },
+            "vbf_YH_0p9_2p5_in_2022postEE_hgg": {
+                "procrate": 0.013187973736893515,
+                "sigrate_tot": 20.212652084727885
+            },
+            "vbf_YH_0p9_2p5_in_2022preEE_hgg": {
+                "procrate": 0.004162427523065461,
+                "sigrate_tot": 20.212652084727885
+            },
+            "vh_YH_0p0_2p5_out_2022postEE_hgg": {
+                "procrate": 0.009151527945831532,
+                "sigrate_tot": 20.212652084727885
+            },
+            "vh_YH_0p0_2p5_out_2022preEE_hgg": {
+                "procrate": 0.0029766631930953197,
+                "sigrate_tot": 20.212652084727885
+            },
+            "vh_YH_0p15_0p3_in_2022preEE_hgg": {
+                "procrate": 0.0018353314676151924,
+                "sigrate_tot": 20.212652084727885
+            },
+            "vh_YH_0p3_0p6_in_2022postEE_hgg": {
+                "procrate": 0.003655674193885925,
+                "sigrate_tot": 20.212652084727885
+            },
+            "vh_YH_0p6_0p9_in_2022postEE_hgg": {
+                "procrate": 0.0022961193118730384,
+                "sigrate_tot": 20.212652084727885
+            },
+            "vh_YH_0p6_0p9_in_2022preEE_hgg": {
+                "procrate": 0.0009671654913280608,
+                "sigrate_tot": 20.212652084727885
+            },
+            "vh_YH_0p9_2p5_in_2022postEE_hgg": {
+                "procrate": 0.0022322083742930183,
+                "sigrate_tot": 20.212652084727885
+            },
+            "vh_YH_0p9_2p5_in_2022preEE_hgg": {
+                "procrate": -7.212909468919836e-20,
+                "sigrate_tot": 20.212652084727885
+            }
+        },
+        "RECO_rapidity_0p15_0p3_cat0": {
+            "ggh_YH_0p0_2p5_out_2022postEE_hgg": {
+                "procrate": 0.018741957370945406,
+                "sigrate_tot": 30.63407502857518
+            },
+            "ggh_YH_0p6_0p9_in_2022preEE_hgg": {
+                "procrate": 0.0071103134543287596,
+                "sigrate_tot": 30.63407502857518
+            },
+            "tth_YH_0p0_0p15_in_2022postEE_hgg": {
+                "procrate": 0.00031956190077876007,
+                "sigrate_tot": 30.63407502857518
+            },
+            "tth_YH_0p0_0p15_in_2022preEE_hgg": {
+                "procrate": 0.0036506134774077124,
+                "sigrate_tot": 30.63407502857518
+            },
+            "tth_YH_0p0_2p5_out_2022postEE_hgg": {
+                "procrate": 0.0018753549904841121,
+                "sigrate_tot": 30.63407502857518
+            },
+            "tth_YH_0p0_2p5_out_2022preEE_hgg": {
+                "procrate": 0.006833046477576796,
+                "sigrate_tot": 30.63407502857518
+            },
+            "tth_YH_0p3_0p6_in_2022postEE_hgg": {
+                "procrate": 0.0020375678546382643,
+                "sigrate_tot": 30.63407502857518
+            },
+            "tth_YH_0p3_0p6_in_2022preEE_hgg": {
+                "procrate": 0.0036144115826564345,
+                "sigrate_tot": 30.63407502857518
+            },
+            "tth_YH_0p6_0p9_in_2022postEE_hgg": {
+                "procrate": 0.0017978350360948266,
+                "sigrate_tot": 30.63407502857518
+            },
+            "tth_YH_0p6_0p9_in_2022preEE_hgg": {
+                "procrate": 0.0020796464536518853,
+                "sigrate_tot": 30.63407502857518
+            },
+            "tth_YH_0p9_2p5_in_2022preEE_hgg": {
+                "procrate": 0.0014023069242691576,
+                "sigrate_tot": 30.63407502857518
+            },
+            "vbf_YH_0p0_0p15_in_2022postEE_hgg": {
+                "procrate": 0.026241276981463498,
+                "sigrate_tot": 30.63407502857518
+            },
+            "vbf_YH_0p0_2p5_out_2022postEE_hgg": {
+                "procrate": 0.0011657876154366822,
+                "sigrate_tot": 30.63407502857518
+            },
+            "vbf_YH_0p0_2p5_out_2022preEE_hgg": {
+                "procrate": 0.005790312991724833,
+                "sigrate_tot": 30.63407502857518
+            },
+            "vbf_YH_0p3_0p6_in_2022postEE_hgg": {
+                "procrate": 0.022505465337654792,
+                "sigrate_tot": 30.63407502857518
+            },
+            "vbf_YH_0p6_0p9_in_2022preEE_hgg": {
+                "procrate": 0.010536949683713472,
+                "sigrate_tot": 30.63407502857518
+            },
+            "vbf_YH_0p9_2p5_in_2022preEE_hgg": {
+                "procrate": 0.015580496964591668,
+                "sigrate_tot": 30.63407502857518
+            },
+            "vh_YH_0p0_0p15_in_2022postEE_hgg": {
+                "procrate": 0.006303964162763736,
+                "sigrate_tot": 30.63407502857518
+            },
+            "vh_YH_0p0_0p15_in_2022preEE_hgg": {
+                "procrate": 0.015939824262436956,
+                "sigrate_tot": 30.63407502857518
+            },
+            "vh_YH_0p0_2p5_out_2022postEE_hgg": {
+                "procrate": 0.0018541469132211602,
+                "sigrate_tot": 30.63407502857518
+            },
+            "vh_YH_0p0_2p5_out_2022preEE_hgg": {
+                "procrate": 0.005987975295524937,
+                "sigrate_tot": 30.63407502857518
+            },
+            "vh_YH_0p3_0p6_in_2022postEE_hgg": {
+                "procrate": 0.005287874192725991,
+                "sigrate_tot": 30.63407502857518
+            },
+            "vh_YH_0p3_0p6_in_2022preEE_hgg": {
+                "procrate": 0.014385714958978797,
+                "sigrate_tot": 30.63407502857518
+            },
+            "vh_YH_0p6_0p9_in_2022preEE_hgg": {
+                "procrate": 0.0007469638855778274,
+                "sigrate_tot": 30.63407502857518
+            }
+        },
+        "RECO_rapidity_0p15_0p3_cat1": {
+            "ggh_YH_0p0_2p5_out_2022preEE_hgg": {
+                "procrate": 0.011272695410300041,
+                "sigrate_tot": 97.9247906119146
+            },
+            "ggh_YH_0p9_2p5_in_2022postEE_hgg": {
+                "procrate": 0.03845364883748977,
+                "sigrate_tot": 97.9247906119146
+            },
+            "tth_YH_0p0_0p15_in_2022postEE_hgg": {
+                "procrate": 0.023331941876697442,
+                "sigrate_tot": 97.9247906119146
+            },
+            "tth_YH_0p0_0p15_in_2022preEE_hgg": {
+                "procrate": 0.002338658994711407,
+                "sigrate_tot": 97.9247906119146
+            },
+            "tth_YH_0p0_2p5_out_2022postEE_hgg": {
+                "procrate": 0.01958946164365223,
+                "sigrate_tot": 97.9247906119146
+            },
+            "tth_YH_0p0_2p5_out_2022preEE_hgg": {
+                "procrate": 0.002337744177624502,
+                "sigrate_tot": 97.9247906119146
+            },
+            "tth_YH_0p15_0p3_in_2022preEE_hgg": {
+                "procrate": 0.0696566782332495,
+                "sigrate_tot": 97.9247906119146
+            },
+            "tth_YH_0p3_0p6_in_2022postEE_hgg": {
+                "procrate": 0.024393247026166083,
+                "sigrate_tot": 97.9247906119146
+            },
+            "tth_YH_0p3_0p6_in_2022preEE_hgg": {
+                "procrate": 0.002851795851146057,
+                "sigrate_tot": 97.9247906119146
+            },
+            "tth_YH_0p6_0p9_in_2022postEE_hgg": {
+                "procrate": 0.005603465871815537,
+                "sigrate_tot": 97.9247906119146
+            },
+            "tth_YH_0p6_0p9_in_2022preEE_hgg": {
+                "procrate": 0.00027559639155708506,
+                "sigrate_tot": 97.9247906119146
+            },
+            "tth_YH_0p9_2p5_in_2022postEE_hgg": {
+                "procrate": 0.003409602362841379,
+                "sigrate_tot": 97.9247906119146
+            },
+            "vbf_YH_0p0_0p15_in_2022preEE_hgg": {
+                "procrate": 0.01453964012862084,
+                "sigrate_tot": 97.9247906119146
+            },
+            "vbf_YH_0p0_2p5_out_2022postEE_hgg": {
+                "procrate": 0.026847717551789163,
+                "sigrate_tot": 97.9247906119146
+            },
+            "vbf_YH_0p0_2p5_out_2022preEE_hgg": {
+                "procrate": 0.0050603272080167955,
+                "sigrate_tot": 97.9247906119146
+            },
+            "vbf_YH_0p3_0p6_in_2022preEE_hgg": {
+                "procrate": 0.013723310154813734,
+                "sigrate_tot": 97.9247906119146
+            },
+            "vbf_YH_0p6_0p9_in_2022postEE_hgg": {
+                "procrate": 0.023245115625661623,
+                "sigrate_tot": 97.9247906119146
+            },
+            "vbf_YH_0p6_0p9_in_2022preEE_hgg": {
+                "procrate": 0.007800509949298967,
+                "sigrate_tot": 97.9247906119146
+            },
+            "vbf_YH_0p9_2p5_in_2022postEE_hgg": {
+                "procrate": 0.04017309290217899,
+                "sigrate_tot": 97.9247906119146
+            },
+            "vbf_YH_0p9_2p5_in_2022preEE_hgg": {
+                "procrate": 0.006239168465643435,
+                "sigrate_tot": 97.9247906119146
+            },
+            "vh_YH_0p0_0p15_in_2022postEE_hgg": {
+                "procrate": 0.05252310276724123,
+                "sigrate_tot": 97.9247906119146
+            },
+            "vh_YH_0p0_0p15_in_2022preEE_hgg": {
+                "procrate": 0.011307186816297029,
+                "sigrate_tot": 97.9247906119146
+            },
+            "vh_YH_0p0_2p5_out_2022postEE_hgg": {
+                "procrate": 0.02972196215815572,
+                "sigrate_tot": 97.9247906119146
+            },
+            "vh_YH_0p0_2p5_out_2022preEE_hgg": {
+                "procrate": 0.001593446910339163,
+                "sigrate_tot": 97.9247906119146
+            },
+            "vh_YH_0p3_0p6_in_2022postEE_hgg": {
+                "procrate": 0.05420969378354726,
+                "sigrate_tot": 97.9247906119146
+            },
+            "vh_YH_0p3_0p6_in_2022preEE_hgg": {
+                "procrate": 0.0046826802880192584,
+                "sigrate_tot": 97.9247906119146
+            },
+            "vh_YH_0p6_0p9_in_2022postEE_hgg": {
+                "procrate": 0.00612966792258108,
+                "sigrate_tot": 97.9247906119146
+            },
+            "vh_YH_0p9_2p5_in_2022postEE_hgg": {
+                "procrate": 0.0023366694387645633,
+                "sigrate_tot": 97.9247906119146
+            }
+        },
+        "RECO_rapidity_0p15_0p3_cat2": {
+            "ggh_YH_0p9_2p5_in_2022postEE_hgg": {
+                "procrate": 0.02424128812262194,
+                "sigrate_tot": 24.82077130092898
+            },
+            "tth_YH_0p0_0p15_in_2022postEE_hgg": {
+                "procrate": 0.0055612799999492125,
+                "sigrate_tot": 24.82077130092898
+            },
+            "tth_YH_0p0_0p15_in_2022preEE_hgg": {
+                "procrate": 0.0011754505309392017,
+                "sigrate_tot": 24.82077130092898
+            },
+            "tth_YH_0p0_2p5_out_2022postEE_hgg": {
+                "procrate": 0.00954413386708743,
+                "sigrate_tot": 24.82077130092898
+            },
+            "tth_YH_0p0_2p5_out_2022preEE_hgg": {
+                "procrate": 0.0006391722821733931,
+                "sigrate_tot": 24.82077130092898
+            },
+            "tth_YH_0p3_0p6_in_2022postEE_hgg": {
+                "procrate": 0.009543879103330766,
+                "sigrate_tot": 24.82077130092898
+            },
+            "tth_YH_0p3_0p6_in_2022preEE_hgg": {
+                "procrate": 0.0017501571607700167,
+                "sigrate_tot": 24.82077130092898
+            },
+            "tth_YH_0p6_0p9_in_2022postEE_hgg": {
+                "procrate": 0.0011385321429633326,
+                "sigrate_tot": 24.82077130092898
+            },
+            "tth_YH_0p6_0p9_in_2022preEE_hgg": {
+                "procrate": 0.0008774228196220471,
+                "sigrate_tot": 24.82077130092898
+            },
+            "tth_YH_0p9_2p5_in_2022postEE_hgg": {
+                "procrate": -0.00012079330915785961,
+                "sigrate_tot": 24.82077130092898
+            },
+            "tth_YH_0p9_2p5_in_2022preEE_hgg": {
+                "procrate": 0.0005073155995041269,
+                "sigrate_tot": 24.82077130092898
+            },
+            "vbf_YH_0p0_2p5_out_2022postEE_hgg": {
+                "procrate": 0.017745478304131593,
+                "sigrate_tot": 24.82077130092898
+            },
+            "vbf_YH_0p0_2p5_out_2022preEE_hgg": {
+                "procrate": 0.003106004971600146,
+                "sigrate_tot": 24.82077130092898
+            },
+            "vbf_YH_0p6_0p9_in_2022postEE_hgg": {
+                "procrate": 0.005802766494790922,
+                "sigrate_tot": 24.82077130092898
+            },
+            "vbf_YH_0p6_0p9_in_2022preEE_hgg": {
+                "procrate": 0.0006478079769374093,
+                "sigrate_tot": 24.82077130092898
+            },
+            "vbf_YH_0p9_2p5_in_2022postEE_hgg": {
+                "procrate": 0.01005004551377513,
+                "sigrate_tot": 24.82077130092898
+            },
+            "vbf_YH_0p9_2p5_in_2022preEE_hgg": {
+                "procrate": 0.002134428336242042,
+                "sigrate_tot": 24.82077130092898
+            },
+            "vh_YH_0p0_0p15_in_2022postEE_hgg": {
+                "procrate": 0.01589299153203194,
+                "sigrate_tot": 24.82077130092898
+            },
+            "vh_YH_0p0_0p15_in_2022preEE_hgg": {
+                "procrate": 0.0032269416797423203,
+                "sigrate_tot": 24.82077130092898
+            },
+            "vh_YH_0p0_2p5_out_2022postEE_hgg": {
+                "procrate": 0.007332839529268492,
+                "sigrate_tot": 24.82077130092898
+            },
+            "vh_YH_0p0_2p5_out_2022preEE_hgg": {
+                "procrate": 0.0011517428304016319,
+                "sigrate_tot": 24.82077130092898
+            },
+            "vh_YH_0p3_0p6_in_2022preEE_hgg": {
+                "procrate": 0.004007539875905562,
+                "sigrate_tot": 24.82077130092898
+            },
+            "vh_YH_0p6_0p9_in_2022postEE_hgg": {
+                "procrate": 0.002457143388676656,
+                "sigrate_tot": 24.82077130092898
+            },
+            "vh_YH_0p6_0p9_in_2022preEE_hgg": {
+                "procrate": 0.00018486740693919487,
+                "sigrate_tot": 24.82077130092898
+            },
+            "vh_YH_0p9_2p5_in_2022postEE_hgg": {
+                "procrate": 0.0007187918017932263,
+                "sigrate_tot": 24.82077130092898
+            },
+            "vh_YH_0p9_2p5_in_2022preEE_hgg": {
+                "procrate": 0.00037823902980951336,
+                "sigrate_tot": 24.82077130092898
+            }
+        },
+        "RECO_rapidity_0p3_0p6_cat0": {
+            "ggh_YH_0p0_0p15_in_2022preEE_hgg": {
+                "procrate": 0.012903903222407134,
+                "sigrate_tot": 49.38749179703422
+            },
+            "ggh_YH_0p0_2p5_out_2022postEE_hgg": {
+                "procrate": 0.008308187774327458,
+                "sigrate_tot": 49.38749179703422
+            },
+            "ggh_YH_0p9_2p5_in_2022preEE_hgg": {
+                "procrate": 0.004770398945911058,
+                "sigrate_tot": 49.38749179703422
+            },
+            "tth_YH_0p0_0p15_in_2022postEE_hgg": {
+                "procrate": 3.260526287532617e-05,
+                "sigrate_tot": 49.38749179703422
+            },
+            "tth_YH_0p0_0p15_in_2022preEE_hgg": {
+                "procrate": 0.0022224591342620433,
+                "sigrate_tot": 49.38749179703422
+            },
+            "tth_YH_0p0_2p5_out_2022postEE_hgg": {
+                "procrate": 0.0028412690277791943,
+                "sigrate_tot": 49.38749179703422
+            },
+            "tth_YH_0p0_2p5_out_2022preEE_hgg": {
+                "procrate": 0.006748996061475033,
+                "sigrate_tot": 49.38749179703422
+            },
+            "tth_YH_0p15_0p3_in_2022postEE_hgg": {
+                "procrate": 0.001708392695970043,
+                "sigrate_tot": 49.38749179703422
+            },
+            "tth_YH_0p15_0p3_in_2022preEE_hgg": {
+                "procrate": 0.004421934260580123,
+                "sigrate_tot": 49.38749179703422
+            },
+            "tth_YH_0p6_0p9_in_2022postEE_hgg": {
+                "procrate": 0.0023502695457011964,
+                "sigrate_tot": 49.38749179703422
+            },
+            "tth_YH_0p6_0p9_in_2022preEE_hgg": {
+                "procrate": 0.00029526351174868795,
+                "sigrate_tot": 49.38749179703422
+            },
+            "tth_YH_0p9_2p5_in_2022postEE_hgg": {
+                "procrate": 0.0013680971442596452,
+                "sigrate_tot": 49.38749179703422
+            },
+            "tth_YH_0p9_2p5_in_2022preEE_hgg": {
+                "procrate": 0.0006275470314287304,
+                "sigrate_tot": 49.38749179703422
+            },
+            "vbf_YH_0p0_0p15_in_2022preEE_hgg": {
+                "procrate": 0.008316728342105468,
+                "sigrate_tot": 49.38749179703422
+            },
+            "vbf_YH_0p0_2p5_out_2022preEE_hgg": {
+                "procrate": 0.014332366319680738,
+                "sigrate_tot": 49.38749179703422
+            },
+            "vbf_YH_0p15_0p3_in_2022postEE_hgg": {
+                "procrate": 0.017326834336738713,
+                "sigrate_tot": 49.38749179703422
+            },
+            "vbf_YH_0p6_0p9_in_2022postEE_hgg": {
+                "procrate": 0.017884542205723723,
+                "sigrate_tot": 49.38749179703422
+            },
+            "vbf_YH_0p6_0p9_in_2022preEE_hgg": {
+                "procrate": 0.03058613533553612,
+                "sigrate_tot": 49.38749179703422
+            },
+            "vbf_YH_0p9_2p5_in_2022postEE_hgg": {
+                "procrate": 0.016800574501971005,
+                "sigrate_tot": 49.38749179703422
+            },
+            "vbf_YH_0p9_2p5_in_2022preEE_hgg": {
+                "procrate": 0.02368780923369398,
+                "sigrate_tot": 49.38749179703422
+            },
+            "vh_YH_0p0_0p15_in_2022preEE_hgg": {
+                "procrate": 0.0021318416929037576,
+                "sigrate_tot": 49.38749179703422
+            },
+            "vh_YH_0p0_2p5_out_2022postEE_hgg": {
+                "procrate": 0.002705632818659954,
+                "sigrate_tot": 49.38749179703422
+            },
+            "vh_YH_0p0_2p5_out_2022preEE_hgg": {
+                "procrate": 0.00954804048366161,
+                "sigrate_tot": 49.38749179703422
+            },
+            "vh_YH_0p15_0p3_in_2022postEE_hgg": {
+                "procrate": 0.0036803262949734097,
+                "sigrate_tot": 49.38749179703422
+            },
+            "vh_YH_0p15_0p3_in_2022preEE_hgg": {
+                "procrate": 0.01044089634365357,
+                "sigrate_tot": 49.38749179703422
+            },
+            "vh_YH_0p6_0p9_in_2022postEE_hgg": {
+                "procrate": 0.005019056371517323,
+                "sigrate_tot": 49.38749179703422
+            },
+            "vh_YH_0p6_0p9_in_2022preEE_hgg": {
+                "procrate": 0.01280728837622716,
+                "sigrate_tot": 49.38749179703422
+            },
+            "vh_YH_0p9_2p5_in_2022preEE_hgg": {
+                "procrate": 0.0034240026970297367,
+                "sigrate_tot": 49.38749179703422
+            }
+        },
+        "RECO_rapidity_0p3_0p6_cat1": {
+            "ggh_YH_0p0_0p15_in_2022preEE_hgg": {
+                "procrate": 0.0020916312181932907,
+                "sigrate_tot": 164.88290089903546
+            },
+            "ggh_YH_0p0_2p5_out_2022preEE_hgg": {
+                "procrate": 0.07987502148870508,
+                "sigrate_tot": 164.88290089903546
+            },
+            "ggh_YH_0p9_2p5_in_2022postEE_hgg": {
+                "procrate": 0.09524663623710498,
+                "sigrate_tot": 164.88290089903546
+            },
+            "tth_YH_0p0_0p15_in_2022postEE_hgg": {
+                "procrate": 0.012479193066074803,
+                "sigrate_tot": 164.88290089903546
+            },
+            "tth_YH_0p0_0p15_in_2022preEE_hgg": {
+                "procrate": 0.0008337923950613098,
+                "sigrate_tot": 164.88290089903546
+            },
+            "tth_YH_0p0_2p5_out_2022postEE_hgg": {
+                "procrate": 0.028892695366259675,
+                "sigrate_tot": 164.88290089903546
+            },
+            "tth_YH_0p0_2p5_out_2022preEE_hgg": {
+                "procrate": 0.0028380187691045464,
+                "sigrate_tot": 164.88290089903546
+            },
+            "tth_YH_0p15_0p3_in_2022postEE_hgg": {
+                "procrate": 0.020397769615924804,
+                "sigrate_tot": 164.88290089903546
+            },
+            "tth_YH_0p15_0p3_in_2022preEE_hgg": {
+                "procrate": 0.0006207993523127373,
+                "sigrate_tot": 164.88290089903546
+            },
+            "tth_YH_0p3_0p6_in_2022preEE_hgg": {
+                "procrate": 0.1499723503211584,
+                "sigrate_tot": 164.88290089903546
+            },
+            "tth_YH_0p6_0p9_in_2022postEE_hgg": {
+                "procrate": 0.019138562069800677,
+                "sigrate_tot": 164.88290089903546
+            },
+            "tth_YH_0p6_0p9_in_2022preEE_hgg": {
+                "procrate": 0.004352720347247954,
+                "sigrate_tot": 164.88290089903546
+            },
+            "tth_YH_0p9_2p5_in_2022postEE_hgg": {
+                "procrate": 0.008152260472954129,
+                "sigrate_tot": 164.88290089903546
+            },
+            "tth_YH_0p9_2p5_in_2022preEE_hgg": {
+                "procrate": 0.0020939046322460916,
+                "sigrate_tot": 164.88290089903546
+            },
+            "vbf_YH_0p0_0p15_in_2022postEE_hgg": {
+                "procrate": 0.022119823943002697,
+                "sigrate_tot": 164.88290089903546
+            },
+            "vbf_YH_0p0_0p15_in_2022preEE_hgg": {
+                "procrate": 0.0061939160560842465,
+                "sigrate_tot": 164.88290089903546
+            },
+            "vbf_YH_0p0_2p5_out_2022postEE_hgg": {
+                "procrate": 0.06287819591174502,
+                "sigrate_tot": 164.88290089903546
+            },
+            "vbf_YH_0p0_2p5_out_2022preEE_hgg": {
+                "procrate": 0.010690489321662259,
+                "sigrate_tot": 164.88290089903546
+            },
+            "vbf_YH_0p15_0p3_in_2022preEE_hgg": {
+                "procrate": 0.02068898811453073,
+                "sigrate_tot": 164.88290089903546
+            },
+            "vbf_YH_0p6_0p9_in_2022preEE_hgg": {
+                "procrate": 0.026055038746650397,
+                "sigrate_tot": 164.88290089903546
+            },
+            "vbf_YH_0p9_2p5_in_2022postEE_hgg": {
+                "procrate": 0.08391475100193223,
+                "sigrate_tot": 164.88290089903546
+            },
+            "vbf_YH_0p9_2p5_in_2022preEE_hgg": {
+                "procrate": 0.005423232975086168,
+                "sigrate_tot": 164.88290089903546
+            },
+            "vh_YH_0p0_0p15_in_2022postEE_hgg": {
+                "procrate": 0.0072162103341784625,
+                "sigrate_tot": 164.88290089903546
+            },
+            "vh_YH_0p0_0p15_in_2022preEE_hgg": {
+                "procrate": 0.0008314933420804921,
+                "sigrate_tot": 164.88290089903546
+            },
+            "vh_YH_0p0_2p5_out_2022postEE_hgg": {
+                "procrate": 0.051317951811425844,
+                "sigrate_tot": 164.88290089903546
+            },
+            "vh_YH_0p0_2p5_out_2022preEE_hgg": {
+                "procrate": 0.007644878371662492,
+                "sigrate_tot": 164.88290089903546
+            },
+            "vh_YH_0p15_0p3_in_2022postEE_hgg": {
+                "procrate": 0.052635483954098825,
+                "sigrate_tot": 164.88290089903546
+            },
+            "vh_YH_0p15_0p3_in_2022preEE_hgg": {
+                "procrate": 0.005423974191423453,
+                "sigrate_tot": 164.88290089903546
+            },
+            "vh_YH_0p6_0p9_in_2022postEE_hgg": {
+                "procrate": 0.040208042763487925,
+                "sigrate_tot": 164.88290089903546
+            },
+            "vh_YH_0p6_0p9_in_2022preEE_hgg": {
+                "procrate": 0.007840837476604448,
+                "sigrate_tot": 164.88290089903546
+            },
+            "vh_YH_0p9_2p5_in_2022postEE_hgg": {
+                "procrate": 0.004916548692208896,
+                "sigrate_tot": 164.88290089903546
+            }
+        },
+        "RECO_rapidity_0p3_0p6_cat2": {
+            "ggh_YH_0p9_2p5_in_2022postEE_hgg": {
+                "procrate": 0.05525927464553226,
+                "sigrate_tot": 76.01288463248264
+            },
+            "tth_YH_0p0_0p15_in_2022postEE_hgg": {
+                "procrate": 0.006733694458470308,
+                "sigrate_tot": 76.01288463248264
+            },
+            "tth_YH_0p0_0p15_in_2022preEE_hgg": {
+                "procrate": 0.0016443345822115647,
+                "sigrate_tot": 76.01288463248264
+            },
+            "tth_YH_0p0_2p5_out_2022postEE_hgg": {
+                "procrate": 0.018007667586866928,
+                "sigrate_tot": 76.01288463248264
+            },
+            "tth_YH_0p0_2p5_out_2022preEE_hgg": {
+                "procrate": 0.004130549404101148,
+                "sigrate_tot": 76.01288463248264
+            },
+            "tth_YH_0p15_0p3_in_2022postEE_hgg": {
+                "procrate": 0.01096275233838115,
+                "sigrate_tot": 76.01288463248264
+            },
+            "tth_YH_0p15_0p3_in_2022preEE_hgg": {
+                "procrate": 0.001307220397982022,
+                "sigrate_tot": 76.01288463248264
+            },
+            "tth_YH_0p6_0p9_in_2022postEE_hgg": {
+                "procrate": 0.015193736974378506,
+                "sigrate_tot": 76.01288463248264
+            },
+            "tth_YH_0p6_0p9_in_2022preEE_hgg": {
+                "procrate": 0.0037970295612258266,
+                "sigrate_tot": 76.01288463248264
+            },
+            "tth_YH_0p9_2p5_in_2022postEE_hgg": {
+                "procrate": 0.004047393027604411,
+                "sigrate_tot": 76.01288463248264
+            },
+            "tth_YH_0p9_2p5_in_2022preEE_hgg": {
+                "procrate": 0.0002557927964677634,
+                "sigrate_tot": 76.01288463248264
+            },
+            "vbf_YH_0p0_0p15_in_2022postEE_hgg": {
+                "procrate": 0.011785878993102418,
+                "sigrate_tot": 76.01288463248264
+            },
+            "vbf_YH_0p0_0p15_in_2022preEE_hgg": {
+                "procrate": 0.0029132651292377615,
+                "sigrate_tot": 76.01288463248264
+            },
+            "vbf_YH_0p0_2p5_out_2022preEE_hgg": {
+                "procrate": 0.015219871330582061,
+                "sigrate_tot": 76.01288463248264
+            },
+            "vbf_YH_0p15_0p3_in_2022postEE_hgg": {
+                "procrate": 0.07477266169798899,
+                "sigrate_tot": 76.01288463248264
+            },
+            "vbf_YH_0p15_0p3_in_2022preEE_hgg": {
+                "procrate": -0.0008897354887498322,
+                "sigrate_tot": 76.01288463248264
+            },
+            "vbf_YH_0p6_0p9_in_2022preEE_hgg": {
+                "procrate": 0.025991904432141947,
+                "sigrate_tot": 76.01288463248264
+            },
+            "vbf_YH_0p9_2p5_in_2022postEE_hgg": {
+                "procrate": 0.03778175144814636,
+                "sigrate_tot": 76.01288463248264
+            },
+            "vbf_YH_0p9_2p5_in_2022preEE_hgg": {
+                "procrate": 0.008703455618452626,
+                "sigrate_tot": 76.01288463248264
+            },
+            "vh_YH_0p0_0p15_in_2022postEE_hgg": {
+                "procrate": 0.0028572077465150096,
+                "sigrate_tot": 76.01288463248264
+            },
+            "vh_YH_0p0_2p5_out_2022postEE_hgg": {
+                "procrate": 0.037498581755259115,
+                "sigrate_tot": 76.01288463248264
+            },
+            "vh_YH_0p0_2p5_out_2022preEE_hgg": {
+                "procrate": 0.004407485803553673,
+                "sigrate_tot": 76.01288463248264
+            },
+            "vh_YH_0p15_0p3_in_2022postEE_hgg": {
+                "procrate": 0.027232839604805322,
+                "sigrate_tot": 76.01288463248264
+            },
+            "vh_YH_0p15_0p3_in_2022preEE_hgg": {
+                "procrate": 0.00534936358570703,
+                "sigrate_tot": 76.01288463248264
+            },
+            "vh_YH_0p6_0p9_in_2022postEE_hgg": {
+                "procrate": 0.04450411297964561,
+                "sigrate_tot": 76.01288463248264
+            },
+            "vh_YH_0p6_0p9_in_2022preEE_hgg": {
+                "procrate": 0.016707133862210947,
+                "sigrate_tot": 76.01288463248264
+            },
+            "vh_YH_0p9_2p5_in_2022postEE_hgg": {
+                "procrate": 0.004436611621092035,
+                "sigrate_tot": 76.01288463248264
+            },
+            "vh_YH_0p9_2p5_in_2022preEE_hgg": {
+                "procrate": 0.0007249874804943057,
+                "sigrate_tot": 76.01288463248264
+            }
+        },
+        "RECO_rapidity_0p6_0p9_cat0": {
+            "ggh_YH_0p0_2p5_out_2022postEE_hgg": {
+                "procrate": 0.014913766870233068,
+                "sigrate_tot": 23.97486687498612
+            },
+            "tth_YH_0p0_0p15_in_2022postEE_hgg": {
+                "procrate": 0.0006359202733492324,
+                "sigrate_tot": 23.97486687498612
+            },
+            "tth_YH_0p0_0p15_in_2022preEE_hgg": {
+                "procrate": 8.012561237732044e-05,
+                "sigrate_tot": 23.97486687498612
+            },
+            "tth_YH_0p0_2p5_out_2022postEE_hgg": {
+                "procrate": 0.0034815856507518644,
+                "sigrate_tot": 23.97486687498612
+            },
+            "tth_YH_0p0_2p5_out_2022preEE_hgg": {
+                "procrate": 0.0035349289373972706,
+                "sigrate_tot": 23.97486687498612
+            },
+            "tth_YH_0p15_0p3_in_2022postEE_hgg": {
+                "procrate": 7.788905195621037e-05,
+                "sigrate_tot": 23.97486687498612
+            },
+            "tth_YH_0p15_0p3_in_2022preEE_hgg": {
+                "procrate": 0.00021050055125610583,
+                "sigrate_tot": 23.97486687498612
+            },
+            "tth_YH_0p3_0p6_in_2022postEE_hgg": {
+                "procrate": 0.0013832603630454278,
+                "sigrate_tot": 23.97486687498612
+            },
+            "tth_YH_0p3_0p6_in_2022preEE_hgg": {
+                "procrate": 0.0021567627187393168,
+                "sigrate_tot": 23.97486687498612
+            },
+            "tth_YH_0p9_2p5_in_2022postEE_hgg": {
+                "procrate": 0.001359348067009808,
+                "sigrate_tot": 23.97486687498612
+            },
+            "tth_YH_0p9_2p5_in_2022preEE_hgg": {
+                "procrate": 0.0011662782849263399,
+                "sigrate_tot": 23.97486687498612
+            },
+            "vbf_YH_0p0_0p15_in_2022preEE_hgg": {
+                "procrate": 0.005492173468290996,
+                "sigrate_tot": 23.97486687498612
+            },
+            "vbf_YH_0p0_2p5_out_2022postEE_hgg": {
+                "procrate": -0.00013472913227314843,
+                "sigrate_tot": 23.97486687498612
+            },
+            "vbf_YH_0p0_2p5_out_2022preEE_hgg": {
+                "procrate": -0.0007949498435110252,
+                "sigrate_tot": 23.97486687498612
+            },
+            "vbf_YH_0p15_0p3_in_2022postEE_hgg": {
+                "procrate": 0.0024390114104394125,
+                "sigrate_tot": 23.97486687498612
+            },
+            "vbf_YH_0p15_0p3_in_2022preEE_hgg": {
+                "procrate": 0.0024371808558355788,
+                "sigrate_tot": 23.97486687498612
+            },
+            "vbf_YH_0p3_0p6_in_2022postEE_hgg": {
+                "procrate": 0.010672166705708018,
+                "sigrate_tot": 23.97486687498612
+            },
+            "vbf_YH_0p9_2p5_in_2022postEE_hgg": {
+                "procrate": 0.0037308397400244333,
+                "sigrate_tot": 23.97486687498612
+            },
+            "vbf_YH_0p9_2p5_in_2022preEE_hgg": {
+                "procrate": 0.014102348902030774,
+                "sigrate_tot": 23.97486687498612
+            },
+            "vh_YH_0p0_0p15_in_2022preEE_hgg": {
+                "procrate": 0.0003667235262021587,
+                "sigrate_tot": 23.97486687498612
+            },
+            "vh_YH_0p0_2p5_out_2022postEE_hgg": {
+                "procrate": 0.0004450424278239229,
+                "sigrate_tot": 23.97486687498612
+            },
+            "vh_YH_0p0_2p5_out_2022preEE_hgg": {
+                "procrate": 0.004052900794942796,
+                "sigrate_tot": 23.97486687498612
+            },
+            "vh_YH_0p15_0p3_in_2022preEE_hgg": {
+                "procrate": 0.0003700276238438559,
+                "sigrate_tot": 23.97486687498612
+            },
+            "vh_YH_0p3_0p6_in_2022postEE_hgg": {
+                "procrate": 0.005283504473129825,
+                "sigrate_tot": 23.97486687498612
+            },
+            "vh_YH_0p3_0p6_in_2022preEE_hgg": {
+                "procrate": 0.008421405161885182,
+                "sigrate_tot": 23.97486687498612
+            },
+            "vh_YH_0p9_2p5_in_2022postEE_hgg": {
+                "procrate": 0.0016335871772027056,
+                "sigrate_tot": 23.97486687498612
+            },
+            "vh_YH_0p9_2p5_in_2022preEE_hgg": {
+                "procrate": 0.0013856842587827174,
+                "sigrate_tot": 23.97486687498612
+            }
+        },
+        "RECO_rapidity_0p6_0p9_cat1": {
+            "tth_YH_0p0_0p15_in_2022postEE_hgg": {
+                "procrate": 0.004600435994895861,
+                "sigrate_tot": 106.51970217133635
+            },
+            "tth_YH_0p0_0p15_in_2022preEE_hgg": {
+                "procrate": 0.0011274275104724678,
+                "sigrate_tot": 106.51970217133635
+            },
+            "tth_YH_0p0_2p5_out_2022postEE_hgg": {
+                "procrate": 0.02086686715531601,
+                "sigrate_tot": 106.51970217133635
+            },
+            "tth_YH_0p0_2p5_out_2022preEE_hgg": {
+                "procrate": 0.005301449461773057,
+                "sigrate_tot": 106.51970217133635
+            },
+            "tth_YH_0p15_0p3_in_2022postEE_hgg": {
+                "procrate": 0.0035328946462316623,
+                "sigrate_tot": 106.51970217133635
+            },
+            "tth_YH_0p15_0p3_in_2022preEE_hgg": {
+                "procrate": -0.00015845563485785699,
+                "sigrate_tot": 106.51970217133635
+            },
+            "tth_YH_0p3_0p6_in_2022postEE_hgg": {
+                "procrate": 0.013949430944382567,
+                "sigrate_tot": 106.51970217133635
+            },
+            "tth_YH_0p3_0p6_in_2022preEE_hgg": {
+                "procrate": 0.002190836489912467,
+                "sigrate_tot": 106.51970217133635
+            },
+            "tth_YH_0p9_2p5_in_2022postEE_hgg": {
+                "procrate": 0.011621338093011156,
+                "sigrate_tot": 106.51970217133635
+            },
+            "tth_YH_0p9_2p5_in_2022preEE_hgg": {
+                "procrate": 0.00562850436752314,
+                "sigrate_tot": 106.51970217133635
+            },
+            "vbf_YH_0p0_0p15_in_2022postEE_hgg": {
+                "procrate": 0.009363318212523718,
+                "sigrate_tot": 106.51970217133635
+            },
+            "vbf_YH_0p0_0p15_in_2022preEE_hgg": {
+                "procrate": 0.009713521630591776,
+                "sigrate_tot": 106.51970217133635
+            },
+            "vbf_YH_0p0_2p5_out_2022postEE_hgg": {
+                "procrate": 0.06664782076489673,
+                "sigrate_tot": 106.51970217133635
+            },
+            "vbf_YH_0p0_2p5_out_2022preEE_hgg": {
+                "procrate": 0.02328466943710029,
+                "sigrate_tot": 106.51970217133635
+            },
+            "vbf_YH_0p15_0p3_in_2022postEE_hgg": {
+                "procrate": 0.008953989036749724,
+                "sigrate_tot": 106.51970217133635
+            },
+            "vbf_YH_0p15_0p3_in_2022preEE_hgg": {
+                "procrate": 0.0034356001486332615,
+                "sigrate_tot": 106.51970217133635
+            },
+            "vbf_YH_0p3_0p6_in_2022preEE_hgg": {
+                "procrate": 0.009459698665880983,
+                "sigrate_tot": 106.51970217133635
+            },
+            "vbf_YH_0p9_2p5_in_2022postEE_hgg": {
+                "procrate": 0.08186634171540981,
+                "sigrate_tot": 106.51970217133635
+            },
+            "vbf_YH_0p9_2p5_in_2022preEE_hgg": {
+                "procrate": 0.04062029251928886,
+                "sigrate_tot": 106.51970217133635
+            },
+            "vh_YH_0p0_0p15_in_2022postEE_hgg": {
+                "procrate": 0.0025315642212801973,
+                "sigrate_tot": 106.51970217133635
+            },
+            "vh_YH_0p0_2p5_out_2022postEE_hgg": {
+                "procrate": 0.02938836476602811,
+                "sigrate_tot": 106.51970217133635
+            },
+            "vh_YH_0p0_2p5_out_2022preEE_hgg": {
+                "procrate": 0.006254466263038635,
+                "sigrate_tot": 106.51970217133635
+            },
+            "vh_YH_0p15_0p3_in_2022preEE_hgg": {
+                "procrate": -0.001626764641802985,
+                "sigrate_tot": 106.51970217133635
+            },
+            "vh_YH_0p3_0p6_in_2022postEE_hgg": {
+                "procrate": 0.04307684881070259,
+                "sigrate_tot": 106.51970217133635
+            },
+            "vh_YH_0p3_0p6_in_2022preEE_hgg": {
+                "procrate": 0.0065123635108133284,
+                "sigrate_tot": 106.51970217133635
+            },
+            "vh_YH_0p9_2p5_in_2022postEE_hgg": {
+                "procrate": 0.023429307351497515,
+                "sigrate_tot": 106.51970217133635
+            },
+            "vh_YH_0p9_2p5_in_2022preEE_hgg": {
+                "procrate": 0.005010060165205627,
+                "sigrate_tot": 106.51970217133635
+            }
+        },
+        "RECO_rapidity_0p6_0p9_cat2": {
+            "tth_YH_0p0_0p15_in_2022preEE_hgg": {
+                "procrate": 0.000908389110526358,
+                "sigrate_tot": 122.66085546645982
+            },
+            "tth_YH_0p0_2p5_out_2022postEE_hgg": {
+                "procrate": 0.030127703734233763,
+                "sigrate_tot": 122.66085546645982
+            },
+            "tth_YH_0p0_2p5_out_2022preEE_hgg": {
+                "procrate": 0.006241410215316342,
+                "sigrate_tot": 122.66085546645982
+            },
+            "tth_YH_0p15_0p3_in_2022postEE_hgg": {
+                "procrate": 0.006652271675480737,
+                "sigrate_tot": 122.66085546645982
+            },
+            "tth_YH_0p15_0p3_in_2022preEE_hgg": {
+                "procrate": 0.001420202114118401,
+                "sigrate_tot": 122.66085546645982
+            },
+            "tth_YH_0p3_0p6_in_2022postEE_hgg": {
+                "procrate": 0.020459708779635197,
+                "sigrate_tot": 122.66085546645982
+            },
+            "tth_YH_0p3_0p6_in_2022preEE_hgg": {
+                "procrate": 0.006158826047222828,
+                "sigrate_tot": 122.66085546645982
+            },
+            "tth_YH_0p9_2p5_in_2022postEE_hgg": {
+                "procrate": 0.02501885459317905,
+                "sigrate_tot": 122.66085546645982
+            },
+            "tth_YH_0p9_2p5_in_2022preEE_hgg": {
+                "procrate": 0.008521748667913337,
+                "sigrate_tot": 122.66085546645982
+            },
+            "vbf_YH_0p0_0p15_in_2022postEE_hgg": {
+                "procrate": 0.017550095135912578,
+                "sigrate_tot": 122.66085546645982
+            },
+            "vbf_YH_0p0_0p15_in_2022preEE_hgg": {
+                "procrate": 0.0027325456937098472,
+                "sigrate_tot": 122.66085546645982
+            },
+            "vbf_YH_0p0_2p5_out_2022postEE_hgg": {
+                "procrate": 0.09998459671610821,
+                "sigrate_tot": 122.66085546645982
+            },
+            "vbf_YH_0p0_2p5_out_2022preEE_hgg": {
+                "procrate": 0.03371254185484553,
+                "sigrate_tot": 122.66085546645982
+            },
+            "vbf_YH_0p15_0p3_in_2022postEE_hgg": {
+                "procrate": 0.016391097095548913,
+                "sigrate_tot": 122.66085546645982
+            },
+            "vbf_YH_0p15_0p3_in_2022preEE_hgg": {
+                "procrate": 0.001820744137142269,
+                "sigrate_tot": 122.66085546645982
+            },
+            "vbf_YH_0p3_0p6_in_2022postEE_hgg": {
+                "procrate": 0.12002602572965175,
+                "sigrate_tot": 122.66085546645982
+            },
+            "vbf_YH_0p3_0p6_in_2022preEE_hgg": {
+                "procrate": 0.02532618974575538,
+                "sigrate_tot": 122.66085546645982
+            },
+            "vbf_YH_0p9_2p5_in_2022preEE_hgg": {
+                "procrate": 0.044383601400929056,
+                "sigrate_tot": 122.66085546645982
+            },
+            "vh_YH_0p0_0p15_in_2022preEE_hgg": {
+                "procrate": 0.0030616303477793787,
+                "sigrate_tot": 122.66085546645982
+            },
+            "vh_YH_0p0_2p5_out_2022postEE_hgg": {
+                "procrate": 0.06434192791742797,
+                "sigrate_tot": 122.66085546645982
+            },
+            "vh_YH_0p0_2p5_out_2022preEE_hgg": {
+                "procrate": 0.01409234813856775,
+                "sigrate_tot": 122.66085546645982
+            },
+            "vh_YH_0p15_0p3_in_2022postEE_hgg": {
+                "procrate": 0.0024804485076712563,
+                "sigrate_tot": 122.66085546645982
+            },
+            "vh_YH_0p3_0p6_in_2022postEE_hgg": {
+                "procrate": 0.0446896041299517,
+                "sigrate_tot": 122.66085546645982
+            },
+            "vh_YH_0p3_0p6_in_2022preEE_hgg": {
+                "procrate": 0.009437984628565942,
+                "sigrate_tot": 122.66085546645982
+            },
+            "vh_YH_0p9_2p5_in_2022postEE_hgg": {
+                "procrate": 0.0785115169010623,
+                "sigrate_tot": 122.66085546645982
+            },
+            "vh_YH_0p9_2p5_in_2022preEE_hgg": {
+                "procrate": 0.018756264627370345,
+                "sigrate_tot": 122.66085546645982
+            }
+        },
+        "RECO_rapidity_0p9_2p5_cat0": {
+            "ggh_YH_0p0_0p15_in_2022preEE_hgg": {
+                "procrate": 0.0023898590061055725,
+                "sigrate_tot": 4.2687071429460515
+            },
+            "tth_YH_0p0_0p15_in_2022preEE_hgg": {
+                "procrate": 0.0002400557238044671,
+                "sigrate_tot": 4.2687071429460515
+            },
+            "tth_YH_0p0_2p5_out_2022postEE_hgg": {
+                "procrate": 0.0002331176742587616,
+                "sigrate_tot": 4.2687071429460515
+            },
+            "tth_YH_0p0_2p5_out_2022preEE_hgg": {
+                "procrate": 0.0001796740615657106,
+                "sigrate_tot": 4.2687071429460515
+            },
+            "tth_YH_0p15_0p3_in_2022preEE_hgg": {
+                "procrate": -0.000328944914278868,
+                "sigrate_tot": 4.2687071429460515
+            },
+            "tth_YH_0p3_0p6_in_2022preEE_hgg": {
+                "procrate": 6.19202395096147e-05,
+                "sigrate_tot": 4.2687071429460515
+            },
+            "tth_YH_0p6_0p9_in_2022postEE_hgg": {
+                "procrate": 0.00010746650504494618,
+                "sigrate_tot": 4.2687071429460515
+            },
+            "vbf_YH_0p6_0p9_in_2022postEE_hgg": {
+                "procrate": 0.002724850690985289,
+                "sigrate_tot": 4.2687071429460515
+            },
+            "vbf_YH_0p6_0p9_in_2022preEE_hgg": {
+                "procrate": 0.0021905959838113232,
+                "sigrate_tot": 4.2687071429460515
+            },
+            "vh_YH_0p0_0p15_in_2022preEE_hgg": {
+                "procrate": 0.0,
+                "sigrate_tot": 4.2687071429460515
+            },
+            "vh_YH_0p0_2p5_out_2022postEE_hgg": {
+                "procrate": 0.0,
+                "sigrate_tot": 4.2687071429460515
+            },
+            "vh_YH_0p0_2p5_out_2022preEE_hgg": {
+                "procrate": 0.00024147257626513092,
+                "sigrate_tot": 4.2687071429460515
+            },
+            "vh_YH_0p15_0p3_in_2022preEE_hgg": {
+                "procrate": 7.212909468919836e-20,
+                "sigrate_tot": 4.2687071429460515
+            },
+            "vh_YH_0p6_0p9_in_2022postEE_hgg": {
+                "procrate": 0.002098475636249526,
+                "sigrate_tot": 4.2687071429460515
+            },
+            "vh_YH_0p6_0p9_in_2022preEE_hgg": {
+                "procrate": -8.307523472129524e-05,
+                "sigrate_tot": 4.2687071429460515
+            }
+        },
+        "RECO_rapidity_0p9_2p5_cat1": {
+            "tth_YH_0p0_0p15_in_2022preEE_hgg": {
+                "procrate": 0.0007597029112088756,
+                "sigrate_tot": 69.73052887798602
+            },
+            "tth_YH_0p0_2p5_out_2022postEE_hgg": {
+                "procrate": 0.0089876287631527,
+                "sigrate_tot": 69.73052887798602
+            },
+            "tth_YH_0p0_2p5_out_2022preEE_hgg": {
+                "procrate": 0.005691508569064814,
+                "sigrate_tot": 69.73052887798602
+            },
+            "tth_YH_0p15_0p3_in_2022preEE_hgg": {
+                "procrate": 0.00022926696617637903,
+                "sigrate_tot": 69.73052887798602
+            },
+            "tth_YH_0p3_0p6_in_2022postEE_hgg": {
+                "procrate": 0.0006035681872056508,
+                "sigrate_tot": 69.73052887798602
+            },
+            "tth_YH_0p3_0p6_in_2022preEE_hgg": {
+                "procrate": 0.0016552302817620425,
+                "sigrate_tot": 69.73052887798602
+            },
+            "tth_YH_0p6_0p9_in_2022postEE_hgg": {
+                "procrate": 0.003926862475259446,
+                "sigrate_tot": 69.73052887798602
+            },
+            "tth_YH_0p6_0p9_in_2022preEE_hgg": {
+                "procrate": 0.0037200624070911764,
+                "sigrate_tot": 69.73052887798602
+            },
+            "vbf_YH_0p0_0p15_in_2022preEE_hgg": {
+                "procrate": 0.0021720518770762223,
+                "sigrate_tot": 69.73052887798602
+            },
+            "vbf_YH_0p0_2p5_out_2022postEE_hgg": {
+                "procrate": 0.033202176707871324,
+                "sigrate_tot": 69.73052887798602
+            },
+            "vbf_YH_0p0_2p5_out_2022preEE_hgg": {
+                "procrate": 0.033991749192623655,
+                "sigrate_tot": 69.73052887798602
+            },
+            "vbf_YH_0p15_0p3_in_2022postEE_hgg": {
+                "procrate": 0.006005705635595703,
+                "sigrate_tot": 69.73052887798602
+            },
+            "vbf_YH_0p15_0p3_in_2022preEE_hgg": {
+                "procrate": 0.004886182581452171,
+                "sigrate_tot": 69.73052887798602
+            },
+            "vbf_YH_0p3_0p6_in_2022postEE_hgg": {
+                "procrate": 0.004458922837984963,
+                "sigrate_tot": 69.73052887798602
+            },
+            "vbf_YH_0p3_0p6_in_2022preEE_hgg": {
+                "procrate": 0.0070570790020059735,
+                "sigrate_tot": 69.73052887798602
+            },
+            "vbf_YH_0p6_0p9_in_2022postEE_hgg": {
+                "procrate": 0.05359679643549249,
+                "sigrate_tot": 69.73052887798602
+            },
+            "vbf_YH_0p6_0p9_in_2022preEE_hgg": {
+                "procrate": 0.025082648711987766,
+                "sigrate_tot": 69.73052887798602
+            },
+            "vh_YH_0p0_2p5_out_2022postEE_hgg": {
+                "procrate": 0.029999593484222944,
+                "sigrate_tot": 69.73052887798602
+            },
+            "vh_YH_0p0_2p5_out_2022preEE_hgg": {
+                "procrate": 0.016862958548393762,
+                "sigrate_tot": 69.73052887798602
+            },
+            "vh_YH_0p6_0p9_in_2022postEE_hgg": {
+                "procrate": 0.01600090793840099,
+                "sigrate_tot": 69.73052887798602
+            },
+            "vh_YH_0p6_0p9_in_2022preEE_hgg": {
+                "procrate": 0.006481147619909275,
+                "sigrate_tot": 69.73052887798602
+            }
+        },
+        "RECO_rapidity_0p9_2p5_cat2": {
+            "tth_YH_0p0_0p15_in_2022postEE_hgg": {
+                "procrate": 0.004850652235929226,
+                "sigrate_tot": 530.9786182744023
+            },
+            "tth_YH_0p0_0p15_in_2022preEE_hgg": {
+                "procrate": 0.0010779532520945336,
+                "sigrate_tot": 530.9786182744023
+            },
+            "tth_YH_0p0_2p5_out_2022postEE_hgg": {
+                "procrate": 0.10017152106323184,
+                "sigrate_tot": 530.9786182744023
+            },
+            "tth_YH_0p0_2p5_out_2022preEE_hgg": {
+                "procrate": 0.02249661865982097,
+                "sigrate_tot": 530.9786182744023
+            },
+            "tth_YH_0p15_0p3_in_2022postEE_hgg": {
+                "procrate": 0.005705098925838106,
+                "sigrate_tot": 530.9786182744023
+            },
+            "tth_YH_0p15_0p3_in_2022preEE_hgg": {
+                "procrate": 0.0011051561750448405,
+                "sigrate_tot": 530.9786182744023
+            },
+            "tth_YH_0p3_0p6_in_2022postEE_hgg": {
+                "procrate": 0.013596667113080517,
+                "sigrate_tot": 530.9786182744023
+            },
+            "tth_YH_0p3_0p6_in_2022preEE_hgg": {
+                "procrate": 0.000845660650179422,
+                "sigrate_tot": 530.9786182744023
+            },
+            "tth_YH_0p6_0p9_in_2022postEE_hgg": {
+                "procrate": 0.028008847319164098,
+                "sigrate_tot": 530.9786182744023
+            },
+            "tth_YH_0p6_0p9_in_2022preEE_hgg": {
+                "procrate": 0.008192791098594655,
+                "sigrate_tot": 530.9786182744023
+            },
+            "vbf_YH_0p0_0p15_in_2022postEE_hgg": {
+                "procrate": 0.03812213176291135,
+                "sigrate_tot": 530.9786182744023
+            },
+            "vbf_YH_0p0_2p5_out_2022preEE_hgg": {
+                "procrate": 0.2004110961771776,
+                "sigrate_tot": 530.9786182744023
+            },
+            "vbf_YH_0p15_0p3_in_2022postEE_hgg": {
+                "procrate": 0.029898607837643986,
+                "sigrate_tot": 530.9786182744023
+            },
+            "vbf_YH_0p15_0p3_in_2022preEE_hgg": {
+                "procrate": 0.007585530115636733,
+                "sigrate_tot": 530.9786182744023
+            },
+            "vbf_YH_0p3_0p6_in_2022postEE_hgg": {
+                "procrate": 0.07935897551773219,
+                "sigrate_tot": 530.9786182744023
+            },
+            "vbf_YH_0p6_0p9_in_2022postEE_hgg": {
+                "procrate": 0.18430781725788767,
+                "sigrate_tot": 530.9786182744023
+            },
+            "vbf_YH_0p6_0p9_in_2022preEE_hgg": {
+                "procrate": 0.04143450024715859,
+                "sigrate_tot": 530.9786182744023
+            },
+            "vh_YH_0p0_2p5_out_2022postEE_hgg": {
+                "procrate": 0.43735629538304405,
+                "sigrate_tot": 530.9786182744023
+            },
+            "vh_YH_0p0_2p5_out_2022preEE_hgg": {
+                "procrate": 0.12753090330529812,
+                "sigrate_tot": 530.9786182744023
+            },
+            "vh_YH_0p6_0p9_in_2022postEE_hgg": {
+                "procrate": 0.06424581760605606,
+                "sigrate_tot": 530.9786182744023
+            },
+            "vh_YH_0p6_0p9_in_2022preEE_hgg": {
+                "procrate": 0.023546113865022766,
+                "sigrate_tot": 530.9786182744023
+            }
+        }
+    }
+}

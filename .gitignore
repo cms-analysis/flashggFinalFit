@@ -10,8 +10,13 @@ __init__.py
 crab_*
 crabConfig_*
 
+#config files
+*.dat
+
 # ROOT-related files
 *.root
+*.C
+!checkPdfIdx.C
 *_cc.d
 *_cc.so
 *_C.d
@@ -25,3 +30,51 @@ AutoDict_*
 *.log
 *.png
 *.pdf
+*.out
+*.tmp
+*.pcm
+*.o
+
+# Files and folders from compiling the background area
+Background/RootDict.cxx
+Background/bin/
+Background/lib/
+
+# Output dirs in signal and bkg
+Signal/outdir_*
+Background/outdir_*
+
+.old
+.old/*
+
+# Datacard directory
+Datacard/yields_*
+
+# Combine directory
+Combine/impacts*
+Combine/gof*
+runFits_*
+runFits_*
+!runFits_unblinded*
+Models*
+
+t2w_jobs/
+
+# Plots directory
+Plots/SplusBModels*
+Plots/pkl
+
+# Condor submission files and folders
+*.sub
+jobs/*.sh
+jobs*
+
+install_dir
+.law
+law/output
+law/remote
+
+remote
+htcondor
+
+output

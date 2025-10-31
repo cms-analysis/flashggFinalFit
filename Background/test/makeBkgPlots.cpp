@@ -637,7 +637,7 @@ void profileExtendTerm(RooRealVar *mgg, RooAbsData *data, RooMultiPdf *mpdf, Roo
 	}
 }
 
-void plotAllPdfs(RooRealVar *mgg, RooAbsData *data, RooMultiPdf *mpdf, RooCategory *mcat, string name, int cat, bool unblind, int isFlashgg, std::vector<string> flashggCats){
+void plotAllPdfs(RooRealVar *mgg, RooAbsData *data, RooMultiPdf *mpdf, RooCategory *mcat, string name, int cat, bool unblind, int isFlashgg, std::vector<string> flashggCats, int year=2016){
 	string catname;
 	if (isFlashgg){
 		catname = Form("%s",flashggCats[cat].c_str());
@@ -647,6 +647,7 @@ void plotAllPdfs(RooRealVar *mgg, RooAbsData *data, RooMultiPdf *mpdf, RooCatego
 	RooPlot *plot = mgg->frame();
 	plot->SetTitle(Form("Background functions profiled for category %s",catname.c_str()));
 	plot->GetXaxis()->SetTitle("m_{#gamma#gamma} (GeV)");
+	plot->GetYaxis()->SetTitle("Events");
 	if (!unblind) {
 		mgg->setRange("unblind_up",135,180);
 		mgg->setRange("unblind_down",100,115);
@@ -656,9 +657,11 @@ void plotAllPdfs(RooRealVar *mgg, RooAbsData *data, RooMultiPdf *mpdf, RooCatego
 		data->plotOn(plot,Binning(80));
 	}
 
-	TLegend *leg = new TLegend(0.6,0.4,0.92,0.92);
+	TLegend *leg = new TLegend(0.6,0.4,0.9,0.9);
 	leg->SetFillColor(0);
 	leg->SetLineColor(0);
+	leg->SetBorderSize(0);
+	leg->SetTextSize(0.03);
 
 	int color[10] = {kBlue,kOrange,kGreen,kRed,kMagenta,kPink,kViolet,kCyan,kYellow,kBlack};
 	for (int pInd=0; pInd<mpdf->getNumPdfs(); pInd++){
@@ -667,15 +670,42 @@ void plotAllPdfs(RooRealVar *mgg, RooAbsData *data, RooMultiPdf *mpdf, RooCatego
 		mpdf->getCurrentPdf()->fitTo(*data);
 		mpdf->getCurrentPdf()->plotOn(plot,LineColor(color[pInd]),LineWidth(2));
 		TObject *legObj = plot->getObject(plot->numItems()-1);
-		leg->AddEntry(legObj,mpdf->getCurrentPdf()->GetName(),"L");
+    TString tempPdfName = TString(mpdf->getCurrentPdf()->GetName());
+    std::string prettyName = "";
+    if(int(tempPdfName.Contains("pow"))>0) prettyName = "#splitline{Sum of power laws";
+    if(int(tempPdfName.Contains("exp"))>0) prettyName = "#splitline{Sum of exponentials";
+    if(int(tempPdfName.Contains("bern"))>0) prettyName = "#splitline{Bernstein polynomial";
+    if(int(tempPdfName.Contains("lau"))>0) prettyName = "#splitline{Laurent series";
+    prettyName += ",}{order ";
+    prettyName += tempPdfName[tempPdfName.Length()-1];
+    prettyName += "}";
+		//leg->AddEntry(legObj,mpdf->getCurrentPdf()->GetName(),"L");
+		leg->AddEntry(legObj,prettyName.c_str(),"L");
 	}
 
 	TCanvas *canv = new TCanvas();
 	plot->Draw();
 	if (!unblind) plot->SetMinimum(0.0001);
 	leg->Draw();
+  TString catLabel_humanReadable = TString(catname);
+  catLabel_humanReadable.ReplaceAll("RECO_","");
+  catLabel_humanReadable.ReplaceAll("PTH_120_200","high");
+  catLabel_humanReadable.ReplaceAll("_"," ");
+  catLabel_humanReadable.ReplaceAll("UntaggedTag","Untagged");
+  catLabel_humanReadable.ReplaceAll("VBFTag","VBF Tag");
+  catLabel_humanReadable.ReplaceAll("TTHLeptonicTag","TTH Leptonic Tag");
+  catLabel_humanReadable.ReplaceAll("TTHHadronicTag","TTH Hadronic Tag");
+  catLabel_humanReadable.ReplaceAll("all","All Categories");
+  TLatex lat2(0.5,0.88,Form("%s",catLabel_humanReadable.Data())); //FIXME
+  lat2.SetTextAlign(33);
+  lat2.SetNDC(1);
+  lat2.SetTextSize(0.04);
+  lat2.Draw("same");
 	canv->Modified();
 	canv->Update();
+  lumi_sqrtS = Form("%s (13 TeV, %d)",lumi_13TeV.Data(),year);
+  std::string txt="";
+  CMS_lumi( canv, 0,0,txt);
 	canv->Print(Form("%s.pdf",name.c_str()));
 	canv->Print(Form("%s.png",name.c_str()));
 	canv->Print(Form("%s.C",name.c_str()));
@@ -687,11 +717,11 @@ int main(int argc, char* argv[]){
   
   setTDRStyle();
   writeExtraText = true;       // if extra text
-  extraText  = "Preliminary";  // default extra text is "Preliminary"
+  extraText  = "Work in Progress";  // default extra text is "Preliminary"
   lumi_13TeV ="2.6 fb^{-1}";
   lumi_8TeV  = "19.1 fb^{-1}"; // default is "19.7 fb^{-1}"
   lumi_7TeV  = "4.9 fb^{-1}";  // default is "5.1 fb^{-1}"
-  lumi_sqrtS = "13 TeV";       // used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
+  lumi_sqrtS = "13.6 TeV";       // used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
 
 
 	string bkgFileName;
@@ -711,6 +741,8 @@ int main(int argc, char* argv[]){
 	int mhLow;
 	int mhHigh;
 	int sqrts;
+	int year_=2016;
+	//int year_=2017;
 	float intLumi;
 	double mhvalue_;
 	int isFlashgg_ =1;
@@ -739,6 +771,7 @@ int main(int argc, char* argv[]){
 		("mhVal", po::value<double>(&mhvalue_)->default_value(125.),														"Choose the MH for the plots")
 		("higgsResolution", po::value<double>(&higgsResolution_)->default_value(1.),															"Starting point for scan")
 		("intLumi", po::value<float>(&intLumi)->default_value(0.),																"What intLumi in fb^{-1}")
+		("year", po::value<int>(&year_)->default_value(2016),																"Dataset year")
 		("sqrts,S", po::value<int>(&sqrts)->default_value(8),																"Which centre of mass is this data from?")
 		("isFlashgg",  po::value<int>(&isFlashgg_)->default_value(1),  								    	        "Use Flashgg output ")
 		("flashggCats,f", po::value<string>(&flashggCatsStr_)->default_value("UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,VBFTag_0,VBFTag_1,VBFTag_2,TTHHadronicTag,TTHLeptonicTag,VHHadronicTag,VHTightTag,VHLooseTag,VHEtTag"),       "Flashgg category names to consider")
@@ -789,20 +822,20 @@ int main(int argc, char* argv[]){
 	RooMultiPdf *mpdf = 0; 
 	RooCategory *mcat = 0;
 	if (isMultiPdf) {
-		mpdf = (RooMultiPdf*)inWS->pdf(Form("CMS_hgg_%s_%dTeV_bkgshape",catname.c_str(),sqrts));
-		mcat = (RooCategory*)inWS->cat(Form("pdfindex_%s_%dTeV",catname.c_str(),sqrts));
+		mpdf = (RooMultiPdf*)inWS->pdf(Form("CMS_hgg_%s_%dTeV_%d_bkgshape",catname.c_str(),sqrts,year_));
+		mcat = (RooCategory*)inWS->cat(Form("pdfindex_%s_%dTeV_%d",catname.c_str(),sqrts,year_));
 		if (!mpdf || !mcat){
-			cout << "[ERROR] "<< "Can't find multipdfs (" << Form("CMS_hgg_%s_%dTeV_bkgshape",catname.c_str(),sqrts) << ") or multicat ("<< Form("pdfindex_%s_%dTeV",catname.c_str(),sqrts) <<")" << endl;
+			cout << "[ERROR] "<< "Can't find multipdfs (" << Form("CMS_hgg_%s_%dTeV_%d_bkgshape",catname.c_str(),sqrts,year_) << ") or multicat ("<< Form("pdfindex_%s_%dTeV_%d",catname.c_str(),sqrts,year_) <<")" << endl;
 			exit(0);
 		}
 	}
 	else {
-		bpdf = (RooAbsPdf*)inWS->pdf(Form("pdf_data_pol_model_%dTeV_%s",sqrts,catname.c_str()));
+		bpdf = (RooAbsPdf*)inWS->pdf(Form("pdf_data_pol_model_%dTeV_%d_%s",sqrts,year_,catname.c_str()));
 		if (!bpdf){
-			cout << "[ERROR] "<< "Cant't find background pdf " << Form("pdf_data_pol_model_%dTeV_%s",sqrts,catname.c_str()) << endl;
+			cout << "[ERROR] "<< "Cant't find background pdf " << Form("pdf_data_pol_model_%dTeV_%d_%s",sqrts,year_,catname.c_str()) << endl;
 			exit(0);
 		}
-		mcat = new RooCategory(Form("pdfindex_%s_%dTeV",catname.c_str(),sqrts),"c");
+		mcat = new RooCategory(Form("pdfindex_%s_%dTeV_%d",catname.c_str(),sqrts,year_),"c");
 		RooArgList temp;
 		temp.add(*bpdf);
 		mpdf = new RooMultiPdf(Form("tempmpdf_%s",catname.c_str()),"",*mcat,temp);
@@ -813,7 +846,7 @@ int main(int argc, char* argv[]){
 	cout << "[INFO] "<< "\t"; data->Print();
 
 	// plot all the pdfs for reference
-	if (isMultiPdf || verbose_) plotAllPdfs(mgg,data,mpdf,mcat,Form("%s/allPdfs_%s",outDir.c_str(),catname.c_str()),cat,unblind, isFlashgg_, flashggCats_);
+	if (isMultiPdf || verbose_) plotAllPdfs(mgg,data,mpdf,mcat,Form("%s/allPdfs_%s",outDir.c_str(),catname.c_str()),cat,unblind, isFlashgg_, flashggCats_, year_);
 
 	// include normalization hack RooBernsteinFast;
 	/*

@@ -1,0 +1,23 @@
+{
+
+    "stage1p2_maximal":{
+        "pois":"r_ggH_0J_low,r_ggH_0J_high,r_ggH_1J_low,r_ggH_1J_med,r_ggH_1J_high,r_ggH_2J_low,r_ggH_2J_med,r_ggH_2J_high,r_ggH_BSM,r_ggH_VBFlike,r_qqH_VBFlike,r_qqH_BSM,r_qqH_VHhad,r_WH_lep,r_ZH_lep,r_ttH,r_tH",
+        "fits":"profile2D:syst:r_ggH_VBFlike,r_qqH_VBFlike+profile2D:syst:r_ttH,r_tH",
+        "points":"400:1+400:1",
+        "fit_opts":"--saveSpecifiedNuis all --saveInactivePOI 1 --freezeParameters BR_hgg,rgx{THU_ggH.*},rgx{THU_qqH.*},rgx{QCDscale_.*},rgx{pdf_Higgs_.*},rgx{alphaS_.*},rgx{MergeUnc_minimal.*},rgx{CMS_hgg_tth_.*},UnderlyingEvent_norm,PartonShower_norm+--saveSpecifiedNuis all --saveInactivePOI 1 --freezeParameters BR_hgg,rgx{THU_ggH.*},rgx{THU_qqH.*},rgx{QCDscale_.*},rgx{pdf_Higgs_.*},rgx{alphaS_.*},rgx{MergeUnc_minimal.*},rgx{CMS_hgg_tth_.*},UnderlyingEvent_norm,PartonShower_norm --setParameterRanges r_ttH=0,4:r_tH=0,20"
+    },
+
+    "kappas":{
+        "pois":"kappa_W,kappa_Z,kappa_tau,kappa_t,kappa_b,kappa_g,kappa_gam",
+        "fits":"scan2D:syst:kappa_g,kappa_gam",
+        "points":"400:1",
+        "fit_opts":"--saveSpecifiedNuis all --saveInactivePOI 1 --setParameterRanges kappa_g=0.5,2:kappa_gam=0.4,1.6 --freezeParameters rgx{STXS_constrain_.*},rgx{MergeUnc_.*}"      
+    },
+
+    "kVkF":{
+        "pois":"kappa_V,kappa_F",
+        "fits":"scan2D:syst:kappa_V,kappa_F",
+        "points":"400:1",
+        "fit_opts":"--saveSpecifiedNuis all --saveInactivePOI 1 --setParameterRanges kappa_V=0,2:kappa_F=-1.5,2.5 --freezeParameters rgx{STXS_constrain_.*},rgx{MergeUnc_.*}"  
+    }
+}
