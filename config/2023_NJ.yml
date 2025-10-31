@@ -4,8 +4,8 @@ outputFolder: '/pnfs/psi.ch/cms/trivcat/store/user/niharrin/ntuples/midRun3/samp
 
 inputFiles:
   # Trees2WS
-  Trees2WSData: '/pnfs/psi.ch/cms/trivcat/store/user/niharrin/ntuples/midRun3/samples/2025_06_12/intermediateRun3/variables/NJ/allData_2023.root'
-  Trees2WS: '/pnfs/psi.ch/cms/trivcat/store/user/niharrin/ntuples/midRun3/samples/2025_06_12/intermediateRun3/variables/NJ/root'
+  Trees2WSData: '/net/data_cms3a-2/nobackup/group_JE_CMS/Hgg_PartialRun3/stat_analysis/differential/2025_08_04_fixedFNUF/Njets2p5/2023/data/allData_2023.root'
+  Trees2WS: '/net/data_cms3a-2/nobackup/group_JE_CMS/Hgg_PartialRun3/stat_analysis/differential/2025_08_04_fixedFNUF/Njets2p5/2023/signal'
 
 backgroundScriptCfg:
   # Setup

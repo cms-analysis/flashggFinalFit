@@ -4,8 +4,8 @@ outputFolder: '/net/data_cms3a-1/wrabetz/CMSSW_14_1_0_pre4/src/flashggFinalFit/o
 
 inputFiles:
   # Trees2WS
-  Trees2WSData: '/net/data_cms3a-2/nobackup/group_JE_CMS/Hgg_PartialRun3/stat_analysis/differential/2025_07_18/PTH/allData_2023.root'
-  Trees2WS: '/net/data_cms3a-2/nobackup/group_JE_CMS/Hgg_PartialRun3/stat_analysis/differential/2025_07_18/PTH/root/'
+  Trees2WSData: '/net/data_cms3a-2/nobackup/group_JE_CMS/Hgg_PartialRun3/stat_analysis/differential/2025_08_04_fixedFNUF/PTH/2023/data/allData_2023.root'
+  Trees2WS: '/net/data_cms3a-2/nobackup/group_JE_CMS/Hgg_PartialRun3/stat_analysis/differential/2025_08_04_fixedFNUF/PTH/2023/signal'
 
 backgroundScriptCfg:
   # Setup
