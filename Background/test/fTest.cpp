@@ -102,6 +102,8 @@ void runFit(RooAbsPdf *pdf, RooDataSet *data, double *NLL, int *stat_t, int MaxT
 	*NLL = minnll;
 }
 
+// Needed to scale the sideband yield to the full range yield
+// It is a C++ implementation of Jon's code -> https://github.com/jonathon-langford/flashggFinalFit/blob/dev_lowmass/Background/tools/modelBuilder_v2.py#L266-L306 
 double computeSidebandScaledYield(RooAbsPdf *pdf, RooRealVar *mass, double sidebandYield){
   if (!pdf || !mass) {
     return sidebandYield;
@@ -173,7 +175,8 @@ double getProbabilityFtest(double chi2, int ndof,RooAbsPdf *pdfNull, RooAbsPdf *
 
         params_null->assignValueOnly(preParams_null);
         params_test->assignValueOnly(preParams_test);
-  	RooDataHist *binnedtoy = pdfNull->generateBinned(RooArgSet(*mass),
+  	    // Now the toys should be thrown only in the sidebands
+        RooDataHist *binnedtoy = pdfNull->generateBinned(RooArgSet(*mass),
         RooFit::NumEvents(ndata),
         RooFit::Range(MASS_FIT_RANGE),
         RooFit::ExpectedData(false),
@@ -384,7 +387,7 @@ void plot(RooRealVar *mass, RooAbsPdf *pdf, RooDataSet *data, string name,vector
   canv->SaveAs(name.c_str());
   if (name.size() > 4 && name.substr(name.size() - 4) == ".pdf") {
     std::string pngName = name.substr(0, name.size() - 4) + ".png";
-    canv->SaveAs(pngName.c_str());
+    canv->SaveAs(pngName.c_str()); // also keep a png copy for quick inspections / web plots
   }
  	
 	//plot_chi2->Draw();
@@ -420,7 +423,9 @@ void plot(RooRealVar *mass, RooMultiPdf *pdfs, RooCategory *catIndex, RooDataSet
   pad2->Draw();
   pad1->cd();
   // enf extra bit for ratio plot///
+  // Choose a suffix for saved objects, falling back to a generic catN label if no names are provided.
   std::string histSuffix = flashggCats_.empty() ? Form("cat%d",cat) : flashggCats_[cat];
+  // Build an explicit TH1 copy of the data so we can zero the blinded bins before computing residuals.
   std::unique_ptr<TH1> dataHist(data->createHistogram(Form("h_data_%s",histSuffix.c_str()),*mass,RooFit::Binning(mgg_high-mgg_low,mgg_low,mgg_high)));
   if (!dataHist){
     std::cerr << "[WARNING] Failed to build data histogram for ratio plot in " << histSuffix << std::endl;
@@ -456,8 +461,9 @@ void plot(RooRealVar *mass, RooMultiPdf *pdfs, RooCategory *catIndex, RooDataSet
   if (BLIND) plot->SetMinimum(0.0001);
   plot->Draw();
   leg->Draw("same");
-  CMS_lumi(canv, 2022, 0); // second argument is iperiod
+  CMS_lumi(canv, 0, 0);
   ///start extra bit for ratio plot///
+  // Mirror the (best-fit) pdf into a histogram with the same binning as the data histogram.
   std::unique_ptr<TH1> pdfHist;
   if (pdf){
     pdfHist.reset(pdf->createHistogram(Form("h_pdf_%s",histSuffix.c_str()),*mass,RooFit::Binning(mgg_high-mgg_low,mgg_low,mgg_high)));
@@ -486,6 +492,7 @@ void plot(RooRealVar *mass, RooMultiPdf *pdfs, RooCategory *catIndex, RooDataSet
     }
   }
   if (pdfHist && pdfSidebandYield > 0.){
+    // Rescale so the pdf sideband integral matches the observed sideband yield.
     pdfHist->Scale(dataSidebandYield/pdfSidebandYield);
   }
   if (pdfHist){
@@ -493,6 +500,7 @@ void plot(RooRealVar *mass, RooMultiPdf *pdfs, RooCategory *catIndex, RooDataSet
     pdfHist->SetLineWidth(2);
     pdfHist->Draw("same");
   }
+  // Build the (data - pdf) graph that we draw in the ratio pad.
   TGraphAsymmErrors *hdatasub = new TGraphAsymmErrors();
   double diffMax = -1e9;
   double diffMin = 1e9;
@@ -521,6 +529,7 @@ void plot(RooRealVar *mass, RooMultiPdf *pdfs, RooCategory *catIndex, RooDataSet
     diffMax = 1.;
     diffMin = -1.;
   }
+  // Expand the plotting window slightly so residual markers and errors are fully visible.
   const double margin = 0.15 * std::max(std::abs(diffMax), std::abs(diffMin));
   hdummy->SetMaximum(diffMax + margin);
   hdummy->SetMinimum(diffMin - margin);
@@ -539,7 +548,7 @@ void plot(RooRealVar *mass, RooMultiPdf *pdfs, RooCategory *catIndex, RooDataSet
   hdatasub->Draw("PESAME");
   // enf extra bit for ratio plot///
   canv->SaveAs(Form("%s.pdf",name.c_str()));
-  canv->SaveAs(Form("%s.png",name.c_str()));
+  canv->SaveAs(Form("%s.png",name.c_str())); // keep png twin alongside the pdf
   catIndex->setIndex(currentIndex);
   delete hdatasub;
   delete canv;
@@ -587,9 +596,9 @@ void plot(RooRealVar *mass, map<string,RooAbsPdf*> pdfs, RooDataSet *data, strin
   if (BLIND) plot->SetMinimum(0.0001);
   plot->Draw();
   leg->Draw("same");
-  CMS_lumi(canv, 2022, 0); // second argument is iperiod
+  CMS_lumi(canv, 0, 0);
   canv->SaveAs(Form("%s.pdf",name.c_str()));
-  canv->SaveAs(Form("%s.png",name.c_str()));
+  canv->SaveAs(Form("%s.png",name.c_str())); // keep png twin alongside the pdf
   delete canv;
 }
 
@@ -686,11 +695,11 @@ int main(int argc, char* argv[]){
  
   setTDRStyle();
   writeExtraText = true;       // if extra text
-  extraText  = "Private Work";  // default extra text is "Preliminary"
+  extraText  = "Preliminary";  // default extra text is "Preliminary"
   lumi_13p6TeV = "61.9 fb^{-1}";
   lumi_8TeV  = "19.1 fb^{-1}"; // default is "19.7 fb^{-1}"
   lumi_7TeV  = "4.9 fb^{-1}";  // default is "5.1 fb^{-1}"
-  lumi_sqrtS = "";       // used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
+  lumi_sqrtS = "13 TeV";       // used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
   string year_ = "2016";
   //int year_ = 2017;
 
@@ -897,6 +906,7 @@ int main(int argc, char* argv[]){
 			thisdataBinned_name= Form("roohist_data_mass_cat%d",cat);
 			//RooDataSet *data = (RooDataSet*)dataFull;
 		}
+    // Build the sideband-only dataset used for fitting, keeping both total and sideband yields.
     std::unique_ptr<RooDataSet> dataFullSideband((RooDataSet*) dataFull->reduce(RooFit::Cut(Form("CMS_hgg_mass<%d || CMS_hgg_mass>%d", blind_low, blind_high))));
     RooDataSet *sidebandData = dataFullSideband ? dataFullSideband.get() : dataFull;
     RooDataHist thisdataBinned(thisdataBinned_name.c_str(),"data",*mass,*sidebandData);
@@ -1006,8 +1016,8 @@ int main(int argc, char* argv[]){
 
 						// Calculate goodness of fit for the thing to be included (will use toys for lowstats)!
 						double gofProb =0; 
-            // Deactivate Goodness of Fit plots for now
-						// plot(mass,bkgPdf,data,Form("%s/%s%d_cat%d.pdf",outDir.c_str(),funcType->c_str(),order,(cat+catOffset)),flashggCats_,fitStatus,&gofProb);
+            // Also produce the GOF figure (computed in the sidebands) for this candidate.
+						plot(mass,bkgPdf,data,Form("%s/%s%d_cat%d.pdf",outDir.c_str(),funcType->c_str(),order,(cat+catOffset)),flashggCats_,fitStatus,&gofProb);
 
 						if ((prob < upperEnvThreshold) ) { // Looser requirements for the envelope
 
@@ -1067,16 +1077,19 @@ int main(int argc, char* argv[]){
 			int bestFitPdfIndex = getBestFitFunction(pdf,data,&catIndex,!verbose);
 			catIndex.setIndex(bestFitPdfIndex);
       if (bestFitPdfIndex >= 0 && bestFitPdfIndex < storedPdfs.getSize()) {
+        // Use the pdf that minimised the NLL when setting up the yield scaling.
         bestPdfForNorm = dynamic_cast<RooAbsPdf*>(storedPdfs.at(bestFitPdfIndex));
       }
       if (!bestPdfForNorm && storedPdfs.getSize() > 0) {
+        // Fall back to the first stored pdf in case something went wrong with the index lookup.
         bestPdfForNorm = dynamic_cast<RooAbsPdf*>(storedPdfs.at(0));
       }
+      // Guard against pathological scaling (e.g. failed fit returning negative yield).
       double scaledYield = computeSidebandScaledYield(bestPdfForNorm, mass, sidebandYield);
       if (scaledYield <= 0.) {
         scaledYield = fullDataEntries;
       }
-      const double upperBound = std::max(3.0 * scaledYield, scaledYield + 10.0);
+      const double upperBound = std::max(3.0 * scaledYield, scaledYield + 10.0); // generous roof for the background yield
 			RooRealVar nBackground(Form("CMS_hgg_%s_%s_bkgshape_norm",catname.c_str(),ext.c_str()),"nbkg",scaledYield,0,upperBound);
 			std::cout << "// ------------------------------------------------------------------------- //" <<std::endl; 
 			std::cout << "[INFO] Created MultiPdf " << pdf->GetName() << ", in Category " << cat << " with a total of " << catIndex.numTypes() << " pdfs"<< std::endl;
