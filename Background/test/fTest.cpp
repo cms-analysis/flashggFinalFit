@@ -92,7 +92,7 @@ void runFit(RooAbsPdf *pdf, RooDataSet *data, double *NLL, int *stat_t, int MaxT
 	while (stat!=0){
 	  if (ntries>=MaxTries) break;
 	  RooFitResult *fitTest = pdf->fitTo(*data,RooFit::Save(1)
-    ,RooFit::Minimizer("Minuit2","minimize"),RooFit::SumW2Error(kTRUE),RooFit::Range(MASS_FIT_RANGE)); //FIXME
+    ,RooFit::Minimizer("Minuit2","minimize"),RooFit::SumW2Error(kTRUE),RooFit::Range(MASS_FIT_RANGE)); 
           stat = fitTest->status();
 	  minnll = fitTest->minNll();
 	  if (stat!=0) params_test->assignValueOnly(fitTest->randomizePars());
@@ -136,9 +136,9 @@ double getProbabilityFtest(double chi2, int ndof,RooAbsPdf *pdfNull, RooAbsPdf *
   
   // fit the pdfs to the data and keep this fit Result (for randomizing)
   RooFitResult *fitNullData = pdfNull->fitTo(*data,RooFit::Save(1),RooFit::Strategy(1)
-		,RooFit::Minimizer("Minuit2","minimize"),RooFit::SumW2Error(kTRUE),RooFit::PrintLevel(-1),RooFit::Range(MASS_FIT_RANGE)); //FIXME
+		,RooFit::Minimizer("Minuit2","minimize"),RooFit::SumW2Error(kTRUE),RooFit::PrintLevel(-1),RooFit::Range(MASS_FIT_RANGE)); 
   RooFitResult *fitTestData = pdfTest->fitTo(*data,RooFit::Save(1),RooFit::Strategy(1)
-		,RooFit::Minimizer("Minuit2","minimize"),RooFit::SumW2Error(kTRUE),RooFit::PrintLevel(-1),RooFit::Range(MASS_FIT_RANGE)); //FIXME
+		,RooFit::Minimizer("Minuit2","minimize"),RooFit::SumW2Error(kTRUE),RooFit::PrintLevel(-1),RooFit::Range(MASS_FIT_RANGE)); 
 
   // Ok we want to check the distribution in toys then 
   // Step 1, cache the parameters of each pdf so as not to upset anything 
@@ -190,7 +190,7 @@ double getProbabilityFtest(double chi2, int ndof,RooAbsPdf *pdfNull, RooAbsPdf *
 	int MaxTries = 2;
 	while (stat_n!=0){
 	  if (ntries>=MaxTries) break;
-  	RooFitResult *fitNull = pdfNull->fitTo(*binnedtoy,RooFit::Save(1),RooFit::Strategy(1),RooFit::SumW2Error(kTRUE) //FIXME
+  	RooFitResult *fitNull = pdfNull->fitTo(*binnedtoy,RooFit::Save(1),RooFit::Strategy(1),RooFit::SumW2Error(kTRUE) 
 		,RooFit::Minimizer("Minuit2","minimize"),RooFit::Minos(0),RooFit::Hesse(0),RooFit::PrintLevel(-1),RooFit::Range(MASS_FIT_RANGE));
 		//,RooFit::Optimize(0));
 
@@ -203,7 +203,7 @@ double getProbabilityFtest(double chi2, int ndof,RooAbsPdf *pdfNull, RooAbsPdf *
 	ntries = 0;
 	while (stat_t!=0){
 	  if (ntries>=MaxTries) break;
-  	RooFitResult *fitTest = pdfTest->fitTo(*binnedtoy,RooFit::Save(1),RooFit::Strategy(1),RooFit::SumW2Error(kTRUE) //FIXME
+  	RooFitResult *fitTest = pdfTest->fitTo(*binnedtoy,RooFit::Save(1),RooFit::Strategy(1),RooFit::SumW2Error(kTRUE) 
 		,RooFit::Minimizer("Minuit2","minimize"),RooFit::Minos(0),RooFit::Hesse(0),RooFit::PrintLevel(-1),RooFit::Range(MASS_FIT_RANGE));
 	  nllTest = fitTest->minNll();
           stat_t = fitTest->status();
@@ -306,7 +306,7 @@ double getGoodnessOfFit(RooRealVar *mass, RooAbsPdf *mpdf, RooDataSet *data, std
         RooFit::Range(MASS_FIT_RANGE),
         RooFit::ExpectedData(false),
         RooFit::Extended(false));
-      pdf->fitTo(*binnedtoy,RooFit::Minimizer("Minuit2","minimize"),RooFit::Minos(0),RooFit::Hesse(0),RooFit::PrintLevel(-1),RooFit::Strategy(0),RooFit::SumW2Error(kTRUE),RooFit::Range(MASS_FIT_RANGE)); //FIXME
+      pdf->fitTo(*binnedtoy,RooFit::Minimizer("Minuit2","minimize"),RooFit::Minos(0),RooFit::Hesse(0),RooFit::PrintLevel(-1),RooFit::Strategy(0),RooFit::SumW2Error(kTRUE),RooFit::Range(MASS_FIT_RANGE)); 
 
       RooPlot *plot_t = mass->frame();
       const double toyEntries = binnedtoy->sumEntries();
@@ -444,7 +444,7 @@ void plot(RooRealVar *mass, RooMultiPdf *pdfs, RooCategory *catIndex, RooDataSet
     if (icat<=6) col=color[icat];
     else {col=kBlack; style++;}
     catIndex->setIndex(icat);
-    pdfs->getCurrentPdf()->fitTo(*data,RooFit::Minos(0),RooFit::Minimizer("Minuit2","minimize"),RooFit::SumW2Error(kTRUE),RooFit::Range(MASS_FIT_RANGE));	 //FIXME
+    pdfs->getCurrentPdf()->fitTo(*data,RooFit::Minos(0),RooFit::Minimizer("Minuit2","minimize"),RooFit::SumW2Error(kTRUE),RooFit::Range(MASS_FIT_RANGE));	 
     pdfs->getCurrentPdf()->plotOn(plot,RooFit::Range(mgg_low,mgg_high),RooFit::NormRange(MASS_FIT_RANGE),
       RooFit::Normalization(sidebandEntries,RooAbsReal::NumEvent),LineColor(col),LineStyle(style));//,RooFit::NormRange("fitdata_1,fitdata_2"));
     TObject *pdfLeg = plot->getObject(int(plot->numItems()-1));
@@ -786,7 +786,7 @@ int main(int argc, char* argv[]){
 			inWS = (RooWorkspace*)inFile->Get("cms_hgg_workspace");
 		}
 	} else {
-		inWS = (RooWorkspace*)inFile->Get("cms_hgg_workspace");//FIXME
+		inWS = (RooWorkspace*)inFile->Get("cms_hgg_workspace");
 	}
 	if (verbose) std::cout << "[INFO]  inWS open " << inWS << std::endl;
 	if (saveMultiPdf){
@@ -848,7 +848,7 @@ int main(int argc, char* argv[]){
 	std::string ext = is2011 ? "7TeV" : "8TeV";
         if( isFlashgg_ ){
           if( year_ == "all" ){ ext = "13TeV"; }
-          //else{ ext = "13TeV"; } //FIXME 
+          //else{ ext = "13TeV"; } 
           else{ ext = Form("%s_13TeV",year_.c_str()); }
         }
 	//if (isFlashgg_) ext = "13TeV";
