@@ -18,11 +18,40 @@ def addConstantSyst(sd,_syst,options):
   # Add column to dataFrame with default value
   if _syst['correlateAcrossYears'] == 1: 
     sd[_syst['name']] = '-'
+    mask_sig = (sd['type']=='sig')&(~sd['cat'].str.contains("NOTAG"))
     if fromJson:
       sd.loc[(sd['type']=='sig'),_syst['name']] = sd[(sd['type']=='sig')].apply(lambda x: getValueFromJson(x,uval,_syst['name']), axis=1)
     else:
-      # If signal and not NOTAG then set value
-      sd.loc[(sd['type']=='sig')&(~sd['cat'].str.contains("NOTAG")), _syst['name']] = _syst['value']
+      value = _syst['value']
+      if isinstance(value, dict):
+        # We want to have a per-year lumi nuisance, not per era. This block renames the keys accordingly.
+        if _syst['name'].startswith('lumi'):
+          # For luminosity we allow multiple naming conventions when resolving
+          # the per-year value (full label, prefix, digits, generic fallbacks).
+          def resolve_lumi(row):
+            year_label = str(row.get('year', ''))
+            candidates = [
+              year_label,
+              year_label.split("_", 1)[0] if "_" in year_label else year_label,
+              ''.join(ch for ch in year_label if ch.isdigit())
+            ]
+            # Fallback matches used when configs provide inclusive keys.
+            candidates.extend(["Run3", "combined", "all"])
+
+            for key in candidates:
+              if key and key in value:
+                return value[key]
+            return '-'
+
+          sd.loc[mask_sig, _syst['name']] = sd.loc[mask_sig].apply(resolve_lumi, axis=1)
+        else:
+          # Any other dict-valued constant should continue to depend on the full
+          # year label only (original behaviour).
+          sd.loc[mask_sig, _syst['name']] = sd.loc[mask_sig].apply(
+              lambda row: value.get(str(row.get('year', '')), '-'), axis=1)
+      else:
+        # Scalar value shared by all signal rows.
+        sd.loc[mask_sig, _syst['name']] = value
 
   # Partial correlation
   elif _syst['correlateAcrossYears'] == -1:
