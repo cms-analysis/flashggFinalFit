@@ -351,7 +351,7 @@ double getGoodnessOfFit(RooRealVar *mass, RooAbsPdf *mpdf, RooDataSet *data, std
 
 void plot(RooRealVar *mass, RooAbsPdf *pdf, RooDataSet *data, string name,vector<string> flashggCats_, int status, double *prob){
   
-  // Chi2 taken from full range fit
+  // Chi2 taken only from the sidebands 
   const double sidebandEntries = data->sumEntries();
   RooPlot *plot_chi2 = mass->frame();
   data->plotOn(plot_chi2,Binning(nBinsForMass),RooFit::Range(MASS_FIT_RANGE));
