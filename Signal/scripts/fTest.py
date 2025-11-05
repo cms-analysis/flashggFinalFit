@@ -52,6 +52,7 @@ if opt.doPlots:
   if not os.path.isdir("%s/outdir_%s/fTest/Plots"%(opt.outputDir,opt.ext)): os.system("mkdir %s/outdir_%s/fTest/Plots"%(opt.outputDir,opt.ext))
 
 # Load xvar to fit
+print(opt.inputWSDir)
 nominalWSFileName = glob.glob("%s/output*"%(opt.inputWSDir))[0]
 f0 = ROOT.TFile(nominalWSFileName,"read")
 inputWS0 = f0.Get(inputWSName__)
@@ -75,9 +76,9 @@ for proc in opt.procs.split(","):
   f = ROOT.TFile(WSFileName,"read")
   inputWS = f.Get(inputWSName__)
   if (len(proc.split("_")) <= 2) and (proc.split("_")[-1] in ["in", "out"]):
-    d = reduceDataset(inputWS.data("%s_%s_%s_%s_%s"%(procToData(proc.split("_")[0]),procToData(proc.split("_")[-1]),opt.mass,sqrts__,opt.cat)),aset)
+    d = reduceDataset(inputWS.data(f"{procToData(proc.split('_')[0])}_{procToData(proc.split('_')[-1])}_{opt.mass}_{sqrts__}_{opt.cat}"), aset)
   else:
-    d = reduceDataset(inputWS.data("%s_%s_%s_%s"%(procToData(proc.split("_")[0]),opt.mass,sqrts__,opt.cat)),aset)
+    d = reduceDataset(inputWS.data(f"{procToData(proc.split('_')[0])}_{opt.mass}_{sqrts__}_{opt.cat}"), aset)
   df.loc[len(df)] = [proc,d.sumEntries(),1,1]
   inputWS.Delete()
   f.Close()
