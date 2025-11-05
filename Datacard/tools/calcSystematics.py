@@ -118,6 +118,12 @@ def calcSystYields(_nominalDataName,_nominalDataContents,_inputWS,_systFactoryTy
   # For systematics stored as weights (a_w,s_w) in nominal RooDataSets
   # Extract nominal dataset
   data_nominal = _inputWS.data(_nominalDataName)
+  if not data_nominal or data_nominal.numEntries() == 0:
+      print(f"[INFO] Dataset ({_nominalDataName}) not found in workspace for ({proc}, {year}). Setting all yields to 0.")
+      systYields["numEvents"] = 0
+      for s in _systFactoryTypes.keys():
+          systYields[s] = 0
+      return systYields
   # CHECK: is weight in contents: if not then add syst to systToSkip container + print warning
   systToSkip = []
   for s,f in _systFactoryTypes.items():
