@@ -108,7 +108,7 @@ signalScriptCfg_2022_postEE:
   # Setup
   procs: 'auto' # if auto: inferred automatically from filenames (requires names to be of form *pythia8_{PROC}.root)
   cats: 'auto' # if auto: inferred automatically from (0) workspace
-  ext: 'earlyAnalysis_PTH_2022postEE' # output directory extension
+  ext: 'Run3FidXSAnalysis_PTH_2022postEE' # output directory extension
   analysisRM: 'Run3FidXSAnalysisPTH' # To specify replacement dataset (defined in ./commonTools/replacementMap.py)
   analysisXSBR: 'Run3FidXSAnalysis' # To specify XSBR dataset (defined in ./commonTools/XSBRMap.py)
   year: '2022postEE' # Use 'combined' if merging all years: not recommended
