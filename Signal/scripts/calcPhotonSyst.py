@@ -116,7 +116,7 @@ data = pd.DataFrame( columns=columns_data )
 # Loop over processes and add row to dataframe
 for _proc in opt.procs.split(","):
   # Glob M125 filename
-  _WSFileName = glob.glob("%s/output*M125*%s.root"%(opt.inputWSDir,_proc))[0]
+  _WSFileName = glob.glob(f"{opt.inputWSDir}/output*M125*{_proc}.root")[0]
   # Hard-coded for fiducial inclusve with in/out, should maybe be adjusted
   if (len(_proc.split("_")) <= 2) and (_proc.split("_")[-1] in ["in", "out"]):
     _nominalDataName = "%s_%s_125_%s_%s"%(procToData(_proc.split("_")[0]),procToData(_proc.split("_")[-1]),sqrts__,opt.cat)
