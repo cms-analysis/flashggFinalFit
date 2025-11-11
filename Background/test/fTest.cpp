@@ -461,7 +461,7 @@ void plot(RooRealVar *mass, RooMultiPdf *pdfs, RooCategory *catIndex, RooDataSet
   if (BLIND) plot->SetMinimum(0.0001);
   plot->Draw();
   leg->Draw("same");
-  CMS_lumi(canv, 0, 0);
+  CMS_lumi(canv, 2022, 0);
   ///start extra bit for ratio plot///
   // Mirror the (best-fit) pdf into a histogram with the same binning as the data histogram.
   std::unique_ptr<TH1> pdfHist;
@@ -596,7 +596,7 @@ void plot(RooRealVar *mass, map<string,RooAbsPdf*> pdfs, RooDataSet *data, strin
   if (BLIND) plot->SetMinimum(0.0001);
   plot->Draw();
   leg->Draw("same");
-  CMS_lumi(canv, 0, 0);
+  CMS_lumi(canv, 2022, 0);
   canv->SaveAs(Form("%s.pdf",name.c_str()));
   canv->SaveAs(Form("%s.png",name.c_str())); // keep png twin alongside the pdf
   delete canv;
@@ -1074,21 +1074,15 @@ int main(int argc, char* argv[]){
       RooAbsPdf *bestPdfForNorm = nullptr;
 			//nBackground.removeRange(); // bug in roofit will break combine until dev branch brought in
 			//double check the best pdf!
-			int bestFitPdfIndex = getBestFitFunction(pdf,data,&catIndex,!verbose);
-			catIndex.setIndex(bestFitPdfIndex);
-      if (bestFitPdfIndex >= 0 && bestFitPdfIndex < storedPdfs.getSize()) {
-        // Use the pdf that minimised the NLL when setting up the yield scaling.
-        bestPdfForNorm = dynamic_cast<RooAbsPdf*>(storedPdfs.at(bestFitPdfIndex));
-      }
-      if (!bestPdfForNorm && storedPdfs.getSize() > 0) {
-        // Fall back to the first stored pdf in case something went wrong with the index lookup.
-        bestPdfForNorm = dynamic_cast<RooAbsPdf*>(storedPdfs.at(0));
-      }
-      // Guard against pathological scaling (e.g. failed fit returning negative yield).
+
+      int bestFitPdfIndex = getBestFitFunction(pdf, data, &catIndex, !verbose);
+      catIndex.setIndex(bestFitPdfIndex);
+      bestPdfForNorm = dynamic_cast<RooAbsPdf*>(storedPdfs.at(bestFitPdfIndex));
       double scaledYield = computeSidebandScaledYield(bestPdfForNorm, mass, sidebandYield);
       if (scaledYield <= 0.) {
-        scaledYield = fullDataEntries;
+          throw std::runtime_error("Error: computed scaled yield is non-positive.");
       }
+
       const double upperBound = std::max(3.0 * scaledYield, scaledYield + 10.0); // generous roof for the background yield
 			RooRealVar nBackground(Form("CMS_hgg_%s_%s_bkgshape_norm",catname.c_str(),ext.c_str()),"nbkg",scaledYield,0,upperBound);
 			std::cout << "// ------------------------------------------------------------------------- //" <<std::endl; 
