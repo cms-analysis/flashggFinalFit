@@ -3,6 +3,9 @@
 #include <vector>
 #include <string>
 #include <map>
+#include <memory>
+#include <algorithm>
+#include <cmath>
 
 #include "boost/program_options.hpp"
 #include "boost/lexical_cast.hpp"
@@ -17,6 +20,7 @@
 #include "RooHist.h"
 #include "RooAbsData.h"
 #include "RooAbsPdf.h"
+#include "RooAbsReal.h"
 #include "RooArgSet.h"
 #include "RooFitResult.h"
 #include "RooMinimizer.h"
@@ -56,7 +60,10 @@ bool BLIND = true;
 bool runFtestCheckWithToys=false;
 int mgg_low =100;
 int mgg_high =180;
+const int blind_low = 115;
+const int blind_high = 135;
 int nBinsForMass = 4*(mgg_high-mgg_low);
+const char* MASS_FIT_RANGE = "low,high";
 
 RooRealVar *intLumi_ = new RooRealVar("IntLumi","hacked int lumi", 1000.);
 
@@ -85,7 +92,7 @@ void runFit(RooAbsPdf *pdf, RooDataSet *data, double *NLL, int *stat_t, int MaxT
 	while (stat!=0){
 	  if (ntries>=MaxTries) break;
 	  RooFitResult *fitTest = pdf->fitTo(*data,RooFit::Save(1)
-    ,RooFit::Minimizer("Minuit2","minimize"),RooFit::SumW2Error(kTRUE)); //FIXME
+    ,RooFit::Minimizer("Minuit2","minimize"),RooFit::SumW2Error(kTRUE),RooFit::Range(MASS_FIT_RANGE)); 
           stat = fitTest->status();
 	  minnll = fitTest->minNll();
 	  if (stat!=0) params_test->assignValueOnly(fitTest->randomizePars());
@@ -94,8 +101,35 @@ void runFit(RooAbsPdf *pdf, RooDataSet *data, double *NLL, int *stat_t, int MaxT
 	*stat_t = stat;
 	*NLL = minnll;
 }
+
+// Needed to scale the sideband yield to the full range yield
+// It is a C++ implementation of Jon's code -> https://github.com/jonathon-langford/flashggFinalFit/blob/dev_lowmass/Background/tools/modelBuilder_v2.py#L266-L306 
+double computeSidebandScaledYield(RooAbsPdf *pdf, RooRealVar *mass, double sidebandYield){
+  if (!pdf || !mass) {
+    std::cerr << "[ERROR] computeSidebandScaledYield: pdf or mass is null. Returning uncorrected sidebandYield (" << sidebandYield << ")." << std::endl;
+    return sidebandYield;
+  }
+  RooArgSet observables(*mass);
+  std::unique_ptr<RooAbsReal> sidebandIntegral(
+    pdf->createIntegral(observables, RooFit::NormSet(observables), RooFit::Range(MASS_FIT_RANGE)));
+  std::unique_ptr<RooAbsReal> fullIntegral(
+    pdf->createIntegral(observables, RooFit::NormSet(observables), RooFit::Range("fullRange")));
+
+  const double pdfSidebandFrac = sidebandIntegral ? sidebandIntegral->getVal() : 0.;
+  double pdfFullFrac = fullIntegral ? fullIntegral->getVal() : 0.;
+
+  if (pdfSidebandFrac <= 0.) {
+    return sidebandYield;
+  }
+  if (pdfFullFrac <= 0.) {
+    pdfFullFrac = 1.;
+  }
+
+  return sidebandYield * (pdfFullFrac / pdfSidebandFrac);
+}
+
 double getProbabilityFtest(double chi2, int ndof,RooAbsPdf *pdfNull, RooAbsPdf *pdfTest, RooRealVar *mass, RooDataSet *data, std::string name){
- 
+
   double prob_asym = TMath::Prob(chi2,ndof);
   if (!runFtestCheckWithToys) return prob_asym;
 
@@ -103,9 +137,9 @@ double getProbabilityFtest(double chi2, int ndof,RooAbsPdf *pdfNull, RooAbsPdf *
   
   // fit the pdfs to the data and keep this fit Result (for randomizing)
   RooFitResult *fitNullData = pdfNull->fitTo(*data,RooFit::Save(1),RooFit::Strategy(1)
-		,RooFit::Minimizer("Minuit2","minimize"),RooFit::SumW2Error(kTRUE),RooFit::PrintLevel(-1)); //FIXME
+		,RooFit::Minimizer("Minuit2","minimize"),RooFit::SumW2Error(kTRUE),RooFit::PrintLevel(-1),RooFit::Range(MASS_FIT_RANGE)); 
   RooFitResult *fitTestData = pdfTest->fitTo(*data,RooFit::Save(1),RooFit::Strategy(1)
-		,RooFit::Minimizer("Minuit2","minimize"),RooFit::SumW2Error(kTRUE),RooFit::PrintLevel(-1)); //FIXME
+		,RooFit::Minimizer("Minuit2","minimize"),RooFit::SumW2Error(kTRUE),RooFit::PrintLevel(-1),RooFit::Range(MASS_FIT_RANGE)); 
 
   // Ok we want to check the distribution in toys then 
   // Step 1, cache the parameters of each pdf so as not to upset anything 
@@ -142,7 +176,12 @@ double getProbabilityFtest(double chi2, int ndof,RooAbsPdf *pdfNull, RooAbsPdf *
 
         params_null->assignValueOnly(preParams_null);
         params_test->assignValueOnly(preParams_test);
-  	RooDataHist *binnedtoy = pdfNull->generateBinned(RooArgSet(*mass),ndata,0,1);
+  	    // Now the toys should be thrown only in the sidebands
+        RooDataHist *binnedtoy = pdfNull->generateBinned(RooArgSet(*mass),
+        RooFit::NumEvents(ndata),
+        RooFit::Range(MASS_FIT_RANGE),
+        RooFit::ExpectedData(false),
+        RooFit::Extended(false));
 
 	int stat_n=1;
         int stat_t=1;
@@ -152,8 +191,8 @@ double getProbabilityFtest(double chi2, int ndof,RooAbsPdf *pdfNull, RooAbsPdf *
 	int MaxTries = 2;
 	while (stat_n!=0){
 	  if (ntries>=MaxTries) break;
-	  RooFitResult *fitNull = pdfNull->fitTo(*binnedtoy,RooFit::Save(1),RooFit::Strategy(1),RooFit::SumW2Error(kTRUE) //FIXME
-		,RooFit::Minimizer("Minuit2","minimize"),RooFit::Minos(0),RooFit::Hesse(0),RooFit::PrintLevel(-1));
+  	RooFitResult *fitNull = pdfNull->fitTo(*binnedtoy,RooFit::Save(1),RooFit::Strategy(1),RooFit::SumW2Error(kTRUE) 
+		,RooFit::Minimizer("Minuit2","minimize"),RooFit::Minos(0),RooFit::Hesse(0),RooFit::PrintLevel(-1),RooFit::Range(MASS_FIT_RANGE));
 		//,RooFit::Optimize(0));
 
 	  nllNull = fitNull->minNll();
@@ -165,8 +204,8 @@ double getProbabilityFtest(double chi2, int ndof,RooAbsPdf *pdfNull, RooAbsPdf *
 	ntries = 0;
 	while (stat_t!=0){
 	  if (ntries>=MaxTries) break;
-	  RooFitResult *fitTest = pdfTest->fitTo(*binnedtoy,RooFit::Save(1),RooFit::Strategy(1),RooFit::SumW2Error(kTRUE) //FIXME
-		,RooFit::Minimizer("Minuit2","minimize"),RooFit::Minos(0),RooFit::Hesse(0),RooFit::PrintLevel(-1));
+  	RooFitResult *fitTest = pdfTest->fitTo(*binnedtoy,RooFit::Save(1),RooFit::Strategy(1),RooFit::SumW2Error(kTRUE) 
+		,RooFit::Minimizer("Minuit2","minimize"),RooFit::Minos(0),RooFit::Hesse(0),RooFit::PrintLevel(-1),RooFit::Range(MASS_FIT_RANGE));
 	  nllTest = fitTest->minNll();
           stat_t = fitTest->status();
 	  if (stat_t!=0) params_test->assignValueOnly(fitTestData->randomizePars()); 
@@ -232,12 +271,14 @@ double getGoodnessOfFit(RooRealVar *mass, RooAbsPdf *mpdf, RooDataSet *data, std
   //norm.removeRange();
 
   RooExtendPdf *pdf = new RooExtendPdf("ext","ext",*mpdf,norm);
+  const double sidebandEntries = data->sumEntries();
 
   // get The Chi2 value from the data
   RooPlot *plot_chi2 = mass->frame();
-  data->plotOn(plot_chi2,Binning(nBinsForMass),Name("data"));
+  data->plotOn(plot_chi2,Binning(nBinsForMass),Name("data"),RooFit::Range(MASS_FIT_RANGE));
 
-  pdf->plotOn(plot_chi2,Name("pdf"));
+  pdf->plotOn(plot_chi2,Name("pdf"),RooFit::Range(MASS_FIT_RANGE),RooFit::NormRange(MASS_FIT_RANGE),
+    RooFit::Normalization(sidebandEntries,RooAbsReal::NumEvent));
   int np = pdf->getParameters(*data)->getSize();
 
   double chi2 = plot_chi2->chiSquare("pdf","data",np);
@@ -261,12 +302,18 @@ double getGoodnessOfFit(RooRealVar *mass, RooAbsPdf *mpdf, RooDataSet *data, std
     //  std::cout << "[INFO] " <<Form("\t.. %.1f %% complete\r",100*float(itoy)/ntoys) << std::flush;
       params->assignValueOnly(preParams);
       int nToyEvents = RandomGen->Poisson(ndata);
-      RooDataHist *binnedtoy = pdf->generateBinned(RooArgSet(*mass),nToyEvents,0,1);
-      pdf->fitTo(*binnedtoy,RooFit::Minimizer("Minuit2","minimize"),RooFit::Minos(0),RooFit::Hesse(0),RooFit::PrintLevel(-1),RooFit::Strategy(0),RooFit::SumW2Error(kTRUE)); //FIXME
+      RooDataHist *binnedtoy = pdf->generateBinned(RooArgSet(*mass),
+        RooFit::NumEvents(nToyEvents),
+        RooFit::Range(MASS_FIT_RANGE),
+        RooFit::ExpectedData(false),
+        RooFit::Extended(false));
+      pdf->fitTo(*binnedtoy,RooFit::Minimizer("Minuit2","minimize"),RooFit::Minos(0),RooFit::Hesse(0),RooFit::PrintLevel(-1),RooFit::Strategy(0),RooFit::SumW2Error(kTRUE),RooFit::Range(MASS_FIT_RANGE)); 
 
       RooPlot *plot_t = mass->frame();
-      binnedtoy->plotOn(plot_t);
-      pdf->plotOn(plot_t);//,RooFit::NormRange("fitdata_1,fitdata_2"));
+      const double toyEntries = binnedtoy->sumEntries();
+      binnedtoy->plotOn(plot_t,Binning(nBinsForMass),RooFit::Range(MASS_FIT_RANGE));
+      pdf->plotOn(plot_t,RooFit::Range(MASS_FIT_RANGE),RooFit::NormRange(MASS_FIT_RANGE),
+        RooFit::Normalization(toyEntries,RooAbsReal::NumEvent));
 
       double chi2_t = plot_t->chiSquare(np);
       if( chi2_t>=chi2) npass++;
@@ -305,10 +352,12 @@ double getGoodnessOfFit(RooRealVar *mass, RooAbsPdf *mpdf, RooDataSet *data, std
 
 void plot(RooRealVar *mass, RooAbsPdf *pdf, RooDataSet *data, string name,vector<string> flashggCats_, int status, double *prob){
   
-  // Chi2 taken from full range fit
+  // Chi2 taken only from the sidebands 
+  const double sidebandEntries = data->sumEntries();
   RooPlot *plot_chi2 = mass->frame();
-  data->plotOn(plot_chi2,Binning(nBinsForMass));
-  pdf->plotOn(plot_chi2);
+  data->plotOn(plot_chi2,Binning(nBinsForMass),RooFit::Range(MASS_FIT_RANGE));
+  pdf->plotOn(plot_chi2,RooFit::Range(MASS_FIT_RANGE),RooFit::NormRange(MASS_FIT_RANGE),
+    RooFit::Normalization(sidebandEntries,RooAbsReal::NumEvent));
 
   int np = pdf->getParameters(*data)->getSize()+1; //Because this pdf has no extend
   double chi2 = plot_chi2->chiSquare(np);
@@ -322,11 +371,12 @@ void plot(RooRealVar *mass, RooAbsPdf *pdf, RooDataSet *data, string name,vector
     data->plotOn(plot,Binning(mgg_high-mgg_low),CutRange("unblindReg_2"));
     data->plotOn(plot,Binning(mgg_high-mgg_low),Invisible());
   }
-  else data->plotOn(plot,Binning(mgg_high-mgg_low));
+  else data->plotOn(plot,Binning(mgg_high-mgg_low),RooFit::Range(MASS_FIT_RANGE));
 
  // data->plotOn(plot,Binning(mgg_high-mgg_low));
   TCanvas *canv = new TCanvas();
-  pdf->plotOn(plot);//,RooFit::NormRange("fitdata_1,fitdata_2"));
+  pdf->plotOn(plot,RooFit::Range(mgg_low,mgg_high),RooFit::NormRange(MASS_FIT_RANGE),
+    RooFit::Normalization(sidebandEntries,RooAbsReal::NumEvent));//,RooFit::NormRange("fitdata_1,fitdata_2"));
   pdf->paramOn(plot,RooFit::Layout(0.34,0.96,0.89),RooFit::Format("NEA",AutoPrecision(1)));
   if (BLIND) plot->SetMinimum(0.0001);
   plot->SetTitle("");
@@ -336,6 +386,10 @@ void plot(RooRealVar *mass, RooAbsPdf *pdf, RooDataSet *data, string name,vector
   lat->SetTextFont(42);
   lat->DrawLatex(0.1,0.92,Form("#chi^{2} = %.3f, Prob = %.2f, Fit Status = %d ",chi2*(nBinsForMass-np),*prob,status));
   canv->SaveAs(name.c_str());
+  if (name.size() > 4 && name.substr(name.size() - 4) == ".pdf") {
+    std::string pngName = name.substr(0, name.size() - 4) + ".png";
+    canv->SaveAs(pngName.c_str()); // also keep a png copy for quick inspections / web plots
+  }
  	
 	//plot_chi2->Draw();
   //canv->SaveAs((name+"debug").c_str());
@@ -358,11 +412,9 @@ void plot(RooRealVar *mass, RooMultiPdf *pdfs, RooCategory *catIndex, RooDataSet
     data->plotOn(plot,Binning(mgg_high-mgg_low),CutRange("unblindReg_2"));
     data->plotOn(plot,Binning(mgg_high-mgg_low),Invisible());
   }
-  else data->plotOn(plot,Binning(mgg_high-mgg_low)); 
+  else data->plotOn(plot,Binning(mgg_high-mgg_low),RooFit::Range(MASS_FIT_RANGE)); 
   TCanvas *canv = new TCanvas();
   ///start extra bit for ratio plot///
-  RooHist *plotdata = (RooHist*)plot->getObject(plot->numItems()-1);
-  bool doRatioPlot_=1;
   TPad *pad1 = new TPad("pad1","pad1",0,0.25,1,1);
   TPad *pad2 = new TPad("pad2","pad2",0,0,1,0.35);
   pad1->SetBottomMargin(0.18); // 0.18 is a good choice to avoid that the xlabel of the upper pad cuts into the lower pad
@@ -372,21 +424,30 @@ void plot(RooRealVar *mass, RooMultiPdf *pdfs, RooCategory *catIndex, RooDataSet
   pad2->Draw();
   pad1->cd();
   // enf extra bit for ratio plot///
+  // Choose a suffix for saved objects, falling back to a generic catN label if no names are provided.
+  std::string histSuffix = flashggCats_.empty() ? Form("cat%d",cat) : flashggCats_[cat];
+  // Build an explicit TH1 copy of the data so we can zero the blinded bins before computing residuals.
+  std::unique_ptr<TH1> dataHist(data->createHistogram(Form("h_data_%s",histSuffix.c_str()),*mass,RooFit::Binning(mgg_high-mgg_low,mgg_low,mgg_high)));
+  if (!dataHist){
+    std::cerr << "[WARNING] Failed to build data histogram for ratio plot in " << histSuffix << std::endl;
+  }
 
   int currentIndex = catIndex->getIndex();
   TObject *datLeg = plot->getObject(int(plot->numItems()-1));
   leg->AddEntry(datLeg,Form("Data - %s",flashggCats_[cat].c_str()),"LEP");
   int style=1;
-  RooAbsPdf *pdf;
-  RooCurve *nomBkgCurve;
+  RooAbsPdf *pdf = nullptr;
+  RooCurve *nomBkgCurve = nullptr;
   int bestcol= -1;
+  const double sidebandEntries = data->sumEntries();
   for (int icat=0;icat<catIndex->numTypes();icat++){
     int col;
     if (icat<=6) col=color[icat];
     else {col=kBlack; style++;}
     catIndex->setIndex(icat);
-    pdfs->getCurrentPdf()->fitTo(*data,RooFit::Minos(0),RooFit::Minimizer("Minuit2","minimize"),RooFit::SumW2Error(kTRUE));	 //FIXME
-    pdfs->getCurrentPdf()->plotOn(plot,LineColor(col),LineStyle(style));//,RooFit::NormRange("fitdata_1,fitdata_2"));
+    pdfs->getCurrentPdf()->fitTo(*data,RooFit::Minos(0),RooFit::Minimizer("Minuit2","minimize"),RooFit::SumW2Error(kTRUE),RooFit::Range(MASS_FIT_RANGE));	 
+    pdfs->getCurrentPdf()->plotOn(plot,RooFit::Range(mgg_low,mgg_high),RooFit::NormRange(MASS_FIT_RANGE),
+      RooFit::Normalization(sidebandEntries,RooAbsReal::NumEvent),LineColor(col),LineStyle(style));//,RooFit::NormRange("fitdata_1,fitdata_2"));
     TObject *pdfLeg = plot->getObject(int(plot->numItems()-1));
     std::string ext = "";
     if (bestFitPdf==icat) {
@@ -401,40 +462,79 @@ void plot(RooRealVar *mass, RooMultiPdf *pdfs, RooCategory *catIndex, RooDataSet
   if (BLIND) plot->SetMinimum(0.0001);
   plot->Draw();
   leg->Draw("same");
-  CMS_lumi(canv, 2022, 0); // second argument is iperiod
+  CMS_lumi(canv, 2022, 0);
   ///start extra bit for ratio plot///
-  TH1D *hbplottmp = (TH1D*) pdf->createHistogram("hbplottmp",*mass,Binning(mgg_high-mgg_low,mgg_low,mgg_high));
-  hbplottmp->Scale(plotdata->Integral());
-  hbplottmp->Draw("same");
-  int npoints = plotdata->GetN();
-  double xtmp,ytmp;//
-  int point =0;
-  TGraphAsymmErrors *hdatasub = new TGraphAsymmErrors(npoints);
-  //hdatasub->SetMarkerSize(defmarkersize);
-  for (int ipoint=0; ipoint<npoints; ++ipoint) {
-  //double bkgval = hbplottmp->GetBinContent(ipoint+1);
-  plotdata->GetPoint(ipoint, xtmp,ytmp);
-  double bkgval = nomBkgCurve->interpolate(xtmp);
-  if (BLIND) {
-   if ((xtmp > 115 ) && ( xtmp < 135) ) continue;
+  // Mirror the (best-fit) pdf into a histogram with the same binning as the data histogram.
+  std::unique_ptr<TH1> pdfHist;
+  if (pdf){
+    pdfHist.reset(pdf->createHistogram(Form("h_pdf_%s",histSuffix.c_str()),*mass,RooFit::Binning(mgg_high-mgg_low,mgg_low,mgg_high)));
   }
-  std::cout << "[INFO] plotdata->Integral() " <<  plotdata->Integral() << " ( bins " << npoints  << ") hbkgplots[i]->Integral() " << hbplottmp->Integral() << " (bins " << hbplottmp->GetNbinsX() << std::endl;
- double errhi = plotdata->GetErrorYhigh(ipoint);
- double errlow = plotdata->GetErrorYlow(ipoint);
-       
- //std::cout << "[INFO]  Channel " << name  << " errhi " << errhi << " errlow " << errlow  << std::endl;
- std::cout << "[INFO] Channel  " << name << " setting point " << point <<" : xtmp "<< xtmp << "  ytmp " << ytmp << " bkgval  " << bkgval << " ytmp-bkgval " << ytmp-bkgval << std::endl;
- bool drawZeroBins_ =1;
- if (!drawZeroBins_) if(fabs(ytmp)<1e-5) continue; 
- hdatasub->SetPoint(point,xtmp,ytmp-bkgval);
- hdatasub->SetPointError(point,0.,0.,errlow,errhi );
- point++;
-  } 
+  if (!pdfHist){
+    std::cerr << "[WARNING] Failed to build pdf histogram for ratio plot in " << histSuffix << std::endl;
+  }
+  double dataSidebandYield = 0.;
+  double pdfSidebandYield = 0.;
+  if (dataHist){
+    for (int ibin = 1; ibin <= dataHist->GetNbinsX(); ++ibin){
+      const double x = dataHist->GetBinCenter(ibin);
+      if (x > blind_low && x < blind_high){
+        dataHist->SetBinContent(ibin,0.);
+        dataHist->SetBinError(ibin,0.);
+        if (pdfHist){
+          pdfHist->SetBinContent(ibin,0.);
+          pdfHist->SetBinError(ibin,0.);
+        }
+        continue;
+      }
+      dataSidebandYield += dataHist->GetBinContent(ibin);
+      if (pdfHist){
+        pdfSidebandYield += pdfHist->GetBinContent(ibin);
+      }
+    }
+  }
+  if (pdfHist && pdfSidebandYield > 0.){
+    // Rescale so the pdf sideband integral matches the observed sideband yield.
+    pdfHist->Scale(dataSidebandYield/pdfSidebandYield);
+  }
+  if (pdfHist){
+    pdfHist->SetLineColor(bestcol);
+    pdfHist->SetLineWidth(2);
+    pdfHist->Draw("same");
+  }
+  // Build the (data - pdf) graph that we draw in the ratio pad.
+  TGraphAsymmErrors *hdatasub = new TGraphAsymmErrors();
+  double diffMax = -1e9;
+  double diffMin = 1e9;
+  int point = 0;
+  if (dataHist && pdfHist){
+    for (int ibin = 1; ibin <= dataHist->GetNbinsX(); ++ibin){
+      const double x = dataHist->GetBinCenter(ibin);
+      if (x > blind_low && x < blind_high){
+        continue;
+      }
+      const double dataVal = dataHist->GetBinContent(ibin);
+      const double dataErr = dataHist->GetBinError(ibin);
+      const double pdfVal = pdfHist->GetBinContent(ibin);
+      const double diff = dataVal - pdfVal;
+      const double halfWidth = dataHist->GetBinWidth(ibin)/2.0;
+      hdatasub->SetPoint(point,x,diff);
+      hdatasub->SetPointError(point,halfWidth,halfWidth,dataErr,dataErr);
+      diffMax = std::max(diffMax,diff + dataErr);
+      diffMin = std::min(diffMin,diff - dataErr);
+      point++;
+    }
+  }
   pad2->cd();
   TH1 *hdummy = new TH1D("hdummyweight","",mgg_high-mgg_low,mgg_low,mgg_high);
-  hdummy->SetMaximum(hdatasub->GetHistogram()->GetMaximum()+1);
-  hdummy->SetMinimum(hdatasub->GetHistogram()->GetMinimum()-1);
-  hdummy->GetYaxis()->SetTitle("data - best fit PDF");
+  if (diffMax <= diffMin){
+    diffMax = 1.;
+    diffMin = -1.;
+  }
+  // Expand the plotting window slightly so residual markers and errors are fully visible.
+  const double margin = 0.15 * std::max(std::abs(diffMax), std::abs(diffMin));
+  hdummy->SetMaximum(diffMax + margin);
+  hdummy->SetMinimum(diffMin - margin);
+  hdummy->GetYaxis()->SetTitle("Data - pdf (events)");
   hdummy->GetYaxis()->SetTitleSize(0.12);
   hdummy->GetXaxis()->SetTitle("m_{#gamma#gamma} (GeV)");
   hdummy->GetXaxis()->SetTitleSize(0.12);
@@ -449,8 +549,9 @@ void plot(RooRealVar *mass, RooMultiPdf *pdfs, RooCategory *catIndex, RooDataSet
   hdatasub->Draw("PESAME");
   // enf extra bit for ratio plot///
   canv->SaveAs(Form("%s.pdf",name.c_str()));
-  canv->SaveAs(Form("%s.png",name.c_str()));
+  canv->SaveAs(Form("%s.png",name.c_str())); // keep png twin alongside the pdf
   catIndex->setIndex(currentIndex);
+  delete hdatasub;
   delete canv;
 }
 
@@ -470,7 +571,7 @@ void plot(RooRealVar *mass, map<string,RooAbsPdf*> pdfs, RooDataSet *data, strin
     data->plotOn(plot,Binning(mgg_high-mgg_low),CutRange("unblindReg_2"));
     data->plotOn(plot,Binning(mgg_high-mgg_low),Invisible());
   }
-  else data->plotOn(plot,Binning(mgg_high-mgg_low));
+  else data->plotOn(plot,Binning(mgg_high-mgg_low),RooFit::Range(MASS_FIT_RANGE));
 
   TObject *datLeg = plot->getObject(int(plot->numItems()-1));
 	if(flashggCats_.size() >0){
@@ -484,7 +585,8 @@ void plot(RooRealVar *mass, map<string,RooAbsPdf*> pdfs, RooDataSet *data, strin
     int col;
     if (i<=6) col=color[i];
     else {col=kBlack; style++;}
-    it->second->plotOn(plot,LineColor(col),LineStyle(style));//,RooFit::NormRange("fitdata_1,fitdata_2"));
+    it->second->plotOn(plot,RooFit::Range(mgg_low,mgg_high),RooFit::NormRange(MASS_FIT_RANGE),
+      RooFit::Normalization(data->sumEntries(),RooAbsReal::NumEvent),LineColor(col),LineStyle(style));//,RooFit::NormRange("fitdata_1,fitdata_2"));
     TObject *pdfLeg = plot->getObject(int(plot->numItems()-1));
     std::string ext = "";
     if (bestFitPdf==i) ext=" (Best Fit Pdf) ";
@@ -495,9 +597,9 @@ void plot(RooRealVar *mass, map<string,RooAbsPdf*> pdfs, RooDataSet *data, strin
   if (BLIND) plot->SetMinimum(0.0001);
   plot->Draw();
   leg->Draw("same");
-  CMS_lumi(canv, 2022, 0); // second argument is iperiod
+  CMS_lumi(canv, 2022, 0);
   canv->SaveAs(Form("%s.pdf",name.c_str()));
-  canv->SaveAs(Form("%s.png",name.c_str()));
+  canv->SaveAs(Form("%s.png",name.c_str())); // keep png twin alongside the pdf
   delete canv;
 }
 
@@ -594,11 +696,11 @@ int main(int argc, char* argv[]){
  
   setTDRStyle();
   writeExtraText = true;       // if extra text
-  extraText  = "Private Work";  // default extra text is "Preliminary"
+  extraText  = "Preliminary";  // default extra text is "Preliminary"
   lumi_13p6TeV = "61.9 fb^{-1}";
   lumi_8TeV  = "19.1 fb^{-1}"; // default is "19.7 fb^{-1}"
   lumi_7TeV  = "4.9 fb^{-1}";  // default is "5.1 fb^{-1}"
-  lumi_sqrtS = "";       // used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
+  lumi_sqrtS = "13 TeV";       // used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
   string year_ = "2016";
   //int year_ = 2017;
 
@@ -685,7 +787,7 @@ int main(int argc, char* argv[]){
 			inWS = (RooWorkspace*)inFile->Get("cms_hgg_workspace");
 		}
 	} else {
-		inWS = (RooWorkspace*)inFile->Get("cms_hgg_workspace");//FIXME
+		inWS = (RooWorkspace*)inFile->Get("cms_hgg_workspace");
 	}
 	if (verbose) std::cout << "[INFO]  inWS open " << inWS << std::endl;
 	if (saveMultiPdf){
@@ -734,6 +836,9 @@ int main(int argc, char* argv[]){
 
 	PdfModelBuilder pdfsModel;
 	RooRealVar *mass = (RooRealVar*)inWS->var("CMS_hgg_mass");
+	mass->setRange("low",mgg_low,blind_low);
+	mass->setRange("high",blind_high,mgg_high);
+	mass->setRange("fullRange",mgg_low,mgg_high);
 	std:: cout << "[INFO] Got mass from ws " << mass << std::endl;
 	pdfsModel.setObsVar(mass);
 	double upperEnvThreshold = 0.1; // upper threshold on delta(chi2) to include function in envelope (looser than truth function)
@@ -744,7 +849,7 @@ int main(int argc, char* argv[]){
 	std::string ext = is2011 ? "7TeV" : "8TeV";
         if( isFlashgg_ ){
           if( year_ == "all" ){ ext = "13TeV"; }
-          //else{ ext = "13TeV"; } //FIXME 
+          //else{ ext = "13TeV"; } 
           else{ ext = Form("%s_13TeV",year_.c_str()); }
         }
 	//if (isFlashgg_) ext = "13TeV";
@@ -802,8 +907,13 @@ int main(int argc, char* argv[]){
 			thisdataBinned_name= Form("roohist_data_mass_cat%d",cat);
 			//RooDataSet *data = (RooDataSet*)dataFull;
 		}
-		RooDataHist thisdataBinned(thisdataBinned_name.c_str(),"data",*mass,*dataFull);
-		data = (RooDataSet*)&thisdataBinned;
+    // Build the sideband-only dataset used for fitting, keeping both total and sideband yields.
+    std::unique_ptr<RooDataSet> dataFullSideband((RooDataSet*) dataFull->reduce(RooFit::Cut(Form("CMS_hgg_mass<%d || CMS_hgg_mass>%d", blind_low, blind_high))));
+    RooDataSet *sidebandData = dataFullSideband ? dataFullSideband.get() : dataFull;
+    RooDataHist thisdataBinned(thisdataBinned_name.c_str(),"data",*mass,*sidebandData);
+    data = (RooDataSet*)&thisdataBinned;
+    const double fullDataEntries = dataFull->sumEntries();
+    const double sidebandYield = thisdataBinned.sumEntries();
 
 		RooArgList storedPdfs("store");
 
@@ -851,8 +961,7 @@ int main(int argc, char* argv[]){
 						prob = 0;
 					}
 					double gofProb=0;
-					// otherwise we get it later ...
-					if (!saveMultiPdf) plot(mass,bkgPdf,data,Form("%s/%s%d_cat%d.pdf",outDir.c_str(),funcType->c_str(),order,(cat+catOffset)),flashggCats_,fitStatus,&gofProb);
+					plot(mass,bkgPdf,data,Form("%s/%s%d_cat%d.pdf",outDir.c_str(),funcType->c_str(),order,(cat+catOffset)),flashggCats_,fitStatus,&gofProb);
 					cout << "[INFO]\t " << *funcType << " " << order << " " << prevNll << " " << thisNll << " " << chi2 << " " << prob << endl;
 					//fprintf(resFile,"%15s && %d && %10.2f && %10.2f && %10.2f \\\\\n",funcType->c_str(),order,thisNll,chi2,prob);
 					prevNll=thisNll;
@@ -908,8 +1017,8 @@ int main(int argc, char* argv[]){
 
 						// Calculate goodness of fit for the thing to be included (will use toys for lowstats)!
 						double gofProb =0; 
-            // Deactivate Goodness of Fit plots for now
-						// plot(mass,bkgPdf,data,Form("%s/%s%d_cat%d.pdf",outDir.c_str(),funcType->c_str(),order,(cat+catOffset)),flashggCats_,fitStatus,&gofProb);
+            // Also produce the GOF figure (computed in the sidebands) for this candidate.
+						plot(mass,bkgPdf,data,Form("%s/%s%d_cat%d.pdf",outDir.c_str(),funcType->c_str(),order,(cat+catOffset)),flashggCats_,fitStatus,&gofProb);
 
 						if ((prob < upperEnvThreshold) ) { // Looser requirements for the envelope
 
@@ -963,11 +1072,20 @@ int main(int argc, char* argv[]){
 			RooCategory catIndex(catindexname.c_str(),"c");
 			RooMultiPdf *pdf = new RooMultiPdf(Form("CMS_hgg_%s_%s_bkgshape",catname.c_str(),ext.c_str()),"all pdfs",catIndex,storedPdfs);
 			//RooRealVar nBackground(Form("CMS_hgg_%s_%s_bkgshape_norm",catname.c_str(),ext.c_str()),"nbkg",data->sumEntries(),0,10E8);
-			RooRealVar nBackground(Form("CMS_hgg_%s_%s_bkgshape_norm",catname.c_str(),ext.c_str()),"nbkg",data->sumEntries(),0,3*data->sumEntries());
+      RooAbsPdf *bestPdfForNorm = nullptr;
 			//nBackground.removeRange(); // bug in roofit will break combine until dev branch brought in
 			//double check the best pdf!
-			int bestFitPdfIndex = getBestFitFunction(pdf,data,&catIndex,!verbose);
-			catIndex.setIndex(bestFitPdfIndex);
+
+      int bestFitPdfIndex = getBestFitFunction(pdf, data, &catIndex, !verbose);
+      catIndex.setIndex(bestFitPdfIndex);
+      bestPdfForNorm = dynamic_cast<RooAbsPdf*>(storedPdfs.at(bestFitPdfIndex));
+      double scaledYield = computeSidebandScaledYield(bestPdfForNorm, mass, sidebandYield);
+      if (scaledYield <= 0.) {
+          throw std::runtime_error("Error: computed scaled yield is non-positive.");
+      }
+
+      const double upperBound = std::max(3.0 * scaledYield, scaledYield + 10.0); // generous roof for the background yield
+			RooRealVar nBackground(Form("CMS_hgg_%s_%s_bkgshape_norm",catname.c_str(),ext.c_str()),"nbkg",scaledYield,0,upperBound);
 			std::cout << "// ------------------------------------------------------------------------- //" <<std::endl; 
 			std::cout << "[INFO] Created MultiPdf " << pdf->GetName() << ", in Category " << cat << " with a total of " << catIndex.numTypes() << " pdfs"<< std::endl;
 			storedPdfs.Print();
