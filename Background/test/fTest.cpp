@@ -106,6 +106,7 @@ void runFit(RooAbsPdf *pdf, RooDataSet *data, double *NLL, int *stat_t, int MaxT
 // It is a C++ implementation of Jon's code -> https://github.com/jonathon-langford/flashggFinalFit/blob/dev_lowmass/Background/tools/modelBuilder_v2.py#L266-L306 
 double computeSidebandScaledYield(RooAbsPdf *pdf, RooRealVar *mass, double sidebandYield){
   if (!pdf || !mass) {
+    std::cerr << "[ERROR] computeSidebandScaledYield: pdf or mass is null. Returning uncorrected sidebandYield (" << sidebandYield << ")." << std::endl;
     return sidebandYield;
   }
   RooArgSet observables(*mass);
