@@ -37,7 +37,7 @@ elif [ $# -eq 0 ]; then
     #for file in Models/background/*resolution.root; do mv "$file" "${file%.root}_2022preEE.root"; done
     #cp ../Background/outdir_earlyAnalysis_2022postEE/CMS-HGG*.root ./Models/background/
     #for file in Models/background/*resolution.root; do mv "$file" "${file%.root}_2022postEE.root"; done
-    cp ../Signal/outdir_packaged/CMS-HGG*.root ./Models/signal/
+    cp ../Signal/outdir_packaged_${differential_variable}/CMS-HGG*.root ./Models/signal/
     # See above
     for file in Models/signal/*_2022.root; do
         if [ -f "$file" ]; then

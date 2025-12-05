@@ -201,16 +201,24 @@ class FTest(law.Task):
         
         i = 1
         # Loop over a years era
-        for currentEra in allErasMap[f"{self.year}"]:
-            
-            
-            if self.variable == '':
-                input_path = os.path.join(config["outputFolder"], f"input_output_{self.year}{currentEra}/ws_signal")
+        eras = allErasMap.get(f"{self.year}", [""])
+
+        for currentEra in eras:
+
+            era_suffix = "" if currentEra in ["", "None"] else currentEra
+
+            if self.variable == "":
+                input_path = os.path.join(
+                    config["outputFolder"],
+                    f"input_output_{self.year}{era_suffix}/ws_signal"
+                )
             else:
-                input_path = os.path.join(config["outputFolder"], f"input_output_{self.variable}_{self.year}{currentEra}/ws_signal")
+                input_path = os.path.join(
+                    config["outputFolder"],
+                    f"input_output_{self.variable}_{self.year}{era_suffix}/ws_signal"
+                )
 
-
-            if currentEra != "None":
+            if currentEra not in ["", "None"]:
                 currentConfig = config[f"signalScriptCfg_{self.year}_{currentEra}"]
             else:
                 currentConfig = config[f"signalScriptCfg_{self.year}"]
@@ -257,10 +265,14 @@ class FTest(law.Task):
         output_paths = []
 
         # Loop over a years era
-        for currentEra in allErasMap[f"{self.year}"]:
+        eras = allErasMap.get(f"{self.year}", [""])
+        
+        for currentEra in eras:
+            
+            era_suffix = "" if currentEra in ["", "None"] else currentEra
 
-            if currentEra != "None":
-                currentConfig = config[f"signalScriptCfg_{self.year}_{currentEra}"]
+            if currentEra not in ["", "None"]:
+                currentConfig = config[f"signalScriptCfg_{self.year}_{era_suffix}"]
             else:
                 currentConfig = config[f"signalScriptCfg_{self.year}"]
             # returns output folder
@@ -463,16 +475,20 @@ class CalcPhotonSyst(law.Task):
         
         i = 1
         # Loop over a years era
-        for currentEra in allErasMap[f"{self.year}"]:
+        eras = allErasMap.get(f"{self.year}", [""])
+        
+        for currentEra in eras:
+            
+            era_suffix = "" if currentEra in ["", "None"] else currentEra
             
             if self.variable == '':
-                input_path = os.path.join(config["outputFolder"], f"input_output_{self.year}{currentEra}/ws_signal")
+                input_path = os.path.join(config["outputFolder"], f"input_output_{self.year}{era_suffix}/ws_signal")
             else:
-                input_path = os.path.join(config["outputFolder"], f"input_output_{self.variable}_{self.year}{currentEra}/ws_signal")
+                input_path = os.path.join(config["outputFolder"], f"input_output_{self.variable}_{self.year}{era_suffix}/ws_signal")
 
 
-            if currentEra != "None":
-                currentConfig = config[f"signalScriptCfg_{self.year}_{currentEra}"]
+            if currentEra not in ["", "None"]:
+                currentConfig = config[f"signalScriptCfg_{self.year}_{era_suffix}"]
             else:
                 currentConfig = config[f"signalScriptCfg_{self.year}"]
                 
@@ -518,10 +534,14 @@ class CalcPhotonSyst(law.Task):
         output_paths = []
         
         # Loop over a years era
-        for currentEra in allErasMap[f"{self.year}"]:
+        eras = allErasMap.get(f"{self.year}", [""])
+        
+        for currentEra in eras:
             
-            if currentEra != "None":
-                currentConfig = config[f"signalScriptCfg_{self.year}_{currentEra}"]
+            era_suffix = "" if currentEra in ["", "None"] else currentEra
+
+            if currentEra not in ["", "None"]:
+                currentConfig = config[f"signalScriptCfg_{self.year}_{era_suffix}"]
             else:
                 currentConfig = config[f"signalScriptCfg_{self.year}"]
             # returns output folder
@@ -748,14 +768,21 @@ class SignalFit(law.Task):
             
         i = 1
         # Loop over a years era
-        for currentEra in allErasMap[f"{self.year}"]:
+        eras = allErasMap.get(f"{self.year}", [""])
+        
+        for currentEra in eras:
+            
+            era_suffix = "" if currentEra in ["", "None"] else currentEra
             
             if self.variable == "":
-                input_path = os.path.join(config["outputFolder"], f"input_output_{self.year}{currentEra}/ws_signal")
+                input_path = os.path.join(config["outputFolder"], f"input_output_{self.year}{era_suffix}/ws_signal")
             else:
-                input_path = os.path.join(config["outputFolder"], f"input_output_{self.variable}_{self.year}{currentEra}/ws_signal")
+                input_path = os.path.join(config["outputFolder"], f"input_output_{self.variable}_{self.year}{era_suffix}/ws_signal")
 
-            currentConfig = config[f"signalScriptCfg_{self.year}_{currentEra}"]
+            if currentEra not in ["", "None"]:
+                currentConfig = config[f"signalScriptCfg_{self.year}_{era_suffix}"]
+            else:
+                currentConfig = config[f"signalScriptCfg_{self.year}"]
 
             # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             # If proc/cat == auto. Extract processes and categories
@@ -804,10 +831,17 @@ class SignalFit(law.Task):
         data_input_path = config['inputFiles']['Trees2WSData']  
 
         # Loop over a years era
-        for currentEra in allErasMap[f"{self.year}"]:
-
-            currentConfig = config[f"signalScriptCfg_{self.year}_{currentEra}"]
+        eras = allErasMap.get(f"{self.year}", [""])
+        
+        for currentEra in eras:
             
+            era_suffix = "" if currentEra in ["", "None"] else currentEra
+
+            if currentEra not in ["", "None"]:
+                currentConfig = config[f"signalScriptCfg_{self.year}_{era_suffix}"]
+            else:
+                currentConfig = config[f"signalScriptCfg_{self.year}"]
+
             # returns output folder
             output_paths.append(law.LocalFileTarget(os.path.join(output_dir, f"outdir_{currentConfig['ext']}/signalFit")))
             output_paths.append(law.LocalFileTarget(os.path.join(output_dir, f"outdir_{currentConfig['ext']}/signalFit/output")))
@@ -935,14 +969,22 @@ class SignalPackagingCategory(Task, HTCondorWorkflow, SlurmWorkflow, law.LocalWo
             #Load central config file
             with open(configYamlPath, 'r') as file:
                 config = yaml.safe_load(file)
-            for currentEra in allErasMap[f"{self.year}"]:
-                signalScriptCfg = config[f"signalScriptCfg_{self.year}_{currentEra}"]
+            eras = allErasMap.get(f"{self.year}", [""])
+            
+            for currentEra in eras:
+                
+                era_suffix = "" if currentEra in ["", "None"] else currentEra
+        
+                if currentEra not in ["", "None"]:
+                    currentConfig = config[f"signalScriptCfg_{self.year}_{era_suffix}"]
+                else:
+                    currentConfig = config[f"signalScriptCfg_{self.year}"]
                 # Have to copy over the input to the JOB directory
                 # Don't forget to VOMS!
                 if "/work" in self.output_dir:
                     slurm_copy_command = [
                         'cp', '-rf',
-                        f"{self.output_dir}/outdir_{signalScriptCfg['ext']}",
+                        f"{self.output_dir}/outdir_{currentConfig['ext']}",
                         f"{os.environ['TARGET_PATH']}/"
                     ]
                 else:
@@ -1042,10 +1084,17 @@ class SignalPackaging(law.Task):
         exts = []
             
         # Loop over a years era and extract the ext string in a list
-        for currentEra in allErasMap[f"{self.year}"]:
-
-            currentConfig = config[f"signalScriptCfg_{self.year}_{currentEra}"]
+        eras = allErasMap.get(f"{self.year}", [""])
+        
+        for currentEra in eras:
             
+            era_suffix = "" if currentEra in ["", "None"] else currentEra
+
+            if currentEra not in ["", "None"]:
+                currentConfig = config[f"signalScriptCfg_{self.year}_{era_suffix}"]
+            else:
+                currentConfig = config[f"signalScriptCfg_{self.year}"]
+
             exts.append(currentConfig['ext'])
         
         exts_string = ''

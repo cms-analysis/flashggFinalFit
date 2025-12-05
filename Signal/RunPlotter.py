@@ -50,11 +50,17 @@ if opt.cats in ['all','wall']:
     citr += 1
 else:
   if "=" in opt.cats:
-    catString = opt.cats.split("=")[-1]
+    cat_raw = opt.cats.split("=")[-1]
   else:
-    catString = opt.cats.split(",")
-  for cat in catString.split(","):
-  # for cat in catString:
+    cat_raw = opt.cats
+
+  # normalize to a list
+  if isinstance(cat_raw, list):
+    cat_list = cat_raw
+  else:
+    cat_list = [c.strip() for c in str(cat_raw).split(",") if c.strip()]
+
+  for cat in cat_list:
     f = "%s/outdir_%s/CMS-HGG_sigfit_%s_%s.root"%(swd__,opt.ext,opt.ext,cat)
     inputFiles[cat] = f
     if citr == 0:

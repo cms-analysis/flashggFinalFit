@@ -9,13 +9,13 @@ import time
 input_masses = [120, 125, 130]
 
 # Define an array of eras
-eras = ["preEE", "postEE"]
+eras = ["2024"]
 
 # Define an array of production modes and corresponding process strings
 production_modes = [
     ("ggh", "GluGluHtoGG"),
-    ("vbf", "VBFHtoGG"),
-    ("vh", "VHtoGG"),
+    ("vbf", "VBFHto2G"),
+    ("vh", "VHto2G"),
     ("tth", "ttHtoGG")
 ]
 
@@ -30,11 +30,11 @@ def safe_mkdir(path):
 # Function to run the command
 def run_process(args):
     mass, era, mode, process, path_to_root_files = args
-    output_dir = "../input_output_2022{}".format(era)
+    output_dir = "../input_output_Full_2024_Preliminary_16_10_25_{}".format(era)
     safe_mkdir(output_dir)  # Create output directory if it doesn't exist
     
     # Construct the command as a single string
-    cmd = "python3 trees2ws.py --inputMass {mass} --productionMode {mode} --year 2022{era} --doSystematics --doInOutSplitting --inputConfig config_2022.py --inputTreeFile '{path_to_root_files}/{process}_M-{mass}_{era}/'*.root --outputWSDir {output_dir}".format(
+    cmd = "python3 trees2ws.py --inputMass {mass} --productionMode {mode} --year 2024 --doSystematics --doInOutSplitting --inputConfig config_2022.py --inputTreeFile '{path_to_root_files}/{process}_M-{mass}_{era}/'*.root --outputWSDir {output_dir}".format(
         mass=mass, mode=mode, era=era, path_to_root_files=path_to_root_files, process=process, output_dir=output_dir)
     
     try:
@@ -52,7 +52,7 @@ def run_process(args):
 # Main function to parallelize tasks
 def main(path_to_root_files):
     
-    num_workers = 24 # masses x 2 eras x 4 production modes = 24
+    num_workers = 12 # masses x 2 eras x 4 production modes = 24
     pool = Pool(processes=num_workers)
     tasks = [
         (mass, era, mode, process, path_to_root_files)

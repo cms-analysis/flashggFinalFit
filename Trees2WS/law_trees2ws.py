@@ -676,18 +676,26 @@ class Trees2WS(law.Task):
 
         tasks = []
         
+        eras = allErasMap.get(f"{self.year}", [""])
+
         era_list = [
-        (era, self.variable, input_paths)
-        for era in allErasMap[f"{self.year}"]
+            (era, self.variable, input_paths)
+            for era in eras
         ]
-            
+
         i = 1
         for era, var, path_to_root_files in era_list:
-            if var == '':
-                current_output_path = output_dir + "/input_output_{}{}".format(self.year, era)
+            era_suffix = "" if era in ["", "None"] else era
+
+            if var == "":
+                current_output_path = os.path.join(
+                    output_dir, f"input_output_{self.year}{era_suffix}"
+                )
             else:
-                current_output_path = output_dir + "/input_output_{}_{}{}".format(var, self.year, era)
-                            
+                current_output_path = os.path.join(
+                    output_dir, f"input_output_{var}_{self.year}{era_suffix}"
+                )
+             
             tasks.append(Trees2WSSingleProcess(input_paths=path_to_root_files, era=era, apply_mass_cut=mass_cut, mass_cut_range=mass_cut_r, year=f"{self.year}{era}", doSystematics=doSystematics, doDiffSplitting=doDiffSplitting, doSTXSSplitting=doSTXSSplitting, doInOutSplitting=doInOutSplitting, output_dir=current_output_path, variable=var, version=f"v{i}", workflow=config['execution'], batch_flavor=self.batch_flavor, slurm_partition=config['batchPartition'], slurm_memory=config['batchMemory'], slurm_max_runtime=config['batchMaxRuntime'], htcondor_partition=config['batchPartition'], htcondor_memory=config['batchMemory'], htcondor_max_runtime=config['batchMaxRuntime']))
             i += 1
         return tasks
@@ -709,18 +717,23 @@ class Trees2WS(law.Task):
         
         input_paths = config["inputFiles"]["Trees2WS"]
         
+        eras = allErasMap.get(f"{self.year}", [""])
+
         era_list_with_variable = [
             (era, self.variable)
-            for era in allErasMap[f"{self.year}"]
+            for era in eras
         ]
+
         outputFolders = []
         for era, var in era_list_with_variable:
-            if var == '':
-                current_output_path = output_dir + "/input_output_{}{}".format(self.year, era)
+            era_suffix = "" if era in ["", "None"] else era
+
+            if var == "":
+                current_output_path = os.path.join(output_dir, f"input_output_{self.year}{era_suffix}")
             else:
-                current_output_path = output_dir + "/input_output_{}_{}{}".format(var, self.year, era)
-                
-            outputFolders.append(law.LocalFileTarget(current_output_path + '/ws_signal'))
+                current_output_path = os.path.join(output_dir, f"input_output_{var}_{self.year}{era_suffix}")
+
+            outputFolders.append(law.LocalFileTarget(os.path.join(current_output_path, "ws_signal")))
 
         return outputFolders
     
@@ -741,46 +754,43 @@ class Trees2WS(law.Task):
         else:
             output_dir = self.output_dir
         
-        era_list_with_variable = [
-            (era, self.variable)
-            for era in allErasMap[f"{self.year}"]
-        ]
+        eras = allErasMap.get(str(self.year), [""])
+        
+        era_list_with_variable = [(era, self.variable) for era in eras]
         
         outputFolders = []
         for era, var in era_list_with_variable:
-            if var == '':
-                current_output_path = os.path.join(output_dir, "input_output_{}{}".format(self.year, era))
+            era_suffix = "" if era in ["", "None"] else era
+
+            if var == "":
+                current_output_path = os.path.join(output_dir, f"input_output_{self.year}{era_suffix}")
             else:
-                current_output_path = os.path.join(output_dir, "input_output_{}_{}{}".format(var, self.year, era))
+                current_output_path = os.path.join(output_dir, f"input_output_{var}_{self.year}{era_suffix}")
+
             outputFolders.append(current_output_path)
 
-            
         for currentEra in outputFolders:
-            # Create ws_signal folder
-            dst_folder = currentEra + "/ws_signal"
+            dst_folder = os.path.join(currentEra, "ws_signal")
+
             if not os.path.exists(dst_folder):
                 if self.batch_flavor == "slurm/psi":
                     execute_command([f'xrdfs root://t3dcachedb03.psi.ch:1094/ mkdir -p {dst_folder}'], shell=True)
                 else:
                     safe_mkdir(dst_folder)
-            
-            # Copy files to ws_signal
+
             src_file_list = glob.glob(os.path.join(currentEra, "ws_*", "*"))
             for currentFile in src_file_list:
                 if not os.path.samefile(currentFile, dst_folder):
                     if self.batch_flavor == "slurm/psi":
-                        if '/pnfs' in currentFile:
-                            currentFile = currentFile.replace('/pnfs', 'root://t3dcachedb03.psi.ch:1094//pnfs')
-                        elif '/pnfs' in dst_folder:
-                            dst_folder = dst_folder.replace('/pnfs', 'root://t3dcachedb03.psi.ch:1094//pnfs')
-                        execute_command([f'xrdcp -rf {currentFile} {dst_folder}'], shell=True)
+                        if "/pnfs" in currentFile:
+                            currentFile = currentFile.replace("/pnfs", "root://t3dcachedb03.psi.ch:1094//pnfs")
+                        elif "/pnfs" in dst_folder:
+                            dst_folder = dst_folder.replace("/pnfs", "root://t3dcachedb03.psi.ch:1094//pnfs")
+                        execute_command([f"xrdcp -rf {currentFile} {dst_folder}"], shell=True)
                     else:
                         shutil.copy2(currentFile, dst_folder)
                 else:
                     print(f"Skip copying {currentFile} since it is already in ws_signal.")
-            
-        print("Copy completed.")
 
+        print("Copy completed.")
         return True
-    
-    

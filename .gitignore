@@ -76,5 +76,5 @@ law/remote
 
 remote
 htcondor
-
+output*
 output

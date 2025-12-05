@@ -289,7 +289,7 @@ globalReplacementMap["Run3FidXSAnalysisPTH"]['procWV'] = "ggh_PTH_45p0_80p0_in"
 globalReplacementMap["Run3FidXSAnalysisPTH"]['catWV'] = "RECO_PTH_45p0_80p0_cat2"
 # Relacement processes for RV
 globalReplacementMap["Run3FidXSAnalysisPTH"]['procRVMap'] = od()
-globalReplacementMap["Run3FidXSAnalysisPTH"]["procRVMap"]["RECO_PTH_0p0_15p0_cat0"] = "ggh_PTH_0p0_15p0_in"
+globalReplacementMap["Run3FidXSAnalysisPTH"]["procRVMap"]["RECO_PTH_0p0_15p0_cat0"] = "ggh_PTH_15p0_30p0_in"
 globalReplacementMap["Run3FidXSAnalysisPTH"]["procRVMap"]["RECO_PTH_0p0_15p0_cat1"] = "ggh_PTH_0p0_15p0_in"
 globalReplacementMap["Run3FidXSAnalysisPTH"]["procRVMap"]["RECO_PTH_0p0_15p0_cat2"] = "ggh_PTH_0p0_15p0_in"
 globalReplacementMap["Run3FidXSAnalysisPTH"]["procRVMap"]["RECO_PTH_15p0_30p0_cat0"] = "ggh_PTH_15p0_30p0_in"
@@ -316,7 +316,7 @@ globalReplacementMap["Run3FidXSAnalysisPTH"]["procRVMap"]["RECO_PTH_350p0_10000p
 
 # Replacement categories for RV
 globalReplacementMap["Run3FidXSAnalysisPTH"]["catRVMap"] = od()
-globalReplacementMap["Run3FidXSAnalysisPTH"]["catRVMap"]["RECO_PTH_0p0_15p0_cat0"] = "RECO_PTH_0p0_15p0_cat0"
+globalReplacementMap["Run3FidXSAnalysisPTH"]["catRVMap"]["RECO_PTH_0p0_15p0_cat0"] = "RECO_PTH_15p0_30p0_cat0"
 globalReplacementMap["Run3FidXSAnalysisPTH"]["catRVMap"]["RECO_PTH_0p0_15p0_cat1"] = "RECO_PTH_0p0_15p0_cat1"
 globalReplacementMap["Run3FidXSAnalysisPTH"]["catRVMap"]["RECO_PTH_0p0_15p0_cat2"] = "RECO_PTH_0p0_15p0_cat2"
 globalReplacementMap["Run3FidXSAnalysisPTH"]["catRVMap"]["RECO_PTH_15p0_30p0_cat0"] = "RECO_PTH_15p0_30p0_cat0"
