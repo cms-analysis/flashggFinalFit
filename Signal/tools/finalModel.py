@@ -244,14 +244,16 @@ class FinalModel:
     if len(frv) == 1: frv, mh = [frv[0],frv[0],frv[0]], [float(self.MHLow),mh[0],float(self.MHHigh)]
     # Convert to numpy arrays and make spline
     frv, mh = np.asarray(frv), np.asarray(mh)
+    frv = np.clip(frv, 0., 1.) # Additional safety clip between 0 and 1
     self.Splines['fracRV'] = ROOT.RooSpline1D("%s_%s_rvFracSpline"%(outputWSObjectTitle__,self.name),"%s_%s_rvFracSpline"%(outputWSObjectTitle__,self.name),self.MH,len(mh),mh,frv)
     # Create function: if not skip systematics then add nuisance for RV fraction
+    # JLS 25_12_05: Clamp the value between 0 and 1
     if self.skipSystematics:
-      self.Functions['fracRV'] = ROOT.RooFormulaVar("%s_%s_rvFrac"%(outputWSObjectTitle__,self.name),"%s_%s_rvFrac"%(outputWSObjectTitle__,self.name),"TMath::Min(@0,1.0)",ROOT.RooArgList(self.Splines['fracRV']))
+      self.Functions['fracRV'] = ROOT.RooFormulaVar(f"{outputWSObjectTitle__}_{self.name}_rvFrac",f"{outputWSObjectTitle__}_{self.name}_rvFrac", "TMath::Max(0.0, TMath::Min(@0, 1.0))", ROOT.RooArgList(self.Splines['fracRV']))
     else:
       self.NuisanceMap['other'] = od()
       self.makeNuisance('deltafracright',1.,1.,1.,'other')
-      self.Functions['fracRV'] = ROOT.RooFormulaVar("%s_%s_rvFrac"%(outputWSObjectTitle__,self.name),"%s_%s_rvFrac"%(outputWSObjectTitle__,self.name),"TMath::Min(@0+@1,1.0)",ROOT.RooArgList(self.Splines['fracRV'],self.NuisanceMap['other']['deltafracright']['param']))
+      self.Functions['fracRV'] = ROOT.RooFormulaVar(f"{outputWSObjectTitle__}_{self.name}_rvFrac",f"{outputWSObjectTitle__}_{self.name}_rvFrac", "TMath::Max(0.0, TMath::Min(@0 + @1, 1.0))",ROOT.RooArgList(self.Splines['fracRV'], self.NuisanceMap['other']['deltafracright']['param']))
 
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Function to build final PDFs from input SimultaneousFit object splines
