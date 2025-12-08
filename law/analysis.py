@@ -433,7 +433,8 @@ class FinalFitsYear(law.Task):
 
     def output(self):
         # returns output folder
-        
+
+        is_combined_year = "_" in str(self.year)
         if self.variable == '':
             # configYamlPath = os.path.dirname(os.path.abspath(__file__)) + f"/../config/{self.year}_inclusive.yml"
             configYamlPath = os.environ["ANALYSIS_PATH"] + f"/config/{self.year}_inclusive.yml"
@@ -459,33 +460,40 @@ class FinalFitsYear(law.Task):
             fitFolderName = f'runFits_{self.variable}'  
         
         output_paths = []
-        
-        if self.variable == '': 
-            # Signal+Datacard output
-            if datacard_config['saveDataFrame']:
-                output_paths.append(law.LocalFileTarget(output_dir+ f"/Datacards/Dataframe"))
-                output_paths.append(law.LocalFileTarget(output_dir+ f"/Datacards/Dataframe/Datacard_{self.year}.pkl"))
-                output_paths.append(law.LocalFileTarget(output_dir+ f"/Datacards/Dataframe/Datacard_{self.year}_unsymmetrized.pkl"))
-            output_paths.append(law.LocalFileTarget(output_dir+ f"/Datacards/Datacard_{self.year}.txt"))
-            
-            # Background output
-            base_path = os.path.join(output_dir, "Background", f"outdir_{background_config['ext']}")
-            output_paths.append(law.LocalFileTarget(base_path))
-            output_paths.append(law.LocalFileTarget(os.path.join(base_path, "bkgfTest-Data", "fTestResults.txt")))
 
+        if is_combined_year:
+            if self.variable == '':
+                output_paths.append(law.LocalFileTarget(os.path.join(output_dir, "Combine", f"Datacard_{self.year}.txt")))
+                output_paths.append(law.LocalFileTarget(os.path.join(output_dir, "Combine", f"Datacard_{self.year}.root")))
+            else:
+                output_paths.append(law.LocalFileTarget(os.path.join(output_dir, "Combine", f"Datacard_{self.variable}_{self.year}.txt")))
+                output_paths.append(law.LocalFileTarget(os.path.join(output_dir, "Combine", f"Datacard_{self.variable}_{self.year}.root")))
         else:
-            # Signal+Datacard output
-            if datacard_config['saveDataFrame']:
-                output_paths.append(law.LocalFileTarget(output_dir+ f"/Datacards/Dataframe"))
-                output_paths.append(law.LocalFileTarget(output_dir+ f"/Datacards/Dataframe/Datacard_{self.variable}_{self.year}.pkl"))
-                output_paths.append(law.LocalFileTarget(output_dir+ f"/Datacards/Dataframe/Datacard_{self.variable}_{self.year}_unsymmetrized.pkl"))
-            output_paths.append(law.LocalFileTarget(output_dir+ f"/Datacards/Datacard_{self.variable}_{self.year}.txt"))
-            output_paths.append(law.LocalFileTarget(output_dir+ f"/Datacards/Datacard_{self.variable}_{self.year}_unsymmetrized.txt"))
-            
-            # Background output
-            base_path = os.path.join(output_dir, "Background", f"outdir_{background_config['ext']}") # because config for diffs already has variable suffix
-            output_paths.append(law.LocalFileTarget(base_path))
-            output_paths.append(law.LocalFileTarget(os.path.join(base_path, "bkgfTest-Data", "fTestResults.txt")))
+            if self.variable == '': 
+                if datacard_config['saveDataFrame']:
+                    output_paths.append(law.LocalFileTarget(output_dir+ f"/Datacards/Dataframe"))
+                    output_paths.append(law.LocalFileTarget(output_dir+ f"/Datacards/Dataframe/Datacard_{self.year}.pkl"))
+                    output_paths.append(law.LocalFileTarget(output_dir+ f"/Datacards/Dataframe/Datacard_{self.year}_unsymmetrized.pkl"))
+                output_paths.append(law.LocalFileTarget(output_dir+ f"/Datacards/Datacard_{self.year}.txt"))
+                
+                # Background output
+                base_path = os.path.join(output_dir, "Background", f"outdir_{background_config['ext']}")
+                output_paths.append(law.LocalFileTarget(base_path))
+                output_paths.append(law.LocalFileTarget(os.path.join(base_path, "bkgfTest-Data", "fTestResults.txt")))
+
+            else:
+                # Signal+Datacard output
+                if datacard_config['saveDataFrame']:
+                    output_paths.append(law.LocalFileTarget(output_dir+ f"/Datacards/Dataframe"))
+                    output_paths.append(law.LocalFileTarget(output_dir+ f"/Datacards/Dataframe/Datacard_{self.variable}_{self.year}.pkl"))
+                    output_paths.append(law.LocalFileTarget(output_dir+ f"/Datacards/Dataframe/Datacard_{self.variable}_{self.year}_unsymmetrized.pkl"))
+                output_paths.append(law.LocalFileTarget(output_dir+ f"/Datacards/Datacard_{self.variable}_{self.year}.txt"))
+                output_paths.append(law.LocalFileTarget(output_dir+ f"/Datacards/Datacard_{self.variable}_{self.year}_unsymmetrized.txt"))
+                
+                # Background output
+                base_path = os.path.join(output_dir, "Background", f"outdir_{background_config['ext']}") # because config for diffs already has variable suffix
+                output_paths.append(law.LocalFileTarget(base_path))
+                output_paths.append(law.LocalFileTarget(os.path.join(base_path, "bkgfTest-Data", "fTestResults.txt")))
  
         if convert_boolean_string(self.unblinded_fits) or convert_boolean_string(self.unblinded_stage_three):
             output = []
