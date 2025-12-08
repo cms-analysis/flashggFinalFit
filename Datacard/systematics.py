@@ -158,7 +158,7 @@ experimental_systematics = [
                 #{'name':'lumi_13TeV_Correlated','title':'lumi_13TeV_Correlated','type':'constant','prior':'lnN','correlateAcrossYears':-1,'value':{'2016':'1.006','2017':'1.009','2018':'1.020'}},
                 #{'name':'lumi_13TeV_Correlated_1718','title':'lumi_13TeV_Correlated_1718','type':'constant','prior':'lnN','correlateAcrossYears':-1,'value':{'2016':'-','2017':'1.006','2018':'1.002'}},
                 # {'name':'lumi_13p6TeV_2022','title':'lumi_13p6TeV_2022','type':'constant','prior':'lnN','correlateAcrossYears':1,'value':"1.014"},
-                {'name':'lumi_13p6TeV','title':'lumi_13p6TeV','type':'constant','prior':'lnN','correlateAcrossYears':0,'value':{"2022preEE": "1.014", "2022postEE": "1.014", "2022": "1.014", "2023preBPix": "1.013", "2023postBPix": "1.013", "2023": "1.013", "2024": "1.013", "2024all": "1.013"}},
+                {'name':'lumi_13p6TeV','title':'lumi_13p6TeV','type':'constant','prior':'lnN','correlateAcrossYears':0,'value':{"2022preEE": "1.014", "2022postEE": "1.014", "2022": "1.014", "2023preBPix": "1.013", "2023postBPix": "1.013", "2023": "1.013", "2024": "1.016", "2024all": "1.016"}},
                 {'name':'weight_Pileup','title':'CMS_hgg_PileupWeight','type':'factory','prior':'lnN','correlateAcrossYears':1},
                 {'name':'weight_TriggerSF','title':'CMS_hgg_TriggerWeight','type':'factory','prior':'lnN','correlateAcrossYears':1},
                 {'name':'weight_ElectronVetoSF','title':'CMS_hgg_ElectronVetoSF','type':'factory','prior':'lnN','correlateAcrossYears':0},
