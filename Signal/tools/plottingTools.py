@@ -1,4 +1,4 @@
-# Functions for plotting 
+# Functions for plotting
 import ROOT
 import json
 from collections import OrderedDict as od
@@ -115,7 +115,7 @@ def plotFTest(ssfs,_opt=1,_outdir='./',_extension='',_proc='',_cat='',_mass='125
   leg.SetLineColor(0)
   leg.SetTextSize(0.03)
   leg.AddEntry(hists['data'],"Simulation","ep")
-  for k,ssf in ssfs.items(): 
+  for k,ssf in ssfs.items():
     if int(k.split("_")[-1]) == _opt: leg.AddEntry(hists[k],"#bf{N_{gauss} = %s}: #chi^{2}/n(dof) = %.4f"%(k.split("_")[-1],ssf.getReducedChi2()),"L")
     else: leg.AddEntry(hists[k],"N_{gauss} = %s: #chi^{2}/n(dof) = %.4f"%(k.split("_")[-1],ssf.getReducedChi2()),"L")
   leg.Draw("Same")
@@ -286,7 +286,7 @@ def plotInterpolation(_finalModel,_outdir='./',_massPoints='120,121,122,123,124,
   # Total pdf histograms
   dh = od()
   hists = od()
-  hmax = 0.0001 
+  hmax = 0.0001
   for mp in _massPoints.split(","):
     _finalModel.MH.setVal(int(mp))
     hists[mp] = _finalModel.Pdfs['final'].createHistogram("h_%s"%mp,_finalModel.xvar,ROOT.RooFit.Binning(3200))
@@ -323,9 +323,9 @@ def plotInterpolation(_finalModel,_outdir='./',_massPoints='120,121,122,123,124,
   haxes.Draw("AXIS")
 
   # Draw rest of histograms
-  for k,h in hists.items(): 
+  for k,h in hists.items():
     if "data" in k: h.Draw("Same EP")
-    else: 
+    else:
       h.Draw("Same HIST")
 
   # Add Latex
@@ -398,7 +398,7 @@ def plotSplines(_finalModel,_outdir="./",_nominalMass='125',splinesToPlot=['xs',
   leg.SetLineColor(0)
   leg.SetTextSize(0.04)
   # Draw graphs
-  for x, gr in grs.items(): 
+  for x, gr in grs.items():
     gr.SetLineColor(colorMap[x])
     gr.SetMarkerColor(colorMap[x])
     gr.SetMarkerStyle(20)
@@ -430,7 +430,7 @@ def plotSignalModel(_hists,_opt,_outdir=".",offset=0.02, lumi = 138):
   violet = ROOT.TColor.GetColor("#964a8b")
   strong_gray = ROOT.TColor.GetColor("#717581")
   colorMap = {'2016':blue,'2016preVFP': blue, '2016postVFP': orange,'2017':red,'2018':violet}
-  
+
   canv = ROOT.TCanvas("c","c",800,700)
   canv.SetBottomMargin(0.12)
   canv.SetLeftMargin(0.15)
@@ -451,7 +451,7 @@ def plotSignalModel(_hists,_opt,_outdir=".",offset=0.02, lumi = 138):
   h_axes.GetYaxis().SetLabelSize(0.04)
   h_axes.GetYaxis().SetTitleOffset(1.2)
   h_axes.Draw()
-    
+
   # Extract effSigma
   effSigma = getEffSigma(_hists['pdf'])
   effSigma_low, effSigma_high = _hists['pdf'].GetMean()-effSigma, _hists['pdf'].GetMean()+effSigma
@@ -481,7 +481,7 @@ def plotSignalModel(_hists,_opt,_outdir=".",offset=0.02, lumi = 138):
     leg2.Draw("Same")
   else:
     year = _opt.years
-    leg = ROOT.TLegend(0.35+offset,0.4,0.5+offset,0.92)
+    leg = ROOT.TLegend(0.15+offset,0.4,0.5+offset,0.92)
     leg.SetFillStyle(0)
     leg.SetLineColor(0)
     leg.SetTextSize(0.04)
@@ -534,7 +534,7 @@ def plotSignalModel(_hists,_opt,_outdir=".",offset=0.02, lumi = 138):
   _hists['data'].SetLineColor(1)
   _hists['data'].SetLineWidth(2)
   _hists['data'].Draw("Same PE")
-  
+
   # Add TLatex to plot
   lat0 = ROOT.TLatex()
   lat0.SetTextFont(42)
@@ -558,7 +558,7 @@ def plotSignalModel(_hists,_opt,_outdir=".",offset=0.02, lumi = 138):
   if _opt.procs == 'all': procStr, procExt = "", ""
   elif len(_opt.procs.split(","))>1: procStr, procExt = "Multiple processes", "_multipleProcs"
   else: procStr, procExt = Translate(_opt.procs,translateProcs), "_%s"%_opt.procs
- 
+
   if len(_opt.years.split(","))>1: yearStr, yearExt = "", ""
   else: yearStr, yearExt = _opt.years, "_%s"%_opt.years
 
@@ -566,7 +566,7 @@ def plotSignalModel(_hists,_opt,_outdir=".",offset=0.02, lumi = 138):
   elif _opt.cats == 'wall': catStr, catExt = "#splitline{All categories}{S/(S+B) weighted}", "wall"
   elif len(_opt.cats.split(","))>1: catStr, catExt = "Multiple categories", "multipleCats"
   else: catStr, catExt = Translate(_opt.cats,translateCats), _opt.cats
- 
+
   lat1.DrawLatex(0.86,0.86,"%s"%catStr)
   lat1.DrawLatex(0.87,0.81,"%s %s"%(procStr,yearStr))
 
