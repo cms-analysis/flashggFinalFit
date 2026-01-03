@@ -1,4 +1,4 @@
-# Functions for plotting 
+# Functions for plotting
 import ROOT
 import json
 from collections import OrderedDict as od
@@ -115,7 +115,7 @@ def plotFTest(ssfs,_opt=1,_outdir='./',_extension='',_proc='',_cat='',_mass='125
   leg.SetLineColor(0)
   leg.SetTextSize(0.03)
   leg.AddEntry(hists['data'],"Simulation","ep")
-  for k,ssf in ssfs.items(): 
+  for k,ssf in ssfs.items():
     if int(k.split("_")[-1]) == _opt: leg.AddEntry(hists[k],"#bf{N_{gauss} = %s}: #chi^{2}/n(dof) = %.4f"%(k.split("_")[-1],ssf.getReducedChi2()),"L")
     else: leg.AddEntry(hists[k],"N_{gauss} = %s: #chi^{2}/n(dof) = %.4f"%(k.split("_")[-1],ssf.getReducedChi2()),"L")
   leg.Draw("Same")
@@ -286,7 +286,7 @@ def plotInterpolation(_finalModel,_outdir='./',_massPoints='120,121,122,123,124,
   # Total pdf histograms
   dh = od()
   hists = od()
-  hmax = 0.0001 
+  hmax = 0.0001
   for mp in _massPoints.split(","):
     _finalModel.MH.setVal(int(mp))
     hists[mp] = _finalModel.Pdfs['final'].createHistogram("h_%s"%mp,_finalModel.xvar,ROOT.RooFit.Binning(3200))
@@ -323,9 +323,9 @@ def plotInterpolation(_finalModel,_outdir='./',_massPoints='120,121,122,123,124,
   haxes.Draw("AXIS")
 
   # Draw rest of histograms
-  for k,h in hists.items(): 
+  for k,h in hists.items():
     if "data" in k: h.Draw("Same EP")
-    else: 
+    else:
       h.Draw("Same HIST")
 
   # Add Latex
@@ -398,7 +398,7 @@ def plotSplines(_finalModel,_outdir="./",_nominalMass='125',splinesToPlot=['xs',
   leg.SetLineColor(0)
   leg.SetTextSize(0.04)
   # Draw graphs
-  for x, gr in grs.items(): 
+  for x, gr in grs.items():
     gr.SetLineColor(colorMap[x])
     gr.SetMarkerColor(colorMap[x])
     gr.SetMarkerStyle(20)
@@ -423,26 +423,35 @@ def plotSplines(_finalModel,_outdir="./",_nominalMass='125',splinesToPlot=['xs',
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Function for plotting final signal model: neat
-def plotSignalModel(_hists,_opt,_outdir=".",offset=0.02):
-  colorMap = {'2016':38,'2017':30,'2018':46,'2022preEE':38,'2022postEE':30}
-  canv = ROOT.TCanvas("c","c",650,600)
+def plotSignalModel(_hists,_opt,_outdir=".",offset=0.02, lumi = 138):
+  blue = ROOT.TColor.GetColor("#578ffd")
+  orange = ROOT.TColor.GetColor("#f79c20")
+  red = ROOT.TColor.GetColor("#e32535")
+  violet = ROOT.TColor.GetColor("#964a8b")
+  strong_gray = ROOT.TColor.GetColor("#717581")
+  colorMap = {'2016':blue,'2016preVFP': blue, '2016postVFP': orange,'2017':red,'2018':violet}
+
+  canv = ROOT.TCanvas("c","c",800,700)
   canv.SetBottomMargin(0.12)
   canv.SetLeftMargin(0.15)
   canv.SetTickx()
   canv.SetTicky()
   h_axes = _hists['data'].Clone()
   h_axes.Reset()
-  h_axes.SetMaximum(_hists['data'].GetMaximum()*1.2)
+  h_axes.SetMaximum(_hists['data'].GetMaximum()*1.3)
   h_axes.SetMinimum(0.)
-  h_axes.GetXaxis().SetRangeUser(105,140)
+  h_axes.GetXaxis().SetRangeUser(100,140)
   h_axes.SetTitle("")
   h_axes.GetXaxis().SetTitle("%s (%s)"%(_opt.xvar.split(":")[1],_opt.xvar.split(":")[2]))
   h_axes.GetXaxis().SetTitleSize(0.05)
-  h_axes.GetXaxis().SetTitleOffset(1.)
+  h_axes.GetXaxis().SetLabelSize(0.04)
+  h_axes.GetXaxis().SetLabelOffset(0.02)
+  h_axes.GetXaxis().SetTitleOffset(1.2)
   h_axes.GetYaxis().SetTitleSize(0.05)
+  h_axes.GetYaxis().SetLabelSize(0.04)
   h_axes.GetYaxis().SetTitleOffset(1.2)
   h_axes.Draw()
-    
+
   # Extract effSigma
   effSigma = getEffSigma(_hists['pdf'])
   effSigma_low, effSigma_high = _hists['pdf'].GetMean()-effSigma, _hists['pdf'].GetMean()+effSigma
@@ -451,37 +460,35 @@ def plotSignalModel(_hists,_opt,_outdir=".",offset=0.02):
 
   # Legend
   if len(_opt.years.split(","))>1:
-    leg0 = ROOT.TLegend(0.15+offset,0.6,0.5+offset,0.82)
+    leg0 = ROOT.TLegend(0.15+offset,0.75,0.5+offset,0.87)
     leg0.SetFillStyle(0)
     leg0.SetLineColor(0)
-    leg0.SetTextSize(0.03)
+    leg0.SetTextSize(0.04)
     leg0.AddEntry(_hists['data'],"Simulation","ep")
-    leg0.AddEntry(_hists['pdf'],"#splitline{Parametric}{model}","l")
+    leg0.AddEntry(_hists['pdf'],"Parametric model","l")
     leg0.Draw("Same")
-
-    leg1 = ROOT.TLegend(0.17+offset,0.45,0.4+offset,0.61)
+    leg1 = ROOT.TLegend(0.15+offset,0.5,0.4+offset,0.75)
     leg1.SetFillStyle(0)
     leg1.SetLineColor(0)
-    leg1.SetTextSize(0.03)
-    for year in _opt.years.split(","): leg1.AddEntry(_hists['pdf_%s'%year],"%s: #scale[0.8]{#sigma_{eff} = %1.2f GeV}"%(year,getEffSigma(_hists['pdf_%s'%year])),"l")
+    leg1.SetTextSize(0.033)
+    for year in _opt.years.split(","): leg1.AddEntry(_hists['pdf_%s'%year],"%s: #scale[1]{#sigma_{eff} = %1.2f GeV}"%(year,getEffSigma(_hists['pdf_%s'%year])),"l")
     leg1.Draw("Same")
-
-    leg2 = ROOT.TLegend(0.15+offset,0.3,0.5+offset,0.45)
+    leg2 = ROOT.TLegend(0.15+offset,0.4,0.5+offset,0.5)
     leg2.SetFillStyle(0)
     leg2.SetLineColor(0)
-    leg2.SetTextSize(0.03)
+    leg2.SetTextSize(0.033)
     leg2.AddEntry(h_effSigma,"#sigma_{eff} = %1.2f GeV"%(0.5*(effSigma_high-effSigma_low)),"fl")
     leg2.Draw("Same")
   else:
     year = _opt.years
-    leg = ROOT.TLegend(0.15+offset,0.4,0.5+offset,0.82)
+    leg = ROOT.TLegend(0.15+offset,0.4,0.5+offset,0.92)
     leg.SetFillStyle(0)
     leg.SetLineColor(0)
-    leg.SetTextSize(0.03)
+    leg.SetTextSize(0.04)
     leg.AddEntry(_hists['data'],"Simulation","lep")
     leg.AddEntry(_hists['pdf'],"#splitline{Parametric}{model (%s)}"%year,"l")
     leg.AddEntry(h_effSigma,"#sigma_{eff} = %1.2f GeV"%(0.5*(effSigma_high-effSigma_low)),"fl")
-    leg.Draw("Same")    
+    leg.Draw("Same")
 
   # Set style effSigma
   h_effSigma.SetLineColor(15)
@@ -512,12 +519,12 @@ def plotSignalModel(_hists,_opt,_outdir=".",offset=0.02):
     fwhmText.DrawLatex(0.17+offset,0.25,"FWHM = %1.2f GeV"%(fwhm_high-fwhm_low))
 
   # Set style pdf
-  _hists['pdf'].SetLineColor(4)
+  _hists['pdf'].SetLineColor(strong_gray)
   _hists['pdf'].SetLineWidth(2)
   _hists['pdf'].Draw("Same Hist C")
   if len(_opt.years.split(","))>1:
     for year in _opt.years.split(","):
-      _hists['pdf_%s'%year].SetLineColor( colorMap[year] )  
+      _hists['pdf_%s'%year].SetLineColor( colorMap[year] )
       _hists['pdf_%s'%year].SetLineStyle(2)
       _hists['pdf_%s'%year].SetLineWidth(2)
       _hists['pdf_%s'%year].Draw("Same Hist C")
@@ -527,7 +534,7 @@ def plotSignalModel(_hists,_opt,_outdir=".",offset=0.02):
   _hists['data'].SetLineColor(1)
   _hists['data'].SetLineWidth(2)
   _hists['data'].Draw("Same PE")
-  
+
   # Add TLatex to plot
   lat0 = ROOT.TLatex()
   lat0.SetTextFont(42)
@@ -535,8 +542,9 @@ def plotSignalModel(_hists,_opt,_outdir=".",offset=0.02):
   lat0.SetNDC()
   lat0.SetTextSize(0.045)
   lat0.DrawLatex(0.15,0.92,"#bf{CMS} #it{%s}"%_opt.label)
-  lat0.DrawLatex(0.77,0.92,"%s TeV"%(sqrts__.split("TeV")[0]))
-  lat0.DrawLatex(0.16+offset,0.83,"H #rightarrow #gamma#gamma")
+  lat0.DrawLatex(0.65,0.92,"%s fb^{-1}"%(lumi))
+  lat0.DrawLatex(0.77,0.92,"(%s TeV)"%(sqrts__.split("TeV")[0]))
+  #lat0.DrawLatex(0.16+offset,0.83,"H #rightarrow #gamma#gamma")
 
   # Load translations
   translateCats = {} if _opt.translateCats is None else LoadTranslations(_opt.translateCats)
@@ -550,17 +558,17 @@ def plotSignalModel(_hists,_opt,_outdir=".",offset=0.02):
   if _opt.procs == 'all': procStr, procExt = "", ""
   elif len(_opt.procs.split(","))>1: procStr, procExt = "Multiple processes", "_multipleProcs"
   else: procStr, procExt = Translate(_opt.procs,translateProcs), "_%s"%_opt.procs
- 
+
   if len(_opt.years.split(","))>1: yearStr, yearExt = "", ""
   else: yearStr, yearExt = _opt.years, "_%s"%_opt.years
 
   if _opt.cats == 'all': catStr, catExt = "All categories", "all"
   elif _opt.cats == 'wall': catStr, catExt = "#splitline{All categories}{S/(S+B) weighted}", "wall"
-  elif len(_opt.cats.split(","))>1: procStr, procExt = "Multiple categories", "multipleCats"
+  elif len(_opt.cats.split(","))>1: catStr, catExt = "Multiple categories", "multipleCats"
   else: catStr, catExt = Translate(_opt.cats,translateCats), _opt.cats
- 
-  lat1.DrawLatex(0.85,0.86,"%s"%catStr)
-  lat1.DrawLatex(0.83,0.8,"%s %s"%(procStr,yearStr))
+
+  lat1.DrawLatex(0.86,0.86,"%s"%catStr)
+  lat1.DrawLatex(0.87,0.81,"%s %s"%(procStr,yearStr))
 
   canv.Update()
 
