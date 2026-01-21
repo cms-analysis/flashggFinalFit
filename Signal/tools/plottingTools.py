@@ -67,7 +67,19 @@ def getEffSigma(_h):
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Ftest: plots
 # Plot possible nGauss fits and chi2 values
-def plotFTest(ssfs,_opt=1,_outdir='./',_extension='',_proc='',_cat='',_mass='125'):
+def plotFTest(
+    ssfs,
+    _opt=1,
+    _outdir='./',
+    _extension='',
+    _proc='',
+    _cat='',
+    _mass='125',
+    _fnameprefix='', # Prefix for output file name
+    _xaxislabel='m_{#gamma#gamma} [GeV]', # Label for x-axis
+    _xrange=[115,140], # Range for x-axis
+    _funcname="gauss", # Short name of the order-varied function to display on plots
+):
   canv = ROOT.TCanvas()
   canv.SetLeftMargin(0.15)
   LineColorMap = {'1':ROOT.kAzure+1,'2':ROOT.kRed-4,'3':ROOT.kGreen+2,'4':ROOT.kMagenta-9,'5':ROOT.kOrange}
@@ -82,11 +94,11 @@ def plotFTest(ssfs,_opt=1,_outdir='./',_extension='',_proc='',_cat='',_mass='125
     else: hists[k].SetLineWidth(1)
     hists[k].SetLineColor(LineColorMap[k.split("_")[-1]])
     hists[k].SetTitle("")
-    hists[k].GetXaxis().SetTitle("m_{#gamma#gamma} [GeV]")
+    hists[k].GetXaxis().SetTitle(_xaxislabel)
     hists[k].SetMinimum(0)
     if hists[k].GetMaximum()>hmax: hmax = hists[k].GetMaximum()
     if hists[k].GetMinimum()<hmin: hmin = hists[k].GetMinimum()
-    hists[k].GetXaxis().SetRangeUser(115,140)
+    hists[k].GetXaxis().SetRangeUser(_xrange[0],_xrange[1])
   # Extract data histogram
   hists['data'] = ssf.xvar.createHistogram("h_data%s"%_extension,ROOT.RooFit.Binning(ssf.nBins))
   ssf.DataHists[_mass].fillHistogram(hists['data'],ROOT.RooArgList(ssf.xvar))
@@ -95,9 +107,9 @@ def plotFTest(ssfs,_opt=1,_outdir='./',_extension='',_proc='',_cat='',_mass='125
   hists['data'].SetMarkerColor(1)
   hists['data'].SetLineColor(1)
   hists['data'].SetTitle("")
-  hists['data'].GetXaxis().SetTitle("m_{#gamma#gamma} [GeV]")
+  hists['data'].GetXaxis().SetTitle(_xaxislabel)
   hists['data'].SetMinimum(0)
-  hists['data'].GetXaxis().SetRangeUser(115,140)
+  hists['data'].GetXaxis().SetRangeUser(_xrange[0],_xrange[1])
   if hists['data'].GetMaximum()>hmax: hmax = hists['data'].GetMaximum()
   if hists['data'].GetMinimum()<hmin: hmin = hists['data'].GetMinimum()
 
@@ -116,8 +128,8 @@ def plotFTest(ssfs,_opt=1,_outdir='./',_extension='',_proc='',_cat='',_mass='125
   leg.SetTextSize(0.03)
   leg.AddEntry(hists['data'],"Simulation","ep")
   for k,ssf in ssfs.items(): 
-    if int(k.split("_")[-1]) == _opt: leg.AddEntry(hists[k],"#bf{N_{gauss} = %s}: #chi^{2}/n(dof) = %.4f"%(k.split("_")[-1],ssf.getReducedChi2()),"L")
-    else: leg.AddEntry(hists[k],"N_{gauss} = %s: #chi^{2}/n(dof) = %.4f"%(k.split("_")[-1],ssf.getReducedChi2()),"L")
+    if int(k.split("_")[-1]) == _opt: leg.AddEntry(hists[k],"#bf{N_{%s} = %s}: #chi^{2}/n(dof) = %.4f"%(_funcname,k.split("_")[-1],ssf.getReducedChi2()),"L")
+    else: leg.AddEntry(hists[k],"N_{%s} = %s: #chi^{2}/n(dof) = %.4f"%(_funcname,k.split("_")[-1],ssf.getReducedChi2()),"L")
   leg.Draw("Same")
   # Add Latex
   lat = ROOT.TLatex()
@@ -127,12 +139,25 @@ def plotFTest(ssfs,_opt=1,_outdir='./',_extension='',_proc='',_cat='',_mass='125
   lat.SetTextSize(0.03)
   lat.DrawLatex(0.9,0.92,"( %s , %s , %s )"%(_extension,_proc,_cat))
 
+  if len(_fnameprefix) > 0 and not _fnameprefix.endswith("_"):
+    _fnameprefix += "_"
   canv.Update()
-  canv.SaveAs("%s/fTest_%s_%s_%s.png"%(_outdir,_cat,_proc,_extension))
-  canv.SaveAs("%s/fTest_%s_%s_%s.pdf"%(_outdir,_cat,_proc,_extension))
+  canv.SaveAs("%s/%sfTest_%s_%s_%s.png"%(_outdir,_fnameprefix,_cat,_proc,_extension))
+  canv.SaveAs("%s/%sfTest_%s_%s_%s.pdf"%(_outdir,_fnameprefix,_cat,_proc,_extension))
 
 # Plot reduced chi2 vs nGauss
-def plotFTestResults(ssfs,_opt,_outdir="./",_extension='',_proc='',_cat='',_mass='125'):
+def plotFTestResults(
+    ssfs,
+    _opt,
+    _outdir="./",
+    _extension='',
+    _proc='',
+    _cat='',
+    _mass='125',
+    _fnameprefix='', # Prefix for output file name
+    _funcname="gauss", # Short name of the order-varied function to display on plots
+
+):
   canv = ROOT.TCanvas()
   gr = ROOT.TGraph()
   # Loop over nGuassians
@@ -151,7 +176,7 @@ def plotFTestResults(ssfs,_opt,_outdir="./",_extension='',_proc='',_cat='',_mass
   # Draw axes
   haxes = ROOT.TH1F("h_axes_%s_%s"%(_proc,_extension),"h_axes_%s_%s"%(_proc,_extension),xmax+1,0,xmax+1)
   haxes.SetTitle("")
-  haxes.GetXaxis().SetTitle("N_{gauss}")
+  haxes.GetXaxis().SetTitle("N_{%s}"%(_funcname))
   haxes.GetXaxis().SetTitleSize(0.05)
   haxes.GetXaxis().SetTitleOffset(0.85)
   haxes.GetXaxis().SetLabelSize(0.035)
@@ -175,15 +200,34 @@ def plotFTestResults(ssfs,_opt,_outdir="./",_extension='',_proc='',_cat='',_mass
   lat.SetNDC()
   lat.SetTextSize(0.03)
   lat.DrawLatex(0.9,0.92,"( %s , %s , %s )"%(_extension,_proc,_cat))
-  lat.DrawLatex(0.6,0.75,"Optimum N_{gauss} = %s"%_opt)
+  lat.DrawLatex(0.6,0.75,"Optimum N_{%s} = %s"%(_funcname,_opt))
+
+  if len(_fnameprefix) > 0 and not _fnameprefix.endswith("_"):
+    _fnameprefix += "_"
+
+  funcname_ncap = "n"
+  for i, c in enumerate(_funcname):
+    if i == 0:
+      funcname_ncap += c.upper()
+    else:
+      funcname_ncap += c
   canv.Update()
-  canv.SaveAs("%s/fTest_%s_%s_%s_chi2_vs_nGauss.png"%(_outdir,_cat,_proc,_extension))
-  canv.SaveAs("%s/fTest_%s_%s_%s_chi2_vs_nGauss.pdf"%(_outdir,_cat,_proc,_extension))
+  canv.SaveAs("%s/%sfTest_%s_%s_%s_chi2_vs_%s.png"%(_outdir,_fnameprefix,_cat,_proc,_extension,funcname_ncap))
+  canv.SaveAs("%s/%sfTest_%s_%s_%s_chi2_vs_%s.pdf"%(_outdir,_fnameprefix,_cat,_proc,_extension,funcname_ncap))
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Signal fit plots
 # Plot final pdf at MH = 125 (with data) + individual Pdf components
-def plotPdfComponents(ssf,_outdir='./',_extension='',_proc='',_cat=''):
+def plotPdfComponents(
+  ssf,
+  _outdir='./',
+  _extension='',
+  _proc='',
+  _cat='',
+  _fnameprefix='', # Prefix for output file name
+  _xaxislabel='m_{#gamma#gamma} [GeV]', # Label for x-axis
+  _xrange=[100,150], # Range for x-axis
+):
   canv = ROOT.TCanvas()
   canv.SetLeftMargin(0.15)
   ssf.MH.setVal(125)
@@ -196,20 +240,20 @@ def plotPdfComponents(ssf,_outdir='./',_extension='',_proc='',_cat=''):
   hists['final'].SetLineWidth(2)
   hists['final'].SetLineColor(1)
   hists['final'].SetTitle("")
-  hists['final'].GetXaxis().SetTitle("m_{#gamma#gamma} [GeV]")
+  hists['final'].GetXaxis().SetTitle(_xaxislabel)
   hists['final'].SetMinimum(0)
   if hists['final'].GetMaximum()>hmax: hmax = hists['final'].GetMaximum()
   if hists['final'].GetMinimum()<hmin: hmin = hists['final'].GetMinimum()
   #hists['final'].GetXaxis().SetRangeUser(115,140)
-  hists['final'].GetXaxis().SetRangeUser(100,150)
+  hists['final'].GetXaxis().SetRangeUser(_xrange[0],_xrange[1])
   # Create data histogram
   hists['data'] = ssf.xvar.createHistogram("h_data%s"%_extension,ROOT.RooFit.Binning(ssf.nBins))
   ssf.DataHists['125'].fillHistogram(hists['data'],ROOT.RooArgList(ssf.xvar))
   hists['data'].SetTitle("")
-  hists['data'].GetXaxis().SetTitle("m_{#gamma#gamma} [GeV]")
+  hists['data'].GetXaxis().SetTitle(_xaxislabel)
   hists['data'].SetMinimum(0)
   #hists['data'].GetXaxis().SetRangeUser(115,140)
-  hists['data'].GetXaxis().SetRangeUser(100,150)
+  hists['data'].GetXaxis().SetRangeUser(_xrange[0],_xrange[1])
   hists['data'].Scale(float(ssf.nBins)/1600)
   hists['data'].SetMarkerStyle(20)
   hists['data'].SetMarkerColor(1)
@@ -270,12 +314,21 @@ def plotPdfComponents(ssf,_outdir='./',_extension='',_proc='',_cat=''):
   lat1.SetTextSize(0.035)
   lat1.DrawLatex(0.65,0.3,"#chi^{2}/n(dof) = %.4f"%(ssf.getChi2()/ssf.Ndof))
 
+  if len(_fnameprefix) > 0 and not _fnameprefix.endswith("_"):
+    _fnameprefix += "_"
   canv.Update()
-  canv.SaveAs("%s/%sshape_pdf_components_%s_%s.png"%(_outdir,_extension,_proc,_cat))
-  canv.SaveAs("%s/%sshape_pdf_components_%s_%s.pdf"%(_outdir,_extension,_proc,_cat))
+  canv.SaveAs("%s/%s%sshape_pdf_components_%s_%s.png"%(_outdir,_fnameprefix,_extension,_proc,_cat))
+  canv.SaveAs("%s/%s%sshape_pdf_components_%s_%s.pdf"%(_outdir,_fnameprefix,_extension,_proc,_cat))
 
 # Plot final pdf for each mass point
-def plotInterpolation(_finalModel,_outdir='./',_massPoints='120,121,122,123,124,125,126,127,128,129,130'):
+def plotInterpolation(
+  _finalModel,
+  _outdir='./',
+  _massPoints='120,121,122,123,124,125,126,127,128,129,130',
+  _fnameprefix='', # Prefix for output file name
+  _xaxislabel='m_{#gamma#gamma} [GeV]', # Label for x-axis
+  _xrange=[100,150], # Range for x-axis 
+):
 
   canv = ROOT.TCanvas()
   colors = [ROOT.kRed,ROOT.kCyan,ROOT.kBlue+1,ROOT.kOrange-3,ROOT.kMagenta-7,ROOT.kGreen+1,ROOT.kYellow-7,ROOT.kViolet+6,ROOT.kTeal+1,ROOT.kPink+1,ROOT.kAzure+1]
@@ -315,11 +368,11 @@ def plotInterpolation(_finalModel,_outdir='./',_massPoints='120,121,122,123,124,
 
   # Extract first hist and clone for axes
   haxes = hists[list(hists.keys())[0]].Clone()
-  haxes.GetXaxis().SetTitle("m_{#gamma#gamma} [GeV]")
+  haxes.GetXaxis().SetTitle(_xaxislabel)
   haxes.GetYaxis().SetTitle("Events / %.2f GeV"%((_finalModel.xvar.getMax()-_finalModel.xvar.getMin())/_finalModel.xvar.getBins()))
   haxes.SetMinimum(0)
   haxes.SetMaximum(hmax*1.2)
-  haxes.GetXaxis().SetRangeUser(100,150)
+  haxes.GetXaxis().SetRangeUser(_xrange[0],_xrange[1])
   haxes.Draw("AXIS")
 
   # Draw rest of histograms
@@ -337,9 +390,11 @@ def plotInterpolation(_finalModel,_outdir='./',_massPoints='120,121,122,123,124,
   lat.DrawLatex(0.9,0.92,"%s"%(_finalModel.name))
 
 
+  if len(_fnameprefix) > 0 and not _fnameprefix.endswith("_"):
+    _fnameprefix += "_"
   canv.Update()
-  canv.SaveAs("%s/%s_model_vs_mH.png"%(_outdir,_finalModel.name))
-  canv.SaveAs("%s/%s_model_vs_mH.pdf"%(_outdir,_finalModel.name))
+  canv.SaveAs("%s/%s%s_model_vs_mH.png"%(_outdir,_fnameprefix,_finalModel.name))
+  canv.SaveAs("%s/%s%s_model_vs_mH.pdf"%(_outdir,_fnameprefix,_finalModel.name))
 
 
 
@@ -347,7 +402,14 @@ def plotInterpolation(_finalModel,_outdir='./',_massPoints='120,121,122,123,124,
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Plot splines
-def plotSplines(_finalModel,_outdir="./",_nominalMass='125',splinesToPlot=['xs','br','ea','fracRV']):
+def plotSplines(
+  _finalModel,
+  _outdir="./",
+  _nominalMass='125',
+  splinesToPlot=['xs','br','ea','fracRV'],
+  _fnameprefix='', # Prefix for output file name
+  _xaxislabel='m_{H} [GeV]', # Label for x-axis
+):
   canv = ROOT.TCanvas()
   colorMap = {'xs':ROOT.kRed-4,'br':ROOT.kAzure+1,'ea':ROOT.kGreen+1,'fracRV':ROOT.kMagenta-7,'norm':ROOT.kBlack}
   grs = od()
@@ -382,7 +444,7 @@ def plotSplines(_finalModel,_outdir="./",_nominalMass='125',splinesToPlot=['xs',
   # Draw axes
   haxes = ROOT.TH1F("h_axes_spl","h_axes_spl",int(_finalModel.MHHigh)-int(_finalModel.MHLow),int(_finalModel.MHLow),int(_finalModel.MHHigh))
   haxes.SetTitle("")
-  haxes.GetXaxis().SetTitle("m_{H} [GeV]")
+  haxes.GetXaxis().SetTitle(_xaxislabel)
   haxes.GetXaxis().SetTitleSize(0.05)
   haxes.GetXaxis().SetTitleOffset(0.85)
   haxes.GetXaxis().SetLabelSize(0.035)
@@ -417,13 +479,23 @@ def plotSplines(_finalModel,_outdir="./",_nominalMass='125',splinesToPlot=['xs',
   lat.SetNDC()
   lat.SetTextSize(0.03)
   lat.DrawLatex(0.9,0.92,"%s"%(_finalModel.name))
+  if len(_fnameprefix) > 0 and not _fnameprefix.endswith("_"):
+    _fnameprefix += "_"
   canv.Update()
-  canv.SaveAs("%s/%s_splines.png"%(_outdir,_finalModel.name))
-  canv.SaveAs("%s/%s_splines.pdf"%(_outdir,_finalModel.name))
+  canv.SaveAs("%s/%s%s_splines.png"%(_outdir,_fnameprefix,_finalModel.name))
+  canv.SaveAs("%s/%s%s_splines.pdf"%(_outdir,_fnameprefix,_finalModel.name))
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Function for plotting final signal model: neat
-def plotSignalModel(_hists,_opt,_outdir=".",offset=0.02):
+def plotSignalModel(
+  _hists,
+  _opt,
+  _outdir=".",
+  offset=0.02,
+  _fnameprefix='', # Prefix for output file name
+  _xrange=[105,140],
+  _proctext='H #rightarrow #gamma#gamma', # LaTeX of process on plot
+  ):
   colorMap = {'2016':38,'2017':30,'2018':46,'2022preEE':38,'2022postEE':30}
   canv = ROOT.TCanvas("c","c",650,600)
   canv.SetBottomMargin(0.12)
@@ -434,7 +506,7 @@ def plotSignalModel(_hists,_opt,_outdir=".",offset=0.02):
   h_axes.Reset()
   h_axes.SetMaximum(_hists['data'].GetMaximum()*1.2)
   h_axes.SetMinimum(0.)
-  h_axes.GetXaxis().SetRangeUser(105,140)
+  h_axes.GetXaxis().SetRangeUser(_xrange[0],_xrange[1])
   h_axes.SetTitle("")
   h_axes.GetXaxis().SetTitle("%s (%s)"%(_opt.xvar.split(":")[1],_opt.xvar.split(":")[2]))
   h_axes.GetXaxis().SetTitleSize(0.05)
@@ -536,7 +608,7 @@ def plotSignalModel(_hists,_opt,_outdir=".",offset=0.02):
   lat0.SetTextSize(0.045)
   lat0.DrawLatex(0.15,0.92,"#bf{CMS} #it{%s}"%_opt.label)
   lat0.DrawLatex(0.77,0.92,"%s TeV"%(sqrts__.split("TeV")[0]))
-  lat0.DrawLatex(0.16+offset,0.83,"H #rightarrow #gamma#gamma")
+  lat0.DrawLatex(0.16+offset,0.83,"%s"%_proctext)
 
   # Load translations
   translateCats = {} if _opt.translateCats is None else LoadTranslations(_opt.translateCats)
@@ -563,14 +635,16 @@ def plotSignalModel(_hists,_opt,_outdir=".",offset=0.02):
   lat1.DrawLatex(0.83,0.8,"%s %s"%(procStr,yearStr))
 
   canv.Update()
+  if len(_fnameprefix) > 0 and not _fnameprefix.endswith("_"):
+    _fnameprefix += "_"
 
   # Write effSigma to file
   if len(_opt.years.split(",")) >1:
     es = {}
     es['combined'] = effSigma
     for year in _opt.years.split(","): es[year] = getEffSigma(_hists['pdf_%s'%year])
-    with open("%s/effSigma_%s.json"%(_outdir,catExt),"w") as jf: json.dump(es,jf)
+    with open("%s/%seffSigma_%s.json"%(_outdir,_fnameprefix,catExt),"w") as jf: json.dump(es,jf)
 
   # Save canvas
-  canv.SaveAs("%s/smodel_%s%s%s.pdf"%(_outdir,catExt,procExt,yearExt))
-  canv.SaveAs("%s/smodel_%s%s%s.png"%(_outdir,catExt,procExt,yearExt))
+  canv.SaveAs("%s/%ssmodel_%s%s%s.pdf"%(_outdir,_fnameprefix,catExt,procExt,yearExt))
+  canv.SaveAs("%s/%ssmodel_%s%s%s.png"%(_outdir,_fnameprefix,catExt,procExt,yearExt))

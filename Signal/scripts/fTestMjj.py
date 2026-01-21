@@ -41,8 +41,8 @@ def get_options():
   parser.add_option('--nGaussMax', dest='nGaussMax', default=5, type='int', help="Max number of gaussians to test")
   parser.add_option('--skipWV', dest='skipWV', default=False, action="store_true", help="Skip processing of WV case")
   parser.add_option('--weightName', dest='weightName', default='weight', help="Weight name to apply to dataset (default: weight)")
-  parser.add_option('--mggLow', dest='mggLow', default=100, type='int', help="Lower mgg fit range (default: 100)")
-  parser.add_option('--mggHigh', dest='mggHigh', default=180, type='int', help="Upper mgg fit range (default: 180)")
+  parser.add_option('--mjjLow', dest='mjjLow', default=80, type='int', help="Lower mjj fit range (default: 80)")
+  parser.add_option('--mjjHigh', dest='mjjHigh', default=190, type='int', help="Upper mjj fit range (default: 190)")
   # Minimizer options
   parser.add_option('--minimizerMethod', dest='minimizerMethod', default='TNC', help="(Scipy) Minimizer method")
   parser.add_option('--minimizerTolerance', dest='minimizerTolerance', default=1e-8, type='float', help="(Scipy) Minimizer toleranve")
@@ -106,7 +106,7 @@ for pidx, proc in enumerate(procsToFTest):
     for nGauss in range(1,opt.nGaussMax+1):
       k = "nGauss_%g"%nGauss
       ssf = SimultaneousFit(
-          "fTest_Mgg_RV_%g" % nGauss,
+          "fTest_Mjj_RV_%g" % nGauss,
           proc,
           opt.cat,
           datasets_RV,
@@ -119,9 +119,9 @@ for pidx, proc in enumerate(procsToFTest):
           0,
           opt.minimizerMethod,
           opt.minimizerTolerance,
-          xhigh=opt.mggHigh,
-          xlow=opt.mggLow,
-          fitType="mgg", 
+          xhigh=opt.mjjHigh,
+          xlow=opt.mjjLow,
+          fitType="mjj", 
           verbose=False
       )
       ssf.buildNGaussians(nGauss)
@@ -133,6 +133,7 @@ for pidx, proc in enumerate(procsToFTest):
           min_reduced_chi2 = ssfs[k].getReducedChi2()
           nGauss_opt = nGauss
         print("   * (%s,%s,RV): nGauss = %g, chi^2/n(dof) = %.4f"%(proc,opt.cat,nGauss,ssfs[k].getReducedChi2()))
+    funcname = "gauss" # change if adding other functions
     # Set optimum
     df.loc[df['proc']==proc,'nRV'] = nGauss_opt
     # Make plots
@@ -145,7 +146,9 @@ for pidx, proc in enumerate(procsToFTest):
           _proc=proc,
           _cat=opt.cat,
           _mass=opt.mass,
-          _fnameprefix="Mgg",
+          _fnameprefix="Mjj",
+          _xaxislabel="m_{jj} [GeV]",
+          _xrange=[opt.mjjLow,opt.mjjHigh],
       )
       plotFTestResults(
           ssfs,
@@ -155,7 +158,8 @@ for pidx, proc in enumerate(procsToFTest):
           _proc=proc,
           _cat=opt.cat,
           _mass=opt.mass,
-          _fnameprefix="Mgg",
+          _fnameprefix="Mjj",
+          _funcname=funcname,
       )
 
   # Run fTest: WV
@@ -167,7 +171,7 @@ for pidx, proc in enumerate(procsToFTest):
     for nGauss in range(1,opt.nGaussMax+1):
       k = "nGauss_%g"%nGauss
       ssf = SimultaneousFit(
-          "fTest_Mgg_WV_%g" % nGauss,
+          "fTest_Mjj_WV_%g" % nGauss,
           proc,
           opt.cat,
           datasets_WV,
@@ -180,9 +184,9 @@ for pidx, proc in enumerate(procsToFTest):
           0,
           opt.minimizerMethod,
           opt.minimizerTolerance,
-          xhigh=opt.mggHigh,
-          xlow=opt.mggLow,
-          fitType="mgg", 
+          xhigh=opt.mjjHigh,
+          xlow=opt.mjjLow,
+          fitType="mjj", 
           verbose=False
       )
       ssf.buildNGaussians(nGauss)
@@ -194,38 +198,44 @@ for pidx, proc in enumerate(procsToFTest):
           min_reduced_chi2 = ssfs[k].getReducedChi2()
           nGauss_opt = nGauss
         print("   * (%s,%s,WV): nGauss = %g, chi^2/n(dof) = %.4f"%(proc,opt.cat,nGauss,ssfs[k].getReducedChi2()))
+    funcname = "gauss" # change if adding other functions
     # Set optimum
     df.loc[df['proc']==proc,'nWV'] = nGauss_opt
     # Make plots
     if( opt.doPlots )&( len(ssfs.keys())!=0 ):
       plotFTest(
-          ssfs,
-          _opt=nGauss_opt,
-          _outdir="%s/outdir_%s/fTest/Plots" % (swd__, opt.ext),
-          _extension="WV",
-          _proc=proc,
-          _cat=opt.cat,
-          _mass=opt.mass,
-          _fnameprefix="Mgg",
+        ssfs,
+        _opt=nGauss_opt,
+        _outdir="%s/outdir_%s/fTest/Plots" % (swd__, opt.ext),
+        _extension="WV",
+        _proc=proc,
+        _cat=opt.cat,
+        _mass=opt.mass,
+        _fnameprefix="Mjj",
+        _xaxislabel="m_{jj} [GeV]",
+        _xrange=[opt.mjjLow,opt.mjjHigh], 
       )
       plotFTestResults(
-          ssfs,
-          _opt=nGauss_opt,
-          _outdir="%s/outdir_%s/fTest/Plots" % (swd__, opt.ext),
-          _extension="WV",
-          _proc=proc,
-          _cat=opt.cat,
-          _mass=opt.mass,
-          _fnameprefix="Mgg",
+        ssfs,
+        _opt=nGauss_opt,
+        _outdir="%s/outdir_%s/fTest/Plots" % (swd__, opt.ext),
+        _extension="WV",
+        _proc=proc,
+        _cat=opt.cat,
+        _mass=opt.mass,
+        _fnameprefix="Mjj",
+        _funcname=funcname,
       )
 
   # Close ROOT file
   inputWS.Delete()
   f.Close()
 
+json_func_shortname = "nGauss" # change if adding other functions
+
 # Make output
 if not os.path.isdir("%s/outdir_%s/fTest/json"%(swd__,opt.ext)): os.system("mkdir %s/outdir_%s/fTest/json"%(swd__,opt.ext))
-ff = open("%s/outdir_%s/fTest/json/nGauss_Mgg_%s.json"%(swd__,opt.ext,opt.cat),"w")
+ff = open("%s/outdir_%s/fTest/json/%s_Mjj_%s.json"%(swd__,opt.ext,json_func_shortname,opt.cat),"w")
 ff.write("{\n")
 # Iterate over rows in dataframe: sorted by sumEntries
 pitr = 1

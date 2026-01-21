@@ -20,6 +20,10 @@ BATCH=""
 QUEUE=""
 YEAR="2016"
 CATOFFSET=0
+FITTYPE="mgg" # mgg or mjj
+MASSLOW=100
+MASSHIGH=180
+BINWIDTH=2
 
 usage(){
 	echo "The script runs background scripts:"
@@ -43,6 +47,10 @@ echo "--isData) specified in fb^-{1} (default $DATA)) "
 echo "--unblind) specified in fb^-{1} (default $UNBLIND)) "
 echo "--batch) which batch system to use (None (''),HTCONDOR,IC) (default '$BATCH')) "
 echo "--queue) queue to submit jobs to (specific to batch))"
+echo "--fitType) mgg or mjj (default $FITTYPE)) "
+echo "--massLow) lower fit range (default $MASSLOW)) "
+echo "--massHigh) upper fit range (default $MASSHIGH)) "
+echo "--binWidth) bin width for plots (default $BINWIDTH)) "
 }
 
 
@@ -50,7 +58,7 @@ echo "--queue) queue to submit jobs to (specific to batch))"
 
 
 # options may be followed by one colon to indicate they have a required argument
-if ! options=$(getopt -u -o hi:p:f: -l help,inputFile:,procs:,flashggCats:,ext:,catOffset:,fTestOnly,pseudoDataOnly,bkgPlotsOnly,pseudoDataDat:,sigFile:,seed:,intLumi:,year:,unblind,isData,batch:,queue: -- "$@")
+if ! options=$(getopt -u -o hi:p:f: -l help,inputFile:,procs:,flashggCats:,ext:,catOffset:,fTestOnly,pseudoDataOnly,bkgPlotsOnly,pseudoDataDat:,sigFile:,seed:,intLumi:,year:,unblind,isData,batch:,queue:,fitType:,massLow:,massHigh:,binWidth: -- "$@")
 then
 # something went wrong, getopt will put out an error message for us
 exit 1
@@ -78,6 +86,10 @@ case $1 in
 --unblind) UNBLIND=1;;
 --batch) BATCH=$2; shift;;
 --queue) QUEUE=$2; shift;;
+--fitType) FITTYPE=$2; shift;;
+--massLow) MASSLOW=$2; shift;;
+--massHigh) MASSHIGH=$2; shift;;
+--binWidth) BINWIDTH=$2; shift;;
 
 (--) shift; break;;
 (-*) usage; echo "$0: error - unrecognized option $1" 1>&2; usage >> /dev/stderr; exit 1;;
@@ -134,6 +146,7 @@ echo "--> Create fake data by fitting simulations, throwing toys and adding data
 echo "--> generating $INTLUMI fb^{-1} of pseudodata."
 echo "--------------------------------------"
 
+# TODO: Add binWidth arg?
 echo " ./bin/pseudodataMaker -i $PSEUDODATADAT --pseudodata 1 --plotdir $OUTDIR/pseudoData -f $CATS --seed $SEED --intLumi $INTLUMI "
 ./bin/pseudodataMaker -i $PSEUDODATADAT --pseudodata 1 --plotdir $OUTDIR/pseudoData -f $CATS --seed $SEED --intLumi $INTLUMI  -y $OUTDIR/pseudoData/yields_pseudodata.txt
 FILE=$OUTDIR/pseudoData/pseudoWS.root
@@ -159,8 +172,14 @@ if [ $ISDATA == 1 ]; then
 OPT=" --isData 1"
 fi
 
-echo " ./bin/fTest -i $FILE --saveMultiPdf $OUTDIR/CMS-HGG_multipdf_$EXT_$CATS.root  -D $OUTDIR/bkgfTest$DATAEXT -f $CATS $OPT --year $YEAR --catOffset $CATOFFSET"
-./bin/fTest -i $FILE --saveMultiPdf $OUTDIR/CMS-HGG_multipdf_$EXT_$CATS.root  -D $OUTDIR/bkgfTest$DATAEXT -f $CATS $OPT --year $YEAR --catOffset $CATOFFSET
+if [  $FITTYPE == "mgg" ]; then
+  echo " ./bin/fTest -i $FILE --saveMultiPdf $OUTDIR/CMS-HGG_multipdf_$EXT_$CATS.root  -D $OUTDIR/bkgfTest$DATAEXT -f $CATS $OPT --year $YEAR --catOffset $CATOFFSET --massLow $MASSLOW --massHigh $MASSHIGH --fitType $FITTYPE --binWidth $BINWIDTH"
+  ./bin/fTest -i $FILE --saveMultiPdf $OUTDIR/CMS-HGG_multipdf_$EXT_$CATS.root  -D $OUTDIR/bkgfTest$DATAEXT -f $CATS $OPT --year $YEAR --catOffset $CATOFFSET --massLow $MASSLOW --massHigh $MASSHIGH --fitType $FITTYPE --binWidth $BINWIDTH
+fi
+if [  $FITTYPE == "mjj" ]; then
+  echo " ./bin/fTest -i $FILE --saveMultiPdf $OUTDIR/CMS-HBB_multipdf_$EXT_$CATS.root  -D $OUTDIR/bkgfTest$DATAEXT -f $CATS $OPT --year $YEAR --catOffset $CATOFFSET --massLow $MASSLOW --massHigh $MASSHIGH --fitType $FITTYPE --binWidth $BINWIDTH"
+  ./bin/fTest -i $FILE --saveMultiPdf $OUTDIR/CMS-HBB_multipdf_$EXT_$CATS.root  -D $OUTDIR/bkgfTest$DATAEXT -f $CATS $OPT --year $YEAR --catOffset $CATOFFSET --massLow $MASSLOW --massHigh $MASSHIGH --fitType $FITTYPE --binWidth $BINWIDTH
+fi
 
 OPT=""
 fi
@@ -180,8 +199,14 @@ fi
 if [ $UNBLIND == 1 ]; then
 OPT=" --unblind"
 fi
-echo "./scripts/subBkgPlots.py -b CMS-HGG_multipdf_$EXT.root -d $OUTDIR/bkgPlots$DATAEXT -S 13 --isMultiPdf --useBinnedData  --doBands --massStep 1 $SIG -L 100 -H 180 -f $CATS -l $CATS --intLumi $INTLUMI $OPT --batch $BATCH -q $QUEUE --year $YEAR"
-./scripts/subBkgPlots.py -b CMS-HGG_multipdf_$EXT.root -d $OUTDIR/bkgPlots$DATAEXT -S 13 --isMultiPdf --useBinnedData  --doBands  --massStep 1 $SIG -L 100 -H 180 -f $CATS -l $CATS --intLumi $INTLUMI $OPT --batch $BATCH -q $QUEUE --year $YEAR
+if [  $FITTYPE == "mgg" ]; then # TODO: Add binWidth arg?
+  echo "./scripts/subBkgPlots.py -b CMS-HGG_multipdf_$EXT.root -d $OUTDIR/bkgPlots$DATAEXT -S 13 --isMultiPdf --useBinnedData  --doBands --massStep 1 $SIG -L $MASSLOW -H $MASSHIGH -f $CATS -l $CATS --intLumi $INTLUMI $OPT --batch $BATCH -q $QUEUE --year $YEAR"
+  ./scripts/subBkgPlots.py -b CMS-HGG_multipdf_$EXT.root -d $OUTDIR/bkgPlots$DATAEXT -S 13 --isMultiPdf --useBinnedData  --doBands  --massStep 1 $SIG -L $MASSLOW -H $MASSHIGH -f $CATS -l $CATS --intLumi $INTLUMI $OPT --batch $BATCH -q $QUEUE --year $YEAR
+fi
+if [  $FITTYPE == "mjj" ]; then # TODO: Add binWidth arg?
+  echo "./scripts/subBkgPlots.py -b CMS-HBB_multipdf_$EXT.root -d $OUTDIR/bkgPlots$DATAEXT -S 13 --isMultiPdf --useBinnedData  --doBands --massStep 1 $SIG -L $MASSLOW -H $MASSHIGH -f $CATS -l $CATS --intLumi $INTLUMI $OPT --batch $BATCH -q $QUEUE --year $YEAR"
+  ./scripts/subBkgPlots.py -b CMS-HBB_multipdf_$EXT.root -d $OUTDIR/bkgPlots$DATAEXT -S 13 --isMultiPdf --useBinnedData  --doBands  --massStep 1 $SIG -L $MASSLOW -H $MASSHIGH -f $CATS -l $CATS --intLumi $INTLUMI $OPT --batch $BATCH -q $QUEUE --year $YEAR
+fi
 
 # FIX THIS FOR CONDOR: 
 #continueLoop=1

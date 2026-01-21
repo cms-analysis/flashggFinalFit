@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
 # Script for submitting signal fitting jobs for finalfitslite
-import os, sys
+import os
+import sys
 from optparse import OptionParser
 from collections import OrderedDict as od
 
@@ -9,6 +10,7 @@ from collections import OrderedDict as od
 from commonTools import *
 from commonObjects import *
 from tools.submissionTools import *
+from CollectModels import collect_models, create_empty_json
 
 def get_options():
   parser = OptionParser()
@@ -19,6 +21,12 @@ def get_options():
   parser.add_option('--jobOpts', dest='jobOpts', default='', help="Additional options to add to job submission. For Condor separate individual options with a colon (specify all within quotes e.g. \"option_xyz = abc+option_123 = 456\")")
   parser.add_option('--groupSignalFitJobsByCat', dest='groupSignalFitJobsByCat', default=False, action="store_true", help="Option to group signalFit jobs by category")
   parser.add_option('--printOnly', dest='printOnly', default=False, action="store_true", help="Dry run: print submission files only")
+  parser.add_option('--fitType', dest='fitType', default='mgg', help="Fit type: mgg, mjj or 2D. (default: mgg)")
+  parser.add_option('--mggLow', dest='mggLow', default=100, type='int', help="Lower mgg fit range (default: 100)")
+  parser.add_option('--mggHigh', dest='mggHigh', default=180, type='int', help="Upper mgg fit range (default: 180)")
+  parser.add_option('--mjjLow', dest='mjjLow', default=80, type='int', help="Lower mjj fit range (default: 80)")
+  parser.add_option('--mjjHigh', dest='mjjHigh', default=190, type='int', help="Upper mjj fit range (default: 190)")
+  parser.add_option('--noClean', dest='noClean', default=False, action="store_true", help="Do not clean up old ROOT files and plots. (default: False)")
   return parser.parse_args()
 (opt,args) = get_options()
 
@@ -58,6 +66,12 @@ if opt.inputConfig != '':
     options['jobOpts']                 = opt.jobOpts
     options['groupSignalFitJobsByCat'] = opt.groupSignalFitJobsByCat
     options['printOnly']               = opt.printOnly
+    options['fitType']                 = opt.fitType
+    options['mggLow']                  = opt.mggLow
+    options['mggHigh']                 = opt.mggHigh
+    options['mjjLow']                  = opt.mjjLow
+    options['mjjHigh']                 = opt.mjjHigh
+    options['noClean']                 = opt.noClean
   
     #Delete copy of file
     os.system("rm config.py")
@@ -106,6 +120,7 @@ print(" --> Mass points: %s --> Low = %s, High = %s"%(options['massPoints'],opti
 print(" --> Extension: %s"%options['ext'])
 print(" --> Analysis: %s"%options['analysis'])
 print(" --> Year: %s ::: Corresponds to intLumi = %.2f fb^-1"%(options['year'],lumiMap[options['year']]))
+print(" --> Fit type: %s"%options['fitType'])
 if options['mode'] in ['calcPhotonSyst']:
   print(" --> Photon shape systematics:")
   print("     * scales       = %s"%options['scales'])
@@ -133,18 +148,95 @@ elif options['mode'] == "packageOnly": print(" --> Packaging signal fits (one fi
 print(" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Remove existing plots
+if options["fitType"] == "2D":
+  plot_fittype_prefix = "M*"
+elif options["fitType"] == "mgg":
+  plot_fittype_prefix = "Mgg*"
+elif options["fitType"] == "mjj":
+  plot_fittype_prefix = "Mjj*"
+else:
+  print(f" --> Invalid fitType {options['fitType']}. Exiting to avoid accidental deletion.")
+  sys.exit(1)
+
+if options["mode"] == "fTest" and not options["noClean"]:
+  # Signal fTest
+  _plotdir = f"{swd__}/outdir_{options['ext']}/fTest/Plots"
+  pattern = f"{_plotdir}/{plot_fittype_prefix}"
+  files = glob.glob(pattern)
+  if len(files) == 0:
+    print(" --> No existing plots found")
+  else:
+    print(f" --> Archiving {len(files)} existing plots")
+    if not os.path.isdir(f"{_plotdir}/archive"):
+      os.system(f"mkdir -p {_plotdir}/archive")
+    for f in files:
+      os.system(f"mv {f} {_plotdir}/archive")
+elif options["mode"] == "signalFit" and not options["noClean"]:
+  # Signal Fit
+  _plotdir = f"{swd__}/outdir_{options['ext']}/signalFit/Plots"
+  pattern = f"{_plotdir}/{plot_fittype_prefix}"
+  files = glob.glob(pattern)
+  if len(files) == 0:
+    print(" --> No existing plots found")
+  else:
+    print(f" --> Archiving {len(files)} existing plots")
+    if not os.path.isdir(f"{_plotdir}/archive"):
+      os.system(f"mkdir -p {_plotdir}/archive")
+    for f in files:
+      print(f"   --> Archiving {f.split('/')[-1]}")
+      os.system(f"mv {f} {_plotdir}/archive")
+elif not options["noClean"]:
+  print(f" --> Invalid mode {options['mode']}. Exiting to avoid accidental deletion.")
+  sys.exit(1)
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Remove old models.json file
+_json_file = "%s/outdir_%s/signalFit/output/models.json"%(swd__,options['ext'])
+if options["mode"] == "signalFit" and not options['noClean']:
+  if os.path.exists(_json_file):
+    print("  --> Removing old models.json file")
+    os.remove(_json_file)
+  else:
+    print("  --> No old models.json file to remove")
+
+if options['mode'] == "signalFit" and not os.path.exists(_json_file):
+  print("  --> Creating empty models.json file")
+  create_empty_json(_json_file)
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Make directory to store job scripts and output
 if not os.path.isdir("%s/outdir_%s"%(swd__,options['ext'])): os.system("mkdir %s/outdir_%s"%(swd__,options['ext']))
 
 # Write submission files: style depends on batch system
 writeSubFiles(options)
+# if options['fitType'] == "mgg" or options['fitType'] == "2D":
+#   writeSubFilesMgg(options)
+# if options['fitType'] == "mjj" or options['fitType'] == "2D":
+#   writeSubFilesMjj(options)
 print("  --> Finished writing submission scripts")
 
 # Submit scripts to batch system
 if not options['printOnly']: 
   submitFiles(options)
+  # if options["fitType"] == "mgg" or options['fitType'] == "2D":
+  #   submitFilesMgg(options)
+  # if options["fitType"] == "mjj" or options['fitType'] == "2D":
+  #   submitFilesMjj(options)
 else:
   print("  --> Running with printOnly option. Will not submit scripts")
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 2D Model Construction
+if options['fitType'] == "2D":
+  print("  --> Running 2D model construction")
+  output_path_base = "%s/outdir_%s/signalFit/output"%(swd__,options['ext'])
+  if options['mode'] == "fTestParallel":
+    collect_models(
+      json_file=f"{output_path_base}/models.json",
+      output_path=f"{output_path_base}/CMS-2D_sigfit_{options['ext']}_%PROC_%YEAR_%CAT.root",
+      ws_type="signal",
+      no_clear=options['noClean'],
+    )
+
 leave()
