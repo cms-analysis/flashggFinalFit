@@ -45,8 +45,17 @@ def getValueFromJson(row,uncertainties,sname):
   p = re.sub("_2016_%s"%decayMode,"",row['proc'])
   p = re.sub("_2017_%s"%decayMode,"",p)
   p = re.sub("_2018_%s"%decayMode,"",p)
-  p = re.sub("_2022preEE_%s"%decayMode,"",p)
-  p = re.sub("_2022postEE_%s"%decayMode,"",p)
+  # p = re.sub("_2022preEE_%s"%decayMode,"",p)
+  # p = re.sub("_2022postEE_%s"%decayMode,"",p)
+  p = re.sub("_preEE_%s"%decayMode,"",p)
+  p = re.sub("_postEE_%s"%decayMode,"",p)
+  p = re.sub("_postBPix_%s"%decayMode,"",p)
+  p = re.sub("_preBPix_%s"%decayMode,"",p)
+  # print('uncertainties')
+  # print(p)
+  # print('j')
+  # print(uncertainties)
+ 
   if p in uncertainties: 
     if type(uncertainties[p][sname])==list: return uncertainties[p][sname]
     else: return [uncertainties[p][sname]]
@@ -58,7 +67,7 @@ def getValueFromJson(row,uncertainties,sname):
 # b) Symmetric weight in nominal RooDataSet: "s_w"
 # c) Anti-symmetric shifts in RooDataHist: "a_h"
 def factoryType(d,s):
-
+ 
   #Fix for pdfWeight (as Nweights > 10)
   if('weight_LHEPd' in s['name']): return "s_w"
 
@@ -68,6 +77,12 @@ def factoryType(d,s):
     ws = f.Get(inputWSName__)
     dataHistUp = "%s_%sUp01sigma"%(r.nominalDataName,s['name'])
     dataHistDown = "%s_%sDown01sigma"%(r.nominalDataName,s['name'])
+    # print('datahistup')
+    # print(dataHistUp)
+    # print(r.inputWSFile)
+    # print(ws.allData())
+    # print(ws.data(dataHistUp))
+    
 
     # Check if syst is var (i.e. weight) in workspace
     if ws.allVars().selectByName("%s*"%(s['name'])).getSize():
@@ -156,15 +171,19 @@ def calcSystYields(_nominalDataName,_nominalDataContents,_inputWS,_systFactoryTy
               systYields["%s_down_COWCorr"%s] += w*(f_NNLOPS/f_COWCorr)
 
         else:
+          # print(_nominalDataContents)
           centralWeightStr = "weight_central"
           # Careful, f_central is actually not used here at the moment
           # Do not set it to "weight" since then he will not find it (it is variable and not in the RooDataSet, setting it to zero and skipping all calculations :/)
           if centralWeightStr in _nominalDataContents:
             f_central = p.getRealValue(centralWeightStr)
           else:
-            print("Be careful, the centralWeightStr %s cannot be found in the contents of the nominal tree"%centralWeightStr)
+            pass#print("Be careful, the centralWeightStr %s cannot be found in the contents of the nominal tree"%centralWeightStr)
           # Changed and removed 01sigma to account for HiggsDNA conventions
           f_up, f_down = p.getRealValue("%sUp"%s), p.getRealValue("%sDown"%s)
+          # print(f_up)
+          # print(f_down)
+          f_central=1
           # Checks:
           # 1) if central weights are zero then skip event
           if f_central == 0: continue

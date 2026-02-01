@@ -69,8 +69,38 @@ def getEffSigma(_h):
 # Plot possible nGauss fits and chi2 values
 def plotFTest(ssfs,_opt=1,_outdir='./',_extension='',_proc='',_cat='',_mass='125'):
   canv = ROOT.TCanvas()
-  canv.SetLeftMargin(0.15)
-  LineColorMap = {'1':ROOT.kAzure+1,'2':ROOT.kRed-4,'3':ROOT.kGreen+2,'4':ROOT.kMagenta-9,'5':ROOT.kOrange}
+  canv.SetLeftMargin(0.15)  
+  LineColorMap = {
+    '1': ROOT.kAzure+1,
+    '2': ROOT.kRed-4,
+    '3': ROOT.kGreen+2,
+    '4': ROOT.kMagenta-9,
+    '5': ROOT.kOrange,
+
+    '6': ROOT.kBlue+2,
+    '7': ROOT.kViolet+1,
+    '8': ROOT.kSpring+5,
+    '9': ROOT.kCyan+2,
+    '10': ROOT.kTeal+3,
+
+    '11': ROOT.kPink+6,
+    '12': ROOT.kYellow-6,
+    '13': ROOT.kOrange+7,
+    '14': ROOT.kGreen-6,
+    '15': ROOT.kRed+1,
+
+    '16': ROOT.kBlue-4,
+    '17': ROOT.kMagenta+3,
+    '18': ROOT.kViolet-8,
+    '19': ROOT.kCyan-6,
+    '20': ROOT.kSpring-4,
+
+    '21': ROOT.kTeal-5,
+    '22': ROOT.kPink+9,
+    '23': ROOT.kYellow+2,
+    '24': ROOT.kAzure-4,
+    '25': ROOT.kOrange-3
+}
   pdfs = od()
   hists = od()
   hmax, hmin = 0, 0
@@ -175,6 +205,7 @@ def plotFTestResults(ssfs,_opt,_outdir="./",_extension='',_proc='',_cat='',_mass
   lat.SetNDC()
   lat.SetTextSize(0.03)
   lat.DrawLatex(0.9,0.92,"( %s , %s , %s )"%(_extension,_proc,_cat))
+  
   lat.DrawLatex(0.6,0.75,"Optimum N_{gauss} = %s"%_opt)
   canv.Update()
   canv.SaveAs("%s/fTest_%s_%s_%s_chi2_vs_nGauss.png"%(_outdir,_cat,_proc,_extension))
@@ -535,7 +566,7 @@ def plotSignalModel(_hists,_opt,_outdir=".",offset=0.02):
   lat0.SetNDC()
   lat0.SetTextSize(0.045)
   lat0.DrawLatex(0.15,0.92,"#bf{CMS} #it{%s}"%_opt.label)
-  lat0.DrawLatex(0.77,0.92,"%s TeV"%(sqrts__.split("TeV")[0]))
+  lat0.DrawLatex(0.67,0.92,"61.9 fb^{-1} (13.6 TeV)")
   lat0.DrawLatex(0.16+offset,0.83,"H #rightarrow #gamma#gamma")
 
   # Load translations

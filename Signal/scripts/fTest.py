@@ -31,7 +31,7 @@ def get_options():
   parser.add_option("--inputWSDir", dest='inputWSDir', default='', help="Input flashgg WS directory")
   parser.add_option("--ext", dest='ext', default='', help="Extension")
   parser.add_option("--procs", dest='procs', default='', help="Signal processes")
-  parser.add_option("--nProcsToFTest", dest='nProcsToFTest', default=5, type='int',help="Number of signal processes to fTest (ordered by sum entries), others are set to nRV=1,nWV=1. Set to -1 to run over all")
+  parser.add_option("--nProcsToFTest", dest='nProcsToFTest', default=-1, type='int',help="Number of signal processes to fTest (ordered by sum entries), others are set to nRV=1,nWV=1. Set to -1 to run over all")
   parser.add_option("--cat", dest='cat', default='', help="RECO category")
   parser.add_option('--mass', dest='mass', default='125', help="Mass point to fit")
   parser.add_option('--doPlots', dest='doPlots', default=False, action="store_true", help="Produce Signal fTest plots")
@@ -54,13 +54,14 @@ if opt.doPlots:
 # Load xvar to fit
 nominalWSFileName = glob.glob("%s/output*"%(opt.inputWSDir))[0]
 f0 = ROOT.TFile(nominalWSFileName,"read")
+print('first')
 inputWS0 = f0.Get(inputWSName__)
 xvar = inputWS0.var(opt.xvar)
 xvarFit = xvar.Clone()
 dZ = inputWS0.var("dZ")
 aset = ROOT.RooArgSet(xvar,dZ)
 f0.Close()
-
+print('second')
 # Create MH var
 MH = ROOT.RooRealVar("MH","m_{H}", int(MHLow), int(MHHigh))
 MH.setUnit("GeV")
@@ -70,17 +71,21 @@ MH.setConstant(True)
 df = pd.DataFrame(columns=['proc','sumEntries','nRV','nWV'])
 procYields = od()
 for proc in opt.procs.split(","):
-  WSFileName = glob.glob("%s/output*M%s*%s.root"%(opt.inputWSDir,opt.mass,proc))[0]
-  f = ROOT.TFile(WSFileName,"read")
-  inputWS = f.Get(inputWSName__)
+  print(proc)
   try:
-    d = reduceDataset(inputWS.data("%s_%s_hgg_%s_%s_%s"%(proc,opt.year,opt.mass,sqrts__,opt.cat)),aset)
-    df.loc[len(df)] = [proc,d.sumEntries(),1,1]
-  except TypeError:
-    df.loc[len(df)] = [proc,0,1,1]
-  inputWS.Delete()
-  f.Close()
-
+    WSFileName = glob.glob("%s/output*M%s*%s.root"%(opt.inputWSDir,opt.mass,proc))[0]
+    f = ROOT.TFile(WSFileName,"read")
+    inputWS = f.Get(inputWSName__)
+    try:
+      d = reduceDataset(inputWS.data("%s_%s_hgg_%s_%s_%s"%(proc,opt.year,opt.mass,sqrts__,opt.cat)),aset)
+      df.loc[len(df)] = [proc,d.sumEntries(),1,1]
+    except TypeError:
+      df.loc[len(df)] = [proc,0,1,1]
+    inputWS.Delete()
+    f.Close()
+  except:
+    print(f'error with {proc}')
+print('read in')
 # Extract processes to perform fTest (i.e. first nProcsToFTest):
 if( opt.nProcsToFTest == -1)|( opt.nProcsToFTest > len(opt.procs.split(",")) ): procsToFTest = opt.procs.split(",")
 else: procsToFTest = list(df.sort_values('sumEntries',ascending=False)[0:opt.nProcsToFTest].proc.values)
@@ -109,6 +114,7 @@ for pidx, proc in enumerate(procsToFTest):
       ssf.buildNGaussians(nGauss)
       ssf.runFit()
       ssf.buildSplines()
+      print(ssf.Ndof)
       if ssf.Ndof >= 1: 
         ssfs[k] = ssf
         if ssfs[k].getReducedChi2() < min_reduced_chi2: 

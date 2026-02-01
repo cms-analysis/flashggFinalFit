@@ -249,6 +249,8 @@ lat1.SetTextAlign(31)
 lat1.SetNDC()
 lat1.SetTextSize(0.06)
 lat1.DrawLatex(0.9,0.92,"61.9 fb^{-1} (13.6 TeV)")
+lat1.DrawLatex(0.38,0.92,"#bf{CMS} #it{Preliminary}")
+
 
 pad2.cd()
 h_axes_ratio = hists_ratio['data'].Clone()

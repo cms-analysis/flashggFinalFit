@@ -1,5 +1,5 @@
 {
-    "qqH_FWDH":{
+    "VBF_FWDH":{
         "THU_qqH_Yield":1.0038,
         "THU_qqH_PTH200":1.0000,
         "THU_qqH_MJJ60":1.0000,
@@ -11,7 +11,7 @@
         "THU_qqH_PTHJJ25":1.0000,
         "THU_qqH_JET01":1.0000
     },
-    "WH_had_FWDH":{
+    "WMINUSH2HQQ_FWDH":{
         "THU_qqH_Yield":1.0038,
         "THU_qqH_PTH200":1.0000,
         "THU_qqH_MJJ60":1.0000,
@@ -23,7 +23,7 @@
         "THU_qqH_PTHJJ25":1.0000,
         "THU_qqH_JET01":1.0000
     },
-    "ZH_had_FWDH":{
+    "WPLUSH2HQQ_FWDH":{
         "THU_qqH_Yield":1.0038,
         "THU_qqH_PTH200":1.0000,
         "THU_qqH_MJJ60":1.0000,
@@ -35,7 +35,19 @@
         "THU_qqH_PTHJJ25":1.0000,
         "THU_qqH_JET01":1.0000
     },
-    "qqH_0J":{
+    "ZH2HQQ_FWDH":{
+        "THU_qqH_Yield":1.0038,
+        "THU_qqH_PTH200":1.0000,
+        "THU_qqH_MJJ60":1.0000,
+        "THU_qqH_MJJ120":1.0000,
+        "THU_qqH_MJJ350":1.0000,
+        "THU_qqH_MJJ700":1.0000,
+        "THU_qqH_MJJ1000":1.0000,
+        "THU_qqH_MJJ1500":1.0000,
+        "THU_qqH_PTHJJ25":1.0000,
+        "THU_qqH_JET01":1.0000
+    },
+    "VBF_0J":{
         "THU_qqH_Yield":1.0038,
         "THU_qqH_PTH200":1.0000,
         "THU_qqH_MJJ60":1.0000,
@@ -47,7 +59,7 @@
         "THU_qqH_PTHJJ25":1.0000,
         "THU_qqH_JET01":0.9859
     },
-    "WH_had_0J":{
+    "WMINUSH2HQQ_0J":{
         "THU_qqH_Yield":1.0038,
         "THU_qqH_PTH200":1.0000,
         "THU_qqH_MJJ60":1.0000,
@@ -59,7 +71,7 @@
         "THU_qqH_PTHJJ25":1.0000,
         "THU_qqH_JET01":0.9859
     },
-    "ZH_had_0J":{
+    "WPLUSH2HQQ_0J":{
         "THU_qqH_Yield":1.0038,
         "THU_qqH_PTH200":1.0000,
         "THU_qqH_MJJ60":1.0000,
@@ -71,7 +83,7 @@
         "THU_qqH_PTHJJ25":1.0000,
         "THU_qqH_JET01":0.9859
     },
-    "qqH_1J":{
+    "ZH2HQQ_0J":{
         "THU_qqH_Yield":1.0038,
         "THU_qqH_PTH200":1.0000,
         "THU_qqH_MJJ60":1.0000,
@@ -83,7 +95,7 @@
         "THU_qqH_PTHJJ25":1.0000,
         "THU_qqH_JET01":0.9859
     },
-    "WH_had_1J":{
+    "VBF_1J":{
         "THU_qqH_Yield":1.0038,
         "THU_qqH_PTH200":1.0000,
         "THU_qqH_MJJ60":1.0000,
@@ -95,7 +107,7 @@
         "THU_qqH_PTHJJ25":1.0000,
         "THU_qqH_JET01":0.9859
     },
-    "ZH_had_1J":{
+    "WMINUSH2HQQ_1J":{
         "THU_qqH_Yield":1.0038,
         "THU_qqH_PTH200":1.0000,
         "THU_qqH_MJJ60":1.0000,
@@ -107,7 +119,31 @@
         "THU_qqH_PTHJJ25":1.0000,
         "THU_qqH_JET01":0.9859
     },
-    "qqH_GE2J_MJJ_0_60":{
+    "WPLUSH2HQQ_1J":{
+        "THU_qqH_Yield":1.0038,
+        "THU_qqH_PTH200":1.0000,
+        "THU_qqH_MJJ60":1.0000,
+        "THU_qqH_MJJ120":1.0000,
+        "THU_qqH_MJJ350":1.0000,
+        "THU_qqH_MJJ700":1.0000,
+        "THU_qqH_MJJ1000":1.0000,
+        "THU_qqH_MJJ1500":1.0000,
+        "THU_qqH_PTHJJ25":1.0000,
+        "THU_qqH_JET01":0.9859
+    },
+    "ZH2HQQ_1J":{
+        "THU_qqH_Yield":1.0038,
+        "THU_qqH_PTH200":1.0000,
+        "THU_qqH_MJJ60":1.0000,
+        "THU_qqH_MJJ120":1.0000,
+        "THU_qqH_MJJ350":1.0000,
+        "THU_qqH_MJJ700":1.0000,
+        "THU_qqH_MJJ1000":1.0000,
+        "THU_qqH_MJJ1500":1.0000,
+        "THU_qqH_PTHJJ25":1.0000,
+        "THU_qqH_JET01":0.9859
+    },
+    "VBF_GE2J_MJJ_0_60":{
         "THU_qqH_Yield":1.0038,
         "THU_qqH_PTH200":0.9997,
         "THU_qqH_MJJ60":0.9690,
@@ -119,7 +155,7 @@
         "THU_qqH_PTHJJ25":1.0073,
         "THU_qqH_JET01":1.0118
     },
-    "WH_had_GE2J_MJJ_0_60":{
+    "WMINUSH2HQQ_GE2J_MJJ_0_60":{
         "THU_qqH_Yield":1.0038,
         "THU_qqH_PTH200":0.9997,
         "THU_qqH_MJJ60":0.9690,
@@ -131,7 +167,7 @@
         "THU_qqH_PTHJJ25":1.0073,
         "THU_qqH_JET01":1.0118
     },
-    "ZH_had_GE2J_MJJ_0_60":{
+    "WPLUSH2HQQ_GE2J_MJJ_0_60":{
         "THU_qqH_Yield":1.0038,
         "THU_qqH_PTH200":0.9997,
         "THU_qqH_MJJ60":0.9690,
@@ -143,7 +179,19 @@
         "THU_qqH_PTHJJ25":1.0073,
         "THU_qqH_JET01":1.0118
     },
-    "qqH_GE2J_MJJ_60_120":{
+    "ZH2HQQ_GE2J_MJJ_0_60":{
+        "THU_qqH_Yield":1.0038,
+        "THU_qqH_PTH200":0.9997,
+        "THU_qqH_MJJ60":0.9690,
+        "THU_qqH_MJJ120":1.0034,
+        "THU_qqH_MJJ350":1.0026,
+        "THU_qqH_MJJ700":1.0026,
+        "THU_qqH_MJJ1000":1.0029,
+        "THU_qqH_MJJ1500":0.9967,
+        "THU_qqH_PTHJJ25":1.0073,
+        "THU_qqH_JET01":1.0118
+    },
+    "VBF_GE2J_MJJ_60_120":{
         "THU_qqH_Yield":1.0038,
         "THU_qqH_PTH200":0.9998,
         "THU_qqH_MJJ60":1.0029,
@@ -155,7 +203,7 @@
         "THU_qqH_PTHJJ25":0.9850,
         "THU_qqH_JET01":1.0118
     },
-    "WH_had_GE2J_MJJ_60_120":{
+    "WMINUSH2HQQ_GE2J_MJJ_60_120":{
         "THU_qqH_Yield":1.0038,
         "THU_qqH_PTH200":0.9998,
         "THU_qqH_MJJ60":1.0029,
@@ -167,7 +215,7 @@
         "THU_qqH_PTHJJ25":0.9850,
         "THU_qqH_JET01":1.0118
     },
-    "ZH_had_GE2J_MJJ_60_120":{
+    "WPLUSH2HQQ_GE2J_MJJ_60_120":{
         "THU_qqH_Yield":1.0038,
         "THU_qqH_PTH200":0.9998,
         "THU_qqH_MJJ60":1.0029,
@@ -179,7 +227,19 @@
         "THU_qqH_PTHJJ25":0.9850,
         "THU_qqH_JET01":1.0118
     },
-    "qqH_GE2J_MJJ_120_350":{
+    "ZH2HQQ_GE2J_MJJ_60_120":{
+        "THU_qqH_Yield":1.0038,
+        "THU_qqH_PTH200":0.9998,
+        "THU_qqH_MJJ60":1.0029,
+        "THU_qqH_MJJ120":0.9878,
+        "THU_qqH_MJJ350":1.0018,
+        "THU_qqH_MJJ700":1.0018,
+        "THU_qqH_MJJ1000":1.0020,
+        "THU_qqH_MJJ1500":1.0023,
+        "THU_qqH_PTHJJ25":0.9850,
+        "THU_qqH_JET01":1.0118
+    },
+    "VBF_GE2J_MJJ_120_350":{
         "THU_qqH_Yield":1.0038,
         "THU_qqH_PTH200":1.0000,
         "THU_qqH_MJJ60":1.0029,
@@ -191,7 +251,7 @@
         "THU_qqH_PTHJJ25":0.9893,
         "THU_qqH_JET01":1.0118
     },
-    "WH_had_GE2J_MJJ_120_350":{
+    "WMINUSH2HQQ_GE2J_MJJ_120_350":{
         "THU_qqH_Yield":1.0038,
         "THU_qqH_PTH200":1.0000,
         "THU_qqH_MJJ60":1.0029,
@@ -203,7 +263,7 @@
         "THU_qqH_PTHJJ25":0.9893,
         "THU_qqH_JET01":1.0118
     },
-    "ZH_had_GE2J_MJJ_120_350":{
+    "WPLUSH2HQQ_GE2J_MJJ_120_350":{
         "THU_qqH_Yield":1.0038,
         "THU_qqH_PTH200":1.0000,
         "THU_qqH_MJJ60":1.0029,
@@ -215,7 +275,19 @@
         "THU_qqH_PTHJJ25":0.9893,
         "THU_qqH_JET01":1.0118
     },
-    "qqH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25":{
+    "ZH2HQQ_GE2J_MJJ_120_350":{
+        "THU_qqH_Yield":1.0038,
+        "THU_qqH_PTH200":1.0000,
+        "THU_qqH_MJJ60":1.0029,
+        "THU_qqH_MJJ120":1.0063,
+        "THU_qqH_MJJ350":0.9902,
+        "THU_qqH_MJJ700":1.0005,
+        "THU_qqH_MJJ1000":1.0006,
+        "THU_qqH_MJJ1500":1.0006,
+        "THU_qqH_PTHJJ25":0.9893,
+        "THU_qqH_JET01":1.0118
+    },
+    "VBF_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25":{
         "THU_qqH_Yield":1.0038,
         "THU_qqH_PTH200":1.0000,
         "THU_qqH_MJJ60":0.9306,
@@ -227,7 +299,7 @@
         "THU_qqH_PTHJJ25":1.0271,
         "THU_qqH_JET01":1.0118
     },
-    "WH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25":{
+    "WMINUSH2HQQ_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25":{
         "THU_qqH_Yield":1.0038,
         "THU_qqH_PTH200":1.0000,
         "THU_qqH_MJJ60":0.9306,
@@ -239,7 +311,7 @@
         "THU_qqH_PTHJJ25":1.0271,
         "THU_qqH_JET01":1.0118
     },
-    "ZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25":{
+    "WPLUSH2HQQ_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25":{
         "THU_qqH_Yield":1.0038,
         "THU_qqH_PTH200":1.0000,
         "THU_qqH_MJJ60":0.9306,
@@ -251,7 +323,19 @@
         "THU_qqH_PTHJJ25":1.0271,
         "THU_qqH_JET01":1.0118
     },
-    "qqH_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25":{
+    "ZH2HQQ_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_0_25":{
+        "THU_qqH_Yield":1.0038,
+        "THU_qqH_PTH200":1.0000,
+        "THU_qqH_MJJ60":0.9306,
+        "THU_qqH_MJJ120":1.0000,
+        "THU_qqH_MJJ350":1.0000,
+        "THU_qqH_MJJ700":1.0000,
+        "THU_qqH_MJJ1000":1.0000,
+        "THU_qqH_MJJ1500":1.0000,
+        "THU_qqH_PTHJJ25":1.0271,
+        "THU_qqH_JET01":1.0118
+    },
+    "VBF_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25":{
         "THU_qqH_Yield":1.0038,
         "THU_qqH_PTH200":1.0037,
         "THU_qqH_MJJ60":1.0030,
@@ -263,7 +347,7 @@
         "THU_qqH_PTHJJ25":0.9850,
         "THU_qqH_JET01":1.0117
     },
-    "WH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25":{
+    "WMINUSH2HQQ_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25":{
         "THU_qqH_Yield":1.0038,
         "THU_qqH_PTH200":1.0037,
         "THU_qqH_MJJ60":1.0030,
@@ -275,7 +359,7 @@
         "THU_qqH_PTHJJ25":0.9850,
         "THU_qqH_JET01":1.0117
     },
-    "ZH_had_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25":{
+    "WPLUSH2HQQ_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25":{
         "THU_qqH_Yield":1.0038,
         "THU_qqH_PTH200":1.0037,
         "THU_qqH_MJJ60":1.0030,
@@ -287,7 +371,19 @@
         "THU_qqH_PTHJJ25":0.9850,
         "THU_qqH_JET01":1.0117
     },
-    "qqH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25":{
+    "ZH2HQQ_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25":{
+        "THU_qqH_Yield":1.0038,
+        "THU_qqH_PTH200":1.0037,
+        "THU_qqH_MJJ60":1.0030,
+        "THU_qqH_MJJ120":1.0063,
+        "THU_qqH_MJJ350":1.0050,
+        "THU_qqH_MJJ700":0.9931,
+        "THU_qqH_MJJ1000":1.0000,
+        "THU_qqH_MJJ1500":1.0000,
+        "THU_qqH_PTHJJ25":0.9850,
+        "THU_qqH_JET01":1.0117
+    },
+    "VBF_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25":{
         "THU_qqH_Yield":1.0038,
         "THU_qqH_PTH200":0.9998,
         "THU_qqH_MJJ60":1.0029,
@@ -299,7 +395,7 @@
         "THU_qqH_PTHJJ25":1.0093,
         "THU_qqH_JET01":1.0118
     },
-    "WH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25":{
+    "WMINUSH2HQQ_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25":{
         "THU_qqH_Yield":1.0038,
         "THU_qqH_PTH200":0.9998,
         "THU_qqH_MJJ60":1.0029,
@@ -311,7 +407,7 @@
         "THU_qqH_PTHJJ25":1.0093,
         "THU_qqH_JET01":1.0118
     },
-    "ZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25":{
+    "WPLUSH2HQQ_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25":{
         "THU_qqH_Yield":1.0038,
         "THU_qqH_PTH200":0.9998,
         "THU_qqH_MJJ60":1.0029,
@@ -323,7 +419,19 @@
         "THU_qqH_PTHJJ25":1.0093,
         "THU_qqH_JET01":1.0118
     },
-    "qqH_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25":{
+    "ZH2HQQ_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25":{
+        "THU_qqH_Yield":1.0038,
+        "THU_qqH_PTH200":0.9998,
+        "THU_qqH_MJJ60":1.0029,
+        "THU_qqH_MJJ120":0.9987,
+        "THU_qqH_MJJ350":0.9984,
+        "THU_qqH_MJJ700":0.9971,
+        "THU_qqH_MJJ1000":1.0000,
+        "THU_qqH_MJJ1500":1.0000,
+        "THU_qqH_PTHJJ25":1.0093,
+        "THU_qqH_JET01":1.0118
+    },
+    "VBF_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25":{
         "THU_qqH_Yield":1.0038,
         "THU_qqH_PTH200":1.0037,
         "THU_qqH_MJJ60":1.0029,
@@ -335,7 +443,7 @@
         "THU_qqH_PTHJJ25":1.0142,
         "THU_qqH_JET01":1.0118
     },
-    "WH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25":{
+    "WMINUSH2HQQ_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25":{
         "THU_qqH_Yield":1.0038,
         "THU_qqH_PTH200":1.0037,
         "THU_qqH_MJJ60":1.0029,
@@ -347,7 +455,7 @@
         "THU_qqH_PTHJJ25":1.0142,
         "THU_qqH_JET01":1.0118
     },
-    "ZH_had_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25":{
+    "WPLUSH2HQQ_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25":{
         "THU_qqH_Yield":1.0038,
         "THU_qqH_PTH200":1.0037,
         "THU_qqH_MJJ60":1.0029,
@@ -359,7 +467,19 @@
         "THU_qqH_PTHJJ25":1.0142,
         "THU_qqH_JET01":1.0118
     },
-    "qqH_GE2J_MJJ_GT350_PTH_GT200":{
+    "ZH2HQQ_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_GT25":{
+        "THU_qqH_Yield":1.0038,
+        "THU_qqH_PTH200":1.0037,
+        "THU_qqH_MJJ60":1.0029,
+        "THU_qqH_MJJ120":1.0063,
+        "THU_qqH_MJJ350":1.0050,
+        "THU_qqH_MJJ700":0.9996,
+        "THU_qqH_MJJ1000":0.9944,
+        "THU_qqH_MJJ1500":1.0000,
+        "THU_qqH_PTHJJ25":1.0142,
+        "THU_qqH_JET01":1.0118
+    },
+    "VBF_GE2J_MJJ_GT350_PTH_GT200":{
         "THU_qqH_Yield":1.0038,
         "THU_qqH_PTH200":1.0000,
         "THU_qqH_MJJ60":1.0029,
@@ -371,7 +491,7 @@
         "THU_qqH_PTHJJ25":1.0004,
         "THU_qqH_JET01":1.0118
     },
-    "WH_had_GE2J_MJJ_GT350_PTH_GT200":{
+    "WMINUSH2HQQ_GE2J_MJJ_GT350_PTH_GT200":{
         "THU_qqH_Yield":1.0038,
         "THU_qqH_PTH200":1.0000,
         "THU_qqH_MJJ60":1.0029,
@@ -383,7 +503,19 @@
         "THU_qqH_PTHJJ25":1.0004,
         "THU_qqH_JET01":1.0118
     },
-    "ZH_had_GE2J_MJJ_GT350_PTH_GT200":{
+    "WPLUSH2HQQ_GE2J_MJJ_GT350_PTH_GT200":{
+        "THU_qqH_Yield":1.0038,
+        "THU_qqH_PTH200":1.0000,
+        "THU_qqH_MJJ60":1.0029,
+        "THU_qqH_MJJ120":1.0063,
+        "THU_qqH_MJJ350":1.0050,
+        "THU_qqH_MJJ700":1.0021,
+        "THU_qqH_MJJ1000":0.9982,
+        "THU_qqH_MJJ1500":0.9984,
+        "THU_qqH_PTHJJ25":1.0004,
+        "THU_qqH_JET01":1.0118
+    },
+    "ZH2HQQ_GE2J_MJJ_GT350_PTH_GT200":{
         "THU_qqH_Yield":1.0038,
         "THU_qqH_PTH200":1.0000,
         "THU_qqH_MJJ60":1.0029,

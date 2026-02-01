@@ -76,15 +76,16 @@ if opt.procs == 'auto':
 
 
 else: procs = opt.procs.split(",")
-procs.remove('ZH2HQQ_FWDH')
-procs.remove('WMINUSH2HQQ_FWDH')
+# procs.remove('ZH2HQQ_FWDH')
+# procs.remove('WMINUSH2HQQ_FWDH')
 
-procs.remove('GG2HNUNU_FWDH')
-procs.remove('WPLUSH2HLNU_PTV_150_250_0J')
-procs.remove('GG2HQQ_PTH_200_300')
-procs.remove('GG2HQQ_PTH_GT650')
-procs.remove('THW_FWDH')
-procs.remove('ZH2HNUNU_FWDH')
+# procs.remove('GG2HNUNU_FWDH')
+# # procs.remove('WPLUSH2HLNU_PTV_150_250_0J')
+# procs.remove('GG2HQQ_PTH_200_300')
+# procs.remove('GG2HQQ_PTH_GT650')
+# procs.remove('THW_FWDH')
+# # procs.remove('GG2HQQ_GE2J_MJJ_GT700_PTH_0_200_PTHJJ_0_25')
+# procs.remove('ZH2HNUNU_FWDH')
 procs.sort()
 
 # Initiate pandas dataframe
@@ -97,49 +98,52 @@ print(" ........................................................................
 
 # Signal processes
 for year in years:
-  for proc in procs:
+  for proc in procsMap[year].split(","):
+    if proc not in ['GG2HNUNU_FWDH','ZH2HQQ_FWDH','TTH_FWDH','GG2HLL_FWDH']:#,'GG2HQQ_PTH_200_300','GG2HQQ_PTH_GT650','TTH_FWDH','ZH2HNUNU_FWDH','GG2HLL_FWDH','GG2HLL_PTV_150_250_0J_','GG2HLL_PTV_150_250_0J','GG2HLL_PTV_150_250_GE1J','GG2HLL_PTV_GT250','GG2HNUNU_PTV_150_250_0J','GG2HNUNU_PTV_150_250_GE1J','GG2HNUNU_PTV_GT250']:
+      print(proc)
+      # Identifier
+      _id = "%s_%s_%s_%s"%(proc,year,opt.cat,sqrts__)
 
-    # Identifier
-    _id = "%s_%s_%s_%s"%(proc,year,opt.cat,sqrts__)
+      # Mapping to STXS definition here
+      _procOriginal = proc
+      _proc = "%s_%s_%s"%(proc,year,decayMode)
+      _proc_s0 = proc
+      # print(proc)
 
-    # Mapping to STXS definition here
-    _procOriginal = proc
-    _proc = "%s_%s_%s"%(proc,year,decayMode)
-    _proc_s0 = proc
-    print(proc)
+      # Define category: add year tag if not merging
+      if opt.mergeYears: _cat = opt.cat
+      else: _cat = "%s_%s"%(opt.cat,year)
 
-    # Define category: add year tag if not merging
-    if opt.mergeYears: _cat = opt.cat
-    else: _cat = "%s_%s"%(opt.cat,year)
+      # Input flashgg ws 
+      _inputWSFile = glob.glob("%s/*M%s*_%s.root"%(inputWSDirMap[year],opt.mass,proc))[0]
+      _nominalDataName = "%s_%s_hgg_%s_%s_%s"%(_proc_s0,year, opt.mass,sqrts__,opt.cat)
+      # print('AAA')
+      # print(_nominalDataName)
+      # print('BBB')
 
-    # Input flashgg ws 
-    _inputWSFile = glob.glob("%s/*M%s*_%s.root"%(inputWSDirMap[year],opt.mass,proc))[0]
-    _nominalDataName = "%s_%s_hgg_%s_%s_%s"%(_proc_s0,year, opt.mass,sqrts__,opt.cat)
-    print(_nominalDataName)
+      # If opt.skipZeroes check nominal yield if 0 then do not add
+      skipProc = False
+      if opt.skipZeroes:
+        f = ROOT.TFile(_inputWSFile)
+        w = f.Get(inputWSName__)
+        sumw = w.data(_nominalDataName).sumEntries()
+        if sumw == 0.: skipProc = True
+        w.Delete()
+        f.Close()
+      if skipProc: continue
 
-    # If opt.skipZeroes check nominal yield if 0 then do not add
-    skipProc = False
-    if opt.skipZeroes:
-      f = ROOT.TFile(_inputWSFile)
-      w = f.Get(inputWSName__)
-      sumw = w.data(_nominalDataName).sumEntries()
-      if sumw == 0.: skipProc = True
-      w.Delete()
-      f.Close()
-    if skipProc: continue
+      # Input model ws 
+      if opt.cat == "NOTAG": _modelWSFile, _model = '-', '-'
+      else:
+        _modelWSFile = "%s/CMS-HGG_sigfit_%s_%s.root"%(opt.sigModelWSDir,opt.sigModelExt,_cat)
+        _model = "%s_%s:%s_%s"%(outputWSName__,sqrts__,outputWSObjectTitle__,_id)
 
-    # Input model ws 
-    if opt.cat == "NOTAG": _modelWSFile, _model = '-', '-'
-    else:
-      _modelWSFile = "%s/CMS-HGG_sigfit_%s_%s.root"%(opt.sigModelWSDir,opt.sigModelExt,_cat)
-      _model = "%s_%s:%s_%s"%(outputWSName__,sqrts__,outputWSObjectTitle__,_id)
+      # Extract rate from lumi
+      _rate = float(lumiMap[year])*1000
 
-    # Extract rate from lumi
-    _rate = float(lumiMap[year])*1000
-
-    # Add signal process to dataFrame:
-    print(" --> Adding to dataFrame: (proc,cat) = (%s,%s)"%(_proc,_cat))
-    data.loc[len(data)] = [year,'sig',_procOriginal,_proc,_proc_s0,_cat,_inputWSFile,_nominalDataName,_modelWSFile,_model,_rate]
+      # Add signal process to dataFrame:
+      print(" --> Adding to dataFrame: (proc,cat) = (%s,%s)"%(_proc,_cat))
+      data.loc[len(data)] = [year,'sig',_procOriginal,_proc,_proc_s0,_cat,_inputWSFile,_nominalDataName,_modelWSFile,_model,_rate]
 
 # Background and data processes
 if( not opt.skipBkg)&( opt.cat != "NOTAG" ):
@@ -200,11 +204,15 @@ if opt.doSystematics:
       if s['type'] == 'factory': 
         # Fix for HEM as only in 2018 workspaces
         if s['name'] == 'JetHEM': experimentalFactoryType[s['name']] = "a_h"
-        else: experimentalFactoryType[s['name']] = factoryType(data,s)
+        else: 
+          experimentalFactoryType[s['name']] = factoryType(data,s)
+          # print('ftype'+str(factoryType(data,s)))
         if experimentalFactoryType[s['name']] in ["a_w","a_h"]:
           data['%s_up_yield'%s['name']] = '-'
           data['%s_down_yield'%s['name']] = '-'
         else: data['%s_yield'%s['name']] = '-'
+  # print(experimentalFactoryType)
+        
   for s in theory_systematics: 
     if s['type'] == 'factory': 
       theoryFactoryType[s['name']] = factoryType(data,s)
@@ -226,10 +234,12 @@ for ir,r in data[data['type']=='sig'].iterrows():
 
   # Open input WS file and extract workspace
   f_in = ROOT.TFile(r.inputWSFile)
-  print(r.inputWSFile)
+  # print(r.inputWSFile)
   inputWS = f_in.Get(inputWSName__)
   # Extract nominal RooDataSet and yield
   rdata_nominal = inputWS.data(r.nominalDataName)
+  # print(rdata_nominal)
+  # print('nominal='+str(rdata_nominal.Print()))
 
   # Calculate nominal yield, sumw2 and add COW correction for in acceptance events
   contents = ""
@@ -250,17 +260,21 @@ for ir,r in data[data['type']=='sig'].iterrows():
         else: y_COWCorr += w*(f_NNLOPS/f_COWCorr)
   except ReferenceError:
     print(f"\n Proc {r.proc} in Cat {r['cat']} has no entries,  skipping\n" )
+ 
   data.at[ir,'nominal_yield'] = y
+  # print(y)
   data.at[ir,'sumw2'] = sumw2
   if not opt.skipCOWCorr: data.at[ir,'nominal_yield_COWCorr'] = y_COWCorr
 
   # Systematics: loop over systematics and use function to extract yield variations
   if opt.doSystematics:
-
+    print(contents)
     # For experimental systematics: skip NOTAG events
     if "NOTAG" not in r['cat']:
       # Skip centralObjectWeight correction as concerns events in acceptance
       experimentalSystYields = calcSystYields(r['nominalDataName'],contents,inputWS,experimentalFactoryType,skipCOWCorr=True,proc=r['proc'],year=r['year'],systWeightScheme=opt.systWeightScheme,ignoreWarnings=opt.ignore_warnings)
+      # print('YIELLLLLDS:')
+      # print(experimentalSystYields)
       for s,f in experimentalFactoryType.items():
         if f in ['a_w','a_h']: 
           for direction in ['up','down']: 
@@ -278,11 +292,13 @@ for ir,r in data[data['type']=='sig'].iterrows():
       else:
         data.at[ir,"%s_yield"%s] = theorySystYields[s]
         if not opt.skipCOWCorr: data.at[ir,"%s_yield_COWCorr"%s] = theorySystYields["%s_COWCorr"%s]
-
+    # print(theorySystYields)
   # Remove the workspace and file from heap
   inputWS.Delete()
   f_in.Close()
-
+# print('check')
+# for i in data.columns:
+  # print(i)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # SAVE YIELDS DATAFRAME
 print(" ..........................................................................................")
