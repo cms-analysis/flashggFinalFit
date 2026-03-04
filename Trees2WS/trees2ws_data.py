@@ -1,147 +1,195 @@
 # Script to convert data trees to RooWorkspace (compatible for finalFits)
 # Assumes tree names of the format:
 # * Data_<sqrts>_category
-
-import os, sys
-import re
+import os, sys, re
 from optparse import OptionParser
-
-def get_options():
-  parser = OptionParser()
-  parser.add_option('--inputConfig',dest='inputConfig', default="", help='Input config: specify list of variables/analysis categories')
-  parser.add_option('--inputTreeFile',dest='inputTreeFile', default=None, help='Input tree file')
-  parser.add_option('--outputWSDir',dest='outputWSDir', default=None, help='Output dir (default is same as input dir)')
-  parser.add_option('--applyMassCut',dest='applyMassCut', default=False, action="store_true", help='Apply cut on CMS_hgg_mass')
-  parser.add_option('--massCutRange',dest='massCutRange', default='100,180', help='CMS_hgg_mass cut range')
-  return parser.parse_args()
-(opt,args) = get_options()
-
 from collections import OrderedDict as od
 from importlib import import_module
 
+import json
 import ROOT
-import pandas
+import pandas as pd
 import numpy as np
-import uproot
 
 from commonTools import *
 from commonObjects import *
+from tools.STXS_tools import *
 
+def get_options():
+    parser = OptionParser()
+    parser.add_option('--inputConfig', dest='inputConfig', default="", help='Input config file')
+    parser.add_option('--inputMass', dest='inputMass', default="125", help='Higgs mass')
+    parser.add_option('--inputTreeFile',dest='inputTreeFile', default="./output_0.root", help='Input tree file')
+    parser.add_option('--outputWSDir',dest='outputWSDir', default=None, help='Output dir (default is same as input dir)')
+    parser.add_option('--applyMassCut',dest='applyMassCut', default=False, action="store_true", help='Apply cut on CMS_hgg_mass')
+    parser.add_option('--massCutRange',dest='massCutRange', default='100,180', help='CMS_hgg_mass cut range')
+    parser.add_option('--categorisationConfig',default='category_STXS_stage1p2.json')
+    return parser.parse_args()
 
-print(" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG TREES 2 WS (DATA) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ")
+(opt, args) = get_options()
+
 def leave():
-  print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG TREES 2 WS (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-  exit(0)
+    print("~~~~~~~~~~~~~~~~~~~~~~~~~ SCRIPT END ~~~~~~~~~~~~~~~~~~~~~~~~~")
+    exit(0)
 
-# Function to add vars to workspace
-def add_vars_to_workspace(_ws=None,_dataVars=None):
-  # Add intLumi var
-  intLumi = ROOT.RooRealVar("intLumi","intLumi",1000.,0.,999999999.)
-  intLumi.setConstant(True)
-  getattr(_ws,'import')(intLumi)
-  _vars = od()
-  for var in _dataVars:
-    if var == "CMS_hgg_mass":
-      _vars[var] = ROOT.RooRealVar(var,var,125.,100.,180.)
-      _vars[var].setBins(160)
-    elif var == "dZ":
-      _vars[var] = ROOT.RooRealVar(var,var,0.,-20.,20.)
-      _vars[var].setBins(40)
-    elif var == "weight":
-      _vars[var] = ROOT.RooRealVar(var,var,0.)
-    else:
-      _vars[var] = ROOT.RooRealVar(var,var,1.,-999999,999999)
-      _vars[var].setBins(1)
-    getattr(_ws,'import')(_vars[var],ROOT.RooFit.Silence())
-  return _vars.keys()
-
-# Function to make RooArgSet
-def make_argset(_ws=None,_varNames=None):
-  _aset = ROOT.RooArgSet()
-  for v in _varNames: _aset.add(_ws.var(v))
-  return _aset
-
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Extract options from config file:
-options = od()
-if opt.inputConfig != '':
-  if os.path.exists( opt.inputConfig ):
-
-    # Import config options
-    _cfg = import_module(re.sub(".py","",opt.inputConfig)).trees2wsCfg
-
-    #Extract options
-    inputTreeDir     = _cfg['inputTreeDir']
-    dataVars         = _cfg['dataVars']
-    cats             = _cfg['cats']
-
-  else:
-    print("[ERROR] %s config file does not exist. Leaving..."%opt.inputConfig)
+# Load config
+if opt.inputConfig == '' or not os.path.exists(opt.inputConfig):
+    print(f"[ERROR] Config file {opt.inputConfig} not found.")
     leave()
-else:
-  print("[ERROR] Please specify config file to run from. Leaving..."%opt.inputConfig)
-  leave()
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# UPROOT file
-f = uproot.open(opt.inputTreeFile)
-if inputTreeDir == '': listOfTreeNames == f.keys()
-else: listOfTreeNames = f[inputTreeDir].keys()
-# If cats = 'auto' then determine from list of trees
+_cfg = import_module(re.sub(".py$", "", opt.inputConfig)).trees2wsCfg
+
+inputTreeDir     = _cfg['inputTreeDir'].rstrip('/')
+dataVars         = _cfg['dataVars']
+stxsVar          = _cfg['stxsVar']
+cats             = _cfg['cats']
+
+with open(opt.categorisationConfig, "r") as f:
+        cat_dict = json.load(f)
+merged=pd.DataFrame([])
+for file in glob.glob(opt.inputTreeFile+'/*/*.parquet'):
+    merged = pd.concat([merged,pd.read_parquet(file)])
+
+# Auto-detect categories from .parquet files in inputTreeFile directory
 if cats == 'auto':
-  cats = []
-  for tn in listOfTreeNames:
-    if "sigma" in tn: continue
-    c = tn.split("_%s_"%sqrts__)[-1].split(";")[0]
-    cats.append(c)
+    if not os.path.isdir(opt.inputTreeFile):
+        print(f"[ERROR] Input directory '{opt.inputTreeFile}' does not exist.")
+        leave()
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Open input ROOT file
-f = ROOT.TFile(opt.inputTreeFile)
+    cats = []
+    for cat in merged.pred_ia.unique():
+        if cat!=0:
+            cats.append(cat_dict['cat_dict'][str(cat)])
 
-# Open output ROOT file and initiate workspace to store RooDataSets
-if opt.outputWSDir is not None: outputWSDir = opt.outputWSDir+"/ws"
-else: outputWSDir = "/".join(opt.inputTreeFile.split("/")[:-1])+"/ws"
-if not os.path.exists(outputWSDir): os.system("mkdir %s"%outputWSDir)
-outputWSFile = outputWSDir+"/"+opt.inputTreeFile.split("/")[-1]
-print(" --> Creating output workspace: (%s)"%outputWSFile)
-fout = ROOT.TFile(outputWSFile,"RECREATE")
-foutdir = fout.mkdir(inputWSName__.split("/")[0])
-foutdir.cd()
-ws = ROOT.RooWorkspace(inputWSName__.split("/")[1],inputWSName__.split("/")[1])
+    if not cats:
+        print(f"[ERROR] No parquet files found in '{opt.inputTreeFile}'")
+        leave()
+    else:
+        print(f"[INFO] Detected categories: {cats}")
 
-# Add variables to workspace
-varNames = add_vars_to_workspace(ws,dataVars)
+cats=list(cat_dict['cat_dict'].values() )# ensure ALL cats are included
 
-# Make argset
-aset = make_argset(ws,varNames)
 
-# Loop over categories and 
-for cat in cats:
-  print(" --> Extracting events from category: %s"%cat)
-  if inputTreeDir == '': treeName = "Data_%s_%s"%(sqrts__,cat)
-  else: treeName = "%s/Data_%s_%s"%(inputTreeDir,sqrts__,cat)
-  print("    * tree: %s"%treeName)
-  t = f.Get(treeName)
 
-  # Define dataset for cat
-  dname = "Data_%s_%s"%(sqrts__,cat)  
-  d = ROOT.RooDataSet(dname,dname,aset,ROOT.RooFit.WeightVar('weight'))
+# Combine data
+data = pd.DataFrame()
 
-  # Loop over events in tree and add to dataset with weight 1
-  for ev in t:
-    if opt.applyMassCut:
-      if(getattr(ev,"CMS_hgg_mass") < float(opt.massCutRange.split(",")[0])) | (getattr(ev,"CMS_hgg_mass") > float(opt.massCutRange.split(",")[1])): continue
-    for var in dataVars: 
-      if var == "weight": continue
-      ws.var(var).setVal(getattr(ev,var))
-    d.add(aset,1.)
+merged['cat'] = merged['pred_ia'].map(str).map(cat_dict['cat_dict'])
+data=merged.copy()
+# ~~~~~~~ RooWorkspace Helpers ~~~~~~~
+def add_vars_to_workspace(ws, df, stxsVar):
+    intLumi = ROOT.RooRealVar("intLumi", "intLumi", 1000., 0., 999999999.)
+    intLumi.setConstant(True)
+    getattr(ws, 'import')(intLumi)
 
-  # Add dataset to worksapce
-  getattr(ws,'import')(d)
-  
-# Write workspace to file
-ws.Write()
+    rvars = od()
+    for col in df.columns:
+        if col in ['cat', 'type', stxsVar, '']: continue
+        if col == "CMS_hgg_mass":
+            rvar = ROOT.RooRealVar(col, col, 125., 100., 180.)
+            rvar.setBins(160)
+        elif col == "dZ":
+            rvar = ROOT.RooRealVar(col, col, 0., -20., 20.)
+            rvar.setBins(40)
+        elif col == "weight":
+            rvar = ROOT.RooRealVar(col, col, 0.)
+        else:
+            rvar = ROOT.RooRealVar(col, col, 1., -999999, 999999)
+            rvar.setBins(1)
+        getattr(ws, 'import')(rvar, ROOT.RooFit.Silence())
+        rvars[col] = rvar
+    return list(rvars.keys())
 
-# Close file
-fout.Close()
+def make_argset(ws, var_names):
+    aset = ROOT.RooArgSet()
+    for name in var_names:
+        aset.add(ws.var(name))
+    return aset
+
+print('A')
+data[stxsVar]=stxsVar
+# ~~~~~~~ RooWorkspace Creation ~~~~~~~
+for stxsId in data[stxsVar].unique():
+    print('B')
+    df = data[data[stxsVar] == stxsId]
+
+    
+
+    output_dir = f"{opt.inputTreeFile}/ws_data"
+    os.makedirs(output_dir, exist_ok=True)
+    output_file = os.path.join(output_dir, f"allData_data.root")
+    print(f"[INFO] Creating workspace: {output_file}")
+
+    fout = ROOT.TFile(output_file, "RECREATE")
+
+    foutdir = fout.mkdir(inputTreeDir)
+    foutdir.cd()  # IMPORTANT: switch to that directory
+
+    ws = ROOT.RooWorkspace("cms_hgg_13TeV", "cms_hgg_13TeV")
+
+    
+    if 'mass' in df.columns:
+        df = df.rename(columns={'mass': 'CMS_hgg_mass'})
+    reduced_df = df[dataVars]
+    
+
+    var_names = add_vars_to_workspace(ws, reduced_df, stxsVar)
+    # for cat in cats:
+        
+        
+    #     df_cat = df[df['cat'] == cat]
+    #     print(f"[DEBUG] Dataset for category '{cat}' has {len(df_cat)} events before dropping NaNs.")
+    #     print(f"[DEBUG] Columns available: {df_cat.columns.tolist()}")
+    #     print(f"[DEBUG] Variables expected: {var_names}")
+    #     aset = make_argset(ws, var_names)
+    #     dset_name = f"{opt.productionMode}_{opt.inputMass}_{opt.year}_{cat}"
+    #     dset = ROOT.RooDataSet(dset_name, dset_name, aset, ROOT.RooFit.WeightVar("weight"))
+    #     numeric_var_names = [v for v in var_names if pd.api.types.is_numeric_dtype(df_cat[v])]
+        
+    #     df_cat[var_names] = df_cat[var_names].apply(pd.to_numeric, errors='coerce')
+    #     df_cat = df_cat.dropna(subset=var_names)
+
+    #     for row in df_cat[var_names].to_numpy():
+    #         for i, val in enumerate(row):
+    #             aset[i].setVal(val)
+    #         dset.add(aset, aset.getRealValue("weight"))
+    #     getattr(ws, 'import')(dset)
+
+    for cat in cats:
+        
+        
+        
+        df_cat = df[df['cat'] == cat]
+
+        
+        
+
+        aset = make_argset(ws, var_names)  # full list (workspace needs everything)
+        cat_renamed=cat#'_'.join(cat.split('_')[1:-1])
+        dset_name = f"Data_13TeV_{cat_renamed}"
+        dset = ROOT.RooDataSet(dset_name, dset_name, aset, ROOT.RooFit.WeightVar("weight"))
+
+        # Only try to convert numeric columns
+        numeric_var_names = [v for v in var_names if v in df_cat.columns and pd.api.types.is_numeric_dtype(df_cat[v])]
+        df_cat[numeric_var_names] = df_cat[numeric_var_names].apply(pd.to_numeric, errors='coerce')
+        df_cat = df_cat.dropna(subset=numeric_var_names)
+
+        print(f"[INFO] Category {cat} has {len(df_cat)} entries after cleaning.")
+
+        for row in df_cat[numeric_var_names].itertuples(index=False, name=None):
+            for name, val in zip(numeric_var_names, row):
+                var = aset.find(name)
+                if var:  # safeguard
+                    var.setVal(float(val))
+                
+            dset.add(aset, aset.find("weight").getVal())
+
+        getattr(ws, 'import')(dset)
+
+
+    print(ws)
+    ws.Print('v')
+    ws.Write()
+    fout.Close()
+
+print("~~~~~~~~~~~~~~~~~~~~~~~~~ ALL WORKSPACES DONE ~~~~~~~~~~~~~~~~~~~~~~~~~")

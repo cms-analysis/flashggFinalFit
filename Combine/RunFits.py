@@ -60,7 +60,7 @@ if opt.batch == 'crab':
   if opt.doCustomCrab: job_opts += " --custom-crab %s/src/flashggFinalFit/Combine/custom_crab.py"%os.environ['CMSSW_BASE']
   job_opts += " --memory %s"%opt.crabMemory
 elif opt.batch == 'condor': 
-  sub_opts = "--sub-opts=\'+JobFlavour = \"%s\""%opt.queue
+  sub_opts = "--sub-opts=\'+JobFlavour = \"%s\" \n transfer_output_files=\"\" "%opt.queue
   if opt.subOpts != "": sub_opts += "\n%s"%opt.subOpts
   sub_opts += "\'"
   job_opts = "--job-mode condor %s"%sub_opts
@@ -73,6 +73,9 @@ else:
   print(" --> [ERROR] Batch mode (%s) not supported. Leaving"%opt.batch)
   leave()
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# job_opts+="\n transfer_output_files = \'\' "
+print('now')
+print(job_opts)
 
 # Make folder for running fits if does not exist
 if not os.path.isdir("runFits%s_%s"%(opt.ext,opt.mode)): os.system("mkdir runFits%s_%s"%(opt.ext,opt.mode))
@@ -163,7 +166,7 @@ for fidx in range(len(fits)):
   # For 1D scan when profiling other pois
   elif _fit.split(":")[0] == "profile1D":
     for poi in _fitpois:
-      fitcmd = "cd runFits%s_%s; source /cvmfs/cms.cern.ch/crab3/crab.sh; combineTool.py --task-name %s_%s -M MultiDimFit -m %s %s --floatOtherPOIs 1 %s -n _%s_%s -P %s --algo grid --points %s --alignEdges 1 --split-points %s %s %s %s %s; cd .."%(opt.ext,opt.mode,_name,poi,opt.mass,d_opts,exp_opts,_name,poi,poi,_points.split(":")[0],_points.split(":")[1],_fit_opts,pdf_opts,common_opts,job_opts)
+      fitcmd = "cd runFits%s_%s; source /cvmfs/cms.cern.ch/crab3/crab.sh;combineTool.py --task-name %s_%s -M MultiDimFit -m %s %s --floatOtherPOIs 1 %s -n _%s_%s -P %s --algo grid --points %s --alignEdges 1 --split-points %s %s %s %s %s --pre-cmd \"source /eos/user/p/pkrueper/HiggsDNA_and_FinalFits_tutorial24/FF_standalone/src/flashggFinalFit/Combine/test_addition_combine.sh;\"; cd .."%(opt.ext,opt.mode,_name,poi,opt.mass,d_opts,exp_opts,_name,poi,poi,_points.split(":")[0],_points.split(":")[1],_fit_opts,pdf_opts,common_opts,job_opts)
       if(os.environ['PWD'].startswith("/eos"))&(opt.batch == "condor")&(not opt.dryRun):
         fitcmd = re.sub("; cd ..", " --dry-run; condor_submit -spool condor_%s_%s.sub; cd .."%(_name,poi), fitcmd)      
       run(fitcmd)

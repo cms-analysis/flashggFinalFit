@@ -26,13 +26,14 @@ def extractListOfProcs( _listOfWSFileNames ):
   for fName in _listOfWSFileNames:
     p = fName.split("pythia8_")[1].split(".root")[0]
     if p not in procs: procs.append(p)
+ 
   return ",".join(procs)
 
 def extractListOfCats( _listOfWSFileNames ):
   print(_listOfWSFileNames)
-  f0 = ROOT.TFile(_listOfWSFileNames[4]) #Note: This was [0], but not good, if the first file has only 5 instead of 6 RECOS clearly it will miss some RECOs
+  f0 = ROOT.TFile(_listOfWSFileNames[0]) #Note: This was [0], but not good, if the first file has only 5 instead of 6 RECOS clearly it will miss some RECOs
   print("A")
-  print(_listOfWSFileNames[1])
+  print(_listOfWSFileNames[0])
   print(f0.ls())
   ws = f0.Get(inputWSName__)
   print("B")
@@ -56,6 +57,7 @@ def extractListOfCats( _listOfWSFileNames ):
 def extractListOfCatsFromData( _fileName ):
   f = ROOT.TFile(_fileName)
   ws = f.Get(inputWSName__)
+  print(ws)
   allData = ws.allData()
   cats = []
   for d in allData:

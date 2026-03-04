@@ -1,306 +1,455 @@
-# Script to convert HiggsDNA TTrees to RooWorkspace (compatible for finalFits)
-# Assumes tree names of the format: 
-#  * <productionMode>_<MH>_<sqrts>_<category> e.g. ggh_125_13TeV_RECO_0J_PTH_0_10_Tag0
-# For systematics: requires trees of the format:
-#  * <productionMode>_<MH>_<sqrts>_<category>_<syst>Up01sigma e.g. ggh_125_13TeV_RECO_0J_PTH_0_10_Tag0_JECUp01sigma
-#  * <productionMode>_<MH>_<sqrts>_<category>_<syst>Down01sigma e.g. ggh_125_13TeV_RECO_0J_PTH_0_10_Tag0_JECDown01sigma
-
-import os, sys
-import re
+import os, sys, re
 from optparse import OptionParser
-
-def get_options():
-  parser = OptionParser()
-  parser.add_option('--inputConfig',dest='inputConfig', default="", help='Input config: specify list of variables/systematics/analysis categories')
-  parser.add_option('--inputTreeFile',dest='inputTreeFile', default="./output_0.root", help='Input tree file')
-  parser.add_option('--inputMass',dest='inputMass', default="125", help='Input mass')
-  parser.add_option('--productionMode',dest='productionMode', default="ggh", help='Production mode [ggh,vbf,wh,zh,tth,thq,ggzh,bbh]')
-  parser.add_option('--year',dest='year', default="2016", help='Year')
-  parser.add_option('--decayExt',dest='decayExt', default='', help='Decay extension')
-  parser.add_option('--doNNLOPS',dest='doNNLOPS', default=False, action="store_true", help='Add NNLOPS weight variable: NNLOPSweight')
-  parser.add_option('--doSystematics',dest='doSystematics', default=False, action="store_true", help='Add systematics datasets to output WS')
-  parser.add_option('--doSTXSSplitting',dest='doSTXSSplitting', default=False, action="store_true", help='Split output WS per STXS bin')
-  return parser.parse_args()
-(opt,args) = get_options()
-
 from collections import OrderedDict as od
 from importlib import import_module
-
+import json
 import ROOT
-import pandas
+import pandas as pd
 import numpy as np
-import uproot
-import awkward as ak
 
 from commonTools import *
 from commonObjects import *
 from tools.STXS_tools import *
 
-print(" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG TREES 2 WS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ")
-def leave():
-  print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG TREES 2 WS (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-  exit(0)
+def get_options():
+    parser = OptionParser()
+    parser.add_option('--inputConfig', dest='inputConfig', default="", help='Input config file')
+    parser.add_option('--inputMass', dest='inputMass', default="125", help='Higgs mass')
+    parser.add_option('--inputTreeFile',dest='inputTreeFile', default="./output_0.root", help='Input tree file')
+    parser.add_option('--productionMode', dest='productionMode', default="ggh", help='Production mode')
+    parser.add_option('--year', dest='year', default="2016", help='Year')
+    parser.add_option('--decayExt', dest='decayExt', default='', help='Decay extension')
+    parser.add_option('--doNNLOPS', dest='doNNLOPS', default=False, action="store_true", help='Add NNLOPS weight')
+    parser.add_option('--doSystematics', dest='doSystematics', default=False, action="store_true", help='Add systematics')
+    parser.add_option('--doSTXSSplitting', dest='doSTXSSplitting', default=False, action="store_true", help='Split WS by STXS bin')
+    parser.add_option('--categorisationConfig',default='category_STXS_stage1p2.json')
+    parser.add_option('-v',default=False,action="store_true")
+    parser.add_option('--skiplength',default=10000000000)
+    parser.add_option('--reduceprocs',default=[])
+    return parser.parse_args()
 
-# Function to add vars to workspace
-def add_vars_to_workspace(_ws=None,_data=None,_stxsVar=None):
-  # Add intLumi var
-  intLumi = ROOT.RooRealVar("intLumi","intLumi",1000.,0.,999999999.)
-  intLumi.setConstant(True)
-  getattr(_ws,'import')(intLumi)
-  # Add vars specified by dataframe columns: skipping cat, stxsvar and type
-  _vars = od()
-  for var in _data.columns:
-    if var in ['type','cat',_stxsVar,'']: continue
-    if var == "CMS_hgg_mass": 
-      _vars[var] = ROOT.RooRealVar(var,var,125.,100.,180.)
-      _vars[var].setBins(160)
-    elif var == "dZ": 
-      _vars[var] = ROOT.RooRealVar(var,var,0.,-20.,20.)
-      _vars[var].setBins(40)
-    elif var == "weight": 
-      _vars[var] = ROOT.RooRealVar(var,var,0.)
-    else:
-      _vars[var] = ROOT.RooRealVar(var,var,1.,-999999,999999)
-      _vars[var].setBins(1)
-    getattr(_ws,'import')(_vars[var],ROOT.RooFit.Silence())
-  return _vars.keys()
+(opt, args) = get_options()
 
-# Function to make RooArgSet
-def make_argset(_ws=None,_varNames=None):
-  _aset = ROOT.RooArgSet()
-  for v in _varNames: _aset.add(_ws.var(v))
-  return _aset
+proc=opt.inputTreeFile.split('/')[-2]
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Production modes to skip theory weights: fill with 1's
-modesToSkipTheoryWeights = ['bbh','thq','thw']
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Extract options from config file:
-options = od()
-if opt.inputConfig != '':
-  if os.path.exists( opt.inputConfig ):
-
-    # Import config options
-    _cfg = import_module(re.sub(".py","",opt.inputConfig)).trees2wsCfg
-
-    #Extract options
-    inputTreeDir     = _cfg['inputTreeDir']
-    mainVars         = _cfg['mainVars']
-    stxsVar          = _cfg['stxsVar']
-    systematicsVars  = _cfg['systematicsVars']
-    theoryWeightContainers = _cfg['theoryWeightContainers']
-    systematics      = _cfg['systematics']
-    cats             = _cfg['cats']
-
-  else:
-    print( "[ERROR] %s config file does not exist. Leaving..."%opt.inputConfig)
-    leave()
+if proc in opt.reduceprocs:
+    skip_len=int(opt.skiplength)
 else:
-  print( "[ERROR] Please specify config file to run from. Leaving..."%opt.inputConfig)
-  leave()
+    skip_len=10000000000000000000
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# For theory weights: create vars for each weight
-theoryWeightColumns = {}
-for ts, nWeights in theoryWeightContainers.items(): theoryWeightColumns[ts] = ["%s_%g"%(ts[:-1],i) for i in range(0,nWeights)] # drop final s from container name
+def leave():
+    print("~~~~~~~~~~~~~~~~~~~~~~~~~ SCRIPT END ~~~~~~~~~~~~~~~~~~~~~~~~~")
+    exit(0)
 
-# If year == 2018, add HET
-if opt.year == '2018': systematics.append("JetHEM")
+# Load config
+if opt.inputConfig == '' or not os.path.exists(opt.inputConfig):
+    print(f"[ERROR] Config file {opt.inputConfig} not found.")
+    leave()
 
+_cfg = import_module(re.sub(".py$", "", opt.inputConfig)).trees2wsCfg
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# UPROOT file
-f = uproot.open(opt.inputTreeFile)
-if inputTreeDir == '': listOfTreeNames == f.keys()
-else: listOfTreeNames = f[inputTreeDir].keys()
-# If cats = 'auto' then determine from list of trees
+inputTreeDir     = _cfg['inputTreeDir'].rstrip('/')
+mainVars         = _cfg['mainVars']
+stxsVar          = _cfg['stxsVar']
+systematicsVars  = _cfg['systematicsVars']
+theoryWeightContainers = _cfg['theoryWeightContainers']
+systematics      = _cfg['systematics']
+cats             = _cfg['cats']
+
+# If STXS var is not defined, disable splitting
+if not stxsVar:
+    opt.doSTXSSplitting = False
+    stxsVar = 'nosplit'
+    print("[INFO] STXS variable not defined. Disabling STXS splitting.")
+
+# CHANGING STRUCTURE
+import pyarrow.parquet as pq
+import glob
+import random
+
+def fast_sample_single_file(dirpath, n):
+    # take only nominal, non-systematic files
+    files = [
+        f for f in glob.glob(f"{dirpath}/*.parquet")
+        if "Up" not in f and "Down" not in f and "ws_" not in f
+    ]
+
+    if not files:
+        return pd.DataFrame()
+
+    # pick ONE random file
+    f = random.choice(files)
+    pf = pq.ParquetFile(f)
+
+    dfs = []
+    total = 0
+
+    # iter_batches lets you stop early
+    for batch in pf.iter_batches(batch_size=20000):
+        df = batch.to_pandas()
+        dfs.append(df)
+        total += len(df)
+        if total >= n:
+            break
+
+    return pd.concat(dfs).iloc[:n]
+
+if skip_len < 1e15:  # skiplen active
+    merged = fast_sample_single_file(opt.inputTreeFile, skip_len)
+else:
+    merged = fast_sample_single_file(opt.inputTreeFile,skip_len) 
+print('nominal merged')
+# Auto-detect categories from .parquet files in inputTreeFile directory
 if cats == 'auto':
-  cats = []
-  for tn in listOfTreeNames:
-    if "sigma" in tn: continue
-    c = tn.split("_%s_"%sqrts__)[-1].split(";")[0]
-    cats.append(c)
+    if not os.path.isdir(opt.inputTreeFile):
+        print(f"[ERROR] Input directory '{opt.inputTreeFile}' does not exist.")
+        leave()
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# 1) Convert tree to pandas dataframe
-# Create dataframe to store all events in file
-data = pandas.DataFrame()
-if opt.doSystematics: sdata = pandas.DataFrame()
+    
+    # for f in os.listdir(opt.inputTreeFile):
+    #     if f.endswith(".parquet"):
+    #         cats.append(f.replace(".parquet", ""))
+    
+    with open(opt.categorisationConfig, "r") as f:
+        cat_dict = json.load(f)
 
-# Loop over categories: fill dataframe
-for cat in cats:
-  print( " --> Extracting events from category: %s"%cat)
-  if inputTreeDir == '': treeName = "%s_%s_%s_%s"%(opt.productionMode,opt.inputMass,sqrts__,cat)
-  else: treeName = "%s/%s_%s_%s_%s"%(inputTreeDir,opt.productionMode,opt.inputMass,sqrts__,cat)
-  print("    * tree: %s"%treeName)
-  # Extract tree from uproot
-  t = f[treeName]
-  if t.num_entries == 0: continue
-  
-  # Convert tree to pandas dataframe
-  dfs = {}
+    cats = []
+    for cat in merged.pred_ia.unique():
+        if cat!=0:
+            cats.append(cat_dict['cat_dict'][str(cat)])
 
-  # Theory weights
-  for ts, tsColumns in theoryWeightColumns.items():
-    if opt.productionMode in modesToSkipTheoryWeights: 
-      dfs[ts] = pandas.DataFrame(np.ones(shape=(t.num_entries,theoryWeightContainers[ts])))
+    if not cats:
+        print(f"[ERROR] No parquet files found in '{opt.inputTreeFile}'")
+        leave()
     else:
-      dfs[ts] = pandas.DataFrame(np.reshape(np.array(t[ts].array()),(t.num_entries,len(tsColumns))))
-    dfs[ts].columns = tsColumns
+        print(f"[INFO] Detected categories: {cats}")
 
-  # Main variables to add to nominal RooDataSets
-  # For wildcards use filter_name functionality
-  mainVars_dropWildcards = []
-  for var in mainVars:
-    if "*" not in var:
-      mainVars_dropWildcards.append(var)
-      
-  dfs['main'] = t.arrays(mainVars_dropWildcards, library='pd')
+cats=list(cat_dict['cat_dict'].values() )# ensure ALL cats are included
 
-  for var in mainVars:
-    if "*" in var:
-      dfs[var] = t.arrays(filter_name=var, library='pd')
+# Add HEM for 2018
+if opt.year == '2018':
+    systematics.append("JetHEM")
 
-  # Concatenate current dataframes
-  df = pandas.concat(dfs.values(), axis=1)
+# Theory weight names
+modesToSkipTheoryWeights = ['bbh', 'thq', 'thw']
+theoryWeightColumns = {
+    ts: [f"{ts[:-1]}_{i}" for i in range(n)] for ts, n in theoryWeightContainers.items()
+}
 
-  # Add STXS splitting var if splitting necessary
-  if opt.doSTXSSplitting: df[stxsVar] = t.arrays(stxsVar, library='pd')
 
-  # For experimental phase space
-  df['type'] = 'nominal'
-  # Add NNLOPS variable
-  if(opt.doNNLOPS):
-    if opt.productionMode == 'ggh': df['NNLOPSweight'] = t.arrays(['NNLOPSweight'], library='pd')
-    else: df['NNLOPSweight'] = 1.
 
-  # Add columns specifying category add to overall dataframe
-  df['cat'] = cat
-  data = pandas.concat([data,df], ignore_index=True, axis=0, sort=False)
+merged['cat'] = merged['pred_ia'].map(str).map(cat_dict['cat_dict'])
+merged['type'] = 'nominal'
+data = merged.copy()
+# Ensure STXS var
+if stxsVar not in data.columns:
+    data[stxsVar] = 'nosplit'
+# # Combine data
+# data = pd.DataFrame()
 
-  # For systematics trees: only for events in experimental phase space
-  if opt.doSystematics:
-    sdf = pandas.DataFrame()
-    for s in systematics:
-      print("    --> Systematic: %s"%re.sub("YEAR",opt.year,s))
-      for direction in ['Up','Down']:
-        streeName = "%s_%s%s01sigma"%(treeName,s,direction)
-        # If year in streeName then replace by year being processed
-        streeName = re.sub("YEAR",opt.year,streeName)
-        st = f[streeName]
-        if len(st)==0: continue
-        sdf = st.arrays(systematicsVars, library='pd')
-        sdf['type'] = "%s%s"%(s,direction)
-        # Add STXS splitting var if splitting necessary
-        if opt.doSTXSSplitting: sdf[stxsVar] = st.arrays(stxsVar, library='pd')
+# for cat in cats:
+#     # parquet_path = os.path.join(opt.inputTreeFile, f"{cat}.parquet")
+#     # print(f"[INFO] Loading {parquet_path}")
+#     # if not os.path.exists(parquet_path):
+#     #     print(f"[WARNING] Missing file: {parquet_path}. Skipping...")
+#     #     continue
     
-        # Add column specifying category and add to systematics dataframe
-        sdf['cat'] = cat
-        sdata = pandas.concat([sdata,sdf], ignore_index=True, axis=0, sort=False)
-     
-# If not splitting by STXS bin then add dummy column to dataframe
-if not opt.doSTXSSplitting:
-  data[stxsVar] = 'nosplit'  
-  if opt.doSystematics: sdata[stxsVar] = 'nosplit'
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# 2) Convert pandas dataframe to RooWorkspace
+#     # df = pd.read_parquet(parquet_path)
+#     df= merged
+#     if df.empty:
+#         print(f"[WARNING] Empty parquet: {parquet_path}")
+#         continue
+
+#     
+
+#     # Add theory weight cols if missing
+#     for ts, cols in theoryWeightColumns.items():
+#         for col in cols:
+#             if col not in df.columns:
+#                 df[col] = 1.0 if opt.productionMode in modesToSkipTheoryWeights else 0.0
+
+#     # Metadata
+    
+#     df['cat'] = df['pred'].map(str).map(cat_dict['cat_dict'])
+#     # print(f'cat==={}')
+#     df['type'] = 'nominal'
+#     if opt.doNNLOPS and "NNLOPSweight" not in df.columns:
+#         df["NNLOPSweight"] = 1.0
+
+#     data = pd.concat([data, df], ignore_index=True)
+
+# ~~~~~~~ RooWorkspace Helpers ~~~~~~~
+def add_vars_to_workspace(ws, df, stxsVar):
+    intLumi = ROOT.RooRealVar("intLumi", "intLumi", 1000., 0., 999999999.)
+    intLumi.setConstant(True)
+    getattr(ws, 'import')(intLumi)
+
+    rvars = od()
+    for col in df.columns:
+        if col in ['cat', 'type', stxsVar, '']: continue
+        if col == "CMS_hgg_mass":
+            rvar = ROOT.RooRealVar(col, col, 125., 100., 180.)
+            rvar.setBins(160)
+        elif col == "dZ":
+            rvar = ROOT.RooRealVar(col, col, 0., -20., 20.)
+            rvar.setBins(40)
+        elif col == "weight":
+            rvar = ROOT.RooRealVar(col, col, 0.)
+        else:
+            rvar = ROOT.RooRealVar(col, col, 1., -999999, 999999)
+            rvar.setBins(1)
+        getattr(ws, 'import')(rvar, ROOT.RooFit.Silence())
+        rvars[col] = rvar
+    return list(rvars.keys())
+
+def make_argset(ws, var_names):
+    aset = ROOT.RooArgSet()
+    for name in var_names:
+        aset.add(ws.var(name))
+    return aset
+
+# ~~~~~~~ RooWorkspace Creation ~~~~~~~
 for stxsId in data[stxsVar].unique():
+    df = data[data[stxsVar] == stxsId]
 
-  # Split output files for different STXS bins
-  if opt.doSTXSSplitting:
-    df = data[data[stxsVar]==stxsId]
-    if opt.doSystematics: sdf = sdata[sdata[stxsVar]==stxsId]
+    if stxsVar == 'nosplit':
+        stxsBin = opt.productionMode
+    else:
+        stxsBin = flashggSTXSDict.get(int(stxsId), f"unknownSTXS_{stxsId}")
+        if opt.productionMode == "wh":
+            stxsBin = stxsBin.replace("QQ2HQQ", "WH2HQQ")
+        elif opt.productionMode == "zh":
+            stxsBin = stxsBin.replace("QQ2HQQ", "ZH2HQQ")
+        elif opt.productionMode == "ggzh":
+            if opt.decayExt == "_ZToQQ":
+                stxsBin = stxsBin.replace("GG2H", "GG2HQQ")
+            elif opt.decayExt == "_ZToNuNu":
+                stxsBin = stxsBin.replace("GG2HLL", "GG2HNUNU")
+        elif opt.productionMode == "thq":
+            stxsBin = stxsBin.replace("TH", "THQ")
+        elif opt.productionMode == "thw":
+            stxsBin = stxsBin.replace("TH", "THW")
 
-    # Extract stxsBin
-    stxsBin = flashggSTXSDict[int(stxsId)]
-    if opt.productionMode == "wh": 
-      if "QQ2HQQ" in stxsBin: stxsBin = re.sub("QQ2HQQ","WH2HQQ",stxsBin)
-    elif opt.productionMode == "zh": 
-      if "QQ2HQQ" in stxsBin: stxsBin = re.sub("QQ2HQQ","ZH2HQQ",stxsBin)
-    # ggZH: split by decay mode
-    elif opt.productionMode == "ggzh":
-      if opt.decayExt == "_ZToQQ": stxsBin = re.sub("GG2H","GG2HQQ",stxsBin)
-      elif opt.decayExt == "_ZToNuNu": stxsBin = re.sub("GG2HLL","GG2HNUNU",stxsBin)
-    # For tHL split into separate bins for tHq and tHW
-    elif opt.productionMode == "thq": stxsBin = re.sub("TH","THQ",stxsBin)
-    elif opt.productionMode == 'thw': stxsBin = re.sub("TH","THW",stxsBin)
+    output_dir = f"{opt.inputTreeFile}/ws_{stxsBin}"
+    os.makedirs(output_dir, exist_ok=True)
+    output_file = os.path.join(output_dir, f"output_{stxsBin}_M{opt.inputMass}_pythia8_{stxsBin}.root")
+    print(f"[INFO] Creating workspace: {output_file}")
 
-    # Define output workspace file
-    outputWSDir = "/".join(opt.inputTreeFile.split("/")[:-1])+"/ws_%s"%stxsBin
-    if not os.path.exists(outputWSDir): os.system("mkdir %s"%outputWSDir)
-    outputWSFile = outputWSDir+"/"+re.sub(".root","_%s.root"%stxsBin,opt.inputTreeFile.split("/")[-1])
-    print(" --> Creating output workspace for STXS bin: %s (%s)"%(stxsBin,outputWSFile))
+    fout = ROOT.TFile(output_file, "RECREATE")
+
+    foutdir = fout.mkdir(inputTreeDir)
+    foutdir.cd()  # IMPORTANT: switch to that directory
+
+    ws = ROOT.RooWorkspace("cms_hgg_13TeV", "cms_hgg_13TeV")
+
     
-  else:
-    df = data
-    if opt.doSystematics: sdf = sdata
-
-    # Define output workspace file
-    outputWSDir = "/".join(opt.inputTreeFile.split("/")[:-1])+"/ws_%s"%dataToProc(opt.productionMode)
-    if not os.path.exists(outputWSDir): os.system("mkdir %s"%outputWSDir)
-    outputWSFile = outputWSDir+"/"+re.sub(".root","_%s.root"%dataToProc(opt.productionMode),opt.inputTreeFile.split("/")[-1])
-    print(" --> Creating output workspace: (%s)"%outputWSFile)
+    if 'mass' in df.columns:
+        df = df.rename(columns={'mass': 'CMS_hgg_mass'})
+    reduced_df = df[mainVars ]
     
-  # Open file and initiate workspace
-  fout = ROOT.TFile(outputWSFile,"RECREATE")
-  foutdir = fout.mkdir(inputWSName__.split("/")[0])
-  foutdir.cd()
-  ws = ROOT.RooWorkspace(inputWSName__.split("/")[1],inputWSName__.split("/")[1])
-  
-  # Add variables to workspace
-  varNames = add_vars_to_workspace(ws,df,stxsVar)
 
-  # Loop over cats
-  for cat in cats:
+    var_names = add_vars_to_workspace(ws, reduced_df, stxsVar)
+    # for cat in cats:
+        
+        
+    #     df_cat = df[df['cat'] == cat]
+    #     print(f"[DEBUG] Dataset for category '{cat}' has {len(df_cat)} events before dropping NaNs.")
+    #     print(f"[DEBUG] Columns available: {df_cat.columns.tolist()}")
+    #     print(f"[DEBUG] Variables expected: {var_names}")
+    #     aset = make_argset(ws, var_names)
+    #     dset_name = f"{opt.productionMode}_{opt.inputMass}_{opt.year}_{cat}"
+    #     dset = ROOT.RooDataSet(dset_name, dset_name, aset, ROOT.RooFit.WeightVar("weight"))
+    #     numeric_var_names = [v for v in var_names if pd.api.types.is_numeric_dtype(df_cat[v])]
+        
+    #     df_cat[var_names] = df_cat[var_names].apply(pd.to_numeric, errors='coerce')
+    #     df_cat = df_cat.dropna(subset=var_names)
 
-    # a) make RooDataSets: type = nominal
-    mask = (df['cat']==cat)
+    #     for row in df_cat[var_names].to_numpy():
+    #         for i, val in enumerate(row):
+    #             aset[i].setVal(val)
+    #         dset.add(aset, aset.getRealValue("weight"))
+    #     getattr(ws, 'import')(dset)
 
-    # Make argset
-    aset = make_argset(ws,varNames)
+    for cat in cats:
+        
+        
+        
+        df_cat = df[df['cat'] == cat]
 
-    # Define RooDataSet
-    dName = "%s_%s_%s_%s"%(opt.productionMode,opt.inputMass,sqrts__,cat)
-    d = ROOT.RooDataSet(dName,dName,aset,ROOT.RooFit.WeightVar('weight'))
+        if len(df_cat) > skip_len:
+            df_cat = df_cat.iloc[:skip_len]
+            if opt.v:
+                print(f"[INFO] Truncated nominal category '{cat}' to {skip_len} entries.")
+        
 
-    # Loop over events in dataframe and add entry
-    for row in df[mask][varNames].to_numpy():
-      for i, val in enumerate(row):
-        aset[i].setVal(val)
-      d.add(aset,aset.getRealValue("weight"))
+        aset = make_argset(ws, var_names)  # full list (workspace needs everything)
+        cat_renamed=cat#'_'.join(cat.split('_')[:-1])
+        dset_name = f"{opt.productionMode}_{opt.year}_hgg_{opt.inputMass}_13TeV_{cat_renamed}"
+        dset = ROOT.RooDataSet(dset_name, dset_name, aset, ROOT.RooFit.WeightVar("weight"))
 
-    # Add to workspace
-    getattr(ws,'import')(d)
+        # Only try to convert numeric columns
+        numeric_var_names = [v for v in var_names if v in df_cat.columns and pd.api.types.is_numeric_dtype(df_cat[v])]
+        df_cat[numeric_var_names] = df_cat[numeric_var_names].astype('float64')
+        df_cat = df_cat.dropna(subset=numeric_var_names)
 
+        if opt.v:
+            print(f"[INFO] Category {cat} has {len(df_cat)} entries after cleaning.")
+
+        # for row in df_cat[numeric_var_names].to_numpy():
+        #     for i, val in enumerate(row):
+        #         aset[i].setVal(float(val))
+        #     dset.add(aset, aset.getRealValue("weight"))
+        for row in df_cat[numeric_var_names].itertuples(index=False, name=None):
+            for name, val in zip(numeric_var_names, row):
+                var = aset.find(name)
+                if var:  # safeguard
+                    var.setVal(float(val))
+            dset.add(aset, aset.find("weight").getVal())
+
+        getattr(ws, 'import')(dset)
+    
     if opt.doSystematics:
-      # b) make RooDataHists for systematic variations
-      for s in systematics:
-        for direction in ['Up','Down']:
-          # Create mask for systematic variation
-          mask = (sdf['type']=='%s%s'%(s,direction))&(sdf['cat']==cat)
-          
-          # Define RooDataHist
-          hName = "%s_%s_%s_%s_%s%s01sigma"%(opt.productionMode,opt.inputMass,sqrts__,cat,s,direction)
+        def fast_sample_syst_single_file(dirpath, syst, direction, n):
+            """
+            Load only ONE parquet file for each systematic variation,
+            take first n rows, and stop.
+            """
 
-          # Make argset: drop weight column for histogrammed observables
-          systematicsVarsDropWeight = []
-          for var in systematicsVars:
-            if var != "weight": systematicsVarsDropWeight.append(var)
-          aset = make_argset(ws,systematicsVarsDropWeight)
-          
-          h = ROOT.RooDataHist(hName,hName,aset)
-          for row, weight in zip(sdf[mask][systematicsVarsDropWeight].to_numpy(),sdf[mask]["weight"].to_numpy()):
-            for i, val in enumerate(row):
-              aset[i].setVal(val)
-            h.add(aset,weight)
-          
-          # Add to workspace
-          getattr(ws,'import')(h)
+            # Example matches: ...PileupUp.parquet, ...JERDown.parquet
+            files = [
+                f for f in glob.glob(f"{dirpath}/*.parquet")
+                if syst in f and direction in f and "ws_" not in f
+            ]
 
-  # Write WS to file
-  ws.Write()
+            if not files:
+                return pd.DataFrame()
 
-  # Close file and delete workspace from heap
-  fout.Close()
+            # Pick the largest file (most likely to contain enough rows)
+            f = max(files, key=os.path.getsize)
+
+            # Read only first n rows
+            try:
+                table = pq.read_table(f)
+                return table.to_pandas()
+            except Exception as e:
+                print(f"[ERROR] Could not read {f}: {e}")
+                return pd.DataFrame()
+
+            
+
+        for cat in cats:
+            catcopy=cat
+            
+            for syst in systematics:
+                for direction in ['Down',"Up"]:#, "Down"]:
+                    syst_name = f"{syst}{direction}"
+                    # print(f'systname={syst_name}')
+                
+
+                    merged_sys = fast_sample_syst_single_file(opt.inputTreeFile, syst, direction, skip_len)
+                    
+                    merged_sys['cat'] = merged_sys['pred_ia'].map(str).map(cat_dict['cat_dict'])
+                    merged_sys = merged_sys[merged_sys['cat'] == cat]
+                    
+                    # if 'Down' in syst_name:
+                    # print('print'+direction)
+                    # print(merged_sys.tail()) 
+            
+                
+                # catcopy = catcopy.replace(catcopy,catcopy.split('_merged')[0])
+                # catcopy+='_merged'
+                # print(catcopy)
+                # syst_file = os.path.join(opt.inputTreeFile, f"{catcopy}_{syst_name}01sigma.parquet")
+                
+                # if not os.path.exists(syst_file):
+                #     print(f"[WARNING] Missing systematic file: {syst_file}")
+                #     continue
+
+                # sdf = pd.read_parquet(syst_file)
+                    sdf = merged_sys
+                    if len(sdf) > skip_len:
+                        sdf = sdf.iloc[:skip_len]
+                        if opt.v:
+                            print(f"[INFO] Truncated systematic '{syst_name}' for category '{cat}' to {skip_len} entries.")
+                    
+                    if sdf.empty:
+                       if opt.v:
+                        print(f"[WARNING] Empty systematic parquet:") # {syst_file}")
+                        # continue                      
+                    if 'mass' in sdf.columns:
+                        sdf = sdf.rename(columns={'mass': 'CMS_hgg_mass'})
+
+                    # If splitting: ensure STXS var
+                    if stxsVar not in sdf.columns:
+                        sdf[stxsVar] = stxsId
+
+                    # Clean and ensure needed vars
+                    systematicsVarsDropWeight = [v for v in systematicsVars if v != 'weight']
+                    for v in systematicsVarsDropWeight:
+                        if v not in sdf.columns:
+                            print(f"[ERROR] Missing var {v} in {syst_file}")
+                            break
+
+                    sdf = sdf.dropna(subset=systematicsVarsDropWeight + ['weight'])
+
+                    aset = make_argset(ws, systematicsVarsDropWeight)
+                    hist_name = f"{opt.productionMode}_{opt.year}_hgg_{opt.inputMass}_13TeV_{catcopy}_{syst_name}01sigma"
+                    # print(f"[DEBUG] Importing histogram: {hist_name}")
+                    hist = ROOT.RooDataHist(hist_name, hist_name, aset)
+
+                    for row, weight in zip(sdf[systematicsVarsDropWeight].to_numpy(), sdf["weight"].to_numpy()):
+                        for i, val in enumerate(row):
+                            aset[i].setVal(float(val))
+                        hist.add(aset, weight)
+
+                    getattr(ws, 'import')(hist)
+                    if opt.v:
+                        print(f"[INFO] Imported systematics hist: {hist_name}")
+    if opt.v:
+        print(ws)
+    
+
+        ws.Print('v')
+    ws.Write()
+    fout.Close()
+
+    # up=0
+    # down=0
+    # ne=ws.data('BBH_FID_preEE_hgg_125_13TeV_RECO_ggH_0J_PTH_0_10')
+    # for i in range(ne.numEntries()):
+    #     entry=ne.get(i)
+    #     u=entry['weight_PileupUp'].getVal()
+    #     d=entry['weight_PileupDown'].getVal()
+    #     up+=u 
+    #     down+=d 
+    # print(up)
+    # print(down)
+
+    # print('now for ID SF:')
+    # up=0
+    # down=0
+    # ne=ws.data('BBH_FID_preEE_hgg_125_13TeV_RECO_ggH_0J_PTH_0_10')
+    # for i in range(ne.numEntries()):
+    #     entry=ne.get(i)
+    #     u=entry['weight_SF_photon_IDDown'].getVal()
+    #     d=entry['weight_SF_photon_IDUp'].getVal()
+    #     up+=u 
+    #     down+=d 
+    # print(up)
+    # print(down)
+
+print("~~~~~~~~~~~~~~~~~~~~~~~~~ ALL WORKSPACES DONE ~~~~~~~~~~~~~~~~~~~~~~~~~")
+
+
+print(' WARNING: In this setup, parquet files had background (pred=0). This got dropped when making RooWS!')
+
+debug= False
+
+if debug:
+    for i in merged.cat.unique():
+        proc=opt.inputTreeFile.split('/')[-3]
+        n=f'{proc}_preEE_hgg_125_13TeV_{i}'
+        print(f'{i} and {merged[merged.cat==i].weight.sum()} vs root: {ws.data(n).Print()}')
+        print('\n')

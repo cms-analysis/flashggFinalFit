@@ -82,13 +82,23 @@ if opt.doSystematics:
   # Add constant systematics to dataFrame
   for s in experimental_systematics:
     if s['type'] == 'constant': data = addConstantSyst(data,s,opt)
+  print('before')
+  for i in data.columns:
+    print(i)
   data = experimentalSystFactory(data, experimental_systematics, experimentalFactoryType, opt )
-
+  print('after')
+  for i in data.columns:
+    print(i)
   # Theory:
   print(" --> Adding theory systematics variations to dataFrame")
   # Add constant systematics to dataFrame
   for s in theory_systematics:
-    if s['type'] == 'constant': data = addConstantSyst(data,s,opt)
+    if s['type'] == 'constant': 
+      data = addConstantSyst(data,s,opt)
+      print('theory')
+      print(data)
+      print(data.columns)
+
   # Theory factory: group scale weights after calculation in relevant grouping scheme
   data = theorySystFactory(data, theory_systematics, theoryFactoryType, opt, stxsMergeScheme=STXSMergingScheme)
   #data, theory_systematics = groupSystematics(data, theory_systematics, opt, prefix="scaleWeight", groupings=[[1,2],[3,6],[4,8]], stxsMergeScheme=STXSMergingScheme)
@@ -127,6 +137,8 @@ if opt.prune:
     # Set prune = 1 if < threshold of total cat yield
     mask = (data['true_yield']<opt.pruneThreshold*data.apply(lambda x: catTrueYields[x['cat']], axis=1))&(data['type']=='sig')&(~data['cat'].str.contains('NOTAG'))
     data.loc[mask,'prune'] = 1
+    # mask2 = (data['proc']=='THQ_FID_postEE_hgg')| (data['proc']=='THW_FID_postEE_hgg')
+    # data.loc[mask2,'prune'] = 0
 
   else:
     print(" --> Using nominal yield of process (sumEntries) for pruning")
@@ -156,6 +168,7 @@ if opt.saveDataFrame:
 print(" ..........................................................................................")
 fdataName = "%s.txt"%opt.output
 print(" --> Writing to datacard file: %s"%fdataName)
+# print(data.weight_DummyDown_yield)
 from tools.writeToDatacard import writePreamble, writeProcesses, writeSystematic, writeMCStatUncertainty, writePdfIndex, writeBreak
 fdata = open(fdataName,"w")
 if not writePreamble(fdata,opt): 

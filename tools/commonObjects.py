@@ -20,9 +20,13 @@ lumiMap = {
     '2018':59.83, 
     'combined':137.65, 
     'merged':137.65,
-    '2022preEE':8.00,
-    '2022postEE':26.70
+    'preEE':7.98,
+    'postEE':26.67,
+    'preBPix':17.79,
+    'postBPix':9.45
 }
+
+
 # If using ReReco samples then switch to lumiMap below (missing data in 2018 EGamma data set)
 #lumiMap = {'2016':36.33, '2017':41.48, '2018':59.35, 'combined':137.17, 'merged':137.17}
 lumiScaleFactor = 1000. # Converting from pb to fb
@@ -39,7 +43,7 @@ productionModes = ['ggH','qqH','ttH','tHq','tHW','ggZH','WH','ZH','bbH']
 decayMode = 'hgg'
 
 # List of years
-years_to_process = ['2016','2017','2018','2022preEE','2022postEE']
+years_to_process = ['2016','2017','2018','preEE','postEE','preBPix','postBPix']
 
 # flashgg input WS objects
 inputWSName__ = "tagsDumper/cms_hgg_13TeV"

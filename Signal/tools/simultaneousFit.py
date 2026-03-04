@@ -71,7 +71,7 @@ def poisson_interval(x,eSumW2,level=0.68):
 # Function to calc chi2 for binned fit given pdf, RooDataHist and xvar as inputs
 #def calcChi2(x,pdf,d,errorType="Sumw2",_verbose=False,fitRange=[100,180]):
 #def calcChi2(x,pdf,d,errorType="Poisson",_verbose=False,fitRange=[110,140]):
-def calcChi2(x,pdf,d,errorType="Poisson",_verbose=False,fitRange=[110,140]):
+def calcChi2(x,pdf,d,errorType="Poisson",_verbose=False,fitRange=[115,135]):
 
   k = 0. # number of non empty bins (for calc degrees of freedom)
   normFactor = d.sumEntries()

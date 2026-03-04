@@ -1,9 +1,15 @@
 {
-    "mu_inclusive":{
+    "mu_inclusive_statonly":{
         "pois":"r",
         "fits":"profile1D:statonly:r",
         "points":"20:10",
-        "fit_opts":"--setParameterRanges r=0,2 --saveSpecifiedNuis all --freezeParameters MH,lumiscale "
+        "fit_opts":"--setParameterRanges r=0,2 --saveSpecifiedNuis all --freezeParameters MH,thQ_scale,thW_scale,allConstrainedNuisances"
+    },
+    "mu_inclusive":{
+        "pois":"r",
+        "fits":"profile1D:syst:r",
+        "points":"20:10",
+        "fit_opts":"--setParameterRanges r=0,2 --saveSpecifiedNuis all --freezeParameters MH,thQ_scale,thW_scale "
     },
 
     "mu_ggH_VBF":{
@@ -13,6 +19,30 @@
         "fit_opts":"--saveInactivePOI 1 --setParameterRanges r_ggH=0,3:r_VBF=0,5 --saveSpecifiedNuis all --freezeParameters MH"
     },
     "mu_STXS0":{
+        "pois":"r_GG2H,r_QQ2HQQ,r_WH2HLNU,r_ZH2HLL,r_TTH,r_TH",
+        "fits":"profile1D:syst:r_GG2H,r_QQ2HQQ,r_WH2HLNU,r_ZH2HLL,r_TTH,r_TH",
+        "points":"40:40",
+        "fit_opts":"--saveInactivePOI 1 --setParameters r_GG2H=1,r_QQ2HQQ=1,r_WH2HLNU=1,r_ZH2HLL=1,r_TTH=1,r_TH=1 --setParameterRanges r_GG2H=0,3:r_QQ2HQQ=0,3:r_WH2HLNU=0,3:r_ZH2HLL=0,3:r_TTH=0,3:r_TH=0,3 --saveSpecifiedNuis all --freezeParameters MH,thQ_scale,thW_scale"
+    },
+    "mu_STXS0_statonly":{
+        "pois":"r_GG2H,r_QQ2HQQ,r_WH2HLNU,r_ZH2HLL,r_TTH,r_TH",
+        "fits":"profile1D:statonly:r_GG2H,r_QQ2HQQ,r_WH2HLNU,r_ZH2HLL,r_TTH,r_TH",
+        "points":"40:40",
+        "fit_opts":"--saveInactivePOI 1 --setParameters r_GG2H=1,r_QQ2HQQ=1,r_WH2HLNU=1,r_ZH2HLL=1,r_TTH=1,r_TH=1 --setParameterRanges r_GG2H=0,3:r_QQ2HQQ=0,3:r_WH2HLNU=0,3:r_ZH2HLL=0,3:r_TTH=0,3:r_TH=0,3 --saveSpecifiedNuis all --freezeParameters MH,thQ_scale,thW_scale,allConstrainedNuisances"
+    },
+    "mu_STXS1P2_PROTO":{
+        "pois":"r_GG2H_PTH_GT200,r_GG2H_0J_PTH_0_10,r_GG2H_0J_PTH_GT10,r_GG2H_1J_PTH_0_60,r_GG2H_1J_PTH_60_120,r_GG2H_1J_PTH_120_200,r_GG2H_GE2J_MJJ_0_350_PTH_0_60,r_GG2H_GE2J_MJJ_0_350_PTH_60_120,r_GG2H_GE2J_MJJ_0_350_PTH_120_200,r_GG2H_MJJ_GT350_PTH_0_200,r_QQ2HQQ_REST,r_QQ2HQQ_GE2J_MJJ_60_120,r_QQ2HQQ_GE2J_MJJ_GT350_PTH_GT200,r_QQ2HQQ_GE2J_MJJ_GT350_PTH_0_200,r_TTH_PTH_0_120,r_TTH_PTH_GT120,r_TH,r_WH2HLNU_PTV_0_150,r_WH2HLNU_PTV_GT150,r_ZH2HLL",
+        "fits":"profile1D:syst:r_GG2H_PTH_GT200,r_GG2H_0J_PTH_0_10,r_GG2H_0J_PTH_GT10,r_GG2H_1J_PTH_0_60,r_GG2H_1J_PTH_60_120,r_GG2H_1J_PTH_120_200,r_GG2H_GE2J_MJJ_0_350_PTH_0_60,r_GG2H_GE2J_MJJ_0_350_PTH_60_120,r_GG2H_GE2J_MJJ_0_350_PTH_120_200,r_GG2H_MJJ_GT350_PTH_0_200,r_QQ2HQQ_REST,r_QQ2HQQ_GE2J_MJJ_60_120,r_QQ2HQQ_GE2J_MJJ_GT350_PTH_GT200,r_QQ2HQQ_GE2J_MJJ_GT350_PTH_0_200,r_TTH_PTH_0_120,r_TTH_PTH_GT120,r_TH,r_WH2HLNU_PTV_0_150,r_WH2HLNU_PTV_GT150,r_ZH2HLL",
+        "points":"40:40",
+        "fit_opts":"--saveInactivePOI 1 --setParameters r_GG2H_PTH_GT200=1,r_GG2H_0J_PTH_0_10=1,r_GG2H_0J_PTH_GT10=1,r_GG2H_1J_PTH_0_60=1,r_GG2H_1J_PTH_60_120=1,r_GG2H_1J_PTH_120_200=1,r_GG2H_GE2J_MJJ_0_350_PTH_0_60=1,r_GG2H_GE2J_MJJ_0_350_PTH_60_120=1,r_GG2H_GE2J_MJJ_0_350_PTH_120_200=1,r_GG2H_MJJ_GT350_PTH_0_200=1,r_QQ2HQQ_REST=1,r_QQ2HQQ_GE2J_MJJ_60_120=1,r_QQ2HQQ_GE2J_MJJ_GT350_PTH_GT200=1,r_QQ2HQQ_GE2J_MJJ_GT350_PTH_0_200=1,r_TTH_PTH_0_120=1,r_TTH_PTH_GT120=1,r_TH=1,r_WH2HLNU_PTV_0_150=1,r_WH2HLNU_PTV_GT150=1,r_ZH2HLL=1 --setParameterRanges r_GG2H_PTH_GT200=0,3:r_GG2H_0J_PTH_0_10=0,3:r_GG2H_0J_PTH_GT10=0,3:r_GG2H_1J_PTH_0_60=0,3:r_GG2H_1J_PTH_60_120=0,3:r_GG2H_1J_PTH_120_200=0,3:r_GG2H_GE2J_MJJ_0_350_PTH_0_60=0,3:r_GG2H_GE2J_MJJ_0_350_PTH_60_120=0,3:r_GG2H_GE2J_MJJ_0_350_PTH_120_200=0,3:r_GG2H_MJJ_GT350_PTH_0_200=0,3:r_QQ2HQQ_REST=0,3:r_QQ2HQQ_GE2J_MJJ_60_120=0,3:r_QQ2HQQ_GE2J_MJJ_GT350_PTH_GT200=0,3:r_QQ2HQQ_GE2J_MJJ_GT350_PTH_0_200=0,3:r_TTH_PTH_0_120=0,3:r_TTH_PTH_GT120=0,3:r_TH=0,3:r_WH2HLNU_PTV_0_150=0,3:r_WH2HLNU_PTV_GT150=0,3:r_ZH2HLL=0,3 --saveSpecifiedNuis all --freezeParameters MH,thQ_scale,thW_scale"
+    },
+    "mu_STXS1P2_PROTO_statonly":{
+        "pois":"r_GG2H_PTH_GT200,r_GG2H_0J_PTH_0_10,r_GG2H_0J_PTH_GT10,r_GG2H_1J_PTH_0_60,r_GG2H_1J_PTH_60_120,r_GG2H_1J_PTH_120_200,r_GG2H_GE2J_MJJ_0_350_PTH_0_60,r_GG2H_GE2J_MJJ_0_350_PTH_60_120,r_GG2H_GE2J_MJJ_0_350_PTH_120_200,r_GG2H_MJJ_GT350_PTH_0_200,r_QQ2HQQ_REST,r_QQ2HQQ_GE2J_MJJ_60_120,r_QQ2HQQ_GE2J_MJJ_GT350_PTH_GT200,r_QQ2HQQ_GE2J_MJJ_GT350_PTH_0_200,r_TTH_PTH_0_120,r_TTH_PTH_GT120,r_TH,r_WH2HLNU_PTV_0_150,r_WH2HLNU_PTV_GT150,r_ZH2HLL",
+        "fits":"profile1D:statonly:r_GG2H_PTH_GT200,r_GG2H_0J_PTH_0_10,r_GG2H_0J_PTH_GT10,r_GG2H_1J_PTH_0_60,r_GG2H_1J_PTH_60_120,r_GG2H_1J_PTH_120_200,r_GG2H_GE2J_MJJ_0_350_PTH_0_60,r_GG2H_GE2J_MJJ_0_350_PTH_60_120,r_GG2H_GE2J_MJJ_0_350_PTH_120_200,r_GG2H_MJJ_GT350_PTH_0_200,r_QQ2HQQ_REST,r_QQ2HQQ_GE2J_MJJ_60_120,r_QQ2HQQ_GE2J_MJJ_GT350_PTH_GT200,r_QQ2HQQ_GE2J_MJJ_GT350_PTH_0_200,r_TTH_PTH_0_120,r_TTH_PTH_GT120,r_TH,r_WH2HLNU_PTV_0_150,r_WH2HLNU_PTV_GT150,r_ZH2HLL",
+        "points":"40:40",
+        "fit_opts":"--saveInactivePOI 1 --setParameters r_GG2H_PTH_GT200=1,r_GG2H_0J_PTH_0_10=1,r_GG2H_0J_PTH_GT10=1,r_GG2H_1J_PTH_0_60=1,r_GG2H_1J_PTH_60_120=1,r_GG2H_1J_PTH_120_200=1,r_GG2H_GE2J_MJJ_0_350_PTH_0_60=1,r_GG2H_GE2J_MJJ_0_350_PTH_60_120=1,r_GG2H_GE2J_MJJ_0_350_PTH_120_200=1,r_GG2H_MJJ_GT350_PTH_0_200=1,r_QQ2HQQ_REST=1,r_QQ2HQQ_GE2J_MJJ_60_120=1,r_QQ2HQQ_GE2J_MJJ_GT350_PTH_GT200=1,r_QQ2HQQ_GE2J_MJJ_GT350_PTH_0_200=1,r_TTH_PTH_0_120=1,r_TTH_PTH_GT120=1,r_TH=1,r_WH2HLNU_PTV_0_150=1,r_WH2HLNU_PTV_GT150=1,r_ZH2HLL=1 --setParameterRanges r_GG2H_PTH_GT200=0,3:r_GG2H_0J_PTH_0_10=0,3:r_GG2H_0J_PTH_GT10=0,3:r_GG2H_1J_PTH_0_60=0,3:r_GG2H_1J_PTH_60_120=0,3:r_GG2H_1J_PTH_120_200=0,3:r_GG2H_GE2J_MJJ_0_350_PTH_0_60=0,3:r_GG2H_GE2J_MJJ_0_350_PTH_60_120=0,3:r_GG2H_GE2J_MJJ_0_350_PTH_120_200=0,3:r_GG2H_MJJ_GT350_PTH_0_200=0,3:r_QQ2HQQ_REST=0,3:r_QQ2HQQ_GE2J_MJJ_60_120=0,3:r_QQ2HQQ_GE2J_MJJ_GT350_PTH_GT200=0,3:r_QQ2HQQ_GE2J_MJJ_GT350_PTH_0_200=0,3:r_TTH_PTH_0_120=0,3:r_TTH_PTH_GT120=0,3:r_TH=0,3:r_WH2HLNU_PTV_0_150=0,3:r_WH2HLNU_PTV_GT150=0,3:r_ZH2HLL=0,3 --saveSpecifiedNuis all --freezeParameters MH,thQ_scale,thW_scale,allConstrainedNuisances"
+    },
+    "mu_STXS0_old":{
         "pois":"r_gghtruth,r_tthtruth,r_thtruth,r_whltruth,r_zhltruth,r_vbftruth",
         "fits":"profile1D:statonly:r_gghtruth,r_tthtruth,r_thtruth,r_whltruth,r_zhltruth,r_vbftruth",
         "points":"40:40",

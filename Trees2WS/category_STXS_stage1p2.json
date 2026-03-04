@@ -1,0 +1,26 @@
+{"cat_dict" : {
+    "1":"RECO_ggH_0J_PTH_0_10",
+    "2":"RECO_ggH_0J_PTH_GT10_wbbH",
+    "3":"RECO_ggH_1J_PTH_0_60",
+    "4":"RECO_ggH_1J_PTH_60_120",
+    "5":"RECO_ggH_1J_PTH_120_200",
+    "6":"RECO_ggH_GE2J_MJJ_0_350_PTH_0_60",
+    "7":"RECO_ggH_GE2J_MJJ_0_350_PTH_60_120",
+    "8":"RECO_ggH_GE2J_MJJ_0_350_PTH_120_200",
+    "9":"RECO_ggH_GE2J_MJJ_GT350_PTH_0_200",
+    "10":"RECO_ggH_PTH_GT200",
+    "11":"RECO_qqH_REST",
+    "12":"RECO_qqH_GE2J_MJJ_60_120",
+    "13": "RECO_qqH_GE2J_MJJ_GT350_PTH_0_200",
+    "14":"RECO_qqH_GE2J_MJJ_GT350_PTH_GT200",
+    "15": "RECO_WH_lep_PTV_0_150",
+    "16":"RECO_WH_lep_PTV_GT150",
+    "17": "RECO_ZH_lep",
+    "18":"RECO_ttH_PTH_0_120",
+    "19":"RECO_ttH_PTH_GT120",
+    "20":"RECO_tH"
+}
+
+
+}
+

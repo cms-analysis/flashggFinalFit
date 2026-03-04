@@ -68,6 +68,56 @@ globalReplacementMap["Run3STXS0"]["catRVMap"]["ZHleptonic_RECO"]= "ZHleptonic_RE
 
 
 
+globalReplacementMap["Run3STXS12"]=od()
+globalReplacementMap["Run3STXS12"]["procWV"]= "GG2H_0J_PTH_0_10"
+globalReplacementMap["Run3STXS12"]["catWV"]= "RECO_ggH_0J_PTH_0_10"
+
+globalReplacementMap["Run3STXS12"]["procRVMap"]=od()
+globalReplacementMap['Run3STXS12']['procRVMap']['RECO_ggH_0J_PTH_0_10'] = 'GG2H_0J_PTH_0_10'
+globalReplacementMap['Run3STXS12']['procRVMap']['RECO_ggH_0J_PTH_GT10_wbbH'] = 'GG2H_0J_PTH_GT10'
+globalReplacementMap['Run3STXS12']['procRVMap']['RECO_ggH_1J_PTH_0_60'] = 'GG2H_1J_PTH_0_60'
+globalReplacementMap['Run3STXS12']['procRVMap']['RECO_ggH_1J_PTH_60_120'] = 'GG2H_1J_PTH_60_120'
+globalReplacementMap['Run3STXS12']['procRVMap']['RECO_ggH_1J_PTH_120_200'] = 'GG2H_1J_PTH_120_200'
+globalReplacementMap['Run3STXS12']['procRVMap']['RECO_ggH_GE2J_MJJ_0_350_PTH_0_60'] = 'GG2H_GE2J_MJJ_0_350_PTH_0_60'
+globalReplacementMap['Run3STXS12']['procRVMap']['RECO_ggH_GE2J_MJJ_0_350_PTH_60_120'] = 'GG2H_GE2J_MJJ_0_350_PTH_60_120'
+globalReplacementMap['Run3STXS12']['procRVMap']['RECO_ggH_GE2J_MJJ_0_350_PTH_120_200'] = 'GG2H_GE2J_MJJ_0_350_PTH_120_200'
+globalReplacementMap['Run3STXS12']['procRVMap']['RECO_ggH_GE2J_MJJ_GT350_PTH_0_200'] = 'GG2H_GE2J_MJJ_350_700_PTH_0_200_PTHJJ_GT25'
+globalReplacementMap['Run3STXS12']['procRVMap']['RECO_ggH_PTH_GT200'] = 'GG2H_PTH_200_300'
+globalReplacementMap['Run3STXS12']['procRVMap']['RECO_qqH_REST'] = 'VBF_GE2J_MJJ_0_60'
+globalReplacementMap['Run3STXS12']['procRVMap']['RECO_qqH_GE2J_MJJ_60_120'] = 'VBF_GE2J_MJJ_60_120'
+globalReplacementMap['Run3STXS12']['procRVMap']['RECO_qqH_GE2J_MJJ_GT350_PTH_0_200'] = 'VBF_GE2J_MJJ_120_350'
+globalReplacementMap['Run3STXS12']['procRVMap']['RECO_qqH_GE2J_MJJ_GT350_PTH_GT200'] = 'VBF_GE2J_MJJ_GT350_PTH_GT200'
+globalReplacementMap['Run3STXS12']['procRVMap']['RECO_WH_lep_PTV_0_150'] = 'WMINUSH2HLNU_PTV_0_75'
+globalReplacementMap['Run3STXS12']['procRVMap']['RECO_WH_lep_PTV_GT150'] = 'WMINUSH2HLNU_PTV_150_250_0J'
+globalReplacementMap['Run3STXS12']['procRVMap']['RECO_ZH_lep'] = 'ZH2HLL_PTV_0_75'
+globalReplacementMap['Run3STXS12']['procRVMap']['RECO_ttH_PTH_0_120'] = 'TTH_PTH_0_60'
+globalReplacementMap['Run3STXS12']['procRVMap']['RECO_ttH_PTH_GT120'] = 'TTH_PTH_120_200'
+globalReplacementMap['Run3STXS12']['procRVMap']['RECO_tH'] = 'THQ_FID'
+
+
+globalReplacementMap["Run3STXS12"]["catRVMap"]=od()
+globalReplacementMap['Run3STXS12']['catRVMap']['RECO_ggH_0J_PTH_0_10'] = 'RECO_ggH_0J_PTH_0_10'
+globalReplacementMap['Run3STXS12']['catRVMap']['RECO_ggH_0J_PTH_GT10_wbbH'] = 'RECO_ggH_0J_PTH_GT10_wbbH'
+globalReplacementMap['Run3STXS12']['catRVMap']['RECO_ggH_1J_PTH_0_60'] = 'RECO_ggH_1J_PTH_0_60'
+globalReplacementMap['Run3STXS12']['catRVMap']['RECO_ggH_1J_PTH_60_120'] = 'RECO_ggH_1J_PTH_60_120'
+globalReplacementMap['Run3STXS12']['catRVMap']['RECO_ggH_1J_PTH_120_200'] = 'RECO_ggH_1J_PTH_120_200'
+globalReplacementMap['Run3STXS12']['catRVMap']['RECO_ggH_GE2J_MJJ_0_350_PTH_0_60'] = 'RECO_ggH_GE2J_MJJ_0_350_PTH_0_60'
+globalReplacementMap['Run3STXS12']['catRVMap']['RECO_ggH_GE2J_MJJ_0_350_PTH_60_120'] = 'RECO_ggH_GE2J_MJJ_0_350_PTH_60_120'
+globalReplacementMap['Run3STXS12']['catRVMap']['RECO_ggH_GE2J_MJJ_0_350_PTH_120_200'] = 'RECO_ggH_GE2J_MJJ_0_350_PTH_120_200'
+globalReplacementMap['Run3STXS12']['catRVMap']['RECO_ggH_GE2J_MJJ_GT350_PTH_0_200'] = 'RECO_ggH_GE2J_MJJ_GT350_PTH_0_200'
+globalReplacementMap['Run3STXS12']['catRVMap']['RECO_ggH_PTH_GT200'] = 'RECO_ggH_PTH_GT200'
+globalReplacementMap['Run3STXS12']['catRVMap']['RECO_qqH_REST'] = 'RECO_qqH_REST'
+globalReplacementMap['Run3STXS12']['catRVMap']['RECO_qqH_GE2J_MJJ_60_120'] = 'RECO_qqH_GE2J_MJJ_60_120'
+globalReplacementMap['Run3STXS12']['catRVMap']['RECO_qqH_GE2J_MJJ_GT350_PTH_0_200'] = 'RECO_qqH_GE2J_MJJ_GT350_PTH_0_200'
+globalReplacementMap['Run3STXS12']['catRVMap']['RECO_qqH_GE2J_MJJ_GT350_PTH_GT200'] = 'RECO_qqH_GE2J_MJJ_GT350_PTH_GT200'
+globalReplacementMap['Run3STXS12']['catRVMap']['RECO_WH_lep_PTV_0_150'] = 'RECO_WH_lep_PTV_0_150'
+globalReplacementMap['Run3STXS12']['catRVMap']['RECO_WH_lep_PTV_GT150'] = 'RECO_WH_lep_PTV_GT150'
+globalReplacementMap['Run3STXS12']['catRVMap']['RECO_ZH_lep'] = 'RECO_ZH_lep'
+globalReplacementMap['Run3STXS12']['catRVMap']['RECO_ttH_PTH_0_120'] = 'RECO_ttH_PTH_0_120'
+globalReplacementMap['Run3STXS12']['catRVMap']['RECO_ttH_PTH_GT120'] = 'RECO_ttH_PTH_GT120'
+globalReplacementMap['Run3STXS12']['catRVMap']['RECO_tH'] = 'RECO_tH'
+
+
 # Tutorial analysis
 globalReplacementMap['tutorial'] = od()
 # For WRONG VERTEX SCENARIO:

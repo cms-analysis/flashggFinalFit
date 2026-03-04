@@ -100,15 +100,13 @@ for cat,f in inputFiles.items():
   # Iterate over norms: extract total category norm
   catNorm = 0
   for k, norm in norms.items():
-    year = k.split("__")[-1]
-    proc = "_".join(k.split("_")[:3])
+    proc, year = k.split("__")
     w.var("IntLumi").setVal(lumiScaleFactor*lumiMap[year])
     catNorm += norm.getVal()
 
   # Iterate over norms and extract data sets + pdfs
   for k, norm in norms.items():
-    year = k.split("__")[-1]
-    proc = "_".join(k.split("_")[:3])
+    proc, year = k.split("__")
     _id = "%s_%s_%s_%s"%(proc,year,cat,sqrts__)
     w.var("IntLumi").setVal(lumiScaleFactor*lumiMap[year])
 

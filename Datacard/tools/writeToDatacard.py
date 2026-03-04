@@ -17,7 +17,7 @@ def writePreamble(f,options):
 def writeProcesses(f,d,options):
   f.write("\n")
   # If opt.prune then remove all rows from dataFrame with prune=1
-  if options.prune: d = d[d['prune']==0]
+  if options.prune: d = d[(d['prune']==0)]
   # d = Pandas DataFrame
   # Shapes
   # Loop over categories in dataframe
@@ -62,7 +62,8 @@ def writeProcesses(f,d,options):
 
 
 def writeSystematic(f,d,s,options,stxsMergeScheme=None,scaleCorrScheme=None):
-
+  print('neww')
+  # print(d.weight_DummyDown)
   # For signal shape systematics add simple line
   if s['type'] == 'signal_shape':
     stitle = "%s_%s"%(outputWSNuisanceTitle__,s['title'])
@@ -111,10 +112,13 @@ def writeSystematic(f,d,s,options,stxsMergeScheme=None,scaleCorrScheme=None):
         lsyst = '%-50s  %-10s    '%(stitle,s['prior'])
         # Loop over categories and then iterate over rows in category
         for cat in d.cat.unique():
+          print(cat)
+          # print(d[d['cat']==cat][['weight_DummyUp_yield','lumi_13p6TeV_2022']])
           for ir,r in d[d['cat']==cat].iterrows():
             if r['proc'] == "data_obs": continue
             # Extract value and add to line (with checks)
             sval = r["%s%s%s"%(s['name'],mergeStr,tierStr)]
+            print(sval)
             lsyst = addSyst(lsyst,sval,stitle,r['proc'],cat)
         # Remove final space from line and add to file
         f.write("%s\n"%lsyst[:-1])

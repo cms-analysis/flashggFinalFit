@@ -16,15 +16,35 @@ def writePreamble(_file):
   _file.write("source /cvmfs/cms.cern.ch/cmsset_default.sh\n")
   _file.write("eval `scramv1 runtime -sh`\n")
   _file.write("cd %s\n"%swd__)
+  _file.write("cd ..\n")
+
+  # NEW: activate standalone_setup 
+  _file.write('source /eos/user/p/pkrueper/HiggsDNA_and_FinalFits_tutorial24/FF_standalone/src/flashggFinalFit/setup_standalone.sh\n')
+  _file.write("cd Signal\n")
+  # NEW: micromamba in  standalone FF:
+
+  _file.write("export MAMBA_EXE='/eos/home-p/pkrueper/HiggsDNA_and_FinalFits_tutorial24/higgsdna_finalfits_tutorial_24/y/micromamba';\n")
+  _file.write("export MAMBA_ROOT_PREFIX='/eos/home-p/pkrueper/HiggsDNA_and_FinalFits_tutorial24/higgsdna_finalfits_tutorial_24/micromamba';\n")
+  _file.write("__mamba_setup=\"$(\"$MAMBA_EXE\" shell hook --shell bash --root-prefix \"$MAMBA_ROOT_PREFIX\" 2> /dev/null)\"\n")
+  _file.write("if [ $? -eq 0 ]; then\n")
+  _file.write("    eval \"$__mamba_setup\"\n")
+  _file.write("else\n")
+  _file.write("    alias micromamba=\"$MAMBA_EXE\"  # Fallback on help from micromamba activate\n")
+  _file.write("fi\n") 
+  _file.write("unset __mamba_setup\n")
+  _file.write("micromamba activate flashggFinalFit\n")
+
   _file.write("export PYTHONPATH=$PYTHONPATH:%s/tools:%s/tools\n\n"%(cwd__,swd__))
 
 def writeCondorSub(_file,_exec,_queue,_nJobs,_jobOpts,doHoldOnFailure=True,doPeriodicRetry=True,dir="fTest"):
   _file.write("executable = %s.sh\n"%_exec)
   _file.write("arguments  = $(ProcId)\n")
-  _file.write(f"output     = /eos/user/p/pkrueper/HiggsDNA_and_FinalFits_tutorial24/higgsdna_finalfits_tutorial_24/07_FinalFits/CMSSW_14_1_0_pre4/src/flashggFinalFit/Signal/outdir_tutorial_2022preEE/fTest/jobs/%s.$(ClusterId).$(ProcId).out\n"%_exec)
-  _file.write(f"error      = /eos/user/p/pkrueper/HiggsDNA_and_FinalFits_tutorial24/higgsdna_finalfits_tutorial_24/07_FinalFits/CMSSW_14_1_0_pre4/src/flashggFinalFit/Signal/outdir_tutorial_2022preEE/fTest/jobs/%s.$(ClusterId).$(ProcId).err\n\n"%_exec)
-  _file.write(f"output_destination = /eos/user/p/pkrueper/HiggsDNA_and_FinalFits_tutorial24/higgsdna_finalfits_tutorial_24/07_FinalFits/CMSSW_14_1_0_pre4/src/flashggFinalFit/Signal/outdir_tutorial_2022preEE/{dir}")
-  _file.write("transfer_output_files = \"\"")
+  _file.write(f"output     = /eos/user/p/pkrueper/HiggsDNA_and_FinalFits_tutorial24/FF_standalone/src/flashggFinalFit/Signal/logs/{_exec}.$(ClusterId).$(ProcId).out\n")
+  _file.write(f"error      = /eos/user/p/pkrueper/HiggsDNA_and_FinalFits_tutorial24/FF_standalone/src/flashggFinalFit/Signal/logs/{_exec}.$(ClusterId).$(ProcId).err\n")
+  _file.write(f"log      = /eos/user/p/pkrueper/HiggsDNA_and_FinalFits_tutorial24/FF_standalone/src/flashggFinalFit/Signal/logs/{_exec}.$(ClusterId).$(ProcId).log\n")
+  # _file.write(f"output_destination = /eos/user/p/pkrueper/HiggsDNA_and_FinalFits_tutorial24/FF_standalone/src/flashggFinalFit/Signal/logs/\n")
+  #_file.write("transfer_output_files = /eos/user/p/pkrueper/HiggsDNA_and_FinalFits_tutorial24/FF_standalone/src/flashggFinalFit/Signal/logs/")
+  _file.write("transfer_output_files = \"\" \n")
   if _jobOpts != '':
     _file.write("# User specified job options\n")
     for jo in _jobOpts.split(":"): _file.write("%s\n"%jo)
@@ -40,6 +60,7 @@ def writeCondorSub(_file,_exec,_queue,_nJobs,_jobOpts,doHoldOnFailure=True,doPer
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 def writeSubFiles(_opts):
+  print('hellllllllp')
   # Make directory to store sub files
   if not os.path.isdir("%s/outdir_%s"%(swd__,_opts['ext'])): os.system("mkdir %s/outdir_%s"%(swd__,_opts['ext']))
   if not os.path.isdir("%s/outdir_%s/%s"%(swd__,_opts['ext'],_opts['mode'])): os.system("mkdir %s/outdir_%s/%s"%(swd__,_opts['ext'],_opts['mode']))
@@ -63,9 +84,9 @@ def writeSubFiles(_opts):
         for cidx in range(_opts['nCats']):
           pcidx = pidx*_opts['nCats']+cidx
           p,c = _opts['procs'].split(",")[pidx], _opts['cats'].split(",")[cidx]
-          _f.write("if [ $1 -eq %g ]; then\n"%pcidx)
+          # _f.write("if [ $1 -eq %g ]; then\n"%pcidx)
           _f.write("  python3 %s/scripts/signalFit.py --inputWSDir %s --ext %s --proc %s --cat %s --year %s --analysis %s --massPoints %s --scales \'%s\' --scalesCorr \'%s\' --scalesGlobal \'%s\' --smears \'%s\' %s\n"%(swd__,_opts['inputWSDir'],_opts['ext'],p,c,_opts['year'],_opts['analysis'],_opts['massPoints'],_opts['scales'],_opts['scalesCorr'],_opts['scalesGlobal'],_opts['smears'],_opts['modeOpts']))
-          _f.write("fi\n")
+          # _f.write("fi\n")
    
     # For looping over categories
     elif( _opts['mode'] == "signalFit" )&( _opts['groupSignalFitJobsByCat'] ):
@@ -74,21 +95,22 @@ def writeSubFiles(_opts):
         _f.write("if [ $1 -eq %g ]; then\n"%cidx)
         for pidx in range(_opts['nProcs']):
           p = _opts['procs'].split(",")[pidx]
-          _f.write("  python3 %s/scripts/signalFit.py --inputWSDir %s --ext %s --proc %s --cat %s --year %s --analysis %s --massPoints %s --scales \'%s\' --scalesCorr \'%s\' --scalesGlobal \'%s\' --smears \'%s\' %s\n"%(swd__,_opts['inputWSDir'],_opts['ext'],p,c,_opts['year'],_opts['analysis'],_opts['massPoints'],_opts['scales'],_opts['scalesCorr'],_opts['scalesGlobal'],_opts['smears'],_opts['modeOpts']))
+          _f.write(f"  python3 %s/scripts/signalFit.py --inputWSDir %s --ext %s --proc %s --cat %s --year %s --analysis %s --massPoints %s --scales \'%s\' --scalesCorr \'%s\' --scalesGlobal \'%s\' --smears \'%s\' %s   \n"%(swd__,_opts['inputWSDir'],_opts['ext'],p,c,_opts['year'],_opts['analysis'],_opts['massPoints'],_opts['scales'],_opts['scalesCorr'],_opts['scalesGlobal'],_opts['smears'],_opts['modeOpts']))
         _f.write("fi\n")
 
     elif _opts['mode'] == "calcPhotonSyst":
       for cidx in range(_opts['nCats']):
         c = _opts['cats'].split(",")[cidx]
         _f.write("if [ $1 -eq %g ]; then\n"%cidx)
-        _f.write("  python3 %s/scripts/calcPhotonSyst.py --cat %s --procs %s --ext %s --inputWSDir %s --scales \'%s\' --scalesCorr \'%s\' --scalesGlobal \'%s\' --smears \'%s\' %s\n"%(swd__,c,_opts['procs'],_opts['ext'],_opts['inputWSDir'],_opts['scales'],_opts['scalesCorr'],_opts['scalesGlobal'],_opts['smears'],_opts['modeOpts']))
+        _f.write("  python3 %s/scripts/calcPhotonSyst.py --year %s --cat %s --procs %s --ext %s --inputWSDir %s --scales \'%s\' --scalesCorr \'%s\' --scalesGlobal \'%s\' --smears \'%s\' %s\n"%(swd__,_opts['year'],c,_opts['procs'],_opts['ext'],_opts['inputWSDir'],_opts['scales'],_opts['scalesCorr'],_opts['scalesGlobal'],_opts['smears'],_opts['modeOpts']))
         _f.write("fi\n")
 
     elif _opts['mode'] == "fTest":
+      print(_opts['year'])
       for cidx in range(_opts['nCats']):
         c = _opts['cats'].split(",")[cidx]
         _f.write("if [ $1 -eq %g ]; then\n"%cidx)
-        _f.write("  python3 %s/scripts/fTest.py --cat %s --procs %s --ext %s --inputWSDir %s %s\n"%(swd__,c,_opts['procs'],_opts['ext'],_opts['inputWSDir'],_opts['modeOpts']))
+        _f.write(f"  python3 %s/scripts/fTest.py --cat %s --procs %s --year %s --ext %s --inputWSDir %s %s \n"%(swd__,c,_opts['procs'],_opts['year'],_opts['ext'],_opts['inputWSDir'],_opts['modeOpts']))
         _f.write("fi\n")
 
     elif _opts['mode'] == "packageSignal":
@@ -154,10 +176,18 @@ def writeSubFiles(_opts):
 
     elif _opts['mode'] == "fTest":
       for cidx in range(_opts['nCats']):
+      
         c = _opts['cats'].split(",")[cidx]
         _f = open("%s/%s_%s.sh"%(_jobdir,_executable,c),"w")
         writePreamble(_f)
-        _f.write("python3 %s/scripts/fTest.py --cat %s --procs %s --ext %s --inputWSDir %s %s\n"%(swd__,c,_opts['procs'],_opts['ext'],_opts['inputWSDir'],_opts['modeOpts']))
+        for pidx in range(_opts['nProcs']):
+          p = _opts['procs'].split(",")[pidx]
+          print(p)
+          print('hi here')
+        
+        
+        
+          _f.write("python3 %s/scripts/fTest.py --cat %s --procs %s --year %s --ext %s --inputWSDir %s %s\n"%(swd__,c,p,_opts['year'],_opts['ext'],_opts['inputWSDir'],_opts['modeOpts']))
         _f.close()
         os.system("chmod 775 %s/%s_%s.sh"%(_jobdir,_executable,c))
 
