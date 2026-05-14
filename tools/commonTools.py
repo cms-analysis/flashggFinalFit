@@ -104,6 +104,7 @@ def massFromFileName(_fileName):
 # Function for converting STXS process to production mode in dataset name
 procToDataMap = od()
 procToDataMap['GG2H'] = 'ggh'
+procToDataMap['GG2HQQ'] = 'ggzh'
 procToDataMap['VBF'] = 'vbf'
 procToDataMap['WH2HQQ'] = 'wh'
 procToDataMap['ZH2HQQ'] = 'zh'

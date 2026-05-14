@@ -11,7 +11,7 @@ pwd__ = "%s/Plots"%cwd__
 twd__ = "%s/Trees2WS"%cwd__
 
 # Centre of mass energy string
-sqrts__ = "13TeV"
+sqrts__ = "13p6TeV"
 
 # Luminosity map in fb^-1: for using UL 2018
 lumiMap = {
@@ -42,7 +42,7 @@ decayMode = 'hgg'
 years_to_process = ['2016','2017','2018','2022preEE','2022postEE']
 
 # flashgg input WS objects
-inputWSName__ = "tagsDumper/cms_hgg_13TeV"
+inputWSName__ = "stxs/cms_hgg_13p6TeV"
 inputNuisanceExtMap = {'scales':'','scalesCorr':'','smears':''}
 # Signal output WS objects
 outputWSName__ = "wsig"

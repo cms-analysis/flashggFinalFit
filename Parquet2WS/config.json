@@ -1,0 +1,4 @@
+{
+    "main_vars" : ["CMS_hgg_mass", "weight", "dZ"],
+    "cats_to_drop" : ["RECO_DY", "RECO_VV+VG", "RECO_Top", "RECO_GG+GJ"]
+}
