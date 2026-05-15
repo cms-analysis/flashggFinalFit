@@ -16,6 +16,7 @@ from collections import OrderedDict as od
 from commonTools import *
 from commonObjects import *
 from signalTools import *
+from XSBRMap import *
 from simultaneousFit import *
 from plottingTools import *
 
@@ -30,8 +31,9 @@ def get_options():
   parser.add_option("--xvar", dest='xvar', default='CMS_hgg_mass', help="Observable to fit")
   parser.add_option("--inputWSDir", dest='inputWSDir', default='', help="Input flashgg WS directory")
   parser.add_option("--ext", dest='ext', default='', help="Extension")
+  parser.add_option("--analysis", dest='analysis', default='STXS', help="Analysis handle: used to specify XS normalisations")
   parser.add_option("--procs", dest='procs', default='', help="Signal processes")
-  parser.add_option("--nProcsToFTest", dest='nProcsToFTest', default=5, type='int',help="Number of signal processes to fTest (ordered by sum entries), others are set to nRV=1,nWV=1. Set to -1 to run over all")
+  parser.add_option("--nProcsToFTest", dest='nProcsToFTest', default=10, type='int',help="Number of signal processes to fTest (ordered by sum entries), others are set to nRV=1,nWV=1. Set to -1 to run over all")
   parser.add_option("--cat", dest='cat', default='', help="RECO category")
   parser.add_option('--mass', dest='mass', default='125', help="Mass point to fit")
   parser.add_option('--doPlots', dest='doPlots', default=False, action="store_true", help="Produce Signal fTest plots")
@@ -51,7 +53,7 @@ if opt.doPlots:
   if not os.path.isdir("%s/outdir_%s/fTest/Plots"%(swd__,opt.ext)): os.system("mkdir %s/outdir_%s/fTest/Plots"%(swd__,opt.ext))
 
 # Load xvar to fit
-nominalWSFileName = glob.glob("%s/output*"%(opt.inputWSDir))[0]
+nominalWSFileName = glob.glob("%s/events__*.root"%(opt.inputWSDir))[0]
 f0 = ROOT.TFile(nominalWSFileName,"read")
 inputWS0 = f0.Get(inputWSName__)
 xvar = inputWS0.var(opt.xvar)
@@ -66,33 +68,43 @@ MH.setUnit("GeV")
 MH.setConstant(True)
 
 # Loop over processes: extract sum entries and fill dict. Default nRV,nWV = 1,1
-df = pd.DataFrame(columns=['proc','sumEntries','nRV','nWV'])
+df = pd.DataFrame(columns=['proc','sumEntries', 'yield', 'nRV','nWV'])
 procYields = od()
 for proc in opt.procs.split(","):
-  WSFileName = glob.glob("%s/output*M%s*%s.root"%(opt.inputWSDir,opt.mass,proc))[0]
+  #WSFileName = glob.glob("%s/output*M%s*%s.root"%(opt.inputWSDir,opt.mass,proc))[0]
+  WSFileName = "%s/events__%s.root"%(opt.inputWSDir,proc)
   f = ROOT.TFile(WSFileName,"read")
   inputWS = f.Get(inputWSName__)
   try:
-    d = reduceDataset(inputWS.data("%s_%s_%s_%s"%(proc,opt.mass,sqrts__,opt.cat)),aset)
-    df.loc[len(df)] = [proc,d.sumEntries(),1,1]
+    d = reduceDataset(inputWS.data("%s__%s__%s__%s"%(proc,opt.mass,sqrts__,opt.cat)),aset)
+    sumw = d.sumEntries()
+    # TODO: Make need to load combine splines when ready
+    xs = globalXSBRMap[opt.analysis][proc]['factor']
+    df.loc[len(df)] = [proc,sumw, sumw*xs, 1, 1]
   except TypeError:
-    df.loc[len(df)] = [proc,0,1,1]
+    df.loc[len(df)] = [proc,0,0,1,1]
   inputWS.Delete()
   f.Close()
 
 # Extract processes to perform fTest (i.e. first nProcsToFTest):
-if( opt.nProcsToFTest == -1)|( opt.nProcsToFTest > len(opt.procs.split(",")) ): procsToFTest = opt.procs.split(",")
-else: procsToFTest = list(df.sort_values('sumEntries',ascending=False)[0:opt.nProcsToFTest].proc.values)
+# Need yields not just sumEntries (=efficiency)
+if( opt.nProcsToFTest == -1)|( opt.nProcsToFTest > len(opt.procs.split(",")) ): 
+    procsToFTest = opt.procs.split(",")
+else: 
+    procsToFTest = list(df.sort_values('yield',ascending=False)[0:opt.nProcsToFTest].proc.values)
+
+
 for pidx, proc in enumerate(procsToFTest): 
 
   print("\n --> Process (%g): %s"%(pidx,proc))
   try:
     # Split dataset to RV/WV: ssf requires input as dict (with mass point as key)
     datasets_RV, datasets_WV = od(), od()
-    WSFileName = glob.glob("%s/output*M%s*%s.root"%(opt.inputWSDir,opt.mass,proc))[0]
+    #WSFileName = glob.glob("%s/output*M%s*%s.root"%(opt.inputWSDir,opt.mass,proc))[0]
+    WSFileName = glob.glob("%s/events__*%s.root"%(opt.inputWSDir,proc))[0]
     f = ROOT.TFile(WSFileName,"read")
     inputWS = f.Get(inputWSName__)
-    d = reduceDataset(inputWS.data("%s_%s_%s_%s"%(proc,opt.mass,sqrts__,opt.cat)),aset)
+    d = reduceDataset(inputWS.data("%s__%s__%s__%s"%(proc,opt.mass,sqrts__,opt.cat)),aset)
     datasets_RV[opt.mass] = splitRVWV(d,aset,mode="RV")
     datasets_WV[opt.mass] = splitRVWV(d,aset,mode="WV")
 
@@ -149,15 +161,17 @@ for pidx, proc in enumerate(procsToFTest):
     # Close ROOT file
     inputWS.Delete()
     f.Close()
+
   except TypeError:
     print(f"{proc} in {opt.cat} failed")
+
 # Make output
 if not os.path.isdir("%s/outdir_%s/fTest/json"%(swd__,opt.ext)): os.system("mkdir %s/outdir_%s/fTest/json"%(swd__,opt.ext))
 ff = open("%s/outdir_%s/fTest/json/nGauss_%s.json"%(swd__,opt.ext,opt.cat),"w")
 ff.write("{\n")
 # Iterate over rows in dataframe: sorted by sumEntries
 pitr = 1
-for ir,r in df.sort_values('sumEntries',ascending=False).iterrows():
+for ir,r in df.sort_values('yield',ascending=False).iterrows():
   k = "\"%s__%s\""%(r['proc'],opt.cat)
   ff.write("    %-90s : {\"nRV\":%s,\"nWV\":%s}"%(k,r['nRV'],r['nWV']))
   # Drop comma for last proc

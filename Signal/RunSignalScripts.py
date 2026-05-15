@@ -99,7 +99,7 @@ for mp in options['massPoints'].split(","): mps.append(int(mp))
 options['massLow'], options['massHigh'] = '%s'%min(mps), '%s'%max(mps)
 
 # print(info to user)
-print(" --> Input flashgg ws dir: %s"%options['inputWSDir'])
+print(" --> Input WS dir: %s"%options['inputWSDir'])
 print(" --> Processes: %s"%options['procs'])
 print(" --> Categories: %s"%options['cats'])
 print(" --> Mass points: %s --> Low = %s, High = %s"%(options['massPoints'],options['massLow'],options['massHigh']))

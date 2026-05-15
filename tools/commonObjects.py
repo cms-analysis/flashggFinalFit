@@ -18,11 +18,15 @@ lumiMap = {
     '2016':36.33, 
     '2017':41.48, 
     '2018':59.83, 
-    'combined':137.65, 
-    'merged':137.65,
-    '2022preEE':8.00,
-    '2022postEE':26.70
+    '2022preEE':7.99,
+    '2022postEE':26.68,
+    '2023preBPix':17.96,
+    '2023postBPix':9.68,
+    '2024':109.95,
+    'combined':172.26, # 2022-2024 only 
+    'merged':172.26, # 2022-2024 only
 }
+
 # If using ReReco samples then switch to lumiMap below (missing data in 2018 EGamma data set)
 #lumiMap = {'2016':36.33, '2017':41.48, '2018':59.35, 'combined':137.17, 'merged':137.17}
 lumiScaleFactor = 1000. # Converting from pb to fb

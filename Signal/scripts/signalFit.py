@@ -30,7 +30,7 @@ def leave():
 def get_options():
   parser = OptionParser()
   parser.add_option("--xvar", dest='xvar', default='CMS_hgg_mass', help="Observable to fit")
-  parser.add_option("--inputWSDir", dest='inputWSDir', default='', help="Input flashgg WS directory")
+  parser.add_option("--inputWSDir", dest='inputWSDir', default='', help="Input WS directory")
   parser.add_option("--ext", dest='ext', default='', help="Extension")
   parser.add_option("--proc", dest='proc', default='', help="Signal process")
   parser.add_option("--cat", dest='cat', default='', help="RECO category")
@@ -81,6 +81,12 @@ if opt.analysis not in globalReplacementMap:
   leave()
 else: rMap = globalReplacementMap[opt.analysis]
 
+# Fix for 2024 replacement map
+if opt.year == "2024":
+    rMap['procRVMap']["RECO_TH_tH_had"] = "THQ2HQQ_FID"
+    rMap['procRVMap']["RECO_TH_tH_lep"] = "THQ2HLNU_FID"
+    rMap['procRVMap']['RECO_ZH2HLL_ZH_ll'] = "ZH2HLEPLEP_PTV_0_75"
+
 # Load XSBR map
 if opt.analysis not in globalXSBRMap:
   print(" --> [ERROR] XS * BR map does not exist for analysis (%s). Please add to tools/XSBRMap.py"%opt.analysis)
@@ -88,7 +94,8 @@ if opt.analysis not in globalXSBRMap:
 else: xsbrMap = globalXSBRMap[opt.analysis]
 
 # Load RooRealVars
-nominalWSFileName = glob.glob("%s/output*M%s*%s.root"%(opt.inputWSDir,MHNominal,opt.proc))[0]
+#nominalWSFileName = glob.glob("%s/output*M%s*%s.root"%(opt.inputWSDir,MHNominal,opt.proc))[0]
+nominalWSFileName = "%s/events__%s.root"%(opt.inputWSDir,opt.proc)
 f0 = ROOT.TFile(nominalWSFileName,"read")
 inputWS0 = f0.Get(inputWSName__)
 xvar = inputWS0.var(opt.xvar)
@@ -102,15 +109,27 @@ MH = ROOT.RooRealVar("MH","m_{H}", int(MHLow), int(MHHigh))
 MH.setUnit("GeV")
 MH.setConstant(True)
 
+# Stop if zero events
 if opt.skipZeroes:
   # Extract nominal mass dataset and see if entries == 0
-  WSFileName = glob.glob("%s/output*M%s*%s.root"%(opt.inputWSDir,MHNominal,opt.proc))[0]
+  #WSFileName = glob.glob("%s/output*M%s*%s.root"%(opt.inputWSDir,MHNominal,opt.proc))[0]
+  WSFileName = "%s/events__%s.root"%(opt.inputWSDir,opt.proc)
+
   f = ROOT.TFile(WSFileName,"read")
   inputWS = f.Get(inputWSName__)
-  d = reduceDataset(inputWS.data("%s_%s_%s_%s"%(opt.proc,MHNominal,sqrts__,opt.cat)),aset)
-  if( d.numEntries() == 0. )|( d.sumEntries <= 0. ):
+
+  # Check if dataset exists
+  datasets = [d.GetName() for d in inputWS.allData()]
+
+  if "%s__%s__%s__%s"%(opt.proc,MHNominal,sqrts__,opt.cat) not in datasets:
     print(" --> (%s,%s) has zero events. Will not construct signal model"%(opt.proc,opt.cat))
     exit()
+  else:
+    d = reduceDataset(inputWS.data("%s__%s__%s__%s"%(opt.proc,MHNominal,sqrts__,opt.cat)),aset)
+    if( d.numEntries() == 0. )|( d.sumEntries() <= 0. ):
+        print(" --> (%s,%s) has zero events. Will not construct signal model"%(opt.proc,opt.cat))
+        exit()
+
   inputWS.Delete()
   f.Close()
  
@@ -147,13 +166,16 @@ procNorm, catNorm = opt.proc, opt.cat
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # EXTRACT DATASETS TO FIT (for each mass point)
 nominalDatasets = od()
+
 # For RV (or if skipping vertex scenario split)
 datasetRVForFit = od()
 for mp in opt.massPoints.split(","):
-  WSFileName = glob.glob("%s/output*M%s*%s.root"%(opt.inputWSDir,mp,procRVFit))[0]
+  # TODO: add mass point to naming of files
+  #WSFileName = glob.glob("%s/output*M%s*%s.root"%(opt.inputWSDir,mp,procRVFit))[0]
+  WSFileName = "%s/events__%s.root"%(opt.inputWSDir,procRVFit)
   f = ROOT.TFile(WSFileName,"read")
   inputWS = f.Get(inputWSName__)
-  d = reduceDataset(inputWS.data("%s_%s_%s_%s"%(procRVFit,mp,sqrts__,catRVFit)),aset)
+  d = reduceDataset(inputWS.data("%s__%s__%s__%s"%(procRVFit,mp,sqrts__,catRVFit)),aset)
   nominalDatasets[mp] = d.Clone()
   if opt.skipVertexScenarioSplit: datasetRVForFit[mp] = d
   else: datasetRVForFit[mp] = splitRVWV(d,aset,mode="RV")
@@ -165,10 +187,11 @@ if( datasetRVForFit[MHNominal].numEntries() < opt.replacementThreshold  )|( data
   nominal_numEntries = datasetRVForFit[MHNominal].numEntries()
   procReplacementFit, catReplacementFit = rMap['procRVMap'][opt.cat], rMap['catRVMap'][opt.cat]
   for mp in opt.massPoints.split(","):
-    WSFileName = glob.glob("%s/output*M%s*%s.root"%(opt.inputWSDir,mp,procReplacementFit))[0]
+    #WSFileName = glob.glob("%s/output*M%s*%s.root"%(opt.inputWSDir,mp,procReplacementFit))[0]
+    WSFileName = "%s/events__%s.root"%(opt.inputWSDir,procReplacementFit)
     f = ROOT.TFile(WSFileName,"read")
     inputWS = f.Get(inputWSName__)
-    d = reduceDataset(inputWS.data("%s_%s_%s_%s"%(procReplacementFit,mp,sqrts__,catReplacementFit)),aset)
+    d = reduceDataset(inputWS.data("%s__%s__%s__%s"%(procReplacementFit,mp,sqrts__,catReplacementFit)),aset)
     if opt.skipVertexScenarioSplit: datasetRVForFit[mp] = d
     else: datasetRVForFit[mp] = splitRVWV(d,aset,mode="RV")
     inputWS.Delete()
@@ -204,10 +227,11 @@ else:
 if not opt.skipVertexScenarioSplit:
   datasetWVForFit = od()
   for mp in opt.massPoints.split(","):
-    WSFileName = glob.glob("%s/output*M%s*%s.root"%(opt.inputWSDir,mp,procWVFit))[0]
+    #WSFileName = glob.glob("%s/output*M%s*%s.root"%(opt.inputWSDir,mp,procWVFit))[0]
+    WSFileName = "%s/events__%s.root"%(opt.inputWSDir,procWVFit)
     f = ROOT.TFile(WSFileName,"read")
     inputWS = f.Get(inputWSName__)
-    d = reduceDataset(inputWS.data("%s_%s_%s_%s"%(procWVFit,mp,sqrts__,catWVFit)),aset)
+    d = reduceDataset(inputWS.data("%s__%s__%s__%s"%(procWVFit,mp,sqrts__,catWVFit)),aset)
     datasetWVForFit[mp] = splitRVWV(d,aset,mode="WV")
     inputWS.Delete()
     f.Close()
@@ -217,10 +241,11 @@ if not opt.skipVertexScenarioSplit:
     nominal_numEntries = datasetWVForFit[MHNominal].numEntries()
     procReplacementFit, catReplacementFit = rMap['procWV'], rMap['catWV']
     for mp in opt.massPoints.split(","):
-      WSFileName = glob.glob("%s/output*M%s*%s.root"%(opt.inputWSDir,mp,procReplacementFit))[0]
+      #WSFileName = glob.glob("%s/output*M%s*%s.root"%(opt.inputWSDir,mp,procReplacementFit))[0]
+      WSFileName = "%s/events__%s.root"%(opt.inputWSDir,procReplacementFit)
       f = ROOT.TFile(WSFileName,"read")
       inputWS = f.Get(inputWSName__)
-      d = reduceDataset(inputWS.data("%s_%s_%s_%s"%(procReplacementFit,mp,sqrts__,catReplacementFit)),aset)
+      d = reduceDataset(inputWS.data("%s__%s__%s__%s"%(procReplacementFit,mp,sqrts__,catReplacementFit)),aset)
       datasetWVForFit[mp] = splitRVWV(d,aset,mode="WV")
       inputWS.Delete()
       f.Close()

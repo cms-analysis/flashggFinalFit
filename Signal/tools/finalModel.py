@@ -33,7 +33,8 @@ class dummy_options:
 # Functions to get XS/BR
 def getXS(_SM,_MHVar,_mh,_pm):
   _MHVar.setVal(_mh)
-  return _SM.modelBuilder.out.function("SM_XS_%s_%s"%(_pm,sqrts__)).getVal()
+  #return _SM.modelBuilder.out.function("SM_XS_%s_%s"%(_pm,sqrts__)).getVal()
+  return _SM.modelBuilder.out.function("SM_XS_%s_%s"%(_pm,"13TeV")).getVal()
 def getBR(_SM,_MHVar,_mh,_dm):
   _MHVar.setVal(_mh)
   return _SM.modelBuilder.out.function("SM_BR_%s"%_dm).getVal()
@@ -52,7 +53,9 @@ def initialiseXSBR():
 
   # Make XS and BR
   SM.makeBR(decayMode)
-  for pm in productionModes: SM.makeXS(pm,sqrts__)
+  #for pm in productionModes: SM.makeXS(pm,sqrts__)
+  # TODO: temp fix as 13.6 TeV splines not in combine (NOT NEEDED)
+  for pm in productionModes: SM.makeXS(pm,"13TeV")
 
   # Store numpy arrays for each production mode in ordered dict
   xsbr = od()
