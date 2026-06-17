@@ -6,6 +6,8 @@ import glob
 import ROOT
 from optparse import OptionParser
 
+from commonObjects import *
+
 def get_options():
   parser = OptionParser()
   parser.add_option("--cat", dest='cat', default='RECO_0J_PTH_0_10_Tag0', help="RECO category to package")
@@ -30,20 +32,20 @@ for ext in opt.exts.split(","): fNames[ext] = glob.glob("outdir_%s/signalFit/out
 
 # Define ouput packaged workspace
 print(" --> Packaging output workspaces")
-packagedWS = ROOT.RooWorkspace("wsig_13TeV","wsig_13TeV")
+packagedWS = ROOT.RooWorkspace("wsig_%s"%sqrts__,"wsig_%s"%sqrts__)
 packagedWS.imp = getattr(packagedWS,"import")
 
 # Extract merged datasets
 data_merged = {}
 data_merged_names = []
 for mp in opt.massPoints.split(","): 
-  data_merged["m%s"%mp] = ROOT.TFile(fNames[opt.exts.split(",")[0]][0]).Get("wsig_13TeV").data("sig_mass_m%s_%s"%(mp,opt.cat)).emptyClone("sig_mass_m%s_%s"%(mp,opt.cat))
+  data_merged["m%s"%mp] = ROOT.TFile(fNames[opt.exts.split(",")[0]][0]).Get("wsig_%s"%sqrts__).data("sig_mass_m%s_%s"%(mp,opt.cat)).emptyClone("sig_mass_m%s_%s"%(mp,opt.cat))
   data_merged_names.append( data_merged["m%s"%mp].GetName() )
 
 for ext, fNames_by_ext in fNames.items():
   for fName in fNames_by_ext:
     for mp in opt.massPoints.split(","):
-      d = ROOT.TFile(fName).Get("wsig_13TeV").data("sig_mass_m%s_%s"%(mp,opt.cat))
+      d = ROOT.TFile(fName).Get("wsig_%s"%sqrts__).data("sig_mass_m%s_%s"%(mp,opt.cat))
       for i in range(d.numEntries()):
         p = d.get(i)
         w = d.weight()
@@ -55,7 +57,7 @@ for _data in data_merged.values(): packagedWS.imp(_data)
 for ext, fNames_by_ext in fNames.items():
   for fName in fNames_by_ext:
     fin = ROOT.TFile(fName)
-    wsin = fin.Get("wsig_13TeV")
+    wsin = fin.Get("wsig_%s"%sqrts__)
     if not wsin: continue
     allVars, allFunctions, allPdfs = {}, {}, {}
     for _var in wsin.allVars(): allVars[_var.GetName()] = _var

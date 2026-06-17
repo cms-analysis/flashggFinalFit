@@ -26,7 +26,7 @@ def get_options():
   parser.add_option("--nBins", dest="nBins", default=80, type='int', help="Number of bins")
   parser.add_option("--pdfNBins", dest="pdfNBins", default=3200, type='int', help="Number of bins")
   parser.add_option("--translateCats", dest="translateCats", default=None, help="JSON to store cat translations")
-  parser.add_option("--inputSignalWSFile", dest="inputSignalWSFile", default=None, help="Input wsig_13TeV RooWorkspace file. If not none this will add signal to plot")
+  parser.add_option("--inputSignalWSFile", dest="inputSignalWSFile", default=None, help="Input wsig_13p6TeV RooWorkspace file. If not none this will add signal to plot")
   
   return parser.parse_args()
 (opt,args) = get_options()
@@ -47,8 +47,8 @@ xvar.setUnit(opt.xvar.split(",")[2])
 xvar_arglist, xvar_argset = ROOT.RooArgList(xvar), ROOT.RooArgSet(xvar)
 
 # Exact multipdf object and pdfindex
-multipdf = w.pdf("CMS_hgg_%s_13TeV_bkgshape"%opt.cat)
-pdfindex_bf = w.cat("pdfindex_%s_13TeV"%opt.cat).getIndex()
+multipdf = w.pdf("CMS_hgg_%s_13p6TeV_bkgshape"%opt.cat)
+pdfindex_bf = w.cat("pdfindex_%s_13p6TeV"%opt.cat).getIndex()
 bpdf_bf_name = None
 bpdfs = od()
 for ipdf in range(multipdf.getNumPdfs()): 
@@ -56,7 +56,7 @@ for ipdf in range(multipdf.getNumPdfs()):
   if ipdf == pdfindex_bf: bpdf_bf_name = multipdf.getPdf(ipdf).GetName()
 
 # Make histograms from bpdfs and scale by norm
-norm = w.var("CMS_hgg_%s_13TeV_bkgshape_norm"%opt.cat).getVal()
+norm = w.var("CMS_hgg_%s_13p6TeV_bkgshape_norm"%opt.cat).getVal()
 
 hists = od()
 for bname, bpdf in list(bpdfs.items()):
@@ -106,7 +106,7 @@ if opt.inputSignalWSFile is not None:
   doSignal = True
   cat = opt.cat
   fsig = ROOT.TFile(opt.inputSignalWSFile)
-  wsig = fsig.Get("wsig_13TeV")
+  wsig = fsig.Get("wsig_13p6TeV")
   wsig.var("MH").setVal(float(opt.mass))
 
   # Extract norms
@@ -238,7 +238,7 @@ lat0 = ROOT.TLatex()
 lat0.SetTextFont(42)
 lat0.SetTextAlign(11)
 lat0.SetNDC()
-lat0.SetTextSize(0.06)
+lat0.SetTextSize(0.04)
 #lat0.DrawLatex(0.12,0.92,"#bf{CMS} #it{Preliminary}")
 #lat0.DrawLatex(0.12,0.92,"#bf{CMS}")
 lat0.DrawLatex(0.18,0.80,"#scale[0.75]{%s}"%Translate(cat,translateCats))
@@ -248,7 +248,7 @@ lat1.SetTextFont(42)
 lat1.SetTextAlign(31)
 lat1.SetNDC()
 lat1.SetTextSize(0.06)
-#lat1.DrawLatex(0.9,0.92,"137 fb^{-1} (13 TeV)")
+lat1.DrawLatex(0.9,0.92,"172.3 fb^{-1} (13.6 TeV)")
 
 pad2.cd()
 h_axes_ratio = hists_ratio['data'].Clone()

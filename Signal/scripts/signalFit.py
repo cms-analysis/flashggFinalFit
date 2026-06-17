@@ -86,6 +86,7 @@ if opt.year == "2024":
     rMap['procRVMap']["RECO_TH_tH_had"] = "THQ2HQQ_FID"
     rMap['procRVMap']["RECO_TH_tH_lep"] = "THQ2HLNU_FID"
     rMap['procRVMap']['RECO_ZH2HLL_ZH_ll'] = "ZH2HLEPLEP_PTV_0_75"
+    rMap['procRVMap']['RECO_ZH2HLL_ZH_nunu'] = "ZH2HLEPLEP_PTV_150_250_0J"
 
 # Load XSBR map
 if opt.analysis not in globalXSBRMap:

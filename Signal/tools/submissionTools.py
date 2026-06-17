@@ -21,10 +21,9 @@ def writePreamble(_file):
 def writeCondorSub(_file,_exec,_queue,_nJobs,_jobOpts,doHoldOnFailure=True,doPeriodicRetry=True,dir="fTest"):
   _file.write("executable = %s.sh\n"%_exec)
   _file.write("arguments  = $(ProcId)\n")
-  _file.write(f"output     = /eos/user/p/pkrueper/HiggsDNA_and_FinalFits_tutorial24/higgsdna_finalfits_tutorial_24/07_FinalFits/CMSSW_14_1_0_pre4/src/flashggFinalFit/Signal/outdir_tutorial_2022preEE/fTest/jobs/%s.$(ClusterId).$(ProcId).out\n"%_exec)
-  _file.write(f"error      = /eos/user/p/pkrueper/HiggsDNA_and_FinalFits_tutorial24/higgsdna_finalfits_tutorial_24/07_FinalFits/CMSSW_14_1_0_pre4/src/flashggFinalFit/Signal/outdir_tutorial_2022preEE/fTest/jobs/%s.$(ClusterId).$(ProcId).err\n\n"%_exec)
-  _file.write(f"output_destination = /eos/user/p/pkrueper/HiggsDNA_and_FinalFits_tutorial24/higgsdna_finalfits_tutorial_24/07_FinalFits/CMSSW_14_1_0_pre4/src/flashggFinalFit/Signal/outdir_tutorial_2022preEE/{dir}")
-  _file.write("transfer_output_files = \"\"")
+  _file.write(f"output     = %s.$(ClusterId).$(ProcId).out\n"%_exec)
+  _file.write(f"error      = %s.$(ClusterId).$(ProcId).err\n"%_exec)
+  _file.write(f"log       = %s.$(ClusterId).log\n\n"%_exec)
   if _jobOpts != '':
     _file.write("# User specified job options\n")
     for jo in _jobOpts.split(":"): _file.write("%s\n"%jo)
@@ -35,10 +34,10 @@ def writeCondorSub(_file,_exec,_queue,_nJobs,_jobOpts,doHoldOnFailure=True,doPer
   if doPeriodicRetry:
     _file.write("# Periodically retry the jobs every 10 minutes, up to a maximum of 5 retries.\n")
     _file.write("periodic_release =  (NumJobStarts < 3) && ((CurrentTime - EnteredCurrentStatus) > 600)\n\n")
-  _file.write("+JobFlavour = \"%s\"\n"%_queue)
-  _file.write("should_transfer_files   = YES\n")
-  _file.write("when_to_transfer_output = ON_EXIT\n")
-  _file.write("transfer_output_files   = \"\"\n")
+  if _queue in ['espresso', 'microcentury', 'longlunch', 'workday']:
+      _file.write("+JobFlavour = \"%s\"\n"%_queue)
+  else:
+      _file.write("+MaxRunTime = %s\n"%_queue)
   _file.write("queue %g"%_nJobs)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

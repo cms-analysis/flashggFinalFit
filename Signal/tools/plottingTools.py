@@ -424,7 +424,7 @@ def plotSplines(_finalModel,_outdir="./",_nominalMass='125',splinesToPlot=['xs',
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Function for plotting final signal model: neat
 def plotSignalModel(_hists,_opt,_outdir=".",offset=0.02):
-  colorMap = {'2016':38,'2017':30,'2018':46,'2022preEE':38,'2022postEE':30}
+  colorMap = {'2016':38,'2017':30,'2018':46,'2022preEE':38,'2022postEE':30, '2023preBPix':46, '2023postBPix': 42, '2024': 49}
   canv = ROOT.TCanvas("c","c",650,600)
   canv.SetBottomMargin(0.12)
   canv.SetLeftMargin(0.15)
@@ -462,7 +462,7 @@ def plotSignalModel(_hists,_opt,_outdir=".",offset=0.02):
     leg1 = ROOT.TLegend(0.17+offset,0.45,0.4+offset,0.61)
     leg1.SetFillStyle(0)
     leg1.SetLineColor(0)
-    leg1.SetTextSize(0.03)
+    leg1.SetTextSize(0.02)
     for year in _opt.years.split(","): leg1.AddEntry(_hists['pdf_%s'%year],"%s: #scale[0.8]{#sigma_{eff} = %1.2f GeV}"%(year,getEffSigma(_hists['pdf_%s'%year])),"l")
     leg1.Draw("Same")
 
@@ -535,7 +535,8 @@ def plotSignalModel(_hists,_opt,_outdir=".",offset=0.02):
   lat0.SetNDC()
   lat0.SetTextSize(0.045)
   lat0.DrawLatex(0.15,0.92,"#bf{CMS} #it{%s}"%_opt.label)
-  lat0.DrawLatex(0.77,0.92,"%s TeV"%(sqrts__.split("TeV")[0]))
+  #lat0.DrawLatex(0.77,0.92,"%s TeV"%(sqrts__.split("TeV")[0]))
+  lat0.DrawLatex(0.77,0.92,"13.6 TeV")
   lat0.DrawLatex(0.16+offset,0.83,"H #rightarrow #gamma#gamma")
 
   # Load translations
@@ -546,7 +547,7 @@ def plotSignalModel(_hists,_opt,_outdir=".",offset=0.02):
   lat1.SetTextFont(42)
   lat1.SetTextAlign(33)
   lat1.SetNDC(1)
-  lat1.SetTextSize(0.035)
+  lat1.SetTextSize(0.03)
   if _opt.procs == 'all': procStr, procExt = "", ""
   elif len(_opt.procs.split(","))>1: procStr, procExt = "Multiple processes", "_multipleProcs"
   else: procStr, procExt = Translate(_opt.procs,translateProcs), "_%s"%_opt.procs
