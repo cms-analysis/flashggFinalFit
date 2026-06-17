@@ -13,7 +13,7 @@ def get_options():
   parser = OptionParser()
   # Input details
   parser.add_option('--cats', dest='cats', default='auto', help="Comma separated list of categories. auto = automatically inferred from inputWSDirMap")
-  parser.add_option('--inputWSDirMap', dest='inputWSDirMap', default='2016=/vols/cms/jl2117/hgg/ws/UL/Sept20/MC_final/signal_2016', help="Map. Format: year=inputWSDir (separate years by comma)")
+  parser.add_option('--inputParquetDirMap', dest='inputParquetDirMap', default='2016=/vols/cms/jl2117/hgg/ws/UL/Sept20/MC_final/signal_2016', help="Map. Format: year=inputWSDir (separate years by comma)")
   parser.add_option('--procs', dest='procs', default='auto', help='Comma separated list of signal processes. auto = automatically inferred from input workspaces')
   parser.add_option('--ext', dest='ext', default='test', help='Extension for saving')
   parser.add_option('--mass', dest='mass', default='125', help='Input workspace mass')
@@ -26,10 +26,6 @@ def get_options():
   parser.add_option('--bkgModelExt', dest='bkgModelExt', default='multipdf', help='Extension used when saving background model')
   # For yields calculations:
   parser.add_option('--skipZeroes', dest='skipZeroes', default=False, action="store_true", help="Skip signal processes with 0 sum of weights")
-  parser.add_option('--skipCOWCorr', dest='skipCOWCorr', default=False, action="store_true", help="Skip centralObjectWeight correction for events in acceptance. Use if no centralObjectWeight in workspace")
-  parser.add_option('--systWeightScheme', dest='systWeightScheme', default='accEff', choices=['legacyHiggsDNA','accEff'], help="""Choose normalisation scheme for weight systematics.
-                    The option legacyHiggsDNA assumes that your samples were produced with a commit from HiggsDNA before c04ff5f2, where the weight systematics were not normalised to the genWeight and normalisation wrt to central_weight is needed.
-                    Defaults to accEff, meaning that all systematic weight branches include the genWeight and sum(weight_*)=acc x eff.""")
   # For systematics:
   parser.add_option('--doSystematics', dest='doSystematics', default=False, action="store_true", help="Include systematics calculations and add to datacard")
   parser.add_option('--ignore-warnings', dest='ignore_warnings', default=False, action="store_true", help="Skip errors for missing systematics. Instead output warning message")
@@ -49,7 +45,7 @@ def leave():
 # Store all opts in orderedDict for submissionTools
 options = od()
 options['cats'] = opt.cats
-options['inputWSDirMap'] = opt.inputWSDirMap
+options['inputParquetDirMap'] = opt.inputWSDirMap
 options['procs'] = opt.procs
 options['ext'] = opt.ext
 options['mass'] = opt.mass
@@ -62,8 +58,6 @@ if opt.mergeYears:  options['modeOpts'] += ' --mergeYears'
 if opt.skipBkg: options['modeOpts'] += ' --skipBkg'
 if opt.bkgScaler != 1.: options['modeOpts'] += ' --bkgScaler %.4f'%opt.bkgScaler
 if opt.skipZeroes: options['modeOpts'] += ' --skipZeroes'
-if opt.skipCOWCorr: options['modeOpts'] += ' --skipCOWCorr'
-if opt.systWeightScheme: options['modeOpts'] += ' --systWeightScheme %s'%opt.systWeightScheme
 if opt.doSystematics: options['modeOpts'] += ' --doSystematics'
 if opt.ignore_warnings: options['modeOpts'] += ' --ignore-warnings'
 options['batch'] = opt.batch
@@ -71,13 +65,8 @@ options['queue'] = opt.queue
 options['jobOpts'] = opt.jobOpts
 options['printOnly'] = opt.printOnly
 
-# If auto: extract cats from first input workspace dir
-inputWSDir0 = options['inputWSDirMap'].split(",")[0].split("=")[1]
-WSFileNames = extractWSFileNames(inputWSDir0)
-if options['cats'] == "auto": options['cats'] = extractListOfCats(WSFileNames)
 
 options['nCats'] = len(options['cats'].split(","))
-
 print(" --> Running yields for following cats: %s"%options['cats'])
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

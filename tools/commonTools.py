@@ -20,12 +20,20 @@ def extractWSFileNames( _inputWSDir ):
     return False
   return glob.glob("%s/events__*.root"%_inputWSDir)
 
-def extractListOfProcs( _listOfWSFileNames ):
+def extractParquetFileNames( _inputParquetDir ): 
+  if not os.path.isdir(_inputParquetDir):
+    print(" --> [ERROR] No such directory (%s)")
+    return False
+  return glob.glob("%s/events__*.parquet"%_inputParquetDir)
+
+def extractListOfProcs( _listOfWSFileNames, mode="root" ):
   procs = []
   
   for fName in _listOfWSFileNames:
-    p = fName.split("__")[-1].split(".root")[0]
-    if p not in procs: procs.append(p)
+    p = fName.split("__")[-1].split(f".{mode}")[0]
+    if (p not in procs): 
+        if p != "Data":
+            procs.append(p)
   return ",".join(procs)
 
 def extractListOfCats( _listOfWSFileNames ):

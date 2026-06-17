@@ -89,7 +89,6 @@ def writeSystematic(f,d,s,options,stxsMergeScheme=None,scaleCorrScheme=None):
   # If theory: loop over tiers else run over once
   tiers = []
   if 'tiers' in s: tiers = s['tiers']
-  if(not options.doSTXSMerging)&('mnorm' in tiers): tiers.remove("mnorm")
   if len(tiers)==0: tiers = ['']
   for tier in tiers:
     if tier != '': tierStr = "_%s"%tier
@@ -97,9 +96,6 @@ def writeSystematic(f,d,s,options,stxsMergeScheme=None,scaleCorrScheme=None):
     
     # If calculating merged bin: loop over mergings else run over once
     mns = []
-    if tier == 'mnorm':
-      if options.doSTXSMerging:
-        for mergeName in stxsMergeScheme: mns.append(mergeName)
     if len(mns) == 0: mns.append('')
     for mn in mns:
       if mn != '': mergeStr = "_%s"%mn
@@ -118,29 +114,7 @@ def writeSystematic(f,d,s,options,stxsMergeScheme=None,scaleCorrScheme=None):
             lsyst = addSyst(lsyst,sval,stitle,r['proc'],cat)
         # Remove final space from line and add to file
         f.write("%s\n"%lsyst[:-1])
-        # For uncorrelated scale weights: not for merged bins
-        if options.doSTXSScaleCorrelationScheme:
-          if(tier!='mnorm')&("scaleWeight" in s['name']):
-            for ps,psProcs in scaleCorrScheme.items():
-              psStr = "_%s"%ps
-              stitle = "%s%s%s"%(s['title'],psStr,tierStr)
-              lsyst = '%-50s  %-10s    '%(stitle,s['prior'])
-              # Loop over categories and then iterate over rows in category
-              for cat in d.cat.unique():
-                for ir,r in d[d['cat']==cat].iterrows():
-                  if r['proc'] == "data_obs": continue
-                  # Remove year+hgg tags from proc
-                  p = re.sub("_2016_hgg","",r['proc'])
-                  p = re.sub("_2017_hgg","",p)
-                  p = re.sub("_2018_hgg","",p)
-                  p = re.sub("_2022preEE_hgg","",p)
-                  p = re.sub("_2022postEE_hgg","",p)
-                  # Add value if in proc in phase space else -
-                  if p in psProcs: sval = r["%s%s"%(s['name'],tierStr)]
-                  else: sval = '-'
-                  lsyst = addSyst(lsyst,sval,stitle,r['proc'],cat)
-              # Remove final space from line and add to file
-              f.write("%s\n"%lsyst[:-1])
+
       else:
         for year in options.years.split(","):
           stitle = "%s%s%s_%s"%(s['title'],mergeStr,tierStr,year)
@@ -155,6 +129,7 @@ def writeSystematic(f,d,s,options,stxsMergeScheme=None,scaleCorrScheme=None):
               lsyst = addSyst(lsyst,sval,stitle,r['proc'],cat)
           # Remove final space from line and add to file
           f.write("%s\n"%lsyst[:-1])
+
   return True
           
 
@@ -234,7 +209,7 @@ def writeMCStatUncertainty(f,d,options):
 def writePdfIndex(f,d,options):
   f.write("\n")
   for cat in d[~d['cat'].str.contains("NOTAG")].cat.unique(): 
-    indexStr = "pdfindex_%s_13TeV"%cat
+    indexStr = "pdfindex_%s_%s"%(cat,sqrts__)
     f.write("%-55s  discrete\n"%indexStr)
   return True
 
