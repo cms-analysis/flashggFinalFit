@@ -59,6 +59,9 @@ using namespace boost;
 
 namespace po = program_options;
 bool data_by_fit = false;
+
+int data_minus_fit_by_err = 1;
+
 bool BLIND = false;
 bool runFtestCheckWithToys=false;
 int mgg_low = 500;
@@ -469,7 +472,19 @@ void plot(RooRealVar *mass, RooAbsPdf *pdf, RooDataSet *data, string name,vector
 
     // gModifiedData->SetPoint(point, meanMass, ytmp);
     // gModifiedData->SetPointError(point, 0., 0., errlow, errhi);
-    } else{
+    }
+    else if (data_minus_fit_by_err==1){
+        // Choose the error pointing towards the background fit
+        double pull_err = (ytmp >= bkgval) ? errlow : errhi;
+        if (pull_err <= 0) pull_err = 1.0; // Protection against empty/zero-error bins
+
+        // Set the normalized point: (data - fit) / error
+        hdatasub->SetPoint(point, meanMass, (ytmp - bkgval) / pull_err);
+        
+        // Normalize the error bars as well
+        hdatasub->SetPointError(point, 0., 0., errlow / pull_err, errhi / pull_err);
+    }
+    else{
     hdatasub->SetPoint(point, meanMass, ytmp - bkgval);
     hdatasub->SetPointError(point, 0., 0., errlow, errhi);
 
@@ -499,7 +514,14 @@ void plot(RooRealVar *mass, RooAbsPdf *pdf, RooDataSet *data, string name,vector
       hdummy->GetYaxis()->SetTitle("data/(best fit)");
       hdummy->SetMaximum(1.05);
       hdummy->SetMinimum(0.95);
- }else{
+ }
+ else if(data_minus_fit_by_err==1){
+      hdummy->GetYaxis()->SetTitle("(data - best_fit)/#sigma");
+      hdummy->SetMaximum(5.0);  // Standard pull plot range
+      hdummy->SetMinimum(-5.0);
+ }
+ 
+ else{
       hdummy->GetYaxis()->SetTitle("data - best_fit");
       hdummy->SetMaximum(hdatasub->GetHistogram()->GetMaximum()+1);
       hdummy->SetMinimum(hdatasub->GetHistogram()->GetMinimum()-1);
@@ -519,6 +541,13 @@ void plot(RooRealVar *mass, RooAbsPdf *pdf, RooDataSet *data, string name,vector
    line3->SetLineColor(kBlue);
   line3->SetLineWidth(5);
   line3->Draw();
+  }
+  else if(data_minus_fit_by_err==1){
+      TLine *line3 = new TLine(mgg_low, 0., mgg_high, 0.);
+      line3->SetLineColor(kBlue);
+      line3->SetLineWidth(5);
+      line3->Draw();
+
   }
   else {
       TLine *line3 = new TLine(mgg_low, 0., mgg_high, 0.);
@@ -651,6 +680,17 @@ void plot(RooRealVar *mass, RooMultiPdf *pdfs, RooCategory *catIndex, RooDataSet
     hdatasub->SetPoint(point,xtmp,ytmp/bkgval);
     hdatasub->SetPointError(point,0.,0.,rel_err_low,rel_err_high );
   }
+  else if(data_minus_fit_by_err==1){
+        // Choose the error pointing towards the background fit
+        double pull_err = (ytmp >= bkgval) ? errlow : errhi;
+        if (pull_err <= 0) pull_err = 1.0; // Protection against empty/zero-error bins
+
+        // Set the normalized point: (data - fit) / error
+        hdatasub->SetPoint(point, xtmp, (ytmp - bkgval) / pull_err);
+        
+        // Normalize the error bars as well
+        hdatasub->SetPointError(point, 0., 0., errlow / pull_err, errhi / pull_err);
+  }
   else {
       hdatasub->SetPoint(point,xtmp,ytmp - bkgval);
       hdatasub->SetPointError(point,0.,0.,errlow,errhi );
@@ -669,6 +709,11 @@ void plot(RooRealVar *mass, RooMultiPdf *pdfs, RooCategory *catIndex, RooDataSet
       hdummy->GetYaxis()->SetTitle("data/(best fit)");
       hdummy->SetMaximum(1.05);
       hdummy->SetMinimum(0.95);
+  }
+  else if(data_minus_fit_by_err==1){
+      hdummy->GetYaxis()->SetTitle("(data - best_fit)/#sigma");
+      hdummy->SetMaximum(5.0);  // Standard pull plot range
+      hdummy->SetMinimum(-5.0);
   }
   else {
       hdummy->GetYaxis()->SetTitle("data - best_fit");
@@ -690,6 +735,13 @@ void plot(RooRealVar *mass, RooMultiPdf *pdfs, RooCategory *catIndex, RooDataSet
    line3->SetLineColor(bestcol);
   line3->SetLineWidth(5);
   line3->Draw();
+  }
+  else if(data_minus_fit_by_err==1){
+      TLine *line3 = new TLine(mgg_low, 0., mgg_high, 0.);
+      line3->SetLineColor(bestcol);
+      line3->SetLineWidth(5);
+      line3->Draw();
+
   }
   else {
       TLine *line3 = new TLine(mgg_low, 0., mgg_high, 0.);
