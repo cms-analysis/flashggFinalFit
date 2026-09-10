@@ -43,7 +43,7 @@ productionModes = ['ggH','qqH','ttH','tHq','tHW','ggZH','WH','ZH','bbH']
 decayMode = 'hgg'
 
 # List of years
-years_to_process = ['2016','2017','2018','2022preEE','2022postEE']
+years_to_process = ['2016','2017','2018','2022preEE','2022postEE','2023preBPix','2023postBPix','2024']
 
 # flashgg input WS objects
 inputWSName__ = "stxs/cms_hgg_13p6TeV"

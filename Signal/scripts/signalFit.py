@@ -45,7 +45,7 @@ def get_options():
   parser.add_option('--skipVertexScenarioSplit', dest='skipVertexScenarioSplit', default=True, action="store_true", help="Skip vertex scenario split")
   parser.add_option('--skipZeroes', dest='skipZeroes', default=False, action="store_true", help="Skip proc x cat is numEntries = 0., or sumEntries < 0.")
   # For systematics
-  parser.add_option('--skipSystematics', dest='skipSystematics', default=True, action="store_true", help="Skip shape systematics in signal model")
+  parser.add_option('--skipSystematics', dest='skipSystematics', default=False, action="store_true", help="Skip shape systematics in signal model")
   parser.add_option('--useDiagonalProcForSyst', dest='useDiagonalProcForSyst', default=False, action="store_true", help="Use diagonal process for systematics (requires diagonal mapping produced by getDiagProc script)")
   parser.add_option("--scales", dest='scales', default='', help="Photon shape systematics: scales")
   parser.add_option("--scalesCorr", dest='scalesCorr', default='', help='Photon shape systematics: scalesCorr')
@@ -84,9 +84,9 @@ else: rMap = globalReplacementMap[opt.analysis]
 # Fix for 2024 replacement map
 if opt.year == "2024":
     rMap['procRVMap']["RECO_TH_tH_had"] = "THQ2HQQ_FID"
+    rMap['procRVMap']["RECO_TH_tH_had_res0"] = "THQ2HQQ_FID"
+    rMap['procRVMap']["RECO_TH_tH_had_res1"] = "THQ2HQQ_FID"
     rMap['procRVMap']["RECO_TH_tH_lep"] = "THQ2HLNU_FID"
-    rMap['procRVMap']['RECO_ZH2HLL_ZH_ll'] = "ZH2HLEPLEP_PTV_0_75"
-    rMap['procRVMap']['RECO_ZH2HLL_ZH_nunu'] = "ZH2HLEPLEP_PTV_150_250_0J"
 
 # Load XSBR map
 if opt.analysis not in globalXSBRMap:

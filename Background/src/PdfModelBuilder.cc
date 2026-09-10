@@ -225,6 +225,8 @@ RooAbsPdf* PdfModelBuilder::getExponential(string prefix, int order){
 
 RooAbsPdf* PdfModelBuilder::getPowerLawSingle(string prefix, int order){
   
+  // QUICK FIX: only allow power law order 1
+  //if (order>1){
   if (order%2==0){
     cerr << "ERROR -- addPowerLaw -- only odd number of params allowed" << endl;
     return NULL;
@@ -261,6 +263,11 @@ RooAbsPdf* PdfModelBuilder::getPowerLawSingle(string prefix, int order){
 }
 
 RooAbsPdf* PdfModelBuilder::getLaurentSeries(string prefix, int order){
+
+  // if (order>1){
+  //   cerr << "ERROR -- addLaurentSeries -- only order 1 allowed" << endl;
+  //   return NULL;
+  // }
  
   int nlower=int(ceil(order/2.));
   int nhigher=order-nlower;

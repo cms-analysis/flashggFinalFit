@@ -33,10 +33,10 @@ def writeCondorSub(_file,_exec,_queue,_nJobs,_jobOpts,doHoldOnFailure=True,doPer
   if doPeriodicRetry:
     _file.write("# Periodically retry the jobs every 10 minutes, up to a maximum of 5 retries.\n")
     _file.write("periodic_release =  (NumJobStarts < 3) && ((CurrentTime - EnteredCurrentStatus) > 600)\n\n")
-  _file.write("+JobFlavour = \"%s\"\n"%_queue)
-  _file.write("should_transfer_files   = YES\n")
-  _file.write("when_to_transfer_output = ON_EXIT\n")
-  _file.write("transfer_output_files   = \"\"\n")
+  if _queue in ['espresso', 'microcentury', 'longlunch', 'workday']:
+      _file.write("+JobFlavour = \"%s\"\n"%_queue)
+  else:
+      _file.write("+MaxRunTime = %s\n"%_queue)
   _file.write("queue %g"%_nJobs)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

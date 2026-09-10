@@ -1,10 +1,30 @@
 {
-    "tHq_FWDH":{
+    "THQ_FWDH":{
         "QCDscale_tHq":[1.065,0.851],
         "pdf_Higgs_tHq":1.035,
         "alphaS_tHq":1.012
     },
-    "tHq":{
+    "THQ_FID":{
+        "QCDscale_tHq":[1.065,0.851],
+        "pdf_Higgs_tHq":1.035,
+        "alphaS_tHq":1.012
+    },
+    "TH2HQQ_FWDH":{
+        "QCDscale_tHq":[1.065,0.851],
+        "pdf_Higgs_tHq":1.035,
+        "alphaS_tHq":1.012
+    },
+    "TH2HQQ_FID":{
+        "QCDscale_tHq":[1.065,0.851],
+        "pdf_Higgs_tHq":1.035,
+        "alphaS_tHq":1.012
+    },
+    "TH2HLNU_FWDH":{
+        "QCDscale_tHq":[1.065,0.851],
+        "pdf_Higgs_tHq":1.035,
+        "alphaS_tHq":1.012
+    },
+    "TH2HLNU_FID":{
         "QCDscale_tHq":[1.065,0.851],
         "pdf_Higgs_tHq":1.035,
         "alphaS_tHq":1.012

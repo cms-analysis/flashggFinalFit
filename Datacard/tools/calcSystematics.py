@@ -7,6 +7,14 @@ from commonObjects import *
 
 # sd = "systematics dataframe"
 
+nuisance_year_map = {
+  '2022preEE':'2022',
+  '2022postEE':'2022EE',
+  '2023preBPix':'2023',
+  '2023postBPix':'2023BPix',
+  '2024':'2024'
+}
+
 # For constant systematics:
 def addConstantSyst(sd,_syst,options):
 
@@ -36,8 +44,8 @@ def addConstantSyst(sd,_syst,options):
   # If not correlate across years then create separate columns for each year and fill separately
   else:
     for year in options.years.split(","):
-      sd["%s_%s"%(_syst['name'],year)] = '-'
-      sd.loc[(sd['type']=='sig')&(sd['year']==year)&(~sd['cat'].str.contains("NOTAG")), "%s_%s"%(_syst['name'],year)] = _syst['value'][year]
+      sd["%s_%s"%(_syst['name'],nuisance_year_map[year])] = '-'
+      sd.loc[(sd['type']=='sig')&(sd['year']==year)&(~sd['cat'].str.contains("NOTAG")), "%s_%s"%(_syst['name'],nuisance_year_map[year])] = _syst['value'][year]
 
   return sd
 
@@ -66,8 +74,8 @@ def factoryType(d,s):
     f = pq.ParquetFile(r['inputFile']).read()
     columns = f.schema.names
 
-    syst_up_file = re.sub("nominal", "%s/Up"%s['name'], r['inputFile'])
-    syst_down_file = re.sub("nominal", "%s/Down"%s['name'], r['inputFile'])
+    syst_up_file = re.sub("nominal", "%s/up"%s['name'], r['inputFile'])
+    syst_down_file = re.sub("nominal", "%s/down"%s['name'], r['inputFile'])
 
     if ("%sUp"%s['name'] in columns)&("%sDown"%s['name'] in columns):
         return "a_w"
@@ -147,7 +155,26 @@ def calcSystYields(inputFile, systFactoryTypes, proc="GG2H_0J_PTH_0_10", year='2
   # For systematics stored as separate RooDataHists
   for s, f in systFactoryTypes.items():
     if f == "a_h":
-      print("TO IMPLEMENT")
+      syst_up_file = re.sub("nominal", "%s/up"%s, inputFile)
+      syst_down_file = re.sub("nominal", "%s/down"%s, inputFile)
+      if( not os.path.exists(syst_up_file) )|( not os.path.exists(syst_down_file) ):
+        systToSkip.append(s)
+        print(" --> [%s] Parquet for systematic (%s) does not exist for (%s,%s). %s"%(errMessage,s,proc,year,errString))
+        if not ignoreWarnings: sys.exit(1)
+
+      # Open parquet files and extract yields
+      f_up = pq.ParquetFile(syst_up_file).read()
+      f_down = pq.ParquetFile(syst_down_file).read()
+      df_up = f_up.to_pandas()
+      df_down = f_down.to_pandas()
+      sumw_up = df_up[df_up['category']==cat]['weight'].sum()
+      sumw_down = df_down[df_down['category']==cat]['weight'].sum()
+      if s in systToSkip:
+        systYields["%s_up"%s] = df_subset['weight'].sum()
+        systYields["%s_down"%s] = df_subset['weight'].sum()
+      else:
+        systYields["%s_up"%s] = sumw_up
+        systYields["%s_down"%s] = sumw_down 
         
   # Add variations to dataFrame
   return systYields
@@ -163,7 +190,7 @@ def experimentalSystFactory(d,systs,ftype,options,_removal=False):
     if s['type'] == 'constant': continue
     if s['correlateAcrossYears']: d[s['name']] = '-'
     else:
-      for year in options.years.split(","): d['%s_%s'%(s['name'],year)] = '-'
+      for year in options.years.split(","): d['%s_%s'%(s['name'],nuisance_year_map[year])] = '-'
 
   # Loop over systematics and fill entries for rows which satisfy mask
   for s in systs:
@@ -176,7 +203,7 @@ def experimentalSystFactory(d,systs,ftype,options,_removal=False):
     else:
       for year in options.years.split(","):
         mask = (d['type']=='sig')&(~d['cat'].str.contains("NOTAG"))&(d['year']==year)
-        d.loc[mask,'%s_%s'%(s['name'],year)] = d[mask].apply(lambda x: compareYield(x,f,s['name']), axis=1)
+        d.loc[mask,'%s_%s'%(s['name'],nuisance_year_map[year])] = d[mask].apply(lambda x: compareYield(x,f,s['name']), axis=1)
 
     # Remove yield columns from dataFrame
     if _removal:
