@@ -23,8 +23,9 @@ lumiMap = {
     '2023preBPix':17.96,
     '2023postBPix':9.68,
     '2024':109.95,
-    'combined':172.26, # 2022-2024 only 
-    'merged':172.26, # 2022-2024 only
+    '2025':110.38,
+    'combined':282.64, # 2022-2025 only 
+    'merged':282.64, # 2022-2025 only
 }
 
 # If using ReReco samples then switch to lumiMap below (missing data in 2018 EGamma data set)
@@ -43,7 +44,7 @@ productionModes = ['ggH','qqH','ttH','tHq','tHW','ggZH','WH','ZH','bbH']
 decayMode = 'hgg'
 
 # List of years
-years_to_process = ['2016','2017','2018','2022preEE','2022postEE','2023preBPix','2023postBPix','2024']
+years_to_process = ['2016','2017','2018','2022preEE','2022postEE','2023preBPix','2023postBPix','2024', '2025']
 
 # flashgg input WS objects
 inputWSName__ = "stxs/cms_hgg_13p6TeV"

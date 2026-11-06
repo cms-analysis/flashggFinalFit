@@ -42,7 +42,7 @@ def get_options():
   parser.add_option("--doVoigtian", dest='doVoigtian', default=False, action="store_true", help="Use Voigtians instead of Gaussians for signal models with Higgs width as parameter")
   parser.add_option("--useDCB", dest='useDCB', default=False, action="store_true", help="Use DCB in signal fitting")
   parser.add_option("--useDiagonalProcForShape", dest='useDiagonalProcForShape', default=False, action="store_true", help="Use shape of diagonal process, keeping normalisation (requires diagonal mapping produced by getDiagProc script)")
-  parser.add_option('--skipVertexScenarioSplit', dest='skipVertexScenarioSplit', default=True, action="store_true", help="Skip vertex scenario split")
+  parser.add_option('--skipVertexScenarioSplit', dest='skipVertexScenarioSplit', default=False, action="store_true", help="Skip vertex scenario split")
   parser.add_option('--skipZeroes', dest='skipZeroes', default=False, action="store_true", help="Skip proc x cat is numEntries = 0., or sumEntries < 0.")
   # For systematics
   parser.add_option('--skipSystematics', dest='skipSystematics', default=False, action="store_true", help="Skip shape systematics in signal model")
@@ -81,8 +81,8 @@ if opt.analysis not in globalReplacementMap:
   leave()
 else: rMap = globalReplacementMap[opt.analysis]
 
-# Fix for 2024 replacement map
-if opt.year == "2024":
+# Fix for 2024 and 2025 replacement map
+if opt.year in ['2024', '2025']:
     rMap['procRVMap']["RECO_TH_tH_had"] = "THQ2HQQ_FID"
     rMap['procRVMap']["RECO_TH_tH_had_res0"] = "THQ2HQQ_FID"
     rMap['procRVMap']["RECO_TH_tH_had_res1"] = "THQ2HQQ_FID"
@@ -193,8 +193,10 @@ if( datasetRVForFit[MHNominal].numEntries() < opt.replacementThreshold  )|( data
     f = ROOT.TFile(WSFileName,"read")
     inputWS = f.Get(inputWSName__)
     d = reduceDataset(inputWS.data("%s__%s__%s__%s"%(procReplacementFit,mp,sqrts__,catReplacementFit)),aset)
+    print(d.numEntries())
     if opt.skipVertexScenarioSplit: datasetRVForFit[mp] = d
     else: datasetRVForFit[mp] = splitRVWV(d,aset,mode="RV")
+    print(datasetRVForFit[mp].numEntries())
     inputWS.Delete()
     f.Close() 
 

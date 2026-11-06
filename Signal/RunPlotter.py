@@ -156,7 +156,7 @@ for cat,f in inputFiles.items():
       # Fill
       for _id,p in hpdfs.items():
         if year in _id: hists['pdf_%s'%year] += p
-   
+
   # Garbage removal
   #for d in data_rwgt.values(): d.Delete()
   #for p in hpdfs.values(): p.Delete()

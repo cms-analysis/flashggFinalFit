@@ -149,7 +149,7 @@ translateCats = {} if opt.translateCats is None else LoadTranslations(opt.transl
 
 blindingRegion = [float(opt.blindingRegion.split(",")[0]),float(opt.blindingRegion.split(",")[1])]
 
-canv = ROOT.TCanvas("canv_%s"%cat,"canv_%s"%cat,700,700)
+canv = ROOT.TCanvas("canv_%s"%cat,"canv_%s"%cat,700,800)
 pad1 = ROOT.TPad("pad1_%s"%cat,"pad1_%s"%cat,0,0.35,1,1)
 pad1.SetTickx()
 pad1.SetTicky()
@@ -238,17 +238,17 @@ lat0 = ROOT.TLatex()
 lat0.SetTextFont(42)
 lat0.SetTextAlign(11)
 lat0.SetNDC()
-lat0.SetTextSize(0.04)
-#lat0.DrawLatex(0.12,0.92,"#bf{CMS} #it{Preliminary}")
+lat0.SetTextSize(0.06)
+lat0.DrawLatex(0.12,0.92,"#bf{CMS} #scale[0.8]{#it{Preliminary}}")
 #lat0.DrawLatex(0.12,0.92,"#bf{CMS}")
-lat0.DrawLatex(0.18,0.80,"#scale[0.75]{%s}"%Translate(cat,translateCats))
+lat0.DrawLatex(0.18,0.80,"#scale[0.5]{%s}"%Translate(cat,translateCats))
 
 lat1 = ROOT.TLatex()
 lat1.SetTextFont(42)
 lat1.SetTextAlign(31)
 lat1.SetNDC()
 lat1.SetTextSize(0.06)
-lat1.DrawLatex(0.9,0.92,"172.3 fb^{-1} (13.6 TeV)")
+lat1.DrawLatex(0.9,0.92,"283 fb^{-1} (13.6 TeV)")
 
 pad2.cd()
 h_axes_ratio = hists_ratio['data'].Clone()

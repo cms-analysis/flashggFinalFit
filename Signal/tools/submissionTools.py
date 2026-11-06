@@ -101,7 +101,7 @@ def writeSubFiles(_opts):
         _f.write("fi\n")
 
     elif _opts['mode'] == 'getDiagProc':
-      _f.write("python3 %s/scripts/getDiagProc.py --inputWSDir %s --ext %s %s\n"%(swd__,_opts['inputWSDir'],_opts['ext'],_opts['modeOpts']))
+      _f.write("python3 %s/scripts/getDiagProc.py --inputParquetDir %s --ext %s %s\n"%(swd__,_opts['inputWSDir'],_opts['ext'],_opts['modeOpts']))
       
     # Close .sh file
     _f.close()
@@ -176,7 +176,7 @@ def writeSubFiles(_opts):
     elif _opts['mode'] == "getDiagProc":
       _f = open("%s/%s.sh"%(_jobdir,_executable),"w")
       writePreamble(_f)
-      _f.write("python3 %s/scripts/getDiagProc.py --inputWSDir %s --ext %s %s\n"%(swd__,_opts['inputWSDir'],_opts['ext'],_opts['modeOpts']))
+      _f.write("python3 %s/scripts/getDiagProc.py --inputParquetDir %s --ext %s %s\n"%(swd__,_opts['inputWSDir'],_opts['ext'],_opts['modeOpts']))
       _f.close()
       os.system("chmod 775 %s/%s.sh"%(_jobdir,_executable))
 

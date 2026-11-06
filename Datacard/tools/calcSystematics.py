@@ -12,7 +12,8 @@ nuisance_year_map = {
   '2022postEE':'2022EE',
   '2023preBPix':'2023',
   '2023postBPix':'2023BPix',
-  '2024':'2024'
+  '2024':'2024',
+  '2025':'2025',
 }
 
 # For constant systematics:
